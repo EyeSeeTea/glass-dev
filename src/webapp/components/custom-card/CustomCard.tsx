@@ -22,5 +22,5 @@ export const StyleCard = styled(Paper)<{ minHeight?: string; padding?: string }>
     border-radius: 20px !important;
     height: ${props => props.minHeight};
     padding: ${props => props.padding};
-    overflow: scroll;
+    overflow: hidden;
 `;
