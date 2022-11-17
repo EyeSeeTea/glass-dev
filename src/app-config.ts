@@ -1,5 +1,5 @@
 export const appConfig: AppConfig = {
-    appKey: "dhis2-app-skeleton",
+    appKey: "glass",
     appearance: {
         showShareButton: true,
     },
