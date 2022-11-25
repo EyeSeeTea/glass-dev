@@ -21,7 +21,7 @@ export const SideBar: React.FC = () => {
             return <Typography variant="h6">{menusResult.message}</Typography>;
         case "loaded":
             return (
-                <CustomCard minHeight="80vh">
+                <CustomCard minHeight="80vh" overflow="scroll">
                     <TitleContainer>
                         <StarIcon />
                         <Box width={40} />
