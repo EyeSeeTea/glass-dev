@@ -15,6 +15,8 @@ interface SidebarNavProps {
 
 const SidebarNavMenu: React.FC<SidebarNavProps> = ({ menu, className }) => {
     const classes = useStyles(menu.level);
+    console.log('menu.path: ', menu.path);
+    
 
     return (
         <ListItem className={clsx(classes.root, className)} disableGutters style={{ paddingLeft: menu.level * 8 }}>

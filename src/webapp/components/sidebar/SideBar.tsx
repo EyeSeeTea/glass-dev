@@ -1,7 +1,6 @@
 import React from "react";
 import styled from "styled-components";
-import { Box, Button, Typography } from "@material-ui/core";
-import ExitToAppIcon from "@material-ui/icons/ExitToApp";
+import { Box, Typography } from "@material-ui/core";
 import StarIcon from "@material-ui/icons/Star";
 import { CustomCard } from "../custom-card/CustomCard";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
@@ -10,7 +9,7 @@ import FolderIcon from "@material-ui/icons/Folder";
 
 export const SideBar: React.FC = () => {
     return (
-        <CustomCard minHeight="80vh">
+        <CustomCard minHeight="630px" padding="0 0 100px 0">
             <TitleContainer>
                 <StarIcon />
                 <Box width={40} />
@@ -19,13 +18,7 @@ export const SideBar: React.FC = () => {
 
             <SidebarNav menus={menus} />
 
-            <div style={{ flexGrow: 1 }} />
-
-            <ButtonContainer>
-                <StyledButton variant="contained" color="default" startIcon={<ExitToAppIcon />} disableElevation>
-                    Log Out
-                </StyledButton>
-            </ButtonContainer>
+            {/* <div style={{ flexGrow: 1 }} /> */}
         </CustomCard>
     );
 };
@@ -41,7 +34,7 @@ const menus: Menu[] = [
                 kind: "MenuLeaf",
                 level: 0,
                 title: "Current Call",
-                path: "",
+                path: "/current-call",
             },
             {
                 kind: "MenuLeaf",
@@ -79,7 +72,7 @@ const menus: Menu[] = [
                 kind: "MenuLeaf",
                 level: 0,
                 title: "Current Call",
-                path: "",
+                path: "/current-call",
             },
             {
                 kind: "MenuLeaf",
@@ -117,7 +110,7 @@ const menus: Menu[] = [
                 kind: "MenuLeaf",
                 level: 0,
                 title: "Current Call",
-                path: "",
+                path: "/current-call",
             },
             {
                 kind: "MenuLeaf",
@@ -146,18 +139,6 @@ const menus: Menu[] = [
         ],
     },
 ];
-
-const ButtonContainer = styled.div`
-    display: flex;
-    flex-direction: column;
-    aleg-itrems: center;
-`;
-
-const StyledButton = styled(Button)`
-    margin: 16px;
-    background: transparent;
-    text-transform: none;
-`;
 
 const TitleContainer = styled.div`
     background: ${glassColors.lightSecondary};
