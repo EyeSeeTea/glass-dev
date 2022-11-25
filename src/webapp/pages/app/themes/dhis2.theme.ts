@@ -34,7 +34,7 @@ export const glassColors = {
 
     negative: "#E53935",
     warning: "#F19C02",
-    positive: "#3D9305",
+    positive: "#69bb6d",
     info: "#EAF4FF",
 };
 

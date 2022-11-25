@@ -34,14 +34,14 @@ const menus: Menu[] = [
     {
         kind: "MenuGroup",
         level: 0,
-        title: "ARM",
+        title: "AMR",
         icon: <FolderIcon htmlColor={glassColors.lightSecondary} />,
         children: [
             {
                 kind: "MenuLeaf",
                 level: 0,
                 title: "Current Call",
-                path: "",
+                path: "/current-call/AMR",
             },
             {
                 kind: "MenuLeaf",
@@ -79,7 +79,7 @@ const menus: Menu[] = [
                 kind: "MenuLeaf",
                 level: 0,
                 title: "Current Call",
-                path: "",
+                path: "/current-call/AMC",
             },
             {
                 kind: "MenuLeaf",
@@ -117,7 +117,7 @@ const menus: Menu[] = [
                 kind: "MenuLeaf",
                 level: 0,
                 title: "Current Call",
-                path: "",
+                path: "/current-call/EGASP",
             },
             {
                 kind: "MenuLeaf",
