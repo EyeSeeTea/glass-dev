@@ -8,6 +8,7 @@ import { glassColors } from "../../pages/app/themes/dhis2.theme";
 import SidebarNav from "../sidebar-nav/SidebarNav";
 import { useAppContext } from "../../contexts/app-context";
 import { useSidebarMenus } from "../../hooks/useSidebarMenus";
+import i18n from "../../../locales";
 
 export const SideBar: React.FC = () => {
     const { compositionRoot } = useAppContext();
@@ -25,7 +26,7 @@ export const SideBar: React.FC = () => {
                     <TitleContainer>
                         <StarIcon />
                         <Box width={40} />
-                        <Typography>HOME</Typography>
+                        <Typography>{i18n.t("HOME")}</Typography>
                     </TitleContainer>
 
                     <SidebarNav menus={menusResult.data} />
@@ -39,7 +40,7 @@ export const SideBar: React.FC = () => {
                             startIcon={<ExitToAppIcon />}
                             disableElevation
                         >
-                            Log Out
+                            {i18n.t("Log Out")}
                         </StyledButton>
                     </ButtonContainer>
                 </CustomCard>

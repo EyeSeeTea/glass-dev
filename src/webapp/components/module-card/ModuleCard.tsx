@@ -5,6 +5,7 @@ import { CustomCard } from "../custom-card/CustomCard";
 import StarIcon from "@material-ui/icons/Star";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
 import WarningIcon from "@material-ui/icons/WarningOutlined";
+import i18n from "../../../locales";
 
 interface ModuleCardProps {
     title: string;
@@ -41,7 +42,7 @@ export const ModuleCard: React.FC<ModuleCardProps> = ({ title, titleColor, iconC
                 </Container>
 
                 <Button variant="contained" color="primary">
-                    GO
+                    {i18n.t("GO")}
                 </Button>
             </ContentContainer>
         </CustomCard>

@@ -5,20 +5,21 @@ import VisibilityIcon from "@material-ui/icons/Visibility";
 import StarIcon from "@material-ui/icons/Star";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
 import { SideTitle, StyledHeadTableCell, StyledTableCell, StyledTableContainer } from "./common";
+import i18n from "../../../locales";
 
 export const CountryQuestionnarie: React.FC = () => {
     return (
         <ContentContainer>
             <SideTitleContainer>
-                <SideTitle variant="h4">Country questionnaire</SideTitle>
+                <SideTitle variant="h4">{i18n.t("Country questionnaire")}</SideTitle>
             </SideTitleContainer>
 
             <StyledTableContainer>
                 <Table>
                     <TableHead>
                         <TableRow>
-                            <StyledHeadTableCell>Date</StyledHeadTableCell>
-                            <StyledHeadTableCell>Details</StyledHeadTableCell>
+                            <StyledHeadTableCell>{i18n.t("Date")}</StyledHeadTableCell>
+                            <StyledHeadTableCell>{i18n.t("Details")}</StyledHeadTableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>

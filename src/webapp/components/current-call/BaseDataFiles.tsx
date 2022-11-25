@@ -5,14 +5,15 @@ import VisibilityIcon from "@material-ui/icons/Visibility";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
 import KeyboardArrowDownIcon from "@material-ui/icons/KeyboardArrowDown";
 import { SideTitle, StyledHeadTableCell, StyledTableCell, StyledTableContainer } from "./common";
+import i18n from "../../../locales";
 
 export const BaseDataFiles: React.FC = () => {
     return (
         <ContentContainer>
             <Box display="flex" flexDirection="row" justifyContent={"space-between"} alignItems="center">
                 <Box display="flex" flexDirection={"column"} justifyContent={"center"}>
-                    <SideTitle variant="h4">Base data files</SideTitle>
-                    <SideSubtitle>Sample and RIS files</SideSubtitle>
+                    <SideTitle variant="h4">{i18n.t("Base data files")}</SideTitle>
+                    <SideSubtitle>{i18n.t("Sample and RIS files")}</SideSubtitle>
                 </Box>
                 <Button
                     variant="contained"
@@ -20,16 +21,16 @@ export const BaseDataFiles: React.FC = () => {
                     endIcon={<Icon>add</Icon>}
                     style={{ padding: "10px 30px", fontSize: 20 }}
                 >
-                    UPLOAD NEW
+                    {i18n.t("UPLOAD NEW")}
                 </Button>
             </Box>
             <StyledTableContainer>
                 <Table>
                     <TableHead>
                         <TableRow>
-                            <StyledHeadTableCell variant="head">Date</StyledHeadTableCell>
-                            <StyledHeadTableCell variant="head">Status</StyledHeadTableCell>
-                            <StyledHeadTableCell variant="head">Details</StyledHeadTableCell>
+                            <StyledHeadTableCell variant="head">{i18n.t("Date")}</StyledHeadTableCell>
+                            <StyledHeadTableCell variant="head">{i18n.t("status")}</StyledHeadTableCell>
+                            <StyledHeadTableCell variant="head">{i18n.t("Details")}</StyledHeadTableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
@@ -68,7 +69,7 @@ export const BaseDataFiles: React.FC = () => {
                                     fontSize="large"
                                     style={{ verticalAlign: "middle", marginRight: 8 }}
                                 />
-                                Deleted / Incompleted
+                                {i18n.t("DaDeleted / Incompletedte")}
                             </StyledHeadTableCell>
                         </TableRow>
                     </TableHead>

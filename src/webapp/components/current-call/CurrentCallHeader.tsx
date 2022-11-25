@@ -3,6 +3,7 @@ import { Box, Typography } from "@material-ui/core";
 import styled from "styled-components";
 import { CustomCard } from "../custom-card/CustomCard";
 import { GlassModule } from "../../../domain/entities/GlassModule";
+import i18n from "../../../locales";
 
 interface CurrentCallHeaderProps {
     module: GlassModule;
@@ -23,7 +24,7 @@ export const CurrentCallHeader: React.FC<CurrentCallHeaderProps> = ({ module }) 
                 </CardText>
                 <Box display="flex" flexDirection="row">
                     <CallCodeText variant="h5">220 YEAR CALL</CallCodeText>
-                    <CallStatusContainer>NOT COMPLETED</CallStatusContainer>
+                    <CallStatusContainer>{i18n.t("NOT COMPLETED")}</CallStatusContainer>
                 </Box>
             </ContentContainer>
         </CustomCard>
