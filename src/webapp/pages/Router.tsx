@@ -1,5 +1,6 @@
 import React from "react";
 import { HashRouter, Route, Switch } from "react-router-dom";
+import { FakeCurrentCallPage } from "./landing/FakeCurrentCallPage";
 import { FakeLandingPage } from "./landing/FakeLandingPage";
 
 export const Router: React.FC = React.memo(() => {
@@ -16,6 +17,8 @@ export const Router: React.FC = React.memo(() => {
 
                 {/* Default route */}
                 <Route render={() => <FakeLandingPage />} />
+                <Route path="/current-call" render={() => <FakeCurrentCallPage />} />
+
             </Switch>
         </HashRouter>
     );
