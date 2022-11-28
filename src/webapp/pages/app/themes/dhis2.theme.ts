@@ -1,7 +1,19 @@
 import { createTheme } from "@material-ui/core/styles";
 
-// Color palette from https://projects.invisionapp.com/share/A7LT4TJYETS#/screens/302550228_Color
-export const colors = {
+export const glassColors = {
+    mainPrimary: "#5699db",
+    darkPrimary: "#4072a2",
+    lightPrimary: "#ceddf2",
+    mainSecondary: "#8f238a",
+    darkSecondary: "#701a6c",
+    lightSecondary: "#b39cc0",
+    mainTertiary: "#e06829",
+    darkTertiary: "#a64818",
+    lightTertiary: "#ecb390",
+    mainQuaternary: "#7846ae",
+    darkQuaternary: "#4f1787",
+    lightQuaternary: "#c6bae0",
+
     accentPrimary: "#1976d2",
     accentPrimaryDark: "#004BA0",
     accentPrimaryLight: "#63A4FF",
@@ -28,50 +40,50 @@ export const colors = {
 
 export const palette = {
     common: {
-        white: colors.white,
-        black: colors.black,
+        white: glassColors.white,
+        black: glassColors.black,
     },
     action: {
-        active: colors.greyBlack,
-        disabled: colors.greyDisabled,
+        active: glassColors.greyBlack,
+        disabled: glassColors.greyDisabled,
     },
     text: {
-        primary: colors.black,
-        secondary: colors.greyBlack,
-        disabled: colors.greyDisabled,
-        hint: colors.grey,
+        primary: glassColors.black,
+        secondary: glassColors.grey,
+        disabled: glassColors.greyDisabled,
+        hint: glassColors.grey,
     },
     primary: {
-        main: colors.accentPrimary,
-        dark: colors.accentPrimaryDark,
-        light: colors.accentPrimaryLight,
-        lightest: colors.accentPrimaryLightest, // Custom extension, not used by default
+        main: glassColors.mainPrimary,
+        dark: glassColors.darkPrimary,
+        light: glassColors.lightPrimary,
+        lightest: glassColors.accentPrimaryLightest, // Custom extension, not used by default
         // contrastText: 'white',
     },
     secondary: {
-        main: colors.accentSecondary,
-        light: colors.accentSecondaryLight,
-        dark: colors.accentSecondaryDark,
+        main: glassColors.mainSecondary,
+        light: glassColors.lightSecondary,
+        dark: glassColors.darkSecondary,
         contrastText: "#fff",
     },
     error: {
-        main: colors.negative, // This is automatically expanded to main/light/dark/contrastText, what do we use here?
+        main: glassColors.negative, // This is automatically expanded to main/light/dark/contrastText, what do we use here?
     },
     status: {
         //Custom colors collection, not used by default in MUI
-        negative: colors.negative,
-        warning: colors.warning,
-        positive: colors.positive,
-        info: colors.info,
+        negative: glassColors.negative,
+        warning: glassColors.warning,
+        positive: glassColors.positive,
+        info: glassColors.info,
     },
     background: {
-        paper: colors.white,
-        default: colors.snow,
+        paper: glassColors.white,
+        default: glassColors.snow,
         grey: "#FCFCFC",
-        hover: colors.greyLight,
+        hover: glassColors.greyLight,
     },
-    divider: colors.greyLight,
-    shadow: colors.grey,
+    divider: glassColors.greyLight,
+    shadow: glassColors.grey,
 };
 
 export const muiTheme = createTheme({
