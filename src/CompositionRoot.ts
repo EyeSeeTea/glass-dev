@@ -1,15 +1,27 @@
+import { DataStoreClient } from "./data/data-store/DataStoreClient";
 import { Instance } from "./data/entities/Instance";
+import { GlassModuleDefaultRepository } from "./data/repositories/GlassModuleDefaultRepository";
 import { InstanceDefaultRepository } from "./data/repositories/InstanceDefaultRepository";
 import { GetCurrentUserUseCase } from "./domain/usecases/GetCurrentUserUseCase";
+import { GetGlassModuleByNameUseCase } from "./domain/usecases/GetGlassModuleByNameUseCase";
+import { GetGlassModulesUseCase } from "./domain/usecases/GetGlassModulesUseCase";
 import { GetInstanceVersionUseCase } from "./domain/usecases/GetInstanceVersionUseCase";
+import { ValidateGlassModulesUseCase } from "./domain/usecases/ValidateGlassModulesUseCase";
 
 export function getCompositionRoot(instance: Instance) {
+    const dataStoreClient = new DataStoreClient(instance);
     const instanceRepository = new InstanceDefaultRepository(instance);
+    const glassModuleRepository = new GlassModuleDefaultRepository(dataStoreClient);
 
     return {
         instance: getExecute({
             getCurrentUser: new GetCurrentUserUseCase(instanceRepository),
             getVersion: new GetInstanceVersionUseCase(instanceRepository),
+        }),
+        glassModules: getExecute({
+            getAll: new GetGlassModulesUseCase(glassModuleRepository),
+            getByName: new GetGlassModuleByNameUseCase(glassModuleRepository),
+            validate: new ValidateGlassModulesUseCase(glassModuleRepository),
         }),
     };
 }

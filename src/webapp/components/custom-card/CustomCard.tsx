@@ -6,11 +6,12 @@ import styled from "styled-components";
 interface CustomCardProps {
     minHeight?: string;
     padding?: string;
+    overflow?: string;
 }
 
-export const CustomCard: React.FC<CustomCardProps> = ({ minHeight, padding, children }) => {
+export const CustomCard: React.FC<CustomCardProps> = ({ minHeight, padding, children, overflow }) => {
     return (
-        <StyleCard minHeight={minHeight} padding={padding}>
+        <StyleCard minHeight={minHeight} padding={padding} overflow={overflow}>
             <Box display="flex" flexDirection="column" justifyContent="space-between" height={"100%"}>
                 {children}
             </Box>
@@ -18,9 +19,9 @@ export const CustomCard: React.FC<CustomCardProps> = ({ minHeight, padding, chil
     );
 };
 
-export const StyleCard = styled(Paper)<{ minHeight?: string; padding?: string }>`
+export const StyleCard = styled(Paper)<{ minHeight?: string; padding?: string; overflow?: string }>`
     border-radius: 20px !important;
     height: ${props => props.minHeight};
     padding: ${props => props.padding};
-    overflow: hidden;
+    overflow: ${props => props.overflow || "hidden"};
 `;

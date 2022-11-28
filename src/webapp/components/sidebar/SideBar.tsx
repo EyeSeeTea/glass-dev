@@ -1,151 +1,52 @@
 import React from "react";
 import styled from "styled-components";
-import { Box, Button, Typography } from "@material-ui/core";
+import { Box, Button, CircularProgress, Typography } from "@material-ui/core";
 import ExitToAppIcon from "@material-ui/icons/ExitToApp";
 import StarIcon from "@material-ui/icons/Star";
 import { CustomCard } from "../custom-card/CustomCard";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
-import SidebarNav, { Menu } from "../sidebar-nav/SidebarNav";
-import FolderIcon from "@material-ui/icons/Folder";
+import SidebarNav from "../sidebar-nav/SidebarNav";
+import { useAppContext } from "../../contexts/app-context";
+import { useSidebarMenus } from "../../hooks/useSidebarMenus";
+import i18n from "../../../locales";
 
 export const SideBar: React.FC = () => {
-    return (
-        <CustomCard minHeight="80vh">
-            <TitleContainer>
-                <StarIcon />
-                <Box width={40} />
-                <Typography>HOME</Typography>
-            </TitleContainer>
+    const { compositionRoot } = useAppContext();
 
-            <SidebarNav menus={menus} />
+    const menusResult = useSidebarMenus(compositionRoot);
 
-            <div style={{ flexGrow: 1 }} />
+    switch (menusResult.kind) {
+        case "loading":
+            return <CircularProgress />;
+        case "error":
+            return <Typography variant="h6">{menusResult.message}</Typography>;
+        case "loaded":
+            return (
+                <CustomCard minHeight="80vh" overflow="auto">
+                    <TitleContainer>
+                        <StarIcon />
+                        <Box width={40} />
+                        <Typography>{i18n.t("HOME")}</Typography>
+                    </TitleContainer>
 
-            <ButtonContainer>
-                <StyledButton variant="contained" color="default" startIcon={<ExitToAppIcon />} disableElevation>
-                    Log Out
-                </StyledButton>
-            </ButtonContainer>
-        </CustomCard>
-    );
+                    <SidebarNav menus={menusResult.data} />
+
+                    <div style={{ flexGrow: 1 }} />
+
+                    <ButtonContainer>
+                        <StyledButton
+                            variant="contained"
+                            color="default"
+                            startIcon={<ExitToAppIcon />}
+                            disableElevation
+                        >
+                            {i18n.t("Log Out")}
+                        </StyledButton>
+                    </ButtonContainer>
+                </CustomCard>
+            );
+    }
 };
-
-const menus: Menu[] = [
-    {
-        kind: "MenuGroup",
-        level: 0,
-        title: "ARM",
-        icon: <FolderIcon htmlColor={glassColors.lightSecondary} />,
-        children: [
-            {
-                kind: "MenuLeaf",
-                level: 0,
-                title: "Current Call",
-                path: "",
-            },
-            {
-                kind: "MenuLeaf",
-                level: 0,
-                title: "Reports",
-                path: "",
-            },
-            {
-                kind: "MenuLeaf",
-                level: 0,
-                title: "Upload History",
-                path: "",
-            },
-            {
-                kind: "MenuLeaf",
-                level: 0,
-                title: "Calls History",
-                path: "",
-            },
-            {
-                kind: "MenuLeaf",
-                level: 0,
-                title: "Country Information",
-                path: "",
-            },
-        ],
-    },
-    {
-        kind: "MenuGroup",
-        level: 0,
-        title: "AMC",
-        icon: <FolderIcon htmlColor={glassColors.lightTertiary} />,
-        children: [
-            {
-                kind: "MenuLeaf",
-                level: 0,
-                title: "Current Call",
-                path: "",
-            },
-            {
-                kind: "MenuLeaf",
-                level: 0,
-                title: "Reports",
-                path: "",
-            },
-            {
-                kind: "MenuLeaf",
-                level: 0,
-                title: "Upload History",
-                path: "",
-            },
-            {
-                kind: "MenuLeaf",
-                level: 0,
-                title: "Calls History",
-                path: "",
-            },
-            {
-                kind: "MenuLeaf",
-                level: 0,
-                title: "Country Information",
-                path: "",
-            },
-        ],
-    },
-    {
-        kind: "MenuGroup",
-        level: 0,
-        title: "EGASP",
-        icon: <FolderIcon htmlColor={glassColors.lightPrimary} />,
-        children: [
-            {
-                kind: "MenuLeaf",
-                level: 0,
-                title: "Current Call",
-                path: "",
-            },
-            {
-                kind: "MenuLeaf",
-                level: 0,
-                title: "Reports",
-                path: "",
-            },
-            {
-                kind: "MenuLeaf",
-                level: 0,
-                title: "Upload History",
-                path: "",
-            },
-            {
-                kind: "MenuLeaf",
-                level: 0,
-                title: "Calls History",
-                path: "",
-            },
-            {
-                kind: "MenuLeaf",
-                level: 0,
-                title: "Country Information",
-                path: "",
-            },
-        ],
-    },
-];
 
 const ButtonContainer = styled.div`
     display: flex;

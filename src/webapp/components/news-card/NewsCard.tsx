@@ -3,12 +3,13 @@ import { Grid, Typography } from "@material-ui/core";
 import styled from "styled-components";
 import { CustomCard } from "../custom-card/CustomCard";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
+import i18n from "@eyeseetea/d2-ui-components/locales";
 
 export const NewsCard: React.FC = () => {
     return (
         <CustomCard>
             <TitleContainer>
-                <Typography variant="h5">News from GLASS</Typography>
+                <Typography variant="h5">{i18n.t("News from GLASS")}</Typography>
             </TitleContainer>
             <ContentContainer>
                 <Grid container spacing={4}>
