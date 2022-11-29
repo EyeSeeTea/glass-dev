@@ -1,4 +1,4 @@
-import { Box, Breadcrumbs, Link, Typography } from "@material-ui/core";
+import { Box, Breadcrumbs, Button, Link, Typography } from "@material-ui/core";
 import { CircularProgress } from "material-ui";
 import React from "react";
 import styled from "styled-components";
@@ -8,6 +8,7 @@ import { useAppContext } from "../../contexts/app-context";
 import { useGlassModule } from "../../hooks/useGlassModule";
 import { glassColors, palette } from "../app/themes/dhis2.theme";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
+import { NavLink } from "react-router-dom";
 
 interface DataSubmissionPageProps {
     moduleName: string;
@@ -42,9 +43,11 @@ export const DataSubmissionPageContent: React.FC<DataSubmissionPageProps> = Reac
             return (
                 <React.Fragment>
                     <StyledBreadCrumbs aria-label="breadcrumb" separator="">
-                        <Link href="/getting-started/installation/" onClick={handleClick}>
-                            {moduleName}
-                        </Link>
+                        <Button component={NavLink} to={`/#/current-call/${moduleName}`} exact={true}>
+                            <Typography variant="body1" style={{ color: glassColors.greyBlack }}>
+                                {moduleName}
+                            </Typography>
+                        </Button>
                         <ChevronRightIcon />
                         <Typography>2020 Call</Typography>
                     </StyledBreadCrumbs>

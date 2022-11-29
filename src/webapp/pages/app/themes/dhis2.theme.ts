@@ -39,7 +39,6 @@ export const glassColors = {
 
     gradientBg: "linear-gradient(180deg, rgba(155,186,232,1) 0%, rgba(196,149,218,1) 100%)",
     gradientLightBg: "linear-gradient(180deg, rgba(155,186,232,1) 0%, rgba(196,149,218,1) 100%)",
-    
 };
 
 export const palette = {

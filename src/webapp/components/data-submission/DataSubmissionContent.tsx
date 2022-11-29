@@ -1,20 +1,23 @@
 import React from "react";
-import { Grid } from "@material-ui/core";
-import { CustomCard } from "../custom-card/CustomCard";
-import styled from "styled-components";
+import { CircularProgress, Grid, Typography } from "@material-ui/core";
+import { DataSubmissionNav } from "./DataSubmissionNav";
+import { useAppContext } from "../../contexts/app-context";
+import { useDataSubmissionSteps } from "../../hooks/userDataSubmissionSteps";
 
 export const DataSubmissionContent: React.FC = () => {
-    return (
-        <CustomCard padding="40px">
-            <Grid container spacing={10} direction={"column"}>
-                <Grid item>
-                    <h3>Data Submission Content here...</h3>
-                    <p>Lorem ipsum...</p>
-                </Grid>
-                <Grid item md={6} xs={12}>
-                    <p>Lorem ipsum dolor...</p>
-                </Grid>
-            </Grid>
-        </CustomCard>
-    );
+    const { compositionRoot } = useAppContext();
+
+    const stepsResult = useDataSubmissionSteps(compositionRoot);
+
+    console.log("stepsResult:", stepsResult);
+
+    switch (stepsResult.kind) {
+        case "loading":
+            return <CircularProgress />;
+        case "error":
+            return <Typography variant="h6">{stepsResult.message}</Typography>;
+        case "loaded":
+            // return <DataSubmissionNav steps={stepsResult.data} />;
+            return <span>Steps loaded...</span>;
+    }
 };
