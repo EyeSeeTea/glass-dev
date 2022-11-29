@@ -24,7 +24,7 @@ export const SideBar: React.FC = () => {
             return (
                 <CustomCard minHeight="630px" padding="0 0 100px 0" data-test="test2">
                     <TitleContainer data-test="test3">
-                        <StarGradient className="star-icon"/>
+                        <StarGradient className="star-icon" />
                         <Box width={40} />
                         <Typography>{i18n.t("HOME")}</Typography>
                     </TitleContainer>
