@@ -7,14 +7,14 @@ import { MainLayout } from "../../components/main-layout/MainLayout";
 import { useAppContext } from "../../contexts/app-context";
 import { useGlassModule } from "../../hooks/useGlassModule";
 import { glassColors, palette } from "../app/themes/dhis2.theme";
-import ChevronRightIcon from '@material-ui/icons/ChevronRight';
+import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 
 interface DataSubmissionPageProps {
     moduleName: string;
 }
 
 export const DataSubmissionPage: React.FC<DataSubmissionPageProps> = React.memo(({ moduleName }) => {
-    console.log('init DataSubmissionPage...');
+    console.log("init DataSubmissionPage...");
 
     return (
         <MainLayout>
@@ -30,7 +30,7 @@ export const DataSubmissionPageContent: React.FC<DataSubmissionPageProps> = Reac
 
     function handleClick(event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) {
         event.preventDefault();
-        console.info('You clicked a breadcrumb.');
+        console.info("You clicked a breadcrumb.");
     }
 
     switch (result.kind) {
@@ -42,7 +42,7 @@ export const DataSubmissionPageContent: React.FC<DataSubmissionPageProps> = Reac
             return (
                 <React.Fragment>
                     <StyledBreadCrumbs aria-label="breadcrumb" separator="">
-                        <Link href="/getting-started/installation/" onClick={handleClick} >
+                        <Link href="/getting-started/installation/" onClick={handleClick}>
                             {moduleName}
                         </Link>
                         <ChevronRightIcon />
@@ -55,7 +55,6 @@ export const DataSubmissionPageContent: React.FC<DataSubmissionPageProps> = Reac
     }
 });
 
-
 const StyledBreadCrumbs = styled(Breadcrumbs)`
     color: ${glassColors.mainPrimary};
     font-weight: 400;
@@ -65,6 +64,6 @@ const StyledBreadCrumbs = styled(Breadcrumbs)`
         align-items: center;
     }
     svg {
-        color: ${palette.text.secondary}
+        color: ${palette.text.secondary};
     }
-`
+`;

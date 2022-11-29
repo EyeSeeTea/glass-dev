@@ -9,8 +9,7 @@ interface CurrentCallContentProps {
     module: GlassModule;
 }
 
-
-export const CurrentCallContent: React.FC<CurrentCallContentProps> = ({module}) => {
+export const CurrentCallContent: React.FC<CurrentCallContentProps> = ({ module }) => {
     return (
         <CustomCard>
             <Grid container spacing={10}>

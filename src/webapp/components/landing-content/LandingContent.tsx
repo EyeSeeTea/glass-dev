@@ -46,7 +46,6 @@ export const LandingContent: React.FC = () => {
             <Grid item xs={12}>
                 <NewsCard />
             </Grid>
-            <AppFooter />
         </StyledGrid>
     );
 };
