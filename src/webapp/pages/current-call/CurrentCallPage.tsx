@@ -34,7 +34,7 @@ export const CurrentCallPageContent: React.FC<CurrentCallPageProps> = React.memo
                 <React.Fragment>
                     <CurrentCallHeader module={result.data} />
                     <Box height={40} />
-                    <CurrentCallContent />
+                    <CurrentCallContent module={result.data} />
                 </React.Fragment>
             );
     }
