@@ -17,7 +17,12 @@ export const MainLayout: React.FC = React.memo(({ children }) => {
                         <SideBar />
                         <ButtonContainer>
                             <div>
-                                <StyledButton variant="contained" color="default" startIcon={<ExitToAppIcon />} disableElevation>
+                                <StyledButton
+                                    variant="contained"
+                                    color="default"
+                                    startIcon={<ExitToAppIcon />}
+                                    disableElevation
+                                >
                                     {i18n.t("Log Out")}
                                 </StyledButton>
                             </div>
@@ -39,7 +44,6 @@ const LandingContainer = styled.div`
         .MuiGrid-item:first-child {
             min-width: 300px;
             > div {
-
             }
         }
         .MuiGrid-item:last-child {
