@@ -6,9 +6,9 @@ import { palette } from "../../pages/app/themes/dhis2.theme";
 export const AppFooter: React.FC = () => {
     return (
         <Wrapper>
-            <Typography variant="body2" gutterBottom
-                style={{ color: palette.text.secondary }}
-            >&copy; {new Date().getFullYear()} Lorem ipsum dolor sit amet, consectetur adipiscing elit. </Typography>
+            <Typography variant="body2" gutterBottom style={{ color: palette.text.secondary }}>
+                &copy; {new Date().getFullYear()} Lorem ipsum dolor sit amet, consectetur adipiscing elit.{" "}
+            </Typography>
         </Wrapper>
     );
 };
