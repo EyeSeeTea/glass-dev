@@ -9,6 +9,7 @@ import { useGlassModule } from "../../hooks/useGlassModule";
 import { glassColors, palette } from "../app/themes/dhis2.theme";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import { NavLink } from "react-router-dom";
+import { CustomCard } from "../../components/custom-card/CustomCard";
 
 interface DataSubmissionPageProps {
     moduleName: string;
@@ -51,8 +52,10 @@ export const DataSubmissionPageContent: React.FC<DataSubmissionPageProps> = Reac
                         <ChevronRightIcon />
                         <Typography>2020 Call</Typography>
                     </StyledBreadCrumbs>
-                    <Box height={40} />
-                    <DataSubmissionContent />
+                    <Box height={10} />
+                    <CustomCard padding="30px 60px">
+                        <DataSubmissionContent />
+                    </CustomCard>
                 </React.Fragment>
             );
     }
