@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { CircularProgress, Grid, Typography } from "@material-ui/core";
 import { DataSubmissionNav } from "./DataSubmissionNav";
 import { useAppContext } from "../../contexts/app-context";
@@ -6,10 +6,13 @@ import { useDataSubmissionSteps } from "../../hooks/userDataSubmissionSteps";
 
 export const DataSubmissionContent: React.FC = () => {
     const { compositionRoot } = useAppContext();
+    const [currentStep, setCurrentStep] = useState(1);
+
+    const changeStep = (step: number) => {
+        setCurrentStep(step);
+    };
 
     const stepsResult = useDataSubmissionSteps(compositionRoot);
-
-    console.log("stepsResult:", stepsResult);
 
     switch (stepsResult.kind) {
         case "loading":
@@ -17,7 +20,17 @@ export const DataSubmissionContent: React.FC = () => {
         case "error":
             return <Typography variant="h6">{stepsResult.message}</Typography>;
         case "loaded":
-            // return <DataSubmissionNav steps={stepsResult.data} />;
-            return <span>Steps loaded...</span>;
+            return (
+                <React.Fragment>
+                    <DataSubmissionNav
+                        steps={stepsResult.data[0]?.children}
+                        currentStep={currentStep}
+                        changeStep={changeStep}
+                    />
+                    {stepsResult?.data[0]?.children?.length && (
+                        <p>{stepsResult.data[0].children[currentStep - 1]?.content}</p>
+                    )}
+                </React.Fragment>
+            );
     }
 };

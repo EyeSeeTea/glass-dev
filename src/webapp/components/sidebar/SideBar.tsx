@@ -22,7 +22,7 @@ export const SideBar: React.FC = () => {
             return <Typography variant="h6">{menusResult.message}</Typography>;
         case "loaded":
             return (
-                <CustomCard minHeight="630px" padding="0 0 100px 0" data-test="test2">
+                <CustomCard minheight="630px" padding="0 0 100px 0" data-test="test2">
                     <TitleContainer data-test="test3">
                         <StarGradient className="star-icon" />
                         <Box width={40} />

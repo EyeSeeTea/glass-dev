@@ -4,14 +4,14 @@ import { Paper } from "material-ui";
 import styled from "styled-components";
 
 interface CustomCardProps {
-    minHeight?: string;
+    minheight?: string;
     height?: string;
     padding?: string;
 }
 
-export const CustomCard: React.FC<CustomCardProps> = ({ minHeight, padding, children, height = "auto" }) => {
+export const CustomCard: React.FC<CustomCardProps> = ({ minheight, padding, children, height = "auto" }) => {
     return (
-        <StyleCard minHeight={minHeight} padding={padding} height={height}>
+        <StyleCard minheight={minheight} padding={padding} height={height}>
             <Box display="flex" flexDirection="column" justifyContent="space-between" height={"100%"}>
                 {children}
             </Box>
@@ -21,7 +21,7 @@ export const CustomCard: React.FC<CustomCardProps> = ({ minHeight, padding, chil
 
 export const StyleCard = styled(Paper)<CustomCardProps>`
     border-radius: 20px !important;
-    min-height: ${props => props.minHeight};
+    min-height: ${props => props.minheight};
     height: ${props => props.height};
     padding: ${props => props.padding};
     overflow: hidden;
