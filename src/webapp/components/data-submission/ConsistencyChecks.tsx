@@ -4,7 +4,6 @@ import { BlockingErrors } from "./BlockingErrors";
 import styled from "styled-components";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
 
-
 export const ConsistencyChecks: React.FC = () => {
     const [fileType, setFileType] = useState<string>("ris");
 
@@ -14,25 +13,35 @@ export const ConsistencyChecks: React.FC = () => {
 
     return (
         <ContentWrapper>
-            <p>Explaining what consistency checks are: Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore</p>
+            <p className="intro">
+                Explaining what consistency checks are: Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+                eiusmod tempor incididunt ut labore
+            </p>
             <div className="toggles">
-                <Button onClick={() => changeType('ris')} className={fileType === 'ris' ? 'current': '' }>RIS File</Button>
-                <Button onClick={() => changeType('sample')} className={fileType === 'sample' ? 'current': '' }>Sample File</Button>
+                <Button onClick={() => changeType("ris")} className={fileType === "ris" ? "current" : ""}>
+                    RIS File
+                </Button>
+                <Button onClick={() => changeType("sample")} className={fileType === "sample" ? "current" : ""}>
+                    Sample File
+                </Button>
             </div>
             <BlockingErrors />
         </ContentWrapper>
-    )
-
-}
+    );
+};
 
 const ContentWrapper = styled.div`
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
     .toggles {
         display: flex;
         align-items: center;
         justify-content: center;
         gap: 0;
+        width: 100%;
         max-width: 550px;
-        margin: 0 auto 40px;
+        margin: 0 auto;
         button {
             color: ${glassColors.greyDisabled};
             padding: 10px 20px;
@@ -46,4 +55,4 @@ const ContentWrapper = styled.div`
             }
         }
     }
-`
+`;
