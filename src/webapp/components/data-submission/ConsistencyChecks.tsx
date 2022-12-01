@@ -32,18 +32,18 @@ export const ConsistencyChecks: React.FC = () => {
 };
 
 const renderTypeContent = (type: string) => {
-    switch(type) {
-      case 'sample':
-        return <p>Sample file uploading content/intructions here...</p>;
+    switch (type) {
+        case "sample":
+            return <p>Sample file uploading content/intructions here...</p>;
         default:
-          return (
-              <>
-                  <BlockingErrors />
-                  <NonBlockingWarnings />
-              </>
-          )
+            return (
+                <>
+                    <BlockingErrors />
+                    <NonBlockingWarnings />
+                </>
+            );
     }
-  }
+};
 
 const ContentWrapper = styled.div`
     display: flex;

@@ -16,6 +16,6 @@ export const AppFooter: React.FC = () => {
 const Wrapper = styled.div`
     background-color: transparent;
     text-align: center;
-    margin: auto auto 0 auto;
+    margin: 20px auto 0 auto;
     padding: 15px;
 `;

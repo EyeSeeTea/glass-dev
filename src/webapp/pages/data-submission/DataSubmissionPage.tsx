@@ -42,30 +42,32 @@ export const DataSubmissionPageContent: React.FC<DataSubmissionPageProps> = Reac
             return <Typography variant="h6">{result.message}</Typography>;
         case "loaded":
             return (
-                <React.Fragment>
+                <ContentWrapper>
                     <PreContent>
                         <StyledBreadCrumbs aria-label="breadcrumb" separator="">
-                            <Button component={NavLink} to={`/#/current-call/${moduleName}`} exact={true}>
-                                <Typography variant="body1" style={{ color: glassColors.greyBlack }}>
-                                    {moduleName}
-                                </Typography>
+                            <Button component={NavLink} to={`/#/current-call/${moduleName}`} exact={true}><span>{moduleName}</span>
                             </Button>
                             <ChevronRightIcon />
-                            <Typography>2020 Call</Typography>
+                            <Button><span>{i18n.t("2020 Call")}</span></Button>
                         </StyledBreadCrumbs>
                         <div className="info">
                             <span>{i18n.t("Yearly data upload")}</span>, &nbsp;
                             <span>Spain</span>
                         </div>
                     </PreContent>
-                    <Box height={10} />
                     <CustomCard padding="40px 60px 50px">
                         <DataSubmissionContent />
                     </CustomCard>
-                </React.Fragment>
+                </ContentWrapper>
             );
     }
 });
+
+const ContentWrapper = styled.div`
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+`
 
 const PreContent = styled.div`
     display: flex;
@@ -89,6 +91,18 @@ const StyledBreadCrumbs = styled(Breadcrumbs)`
     li {
         display: flex;
         align-items: center;
+        p {
+            padding: 6px 8px;
+        }
+        .MuiButton-root {
+            span {
+                color: ${glassColors.mainPrimary};
+                font-size: 15px;
+            }
+        }
+    }
+    .MuiBreadcrumbs-separator {
+        display: none;
     }
     svg {
         color: ${palette.text.secondary};
