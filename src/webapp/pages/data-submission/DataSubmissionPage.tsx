@@ -10,6 +10,7 @@ import { glassColors, palette } from "../app/themes/dhis2.theme";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import { NavLink } from "react-router-dom";
 import { CustomCard } from "../../components/custom-card/CustomCard";
+import i18n from "@eyeseetea/d2-ui-components/locales";
 
 interface DataSubmissionPageProps {
     moduleName: string;
@@ -32,7 +33,6 @@ export const DataSubmissionPageContent: React.FC<DataSubmissionPageProps> = Reac
 
     function handleClick(event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) {
         event.preventDefault();
-        console.info("You clicked a breadcrumb.");
     }
 
     switch (result.kind) {
@@ -43,15 +43,21 @@ export const DataSubmissionPageContent: React.FC<DataSubmissionPageProps> = Reac
         case "loaded":
             return (
                 <React.Fragment>
-                    <StyledBreadCrumbs aria-label="breadcrumb" separator="">
-                        <Button component={NavLink} to={`/#/current-call/${moduleName}`} exact={true}>
-                            <Typography variant="body1" style={{ color: glassColors.greyBlack }}>
-                                {moduleName}
-                            </Typography>
-                        </Button>
-                        <ChevronRightIcon />
-                        <Typography>2020 Call</Typography>
-                    </StyledBreadCrumbs>
+                    <PreContent>
+                        <StyledBreadCrumbs aria-label="breadcrumb" separator="">
+                            <Button component={NavLink} to={`/#/current-call/${moduleName}`} exact={true}>
+                                <Typography variant="body1" style={{ color: glassColors.greyBlack }}>
+                                    {moduleName}
+                                </Typography>
+                            </Button>
+                            <ChevronRightIcon />
+                            <Typography>2020 Call</Typography>
+                        </StyledBreadCrumbs>
+                        <div className="info">
+                            <span>{i18n.t("Yearly data upload")}</span>, &nbsp;
+                            <span>Spain</span>
+                        </div>
+                    </PreContent>
                     <Box height={10} />
                     <CustomCard padding="30px 60px">
                         <DataSubmissionContent />
@@ -61,6 +67,22 @@ export const DataSubmissionPageContent: React.FC<DataSubmissionPageProps> = Reac
     }
 });
 
+
+const PreContent = styled.div`
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    .info {
+        font-size: 14px;
+        span {
+            opacity: .5;
+        }
+        span:nth-child(1) {
+            color: ${glassColors.green};
+            opacity: 1;
+        }
+    }   
+`
 const StyledBreadCrumbs = styled(Breadcrumbs)`
     color: ${glassColors.mainPrimary};
     font-weight: 400;
