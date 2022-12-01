@@ -1,11 +1,6 @@
 import React from "react";
-import { Box, Button, Typography } from "@material-ui/core";
+import { Button } from "@material-ui/core";
 import styled from "styled-components";
-import { CustomCard } from "../custom-card/CustomCard";
-import i18n from "../../../locales";
-import { useDataSubmissionSteps } from "../../hooks/userDataSubmissionSteps";
-import { useAppContext } from "../../contexts/app-context";
-import { CircularProgress } from "material-ui";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
 export interface DataSubmissionStep {
     stepNumber: number;

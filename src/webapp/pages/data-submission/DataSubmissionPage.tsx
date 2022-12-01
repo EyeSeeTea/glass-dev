@@ -59,14 +59,13 @@ export const DataSubmissionPageContent: React.FC<DataSubmissionPageProps> = Reac
                         </div>
                     </PreContent>
                     <Box height={10} />
-                    <CustomCard padding="30px 60px">
+                    <CustomCard padding="40px 60px 50px">
                         <DataSubmissionContent />
                     </CustomCard>
                 </React.Fragment>
             );
     }
 });
-
 
 const PreContent = styled.div`
     display: flex;
@@ -75,14 +74,14 @@ const PreContent = styled.div`
     .info {
         font-size: 14px;
         span {
-            opacity: .5;
+            opacity: 0.5;
         }
         span:nth-child(1) {
             color: ${glassColors.green};
             opacity: 1;
         }
-    }   
-`
+    }
+`;
 const StyledBreadCrumbs = styled(Breadcrumbs)`
     color: ${glassColors.mainPrimary};
     font-weight: 400;

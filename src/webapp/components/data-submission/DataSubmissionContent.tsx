@@ -8,6 +8,7 @@ import styled from "styled-components";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { NonBlockingWarnings } from "./NonBlockingWarnings";
 import { SupportButtons } from "./SupportButtons";
+import { glassColors, palette } from "../../pages/app/themes/dhis2.theme";
 
 export const DataSubmissionContent: React.FC = () => {
     const { compositionRoot } = useAppContext();
@@ -32,30 +33,66 @@ export const DataSubmissionContent: React.FC = () => {
                         currentStep={currentStep}
                         changeStep={changeStep}
                     />
-                    {stepsResult?.data[0]?.children?.length && (
-                        currentStep === 3 ? 
-                            (
-                                <>
-                                    <ConsistencyChecks />
-                                    <NonBlockingWarnings />
-                                    <SupportButtons />                                
-                                </>
-                            ) :
-                            <p className="intro">
-                                {i18n.t(stepsResult.data[0].children[currentStep - 1]?.content)}
-                            </p>
-                    )}
+                    {stepsResult?.data[0]?.children?.length &&
+                        (currentStep === 3 ? (
+                            <>
+                                <ConsistencyChecks />
+                                <NonBlockingWarnings />
+                                <SupportButtons />
+                            </>
+                        ) : (
+                            <p className="intro">{i18n.t(stepsResult.data[0].children[currentStep - 1]?.content)}</p>
+                        ))}
                 </ContentWrapper>
-            )
+            );
     }
 };
 
 const ContentWrapper = styled.div`
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
     p.intro {
-        text-align: center;
+        text-align: left;
         max-width: 730px;
-        margin: 30px auto;
+        margin: 0 auto;
         font-weight: 300px;
         line-height: 1.4;
     }
-`
+    h3 {
+        font-size: 21px;
+        color: ${palette.text.primary};
+    }
+    .MuiTableContainer-root {
+        border: none;
+        box-shadow: none;
+    }
+    .MuiTableRow-head {
+        border-bottom: 3px solid ${glassColors.greyLight};
+        th {
+            color: ${glassColors.grey};
+            font-weight: 400;
+            font-size: 15px;
+        }
+    }
+    .MuiTableBody-root {
+        tr {
+            border: none;
+            td {
+                border-bottom: 1px solid ${glassColors.greyLight};
+            }
+            td:nth-child(1) {
+                color: ${glassColors.red}
+            }
+            td:nth-child(3) {
+                width: 40px;
+                text-align: center;
+                opacity: .4;
+                &:hover {
+                    opacity: 1;
+                }
+            }
+        }
+    }
+`;
+
