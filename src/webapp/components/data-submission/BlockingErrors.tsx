@@ -41,7 +41,4 @@ export const BlockingErrors: React.FC = () => {
     );
 };
 
-
-const ContentWrapper = styled.div`
-
-`
+const ContentWrapper = styled.div``;

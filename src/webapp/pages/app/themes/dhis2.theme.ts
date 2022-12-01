@@ -40,8 +40,8 @@ export const glassColors = {
     positive: "#69bb6d",
     info: "#EAF4FF",
 
-    gradientBg: "linear-gradient(180deg, rgba(155,186,232,1) 0%, rgba(196,149,218,1) 100%)",
-    gradientLightBg: "linear-gradient(180deg, rgba(155,186,232,1) 0%, rgba(196,149,218,1) 100%)",
+    gradientBg: "#9EB0E4",
+    gradientLightBg: "#9EB0E4",
 };
 
 export const palette = {

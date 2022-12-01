@@ -37,7 +37,6 @@ export const DataSubmissionContent: React.FC = () => {
                         (currentStep === 3 ? (
                             <>
                                 <ConsistencyChecks />
-                                <NonBlockingWarnings />
                                 <SupportButtons />
                             </>
                         ) : (
@@ -82,12 +81,12 @@ const ContentWrapper = styled.div`
                 border-bottom: 1px solid ${glassColors.greyLight};
             }
             td:nth-child(1) {
-                color: ${glassColors.red}
+                color: ${glassColors.red};
             }
             td:nth-child(3) {
                 width: 40px;
                 text-align: center;
-                opacity: .4;
+                opacity: 0.4;
                 &:hover {
                     opacity: 1;
                 }
@@ -95,4 +94,3 @@ const ContentWrapper = styled.div`
         }
     }
 `;
-
