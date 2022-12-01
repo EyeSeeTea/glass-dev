@@ -9,21 +9,21 @@ export const SupportButtons: React.FC = () => {
         <ContentWrapper>
             <div>
                 <span>{i18n.t("I need help")}</span>
-                <Button variant="contained" color="primary" >
+                <Button variant="contained" color="primary">
                     {i18n.t("Submit Help Ticket")}
                 </Button>
             </div>
             <div>
                 <span>{i18n.t("I can fix this by myself")}</span>
-                <Button variant="contained" color="primary" >
+                <Button variant="contained" color="primary">
                     {i18n.t("Upload New Data Files")}
                 </Button>
             </div>
             <div>
                 <span>{i18n.t("I'll fix it later")}</span>
-                <Button variant="contained" color="primary" >
+                <Button variant="contained" color="primary">
                     {i18n.t("OK")}
-                </Button>                
+                </Button>
             </div>
         </ContentWrapper>
     );

@@ -3,6 +3,7 @@ import { Button } from "@material-ui/core";
 import { BlockingErrors } from "./BlockingErrors";
 import styled from "styled-components";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
+import { NonBlockingWarnings } from "./NonBlockingWarnings";
 
 export const ConsistencyChecks: React.FC = () => {
     const [fileType, setFileType] = useState<string>("ris");
@@ -25,10 +26,24 @@ export const ConsistencyChecks: React.FC = () => {
                     Sample File
                 </Button>
             </div>
-            <BlockingErrors />
+            {renderTypeContent(fileType)}
         </ContentWrapper>
     );
 };
+
+const renderTypeContent = (type: string) => {
+    switch(type) {
+      case 'sample':
+        return <p>Sample file uploading content/intructions here...</p>;
+        default:
+          return (
+              <>
+                  <BlockingErrors />
+                  <NonBlockingWarnings />
+              </>
+          )
+    }
+  }
 
 const ContentWrapper = styled.div`
     display: flex;
