@@ -17,7 +17,6 @@ interface DataSubmissionPageProps {
 }
 
 export const DataSubmissionPage: React.FC<DataSubmissionPageProps> = React.memo(({ moduleName }) => {
-    console.log("init DataSubmissionPage...");
 
     return (
         <MainLayout>
@@ -45,10 +44,13 @@ export const DataSubmissionPageContent: React.FC<DataSubmissionPageProps> = Reac
                 <ContentWrapper>
                     <PreContent>
                         <StyledBreadCrumbs aria-label="breadcrumb" separator="">
-                            <Button component={NavLink} to={`/#/current-call/${moduleName}`} exact={true}><span>{moduleName}</span>
+                            <Button component={NavLink} to={`/#/current-call/${moduleName}`} exact={true}>
+                                <span>{moduleName}</span>
                             </Button>
                             <ChevronRightIcon />
-                            <Button><span>{i18n.t("2020 Call")}</span></Button>
+                            <Button>
+                                <span>{i18n.t("2020 Call")}</span>
+                            </Button>
                         </StyledBreadCrumbs>
                         <div className="info">
                             <span>{i18n.t("Yearly data upload")}</span>, &nbsp;
@@ -67,7 +69,7 @@ const ContentWrapper = styled.div`
     display: flex;
     flex-direction: column;
     gap: 20px;
-`
+`;
 
 const PreContent = styled.div`
     display: flex;
@@ -84,6 +86,7 @@ const PreContent = styled.div`
         }
     }
 `;
+
 const StyledBreadCrumbs = styled(Breadcrumbs)`
     color: ${glassColors.mainPrimary};
     font-weight: 400;
