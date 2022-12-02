@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2022-12-01T12:21:44.527Z\n"
-"PO-Revision-Date: 2022-12-01T12:21:44.527Z\n"
+"POT-Creation-Date: 2022-12-02T12:40:17.625Z\n"
+"PO-Revision-Date: 2022-12-02T12:40:17.625Z\n"
 
 msgid "Add"
 msgstr ""
@@ -14,40 +14,19 @@ msgstr ""
 msgid "List"
 msgstr ""
 
-msgid "Base data files"
+msgid "Upload dataset"
 msgstr ""
 
-msgid "Sample and RIS files"
+msgid "I can fix this by myself"
 msgstr ""
 
-msgid "UPLOAD NEW"
-msgstr ""
-
-msgid "Date"
-msgstr ""
-
-msgid "status"
-msgstr ""
-
-msgid "Details"
-msgstr ""
-
-msgid "DaDeleted / Incompletedte"
-msgstr ""
-
-msgid "Country questionnaire"
-msgstr ""
-
-msgid "NOT COMPLETED"
+msgid "Go to Questionnaires"
 msgstr ""
 
 msgid "I need help"
 msgstr ""
 
 msgid "Submit Help Ticket"
-msgstr ""
-
-msgid "I can fix this by myself"
 msgstr ""
 
 msgid "Upload New Data Files"
@@ -81,6 +60,9 @@ msgid "2020 Call"
 msgstr ""
 
 msgid "Yearly data upload"
+msgstr ""
+
+msgid "Missing Data"
 msgstr ""
 
 msgid "Hello {{name}}"

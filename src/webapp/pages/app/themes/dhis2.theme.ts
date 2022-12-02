@@ -33,6 +33,7 @@ export const glassColors = {
     gold: "#E2B777",
     red: "#C62828",
     green: "#4CAF50",
+    yellow: "#FBD44C",
     white: "#FFFFFF", // Not included in palette!
 
     negative: "#E53935",
