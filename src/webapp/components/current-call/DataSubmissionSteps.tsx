@@ -108,5 +108,5 @@ const ContentWrapper = styled.div`
                 }
             }
         }
-    }    
+    }
 `;
