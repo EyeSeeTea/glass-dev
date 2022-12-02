@@ -1,8 +1,7 @@
-import { Box, Breadcrumbs, Button, Link, Typography } from "@material-ui/core";
+import { Breadcrumbs, Button, Typography } from "@material-ui/core";
 import { CircularProgress } from "material-ui";
 import React from "react";
 import styled from "styled-components";
-import { DataSubmissionContent } from "../../components/data-submission/DataSubmissionContent";
 import { MainLayout } from "../../components/main-layout/MainLayout";
 import { useAppContext } from "../../contexts/app-context";
 import { useGlassModule } from "../../hooks/useGlassModule";
@@ -11,6 +10,7 @@ import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import { NavLink } from "react-router-dom";
 import { CustomCard } from "../../components/custom-card/CustomCard";
 import i18n from "@eyeseetea/d2-ui-components/locales";
+import { CurrentCallContent } from "../../components/current-call/CurrentCallContent";
 
 interface DataSubmissionPageProps {
     moduleName: string;
@@ -58,11 +58,11 @@ export const DataSubmissionPageContent: React.FC<DataSubmissionPageProps> = Reac
                         </div>
                     </PreContent>
                     <PageTitle>
-                        <h1>{i18n.t("2020 Call")}</h1>
+                        <h3>{i18n.t("2020 Call")}</h3>
                         <div className="status">{i18n.t("Missing Data")}</div>
                     </PageTitle>
                     <CustomCard padding="40px 60px 50px">
-                        <DataSubmissionContent />
+                        <CurrentCallContent />
                     </CustomCard>
                 </ContentWrapper>
             );
@@ -95,6 +95,17 @@ const PageTitle = styled.div`
     display: flex;
     flex-direction: row;
     gap: 20px;
+    align-items: center;
+    .status {
+        display: inline-block;
+        border-radius: 5px;
+        padding: 3px 15px;
+        background-color: ${glassColors.yellow};
+        color: white;
+        text-transform: uppercase;
+        font-weight: bold;
+        font-size: 12px;
+    }
 `;
 
 
