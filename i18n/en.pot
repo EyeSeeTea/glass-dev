@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2022-12-01T12:03:01.952Z\n"
-"PO-Revision-Date: 2022-12-01T12:03:01.952Z\n"
+"POT-Creation-Date: 2022-12-01T12:21:44.527Z\n"
+"PO-Revision-Date: 2022-12-01T12:21:44.527Z\n"
 
 msgid "Add"
 msgstr ""
@@ -75,6 +75,9 @@ msgid "Help"
 msgstr ""
 
 msgid "HOME"
+msgstr ""
+
+msgid "2020 Call"
 msgstr ""
 
 msgid "Yearly data upload"
