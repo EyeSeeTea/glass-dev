@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2022-12-02T12:40:17.625Z\n"
-"PO-Revision-Date: 2022-12-02T12:40:17.625Z\n"
+"POT-Creation-Date: 2022-12-02T13:13:23.250Z\n"
+"PO-Revision-Date: 2022-12-02T13:13:23.250Z\n"
 
 msgid "Add"
 msgstr ""
@@ -17,16 +17,33 @@ msgstr ""
 msgid "Upload dataset"
 msgstr ""
 
-msgid "I can fix this by myself"
+msgid "Go to Questionnaires"
 msgstr ""
 
-msgid "Go to Questionnaires"
+msgid "Current Status"
+msgstr ""
+
+msgid "Not Completed"
+msgstr ""
+
+msgid "At least one dataset is missing"
+msgstr ""
+
+msgid "At least one mandatory questionnaire is not submited"
+msgstr ""
+
+msgid ""
+"You need to complete the mandatory uploads before validate the submissions "
+"for this call"
 msgstr ""
 
 msgid "I need help"
 msgstr ""
 
 msgid "Submit Help Ticket"
+msgstr ""
+
+msgid "I can fix this by myself"
 msgstr ""
 
 msgid "Upload New Data Files"

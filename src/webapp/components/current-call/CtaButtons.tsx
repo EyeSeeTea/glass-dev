@@ -5,7 +5,6 @@ import styled from "styled-components";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 
 export const CtaButtons: React.FC = () => {
-
     return (
         <ContentWrapper className="cta-buttons">
             <div>

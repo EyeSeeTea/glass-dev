@@ -17,7 +17,6 @@ interface DataSubmissionPageProps {
 }
 
 export const DataSubmissionPage: React.FC<DataSubmissionPageProps> = React.memo(({ moduleName }) => {
-
     return (
         <MainLayout>
             <DataSubmissionPageContent moduleName={moduleName} />

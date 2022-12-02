@@ -17,7 +17,6 @@ interface DataSubmissionPageProps {
 }
 
 export const CurrentCallPage: React.FC<DataSubmissionPageProps> = React.memo(({ moduleName }) => {
-
     return (
         <MainLayout>
             <DataSubmissionPageContent moduleName={moduleName} />
@@ -107,7 +106,6 @@ const PageTitle = styled.div`
         font-size: 12px;
     }
 `;
-
 
 const StyledBreadCrumbs = styled(Breadcrumbs)`
     color: ${glassColors.mainPrimary};
