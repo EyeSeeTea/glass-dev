@@ -1,7 +1,7 @@
 /* eslint-disable react/no-multi-comp */
 /* eslint-disable react/display-name */
 import React from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 import { makeStyles } from "@material-ui/styles";
 import { ListItem, Button, colors, Theme, Typography } from "@material-ui/core";
 import clsx from "clsx";
@@ -15,15 +15,28 @@ interface SidebarNavProps {
 
 const SidebarNavMenu: React.FC<SidebarNavProps> = ({ menu, className }) => {
     const classes = useStyles(menu.level);
+    const location = useLocation();
+
+    const isCurrentPage = (val:string) => {
+        if (val) {
+            return location.pathname.includes(val);
+        } else {
+            return false;
+        }
+    }
 
     return (
-        <ListItem className={clsx(classes.root, className)} disableGutters style={{ paddingLeft: menu.level * 8 }}>
+        <ListItem 
+            className={clsx(classes.root, className)} 
+            disableGutters style={{ paddingLeft: menu.level * 8 }}
+            >
             <Button
                 activeClassName={classes.active}
                 className={classes.button}
                 component={NavLink}
                 to={menu.path}
                 exact={true}
+                data-is-page-current={isCurrentPage(menu.path)}
             >
                 <div className={classes.icon}>{menu.icon}</div>
                 <Typography variant="body1" style={{ color: glassColors.greyBlack }}>

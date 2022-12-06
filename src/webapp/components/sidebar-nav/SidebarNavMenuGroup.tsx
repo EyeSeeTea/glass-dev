@@ -5,6 +5,8 @@ import clsx from "clsx";
 import { ExpandLess, ExpandMore } from "@material-ui/icons";
 import { MenuGroup } from "./SidebarNav";
 import SidebarNavMenu from "./SidebarNavMenu";
+import styled from "styled-components";
+import { moduleColors } from "../../pages/app/themes/dhis2.theme";
 
 interface SidebarNavProps {
     className?: string;
@@ -35,8 +37,10 @@ const SidebarNavMenuGroup: React.FC<SidebarNavProps> = ({ menu, className }) => 
                     <div className={classes.expand}>{openCollapse ? <ExpandLess /> : <ExpandMore />}</div>
                 </Button>
             </ListItem>
-            <Collapse in={openCollapse} timeout="auto" unmountOnExit key={menu.title}>
-                <List component="div" disablePadding>
+            <StyledCollapse in={openCollapse} timeout="auto" unmountOnExit key={menu.title}>
+                <List component="div" disablePadding 
+                    data-group-name={'group-name'}
+                    >
                     {menu.children &&
                         menu.children.map(child =>
                             child.kind === "MenuGroup" ? (
@@ -46,12 +50,21 @@ const SidebarNavMenuGroup: React.FC<SidebarNavProps> = ({ menu, className }) => 
                             )
                         )}
                 </List>
-            </Collapse>
+            </StyledCollapse>
         </React.Fragment>
     );
 };
 
 export default SidebarNavMenuGroup;
+
+const StyledCollapse = styled(Collapse)`
+    a[data-is-page-current="true"] {
+        background-color: ${moduleColors.amr};
+        * {
+            color: white !important;
+        }
+    }
+`;
 
 const useStyles = makeStyles((theme: Theme) => ({
     root: { padding: theme.spacing(0) },

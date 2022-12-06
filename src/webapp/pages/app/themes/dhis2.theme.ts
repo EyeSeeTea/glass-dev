@@ -34,6 +34,7 @@ export const glassColors = {
     red: "#C62828",
     green: "#4CAF50",
     yellow: "#FBD44C",
+    orange: "#FF681F",
     white: "#FFFFFF", // Not included in palette!
 
     negative: "#E53935",
@@ -93,6 +94,13 @@ export const palette = {
     shadow: glassColors.grey,
 };
 
+export const moduleColors = {
+    amr: "#BD9EC2",
+    amc: "#FFB490",
+    egasp: "#BD9EC2",
+}
+
+
 export const muiTheme = createTheme({
     // colors,
     palette,
@@ -108,3 +116,5 @@ export const muiTheme = createTheme({
         },
     },
 });
+
+
