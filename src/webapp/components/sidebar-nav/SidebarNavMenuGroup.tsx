@@ -38,9 +38,7 @@ const SidebarNavMenuGroup: React.FC<SidebarNavProps> = ({ menu, className }) => 
                 </Button>
             </ListItem>
             <StyledCollapse in={openCollapse} timeout="auto" unmountOnExit key={menu.title}>
-                <List component="div" disablePadding 
-                    data-group-name={'group-name'}
-                    >
+                <List component="div" disablePadding data-group-name={"group-name"}>
                     {menu.children &&
                         menu.children.map(child =>
                             child.kind === "MenuGroup" ? (

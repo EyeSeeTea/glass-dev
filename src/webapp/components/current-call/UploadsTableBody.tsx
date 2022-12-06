@@ -8,14 +8,12 @@ export interface UploadsTableBodyProps {
     rows?: UploadsDataItemProps[];
 }
 
-export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({
-    rows }) => {
-
+export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows }) => {
     return (
         <>
-            {(rows && rows.length) ?
+            {rows && rows.length ? (
                 <StyledTableBody>
-                    {rows.map((row:UploadsDataItemProps) => (
+                    {rows.map((row: UploadsDataItemProps) => (
                         <TableRow key={row.id}>
                             <TableCell>{row.uploaded_date}</TableCell>
                             <TableCell>{row.date_first}</TableCell>
@@ -27,9 +25,9 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({
                         </TableRow>
                     ))}
                 </StyledTableBody>
-                :
+            ) : (
                 <p>No data found...</p>
-            }
+            )}
         </>
     );
 };
