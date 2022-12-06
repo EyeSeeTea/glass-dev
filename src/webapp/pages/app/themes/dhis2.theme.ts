@@ -98,8 +98,7 @@ export const moduleColors = {
     amr: "#BD9EC2",
     amc: "#FFB490",
     egasp: "#BD9EC2",
-}
-
+};
 
 export const muiTheme = createTheme({
     // colors,
@@ -116,5 +115,3 @@ export const muiTheme = createTheme({
         },
     },
 });
-
-

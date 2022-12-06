@@ -17,19 +17,16 @@ const SidebarNavMenu: React.FC<SidebarNavProps> = ({ menu, className }) => {
     const classes = useStyles(menu.level);
     const location = useLocation();
 
-    const isCurrentPage = (val:string) => {
+    const isCurrentPage = (val: string) => {
         if (val) {
             return location.pathname.includes(val);
         } else {
             return false;
         }
-    }
+    };
 
     return (
-        <ListItem 
-            className={clsx(classes.root, className)} 
-            disableGutters style={{ paddingLeft: menu.level * 8 }}
-            >
+        <ListItem className={clsx(classes.root, className)} disableGutters style={{ paddingLeft: menu.level * 8 }}>
             <Button
                 activeClassName={classes.active}
                 className={classes.button}

@@ -18,19 +18,21 @@ export const CurrentStatus: React.FC = () => {
                 <p>{i18n.t("At least one mandatory questionnaire is not submited")}</p>
                 <p>
                     <strong>
-                        {i18n.t("You need to complete the mandatory uploads before validate the submissions for this call")}
+                        {i18n.t(
+                            "You need to complete the mandatory uploads before validate the submissions for this call"
+                        )}
                     </strong>
                 </p>
 
                 <CtaButtons />
             </LinedBox>
-
         </ContentWrapper>
     );
 };
 
 const ContentWrapper = styled.div`
-    h3, h4 {
+    h3,
+    h4 {
         margin: 0;
     }
     p {
@@ -43,12 +45,12 @@ const ContentWrapper = styled.div`
             font-weight: bold;
             font-size: 13px;
             display: block;
-            opacity: .7;
+            opacity: 0.7;
         }
         .status {
             font-weight: 500;
             &.not-completed {
-                color: ${glassColors.orange} 
+                color: ${glassColors.orange};
             }
         }
     }
@@ -64,4 +66,4 @@ const LinedBox = styled.div`
     border: 1px solid ${glassColors.grey};
     padding: 20px 30px;
     border-radius: 15px;
-`
+`;

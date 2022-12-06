@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Button } from "@material-ui/core";
 import styled from "styled-components";
-import { glassColors, palette } from "../../pages/app/themes/dhis2.theme";
+import { glassColors } from "../../pages/app/themes/dhis2.theme";
 import { ListOfDatasets } from "./ListOfDatasets";
 import { CurrentStatus } from "./CurrentStatus";
 
@@ -71,41 +71,6 @@ const ContentWrapper = styled.div`
             &.current {
                 color: ${glassColors.mainPrimary};
                 border-bottom: 4px solid ${glassColors.mainPrimary};
-            }
-        }
-    }
-    h3 {
-        font-size: 21px;
-        color: ${palette.text.primary};
-    }
-    .MuiTableContainer-root {
-        border: none;
-        box-shadow: none;
-    }
-    .MuiTableRow-head {
-        border-bottom: 3px solid ${glassColors.greyLight};
-        th {
-            color: ${glassColors.grey};
-            font-weight: 400;
-            font-size: 15px;
-        }
-    }
-    .MuiTableBody-root {
-        tr {
-            border: none;
-            td {
-                border-bottom: 1px solid ${glassColors.greyLight};
-            }
-            td:nth-child(1) {
-                color: ${glassColors.red};
-            }
-            td:nth-child(3) {
-                width: 40px;
-                text-align: center;
-                opacity: 0.4;
-                &:hover {
-                    opacity: 1;
-                }
             }
         }
     }
