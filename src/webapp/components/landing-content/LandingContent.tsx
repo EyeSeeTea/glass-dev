@@ -3,7 +3,6 @@ import { Grid } from "@material-ui/core";
 import { ModuleCard } from "../module-card/ModuleCard";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
 import { NewsCard } from "../news-card/NewsCard";
-import { AppFooter } from "../app-footer/AppFooter";
 import styled from "styled-components";
 
 export const LandingContent: React.FC = () => {

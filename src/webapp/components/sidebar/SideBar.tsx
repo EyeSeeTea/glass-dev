@@ -1,8 +1,6 @@
 import React from "react";
 import styled from "styled-components";
-import { Box, Button, CircularProgress, Typography } from "@material-ui/core";
-import ExitToAppIcon from "@material-ui/icons/ExitToApp";
-import StarIcon from "@material-ui/icons/Star";
+import { Box, CircularProgress, Typography } from "@material-ui/core";
 import { CustomCard } from "../custom-card/CustomCard";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
 import SidebarNav from "../sidebar-nav/SidebarNav";
