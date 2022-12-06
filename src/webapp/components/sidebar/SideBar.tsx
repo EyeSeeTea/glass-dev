@@ -28,26 +28,12 @@ export const SideBar: React.FC = () => {
                         <Box width={40} />
                         <Typography>{i18n.t("HOME")}</Typography>
                     </TitleContainer>
-
                     <SidebarNav menus={menusResult.data} />
-
                     <div style={{ flexGrow: 1 }} />
                 </CustomCard>
             );
     }
 };
-
-const ButtonContainer = styled.div`
-    display: flex;
-    flex-direction: column;
-    aleg-itrems: center;
-`;
-
-const StyledButton = styled(Button)`
-    margin: 16px;
-    background: transparent;
-    text-transform: none;
-`;
 
 const TitleContainer = styled.div`
     border-radius: 10px;
