@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2022-12-02T13:13:23.250Z\n"
-"PO-Revision-Date: 2022-12-02T13:13:23.250Z\n"
+"POT-Creation-Date: 2022-12-06T09:31:12.252Z\n"
+"PO-Revision-Date: 2022-12-06T09:31:12.252Z\n"
 
 msgid "Add"
 msgstr ""
@@ -35,6 +35,27 @@ msgstr ""
 msgid ""
 "You need to complete the mandatory uploads before validate the submissions "
 "for this call"
+msgstr ""
+
+msgid "Uploaded"
+msgstr ""
+
+msgid "Date First"
+msgstr ""
+
+msgid "Date Last"
+msgstr ""
+
+msgid "Records"
+msgstr ""
+
+msgid "Type"
+msgstr ""
+
+msgid "Batch ID"
+msgstr ""
+
+msgid "Status"
 msgstr ""
 
 msgid "I need help"

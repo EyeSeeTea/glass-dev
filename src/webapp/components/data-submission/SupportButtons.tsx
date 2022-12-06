@@ -1,6 +1,5 @@
 import React from "react";
 import { Button } from "@material-ui/core";
-import { glassColors, palette } from "../../pages/app/themes/dhis2.theme";
 import styled from "styled-components";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 

@@ -1,4 +1,4 @@
-import { Box, Breadcrumbs, Button, Link, Typography } from "@material-ui/core";
+import { Breadcrumbs, Button, Typography } from "@material-ui/core";
 import { CircularProgress } from "material-ui";
 import React from "react";
 import styled from "styled-components";
@@ -43,7 +43,12 @@ export const DataSubmissionPageContent: React.FC<DataSubmissionPageProps> = Reac
                 <ContentWrapper>
                     <PreContent>
                         <StyledBreadCrumbs aria-label="breadcrumb" separator="">
-                            <Button component={NavLink} to={`/#/current-call/${moduleName}`} exact={true}>
+                            <Button 
+                                component={NavLink} 
+                                to={`/#/current-call/${moduleName}`} 
+                                exact={true}
+                                onClick={handleClick}
+                                >
                                 <span>{moduleName}</span>
                             </Button>
                             <ChevronRightIcon />

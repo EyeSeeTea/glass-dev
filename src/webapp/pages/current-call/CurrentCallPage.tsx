@@ -43,7 +43,12 @@ export const DataSubmissionPageContent: React.FC<DataSubmissionPageProps> = Reac
                 <ContentWrapper>
                     <PreContent>
                         <StyledBreadCrumbs aria-label="breadcrumb" separator="">
-                            <Button component={NavLink} to={`/#/current-call/${moduleName}`} exact={true}>
+                            <Button 
+                                component={NavLink} 
+                                to={`/#/current-call/${moduleName}`} 
+                                exact={true}
+                                onClick={handleClick}
+                                >
                                 <span>{moduleName}</span>
                             </Button>
                             <ChevronRightIcon />
