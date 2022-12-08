@@ -68,5 +68,6 @@ const ContentContainer = styled.div`
     margin: 12px 20px;
     display: flex;
     flex-direction: row;
-    justifycontent: space-between;
+    justify-content: space-between;
+    align-items: end;
 `;

@@ -4,6 +4,9 @@ import styled from "styled-components";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
 import { ListOfDatasets } from "./ListOfDatasets";
 import { CurrentStatus } from "./CurrentStatus";
+import { Questionnaires } from "./Questionnaires";
+import { Advanced } from "./Advanced";
+import { Validations } from "./Validations";
 
 export const DataSubmissionSteps: React.FC = () => {
     const [currentStep, setCurrentStep] = useState<number>(0);
@@ -39,11 +42,11 @@ const renderTypeContent = (step: number) => {
         case 1:
             return <ListOfDatasets />;
         case 2:
-            return <p>Questionnaire One...</p>;
+            return <Questionnaires />;
         case 3:
-            return <p>Validation...</p>;
+            return <Validations />;
         case 4:
-            return <p>Advanced...</p>;
+            return <Advanced />;
         default:
             return <p>No Data uploaded...</p>;
     }

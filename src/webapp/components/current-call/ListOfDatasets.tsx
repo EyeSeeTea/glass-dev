@@ -19,7 +19,9 @@ export const ListOfDatasets: React.FC = () => {
             <UploadsTable title="Correct Uploads" 
                 items={getUploadedItems(data as UploadsDataItemProps[])} />
             <UploadsTable title="Uploads with errors, or discarded"
-                items={getNonUploadedItems(data as UploadsDataItemProps[])} />
+                items={getNonUploadedItems(data as UploadsDataItemProps[])} 
+                className="error-group"
+                />
         </ContentWrapper>
     );
 };

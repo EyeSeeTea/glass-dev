@@ -28,7 +28,6 @@ const SidebarNavMenu: React.FC<SidebarNavProps> = ({ menu, className }) => {
     return (
         <ListItem className={clsx(classes.root, className)} disableGutters style={{ paddingLeft: menu.level * 8 }}>
             <Button
-                activeClassName={classes.active}
                 className={classes.button}
                 component={NavLink}
                 to={menu.path}
