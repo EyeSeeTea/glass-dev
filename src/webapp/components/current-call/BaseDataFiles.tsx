@@ -6,8 +6,14 @@ import { glassColors } from "../../pages/app/themes/dhis2.theme";
 import KeyboardArrowDownIcon from "@material-ui/icons/KeyboardArrowDown";
 import { SideTitle, StyledHeadTableCell, StyledTableCell, StyledTableContainer } from "./common";
 import i18n from "../../../locales";
+import { GlassModule } from "../../../domain/entities/GlassModule";
+import { NavLink } from "react-router-dom";
 
-export const BaseDataFiles: React.FC = () => {
+interface BaseDataFilesProps {
+    module: GlassModule;
+}
+
+export const BaseDataFiles: React.FC<BaseDataFilesProps> = ({ module }) => {
     return (
         <ContentContainer>
             <Box display="flex" flexDirection="row" justifyContent={"space-between"} alignItems="center">
@@ -20,6 +26,9 @@ export const BaseDataFiles: React.FC = () => {
                     color="primary"
                     endIcon={<Icon>add</Icon>}
                     style={{ padding: "10px 30px", fontSize: 20 }}
+                    component={NavLink}
+                    to={`/data-submission/${module.name}`}
+                    exact={true}
                 >
                     {i18n.t("UPLOAD NEW")}
                 </Button>

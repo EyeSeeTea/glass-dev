@@ -22,9 +22,9 @@ export const SideBar: React.FC = () => {
             return <Typography variant="h6">{menusResult.message}</Typography>;
         case "loaded":
             return (
-                <CustomCard minHeight="80vh" overflow="auto">
-                    <TitleContainer>
-                        <StarIcon />
+                <CustomCard minheight="630px" padding="0 0 100px 0" data-test="test2">
+                    <TitleContainer data-test="test3">
+                        <StarGradient className="star-icon" />
                         <Box width={40} />
                         <Typography>{i18n.t("HOME")}</Typography>
                     </TitleContainer>
@@ -32,17 +32,6 @@ export const SideBar: React.FC = () => {
                     <SidebarNav menus={menusResult.data} />
 
                     <div style={{ flexGrow: 1 }} />
-
-                    <ButtonContainer>
-                        <StyledButton
-                            variant="contained"
-                            color="default"
-                            startIcon={<ExitToAppIcon />}
-                            disableElevation
-                        >
-                            {i18n.t("Log Out")}
-                        </StyledButton>
-                    </ButtonContainer>
                 </CustomCard>
             );
     }
@@ -61,11 +50,25 @@ const StyledButton = styled(Button)`
 `;
 
 const TitleContainer = styled.div`
-    background: ${glassColors.lightSecondary};
-    color: white;
     border-radius: 10px;
     padding: 14px 10px;
-    margin: 16px;
+    margin: 16px 16px 0 16px;
     display: flex;
     flex-direction: row;
+    text-transform: uppercase;
+    cursor: pointer;
+    &:hover {
+        background: ${glassColors.gradientLightBg};
+        color: white;
+        .star-icon {
+            background: white;
+        }
+    }
+`;
+
+const StarGradient = styled.div`
+    width: 23px;
+    height: 23px;
+    clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+    background: ${glassColors.gradientLightBg};
 `;
