@@ -32,4 +32,6 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows }) => {
     );
 };
 
-const StyledTableBody = styled(TableBody)``;
+const StyledTableBody = styled(TableBody)`
+    
+`;

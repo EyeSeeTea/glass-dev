@@ -18,11 +18,12 @@ export interface UploadsDataItemProps {
 export interface UploadsDataProps {
     title: string;
     items?: UploadsDataItemProps[];
+    className?: string;
 }
 
-export const UploadsTable: React.FC<UploadsDataProps> = ({ title, items }) => {
+export const UploadsTable: React.FC<UploadsDataProps> = ({ title, items, className}) => {
     return (
-        <ContentWrapper>
+        <ContentWrapper className={className}>
             <Typography variant="h3">{title}</Typography>
 
             <TableContainer component={Paper}>
@@ -56,7 +57,7 @@ const ContentWrapper = styled.div`
         border: none;
         box-shadow: none;
     }
-    .MuiTableRow-head {
+    thead {
         border-bottom: 3px solid ${glassColors.greyLight};
         th {
             color: ${glassColors.grey};
@@ -64,22 +65,30 @@ const ContentWrapper = styled.div`
             font-size: 15px;
         }
     }
-    .MuiTableBody-root {
+    tbody {
         tr {
             border: none;
+            &:hover {
+                background-color: ${glassColors.greyLight};
+            }
             td {
                 border-bottom: 1px solid ${glassColors.greyLight};
             }
-            td:nth-child(1) {
-                color: ${glassColors.red};
+            td:nth-child(5) {
+                text-transform: uppercase;
+                opacity: 0.5;
             }
-            td:nth-child(3) {
-                width: 40px;
-                text-align: center;
-                opacity: 0.4;
-                &:hover {
-                    opacity: 1;
-                }
+            td:nth-child(7) {
+                text-transform: uppercase;
+                opacity: 0.5;
+            }
+        }
+    }
+    &.error-group {
+        tbody {
+            td:nth-child(7) {
+                color: ${glassColors.red};
+                opacity: 1;
             }
         }
     }

@@ -10,10 +10,11 @@ import { moduleColors } from "../../pages/app/themes/dhis2.theme";
 
 interface SidebarNavProps {
     className?: string;
+    groupName?: string;
     menu: MenuGroup;
 }
 
-const SidebarNavMenuGroup: React.FC<SidebarNavProps> = ({ menu, className }) => {
+const SidebarNavMenuGroup: React.FC<SidebarNavProps> = ({ menu, groupName, className }) => {
     const classes = useStyles(menu.level);
 
     const [openCollapse, setOpenCollapse] = React.useState(false);
@@ -38,7 +39,7 @@ const SidebarNavMenuGroup: React.FC<SidebarNavProps> = ({ menu, className }) => 
                 </Button>
             </ListItem>
             <StyledCollapse in={openCollapse} timeout="auto" unmountOnExit key={menu.title}>
-                <List component="div" disablePadding data-group-name={"group-name"}>
+                <List component="div" disablePadding data-group-name={groupName}>
                     {menu.children &&
                         menu.children.map(child =>
                             child.kind === "MenuGroup" ? (
@@ -61,6 +62,16 @@ const StyledCollapse = styled(Collapse)`
         * {
             color: white !important;
         }
+    }
+    [data-group-name="AMC"] {
+        a[data-is-page-current="true"] {
+            background-color: ${moduleColors.amc} !important;
+        } 
+    }
+    [data-group-name="EGASP"] {
+        a[data-is-page-current="true"] {
+            background-color: ${moduleColors.egasp} !important;
+        } 
     }
 `;
 

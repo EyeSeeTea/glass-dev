@@ -1,12 +1,13 @@
 import React from "react";
 import styled from "styled-components";
-import { Box, CircularProgress, Typography } from "@material-ui/core";
+import { Box, Button, CircularProgress, Typography } from "@material-ui/core";
 import { CustomCard } from "../custom-card/CustomCard";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
 import SidebarNav from "../sidebar-nav/SidebarNav";
 import { useAppContext } from "../../contexts/app-context";
 import { useSidebarMenus } from "../../hooks/useSidebarMenus";
 import i18n from "../../../locales";
+import { NavLink } from "react-router-dom";
 
 export const SideBar: React.FC = () => {
     const { compositionRoot } = useAppContext();
@@ -21,34 +22,50 @@ export const SideBar: React.FC = () => {
         case "loaded":
             return (
                 <CustomCard minheight="630px" padding="0 0 100px 0" data-test="test2">
-                    <TitleContainer data-test="test3">
-                        <StarGradient className="star-icon" />
-                        <Box width={40} />
-                        <Typography>{i18n.t("HOME")}</Typography>
-                    </TitleContainer>
+
+                    <HomeButtonWrapper>
+                        <Button
+                            className="home-button"
+                            component={NavLink}
+                            to="/"
+                            exact={true}
+                        >
+                            <StarGradient className="star-icon" />
+                            <Box width={40} />
+                            <Typography>{i18n.t("HOME")}</Typography>
+                        </Button>
+                    </HomeButtonWrapper>
+
+
                     <SidebarNav menus={menusResult.data} />
+
                     <div style={{ flexGrow: 1 }} />
+
                 </CustomCard>
             );
     }
 };
 
-const TitleContainer = styled.div`
-    border-radius: 10px;
-    padding: 14px 10px;
-    margin: 16px 16px 0 16px;
-    display: flex;
-    flex-direction: row;
-    text-transform: uppercase;
-    cursor: pointer;
-    &:hover {
-        background: ${glassColors.gradientLightBg};
-        color: white;
-        .star-icon {
-            background: white;
+const HomeButtonWrapper = styled.div`
+    margin: 25px 0 0 0;
+    .home-button {
+        border-radius: 0;
+        display: flex;
+        flex-direction: row;
+        text-transform: uppercase;
+        cursor: pointer;
+        justify-content: flex-start;
+        padding: 10px 25px;
+        margin: 0;
+        &:hover {
+            background: ${glassColors.gradientLightBg} !important;
+            color: white;
+            .star-icon {
+                background: white;
+            }
         }
     }
-`;
+`
 
 const StarGradient = styled.div`
     width: 23px;

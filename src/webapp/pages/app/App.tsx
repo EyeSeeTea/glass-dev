@@ -8,7 +8,6 @@ import { appConfig } from "../../../app-config";
 import { getCompositionRoot } from "../../../CompositionRoot";
 import { Instance } from "../../../data/entities/Instance";
 import { D2Api } from "../../../types/d2-api";
-import Share from "../../components/share/Share";
 import { AppContext, AppContextState } from "../../contexts/app-context";
 import { Router } from "../Router";
 import "./App.css";
@@ -50,7 +49,9 @@ export const App: React.FC<AppProps> = React.memo(function App({ api, d2, instan
     return (
         <MuiThemeProvider theme={muiTheme}>
             <OldMuiThemeProvider muiTheme={muiThemeLegacy}>
+                
                 <SnackbarProvider>
+
                     {/* <HeaderBar appName="Skeleton App" /> */}
 
                     <div id="app" className="content">
@@ -59,8 +60,10 @@ export const App: React.FC<AppProps> = React.memo(function App({ api, d2, instan
                         </AppContext.Provider>
                     </div>
 
-                    <Share visible={showShareButton} />
+                    {/* <Share visible={showShareButton} /> */}
+
                 </SnackbarProvider>
+                
             </OldMuiThemeProvider>
         </MuiThemeProvider>
     );
