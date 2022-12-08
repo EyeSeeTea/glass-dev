@@ -9,6 +9,7 @@ export const CurrentStatus: React.FC = () => {
     return (
         <ContentWrapper>
             <LinedBox>
+                <Box sx={{ m: 2 }} />
                 <div className="status-box">
                     <small>{i18n.t("Current Status")}</small>
                     <span className="status not-completed">{i18n.t("Not Completed")}</span>

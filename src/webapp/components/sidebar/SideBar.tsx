@@ -24,18 +24,14 @@ export const SideBar: React.FC = () => {
                 <CustomCard minheight="630px" padding="0 0 100px 0" data-test="test2">
 
                     <HomeButtonWrapper>
-                        <Button
-                            className="home-button"
-                            component={NavLink}
-                            to="/"
-                            exact={true}
-                        >
+
+                        <Button className="home-button" component={NavLink} to="/" exact={true}>
                             <StarGradient className="star-icon" />
                             <Box width={40} />
                             <Typography>{i18n.t("HOME")}</Typography>
                         </Button>
-                    </HomeButtonWrapper>
 
+                    </HomeButtonWrapper>
 
                     <SidebarNav menus={menusResult.data} />
 
@@ -65,7 +61,7 @@ const HomeButtonWrapper = styled.div`
             }
         }
     }
-`
+`;
 
 const StarGradient = styled.div`
     width: 23px;

@@ -35,9 +35,6 @@ const ContentWrapper = styled.div`
         display: flex;
         flex-direction: column;
         gap: 15px;
-        span {
-            font-weight: 300;
-        }
         button {
             font-weight: 400;
         }

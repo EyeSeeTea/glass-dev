@@ -5,13 +5,31 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2022-12-06T09:31:12.252Z\n"
-"PO-Revision-Date: 2022-12-06T09:31:12.252Z\n"
+"POT-Creation-Date: 2022-12-08T04:04:23.919Z\n"
+"PO-Revision-Date: 2022-12-08T04:04:23.919Z\n"
 
 msgid "Add"
 msgstr ""
 
 msgid "List"
+msgstr ""
+
+msgid "Ask for updating"
+msgstr ""
+
+msgid ""
+"If for any reason you need to pull this file from the platform to upload a "
+"new version of the data you can do it automatically while it is not "
+"approved by WHO."
+msgstr ""
+
+msgid ""
+"After it the status is “WHO Aproval” or “WHO PUBLISHED” the revoking "
+"process needs to be suppervised by WHO because it can affect ongoing "
+"publications"
+msgstr ""
+
+msgid "Request Dataset update"
 msgstr ""
 
 msgid "Upload dataset"
@@ -76,13 +94,13 @@ msgstr ""
 msgid "OK"
 msgstr ""
 
+msgid "News from GLASS"
+msgstr ""
+
 msgid "Log Out"
 msgstr ""
 
 msgid "GO"
-msgstr ""
-
-msgid "News from GLASS"
 msgstr ""
 
 msgid "Back"
