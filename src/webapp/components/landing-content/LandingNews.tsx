@@ -17,27 +17,44 @@ export const LandingNews: React.FC = () => {
                         <Item>
                             <Heading>
                                 <h3>New Platform</h3>
-                                <Typography align="right" color="textSecondary">1/10/2021</Typography>
+                                <Typography align="right" color="textSecondary">
+                                    1/10/2021
+                                </Typography>
                             </Heading>
-                            <NewsContent>This is a platform for global data sharing on antimicrobial resistance worldwide. It has been launched by WHO as part of the implementation of the Global Action Plan on Antimicrobial Resistance (AMR). The data will help to inform national, regional and global decision-making, strategies and advocacy.</NewsContent>
+                            <NewsContent>
+                                This is a platform for global data sharing on antimicrobial resistance worldwide. It has
+                                been launched by WHO as part of the implementation of the Global Action Plan on
+                                Antimicrobial Resistance (AMR). The data will help to inform national, regional and
+                                global decision-making, strategies and advocacy.
+                            </NewsContent>
                         </Item>
 
                         <Item>
                             <Heading>
                                 <h3>Maintenance shutdown</h3>
-                                <Typography align="right" color="textSecondary">1/11/2021</Typography>
+                                <Typography align="right" color="textSecondary">
+                                    1/11/2021
+                                </Typography>
                             </Heading>
-                            <NewsContent>Nunc auctor purus at mi luctus facilisis. Cras eu nisl vitae elit porta tristique ac id lorem. Sed congue at lacus a blandit.</NewsContent>
+                            <NewsContent>
+                                Nunc auctor purus at mi luctus facilisis. Cras eu nisl vitae elit porta tristique ac id
+                                lorem. Sed congue at lacus a blandit.
+                            </NewsContent>
                         </Item>
 
                         <Item>
                             <Heading>
                                 <h3>Nunc auctor purus at mi luctus facilisis</h3>
-                                <Typography align="right" color="textSecondary">1/11/2021</Typography>
+                                <Typography align="right" color="textSecondary">
+                                    1/11/2021
+                                </Typography>
                             </Heading>
-                            <NewsContent>Aenean fringilla risus a est ultricies laoreet. Aenean tempor turpis enim, non tristique libero interdum eget. Mauris condimentum risus ut efficitur rutrum. Curabitur rhoncus placerat viverra. Nullam mi urna, convallis ut efficitur eu, tempus id dolor.</NewsContent>
+                            <NewsContent>
+                                Aenean fringilla risus a est ultricies laoreet. Aenean tempor turpis enim, non tristique
+                                libero interdum eget. Mauris condimentum risus ut efficitur rutrum. Curabitur rhoncus
+                                placerat viverra. Nullam mi urna, convallis ut efficitur eu, tempus id dolor.
+                            </NewsContent>
                         </Item>
-
                     </NewsList>
                 </ContentContainer>
             </CustomCard>
@@ -56,7 +73,7 @@ const NewsList = styled.div`
     display: flex;
     gap: 30px;
     flex-direction: column;
-`
+`;
 const Item = styled.div`
     display: flex;
     flex-direction: row;
