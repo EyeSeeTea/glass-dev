@@ -30,12 +30,18 @@ export const glassColors = {
     greyDisabled: "#8E8E8E",
     blueGrey: "#ECEFF1",
     snow: "#F4F6F8",
+    gold: "#E2B777",
+    red: "#C62828",
+    green: "#4CAF50",
     white: "#FFFFFF", // Not included in palette!
 
     negative: "#E53935",
     warning: "#F19C02",
     positive: "#69bb6d",
     info: "#EAF4FF",
+
+    gradientBg: "#9EB0E4",
+    gradientLightBg: "#9EB0E4",
 };
 
 export const palette = {

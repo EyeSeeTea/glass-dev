@@ -1,15 +1,20 @@
 import React from "react";
 import { Grid } from "@material-ui/core";
 import { CustomCard } from "../custom-card/CustomCard";
-import { BaseDataFiles } from "./BaseDataFiles";
-import { CountryQuestionnarie } from "./CountryQuestionnarie";
+import { BaseDataFiles } from "../current-call/BaseDataFiles";
+import { CountryQuestionnarie } from "../current-call/CountryQuestionnarie";
+import { GlassModule } from "../../../domain/entities/GlassModule";
 
-export const CurrentCallContent: React.FC = () => {
+interface CurrentCallContentProps {
+    module: GlassModule;
+}
+
+export const CurrentCallContent: React.FC<CurrentCallContentProps> = ({ module }) => {
     return (
         <CustomCard>
             <Grid container spacing={10}>
                 <Grid item md={6} xs={12}>
-                    <BaseDataFiles />
+                    <BaseDataFiles module={module} />
                 </Grid>
                 <Grid item md={6} xs={12}>
                     <CountryQuestionnarie />
