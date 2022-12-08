@@ -18,6 +18,8 @@ export interface UploadsDataProps {
 }
 
 export const QuetionnairesGrid: React.FC<UploadsDataProps> = ({ items, className }) => {
+    console.log("items: ", items);
+
     return (
         <ContentWrapper className={className}>
             <CustomCard />

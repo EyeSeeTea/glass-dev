@@ -1,7 +1,5 @@
 import React from "react";
 import styled from "styled-components";
-import { UploadsDataItemProps, UploadsTable } from "./UploadsTable";
-import { data } from "./mock-tables-data.json";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
 import { Button } from "@material-ui/core";
 import CheckIcon from "@material-ui/icons/Check";

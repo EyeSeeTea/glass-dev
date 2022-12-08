@@ -10,9 +10,8 @@ export const LandingContent: React.FC = () => {
     const location = useLocation();
     // TODO: get actual current module from global context or redux
     // const currentModule = location.substring(location.indexOf('/current-call/') + 1);
-    console.log('location: ', typeof location);
-    console.log('location: ', location);
-    
+    console.log("location: ", location);
+
     return (
         <StyledGrid container spacing={4} alignItems="flex-start">
             <OpenCalls />
