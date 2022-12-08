@@ -66,12 +66,12 @@ const StyledCollapse = styled(Collapse)`
     [data-group-name="AMC"] {
         a[data-is-page-current="true"] {
             background-color: ${moduleColors.amc} !important;
-        } 
+        }
     }
     [data-group-name="EGASP"] {
         a[data-is-page-current="true"] {
             background-color: ${moduleColors.egasp} !important;
-        } 
+        }
     }
 `;
 

@@ -49,9 +49,7 @@ export const App: React.FC<AppProps> = React.memo(function App({ api, d2, instan
     return (
         <MuiThemeProvider theme={muiTheme}>
             <OldMuiThemeProvider muiTheme={muiThemeLegacy}>
-                
                 <SnackbarProvider>
-
                     {/* <HeaderBar appName="Skeleton App" /> */}
 
                     <div id="app" className="content">
@@ -61,9 +59,7 @@ export const App: React.FC<AppProps> = React.memo(function App({ api, d2, instan
                     </div>
 
                     {/* <Share visible={showShareButton} /> */}
-
                 </SnackbarProvider>
-                
             </OldMuiThemeProvider>
         </MuiThemeProvider>
     );

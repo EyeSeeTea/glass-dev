@@ -1,5 +1,9 @@
 import React from "react";
+import { Paper, Table, TableCell, TableContainer, TableHead, TableRow, Typography } from "@material-ui/core";
 import styled from "styled-components";
+import { UploadsTableBody } from "./UploadsTableBody";
+import i18n from "@eyeseetea/d2-ui-components/locales";
+import { glassColors, palette } from "../../pages/app/themes/dhis2.theme";
 import { CustomCard } from "../custom-card/CustomCard";
 export interface UploadsDataItemProps {
     id: number;
@@ -17,7 +21,7 @@ export interface UploadsDataProps {
     className?: string;
 }
 
-export const QuetionnairesGrid: React.FC<UploadsDataProps> = ({ items, className}) => {
+export const QuetionnaireCard: React.FC<UploadsDataProps> = ({ items, className}) => {
     return (
         <ContentWrapper className={className}>
             <CustomCard />

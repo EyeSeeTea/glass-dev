@@ -8,14 +8,9 @@ import { YourNotifications } from "./YourNotifications";
 export const LandingContent: React.FC = () => {
     return (
         <StyledGrid container spacing={4} alignItems="flex-start">
-
             <OpenCalls />
-
             <YourNotifications />
-
             <LandingNews />
-
-
         </StyledGrid>
     );
 };

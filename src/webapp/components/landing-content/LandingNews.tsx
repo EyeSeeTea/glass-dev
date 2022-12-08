@@ -8,6 +8,7 @@ import i18n from "@eyeseetea/d2-ui-components/locales";
 export const LandingNews: React.FC = () => {
     return (
         <Grid item xs={12}>
+
             <CustomCard>
                 <TitleContainer>
                     <Typography variant="h5">{i18n.t("News from GLASS")}</Typography>
@@ -26,8 +27,8 @@ export const LandingNews: React.FC = () => {
                             <NewsContent variant="h6">
                                 This is a platform for global data sharing on antimicrobial resistance worldwide. It has
                                 been launched by WHO as part of the implementation of the Global Action Plan on
-                                Antimicrobial Resistance (AMR). The data will help to inform national, regional and global
-                                decision-making, strategies and advocacy.
+                                Antimicrobial Resistance (AMR). The data will help to inform national, regional and
+                                global decision-making, strategies and advocacy.
                             </NewsContent>
                         </Grid>
                         <Grid item xs={3}>
@@ -45,16 +46,14 @@ export const LandingNews: React.FC = () => {
                             <NewsContent variant="h6">
                                 This is a platform for global data sharing on antimicrobial resistance worldwide. It has
                                 been launched by WHO as part of the implementation of the Global Action Plan on
-                                Antimicrobial Resistance (AMR). The data will help to inform national, regional and global
-                                decision-making, strategies and advocacy.
+                                Antimicrobial Resistance (AMR). The data will help to inform national, regional and
+                                global decision-making, strategies and advocacy.
                             </NewsContent>
                         </Grid>
                     </Grid>
                 </ContentContainer>
             </CustomCard>
         </Grid>
-
-
     );
 };
 

@@ -21,7 +21,7 @@ export interface UploadsDataProps {
     className?: string;
 }
 
-export const UploadsTable: React.FC<UploadsDataProps> = ({ title, items, className}) => {
+export const UploadsTable: React.FC<UploadsDataProps> = ({ title, items, className }) => {
     return (
         <ContentWrapper className={className}>
             <Typography variant="h3">{title}</Typography>

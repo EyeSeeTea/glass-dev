@@ -9,14 +9,23 @@ export const Advanced: React.FC = () => {
     return (
         <ContentWrapper>
             <LinedBox>
+                <Box sx={{ m: 2 }} />
                 <div className="status-box">
                     <small>{i18n.t("Ask for updating")}</small>
                 </div>
                 <Box sx={{ m: 2 }} />
-                <p>{i18n.t("If for any reason you need to pull this file from the platform to upload a new version of the data you can do it automatically while it is not approved by WHO.")}</p>
+                <p>
+                    {i18n.t(
+                        "If for any reason you need to pull this file from the platform to upload a new version of the data you can do it automatically while it is not approved by WHO."
+                    )}
+                </p>
                 <Box sx={{ m: 2 }} />
                 <Box sx={{ m: 2 }} />
-                <p>{i18n.t("After it the status is “WHO Aproval” or “WHO PUBLISHED” the revoking process needs to be suppervised by WHO because it can affect ongoing publications")}</p>
+                <p>
+                    {i18n.t(
+                        "After it the status is “WHO Aproval” or “WHO PUBLISHED” the revoking process needs to be suppervised by WHO because it can affect ongoing publications"
+                    )}
+                </p>
                 <AdvancedButtons />
             </LinedBox>
         </ContentWrapper>

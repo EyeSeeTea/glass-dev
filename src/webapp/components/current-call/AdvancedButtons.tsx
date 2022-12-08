@@ -24,13 +24,16 @@ const ContentWrapper = styled.div`
         flex-direction: column;
         gap: 15px;
         span {
-            font-weight: 300;
+            font-weight: 600;
         }
         button {
             font-weight: 400;
         }
     }
     button {
-        background-color: ${glassColors.red};
+        background-color: ${glassColors.mainTertiary};
+        &:hover {
+            background-color: ${glassColors.darkTertiary};
+        }
     }
 `;

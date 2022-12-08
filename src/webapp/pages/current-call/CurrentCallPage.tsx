@@ -100,6 +100,9 @@ const PageTitle = styled.div`
     flex-direction: row;
     gap: 20px;
     align-items: center;
+    h3 {
+        margin: 0;
+    }
     .status {
         display: inline-block;
         border-radius: 5px;
