@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2022-12-08T04:04:23.919Z\n"
-"PO-Revision-Date: 2022-12-08T04:04:23.919Z\n"
+"POT-Creation-Date: 2022-12-08T10:14:20.275Z\n"
+"PO-Revision-Date: 2022-12-08T10:14:20.275Z\n"
 
 msgid "Add"
 msgstr ""
@@ -95,6 +95,9 @@ msgid "OK"
 msgstr ""
 
 msgid "News from GLASS"
+msgstr ""
+
+msgid "Your Notifications"
 msgstr ""
 
 msgid "Log Out"

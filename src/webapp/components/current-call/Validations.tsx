@@ -4,8 +4,8 @@ import { UploadsDataItemProps, UploadsTable } from "./UploadsTable";
 import { data } from "./mock-tables-data.json";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
 import { Button } from "@material-ui/core";
-import CheckIcon from '@material-ui/icons/Check';
-import WarningIcon from '@material-ui/icons/Warning';
+import CheckIcon from "@material-ui/icons/Check";
+import WarningIcon from "@material-ui/icons/Warning";
 
 export const Validations: React.FC = () => {
     return (
@@ -17,7 +17,9 @@ export const Validations: React.FC = () => {
                 <span className="status">no validation</span>
                 <div className="buttons">
                     <Button>Report</Button>
-                    <Button variant="contained" color="primary">Run Validation</Button>
+                    <Button variant="contained" color="primary">
+                        Run Validation
+                    </Button>
                 </div>
             </ValidationCard>
             <ValidationCard className="correct">
@@ -30,7 +32,9 @@ export const Validations: React.FC = () => {
                 </span>
                 <div className="buttons">
                     <Button>Report</Button>
-                    <Button variant="contained" color="primary">Re-run Validation</Button>
+                    <Button variant="contained" color="primary">
+                        Re-run Validation
+                    </Button>
                 </div>
             </ValidationCard>
             <ValidationCard className="wrong">
@@ -43,7 +47,9 @@ export const Validations: React.FC = () => {
                 </span>
                 <div className="buttons">
                     <Button>Report</Button>
-                    <Button variant="contained" color="primary">Re-run Validation</Button>
+                    <Button variant="contained" color="primary">
+                        Re-run Validation
+                    </Button>
                 </div>
             </ValidationCard>
             <ValidationCard className="correct">
@@ -56,14 +62,14 @@ export const Validations: React.FC = () => {
                 </span>
                 <div className="buttons">
                     <Button>Report</Button>
-                    <Button variant="contained" color="primary">Re-run Validation</Button>
+                    <Button variant="contained" color="primary">
+                        Re-run Validation
+                    </Button>
                 </div>
             </ValidationCard>
         </ValidationsGrid>
-
     );
 };
-
 
 const ValidationsGrid = styled.div`
     display: flex;
@@ -71,10 +77,9 @@ const ValidationsGrid = styled.div`
     flex-wrap: wrap;
     gap: 30px;
     .head {
-       * { 
+        * {
             display: block;
-       }
-
+        }
     }
     .mand {
         margin: 0 0 0 auto;
