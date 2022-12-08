@@ -15,7 +15,9 @@ export const Questionnaires: React.FC = () => {
                 <span className="comp">Not completed</span>
                 <div className="buttons">
                     <Button>View</Button>
-                    <Button variant="contained" color="primary">Go</Button>
+                    <Button variant="contained" color="primary">
+                        Go
+                    </Button>
                 </div>
             </QuestionnaireCard>
             <QuestionnaireCard>
@@ -26,7 +28,9 @@ export const Questionnaires: React.FC = () => {
                 <span className="comp">Not completed</span>
                 <div className="buttons">
                     <Button>View</Button>
-                    <Button variant="contained" color="primary">Go</Button>
+                    <Button variant="contained" color="primary">
+                        Go
+                    </Button>
                 </div>
             </QuestionnaireCard>
             <QuestionnaireCard>
@@ -37,7 +41,9 @@ export const Questionnaires: React.FC = () => {
                 <span className="comp completed">Completed</span>
                 <div className="buttons">
                     <Button>View</Button>
-                    <Button variant="contained" color="primary">Go</Button>
+                    <Button variant="contained" color="primary">
+                        Go
+                    </Button>
                 </div>
             </QuestionnaireCard>
         </QuestionnairesGrid>
