@@ -45,7 +45,7 @@ export const ModuleCard: React.FC<ModuleCardProps> = ({ title, moduleColor, endD
     );
 };
 
-const TitleContainer = styled.div<{moduleColor: string}>`
+const TitleContainer = styled.div<{ moduleColor: string }>`
     background-color: ${props => props.moduleColor};
     padding: 20px;
     margin: 0;
@@ -65,7 +65,7 @@ const TitleContainer = styled.div<{moduleColor: string}>`
     }
 `;
 
-const ContentContainer = styled.div<{moduleColor: string}>`
+const ContentContainer = styled.div<{ moduleColor: string }>`
     border-radius: 10px;
     padding: 15px 10px;
     margin: 12px 20px;

@@ -4,35 +4,46 @@ import styled from "styled-components";
 import { CallsTableBody } from "./CallsTableBody";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { glassColors, palette } from "../../pages/app/themes/dhis2.theme";
-export interface UploadsDataItemProps {
+import ArrowUpwardIcon from '@material-ui/icons/ArrowUpward';
+export interface CallsHistoryItemProps {
     id: number;
-    uploaded_date: string;
-    date_first: string;
-    date_last: string;
-    records: number;
-    type: "ris" | "sample";
-    batch_id: string;
+    year: string | number;
+    open_status: string;
     status: string;
 }
 
 export interface CallsTableProps {
-    title: string;
-    items?: UploadsDataItemProps[];
+    title?: string;
+    items?: CallsHistoryItemProps[];
     className?: string;
 }
 
 export const CallsTable: React.FC<CallsTableProps> = ({ title, items, className }) => {
     return (
         <ContentWrapper className={className}>
-            <Typography variant="h3">{title}</Typography>
+            {title && 
+                <Typography variant="h3">{title}</Typography>
+            }
 
             <TableContainer component={Paper}>
                 <Table className={"blocking-table"} aria-label="simple table">
                     <TableHead>
                         <TableRow>
-                            <TableCell>{i18n.t("Year")}</TableCell>
-                            <TableCell>{i18n.t("Open / Close")}</TableCell>
-                            <TableCell>{i18n.t("Status")}</TableCell>
+                            <TableCell>{i18n.t("Year")}
+                                <ColStatus>
+                                    <ArrowUpwardIcon /><sup>1</sup>
+                                </ColStatus>
+                            </TableCell>
+                            <TableCell>{i18n.t("Open / Close")}
+                                <ColStatus>
+                                    <ArrowUpwardIcon /><sup>1</sup>
+                                </ColStatus>
+                            </TableCell>
+                            <TableCell>{i18n.t("Status")}
+                                <ColStatus>
+                                    <ArrowUpwardIcon /><sup>1</sup>
+                                </ColStatus>
+                            </TableCell>
                             <TableCell>{i18n.t(" ")}</TableCell>
                         </TableRow>
                     </TableHead>
@@ -60,6 +71,17 @@ const ContentWrapper = styled.div`
             color: ${glassColors.grey};
             font-weight: 400;
             font-size: 15px;
+            padding: 10px 15px;
+            vertical-align: bottom;
+            position: relative;
+            &:after {
+                content: "";
+                height: 15px;
+                border-right: 2px solid ${glassColors.greyLight};
+                position: absolute;
+                right: 0;
+                top: 20px;
+            }
         }
     }
     tbody {
@@ -70,14 +92,6 @@ const ContentWrapper = styled.div`
             }
             td {
                 border-bottom: 1px solid ${glassColors.greyLight};
-            }
-            td:nth-child(5) {
-                text-transform: uppercase;
-                opacity: 0.5;
-            }
-            td:nth-child(7) {
-                text-transform: uppercase;
-                opacity: 0.5;
             }
         }
     }
@@ -90,3 +104,16 @@ const ContentWrapper = styled.div`
         }
     }
 `;
+
+const ColStatus = styled.div`
+    display: inline-flex;
+    margin-left: 10px;
+    svg {
+        color: ${glassColors.greyBlack};
+        font-size: 18px;
+        margin-top: auto;
+    }
+    span {
+
+    }
+`

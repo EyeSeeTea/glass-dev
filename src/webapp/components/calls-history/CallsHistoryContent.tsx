@@ -1,10 +1,10 @@
 import styled from "styled-components";
 import { useAppContext } from "../../contexts/app-context";
 import { CircularProgress, Typography } from "@material-ui/core";
-import { useDataSubmissionSteps } from "../../hooks/useDataSubmissionSteps";
 import { CallsTable } from "./CallsTable";
-import i18n from "@eyeseetea/d2-ui-components/locales";
 import { useLocation } from "react-router-dom";
+import { data } from "./mock-tables-data.json";
+import { useDataSubmissionSteps } from "../../hooks/useDataSubmissionSteps";
 
 export const CallsHistoryContent: React.FC = () => {
     const { compositionRoot } = useAppContext();
@@ -21,7 +21,9 @@ export const CallsHistoryContent: React.FC = () => {
         case "loaded":
             return (
                 <ContentWrapper>
-                    <CallsTable title={i18n.t("All CAlls")} data-current-module={params.get("userId")} />
+                    <CallsTable
+                        items={data}
+                        data-current-module={params.get("userId")} />
                 </ContentWrapper>
             );
     }
