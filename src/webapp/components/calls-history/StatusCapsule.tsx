@@ -1,7 +1,7 @@
 import React from "react";
 import styled from "styled-components";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
-import ErrorIcon from '@material-ui/icons/Error';
+import ErrorIcon from "@material-ui/icons/Error";
 
 export interface StatusCapsuleProps {
     status: String;
@@ -15,8 +15,12 @@ export const StatusCapsule: React.FC<StatusCapsuleProps> = ({ status }) => {
             return <Approved>{status}</Approved>;
         case "not submitted":
             // eslint-disable-next-line react/jsx-no-undef
-            return <Warning><ErrorIcon /> {status}</Warning>;
-        default: 
+            return (
+                <Warning>
+                    <ErrorIcon /> {status}
+                </Warning>
+            );
+        default:
             return <span>status</span>;
     }
 };

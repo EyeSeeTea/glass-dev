@@ -4,7 +4,7 @@ import styled from "styled-components";
 import { CallsTableBody } from "./CallsTableBody";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { glassColors, palette } from "../../pages/app/themes/dhis2.theme";
-import ArrowUpwardIcon from '@material-ui/icons/ArrowUpward';
+import ArrowUpwardIcon from "@material-ui/icons/ArrowUpward";
 export interface CallsHistoryItemProps {
     id: number;
     year: string | number;
@@ -21,27 +21,31 @@ export interface CallsTableProps {
 export const CallsTable: React.FC<CallsTableProps> = ({ title, items, className }) => {
     return (
         <ContentWrapper className={className}>
-            {title && 
-                <Typography variant="h3">{title}</Typography>
-            }
+            {title && <Typography variant="h3">{title}</Typography>}
 
             <TableContainer component={Paper}>
                 <Table className={"blocking-table"} aria-label="simple table">
                     <TableHead>
                         <TableRow>
-                            <TableCell>{i18n.t("Year")}
+                            <TableCell>
+                                {i18n.t("Year")}
                                 <ColStatus>
-                                    <ArrowUpwardIcon /><sup>1</sup>
+                                    <ArrowUpwardIcon />
+                                    <sup>1</sup>
                                 </ColStatus>
                             </TableCell>
-                            <TableCell>{i18n.t("Open / Close")}
+                            <TableCell>
+                                {i18n.t("Open / Close")}
                                 <ColStatus>
-                                    <ArrowUpwardIcon /><sup>1</sup>
+                                    <ArrowUpwardIcon />
+                                    <sup>1</sup>
                                 </ColStatus>
                             </TableCell>
-                            <TableCell>{i18n.t("Status")}
+                            <TableCell>
+                                {i18n.t("Status")}
                                 <ColStatus>
-                                    <ArrowUpwardIcon /><sup>1</sup>
+                                    <ArrowUpwardIcon />
+                                    <sup>1</sup>
                                 </ColStatus>
                             </TableCell>
                             <TableCell>{i18n.t(" ")}</TableCell>
@@ -114,6 +118,5 @@ const ColStatus = styled.div`
         margin-top: auto;
     }
     span {
-
     }
-`
+`;
