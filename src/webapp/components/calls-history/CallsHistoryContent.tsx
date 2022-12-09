@@ -1,7 +1,7 @@
 import styled from "styled-components";
 import { useAppContext } from "../../contexts/app-context";
 import { CircularProgress, Typography } from "@material-ui/core";
-import { useDataSubmissionSteps } from "../../hooks/userDataSubmissionSteps";
+import { useDataSubmissionSteps } from "../../hooks/useDataSubmissionSteps";
 import { CallsTable } from "./CallsTable";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { useLocation } from "react-router-dom";
@@ -10,7 +10,6 @@ export const CallsHistoryContent: React.FC = () => {
     const { compositionRoot } = useAppContext();
     const location = useLocation();
     const params = new URLSearchParams(location.search);
-    console.log("current module:", params.get("module"));
 
     const stepsResult = useDataSubmissionSteps(compositionRoot);
 

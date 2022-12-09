@@ -22,8 +22,6 @@ const SidebarNavMenuGroup: React.FC<SidebarNavProps> = ({ menu, groupName, class
         setOpenCollapse(!openCollapse);
     };
 
-    console.log("SidebarNavMenuGroup menu: ", menu);
-
     return (
         <React.Fragment>
             <ListItem

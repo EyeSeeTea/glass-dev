@@ -2,7 +2,6 @@ import React from "react";
 import { TableBody, TableCell, TableRow } from "@material-ui/core";
 import styled from "styled-components";
 import { UploadsDataItemProps } from "./CallsTable";
-import i18n from "@eyeseetea/d2-ui-components/locales";
 
 export interface CallsTableBodyProps {
     rows?: UploadsDataItemProps[];
