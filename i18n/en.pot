@@ -5,11 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2022-12-09T21:08:36.614Z\n"
-"PO-Revision-Date: 2022-12-09T21:08:36.614Z\n"
-
-msgid "All CAlls"
-msgstr ""
+"POT-Creation-Date: 2022-12-09T22:44:29.637Z\n"
+"PO-Revision-Date: 2022-12-09T22:44:29.637Z\n"
 
 msgid "Year"
 msgstr ""

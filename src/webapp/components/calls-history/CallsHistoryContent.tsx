@@ -21,9 +21,7 @@ export const CallsHistoryContent: React.FC = () => {
         case "loaded":
             return (
                 <ContentWrapper>
-                    <CallsTable
-                        items={data}
-                        data-current-module={params.get("userId")} />
+                    <CallsTable items={data} data-current-module={params.get("userId")} />
                 </ContentWrapper>
             );
     }

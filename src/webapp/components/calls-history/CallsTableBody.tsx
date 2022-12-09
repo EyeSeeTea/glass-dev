@@ -2,7 +2,7 @@ import React from "react";
 import { TableBody, TableCell, TableRow } from "@material-ui/core";
 import styled from "styled-components";
 import { CallsHistoryItemProps } from "./CallsTable";
-import ChevronRightIcon from '@material-ui/icons/ChevronRight';
+import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
 import { StatusCapsule } from "./StatusCapsule";
 
@@ -19,8 +19,12 @@ export const CallsTableBody: React.FC<CallsTableBodyProps> = ({ rows }) => {
                         <TableRow key={row.id}>
                             <TableCell>{row.year}</TableCell>
                             <TableCell>{row.open_status}</TableCell>
-                            <TableCell><StatusCapsule status={row.status} /></TableCell>
-                            <TableCell className="cta"><ChevronRightIcon/></TableCell>
+                            <TableCell>
+                                <StatusCapsule status={row.status} />
+                            </TableCell>
+                            <TableCell className="cta">
+                                <ChevronRightIcon />
+                            </TableCell>
                         </TableRow>
                     ))}
                 </StyledTableBody>
