@@ -10,7 +10,7 @@ import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import { NavLink } from "react-router-dom";
 import { CustomCard } from "../../components/custom-card/CustomCard";
 import i18n from "@eyeseetea/d2-ui-components/locales";
-import { CurrentCallContent } from "../../components/current-call/CurrentCallContent";
+import { CallsHistoryContent } from "../../components/calls-history/CallsHistoryContent";
 
 interface CallsHistoryPageProps {
     moduleName: string;
@@ -19,12 +19,12 @@ interface CallsHistoryPageProps {
 export const CallsHistoryPage: React.FC<CallsHistoryPageProps> = React.memo(({ moduleName }) => {
     return (
         <MainLayout>
-            <DataSubmissionPageContent moduleName={moduleName} />
+            <CallsHistoryPageContent moduleName={moduleName} />
         </MainLayout>
     );
 });
 
-export const DataSubmissionPageContent: React.FC<CallsHistoryPageProps> = React.memo(({ moduleName }) => {
+export const CallsHistoryPageContent: React.FC<CallsHistoryPageProps> = React.memo(({ moduleName }) => {
     const { compositionRoot } = useAppContext();
 
     const result = useGlassModule(compositionRoot, moduleName);
@@ -53,20 +53,15 @@ export const DataSubmissionPageContent: React.FC<CallsHistoryPageProps> = React.
                             </Button>
                             <ChevronRightIcon />
                             <Button>
-                                <span>{i18n.t("2020 Call")}</span>
+                                <span>{i18n.t("List of Calls")}</span>
                             </Button>
                         </StyledBreadCrumbs>
-                        <div className="info">
-                            <span>{i18n.t("Yearly data upload")}</span>, &nbsp;
-                            <span>Spain</span>
-                        </div>
                     </PreContent>
                     <PageTitle>
-                        <h3>{i18n.t("2020 Call")}</h3>
-                        <div className="status">{i18n.t("Missing Data")}</div>
+                        <h2>{i18n.t("All Calls")}</h2>
                     </PageTitle>
                     <CustomCard padding="40px 60px 50px">
-                        <CurrentCallContent />
+                        <CallsHistoryContent />
                     </CustomCard>
                 </ContentWrapper>
             );
@@ -100,8 +95,9 @@ const PageTitle = styled.div`
     flex-direction: row;
     gap: 20px;
     align-items: center;
-    h3 {
+    h2 {
         margin: 0;
+        text-transform: uppercase;
     }
     .status {
         display: inline-block;
