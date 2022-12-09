@@ -1,7 +1,7 @@
 import React from "react";
 import { Grid } from "@material-ui/core";
 import { ModuleCard } from "../module-card/ModuleCard";
-import { data } from "./mock-open-calls.json"
+import { data } from "./mock-open-calls.json";
 
 export const OpenCalls: React.FC = () => {
     return (
@@ -9,8 +9,8 @@ export const OpenCalls: React.FC = () => {
             <Grid item xs={12}>
                 <h2 className="section-title">Open Calls</h2>
             </Grid>
-            {data.length ?
-                data.map(item =>
+            {data.length ? (
+                data.map(item => (
                     <Grid item xs={6} key={item.id}>
                         <ModuleCard
                             title={item.title}
@@ -19,9 +19,10 @@ export const OpenCalls: React.FC = () => {
                             endDays={item.end_in_days}
                         />
                     </Grid>
-                ) :
+                ))
+            ) : (
                 <p>No Data loaded...</p>
-            }
+            )}
         </>
     );
 };
