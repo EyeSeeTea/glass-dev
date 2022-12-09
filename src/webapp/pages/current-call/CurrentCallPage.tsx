@@ -19,12 +19,12 @@ interface DataSubmissionPageProps {
 export const CurrentCallPage: React.FC<DataSubmissionPageProps> = React.memo(({ moduleName }) => {
     return (
         <MainLayout>
-            <DataSubmissionPageContent moduleName={moduleName} />
+            <CurrentCallPageContent moduleName={moduleName} />
         </MainLayout>
     );
 });
 
-export const DataSubmissionPageContent: React.FC<DataSubmissionPageProps> = React.memo(({ moduleName }) => {
+export const CurrentCallPageContent: React.FC<DataSubmissionPageProps> = React.memo(({ moduleName }) => {
     const { compositionRoot } = useAppContext();
 
     const result = useGlassModule(compositionRoot, moduleName);
