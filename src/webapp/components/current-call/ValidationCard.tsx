@@ -18,6 +18,7 @@ export interface UploadsDataProps {
 }
 
 export const QuetionnairesGrid: React.FC<UploadsDataProps> = ({ items, className }) => {
+    // eslint-disable-next-line no-console
     console.log("items: ", items);
 
     return (
