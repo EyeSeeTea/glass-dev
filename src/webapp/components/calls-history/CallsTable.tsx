@@ -28,7 +28,6 @@ export const CallsTable: React.FC<CallsTableProps> = ({ title, items, className 
 
             <TableContainer component={Paper}>
                 <Table className={"blocking-table"} aria-label="simple table">
-
                     <TableHead>
                         <TableRow>
                             <TableCell>{i18n.t("Year")}</TableCell>

@@ -11,6 +11,7 @@ export interface MenuGroup {
     kind: "MenuGroup";
     level: number;
     title: string;
+    moduleColor: string;
     icon?: any;
     children?: Menu[];
 }

@@ -40,7 +40,7 @@ export const CurrentCallPageContent: React.FC<DataSubmissionPageProps> = React.m
             return <Typography variant="h6">{result.message}</Typography>;
         case "loaded":
             return (
-                <ContentWrapper>
+                <ContentWrapper moduleColor={result.data.color}>
                     <PreContent>
                         <StyledBreadCrumbs aria-label="breadcrumb" separator="">
                             <Button
@@ -73,10 +73,13 @@ export const CurrentCallPageContent: React.FC<DataSubmissionPageProps> = React.m
     }
 });
 
-const ContentWrapper = styled.div`
+const ContentWrapper = styled.div<{ moduleColor: string }>`
     display: flex;
     flex-direction: column;
     gap: 20px;
+    .module-bg {
+        background-color: ${props => (props.moduleColor ? props.moduleColor : glassColors.mainPrimary)};
+    }
 `;
 
 const PreContent = styled.div`

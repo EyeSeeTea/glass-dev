@@ -10,7 +10,7 @@ export const CallsHistoryContent: React.FC = () => {
     const { compositionRoot } = useAppContext();
     const location = useLocation();
     const params = new URLSearchParams(location.search);
-    console.log('current module:', params.get("module"));
+    console.log("current module:", params.get("module"));
 
     const stepsResult = useDataSubmissionSteps(compositionRoot);
 

@@ -1,20 +1,20 @@
 import { createTheme } from "@material-ui/core/styles";
 
 export const glassColors = {
-    mainPrimary: "#5699db",
+    mainPrimary: "#0099DE",
     darkPrimary: "#4072a2",
     lightPrimary: "#ceddf2",
     mainSecondary: "#8f238a",
     darkSecondary: "#701a6c",
     lightSecondary: "#b39cc0",
-    mainTertiary: "#e06829",
+    mainTertiary: "#FF681F",
     darkTertiary: "#a64818",
     lightTertiary: "#ecb390",
     mainQuaternary: "#7846ae",
     darkQuaternary: "#4f1787",
     lightQuaternary: "#c6bae0",
 
-    accentPrimary: "#1976d2",
+    accentPrimary: "#0099DE",
     accentPrimaryDark: "#004BA0",
     accentPrimaryLight: "#63A4FF",
     accentPrimaryLightest: "#EAF4FF",
@@ -32,14 +32,14 @@ export const glassColors = {
     snow: "#F4F6F8",
     gold: "#E2B777",
     red: "#C62828",
-    green: "#4CAF50",
+    green: "#7EBB01",
     yellow: "#FBD44C",
     orange: "#FF681F",
     white: "#FFFFFF", // Not included in palette!
 
     negative: "#E53935",
     warning: "#F19C02",
-    positive: "#69bb6d",
+    positive: "#7EBB01",
     info: "#EAF4FF",
 
     gradientBg: "#9EB0E4",
@@ -92,12 +92,6 @@ export const palette = {
     },
     divider: glassColors.greyLight,
     shadow: glassColors.grey,
-};
-
-export const moduleColors = {
-    amr: "#BD9EC2",
-    amc: "#FFB490",
-    egasp: "#BD9EC2",
 };
 
 export const muiTheme = createTheme({
