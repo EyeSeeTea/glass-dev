@@ -9,6 +9,7 @@ export interface DataSubmissionStep {
 }
 export interface DataSubmissionWizard {
     moduleName: string;
+    moduleColor: string;
     children?: DataSubmissionStep[];
 }
 

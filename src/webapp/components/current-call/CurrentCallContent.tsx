@@ -1,7 +1,7 @@
 import React from "react";
 import { CircularProgress, Typography } from "@material-ui/core";
 import { useAppContext } from "../../contexts/app-context";
-import { useDataSubmissionSteps } from "../../hooks/userDataSubmissionSteps";
+import { useDataSubmissionSteps } from "../../hooks/useDataSubmissionSteps";
 import { DataSubmissionSteps } from "./DataSubmissionSteps";
 import styled from "styled-components";
 

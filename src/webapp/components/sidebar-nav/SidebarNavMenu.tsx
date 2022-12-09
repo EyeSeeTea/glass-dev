@@ -7,7 +7,6 @@ import { ListItem, Button, colors, Theme, Typography } from "@material-ui/core";
 import clsx from "clsx";
 import { MenuLeaf } from "./SidebarNav";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
-import styled from "styled-components";
 
 interface SidebarNavProps {
     className?: string;
@@ -17,8 +16,6 @@ interface SidebarNavProps {
 const SidebarNavMenu: React.FC<SidebarNavProps> = ({ menu, className }) => {
     const classes = useStyles(menu.level);
     const location = useLocation();
-
-    console.log("menu: ", menu);
 
     const isCurrentPage = (val: string) => {
         if (val) {

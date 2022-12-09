@@ -31,9 +31,9 @@ const ContentWrapper = styled.div`
         }
     }
     button {
-        background-color: ${glassColors.mainTertiary};
+        background-color: ${glassColors.negative};
         &:hover {
-            background-color: ${glassColors.darkTertiary};
+            background-color: ${glassColors.red};
         }
     }
 `;

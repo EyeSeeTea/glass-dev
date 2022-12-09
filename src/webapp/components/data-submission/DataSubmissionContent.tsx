@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { CircularProgress, Typography } from "@material-ui/core";
 import { DataSubmissionNav } from "./DataSubmissionNav";
 import { useAppContext } from "../../contexts/app-context";
-import { useDataSubmissionSteps } from "../../hooks/userDataSubmissionSteps";
+import { useDataSubmissionSteps } from "../../hooks/useDataSubmissionSteps";
 import { ConsistencyChecks } from "./ConsistencyChecks";
 import styled from "styled-components";
 import i18n from "@eyeseetea/d2-ui-components/locales";
