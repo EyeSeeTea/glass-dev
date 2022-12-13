@@ -6,7 +6,6 @@ import { useDataSubmissionSteps } from "../../hooks/userDataSubmissionSteps";
 import { ConsistencyChecks } from "./ConsistencyChecks";
 import styled from "styled-components";
 import i18n from "@eyeseetea/d2-ui-components/locales";
-import { NonBlockingWarnings } from "./NonBlockingWarnings";
 import { SupportButtons } from "./SupportButtons";
 import { glassColors, palette } from "../../pages/app/themes/dhis2.theme";
 
