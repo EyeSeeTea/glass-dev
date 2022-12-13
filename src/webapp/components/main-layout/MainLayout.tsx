@@ -12,7 +12,7 @@ export const MainLayout: React.FC = React.memo(({ children }) => {
         <React.Fragment>
             <GlassAppBar />
             <LandingContainer>
-                <Grid container spacing={6}>
+                <RootGrid container spacing={6}>
                     <Grid item xs={12} sm={2}>
                         <SideBar />
                         <ButtonContainer>
@@ -32,11 +32,30 @@ export const MainLayout: React.FC = React.memo(({ children }) => {
                         {children}
                         <AppFooter />
                     </Grid>
-                </Grid>
+                </RootGrid>
             </LandingContainer>
         </React.Fragment>
     );
 });
+
+const RootGrid = styled(Grid)`
+    @media (max-width: 1024px) {
+        flex-direction: column;
+        margin: 0;
+        padding: 0;
+        gap: 0;
+        width: 100%;
+        > div {
+            max-width: none;
+            width: 100%;
+            margin: 0;
+            &:first-child > div {
+                min-height: 0;
+                padding: 0 0 60px 0;
+            }
+        }
+    }
+`;
 
 const LandingContainer = styled.div`
     padding: 30px;

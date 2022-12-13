@@ -8,7 +8,6 @@ import { appConfig } from "../../../app-config";
 import { getCompositionRoot } from "../../../CompositionRoot";
 import { Instance } from "../../../data/entities/Instance";
 import { D2Api } from "../../../types/d2-api";
-import Share from "../../components/share/Share";
 import { AppContext, AppContextState } from "../../contexts/app-context";
 import { Router } from "../Router";
 import "./App.css";
@@ -23,7 +22,7 @@ export interface AppProps {
 }
 
 export const App: React.FC<AppProps> = React.memo(function App({ api, d2, instance }) {
-    const [showShareButton, setShowShareButton] = useState(false);
+    // const [showShareButton, setShowShareButton] = useState(false);
     const [loading, setLoading] = useState(true);
     const [appContext, setAppContext] = useState<AppContextState | null>(null);
 
@@ -35,10 +34,10 @@ export const App: React.FC<AppProps> = React.memo(function App({ api, d2, instan
 
             await compositionRoot.glassModules.validate().runAsync();
 
-            const isShareButtonVisible = _(appConfig).get("appearance.showShareButton") || false;
+            // const isShareButtonVisible = _(appConfig).get("appearance.showShareButton") || false;
 
             setAppContext({ api, currentUser, compositionRoot });
-            setShowShareButton(isShareButtonVisible);
+            // setShowShareButton(isShareButtonVisible);
             initFeedbackTool(d2, appConfig);
             setLoading(false);
         }
@@ -59,7 +58,7 @@ export const App: React.FC<AppProps> = React.memo(function App({ api, d2, instan
                         </AppContext.Provider>
                     </div>
 
-                    <Share visible={showShareButton} />
+                    {/* <Share visible={showShareButton} /> */}
                 </SnackbarProvider>
             </OldMuiThemeProvider>
         </MuiThemeProvider>

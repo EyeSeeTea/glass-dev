@@ -1,0 +1,74 @@
+{
+    "data": [
+        {
+            "id": 1,
+            "name": "venenatis non sodales",
+            "description": "Optimized intermediate internet solution",
+            "completion": true,
+            "mandatory": true
+        },
+        {
+            "id": 2,
+            "name": "nunc donec quis",
+            "description": "Diverse context-sensitive help-desk",
+            "completion": false,
+            "mandatory": true
+        },
+        {
+            "id": 3,
+            "name": "luctus nec molestie",
+            "description": "Networked systemic synergy",
+            "completion": true,
+            "mandatory": true
+        },
+        {
+            "id": 4,
+            "name": "pede malesuada in imperdiet",
+            "description": "Virtual static algorithm",
+            "completion": false,
+            "mandatory": true
+        },
+        {
+            "id": 5,
+            "name": "curabitur at ipsum ac",
+            "description": "Grass-roots multi-tasking frame",
+            "completion": false,
+            "mandatory": false
+        },
+        {
+            "id": 6,
+            "name": "ante nulla justo aliquam",
+            "description": "Extended human-resource groupware",
+            "completion": false,
+            "mandatory": true
+        },
+        {
+            "id": 7,
+            "name": "erat eros viverra eget",
+            "description": "Function-based systemic projection",
+            "completion": true,
+            "mandatory": false
+        },
+        {
+            "id": 8,
+            "name": "vulputate elementum nullam varius",
+            "description": "Down-sized intangible pricing structure",
+            "completion": true,
+            "mandatory": false
+        },
+        {
+            "id": 9,
+            "name": "tempus sit amet",
+            "description": "Diverse explicit encoding",
+            "completion": false,
+            "mandatory": true
+        },
+        {
+            "id": 10,
+            "name": "pretium nisl ut volutpat",
+            "description": "Reduced user-facing toolset",
+            "completion": true,
+            "mandatory": true
+        }
+    ]
+}

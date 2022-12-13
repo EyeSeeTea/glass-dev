@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2022-12-01T12:03:01.952Z\n"
-"PO-Revision-Date: 2022-12-01T12:03:01.952Z\n"
+"POT-Creation-Date: 2022-12-09T06:02:09.968Z\n"
+"PO-Revision-Date: 2022-12-09T06:02:09.968Z\n"
 
 msgid "Add"
 msgstr ""
@@ -14,31 +14,66 @@ msgstr ""
 msgid "List"
 msgstr ""
 
-msgid "Base data files"
+msgid "Ask for updating"
 msgstr ""
 
-msgid "Sample and RIS files"
+msgid ""
+"If for any reason you need to pull this file from the platform to upload a "
+"new version of the data you can do it automatically while it is not "
+"approved by WHO."
 msgstr ""
 
-msgid "UPLOAD NEW"
+msgid ""
+"After it the status is “WHO Aproval” or “WHO PUBLISHED” the revoking "
+"process needs to be suppervised by WHO because it can affect ongoing "
+"publications"
 msgstr ""
 
-msgid "Date"
+msgid "Request Dataset update"
 msgstr ""
 
-msgid "status"
+msgid "Upload dataset"
 msgstr ""
 
-msgid "Details"
+msgid "Go to Questionnaires"
 msgstr ""
 
-msgid "DaDeleted / Incompletedte"
+msgid "Current Status"
 msgstr ""
 
-msgid "Country questionnaire"
+msgid "Not Completed"
 msgstr ""
 
-msgid "NOT COMPLETED"
+msgid "At least one dataset is missing"
+msgstr ""
+
+msgid "At least one mandatory questionnaire is not submited"
+msgstr ""
+
+msgid ""
+"You need to complete the mandatory uploads before validate the submissions "
+"for this call"
+msgstr ""
+
+msgid "Uploaded"
+msgstr ""
+
+msgid "Date First"
+msgstr ""
+
+msgid "Date Last"
+msgstr ""
+
+msgid "Records"
+msgstr ""
+
+msgid "Type"
+msgstr ""
+
+msgid "Batch ID"
+msgstr ""
+
+msgid "Status"
 msgstr ""
 
 msgid "I need help"
@@ -59,13 +94,16 @@ msgstr ""
 msgid "OK"
 msgstr ""
 
+msgid "News from GLASS"
+msgstr ""
+
+msgid "Your Notifications"
+msgstr ""
+
 msgid "Log Out"
 msgstr ""
 
 msgid "GO"
-msgstr ""
-
-msgid "News from GLASS"
 msgstr ""
 
 msgid "Back"
@@ -77,7 +115,13 @@ msgstr ""
 msgid "HOME"
 msgstr ""
 
+msgid "2020 Call"
+msgstr ""
+
 msgid "Yearly data upload"
+msgstr ""
+
+msgid "Missing Data"
 msgstr ""
 
 msgid "Hello {{name}}"

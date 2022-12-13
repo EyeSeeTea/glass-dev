@@ -5,13 +5,16 @@ import clsx from "clsx";
 import { ExpandLess, ExpandMore } from "@material-ui/icons";
 import { MenuGroup } from "./SidebarNav";
 import SidebarNavMenu from "./SidebarNavMenu";
+import styled from "styled-components";
+import { moduleColors } from "../../pages/app/themes/dhis2.theme";
 
 interface SidebarNavProps {
     className?: string;
+    groupName?: string;
     menu: MenuGroup;
 }
 
-const SidebarNavMenuGroup: React.FC<SidebarNavProps> = ({ menu, className }) => {
+const SidebarNavMenuGroup: React.FC<SidebarNavProps> = ({ menu, groupName, className }) => {
     const classes = useStyles(menu.level);
 
     const [openCollapse, setOpenCollapse] = React.useState(false);
@@ -35,8 +38,8 @@ const SidebarNavMenuGroup: React.FC<SidebarNavProps> = ({ menu, className }) => 
                     <div className={classes.expand}>{openCollapse ? <ExpandLess /> : <ExpandMore />}</div>
                 </Button>
             </ListItem>
-            <Collapse in={openCollapse} timeout="auto" unmountOnExit key={menu.title}>
-                <List component="div" disablePadding>
+            <StyledCollapse in={openCollapse} timeout="auto" unmountOnExit key={menu.title}>
+                <List component="div" disablePadding data-group-name={groupName}>
                     {menu.children &&
                         menu.children.map(child =>
                             child.kind === "MenuGroup" ? (
@@ -46,12 +49,31 @@ const SidebarNavMenuGroup: React.FC<SidebarNavProps> = ({ menu, className }) => 
                             )
                         )}
                 </List>
-            </Collapse>
+            </StyledCollapse>
         </React.Fragment>
     );
 };
 
 export default SidebarNavMenuGroup;
+
+const StyledCollapse = styled(Collapse)`
+    a[data-is-page-current="true"] {
+        background-color: ${moduleColors.amr};
+        * {
+            color: white !important;
+        }
+    }
+    [data-group-name="AMC"] {
+        a[data-is-page-current="true"] {
+            background-color: ${moduleColors.amc} !important;
+        }
+    }
+    [data-group-name="EGASP"] {
+        a[data-is-page-current="true"] {
+            background-color: ${moduleColors.egasp} !important;
+        }
+    }
+`;
 
 const useStyles = makeStyles((theme: Theme) => ({
     root: { padding: theme.spacing(0) },

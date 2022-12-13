@@ -37,7 +37,7 @@ const SidebarNav: React.FC<SidebarNavProps> = ({ menus, className }) => {
         <List className={clsx(classes.root, className)}>
             {menus.map(menu =>
                 menu.kind === "MenuGroup" ? (
-                    <SidebarNavMenuGroup menu={menu} key={menu.title} />
+                    <SidebarNavMenuGroup menu={menu} key={menu.title} groupName={menu.title} />
                 ) : (
                     <SidebarNavMenu menu={menu} key={menu.title} />
                 )
