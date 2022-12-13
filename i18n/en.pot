@@ -5,8 +5,20 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2022-12-09T06:02:09.968Z\n"
-"PO-Revision-Date: 2022-12-09T06:02:09.968Z\n"
+"POT-Creation-Date: 2022-12-09T22:44:29.637Z\n"
+"PO-Revision-Date: 2022-12-09T22:44:29.637Z\n"
+
+msgid "Year"
+msgstr ""
+
+msgid "Open / Close"
+msgstr ""
+
+msgid "Status"
+msgstr ""
+
+msgid " "
+msgstr ""
 
 msgid "Add"
 msgstr ""
@@ -73,9 +85,6 @@ msgstr ""
 msgid "Batch ID"
 msgstr ""
 
-msgid "Status"
-msgstr ""
-
 msgid "I need help"
 msgstr ""
 
@@ -113,6 +122,12 @@ msgid "Help"
 msgstr ""
 
 msgid "HOME"
+msgstr ""
+
+msgid "List of Calls"
+msgstr ""
+
+msgid "All Calls"
 msgstr ""
 
 msgid "2020 Call"

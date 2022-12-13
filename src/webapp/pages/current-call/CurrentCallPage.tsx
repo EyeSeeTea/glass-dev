@@ -19,12 +19,12 @@ interface DataSubmissionPageProps {
 export const CurrentCallPage: React.FC<DataSubmissionPageProps> = React.memo(({ moduleName }) => {
     return (
         <MainLayout>
-            <DataSubmissionPageContent moduleName={moduleName} />
+            <CurrentCallPageContent moduleName={moduleName} />
         </MainLayout>
     );
 });
 
-export const DataSubmissionPageContent: React.FC<DataSubmissionPageProps> = React.memo(({ moduleName }) => {
+export const CurrentCallPageContent: React.FC<DataSubmissionPageProps> = React.memo(({ moduleName }) => {
     const { compositionRoot } = useAppContext();
 
     const result = useGlassModule(compositionRoot, moduleName);
@@ -40,7 +40,7 @@ export const DataSubmissionPageContent: React.FC<DataSubmissionPageProps> = Reac
             return <Typography variant="h6">{result.message}</Typography>;
         case "loaded":
             return (
-                <ContentWrapper>
+                <ContentWrapper moduleColor={result.data.color}>
                     <PreContent>
                         <StyledBreadCrumbs aria-label="breadcrumb" separator="">
                             <Button
@@ -73,10 +73,13 @@ export const DataSubmissionPageContent: React.FC<DataSubmissionPageProps> = Reac
     }
 });
 
-const ContentWrapper = styled.div`
+const ContentWrapper = styled.div<{ moduleColor: string }>`
     display: flex;
     flex-direction: column;
     gap: 20px;
+    .module-bg {
+        background-color: ${props => (props.moduleColor ? props.moduleColor : glassColors.mainPrimary)};
+    }
 `;
 
 const PreContent = styled.div`
