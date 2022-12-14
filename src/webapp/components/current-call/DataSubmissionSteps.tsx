@@ -3,10 +3,10 @@ import { Button } from "@material-ui/core";
 import styled from "styled-components";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
 import { ListOfDatasets } from "./ListOfDatasets";
-import { CurrentStatus } from "./CurrentStatus";
 import { Questionnaires } from "./Questionnaires";
 import { Advanced } from "./Advanced";
 import { Validations } from "./Validations";
+import { Overview } from "./overview/Overview";
 
 export const DataSubmissionSteps: React.FC = () => {
     const [currentStep, setCurrentStep] = useState<number>(0);
@@ -38,7 +38,7 @@ export const DataSubmissionSteps: React.FC = () => {
 const renderTypeContent = (step: number) => {
     switch (step) {
         case 0:
-            return <CurrentStatus />;
+            return <Overview />;
         case 1:
             return <ListOfDatasets />;
         case 2:
