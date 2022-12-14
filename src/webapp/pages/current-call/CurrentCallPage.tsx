@@ -12,11 +12,11 @@ import { CustomCard } from "../../components/custom-card/CustomCard";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { CurrentCallContent } from "../../components/current-call/CurrentCallContent";
 
-interface DataSubmissionPageProps {
+interface CurrentCallPageContentProps {
     moduleName: string;
 }
 
-export const CurrentCallPage: React.FC<DataSubmissionPageProps> = React.memo(({ moduleName }) => {
+export const CurrentCallPage: React.FC<CurrentCallPageContentProps> = React.memo(({ moduleName }) => {
     return (
         <MainLayout>
             <CurrentCallPageContent moduleName={moduleName} />
@@ -24,7 +24,7 @@ export const CurrentCallPage: React.FC<DataSubmissionPageProps> = React.memo(({ 
     );
 });
 
-export const CurrentCallPageContent: React.FC<DataSubmissionPageProps> = React.memo(({ moduleName }) => {
+export const CurrentCallPageContent: React.FC<CurrentCallPageContentProps> = React.memo(({ moduleName }) => {
     const { compositionRoot } = useAppContext();
 
     const result = useGlassModule(compositionRoot, moduleName);
@@ -66,7 +66,7 @@ export const CurrentCallPageContent: React.FC<DataSubmissionPageProps> = React.m
                         <div className="status">{i18n.t("Missing Data")}</div>
                     </PageTitle>
                     <CustomCard padding="40px 60px 50px">
-                        <CurrentCallContent />
+                        <CurrentCallContent moduleName={moduleName} />
                     </CustomCard>
                 </ContentWrapper>
             );

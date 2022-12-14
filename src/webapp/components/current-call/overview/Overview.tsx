@@ -3,33 +3,33 @@ import styled from "styled-components";
 import { CtaButtons } from "./CtaButtons";
 import { glassColors } from "../../../pages/app/themes/dhis2.theme";
 import { CurrentStatus } from "./CurrentStatus";
-import { UploadFiles } from "./UploadFiles";
 
-export const Overview: React.FC = () => {
-    const [screen, setScreen] = useState<string>('status');
+interface OverviewProps {
+    moduleName: string;
+}
 
-    const handleScreenChange = (val:string) => {
+export const Overview: React.FC<OverviewProps> = ({moduleName}) => {
+    const [screen, setScreen] = useState<string>("status");
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const handleScreenChange = (val: string) => {
         setScreen(val);
-    }
+    };
+
     return (
         <LinedBox>
             {renderScreen(screen)}
-
-            {screen === 'status' &&
-                <CtaButtons changeScreen={handleScreenChange}/>
-            }
+            {screen === "status" && <CtaButtons moduleName={moduleName} />}
         </LinedBox>
     );
 };
 
 const renderScreen = (screen: string) => {
     switch (screen) {
-        case 'status':
+        case "status":
             return <CurrentStatus />;
-        case 'upload':
-            return <UploadFiles />;
-        case 'error':
-            return <p>Uploaded file has errrors...</p>;
+        case "error":
+            return <p>Uploaded file has errors...</p>;
         default:
             return <CurrentStatus />;
     }

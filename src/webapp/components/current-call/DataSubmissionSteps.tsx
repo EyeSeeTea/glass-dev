@@ -8,7 +8,11 @@ import { Advanced } from "./Advanced";
 import { Validations } from "./Validations";
 import { Overview } from "./overview/Overview";
 
-export const DataSubmissionSteps: React.FC = () => {
+interface DataSubmissionStepsProps {
+    moduleName: string;
+}
+
+export const DataSubmissionSteps: React.FC<DataSubmissionStepsProps> = ({moduleName}) => {
     const [currentStep, setCurrentStep] = useState<number>(0);
 
     return (
@@ -30,15 +34,16 @@ export const DataSubmissionSteps: React.FC = () => {
                     Advanced
                 </Button>
             </div>
-            {renderTypeContent(currentStep)}
+            {renderTypeContent(currentStep, moduleName)}
         </ContentWrapper>
     );
 };
 
-const renderTypeContent = (step: number) => {
+const renderTypeContent = (step: number, moduleName: string) => {
     switch (step) {
         case 0:
-            return <Overview />;
+            // TODO: set module name inside page root content to avoid prop drilling
+            return <Overview moduleName={moduleName} />;
         case 1:
             return <ListOfDatasets />;
         case 2:
