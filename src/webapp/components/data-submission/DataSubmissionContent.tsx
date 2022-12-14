@@ -8,10 +8,11 @@ import styled from "styled-components";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { SupportButtons } from "./SupportButtons";
 import { glassColors, palette } from "../../pages/app/themes/dhis2.theme";
+import { UploadFiles } from "./UploadFiles";
 
 export const DataSubmissionContent: React.FC = () => {
     const { compositionRoot } = useAppContext();
-    const [currentStep, setCurrentStep] = useState(3);
+    const [currentStep, setCurrentStep] = useState(1);
 
     const changeStep = (step: number) => {
         setCurrentStep(step);
@@ -33,16 +34,26 @@ export const DataSubmissionContent: React.FC = () => {
                         changeStep={changeStep}
                     />
                     {stepsResult?.data[0]?.children?.length &&
-                        (currentStep === 3 ? (
-                            <>
-                                <ConsistencyChecks />
-                                <SupportButtons />
-                            </>
-                        ) : (
-                            <p className="intro">{i18n.t(stepsResult.data[0].children[currentStep - 1]?.content)}</p>
-                        ))}
+                        renderStep(currentStep, i18n.t(stepsResult.data[0].children[currentStep - 1]?.content))
+                    }
                 </ContentWrapper>
             );
+    }
+};
+
+const renderStep = (step: number, content: string) => {
+    switch (step) {
+        case 1:
+            return <UploadFiles />;
+        case 3:
+            return (
+                <>
+                    <ConsistencyChecks />
+                    <SupportButtons />
+                </>
+            );
+        default:
+            return <p className="intro">{content}</p>;
     }
 };
 

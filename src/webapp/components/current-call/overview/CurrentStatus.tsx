@@ -17,9 +17,7 @@ export const CurrentStatus: React.FC = () => {
             <p>{i18n.t("At least one mandatory questionnaire is not submited")}</p>
             <p>
                 <strong>
-                    {i18n.t(
-                        "You need to complete the mandatory uploads before validate the submissions for this call"
-                    )}
+                    {i18n.t("You need to complete the mandatory uploads before validate the submissions for this call")}
                 </strong>
             </p>
         </ContentWrapper>

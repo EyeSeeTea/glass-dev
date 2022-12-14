@@ -2,19 +2,18 @@ import React from "react";
 import { Button } from "@material-ui/core";
 import styled from "styled-components";
 import i18n from "@eyeseetea/d2-ui-components/locales";
+import { NavLink } from "react-router-dom";
 
 
 export interface CtaButtonsProps {
-    changeScreen: (val: string) => void;
+    moduleName: string;
 }
 
-export const CtaButtons: React.FC<CtaButtonsProps> = ({changeScreen}) => {
+export const CtaButtons: React.FC<CtaButtonsProps> = ({moduleName}) => {
 
     return (
         <ContentWrapper>
-            <Button variant="contained" color="primary" 
-                onClick={() => changeScreen('upload')}
-                >
+            <Button variant="contained" color="primary" component={NavLink} to={`/data-submission/${moduleName}`} exact={true}>
                 {i18n.t("Upload dataset")}
             </Button>
             <Button variant="contained" color="primary">
