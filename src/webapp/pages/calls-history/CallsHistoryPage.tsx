@@ -31,7 +31,7 @@ export const CallsHistoryPageContent: React.FC<CallsHistoryPageProps> = React.me
 
     const handleClick = (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
         event.preventDefault();
-    }
+    };
 
     switch (result.kind) {
         case "loading":

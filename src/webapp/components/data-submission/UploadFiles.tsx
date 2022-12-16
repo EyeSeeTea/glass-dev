@@ -11,8 +11,8 @@ interface UploadFilesProps {
     changeStep: (step: number) => void;
 }
 
-export const UploadFiles: React.FC<UploadFilesProps> = ({changeStep}) => {
-    const [batchId, setBatchId] = useState('1');
+export const UploadFiles: React.FC<UploadFilesProps> = ({ changeStep }) => {
+    const [batchId, setBatchId] = useState("1");
     const [isValidated, setIsValidated] = useState(false);
 
     const handleChange = (event: React.ChangeEvent<{ value: unknown }>) => {
@@ -32,10 +32,7 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({changeStep}) => {
             <div className="batch-id">
                 <h3>Batch ID</h3>
                 <FormControl variant="outlined">
-                    <Select
-                        value={batchId}
-                        onChange={handleChange}
-                    >
+                    <Select value={batchId} onChange={handleChange}>
                         {/* <MenuItem value="">
                             <em>None</em>
                         </MenuItem> */}
@@ -56,11 +53,14 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({changeStep}) => {
                         ))}
                     </ul>
                 </div>
-                <Button variant="contained" color={isValidated ? 'primary' : 'default'}
+                <Button
+                    variant="contained"
+                    color={isValidated ? "primary" : "default"}
                     disabled={isValidated ? false : true}
-                    endIcon={<ChevronRightIcon />} disableElevation
+                    endIcon={<ChevronRightIcon />}
+                    disableElevation
                     onClick={() => changeStep(2)}
-                    >
+                >
                     {i18n.t("Continue")}
                 </Button>
             </div>
@@ -139,7 +139,7 @@ const ContentWrapper = styled.div`
             ul {
                 margin: 0;
                 padding: 0 0 0 20px;
-            }  
+            }
         }
     }
 `;

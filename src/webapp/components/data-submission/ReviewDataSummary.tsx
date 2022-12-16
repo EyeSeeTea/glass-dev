@@ -24,16 +24,13 @@ export const ReviewDataSummary: React.FC<ReviewDataSummaryProps> = ({ changeStep
     });
 
     useEffect(() => {
-        if (state.checkedA || 
-            state.checkedB || 
-            state.checkedC || 
-            state.checkedD ) {
+        if (state.checkedA || state.checkedB || state.checkedC || state.checkedD) {
             setIsValidated(true);
         } else {
             setIsValidated(false);
         }
-    }, [state])
-    
+    }, [state]);
+
     const changeType = (fileType: string) => {
         setFileType(fileType);
     };
@@ -57,8 +54,12 @@ export const ReviewDataSummary: React.FC<ReviewDataSummaryProps> = ({ changeStep
                 <SectionCard className="wrong">
                     <ul>
                         <li>130 Subjects</li>
-                        <li><b>First Sample</b> 1-20-2020</li>
-                        <li><b>Last Sample</b> 1-20-2020</li>
+                        <li>
+                            <b>First Sample</b> 1-20-2020
+                        </li>
+                        <li>
+                            <b>Last Sample</b> 1-20-2020
+                        </li>
                     </ul>
                 </SectionCard>
             </Section>
@@ -128,19 +129,20 @@ export const ReviewDataSummary: React.FC<ReviewDataSummaryProps> = ({ changeStep
                 </SectionCard>
             </Section>
             <div className="bottom">
-                <Button variant="contained" color={isValidated ? 'primary' : 'default'}
+                <Button
+                    variant="contained"
+                    color={isValidated ? "primary" : "default"}
                     disabled={isValidated ? false : true}
-                    endIcon={<ChevronRightIcon />} 
+                    endIcon={<ChevronRightIcon />}
                     onClick={() => changeStep(3)}
-                    disableElevation>
-                    
+                    disableElevation
+                >
                     {i18n.t("Continue")}
                 </Button>
             </div>
         </ContentWrapper>
     );
 };
-
 
 const ContentWrapper = styled.div`
     display: flex;
@@ -210,4 +212,4 @@ const SectionCard = styled.div`
             display: inline-block;
         }
     }
-`
+`;

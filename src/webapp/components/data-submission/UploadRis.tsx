@@ -3,12 +3,12 @@ import { Button } from "@material-ui/core";
 import styled from "styled-components";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import BackupIcon from "@material-ui/icons/Backup";
-import CloseIcon from '@material-ui/icons/Close';
+import CloseIcon from "@material-ui/icons/Close";
 
-interface UploadRisProps  {
+interface UploadRisProps {
     handleValidate: (val: boolean) => void;
 }
-export const UploadRis: React.FC<UploadRisProps> = ({ handleValidate}) => {
+export const UploadRis: React.FC<UploadRisProps> = ({ handleValidate }) => {
     const [fileList, setFileList] = useState<FileList | null>(null);
 
     useEffect(() => {
@@ -17,8 +17,8 @@ export const UploadRis: React.FC<UploadRisProps> = ({ handleValidate}) => {
         } else {
             handleValidate(false);
         }
-    }, [fileList, handleValidate])
-    
+    }, [fileList, handleValidate]);
+
     const inputRef = useRef<HTMLInputElement>(null);
 
     const files = fileList ? [...fileList] : [];
@@ -36,7 +36,7 @@ export const UploadRis: React.FC<UploadRisProps> = ({ handleValidate}) => {
     const handleRemoveFiles = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         event.preventDefault();
         setFileList(null);
-    }
+    };
 
     const handleUploadFile = () => {
         if (!fileList) {
@@ -49,21 +49,22 @@ export const UploadRis: React.FC<UploadRisProps> = ({ handleValidate}) => {
         });
 
         // TEST: Uploading the files using the fetch API to mock bin server
-        fetch('https://httpbin.org/post', {
-            method: 'POST',
+        fetch("https://httpbin.org/post", {
+            method: "POST",
             body: data,
         })
-            .then((res) => res.json())
+            .then(res => res.json())
             // eslint-disable-next-line no-console
-            .then((data) => console.log(data))
-            .catch((err) => console.error(err));
+            .then(data => console.log(data))
+            .catch(err => console.error(err));
     };
 
     return (
         <ContentWrapper className="ris-file">
             <span className="label">Choose RIS File</span>
-            {(fileList && fileList?.length) ?
-                <Button variant="contained"
+            {fileList && fileList?.length ? (
+                <Button
+                    variant="contained"
                     color="primary"
                     className="choose-file-button"
                     endIcon={<BackupIcon />}
@@ -71,8 +72,9 @@ export const UploadRis: React.FC<UploadRisProps> = ({ handleValidate}) => {
                 >
                     {i18n.t("Upload file")}
                 </Button>
-                :
-                <Button variant="contained"
+            ) : (
+                <Button
+                    variant="contained"
                     color="primary"
                     className="choose-file-button"
                     endIcon={<BackupIcon />}
@@ -80,8 +82,7 @@ export const UploadRis: React.FC<UploadRisProps> = ({ handleValidate}) => {
                 >
                     {i18n.t("Select file")}
                 </Button>
-            }
-
+            )}
 
             <input ref={inputRef} type="file" onChange={handleFileChange} multiple />
 
@@ -89,9 +90,7 @@ export const UploadRis: React.FC<UploadRisProps> = ({ handleValidate}) => {
                 {files.map((file, i) => (
                     <li key={i}>
                         {file.name} - {file.type}
-                        <button 
-                            className="remove-files" 
-                            onClick={handleRemoveFiles}>
+                        <button className="remove-files" onClick={handleRemoveFiles}>
                             <CloseIcon />
                         </button>
                     </li>
@@ -101,6 +100,4 @@ export const UploadRis: React.FC<UploadRisProps> = ({ handleValidate}) => {
     );
 };
 
-const ContentWrapper = styled.div`
-
-`;
+const ContentWrapper = styled.div``;

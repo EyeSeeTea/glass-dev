@@ -36,9 +36,11 @@ export const DataSubmissionContent: React.FC = () => {
                         changeStep={changeStep}
                     />
                     {stepsResult?.data[0]?.children?.length &&
-                        renderStep(currentStep,
-                            changeStep, 
-                            i18n.t(stepsResult.data[0].children[currentStep - 1]?.content))}
+                        renderStep(
+                            currentStep,
+                            changeStep,
+                            i18n.t(stepsResult.data[0].children[currentStep - 1]?.content)
+                        )}
                 </ContentWrapper>
             );
     }

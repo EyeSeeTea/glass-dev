@@ -3,8 +3,8 @@ import { Button } from "@material-ui/core";
 import styled from "styled-components";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import BackupIcon from "@material-ui/icons/Backup";
-import HelpIcon from '@material-ui/icons/Help';
-import CloseIcon from '@material-ui/icons/Close';
+import HelpIcon from "@material-ui/icons/Help";
+import CloseIcon from "@material-ui/icons/Close";
 
 export const UploadSample: React.FC = () => {
     const [fileList, setFileList] = useState<FileList | null>(null);
@@ -20,7 +20,7 @@ export const UploadSample: React.FC = () => {
     const handleRemoveFiles = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         event.preventDefault();
         setFileList(null);
-    }
+    };
 
     const handleChooseFile = () => {
         if (inputRef.current != null) {
@@ -39,21 +39,24 @@ export const UploadSample: React.FC = () => {
         });
 
         // TEST: Uploading the files using the fetch API to mock bin server
-        fetch('https://httpbin.org/post', {
-            method: 'POST',
+        fetch("https://httpbin.org/post", {
+            method: "POST",
             body: data,
         })
-            .then((res) => res.json())
+            .then(res => res.json())
             // eslint-disable-next-line no-console
-            .then((data) => console.log(data))
-            .catch((err) => console.error(err));
+            .then(data => console.log(data))
+            .catch(err => console.error(err));
     };
 
     return (
         <ContentWrapper className="ris-file">
-            <span className="label">SAMPLE File <small>(not required)</small> <HelpIcon /></span>
-            {files.length ?
-                <Button variant="contained"
+            <span className="label">
+                SAMPLE File <small>(not required)</small> <HelpIcon />
+            </span>
+            {files.length ? (
+                <Button
+                    variant="contained"
                     color="primary"
                     className="choose-file-button"
                     endIcon={<BackupIcon />}
@@ -61,8 +64,9 @@ export const UploadSample: React.FC = () => {
                 >
                     {i18n.t("Upload file")}
                 </Button>
-                :
-                <Button variant="contained"
+            ) : (
+                <Button
+                    variant="contained"
                     color="primary"
                     className="choose-file-button"
                     endIcon={<BackupIcon />}
@@ -70,8 +74,7 @@ export const UploadSample: React.FC = () => {
                 >
                     {i18n.t("Select file")}
                 </Button>
-            }
-
+            )}
 
             <input ref={inputRef} type="file" onChange={handleFileChange} multiple />
 
@@ -79,9 +82,7 @@ export const UploadSample: React.FC = () => {
                 {files.map((file, i) => (
                     <li key={i}>
                         {file.name} - {file.type}
-                        <button 
-                            className="remove-files" 
-                            onClick={handleRemoveFiles}>
+                        <button className="remove-files" onClick={handleRemoveFiles}>
                             <CloseIcon />
                         </button>
                     </li>
@@ -91,6 +92,4 @@ export const UploadSample: React.FC = () => {
     );
 };
 
-const ContentWrapper = styled.div`
-
-`;
+const ContentWrapper = styled.div``;
