@@ -12,7 +12,7 @@ interface DataSubmissionStepsProps {
     moduleName: string;
 }
 
-export const DataSubmissionSteps: React.FC<DataSubmissionStepsProps> = ({moduleName}) => {
+export const DataSubmissionSteps: React.FC<DataSubmissionStepsProps> = ({ moduleName }) => {
     const [currentStep, setCurrentStep] = useState<number>(0);
 
     return (

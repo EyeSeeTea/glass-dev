@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2022-12-14T13:03:11.357Z\n"
-"PO-Revision-Date: 2022-12-14T13:03:11.357Z\n"
+"POT-Creation-Date: 2022-12-16T07:59:16.298Z\n"
+"PO-Revision-Date: 2022-12-16T07:59:16.298Z\n"
 
 msgid "Year"
 msgstr ""
@@ -85,10 +85,16 @@ msgid ""
 "for this call"
 msgstr ""
 
-msgid "select file"
+msgid "Back to Module"
 msgstr ""
 
-msgid "Log Out"
+msgid "Go to Validation Report"
+msgstr ""
+
+msgid "Thank! your data for now is uploaded in our system"
+msgstr ""
+
+msgid "Continue"
 msgstr ""
 
 msgid "I need help"
@@ -109,10 +115,19 @@ msgstr ""
 msgid "OK"
 msgstr ""
 
+msgid "Upload file"
+msgstr ""
+
+msgid "Select file"
+msgstr ""
+
 msgid "News from GLASS"
 msgstr ""
 
 msgid "Your Notifications"
+msgstr ""
+
+msgid "Log Out"
 msgstr ""
 
 msgid "GO"
