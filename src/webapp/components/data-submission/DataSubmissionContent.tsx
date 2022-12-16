@@ -9,6 +9,8 @@ import i18n from "@eyeseetea/d2-ui-components/locales";
 import { SupportButtons } from "./SupportButtons";
 import { glassColors, palette } from "../../pages/app/themes/dhis2.theme";
 import { UploadFiles } from "./UploadFiles";
+import { ReviewDataSummary } from "./ReviewDataSummary";
+import { Completed } from "./Completed";
 
 export const DataSubmissionContent: React.FC = () => {
     const { compositionRoot } = useAppContext();
@@ -34,21 +36,26 @@ export const DataSubmissionContent: React.FC = () => {
                         changeStep={changeStep}
                     />
                     {stepsResult?.data[0]?.children?.length &&
-                        renderStep(currentStep, i18n.t(stepsResult.data[0].children[currentStep - 1]?.content))
-                    }
+                        renderStep(currentStep,
+                            changeStep, 
+                            i18n.t(stepsResult.data[0].children[currentStep - 1]?.content))}
                 </ContentWrapper>
             );
     }
 };
 
-const renderStep = (step: number, content: string) => {
+const renderStep = (step: number, changeStep: any, content: string) => {
     switch (step) {
         case 1:
-            return <UploadFiles />;
+            return <UploadFiles changeStep={changeStep} />;
+        case 2:
+            return <ReviewDataSummary changeStep={changeStep} />;
+        case 4:
+            return <Completed />;
         case 3:
             return (
                 <>
-                    <ConsistencyChecks />
+                    <ConsistencyChecks changeStep={changeStep} />
                     <SupportButtons />
                 </>
             );

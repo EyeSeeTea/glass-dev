@@ -9,7 +9,7 @@ interface CurrentCallContentProps {
     moduleName: string;
 }
 
-export const CurrentCallContent: React.FC<CurrentCallContentProps> = ({moduleName}) => {
+export const CurrentCallContent: React.FC<CurrentCallContentProps> = ({ moduleName }) => {
     const { compositionRoot } = useAppContext();
 
     const stepsResult = useDataSubmissionSteps(compositionRoot);
@@ -22,7 +22,7 @@ export const CurrentCallContent: React.FC<CurrentCallContentProps> = ({moduleNam
         case "loaded":
             return (
                 <ContentWrapper>
-                    <DataSubmissionSteps moduleName={moduleName}/>
+                    <DataSubmissionSteps moduleName={moduleName} />
                 </ContentWrapper>
             );
     }

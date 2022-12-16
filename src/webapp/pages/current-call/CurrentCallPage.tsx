@@ -29,7 +29,7 @@ export const CurrentCallPageContent: React.FC<CurrentCallPageContentProps> = Rea
 
     const result = useGlassModule(compositionRoot, moduleName);
 
-    function handleClick(event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) {
+    const handleClick = (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
         event.preventDefault();
     }
 

@@ -4,16 +4,20 @@ import styled from "styled-components";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { NavLink } from "react-router-dom";
 
-
 export interface CtaButtonsProps {
     moduleName: string;
 }
 
-export const CtaButtons: React.FC<CtaButtonsProps> = ({moduleName}) => {
-
+export const CtaButtons: React.FC<CtaButtonsProps> = ({ moduleName }) => {
     return (
         <ContentWrapper>
-            <Button variant="contained" color="primary" component={NavLink} to={`/data-submission/${moduleName}`} exact={true}>
+            <Button
+                variant="contained"
+                color="primary"
+                component={NavLink}
+                to={`/data-submission/${moduleName}`}
+                exact={true}
+            >
                 {i18n.t("Upload dataset")}
             </Button>
             <Button variant="contained" color="primary">
