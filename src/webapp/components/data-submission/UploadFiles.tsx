@@ -37,8 +37,8 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({ changeStep }) => {
                             <em>None</em>
                         </MenuItem> */}
                         <MenuItem value={1}>Dataset 1</MenuItem>
-                        <MenuItem value={2}>Dataset 1</MenuItem>
-                        <MenuItem value={3}>Dataset 1</MenuItem>
+                        <MenuItem value={2}>Dataset 2</MenuItem>
+                        <MenuItem value={3}>Dataset 3</MenuItem>
                     </Select>
                 </FormControl>
             </div>
