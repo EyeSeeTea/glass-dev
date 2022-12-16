@@ -1,17 +1,13 @@
-import React, {  } from "react";
+import React from "react";
 import styled from "styled-components";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { CompleteButtons } from "./CompleteButtons";
 
-
 export const Completed: React.FC = () => {
-
     return (
         <ContentWrapper>
-            <p className="intro">
-                {i18n.t("Thank! your data for now is uploaded in our system")}
-            </p>
+            <p className="intro">{i18n.t("Thank! your data for now is uploaded in our system")}</p>
             <div className="call-name">
                 <span>2020</span>
                 <span>Spain</span>
@@ -23,11 +19,9 @@ export const Completed: React.FC = () => {
                 <p>Info abou the previously updated quarter and the missing quarters</p>
             </Section>
             <CompleteButtons />
-
         </ContentWrapper>
     );
 };
-
 
 const ContentWrapper = styled.div`
     display: flex;
@@ -64,4 +58,3 @@ const Section = styled.div`
         margin: 40px;
     }
 `;
-

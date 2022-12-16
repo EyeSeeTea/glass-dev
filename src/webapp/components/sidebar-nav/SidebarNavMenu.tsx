@@ -19,7 +19,7 @@ const SidebarNavMenu: React.FC<SidebarNavProps> = ({ menu, className }) => {
     const location = useLocation();
 
     const history = useHistory();
-    
+
     const isCurrentPage = (val: string) => {
         if (val) {
             return location.pathname.includes(val);
@@ -29,10 +29,10 @@ const SidebarNavMenu: React.FC<SidebarNavProps> = ({ menu, className }) => {
     };
 
     const gotoPage = (path: string) => {
-        console.log('router.push(href): ', path);
+        console.log("router.push(href): ", path);
         // history.push({ path: path });
         history.push(path);
-    }
+    };
 
     return (
         <ListItem className={clsx(classes.root, className)} disableGutters style={{ paddingLeft: menu.level * 8 }}>

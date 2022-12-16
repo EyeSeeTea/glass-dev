@@ -31,7 +31,7 @@ export const CurrentCallPageContent: React.FC<CurrentCallPageContentProps> = Rea
 
     const handleClick = (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
         event.preventDefault();
-    }
+    };
 
     switch (result.kind) {
         case "loading":

@@ -10,7 +10,7 @@ interface ConsistencyChecksProps {
     changeStep: (step: number) => void;
 }
 
-export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({changeStep}) => {
+export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({ changeStep }) => {
     const [fileType, setFileType] = useState<string>("ris");
     const [isValidated, setIsValidated] = useState(true);
 
@@ -35,12 +35,14 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({changeStep}
             {renderTypeContent(fileType)}
 
             <div className="bottom">
-                <Button variant="contained" color={isValidated ? 'primary' : 'default'}
+                <Button
+                    variant="contained"
+                    color={isValidated ? "primary" : "default"}
                     disabled={isValidated ? false : true}
-                    endIcon={<ChevronRightIcon />} 
+                    endIcon={<ChevronRightIcon />}
                     onClick={() => changeStep(4)}
-                    disableElevation>
-                    
+                    disableElevation
+                >
                     {i18n.t("Continue")}
                 </Button>
             </div>
