@@ -53,7 +53,7 @@ export const CurrentCallPageContent: React.FC<CurrentCallPageContentProps> = Rea
                             </Button>
                             <ChevronRightIcon />
                             <Button>
-                                <span>{i18n.t("2020 Call")}</span>
+                                <span>{i18n.t("2022 Call")}</span>
                             </Button>
                         </StyledBreadCrumbs>
                         <div className="info">
@@ -62,7 +62,7 @@ export const CurrentCallPageContent: React.FC<CurrentCallPageContentProps> = Rea
                         </div>
                     </PreContent>
                     <PageTitle>
-                        <h3>{i18n.t("2020 Call")}</h3>
+                        <h3>{i18n.t("2022 Call")}</h3>
                         <div className="status">{i18n.t("Missing Data")}</div>
                     </PageTitle>
                     <CustomCard padding="40px 60px 50px">

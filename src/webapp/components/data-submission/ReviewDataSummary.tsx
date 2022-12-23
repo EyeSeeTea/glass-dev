@@ -1,9 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Button, Checkbox, FormControlLabel } from "@material-ui/core";
-import { BlockingErrors } from "./BlockingErrors";
 import styled from "styled-components";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
-import { NonBlockingWarnings } from "./NonBlockingWarnings";
 import sampleCharts from "../../assets/sample-charts.png";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";

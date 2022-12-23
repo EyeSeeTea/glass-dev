@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { makeStyles } from "@material-ui/styles";
 import { List, ListItem, Theme, Collapse, Button, colors } from "@material-ui/core";
 import clsx from "clsx";
@@ -6,6 +6,7 @@ import { ExpandLess, ExpandMore } from "@material-ui/icons";
 import { MenuGroup } from "./SidebarNav";
 import SidebarNavMenu from "./SidebarNavMenu";
 import styled from "styled-components";
+import { useLocation } from "react-router-dom";
 
 interface SidebarNavProps {
     className?: string;
@@ -15,12 +16,31 @@ interface SidebarNavProps {
 
 const SidebarNavMenuGroup: React.FC<SidebarNavProps> = ({ menu, groupName, className }) => {
     const classes = useStyles(menu.level);
+    const location = useLocation();
 
     const [openCollapse, setOpenCollapse] = React.useState(false);
 
     const handleExpand = () => {
         setOpenCollapse(!openCollapse);
     };
+
+    const isCurrentModule = (val: string) => {
+        if (val) {
+            return location.pathname.includes(val);
+        } else {
+            return false;
+        }
+    };
+
+    useEffect(() => {
+        if (isCurrentModule(menu.title)) {
+            setOpenCollapse(true);
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [menu]);
+
+
+
 
     return (
         <React.Fragment>
@@ -33,7 +53,6 @@ const SidebarNavMenuGroup: React.FC<SidebarNavProps> = ({ menu, groupName, class
                 <Button className={classes.button} fullWidth={true}>
                     <div className={classes.icon}>{menu.icon}</div>
                     <span className={classes.title}>{menu.title}</span>
-
                     <div className={classes.expand}>{openCollapse ? <ExpandLess /> : <ExpandMore />}</div>
                 </Button>
             </ListItem>
@@ -44,9 +63,9 @@ const SidebarNavMenuGroup: React.FC<SidebarNavProps> = ({ menu, groupName, class
                         {menu.children &&
                             menu.children.map(child =>
                                 child.kind === "MenuGroup" ? (
-                                    <SidebarNavMenuGroup menu={child} key={child.title} />
+                                    <SidebarNavMenuGroup menu={child} key={child.title} groupName={groupName} />
                                 ) : (
-                                    <SidebarNavMenu menu={child} key={child.title} />
+                                    <SidebarNavMenu menu={child} key={child.title} groupName={groupName}/>
                                 )
                             )}
                     </List>

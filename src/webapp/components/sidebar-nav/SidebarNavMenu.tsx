@@ -1,26 +1,27 @@
 /* eslint-disable react/no-multi-comp */
 /* eslint-disable react/display-name */
 import React from "react";
-import { NavLink, useHistory, useLocation } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 import { makeStyles } from "@material-ui/styles";
 import { ListItem, Button, colors, Theme, Typography } from "@material-ui/core";
 import clsx from "clsx";
 import { MenuLeaf } from "./SidebarNav";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
-import router from "material-ui/svg-icons/hardware/router";
 
 interface SidebarNavProps {
     className?: string;
+    groupName?: string;
     menu: MenuLeaf;
 }
 
-const SidebarNavMenu: React.FC<SidebarNavProps> = ({ menu, className }) => {
+const SidebarNavMenu: React.FC<SidebarNavProps> = ({ menu, className, groupName }) => {
     const classes = useStyles(menu.level);
     const location = useLocation();
 
-    const history = useHistory();
-
     const isCurrentPage = (val: string) => {
+        if (location.pathname.includes(`data-submission/${groupName}`) && menu.title === 'Current Call') {
+            return true;
+        }
         if (val) {
             return location.pathname.includes(val);
         } else {
@@ -28,20 +29,13 @@ const SidebarNavMenu: React.FC<SidebarNavProps> = ({ menu, className }) => {
         }
     };
 
-    const gotoPage = (path: string) => {
-        console.log("router.push(href): ", path);
-        // history.push({ path: path });
-        history.push(path);
-    };
-
     return (
         <ListItem className={clsx(classes.root, className)} disableGutters style={{ paddingLeft: menu.level * 8 }}>
             <Button
                 className={classes.button}
-                onClick={() => gotoPage(menu.path)}
-                // component={NavLink}
-                // to={menu.path}
-                // exact={true}
+                component={NavLink}
+                to={menu.path}
+                exact={true}
                 data-is-page-current={isCurrentPage(menu.path)}
             >
                 <div className={classes.icon}>{menu.icon}</div>

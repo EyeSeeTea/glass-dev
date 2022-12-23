@@ -5,28 +5,32 @@
             "title": "AMR 2022",
             "module_color": "#A6228F",
             "files_uploaded": 0,
-            "end_in_days": null
+            "end_in_days": null,
+            "moduleUrl": "/current-call/AMR"
         },
         {
             "id": 2,
             "title": "AMC 2022",
             "module_color": "#FF6A1E",
             "files_uploaded": 2,
-            "end_in_days": 4
+            "end_in_days": 4,
+            "moduleUrl": "/current-call/AMC"
         },
         {
             "id": 3,
             "title": "EGASP",
             "module_color": "#4A2675",
             "files_uploaded": 0,
-            "end_in_days": null
+            "end_in_days": null,
+            "moduleUrl": "/current-call/EGASP"
         },
         {
             "id": 4,
             "title": "AMR 2023",
             "module_color": "#A6228F",
             "files_uploaded": 0,
-            "end_in_days": 2
+            "end_in_days": 2,
+            "moduleUrl": "/current-call/AMR"
         }
     ]
 }
