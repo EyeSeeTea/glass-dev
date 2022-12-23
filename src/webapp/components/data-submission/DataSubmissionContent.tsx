@@ -15,10 +15,12 @@ import { Completed } from "./Completed";
 export const DataSubmissionContent: React.FC = () => {
     const { compositionRoot } = useAppContext();
     const [currentStep, setCurrentStep] = useState(1);
+    const [completedSteps, setCompletedSteps] = useState([]);
 
     const changeStep = (step: number) => {
         setCurrentStep(step);
     };
+
 
     const stepsResult = useDataSubmissionSteps(compositionRoot);
 
@@ -58,7 +60,7 @@ const renderStep = (step: number, changeStep: any, content: string) => {
             return (
                 <>
                     <ConsistencyChecks changeStep={changeStep} />
-                    <SupportButtons />
+                    <SupportButtons changeStep={changeStep} />
                 </>
             );
         default:
