@@ -2,9 +2,13 @@ import React, { useState } from "react";
 import { Button } from "@material-ui/core";
 import styled from "styled-components";
 import i18n from "@eyeseetea/d2-ui-components/locales";
-import { NavLink, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 
-export const SupportButtons: React.FC = () => {
+interface SupportButtonsProps {
+    changeStep: (step: number) => void;
+}
+
+export const SupportButtons: React.FC<SupportButtonsProps> = ({ changeStep }) => {
     const [isHidden, setIsHidden] = useState(false);
 
     // TODO: remove the next two lines and create a global hook to get current module
@@ -25,9 +29,10 @@ export const SupportButtons: React.FC = () => {
                     <Button
                         variant="contained"
                         color="primary"
-                        component={NavLink}
-                        to={`/data-submission/${moduleName}`}
-                        exact={true}
+                        // component={NavLink}
+                        // to={`/data-submission/${moduleName}`}
+                        onClick={() => changeStep(1)}
+                        // exact={true}
                     >
                         {i18n.t("Upload New Data Files")}
                     </Button>
