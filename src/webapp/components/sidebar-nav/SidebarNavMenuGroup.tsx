@@ -36,11 +36,8 @@ const SidebarNavMenuGroup: React.FC<SidebarNavProps> = ({ menu, groupName, class
         if (isCurrentModule(menu.title)) {
             setOpenCollapse(true);
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [menu]);
-
-
-
 
     return (
         <React.Fragment>
@@ -65,7 +62,7 @@ const SidebarNavMenuGroup: React.FC<SidebarNavProps> = ({ menu, groupName, class
                                 child.kind === "MenuGroup" ? (
                                     <SidebarNavMenuGroup menu={child} key={child.title} groupName={groupName} />
                                 ) : (
-                                    <SidebarNavMenu menu={child} key={child.title} groupName={groupName}/>
+                                    <SidebarNavMenu menu={child} key={child.title} groupName={groupName} />
                                 )
                             )}
                     </List>

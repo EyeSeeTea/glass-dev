@@ -45,14 +45,14 @@ export const CallsHistoryPageContent: React.FC<CallsHistoryPageProps> = React.me
                         <StyledBreadCrumbs aria-label="breadcrumb" separator="">
                             <Button
                                 component={NavLink}
-                                to={`/#/current-call/${moduleName}`}
+                                to={`/current-call/${moduleName}`}
                                 exact={true}
                                 onClick={handleClick}
                             >
                                 <span>{moduleName}</span>
                             </Button>
                             <ChevronRightIcon />
-                            <Button>
+                            <Button component={NavLink} to={`/current-call/${moduleName}`} exact={true}>
                                 <span>{i18n.t("List of Calls")}</span>
                             </Button>
                         </StyledBreadCrumbs>

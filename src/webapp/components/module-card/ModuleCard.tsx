@@ -16,13 +16,7 @@ interface ModuleCardProps {
     moduleUrl: string;
 }
 
-export const ModuleCard: React.FC<ModuleCardProps> = ({
-    title,
-    moduleColor,
-    endDays,
-    filesUploaded,
-    moduleUrl
-}) => {
+export const ModuleCard: React.FC<ModuleCardProps> = ({ title, moduleColor, endDays, filesUploaded, moduleUrl }) => {
     return (
         <CustomCard padding="0">
             <TitleContainer moduleColor={moduleColor}>
@@ -45,11 +39,7 @@ export const ModuleCard: React.FC<ModuleCardProps> = ({
                     <Typography color="textSecondary">{`${filesUploaded} files uploaded`}</Typography>
                 </Container>
 
-                <Button variant="contained" color="primary"
-                    component={NavLink}
-                    to={moduleUrl}
-                    exact={true}
-                >
+                <Button variant="contained" color="primary" component={NavLink} to={moduleUrl} exact={true}>
                     <span>{i18n.t("GO")}</span>
                 </Button>
             </ContentContainer>
@@ -85,7 +75,8 @@ const ContentContainer = styled.div<{ moduleColor: string }>`
     flex-direction: row;
     justify-content: space-between;
     align-items: end;
-    button, a {
+    button,
+    a {
         background-color: ${props => props.moduleColor};
         &:hover {
             background-color: ${props => props.moduleColor};
