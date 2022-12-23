@@ -53,7 +53,7 @@ export const DataSubmissionPageContent: React.FC<DataSubmissionPageProps> = Reac
                             </Button>
                             <ChevronRightIcon />
                             <Button>
-                                <span>{i18n.t("2020 Call")}</span>
+                                <span>{i18n.t("2022 Call")}</span>
                             </Button>
                         </StyledBreadCrumbs>
                         <div className="info">
