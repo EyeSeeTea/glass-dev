@@ -93,6 +93,7 @@ const ContentWrapper = styled.div`
             border: none;
             &:hover {
                 background-color: ${glassColors.greyLight};
+                cursor: pointer;
             }
             td {
                 border-bottom: 1px solid ${glassColors.greyLight};

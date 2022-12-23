@@ -10,9 +10,7 @@ import { GlassModule } from "../../../domain/entities/GlassModule";
 import sideBarData from "./sidebar-list.json";
 import FolderIcon from "@material-ui/icons/Folder";
 
-
 export const SideBar: React.FC = () => {
-    
     const menusResult = { kind: "loaded" as const, data: sideBarData.sideBarData.map(mapModuleToMenu) };
 
     return (
@@ -30,7 +28,6 @@ export const SideBar: React.FC = () => {
             <div style={{ flexGrow: 1 }} />
         </CustomCard>
     );
-
 };
 
 function mapModuleToMenu(module: GlassModule): Menu {
@@ -74,7 +71,6 @@ function mapModuleToMenu(module: GlassModule): Menu {
         ],
     };
 }
-
 
 const HomeButtonWrapper = styled.div`
     margin: 25px 0 0 0;

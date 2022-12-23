@@ -11,7 +11,7 @@ import { NavLink } from "react-router-dom";
 
 export const SideBarDynamic: React.FC = () => {
     const { compositionRoot } = useAppContext();
-    
+
     const menusResult = useSidebarMenus(compositionRoot);
 
     switch (menusResult.kind) {
