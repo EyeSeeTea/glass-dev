@@ -97,13 +97,19 @@ const ContentWrapper = styled.div`
             padding: 0;
             li {
                 font-size: 14px;
-                display: inline-block;
+                display: inline-flex;
+                gap: 5px;
                 .remove-files {
                     font-size: 13px;
+                    cursor: pointer;
                     border: none;
                     background: none;
                     padding: 0;
                     color: ${glassColors.red};
+                    svg {
+                        width: 20px;
+                        height: 20px;
+                    }
                 }
             }
         }

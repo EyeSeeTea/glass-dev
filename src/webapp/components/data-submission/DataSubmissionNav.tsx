@@ -16,18 +16,20 @@ export interface DataSubmissionWizard {
 interface DataSubmissionNavProps {
     steps?: DataSubmissionStep[];
     currentStep: number;
+    completedSteps: number[];
     changeStep: (step: number) => void;
 }
 
 export const DataSubmissionNav: React.FC<DataSubmissionNavProps> = props => {
-    const { steps, currentStep, changeStep } = props;
+    const { steps, currentStep, changeStep, completedSteps } = props;
 
     return (
         <NavContainer>
             {steps?.length && (
                 <ul>
                     {steps.map(step => (
-                        <li key={step.stepNumber} className={currentStep === step.stepNumber ? "current" : ""}>
+                        <li key={step.stepNumber} className={
+                            `${currentStep === step.stepNumber ? "current" : ""} ${completedSteps.includes(step.stepNumber) ? 'completed' : 'incomplete'}`}>
                             <div className="number">{step.stepNumber}</div>
                             <Button onClick={() => changeStep(step.stepNumber)}>{step.title}</Button>
                         </li>
@@ -53,8 +55,12 @@ const NavContainer = styled.div`
         gap: 10px;
         align-items: center;
         opacity: 0.4;
-        &.current {
+        &.current, &.completed {
             opacity: 1;
+        }
+        &:not(.current).incomplete {
+            pointer-events: none;
+            cursor: default;
         }
     }
     .number {
