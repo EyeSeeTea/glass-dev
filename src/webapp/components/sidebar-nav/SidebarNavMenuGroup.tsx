@@ -23,7 +23,6 @@ const SidebarNavMenuGroup: React.FC<SidebarNavProps> = ({
     currentNaVitem,
     handleCurrentNavItem,
 }) => {
-
     const isCurrentModule = (val: string) => {
         if (val) {
             return location.pathname.includes(val);
