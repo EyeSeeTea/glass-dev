@@ -10,19 +10,19 @@ import { useLocation } from "react-router-dom";
 
 interface SidebarNavProps {
     className?: string;
-    groupName?: string;
+    groupName: string;
+    currentNaVitem: string[];
+    handleCurrentNavItem: (val: string[]) => void;
     menu: MenuGroup;
 }
 
-const SidebarNavMenuGroup: React.FC<SidebarNavProps> = ({ menu, groupName, className }) => {
-    const classes = useStyles(menu.level);
-    const location = useLocation();
-
-    const [openCollapse, setOpenCollapse] = React.useState(false);
-
-    const handleExpand = () => {
-        setOpenCollapse(!openCollapse);
-    };
+const SidebarNavMenuGroup: React.FC<SidebarNavProps> = ({
+    menu,
+    groupName,
+    className,
+    currentNaVitem,
+    handleCurrentNavItem,
+}) => {
 
     const isCurrentModule = (val: string) => {
         if (val) {
@@ -30,6 +30,25 @@ const SidebarNavMenuGroup: React.FC<SidebarNavProps> = ({ menu, groupName, class
         } else {
             return false;
         }
+    };
+
+    const isCurrentNavItem = (val: string[]) => {
+        if (isCurrentModule(groupName)) {
+            return true;
+        }
+        if (currentNaVitem && val[0] === groupName) {
+            return true;
+        } else {
+            return false;
+        }
+    };
+
+    const classes = useStyles(menu.level);
+    const location = useLocation();
+    const [openCollapse, setOpenCollapse] = React.useState(isCurrentNavItem(currentNaVitem));
+
+    const handleExpand = () => {
+        setOpenCollapse(!openCollapse);
     };
 
     useEffect(() => {
@@ -60,9 +79,21 @@ const SidebarNavMenuGroup: React.FC<SidebarNavProps> = ({ menu, groupName, class
                         {menu.children &&
                             menu.children.map(child =>
                                 child.kind === "MenuGroup" ? (
-                                    <SidebarNavMenuGroup menu={child} key={child.title} groupName={groupName} />
+                                    <SidebarNavMenuGroup
+                                        menu={child}
+                                        key={child.title}
+                                        groupName={groupName}
+                                        currentNaVitem={currentNaVitem}
+                                        handleCurrentNavItem={handleCurrentNavItem}
+                                    />
                                 ) : (
-                                    <SidebarNavMenu menu={child} key={child.title} groupName={groupName} />
+                                    <SidebarNavMenu
+                                        currentNaVitem={currentNaVitem}
+                                        handleCurrentNavItem={handleCurrentNavItem}
+                                        menu={child}
+                                        key={child.title}
+                                        groupName={groupName}
+                                    />
                                 )
                             )}
                     </List>

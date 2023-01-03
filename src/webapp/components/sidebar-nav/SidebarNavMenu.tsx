@@ -12,9 +12,11 @@ interface SidebarNavProps {
     className?: string;
     groupName?: string;
     menu: MenuLeaf;
+    currentNaVitem: string[];
+    handleCurrentNavItem: (val: string[]) => void;
 }
 
-const SidebarNavMenu: React.FC<SidebarNavProps> = ({ menu, className, groupName }) => {
+const SidebarNavMenu: React.FC<SidebarNavProps> = ({ menu, className, groupName, handleCurrentNavItem }) => {
     const classes = useStyles(menu.level);
     const location = useLocation();
 
@@ -30,7 +32,16 @@ const SidebarNavMenu: React.FC<SidebarNavProps> = ({ menu, className, groupName 
     };
 
     return (
-        <ListItem className={clsx(classes.root, className)} disableGutters style={{ paddingLeft: menu.level * 8 }}>
+        <ListItem
+            className={clsx(classes.root, className)}
+            disableGutters
+            style={{ paddingLeft: menu.level * 8 }}
+            onClick={() => {
+                if (groupName) {
+                    handleCurrentNavItem([groupName, menu.title]);
+                }
+            }}
+        >
             <Button
                 className={classes.button}
                 component={NavLink}

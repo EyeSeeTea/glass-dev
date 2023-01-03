@@ -1,6 +1,6 @@
 /* eslint-disable react/no-multi-comp */
 /* eslint-disable react/display-name */
-import React from "react";
+import React, { useState } from "react";
 import { makeStyles } from "@material-ui/styles";
 import { List, Theme } from "@material-ui/core";
 import clsx from "clsx";
@@ -33,14 +33,32 @@ interface SidebarNavProps {
 
 const SidebarNav: React.FC<SidebarNavProps> = ({ menus, className }) => {
     const classes = useStyles();
+    const [currentNaVitem, setCurrentNavItem] = useState<string[]>([""]);
+
+    const handleCurrentNavItem = (val: string[]) => {
+        // eslint-disable-next-line no-console
+        console.log("handleCurrentNavItem: ", val);
+        setCurrentNavItem(val);
+    };
 
     return (
         <List className={clsx(classes.root, className)}>
             {menus.map(menu =>
                 menu.kind === "MenuGroup" ? (
-                    <SidebarNavMenuGroup menu={menu} key={menu.title} groupName={menu.title} />
+                    <SidebarNavMenuGroup
+                        menu={menu}
+                        key={menu.title}
+                        groupName={menu.title}
+                        currentNaVitem={currentNaVitem}
+                        handleCurrentNavItem={handleCurrentNavItem}
+                    />
                 ) : (
-                    <SidebarNavMenu menu={menu} key={menu.title} />
+                    <SidebarNavMenu
+                        menu={menu}
+                        key={menu.title}
+                        currentNaVitem={currentNaVitem}
+                        handleCurrentNavItem={handleCurrentNavItem}
+                    />
                 )
             )}
         </List>
