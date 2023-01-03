@@ -19,8 +19,8 @@ export const DataSubmissionContent: React.FC = () => {
 
     const changeStep = (step: number) => {
         setCurrentStep(step);
-        if (!completedSteps.includes(step-1)) {
-            setCompletedSteps([...completedSteps, step-1]);
+        if (!completedSteps.includes(step - 1)) {
+            setCompletedSteps([...completedSteps, step - 1]);
         }
     };
 
