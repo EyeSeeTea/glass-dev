@@ -15,12 +15,14 @@ import { Completed } from "./Completed";
 export const DataSubmissionContent: React.FC = () => {
     const { compositionRoot } = useAppContext();
     const [currentStep, setCurrentStep] = useState(1);
-    const [completedSteps, setCompletedSteps] = useState([]);
+    const [completedSteps, setCompletedSteps] = useState<number[]>([]);
 
     const changeStep = (step: number) => {
         setCurrentStep(step);
+        if (!completedSteps.includes(step-1)) {
+            setCompletedSteps([...completedSteps, step-1]);
+        }
     };
-
 
     const stepsResult = useDataSubmissionSteps(compositionRoot);
 
@@ -36,6 +38,7 @@ export const DataSubmissionContent: React.FC = () => {
                         steps={stepsResult.data[0]?.children}
                         currentStep={currentStep}
                         changeStep={changeStep}
+                        completedSteps={completedSteps}
                     />
                     {stepsResult?.data[0]?.children?.length &&
                         renderStep(
