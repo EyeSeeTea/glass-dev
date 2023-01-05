@@ -39,7 +39,7 @@ export const CountryInformationContent: React.FC = () => {
                 </InfoTable>
             </CustomCard>
 
-            <CustomCard title="Enrolment Information">
+            <CustomCard title="National Focal Point">
                 <InfoTable>
                     <tbody>
                         <tr>

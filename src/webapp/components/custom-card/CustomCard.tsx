@@ -18,7 +18,7 @@ export const CustomCard: React.FC<CustomCardProps> = ({ minheight, padding, chil
             <Box display="flex" flexDirection="column" justifyContent="space-between" height={"100%"}>
                 {title && (
                     <TitleContainer>
-                        <Typography variant="h5">{i18n.t("Country Identification")}</Typography>
+                        <Typography variant="h5">{i18n.t(title)}</Typography>
                     </TitleContainer>
                 )}
                 {children}

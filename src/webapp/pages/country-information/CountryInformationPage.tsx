@@ -34,8 +34,8 @@ export const CountryInformationPageContent: React.FC<CountryInformationPageProps
                         <span>{moduleName}</span>
                     </Button>
                     <ChevronRightIcon />
-                    <Button component={NavLink} to={`/current-call/${moduleName}`} exact={true}>
-                        <span>{i18n.t("List of Calls")}</span>
+                    <Button component={NavLink} to={`/country-information/${moduleName}`} exact={true}>
+                        <span>{i18n.t("Country Information")}</span>
                     </Button>
                 </StyledBreadCrumbs>
             </PreContent>

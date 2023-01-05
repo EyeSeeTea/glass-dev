@@ -53,7 +53,7 @@ export const UploadHistoryPageContent: React.FC<UploadHistoryPageProps> = React.
                                 <span>{moduleName} asdd</span>
                             </Button>
                             <ChevronRightIcon />
-                            <Button component={NavLink} to={`/data-submission/${moduleName}`} exact={true}>
+                            <Button component={NavLink} to={`/upload-history/${moduleName}`} exact={true}>
                                 <span>{i18n.t("Upload History")}</span>
                             </Button>
                         </StyledBreadCrumbs>

@@ -54,7 +54,7 @@ export const CallsHistoryPageContent: React.FC<CallsHistoryPageProps> = React.me
                                 <span>{moduleName}</span>
                             </Button>
                             <ChevronRightIcon />
-                            <Button component={NavLink} to={`/current-call/${moduleName}`} exact={true}>
+                            <Button component={NavLink} to={`/calls-history/${moduleName}`} exact={true}>
                                 <span>{i18n.t("List of Calls")}</span>
                             </Button>
                         </StyledBreadCrumbs>
