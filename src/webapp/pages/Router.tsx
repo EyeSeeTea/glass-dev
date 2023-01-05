@@ -4,6 +4,7 @@ import { CallsHistoryPage } from "./calls-history/CallsHistoryPage";
 import { CurrentCallPage } from "./current-call/CurrentCallPage";
 import { DataSubmissionPage } from "./data-submission/DataSubmissionPage";
 import { FakeLandingPage } from "./landing/FakeLandingPage";
+import { UploadHistoryPage } from "./upload-history/UploadHistoryPage";
 
 export const Router: React.FC = React.memo(() => {
     return (
@@ -29,6 +30,10 @@ export const Router: React.FC = React.memo(() => {
                 <Route
                     path="/calls-history/:module"
                     render={({ match }) => <CallsHistoryPage moduleName={match.params.module} />}
+                />
+                <Route
+                    path="/upload-history/:module"
+                    render={({ match }) => <UploadHistoryPage moduleName={match.params.module} />}
                 />
 
                 <Route render={() => <FakeLandingPage />} />
