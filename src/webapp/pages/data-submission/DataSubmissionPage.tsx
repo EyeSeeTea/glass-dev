@@ -27,6 +27,7 @@ export const DataSubmissionPage: React.FC<DataSubmissionPageProps> = React.memo(
 export const DataSubmissionPageContent: React.FC<DataSubmissionPageProps> = React.memo(({ moduleName }) => {
     const { compositionRoot } = useAppContext();
 
+    // TODO: replace useGlassModule (or parameters) with actual hook to fetch data submission data
     const result = useGlassModule(compositionRoot, moduleName);
 
     function handleClick(event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) {
@@ -42,6 +43,7 @@ export const DataSubmissionPageContent: React.FC<DataSubmissionPageProps> = Reac
             return (
                 <ContentWrapper>
                     <PreContent>
+                        {/* // TODO: replace this with a global reusable StyledBreadCrumbs component */}
                         <StyledBreadCrumbs aria-label="breadcrumb" separator="">
                             <Button
                                 component={NavLink}
