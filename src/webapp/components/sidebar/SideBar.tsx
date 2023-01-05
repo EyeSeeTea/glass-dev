@@ -29,7 +29,6 @@ export const SideBar: React.FC = () => {
     );
 };
 
-
 const HomeButtonWrapper = styled.div`
     margin: 25px 0 0 0;
     .home-button {

@@ -28,7 +28,7 @@ export const MainLayout: React.FC = React.memo(({ children }) => {
                             </div>
                         </ButtonContainer>
                     </Grid>
-                    <Grid item xs={12} sm={10}>
+                    <Grid item xs={12} sm={10} style={{ overflow: "auto" }}>
                         {children}
                         <AppFooter />
                     </Grid>
