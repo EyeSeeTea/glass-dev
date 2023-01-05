@@ -27,6 +27,7 @@ export const CallsHistoryPage: React.FC<CallsHistoryPageProps> = React.memo(({ m
 export const CallsHistoryPageContent: React.FC<CallsHistoryPageProps> = React.memo(({ moduleName }) => {
     const { compositionRoot } = useAppContext();
 
+    // TODO: replace useGlassModule (or parameters) with actual hook to fetch calls history data
     const result = useGlassModule(compositionRoot, moduleName);
 
     const handleClick = (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
@@ -42,6 +43,7 @@ export const CallsHistoryPageContent: React.FC<CallsHistoryPageProps> = React.me
             return (
                 <ContentWrapper>
                     <PreContent>
+                        {/* // TODO: replace this with a global reusable StyledBreadCrumbs component */}
                         <StyledBreadCrumbs aria-label="breadcrumb" separator="">
                             <Button
                                 component={NavLink}
