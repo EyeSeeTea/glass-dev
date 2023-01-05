@@ -54,7 +54,7 @@ export const DataSubmissionPageContent: React.FC<DataSubmissionPageProps> = Reac
                                 <span>{moduleName}</span>
                             </Button>
                             <ChevronRightIcon />
-                            <Button component={NavLink} to={`/current-call/${moduleName}`} exact={true}>
+                            <Button component={NavLink} to={`/data-submission/${moduleName}`} exact={true}>
                                 <span>{i18n.t("2022 Call")}</span>
                             </Button>
                         </StyledBreadCrumbs>
