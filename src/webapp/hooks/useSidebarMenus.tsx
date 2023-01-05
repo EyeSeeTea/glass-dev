@@ -15,7 +15,7 @@ export function useSidebarMenus(compositionRoot: CompositionRoot) {
         : modulesResult;
 }
 
-function mapModuleToMenu(module: GlassModule): Menu {
+export function mapModuleToMenu(module: GlassModule): Menu {
     return {
         kind: "MenuGroup",
         level: 0,
