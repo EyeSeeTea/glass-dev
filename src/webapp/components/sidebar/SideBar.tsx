@@ -54,7 +54,7 @@ function mapModuleToMenu(module: GlassModule): Menu {
                 kind: "MenuLeaf",
                 level: 0,
                 title: "Upload History",
-                path: "",
+                path: `/upload-history/${module.name}`,
             },
             {
                 kind: "MenuLeaf",
