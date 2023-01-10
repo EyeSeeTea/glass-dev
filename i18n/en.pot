@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2022-12-23T12:41:11.295Z\n"
-"PO-Revision-Date: 2022-12-23T12:41:11.295Z\n"
+"POT-Creation-Date: 2023-01-09T12:08:05.093Z\n"
+"PO-Revision-Date: 2023-01-09T12:08:05.093Z\n"
 
 msgid "Year"
 msgstr ""
@@ -142,6 +142,36 @@ msgstr ""
 msgid "HOME"
 msgstr ""
 
+msgid "File Type"
+msgstr ""
+
+msgid "Country"
+msgstr ""
+
+msgid "Batch Id"
+msgstr ""
+
+msgid "Start"
+msgstr ""
+
+msgid "End"
+msgstr ""
+
+msgid "Specimens"
+msgstr ""
+
+msgid "Date"
+msgstr ""
+
+msgid "Filename"
+msgstr ""
+
+msgid "Input Line Nb"
+msgstr ""
+
+msgid "Output Line Nb"
+msgstr ""
+
 msgid "List of Calls"
 msgstr ""
 
@@ -161,4 +191,7 @@ msgid "Hello {{name}}"
 msgstr ""
 
 msgid "Detail page"
+msgstr ""
+
+msgid "Upload History"
 msgstr ""
