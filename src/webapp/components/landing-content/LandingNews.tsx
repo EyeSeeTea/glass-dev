@@ -1,65 +1,66 @@
 import React from "react";
-import { Grid, Typography } from "@material-ui/core";
+import { CircularProgress, Grid, Typography } from "@material-ui/core";
 import styled from "styled-components";
 import { CustomCard } from "../custom-card/CustomCard";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
 import i18n from "@eyeseetea/d2-ui-components/locales";
+import dayjs from "dayjs";
+import { useGlassNews } from "../../hooks/useGlassNews";
+import { useAppContext } from "../../contexts/app-context";
+
+type NewsItemProps = {
+    title: string;
+    date: Date;
+    description: string;
+};
+
+const NewsItem = ({ title, date, description }: NewsItemProps): JSX.Element => {
+    return (
+        <Item>
+            <Heading>
+                <h3>{title}</h3>
+                <Typography align="right" color="textSecondary">
+                    {dayjs(date).format("DD/MM/YYYY")}
+                </Typography>
+            </Heading>
+            <NewsContent>{description}</NewsContent>
+        </Item>
+    );
+};
 
 export const LandingNews: React.FC = () => {
-    return (
-        <Grid item xs={12}>
-            <CustomCard>
-                <TitleContainer>
-                    <Typography variant="h5">{i18n.t("News from GLASS")}</Typography>
-                </TitleContainer>
-                <ContentContainer>
-                    <NewsList>
-                        <Item>
-                            <Heading>
-                                <h3>New Platform</h3>
-                                <Typography align="right" color="textSecondary">
-                                    1/10/2021
-                                </Typography>
-                            </Heading>
-                            <NewsContent>
-                                This is a platform for global data sharing on antimicrobial resistance worldwide. It has
-                                been launched by WHO as part of the implementation of the Global Action Plan on
-                                Antimicrobial Resistance (AMR). The data will help to inform national, regional and
-                                global decision-making, strategies and advocacy.
-                            </NewsContent>
-                        </Item>
+    const { compositionRoot } = useAppContext();
 
-                        <Item>
-                            <Heading>
-                                <h3>Maintenance shutdown</h3>
-                                <Typography align="right" color="textSecondary">
-                                    1/11/2021
-                                </Typography>
-                            </Heading>
-                            <NewsContent>
-                                Nunc auctor purus at mi luctus facilisis. Cras eu nisl vitae elit porta tristique ac id
-                                lorem. Sed congue at lacus a blandit.
-                            </NewsContent>
-                        </Item>
+    const news = useGlassNews(compositionRoot);
 
-                        <Item>
-                            <Heading>
-                                <h3>Nunc auctor purus at mi luctus facilisis</h3>
-                                <Typography align="right" color="textSecondary">
-                                    1/11/2021
-                                </Typography>
-                            </Heading>
-                            <NewsContent>
-                                Aenean fringilla risus a est ultricies laoreet. Aenean tempor turpis enim, non tristique
-                                libero interdum eget. Mauris condimentum risus ut efficitur rutrum. Curabitur rhoncus
-                                placerat viverra. Nullam mi urna, convallis ut efficitur eu, tempus id dolor.
-                            </NewsContent>
-                        </Item>
-                    </NewsList>
-                </ContentContainer>
-            </CustomCard>
-        </Grid>
-    );
+    switch (news.kind) {
+        case "loading":
+            return <CircularProgress />;
+        case "error":
+            return <Typography variant="h6">{news.message}</Typography>;
+        case "loaded":
+            return (
+                <Grid item xs={12}>
+                    <CustomCard>
+                        <TitleContainer>
+                            <Typography variant="h5">{i18n.t("News from GLASS")}</Typography>
+                        </TitleContainer>
+                        <ContentContainer>
+                            <NewsList>
+                                {news.data.map(news => (
+                                    <NewsItem
+                                        key={news.title}
+                                        title={news.title}
+                                        description={news.description}
+                                        date={news.createdOn}
+                                    />
+                                ))}
+                            </NewsList>
+                        </ContentContainer>
+                    </CustomCard>
+                </Grid>
+            );
+    }
 };
 
 const TitleContainer = styled.div`
