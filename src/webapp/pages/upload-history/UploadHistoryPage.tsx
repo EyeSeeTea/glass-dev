@@ -26,6 +26,7 @@ export const UploadHistoryPage: React.FC<UploadHistoryPageProps> = React.memo(({
 export const UploadHistoryPageContent: React.FC<UploadHistoryPageProps> = React.memo(({ moduleName }) => {
     const { compositionRoot } = useAppContext();
 
+    // TODO: replace useGlassModule (or parameters) with actual hook to fetch upload history data
     const result = useGlassModule(compositionRoot, moduleName);
 
     const handleClick = (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
@@ -41,17 +42,18 @@ export const UploadHistoryPageContent: React.FC<UploadHistoryPageProps> = React.
             return (
                 <ContentWrapper>
                     <PreContent>
+                        {/* // TODO: replace this with a global reusable StyledBreadCrumbs component */}
                         <StyledBreadCrumbs aria-label="breadcrumb" separator="">
                             <Button
                                 component={NavLink}
-                                to={`/data-submission/${moduleName}`}
+                                to={`/current-call/${moduleName}`}
                                 exact={true}
                                 onClick={handleClick}
                             >
-                                <span>{moduleName}</span>
+                                <span>{moduleName} asdd</span>
                             </Button>
                             <ChevronRightIcon />
-                            <Button component={NavLink} to={`/data-submission/${moduleName}`} exact={true}>
+                            <Button component={NavLink} to={`/upload-history/${moduleName}`} exact={true}>
                                 <span>{i18n.t("Upload History")}</span>
                             </Button>
                         </StyledBreadCrumbs>

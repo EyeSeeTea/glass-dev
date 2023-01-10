@@ -62,6 +62,7 @@ export const LandingNews: React.FC = () => {
     );
 };
 
+// TODO: create reusable custom card with Title prop to prevent repeat of this TitleContainer styled component
 const TitleContainer = styled.div`
     background: ${glassColors.mainPrimary};
     color: white;

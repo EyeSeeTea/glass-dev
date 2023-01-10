@@ -1,6 +1,7 @@
 import React from "react";
 import { HashRouter, Route, Switch } from "react-router-dom";
 import { CallsHistoryPage } from "./calls-history/CallsHistoryPage";
+import { CountryInformationPage } from "./country-information/CountryInformationPage";
 import { CurrentCallPage } from "./current-call/CurrentCallPage";
 import { DataSubmissionPage } from "./data-submission/DataSubmissionPage";
 import { FakeLandingPage } from "./landing/FakeLandingPage";
@@ -34,6 +35,10 @@ export const Router: React.FC = React.memo(() => {
                 <Route
                     path="/upload-history/:module"
                     render={({ match }) => <UploadHistoryPage moduleName={match.params.module} />}
+                />
+                <Route
+                    path="/country-information/:module"
+                    render={({ match }) => <CountryInformationPage moduleName={match.params.module} />}
                 />
 
                 <Route render={() => <FakeLandingPage />} />
