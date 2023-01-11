@@ -1,41 +1,32 @@
 import React from "react";
 import styled from "styled-components";
-import { Box, Button, CircularProgress, Typography } from "@material-ui/core";
+import { Box, Button, Typography } from "@material-ui/core";
 import { CustomCard } from "../custom-card/CustomCard";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
 import SidebarNav from "../sidebar-nav/SidebarNav";
-import { useAppContext } from "../../contexts/app-context";
-import { useSidebarMenus } from "../../hooks/useSidebarMenus";
 import i18n from "../../../locales";
 import { NavLink } from "react-router-dom";
+import sideBarData from "./sidebar-list.json";
+import { mapModuleToMenu } from "../../hooks/useSidebarMenus";
 
 export const SideBar: React.FC = () => {
-    const { compositionRoot } = useAppContext();
+    const menusResult = { kind: "loaded" as const, data: sideBarData.sideBarData.map(mapModuleToMenu) };
 
-    const menusResult = useSidebarMenus(compositionRoot);
+    return (
+        <CustomCard minheight="630px" padding="0 0 100px 0" data-test="test2">
+            <HomeButtonWrapper>
+                <Button className="home-button" component={NavLink} to="/" exact={true}>
+                    <StarGradient className="star-icon" />
+                    <Box width={40} />
+                    <Typography>{i18n.t("HOME")}</Typography>
+                </Button>
+            </HomeButtonWrapper>
 
-    switch (menusResult.kind) {
-        case "loading":
-            return <CircularProgress />;
-        case "error":
-            return <Typography variant="h6">{menusResult.message}</Typography>;
-        case "loaded":
-            return (
-                <CustomCard minheight="630px" padding="0 0 100px 0" data-test="test2">
-                    <HomeButtonWrapper>
-                        <Button className="home-button" component={NavLink} to="/" exact={true}>
-                            <StarGradient className="star-icon" />
-                            <Box width={40} />
-                            <Typography>{i18n.t("HOME")}</Typography>
-                        </Button>
-                    </HomeButtonWrapper>
+            <SidebarNav menus={menusResult.data} />
 
-                    <SidebarNav menus={menusResult.data} />
-
-                    <div style={{ flexGrow: 1 }} />
-                </CustomCard>
-            );
-    }
+            <div style={{ flexGrow: 1 }} />
+        </CustomCard>
+    );
 };
 
 const HomeButtonWrapper = styled.div`

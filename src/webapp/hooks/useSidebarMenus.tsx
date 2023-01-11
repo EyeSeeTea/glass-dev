@@ -15,7 +15,7 @@ export function useSidebarMenus(compositionRoot: CompositionRoot) {
         : modulesResult;
 }
 
-function mapModuleToMenu(module: GlassModule): Menu {
+export function mapModuleToMenu(module: GlassModule): Menu {
     return {
         kind: "MenuGroup",
         level: 0,
@@ -39,7 +39,7 @@ function mapModuleToMenu(module: GlassModule): Menu {
                 kind: "MenuLeaf",
                 level: 0,
                 title: "Upload History",
-                path: "",
+                path: `/upload-history/${module.name}`,
             },
             {
                 kind: "MenuLeaf",
@@ -51,7 +51,7 @@ function mapModuleToMenu(module: GlassModule): Menu {
                 kind: "MenuLeaf",
                 level: 0,
                 title: "Country Information",
-                path: "",
+                path: `/country-information/${module.name}`,
             },
         ],
     };

@@ -17,6 +17,7 @@ export const OpenCalls: React.FC = () => {
                             filesUploaded={item.files_uploaded}
                             moduleColor={item.module_color}
                             endDays={item.end_in_days}
+                            moduleUrl={item.moduleUrl}
                         />
                     </Grid>
                 ))

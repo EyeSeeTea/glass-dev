@@ -1,15 +1,20 @@
 import styled from "styled-components";
-import { CallsTable } from "./CallsTable";
+import { UploadTable } from "./UploadTable";
 import { useLocation } from "react-router-dom";
 import { data } from "./mock-tables-data.json";
+import { Filter } from "./Filter";
+import { CustomCard } from "../custom-card/CustomCard";
 
-export const CallsHistoryContent: React.FC = () => {
+export const UploadHistoryContent: React.FC = () => {
     const location = useLocation();
     const params = new URLSearchParams(location.search);
 
     return (
         <ContentWrapper>
-            <CallsTable items={data} data-current-module={params.get("userId")} />
+            <Filter />
+            <CustomCard padding="20px 30px 20px">
+                <UploadTable items={data} data-current-module={params.get("userId")} />
+            </CustomCard>
         </ContentWrapper>
     );
 };

@@ -8,26 +8,25 @@ import { useGlassModule } from "../../hooks/useGlassModule";
 import { glassColors, palette } from "../app/themes/dhis2.theme";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import { NavLink } from "react-router-dom";
-import { CustomCard } from "../../components/custom-card/CustomCard";
 import i18n from "@eyeseetea/d2-ui-components/locales";
-import { CurrentCallContent } from "../../components/current-call/CurrentCallContent";
+import { UploadHistoryContent } from "../../components/upload-history/UploadHistoryContent";
 
-interface CurrentCallPageContentProps {
+interface UploadHistoryPageProps {
     moduleName: string;
 }
 
-export const CurrentCallPage: React.FC<CurrentCallPageContentProps> = React.memo(({ moduleName }) => {
+export const UploadHistoryPage: React.FC<UploadHistoryPageProps> = React.memo(({ moduleName }) => {
     return (
         <MainLayout>
-            <CurrentCallPageContent moduleName={moduleName} />
+            <UploadHistoryPageContent moduleName={moduleName} />
         </MainLayout>
     );
 });
 
-export const CurrentCallPageContent: React.FC<CurrentCallPageContentProps> = React.memo(({ moduleName }) => {
+export const UploadHistoryPageContent: React.FC<UploadHistoryPageProps> = React.memo(({ moduleName }) => {
     const { compositionRoot } = useAppContext();
 
-    // TODO: replace useGlassModule (or parameters) with actual hook to fetch current call data
+    // TODO: replace useGlassModule (or parameters) with actual hook to fetch upload history data
     const result = useGlassModule(compositionRoot, moduleName);
 
     const handleClick = (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
@@ -41,7 +40,7 @@ export const CurrentCallPageContent: React.FC<CurrentCallPageContentProps> = Rea
             return <Typography variant="h6">{result.message}</Typography>;
         case "loaded":
             return (
-                <ContentWrapper moduleColor={result.data.color}>
+                <ContentWrapper>
                     <PreContent>
                         {/* // TODO: replace this with a global reusable StyledBreadCrumbs component */}
                         <StyledBreadCrumbs aria-label="breadcrumb" separator="">
@@ -51,37 +50,24 @@ export const CurrentCallPageContent: React.FC<CurrentCallPageContentProps> = Rea
                                 exact={true}
                                 onClick={handleClick}
                             >
-                                <span>{moduleName}</span>
+                                <span>{moduleName} asdd</span>
                             </Button>
                             <ChevronRightIcon />
-                            <Button component={NavLink} to={`/current-call/${moduleName}`} exact={true}>
-                                <span>{i18n.t("2022 Call")}</span>
+                            <Button component={NavLink} to={`/upload-history/${moduleName}`} exact={true}>
+                                <span>{i18n.t("Upload History")}</span>
                             </Button>
                         </StyledBreadCrumbs>
-                        <div className="info">
-                            <span>{i18n.t("Yearly data upload")}</span>, &nbsp;
-                            <span>Spain</span>
-                        </div>
                     </PreContent>
-                    <PageTitle>
-                        <h3>{i18n.t("2022 Call")}</h3>
-                        <div className="status">{i18n.t("Missing Data")}</div>
-                    </PageTitle>
-                    <CustomCard padding="40px 60px 50px">
-                        <CurrentCallContent moduleName={moduleName} />
-                    </CustomCard>
+                    <UploadHistoryContent />
                 </ContentWrapper>
             );
     }
 });
 
-const ContentWrapper = styled.div<{ moduleColor: string }>`
+const ContentWrapper = styled.div`
     display: flex;
     flex-direction: column;
     gap: 20px;
-    .module-bg {
-        background-color: ${props => (props.moduleColor ? props.moduleColor : glassColors.mainPrimary)};
-    }
 `;
 
 const PreContent = styled.div`
@@ -97,26 +83,6 @@ const PreContent = styled.div`
             color: ${glassColors.green};
             opacity: 1;
         }
-    }
-`;
-
-const PageTitle = styled.div`
-    display: flex;
-    flex-direction: row;
-    gap: 20px;
-    align-items: center;
-    h3 {
-        margin: 0;
-    }
-    .status {
-        display: inline-block;
-        border-radius: 5px;
-        padding: 3px 15px;
-        background-color: ${glassColors.yellow};
-        color: white;
-        text-transform: uppercase;
-        font-weight: bold;
-        font-size: 12px;
     }
 `;
 

@@ -21,6 +21,7 @@ export interface UploadsDataProps {
     className?: string;
 }
 
+// TODO: replace Table with Datagrid
 export const UploadsTable: React.FC<UploadsDataProps> = ({ title, items, className }) => {
     return (
         <ContentWrapper className={className}>
