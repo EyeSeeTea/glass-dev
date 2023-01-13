@@ -3,6 +3,7 @@ import styled from "styled-components";
 import { CtaButtons } from "./CtaButtons";
 import { glassColors } from "../../../pages/app/themes/dhis2.theme";
 import { CurrentStatus } from "./CurrentStatus";
+import i18n from "@eyeseetea/d2-ui-components/locales";
 
 interface OverviewProps {
     moduleName: string;
@@ -31,7 +32,7 @@ const renderScreen = (screen: string) => {
         case "status":
             return <CurrentStatus />;
         case "error":
-            return <p>Uploaded file has errors...</p>;
+            return <p>{i18n.t("Uploaded file has errors...")}</p>;
         default:
             return <CurrentStatus />;
     }
