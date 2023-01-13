@@ -8,11 +8,13 @@ interface OverviewProps {
     moduleName: string;
 }
 
+type Status = "status" | "error";
+
 export const Overview: React.FC<OverviewProps> = ({ moduleName }) => {
-    const [screen, setScreen] = useState<string>("status");
+    const [screen, setScreen] = useState<Status>("status");
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const handleScreenChange = (val: string) => {
+    const handleScreenChange = (val: Status) => {
         setScreen(val);
     };
 
