@@ -51,7 +51,7 @@ export function mapModuleToMenu(module: GlassModule): Menu {
                 kind: "MenuLeaf",
                 level: 0,
                 title: "Country Information",
-                path: "",
+                path: `/country-information/${module.name}`,
             },
         ],
     };

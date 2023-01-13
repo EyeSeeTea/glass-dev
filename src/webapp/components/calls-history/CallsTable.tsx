@@ -18,6 +18,7 @@ export interface CallsTableProps {
     className?: string;
 }
 
+// TODO: replace Table with Datagrid
 export const CallsTable: React.FC<CallsTableProps> = ({ title, items, className }) => {
     return (
         <ContentWrapper className={className}>
