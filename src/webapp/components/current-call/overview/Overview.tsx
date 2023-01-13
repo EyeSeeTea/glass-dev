@@ -14,8 +14,9 @@ type Status = "status" | "error";
 export const Overview: React.FC<OverviewProps> = ({ moduleName }) => {
     const [screen, setScreen] = useState<Status>("status");
 
+    // TODO: implement upload file valdidation usage
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const handleScreenChange = (val: Status) => {
+    const validateUploadedFile = (val: Status) => {
         setScreen(val);
     };
 
