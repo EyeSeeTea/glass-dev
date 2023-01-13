@@ -6,8 +6,16 @@ import { SideBar } from "../sidebar/SideBar";
 import ExitToAppIcon from "@material-ui/icons/ExitToApp";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { AppFooter } from "../app-footer/AppFooter";
+import { goToDhis2Url } from "../../utils/helpers";
+import { useConfig } from "@dhis2/app-runtime";
 
 export const MainLayout: React.FC = React.memo(({ children }) => {
+    const { baseUrl } = useConfig();
+
+    const handleLogout = () => {
+        goToDhis2Url(baseUrl, "/dhis-web-commons-security/logout.action");
+    };
+
     return (
         <React.Fragment>
             <GlassAppBar />
@@ -18,6 +26,7 @@ export const MainLayout: React.FC = React.memo(({ children }) => {
                         <ButtonContainer>
                             <div>
                                 <StyledButton
+                                    onClick={handleLogout}
                                     variant="contained"
                                     color="default"
                                     startIcon={<ExitToAppIcon />}
