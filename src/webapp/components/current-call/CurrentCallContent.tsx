@@ -5,7 +5,7 @@ import { useDataSubmissionSteps } from "../../hooks/useDataSubmissionSteps";
 import { DataSubmissionSteps } from "./DataSubmissionSteps";
 import styled from "styled-components";
 
-interface CurrentCallContentProps {
+export interface CurrentCallContentProps {
     moduleName: string;
 }
 

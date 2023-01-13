@@ -1,0 +1,96 @@
+{
+    "data": [
+        {
+            "title": "AMC",
+            "module_color": "#FF6A1E",
+            "files_uploaded": 0,
+            "end_in_days": null,
+            "moduleUrl": "/current-call/AMC",
+            "period": 2019,
+            "status": "NOT_COMPLETED"
+        },
+        {
+            "title": "AMC",
+            "module_color": "#FF6A1E",
+            "files_uploaded": 2,
+            "end_in_days": 0,
+            "moduleUrl": "/current-call/AMC",
+            "period": 2020,
+            "status": "PENDING_APPROVAL"
+        },
+        {
+            "title": "EGASP",
+            "module_color": "#4A2675",
+            "files_uploaded": 0,
+            "end_in_days": null,
+            "moduleUrl": "/current-call/EGASP",
+            "period": 2019,
+            "status": "APPROVED"
+        },
+        {
+            "title": "EGASP",
+            "module_color": "#4A2675",
+            "files_uploaded": 74,
+            "end_in_days": 21,
+            "moduleUrl": "/current-call/EGASP",
+            "period": 2020,
+            "status": "REJECTED"
+        },
+        {
+            "title": "EGASP",
+            "module_color": "#4A2675",
+            "files_uploaded": 74,
+            "end_in_days": 21,
+            "moduleUrl": "/current-call/EGASP",
+            "period": 2018,
+            "status": "PENDING_UPDATE_APPROVAL"
+        },
+        {
+            "title": "AMR",
+            "module_color": "#A6228F",
+            "files_uploaded": 127,
+            "end_in_days": 0,
+            "moduleUrl": "/current-call/AMR",
+            "period": 2019,
+            "status": "COMPLETE"
+        }
+    ],
+    "dataTest": [
+        {
+            "module": "AMC",
+            "orgUnit": "DVnpk4xiXGJ",
+            "period": 2019,
+            "status": "NOT_COMPLETED"
+        },
+        {
+            "module": "AMR",
+            "orgUnit": "DVnpk4xiXGJ",
+            "period": 2023,
+            "status": "COMPLETE"
+        },
+        {
+            "module": "AMC",
+            "orgUnit": "DVnpk4xiXGJ",
+            "period": 2020,
+            "status": "PENDING_APPROVAL"
+        },
+        {
+            "module": "EGASP",
+            "orgUnit": "DVnpk4xiXGJ",
+            "period": 2019,
+            "status": "APPROVED"
+        },
+        {
+            "module": "EGASP",
+            "orgUnit": "DVnpk4xiXGJ",
+            "period": 2020,
+            "status": "REJECTED"
+        },
+        {
+            "module": "EGASP",
+            "orgUnit": "DVnpk4xiXGJ",
+            "period": 2018,
+            "status": "PENDING_UPDATE_APPROVAL"
+        }
+    ]
+}

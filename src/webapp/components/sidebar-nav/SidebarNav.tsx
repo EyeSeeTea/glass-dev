@@ -36,7 +36,7 @@ const SidebarNav: React.FC<SidebarNavProps> = ({ menus, className }) => {
     const [currentNaVitem, setCurrentNavItem] = useState<string[]>([""]);
 
     const handleCurrentNavItem = (val: string[]) => {
-        // TODO: cleanup this prop drilling and convert this using context API / redux
+        // TODO: cleanup this prop drilling and convert this using context API
         // eslint-disable-next-line no-console
         console.log("handleCurrentNavItem: ", val);
         setCurrentNavItem(val);

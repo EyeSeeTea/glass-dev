@@ -4,22 +4,13 @@ import { CallsHistoryPage } from "./calls-history/CallsHistoryPage";
 import { CountryInformationPage } from "./country-information/CountryInformationPage";
 import { CurrentCallPage } from "./current-call/CurrentCallPage";
 import { DataSubmissionPage } from "./data-submission/DataSubmissionPage";
-import { FakeLandingPage } from "./landing/FakeLandingPage";
+import { LandingPage } from "./landing/LandingPage";
 import { UploadHistoryPage } from "./upload-history/UploadHistoryPage";
 
 export const Router: React.FC = React.memo(() => {
     return (
         <HashRouter>
             <Switch>
-                {/* <Route
-                    path="/for/:name?"
-                    render={({ match }) => <ExamplePage name={match.params.name ?? "Stranger"} />}
-                />
-
-          
-                <Route render={() => <LandingPage />} /> */}
-
-                {/* Default route */}
                 <Route
                     path="/current-call/:module"
                     render={({ match }) => <CurrentCallPage moduleName={match.params.module} />}
@@ -41,7 +32,9 @@ export const Router: React.FC = React.memo(() => {
                     render={({ match }) => <CountryInformationPage moduleName={match.params.module} />}
                 />
 
-                <Route render={() => <FakeLandingPage />} />
+                {/* Default route */}
+
+                <Route render={() => <LandingPage />} />
             </Switch>
         </HashRouter>
     );

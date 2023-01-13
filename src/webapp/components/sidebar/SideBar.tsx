@@ -6,6 +6,8 @@ import { glassColors } from "../../pages/app/themes/dhis2.theme";
 import SidebarNav from "../sidebar-nav/SidebarNav";
 import i18n from "../../../locales";
 import { NavLink } from "react-router-dom";
+
+// TODO: use this sideBarData only for testing module data and store module names and colors in root context
 import sideBarData from "./sidebar-list.json";
 import { mapModuleToMenu } from "../../hooks/useSidebarMenus";
 
@@ -17,7 +19,7 @@ export const SideBar: React.FC = () => {
             <HomeButtonWrapper>
                 <Button className="home-button" component={NavLink} to="/" exact={true}>
                     <StarGradient className="star-icon" />
-                    <Box width={40} />
+                    <Box width={15} />
                     <Typography>{i18n.t("HOME")}</Typography>
                 </Button>
             </HomeButtonWrapper>

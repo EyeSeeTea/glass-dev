@@ -125,7 +125,7 @@ const useStyles = makeStyles((theme: Theme) => ({
     title: {
         textAlign: "start",
         flexGrow: 1,
-        marginLeft: theme.spacing(4),
+        marginLeft: "10px",
     },
     expand: {
         marginRight: theme.spacing(4),

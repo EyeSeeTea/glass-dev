@@ -1,16 +1,29 @@
 {
     "sideBarData": [
         {
-            "name": "AMR",
-            "color": "#A6228F"
+            "color": "#A6228F",
+            "id": "AVnpk4xiXGG",
+            "name": "AMR"
         },
         {
-            "name": "AMC",
-            "color": "#FF6A1E"
+            "color": "#E23A75",
+            "id": "IVnpk5xiXGG",
+            "name": "AMR - Individual"
         },
         {
-            "name": "EGASP",
-            "color": "#5A1B8B"
+            "color": "#B02A34",
+            "id": "FVnpk6xiXGG",
+            "name": "AMR - Funghi"
+        },
+        {
+            "color": "#FF6A1E",
+            "id": "BVnik5xiXGJ",
+            "name": "AMC"
+        },
+        {
+            "color": "#5A1B8B",
+            "id": "CVVp44xiXGJ",
+            "name": "EGASP"
         }
     ]
 }

@@ -14,14 +14,27 @@ interface ModuleCardProps {
     endDays?: number | null;
     filesUploaded: number;
     moduleUrl: string;
+    period?: number;
+    status?: string;
 }
 
-export const ModuleCard: React.FC<ModuleCardProps> = ({ title, moduleColor, endDays, filesUploaded, moduleUrl }) => {
+export const ModuleCard: React.FC<ModuleCardProps> = ({
+    title,
+    moduleColor,
+    endDays,
+    filesUploaded,
+    moduleUrl,
+    period,
+    status,
+}) => {
     return (
         <CustomCard padding="0">
             <TitleContainer moduleColor={moduleColor}>
                 <StarIcon />
-                <h3>{title}</h3>
+                <h3>
+                    {title} {period}
+                </h3>{" "}
+                <small>{status?.replace(/[^a-zA-Z ]/g, " ")}</small>
             </TitleContainer>
             <ContentContainer moduleColor={moduleColor}>
                 <Container style={{ padding: 0 }}>
@@ -64,6 +77,13 @@ const TitleContainer = styled.div<{ moduleColor: string }>`
         font-weight: 500;
         color: white;
         font-size: 24px;
+    }
+    small {
+        color: white;
+        opacity: 0.5;
+        margin: 0 7px 0 auto;
+        text-transform: capitalize;
+        font-size: 12px;
     }
 `;
 
