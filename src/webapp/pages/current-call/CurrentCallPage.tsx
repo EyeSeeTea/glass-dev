@@ -27,6 +27,7 @@ export const CurrentCallPage: React.FC<CurrentCallPageContentProps> = React.memo
 export const CurrentCallPageContent: React.FC<CurrentCallPageContentProps> = React.memo(({ moduleName }) => {
     const { compositionRoot } = useAppContext();
 
+    // TODO: replace useGlassModule (or parameters) with actual hook to fetch current call data
     const result = useGlassModule(compositionRoot, moduleName);
 
     const handleClick = (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
@@ -42,6 +43,7 @@ export const CurrentCallPageContent: React.FC<CurrentCallPageContentProps> = Rea
             return (
                 <ContentWrapper moduleColor={result.data.color}>
                     <PreContent>
+                        {/* // TODO: replace this with a global reusable StyledBreadCrumbs component */}
                         <StyledBreadCrumbs aria-label="breadcrumb" separator="">
                             <Button
                                 component={NavLink}
