@@ -1,38 +1,38 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import { CtaButtons } from "./CtaButtons";
 import { glassColors } from "../../../pages/app/themes/dhis2.theme";
 import { CurrentStatus } from "./CurrentStatus";
+import { statusMap } from "./StatusMap";
+import { Status, StatusDetails } from "./StatusTypes";
 
 interface OverviewProps {
     moduleName: string;
 }
 
 export const Overview: React.FC<OverviewProps> = ({ moduleName }) => {
-    const [screen, setScreen] = useState<string>("status");
+    const [currentStatus, setCurrentStatus] = useState<Status>("NOT_COMPLETED");
+    const currentStatusDetails: StatusDetails | undefined = statusMap.get(currentStatus);
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const handleScreenChange = (val: string) => {
-        setScreen(val);
-    };
+    useEffect(() => {
+        //TO DO : fetch from datastore API;
+        setCurrentStatus("REJECTED");
+    }, [setCurrentStatus]);
 
     return (
         <LinedBox>
-            {renderScreen(screen)}
-            {screen === "status" && <CtaButtons moduleName={moduleName} />}
+            {currentStatusDetails ? (
+                <CurrentStatus
+                    moduleName={moduleName}
+                    title={currentStatusDetails.title}
+                    description={currentStatusDetails.description}
+                    statusColor={currentStatusDetails.colour}
+                    ctas={currentStatusDetails.cta}
+                />
+            ) : (
+                <p>Uploaded file has errors...</p>
+            )}
         </LinedBox>
     );
-};
-
-const renderScreen = (screen: string) => {
-    switch (screen) {
-        case "status":
-            return <CurrentStatus />;
-        case "error":
-            return <p>Uploaded file has errors...</p>;
-        default:
-            return <CurrentStatus />;
-    }
 };
 
 const LinedBox = styled.div`
