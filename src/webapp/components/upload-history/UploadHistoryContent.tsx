@@ -1,22 +1,33 @@
 import styled from "styled-components";
 import { UploadTable } from "./UploadTable";
 import { useLocation } from "react-router-dom";
-import { data } from "./mock-tables-data.json";
+import { useAppContext } from "../../contexts/app-context";
+import { useGlassSubmissions } from "../../hooks/useGlassSubmissions";
 import { Filter } from "./Filter";
 import { CustomCard } from "../custom-card/CustomCard";
+import { CircularProgress, Typography } from "@material-ui/core";
 
 export const UploadHistoryContent: React.FC = () => {
     const location = useLocation();
+    const { compositionRoot } = useAppContext();
+    const submissions = useGlassSubmissions(compositionRoot);
     const params = new URLSearchParams(location.search);
 
-    return (
-        <ContentWrapper>
-            <Filter />
-            <CustomCard padding="20px 30px 20px">
-                <UploadTable items={data} data-current-module={params.get("userId")} />
-            </CustomCard>
-        </ContentWrapper>
-    );
+    switch (submissions.kind) {
+        case "loading":
+            return <CircularProgress />;
+        case "error":
+            return <Typography variant="h6">{submissions.message}</Typography>;
+        case "loaded":
+            return (
+                <ContentWrapper>
+                    <Filter />
+                    <CustomCard padding="20px 30px 20px">
+                        <UploadTable items={submissions.data} data-current-module={params.get("userId")} />
+                    </CustomCard>
+                </ContentWrapper>
+            );
+    }
 };
 
 const ContentWrapper = styled.div`
