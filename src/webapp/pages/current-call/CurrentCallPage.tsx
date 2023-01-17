@@ -1,22 +1,24 @@
+/* eslint-disable no-console */
 import { Breadcrumbs, Button, Typography } from "@material-ui/core";
 import { CircularProgress } from "material-ui";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { MainLayout } from "../../components/main-layout/MainLayout";
 import { useAppContext } from "../../contexts/app-context";
 import { useGlassModule } from "../../hooks/useGlassModule";
 import { glassColors, palette } from "../app/themes/dhis2.theme";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
-import { NavLink } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 import { CustomCard } from "../../components/custom-card/CustomCard";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { CurrentCallContent } from "../../components/current-call/CurrentCallContent";
-
 interface CurrentCallPageContentProps {
     moduleName: string;
 }
 
 export const CurrentCallPage: React.FC<CurrentCallPageContentProps> = React.memo(({ moduleName }) => {
+
+    
     return (
         <MainLayout>
             <CurrentCallPageContent moduleName={moduleName} />
@@ -25,6 +27,15 @@ export const CurrentCallPage: React.FC<CurrentCallPageContentProps> = React.memo
 });
 
 export const CurrentCallPageContent: React.FC<CurrentCallPageContentProps> = React.memo(({ moduleName }) => {
+    const location = useLocation()
+    const queryParameters = new URLSearchParams(location.search)
+
+    const [period, setPeriod] = useState(queryParameters.get("period"));
+    const [orgUnit, setOrgUnit] = useState(queryParameters.get("orgUnit"));
+    
+    console.log(`period: ${period}`);
+    console.log(`orgUnit: ${orgUnit}`);
+    
     const { compositionRoot } = useAppContext();
 
     // TODO: replace useGlassModule (or parameters) with actual hook to fetch current call data
@@ -32,6 +43,8 @@ export const CurrentCallPageContent: React.FC<CurrentCallPageContentProps> = Rea
 
     const handleClick = (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
         event.preventDefault();
+        setPeriod("new period value");
+        setOrgUnit("new orgUnit value");
     };
 
     switch (result.kind) {
