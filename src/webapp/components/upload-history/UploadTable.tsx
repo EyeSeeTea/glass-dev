@@ -6,19 +6,20 @@ import i18n from "@eyeseetea/d2-ui-components/locales";
 import { glassColors, palette } from "../../pages/app/themes/dhis2.theme";
 import ArrowUpwardIcon from "@material-ui/icons/ArrowUpward";
 export interface UploadHistoryItemProps {
-    id: number;
-    file_type: string;
-    country: string;
-    batch_id: string;
-    year: string | number;
-    start: string;
-    end: string;
+    id: string;
+    batchId: string;
+    countryCode: string;
+    fileType: string;
+    downloadUrl: string;
+    startDate: Date;
+    endDate: Date;
+    fileName: string;
+    inputLineNb: number;
+    outputLineNb: number;
+    period: number;
     specimens: string[];
     status: string;
-    date: Date | string;
-    filename: string;
-    input_line_nb: number;
-    output_line_nb: number;
+    submissionDate: Date;
 }
 
 export interface UploadTableProps {

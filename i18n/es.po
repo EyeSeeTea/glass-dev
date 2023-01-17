@@ -177,6 +177,9 @@ msgstr ""
 msgid "All Calls"
 msgstr ""
 
+msgid "Country Information"
+msgstr ""
+
 msgid "2022 Call"
 msgstr ""
 
