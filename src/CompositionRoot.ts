@@ -1,9 +1,11 @@
 import { DataStoreClient } from "./data/data-store/DataStoreClient";
 import { Instance } from "./data/entities/Instance";
+import { GlassCallDefaultRepository } from "./data/repositories/GlassCallDefaultRepository";
 import { GlassModuleDefaultRepository } from "./data/repositories/GlassModuleDefaultRepository";
 import { GlassNewsDefaultRepository } from "./data/repositories/GlassNewsDefaultRepository";
 import { InstanceDefaultRepository } from "./data/repositories/InstanceDefaultRepository";
 import { GetCurrentUserUseCase } from "./domain/usecases/GetCurrentUserUseCase";
+import { GetSpecificCallUseCase } from "./domain/usecases/GetSpecificCallUseCase";
 import { GetGlassModuleByNameUseCase } from "./domain/usecases/GetGlassModuleByNameUseCase";
 import { GetGlassModulesUseCase } from "./domain/usecases/GetGlassModulesUseCase";
 import { GetGlassNewsUseCase } from "./domain/usecases/GetGlassNewsUseCase";
@@ -16,6 +18,7 @@ export function getCompositionRoot(instance: Instance) {
     const instanceRepository = new InstanceDefaultRepository(instance);
     const glassModuleRepository = new GlassModuleDefaultRepository(dataStoreClient);
     const glassNewsRepository = new GlassNewsDefaultRepository(dataStoreClient);
+    const glassCallRepository = new GlassCallDefaultRepository(dataStoreClient);
 
     return {
         instance: getExecute({
@@ -30,6 +33,9 @@ export function getCompositionRoot(instance: Instance) {
         glassNews: getExecute({
             getAll: new GetGlassNewsUseCase(glassNewsRepository),
             validate: new ValidateGlassNewsUseCase(glassNewsRepository),
+        }),
+        glassCall: getExecute({
+            getSpecificCall: new GetSpecificCallUseCase(glassCallRepository),
         }),
     };
 }

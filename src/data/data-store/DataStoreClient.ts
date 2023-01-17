@@ -34,6 +34,29 @@ export class DataStoreClient {
         });
     }
 
+    public getObjectsFilteredByProps<T>(key: string, filterMap: Map<keyof T, unknown>): FutureData<T[]> {
+        return Future.fromComputation((resolve, reject) => {
+            const res = this.dataStore.get<T[]>(key);
+
+            res.getData()
+                .then(list => {
+                    let filteredList = list;
+
+                    filterMap.forEach((value, key) => {
+                        filteredList = filteredList?.filter(i => i[key] === value);
+                    });
+
+                    if (filteredList) {
+                        resolve(filteredList);
+                    } else {
+                        reject(`Collection with specified filters not found`);
+                    }
+                })
+                .catch(err => reject(err ? err.message : "Unknown key"));
+            return res.cancel;
+        });
+    }
+
     public listCollection<T>(key: string): FutureData<T[]> {
         return apiToFuture(this.dataStore.get<T[]>(key)).map(data => data ?? []);
     }

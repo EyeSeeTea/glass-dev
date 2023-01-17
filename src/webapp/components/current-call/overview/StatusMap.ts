@@ -1,8 +1,9 @@
+import { CallStatusTypes } from "../../../../domain/entities/GlassCallStatus";
 import { glassColors } from "../../../pages/app/themes/dhis2.theme";
-import { Status, StatusDetails } from "./StatusTypes";
+import { StatusDetails } from "./StatusTypes";
 
 //Map of Submission statuses with correponding UI details.
-export const statusMap = new Map<Status, StatusDetails>([
+export const statusMap = new Map<CallStatusTypes, StatusDetails>([
     [
         "NOT_COMPLETED",
         {
