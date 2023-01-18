@@ -4,13 +4,14 @@ import { useAppContext } from "../../contexts/app-context";
 import { useDataSubmissionSteps } from "../../hooks/useDataSubmissionSteps";
 import { DataSubmissionSteps } from "./DataSubmissionSteps";
 import styled from "styled-components";
+import { CallStatusTypes } from "../../../domain/entities/GlassCallStatus";
 
 interface CurrentCallContentProps {
-    moduleId: string;
-    currentPeriod: number;
+    moduleName: string;
+    currentCallStatus: CallStatusTypes;
 }
 
-export const CurrentCallContent: React.FC<CurrentCallContentProps> = ({ moduleId, currentPeriod }) => {
+export const CurrentCallContent: React.FC<CurrentCallContentProps> = ({ moduleName, currentCallStatus }) => {
     const { compositionRoot } = useAppContext();
 
     const stepsResult = useDataSubmissionSteps(compositionRoot);
@@ -23,7 +24,7 @@ export const CurrentCallContent: React.FC<CurrentCallContentProps> = ({ moduleId
         case "loaded":
             return (
                 <ContentWrapper>
-                    <DataSubmissionSteps moduleId={moduleId} currentPeriod={currentPeriod} />
+                    <DataSubmissionSteps moduleName={moduleName} currentCallStatus={currentCallStatus} />
                 </ContentWrapper>
             );
     }

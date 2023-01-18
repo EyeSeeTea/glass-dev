@@ -7,13 +7,14 @@ import { Questionnaires } from "./Questionnaires";
 import { Advanced } from "./Advanced";
 import { Validations } from "./Validations";
 import { Overview } from "./overview/Overview";
+import { CallStatusTypes } from "../../../domain/entities/GlassCallStatus";
 
 interface DataSubmissionStepsProps {
-    moduleId: string;
-    currentPeriod: number;
+    moduleName: string;
+    currentCallStatus: CallStatusTypes;
 }
 
-export const DataSubmissionSteps: React.FC<DataSubmissionStepsProps> = ({ moduleId, currentPeriod }) => {
+export const DataSubmissionSteps: React.FC<DataSubmissionStepsProps> = ({ moduleName, currentCallStatus }) => {
     const [currentStep, setCurrentStep] = useState<number>(0);
 
     return (
@@ -35,16 +36,16 @@ export const DataSubmissionSteps: React.FC<DataSubmissionStepsProps> = ({ module
                     Advanced
                 </Button>
             </div>
-            {renderTypeContent(currentStep, moduleId, currentPeriod)}
+            {renderTypeContent(currentStep, moduleName, currentCallStatus)}
         </ContentWrapper>
     );
 };
 
-const renderTypeContent = (step: number, moduleId: string, currentPeriod: number) => {
+const renderTypeContent = (step: number, moduleName: string, currentCallStatus: CallStatusTypes) => {
     switch (step) {
         case 0:
             // TODO: set module name inside page root content to avoid prop drilling
-            return <Overview moduleId={moduleId} currentPeriod={currentPeriod} />;
+            return <Overview moduleName={moduleName} currentCallStatus={currentCallStatus} />;
         case 1:
             return <ListOfDatasets />;
         case 2:
