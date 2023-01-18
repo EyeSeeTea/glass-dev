@@ -9,14 +9,15 @@ import { CircularProgress, Typography } from "@material-ui/core";
 import { useSpecificCall } from "../../../hooks/useSpecificCall";
 
 interface OverviewProps {
-    moduleName: string;
+    moduleId: string;
+    currentPeriod: number;
 }
 
-export const Overview: React.FC<OverviewProps> = ({ moduleName }) => {
+export const Overview: React.FC<OverviewProps> = ({ moduleId, currentPeriod }) => {
     const { compositionRoot } = useAppContext();
 
-    //TO DO : Fetch actual values
-    const currentCall = useSpecificCall(compositionRoot, "CVVp44xiXGJ", "DVnpk4xiXGJ", 2018);
+    //TO DO : Fetch actual orgUnit value
+    const currentCall = useSpecificCall(compositionRoot, moduleId, "DVnpk4xiXGJ", currentPeriod);
 
     switch (currentCall.kind) {
         case "loading":
@@ -29,7 +30,7 @@ export const Overview: React.FC<OverviewProps> = ({ moduleName }) => {
                 <LinedBox>
                     {currentStatusDetails ? (
                         <CurrentStatus
-                            moduleName={moduleName}
+                            moduleName={moduleId}
                             title={currentStatusDetails.title}
                             description={currentStatusDetails.description}
                             statusColor={currentStatusDetails.colour}
