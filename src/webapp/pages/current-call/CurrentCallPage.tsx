@@ -46,19 +46,20 @@ export const CurrentCallPageContent: React.FC<CurrentCallPageContentProps> = Rea
     const location = useLocation();
     const queryParameters = new URLSearchParams(location.search);
 
-    const [period, setPeriod] = useState(queryParameters?.get("period"));
-    const [orgUnit, setOrgUnit] = useState(queryParameters.get("orgUnit"));
+    //TO DO : orgUnit and period will not be fetched from queryParameters, it will be fetched from context.
+    const periodVal = queryParameters?.get("period");
+    const orgUnitVal = queryParameters.get("orgUnit");
+
+    //set default values till the context changes are integrated
+    const [period, setPeriod] = useState(periodVal === null ? 2023 : parseInt(periodVal));
+    const [orgUnit, setOrgUnit] = useState(orgUnitVal === null ? "DVnpk4xiXGJ" : orgUnitVal);
 
     const { compositionRoot } = useAppContext();
-
-    //TO DO : orgUnit and period will not be fetched from queryParameters, it will be fetched from context.
-    const orgUnitId = orgUnit === null ? "" : orgUnit;
-    const periodInt = period === null ? 0 : parseInt(period);
-    const currentCall = useSpecificCall(compositionRoot, moduleId, orgUnitId, periodInt);
+    const currentCall = useSpecificCall(compositionRoot, moduleId, orgUnit, period);
 
     const handleClick = (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
         event.preventDefault();
-        setPeriod("new period value");
+        setPeriod(0); //new period value
         setOrgUnit("new orgUnit value");
     };
 
