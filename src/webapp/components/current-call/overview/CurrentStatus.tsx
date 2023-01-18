@@ -3,7 +3,7 @@ import { Box } from "@material-ui/core";
 import styled from "styled-components";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { CtaButtons } from "./CtaButtons";
-import { StatusCTAs } from "./StatusTypes";
+import { StatusCTAs } from "./StatusDetails";
 
 interface StatusProps {
     moduleName: string;

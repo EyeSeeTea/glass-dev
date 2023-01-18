@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 import { Breadcrumbs, Button, Typography } from "@material-ui/core";
 import { CircularProgress } from "material-ui";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
 import { MainLayout } from "../../components/main-layout/MainLayout";
 import { useAppContext } from "../../contexts/app-context";
@@ -12,42 +12,22 @@ import { NavLink, useLocation } from "react-router-dom";
 import { CustomCard } from "../../components/custom-card/CustomCard";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { CurrentCallContent } from "../../components/current-call/CurrentCallContent";
-interface CurrentCallPageContentProps {
+import { useSpecificCall } from "../../hooks/useSpecificCall";
+import { statusMap } from "../../components/current-call/StatusMap";
+
+interface CurrentCallPageProps {
     moduleName: string;
 }
 
-export const CurrentCallPage: React.FC<CurrentCallPageContentProps> = React.memo(({ moduleName }) => {
+interface CurrentCallPageContentProps {
+    moduleId: string;
+    moduleName: string;
+}
 
-    
-    return (
-        <MainLayout>
-            <CurrentCallPageContent moduleName={moduleName} />
-        </MainLayout>
-    );
-});
-
-export const CurrentCallPageContent: React.FC<CurrentCallPageContentProps> = React.memo(({ moduleName }) => {
-    const location = useLocation()
-    const queryParameters = new URLSearchParams(location.search)
-
-    const [period, setPeriod] = useState(queryParameters.get("period"));
-    const [orgUnit, setOrgUnit] = useState(queryParameters.get("orgUnit"));
-    
-    console.log(`period: ${period}`);
-    console.log(`orgUnit: ${orgUnit}`);
-    
+export const CurrentCallPage: React.FC<CurrentCallPageProps> = React.memo(({ moduleName }) => {
     const { compositionRoot } = useAppContext();
-    const currentPeriod = 2022; //TO DO : This is currently harcoded, needs to be computed.
 
-    // TODO: replace useGlassModule (or parameters) with actual hook to fetch current call data
     const result = useGlassModule(compositionRoot, moduleName);
-
-    const handleClick = (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
-        event.preventDefault();
-        setPeriod("new period value");
-        setOrgUnit("new orgUnit value");
-    };
-
     switch (result.kind) {
         case "loading":
             return <CircularProgress />;
@@ -55,7 +35,42 @@ export const CurrentCallPageContent: React.FC<CurrentCallPageContentProps> = Rea
             return <Typography variant="h6">{result.message}</Typography>;
         case "loaded":
             return (
-                <ContentWrapper moduleColor={result.data.color}>
+                <MainLayout>
+                    <CurrentCallPageContent moduleName={moduleName} moduleId={result.data.id} />
+                </MainLayout>
+            );
+    }
+});
+
+export const CurrentCallPageContent: React.FC<CurrentCallPageContentProps> = React.memo(({ moduleId, moduleName }) => {
+    const location = useLocation();
+    const queryParameters = new URLSearchParams(location.search);
+
+    const [period, setPeriod] = useState(queryParameters?.get("period"));
+    const [orgUnit, setOrgUnit] = useState(queryParameters.get("orgUnit"));
+
+    const { compositionRoot } = useAppContext();
+
+    //TO DO : orgUnit and period will not be fetched from queryParameters, it will be fetched from context.
+    const orgUnitId = orgUnit === null ? "" : orgUnit;
+    const periodInt = period === null ? 0 : parseInt(period);
+    const currentCall = useSpecificCall(compositionRoot, moduleId, orgUnitId, periodInt);
+
+    const handleClick = (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
+        event.preventDefault();
+        setPeriod("new period value");
+        setOrgUnit("new orgUnit value");
+    };
+
+    switch (currentCall.kind) {
+        case "loading":
+            return <CircularProgress />;
+        case "error":
+            return <Typography variant="h6">{currentCall.message}</Typography>;
+        case "loaded": {
+            const currentCallDetails = statusMap.get(currentCall.data);
+            return (
+                <ContentWrapper>
                     <PreContent>
                         {/* // TODO: replace this with a global reusable StyledBreadCrumbs component */}
                         <StyledBreadCrumbs aria-label="breadcrumb" separator="">
@@ -69,7 +84,7 @@ export const CurrentCallPageContent: React.FC<CurrentCallPageContentProps> = Rea
                             </Button>
                             <ChevronRightIcon />
                             <Button component={NavLink} to={`/current-call/${moduleName}`} exact={true}>
-                                <span>{i18n.t(`${currentPeriod} Call`)}</span>
+                                <span>{i18n.t(`${period} Call`)}</span>
                             </Button>
                         </StyledBreadCrumbs>
                         <div className="info">
@@ -77,25 +92,25 @@ export const CurrentCallPageContent: React.FC<CurrentCallPageContentProps> = Rea
                             <span>Spain</span>
                         </div>
                     </PreContent>
-                    <PageTitle>
-                        <h3>{i18n.t(`${currentPeriod} Call`)}</h3>
-                        <div className="status">{i18n.t("Missing Data")}</div>
-                    </PageTitle>
+                    {currentCallDetails && (
+                        <PageTitle statusColor={currentCallDetails.colour}>
+                            <h3>{i18n.t(`${period} Call`)}</h3>
+                            <div className="status">{i18n.t(currentCallDetails.title)}</div>
+                        </PageTitle>
+                    )}
                     <CustomCard padding="40px 60px 50px">
-                        <CurrentCallContent moduleId={result.data.id} currentPeriod={currentPeriod} />
+                        <CurrentCallContent moduleName={moduleName} currentCallStatus={currentCall.data} />
                     </CustomCard>
                 </ContentWrapper>
             );
+        }
     }
 });
 
-const ContentWrapper = styled.div<{ moduleColor: string }>`
+const ContentWrapper = styled.div`
     display: flex;
     flex-direction: column;
     gap: 20px;
-    .module-bg {
-        background-color: ${props => (props.moduleColor ? props.moduleColor : glassColors.mainPrimary)};
-    }
 `;
 
 const PreContent = styled.div`
@@ -114,7 +129,7 @@ const PreContent = styled.div`
     }
 `;
 
-const PageTitle = styled.div`
+const PageTitle = styled.div<{ statusColor: string }>`
     display: flex;
     flex-direction: row;
     gap: 20px;
@@ -126,7 +141,7 @@ const PageTitle = styled.div`
         display: inline-block;
         border-radius: 5px;
         padding: 3px 15px;
-        background-color: ${glassColors.yellow};
+        background-color: ${props => (props.statusColor ? props.statusColor : glassColors.mainPrimary)};
         color: white;
         text-transform: uppercase;
         font-weight: bold;
