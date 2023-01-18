@@ -26,6 +26,7 @@ export const CurrentCallPage: React.FC<CurrentCallPageContentProps> = React.memo
 
 export const CurrentCallPageContent: React.FC<CurrentCallPageContentProps> = React.memo(({ moduleName }) => {
     const { compositionRoot } = useAppContext();
+    const currentPeriod = 2022; //TO DO : This is currently harcoded, needs to be computed.
 
     // TODO: replace useGlassModule (or parameters) with actual hook to fetch current call data
     const result = useGlassModule(compositionRoot, moduleName);
@@ -55,7 +56,7 @@ export const CurrentCallPageContent: React.FC<CurrentCallPageContentProps> = Rea
                             </Button>
                             <ChevronRightIcon />
                             <Button component={NavLink} to={`/current-call/${moduleName}`} exact={true}>
-                                <span>{i18n.t("2022 Call")}</span>
+                                <span>{i18n.t(`${currentPeriod} Call`)}</span>
                             </Button>
                         </StyledBreadCrumbs>
                         <div className="info">
@@ -64,11 +65,11 @@ export const CurrentCallPageContent: React.FC<CurrentCallPageContentProps> = Rea
                         </div>
                     </PreContent>
                     <PageTitle>
-                        <h3>{i18n.t("2022 Call")}</h3>
+                        <h3>{i18n.t(`${currentPeriod} Call`)}</h3>
                         <div className="status">{i18n.t("Missing Data")}</div>
                     </PageTitle>
                     <CustomCard padding="40px 60px 50px">
-                        <CurrentCallContent moduleName={moduleName} />
+                        <CurrentCallContent moduleId={result.data.id} currentPeriod={currentPeriod} />
                     </CustomCard>
                 </ContentWrapper>
             );

@@ -5,14 +5,17 @@ import { GlassModuleRepository } from "../repositories/GlassModuleRepository";
 
 const glassModules = [
     {
+        id: "AVnpk4xiXGG",
         name: "AMR",
         color: glassColors.lightSecondary,
     },
     {
+        id: "BVnik5xiXGJ",
         name: "AMC",
         color: glassColors.lightTertiary,
     },
     {
+        id: "CVVp44xiXGJ",
         name: "EGASP",
         color: glassColors.lightPrimary,
     },
