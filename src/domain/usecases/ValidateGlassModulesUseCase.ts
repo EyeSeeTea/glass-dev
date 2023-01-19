@@ -6,14 +6,27 @@ import { GlassModuleRepository } from "../repositories/GlassModuleRepository";
 const glassModules = [
     {
         name: "AMR",
+        prettyName: "AMR",
         color: glassColors.lightSecondary,
     },
     {
         name: "AMC",
+        prettyName: "AMC",
         color: glassColors.lightTertiary,
     },
     {
         name: "EGASP",
+        prettyName: "EGASP",
+        color: glassColors.lightPrimary,
+    },
+    {
+        name: "AMR-INDIVIDUAL",
+        prettyName: "AMR - Individual",
+        color: glassColors.lightPrimary,
+    },
+    {
+        name: "AMR-FUNGI",
+        prettyName: "AMR - Funghi",
         color: glassColors.lightPrimary,
     },
 ];

@@ -19,7 +19,7 @@ interface SidebarNavProps {
 const SidebarNavMenu: React.FC<SidebarNavProps> = ({ menu, className, groupName, handleCurrentNavItem }) => {
     const classes = useStyles(menu.level);
     const location = useLocation();
-
+    
     const isCurrentPage = (val: string) => {
         if (location.pathname.includes(`data-submission/${groupName}`) && menu.title === "Current Call") {
             return true;
@@ -45,7 +45,7 @@ const SidebarNavMenu: React.FC<SidebarNavProps> = ({ menu, className, groupName,
             <Button
                 className={classes.button}
                 component={NavLink}
-                to={menu.path}
+                to={menu.path.toUpperCase().replace(/\s/g,'')}
                 exact={true}
                 data-is-page-current={isCurrentPage(menu.path)}
             >

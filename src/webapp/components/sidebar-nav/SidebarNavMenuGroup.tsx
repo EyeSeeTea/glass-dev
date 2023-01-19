@@ -56,7 +56,7 @@ const SidebarNavMenuGroup: React.FC<SidebarNavProps> = ({
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [menu]);
-
+    
     return (
         <React.Fragment>
             <ListItem

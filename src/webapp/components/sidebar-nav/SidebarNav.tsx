@@ -38,7 +38,7 @@ const SidebarNav: React.FC<SidebarNavProps> = ({ menus, className }) => {
     const handleCurrentNavItem = (val: string[]) => {
         // TODO: cleanup this prop drilling and convert this using context API
         // eslint-disable-next-line no-console
-        console.log("handleCurrentNavItem: ", val);
+        // console.log("handleCurrentNavItem: ", val);
         setCurrentNavItem(val);
     };
 
