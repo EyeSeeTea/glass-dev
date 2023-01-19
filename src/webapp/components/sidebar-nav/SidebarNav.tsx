@@ -11,6 +11,7 @@ export interface MenuGroup {
     kind: "MenuGroup";
     level: number;
     title: string;
+    prettyName: string;
     moduleColor: string;
     icon?: any;
     children?: Menu[];
@@ -41,6 +42,9 @@ const SidebarNav: React.FC<SidebarNavProps> = ({ menus, className }) => {
         // console.log("handleCurrentNavItem: ", val);
         setCurrentNavItem(val);
     };
+
+    // console.log("menus: ");
+    // console.log(menus);
 
     return (
         <List className={clsx(classes.root, className)}>

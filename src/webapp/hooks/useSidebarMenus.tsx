@@ -19,7 +19,8 @@ export function mapModuleToMenu(module: GlassModule): Menu {
     return {
         kind: "MenuGroup",
         level: 0,
-        title: module.prettyName,
+        title: module.name,
+        prettyName: module.prettyName,
         moduleColor: module.color,
         icon: <FolderIcon htmlColor={module.color} />,
         children: [

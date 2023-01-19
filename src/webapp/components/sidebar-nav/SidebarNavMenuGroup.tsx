@@ -23,9 +23,13 @@ const SidebarNavMenuGroup: React.FC<SidebarNavProps> = ({
     currentNaVitem,
     handleCurrentNavItem,
 }) => {
+    // TODO: get current module from page context and remove location parsing below
+    const location = useLocation();
+    const urlModuleName = location.pathname.split("/")[2];
+
     const isCurrentModule = (val: string) => {
-        if (val) {
-            return location.pathname.includes(val);
+        if (val === urlModuleName) {
+            return true;
         } else {
             return false;
         }
@@ -43,7 +47,6 @@ const SidebarNavMenuGroup: React.FC<SidebarNavProps> = ({
     };
 
     const classes = useStyles(menu.level);
-    const location = useLocation();
     const [openCollapse, setOpenCollapse] = React.useState(isCurrentNavItem(currentNaVitem));
 
     const handleExpand = () => {
@@ -56,7 +59,7 @@ const SidebarNavMenuGroup: React.FC<SidebarNavProps> = ({
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [menu]);
-    
+
     return (
         <React.Fragment>
             <ListItem
@@ -67,7 +70,7 @@ const SidebarNavMenuGroup: React.FC<SidebarNavProps> = ({
             >
                 <Button className={classes.button} fullWidth={true}>
                     <div className={classes.icon}>{menu.icon}</div>
-                    <span className={classes.title}>{menu.title}</span>
+                    <span className={classes.title}>{menu.prettyName}</span>
                     <div className={classes.expand}>{openCollapse ? <ExpandLess /> : <ExpandMore />}</div>
                 </Button>
             </ListItem>

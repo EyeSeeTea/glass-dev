@@ -18,14 +18,18 @@ interface SidebarNavProps {
 
 const SidebarNavMenu: React.FC<SidebarNavProps> = ({ menu, className, groupName, handleCurrentNavItem }) => {
     const classes = useStyles(menu.level);
+    // TODO: get current module from page context and remove location parsing below
     const location = useLocation();
-    
+    const pageName = location.pathname.split("/")[1];
+    const urlModuleName = location.pathname.split("/")[2];
+
     const isCurrentPage = (val: string) => {
-        if (location.pathname.includes(`data-submission/${groupName}`) && menu.title === "Current Call") {
+        if (pageName === menu.title.replace(/\s+/g, "-").toLowerCase() && groupName === urlModuleName) {
             return true;
         }
-        if (val) {
-            return location.pathname.includes(val);
+
+        if (urlModuleName === val) {
+            return true;
         } else {
             return false;
         }
@@ -45,7 +49,7 @@ const SidebarNavMenu: React.FC<SidebarNavProps> = ({ menu, className, groupName,
             <Button
                 className={classes.button}
                 component={NavLink}
-                to={menu.path.toUpperCase().replace(/\s/g,'')}
+                to={menu.path + "/"}
                 exact={true}
                 data-is-page-current={isCurrentPage(menu.path)}
             >
