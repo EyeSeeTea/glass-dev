@@ -22,7 +22,7 @@ export const DataSubmissionSteps: React.FC<DataSubmissionStepsProps> = ({ module
                     Overview
                 </Button>
                 <Button onClick={() => setCurrentStep(1)} className={currentStep === 1 ? "current" : ""}>
-                    List of Dates
+                    List of Datasets
                 </Button>
                 <Button onClick={() => setCurrentStep(2)} className={currentStep === 2 ? "current" : ""}>
                     Questionnaires
