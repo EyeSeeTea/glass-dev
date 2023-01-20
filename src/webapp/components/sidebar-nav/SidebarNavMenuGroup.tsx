@@ -23,7 +23,6 @@ const SidebarNavMenuGroup: React.FC<SidebarNavProps> = ({
     currentNaVitem,
     handleCurrentNavItem,
 }) => {
-    
     // TODO: get current module from page context and remove location parsing below
     const location = useLocation();
     const urlModuleName = location.pathname.split("/")[2];
@@ -58,7 +57,7 @@ const SidebarNavMenuGroup: React.FC<SidebarNavProps> = ({
         if (isCurrentModule(menu.title)) {
             setOpenCollapse(true);
         }
-        
+
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [menu]);
 
@@ -71,7 +70,9 @@ const SidebarNavMenuGroup: React.FC<SidebarNavProps> = ({
                 style={{ paddingLeft: menu.level * 8 }}
             >
                 <Button className={classes.button} fullWidth={true}>
-                    <div className={classes.icon}><FolderIcon htmlColor={menu.moduleColor} /></div>
+                    <div className={classes.icon}>
+                        <FolderIcon htmlColor={menu.moduleColor} />
+                    </div>
                     <span className={classes.title}>{menu.title}</span>
                     <div className={classes.expand}>{openCollapse ? <ExpandLess /> : <ExpandMore />}</div>
                 </Button>

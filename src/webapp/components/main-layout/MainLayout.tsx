@@ -11,7 +11,6 @@ import { SideBarProvider } from "../sidebar/SideBarProvider";
 export const MainLayout: React.FC = React.memo(({ children }) => {
     return (
         <SideBarProvider>
-
             <GlassAppBar />
             <LandingContainer>
                 <RootGrid container spacing={6}>
@@ -36,7 +35,6 @@ export const MainLayout: React.FC = React.memo(({ children }) => {
                     </Grid>
                 </RootGrid>
             </LandingContainer>
-            
         </SideBarProvider>
     );
 });

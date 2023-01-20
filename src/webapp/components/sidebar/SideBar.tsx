@@ -7,29 +7,26 @@ import SidebarNav, { Menu } from "../sidebar-nav/SidebarNav";
 import i18n from "../../../locales";
 import { NavLink } from "react-router-dom";
 
-// TODO: use this sideBarData only for testing module data and store module names and colors in root context
-import { mapModuleToMenu } from "../../hooks/useSidebarMenus";
 import { useAppContext } from "../../contexts/app-context";
 import { useGlassModules } from "../../hooks/useGlassModules";
 import { SideBarContext } from "../../contexts/sidebar-context";
-
+import { mapModuleToMenu } from "./mapModuleToMenu";
 
 export const SideBar: React.FC = () => {
-
     const { compositionRoot } = useAppContext();
     const { setMenuData } = useContext(SideBarContext);
 
     const [isLoaded, setIsLoaded] = useState(false);
 
-    const storedMenuData: Menu[] | null = JSON.parse(localStorage.getItem('glassSideBarData') || "false") || null;
+    const storedMenuData: Menu[] | null = JSON.parse(localStorage.getItem("glassSideBarData") || "false") || null;
 
     const modulesResult = useGlassModules(compositionRoot);
-    
+
     useEffect(() => {
-        if (!isLoaded && modulesResult.kind === 'loaded') {
+        if (!isLoaded && modulesResult.kind === "loaded") {
             if (modulesResult.data.length) {
                 const menuData = modulesResult.data.map(mapModuleToMenu);
-                localStorage.setItem('glassSideBarData', JSON.stringify(menuData));
+                localStorage.setItem("glassSideBarData", JSON.stringify(menuData));
                 setIsLoaded(true);
                 setMenuData(menuData);
             }
@@ -83,4 +80,4 @@ const StarGradient = styled.div`
 
 const StyledCircularProgress = styled(CircularProgress)`
     margin: 30px auto;
-`
+`;
