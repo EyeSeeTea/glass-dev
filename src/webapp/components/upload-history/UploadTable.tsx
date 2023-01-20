@@ -10,16 +10,16 @@ export interface UploadHistoryItemProps {
     batchId: string;
     countryCode: string;
     fileType: string;
-    downloadUrl: string;
-    startDate: Date;
-    endDate: Date;
+    fileId: string;
     fileName: string;
     inputLineNb: number;
     outputLineNb: number;
-    period: number;
+    period: string;
     specimens: string[];
     status: string;
     submissionDate: Date;
+    call: string;
+    module: string;
 }
 
 export interface UploadTableProps {
@@ -67,25 +67,7 @@ export const UploadTable: React.FC<UploadTableProps> = ({ title, items, classNam
                             </TableCell>
                             <TableCell>
                                 <StyledBox>
-                                    <Typography variant="caption">{i18n.t("Year")}</Typography>
-                                    <ColStatus>
-                                        <ArrowUpwardIcon />
-                                        <sup>1</sup>
-                                    </ColStatus>
-                                </StyledBox>
-                            </TableCell>
-                            <TableCell>
-                                <StyledBox>
-                                    <Typography variant="caption">{i18n.t("Start")}</Typography>
-                                    <ColStatus>
-                                        <ArrowUpwardIcon />
-                                        <sup>1</sup>
-                                    </ColStatus>
-                                </StyledBox>
-                            </TableCell>
-                            <TableCell>
-                                <StyledBox>
-                                    <Typography variant="caption">{i18n.t("End")}</Typography>
+                                    <Typography variant="caption">{i18n.t("Period")}</Typography>
                                     <ColStatus>
                                         <ArrowUpwardIcon />
                                         <sup>1</sup>

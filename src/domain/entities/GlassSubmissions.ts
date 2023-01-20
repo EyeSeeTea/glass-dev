@@ -3,14 +3,14 @@ export interface GlassSubmissions {
     batchId: string;
     countryCode: string;
     fileType: string;
-    downloadUrl: string;
-    startDate: Date;
-    endDate: Date;
+    fileId: string;
     fileName: string;
     inputLineNb: number;
     outputLineNb: number;
-    period: number;
+    period: string;
     specimens: string[];
     status: string;
     submissionDate: Date;
+    call: string;
+    module: string;
 }
