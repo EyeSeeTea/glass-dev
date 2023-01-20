@@ -4,21 +4,20 @@ import { GlassSubmissionsRepository } from "../repositories/GlassSubmissionsRepo
 
 const glassSubmissions = [
     {
-        id: "1",
+        id: "4663764e-9ca6-4a68-ac49-e0605482384c",
         module: "AVnpk4xiXGG",
         batchId: "Data set 1",
         countryCode: "DZA",
-        downloadUrl: "",
-        endDate: new Date("2021-01-10T00:00:00.000Z"),
+        fileId: "",
         fileName: "DZA2010RIS.txt",
         fileType: "RIS",
         inputLineNb: 250,
         outputLineNb: 100,
-        period: 2022,
+        period: "2022Q1",
         specimens: ["Blood", "Stool"],
-        startDate: new Date("2021-01-10T00:00:00.000Z"),
         status: "Done",
         submissionDate: new Date("2021-01-10T00:00:00.000Z"),
+        call: "",
     },
 ];
 

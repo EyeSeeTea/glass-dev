@@ -39,14 +39,12 @@ export const UploadTableBody: React.FC<UploadTableBodyProps> = ({ rows }) => {
                             <TableCell>{row.countryCode.toUpperCase()}</TableCell>
                             <TableCell>{row.batchId}</TableCell>
                             <TableCell>{row.period}</TableCell>
-                            <TableCell>{dayjs(row.startDate).format("MMMM")}</TableCell>
-                            <TableCell>{dayjs(row.endDate).format("MMMM")}</TableCell>
                             <TableCell>{row.specimens.join(", ")}</TableCell>
                             <TableCell>{row.status}</TableCell>
                             <TableCell>{dayjs(row.submissionDate).format("YYYY-MM-DD HH:mm:ss")}</TableCell>
                             <TableCell>{row.fileName}</TableCell>
                             <TableCell>
-                                <CloudDownloadIcon color="error" onClick={() => handleDownload(row.downloadUrl)} />
+                                <CloudDownloadIcon color="error" onClick={() => handleDownload(row.fileId)} />
                             </TableCell>
                             <TableCell>{row.inputLineNb}</TableCell>
                             <TableCell>{row.outputLineNb}</TableCell>
