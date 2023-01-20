@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2023-01-17T06:22:12.200Z\n"
-"PO-Revision-Date: 2023-01-17T06:22:12.200Z\n"
+"POT-Creation-Date: 2023-01-18T12:24:29.887Z\n"
+"PO-Revision-Date: 2023-01-18T12:24:29.887Z\n"
 
 msgid "Year"
 msgstr ""
@@ -173,13 +173,10 @@ msgstr ""
 msgid "Country Information"
 msgstr ""
 
-msgid "2022 Call"
-msgstr ""
-
 msgid "Yearly data upload"
 msgstr ""
 
-msgid "Missing Data"
+msgid "2022 Call"
 msgstr ""
 
 msgid "Hello {{name}}"

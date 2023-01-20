@@ -4,11 +4,11 @@ import { useAppContext } from "../../contexts/app-context";
 import { useDataSubmissionSteps } from "../../hooks/useDataSubmissionSteps";
 import { DataSubmissionSteps } from "./DataSubmissionSteps";
 import styled from "styled-components";
-import { CallStatusTypes } from "../../../domain/entities/GlassCallStatus";
+import { StatusDetails } from "./overview/StatusDetails";
 
 interface CurrentCallContentProps {
     moduleName: string;
-    currentCallStatus: CallStatusTypes;
+    currentCallStatus: StatusDetails;
 }
 
 export const CurrentCallContent: React.FC<CurrentCallContentProps> = ({ moduleName, currentCallStatus }) => {

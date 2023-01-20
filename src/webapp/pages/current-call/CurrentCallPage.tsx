@@ -12,8 +12,7 @@ import { NavLink, useLocation } from "react-router-dom";
 import { CustomCard } from "../../components/custom-card/CustomCard";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { CurrentCallContent } from "../../components/current-call/CurrentCallContent";
-import { useSpecificCall } from "../../hooks/useSpecificCall";
-import { statusMap } from "../../components/current-call/StatusMap";
+import { useStatusCall } from "../../hooks/useStatusCall";
 
 interface CurrentCallPageProps {
     moduleName: string;
@@ -50,12 +49,13 @@ export const CurrentCallPageContent: React.FC<CurrentCallPageContentProps> = Rea
     const periodVal = queryParameters?.get("period");
     const orgUnitVal = queryParameters.get("orgUnit");
 
-    //set default values till the context changes are integrated
-    const [period, setPeriod] = useState(periodVal === null ? 2023 : parseInt(periodVal));
-    const [orgUnit, setOrgUnit] = useState(orgUnitVal === null ? "DVnpk4xiXGJ" : orgUnitVal);
+    //set default values till the context changes are integrated,
+    //once context is implemented these values will never be null, defaults logic to be decided and implemented in context
+    const [period, setPeriod] = useState(periodVal === null ? new Date().getFullYear() : parseInt(periodVal));
+    const [orgUnit, setOrgUnit] = useState(orgUnitVal === null ? "" : orgUnitVal);
 
     const { compositionRoot } = useAppContext();
-    const currentCall = useSpecificCall(compositionRoot, moduleId, orgUnit, period);
+    const currentCallStatus = useStatusCall(compositionRoot, moduleId, orgUnit, period);
 
     const handleClick = (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
         event.preventDefault();
@@ -63,13 +63,12 @@ export const CurrentCallPageContent: React.FC<CurrentCallPageContentProps> = Rea
         setOrgUnit("new orgUnit value");
     };
 
-    switch (currentCall.kind) {
+    switch (currentCallStatus.kind) {
         case "loading":
             return <CircularProgress />;
         case "error":
-            return <Typography variant="h6">{currentCall.message}</Typography>;
+            return <Typography variant="h6">{currentCallStatus.message}</Typography>;
         case "loaded": {
-            const currentCallDetails = statusMap.get(currentCall.data);
             return (
                 <ContentWrapper>
                     <PreContent>
@@ -93,14 +92,14 @@ export const CurrentCallPageContent: React.FC<CurrentCallPageContentProps> = Rea
                             <span>Spain</span>
                         </div>
                     </PreContent>
-                    {currentCallDetails && (
-                        <PageTitle statusColor={currentCallDetails.colour}>
+                    {currentCallStatus && (
+                        <PageTitle statusColor={currentCallStatus.data.colour}>
                             <h3>{i18n.t(`${period} Call`)}</h3>
-                            <div className="status">{i18n.t(currentCallDetails.title)}</div>
+                            <div className="status">{i18n.t(currentCallStatus.data.title)}</div>
                         </PageTitle>
                     )}
                     <CustomCard padding="40px 60px 50px">
-                        <CurrentCallContent moduleName={moduleName} currentCallStatus={currentCall.data} />
+                        <CurrentCallContent moduleName={moduleName} currentCallStatus={currentCallStatus.data} />
                     </CustomCard>
                 </ContentWrapper>
             );
