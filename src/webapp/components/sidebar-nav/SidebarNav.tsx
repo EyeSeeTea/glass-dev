@@ -13,7 +13,7 @@ export interface MenuGroup {
     title: string;
     prettyName: string;
     moduleColor: string;
-    icon?: any;
+    icon?: string;
     children?: Menu[];
 }
 
@@ -36,15 +36,13 @@ const SidebarNav: React.FC<SidebarNavProps> = ({ menus, className }) => {
     const classes = useStyles();
     const [currentNaVitem, setCurrentNavItem] = useState<string[]>([""]);
 
+    
     const handleCurrentNavItem = (val: string[]) => {
         // TODO: cleanup this prop drilling and convert this using context API
         // eslint-disable-next-line no-console
         // console.log("handleCurrentNavItem: ", val);
         setCurrentNavItem(val);
     };
-
-    // console.log("menus: ");
-    // console.log(menus);
 
     return (
         <List className={clsx(classes.root, className)}>

@@ -3,7 +3,6 @@ import { GlassModule } from "../../domain/entities/GlassModule";
 import { Menu } from "../components/sidebar-nav/SidebarNav";
 import { GlassState } from "./State";
 import { useGlassModules } from "./useGlassModules";
-import FolderIcon from "@material-ui/icons/Folder";
 
 export type GlassModulesState = GlassState<Menu[]>;
 
@@ -22,7 +21,7 @@ export function mapModuleToMenu(module: GlassModule): Menu {
         title: module.name,
         prettyName: module.prettyName,
         moduleColor: module.color,
-        icon: <FolderIcon htmlColor={module.color} />,
+        icon: 'folder',
         children: [
             {
                 kind: "MenuLeaf",

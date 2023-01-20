@@ -6,10 +6,12 @@ import { SideBar } from "../sidebar/SideBar";
 import ExitToAppIcon from "@material-ui/icons/ExitToApp";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { AppFooter } from "../app-footer/AppFooter";
+import { SideBarProvider } from "../sidebar/SideBarProvider";
 
 export const MainLayout: React.FC = React.memo(({ children }) => {
     return (
-        <React.Fragment>
+        <SideBarProvider>
+
             <GlassAppBar />
             <LandingContainer>
                 <RootGrid container spacing={6}>
@@ -34,7 +36,8 @@ export const MainLayout: React.FC = React.memo(({ children }) => {
                     </Grid>
                 </RootGrid>
             </LandingContainer>
-        </React.Fragment>
+            
+        </SideBarProvider>
     );
 });
 
