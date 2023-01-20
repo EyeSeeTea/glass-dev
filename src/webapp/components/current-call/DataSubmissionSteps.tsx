@@ -7,11 +7,11 @@ import { Questionnaires } from "./Questionnaires";
 import { Advanced } from "./Advanced";
 import { Validations } from "./Validations";
 import { Overview } from "./overview/Overview";
-import { CallStatusTypes } from "../../../domain/entities/GlassCallStatus";
+import { StatusDetails } from "./overview/StatusDetails";
 
 interface DataSubmissionStepsProps {
     moduleName: string;
-    currentCallStatus: CallStatusTypes;
+    currentCallStatus: StatusDetails;
 }
 
 export const DataSubmissionSteps: React.FC<DataSubmissionStepsProps> = ({ moduleName, currentCallStatus }) => {
@@ -41,7 +41,7 @@ export const DataSubmissionSteps: React.FC<DataSubmissionStepsProps> = ({ module
     );
 };
 
-const renderTypeContent = (step: number, moduleName: string, currentCallStatus: CallStatusTypes) => {
+const renderTypeContent = (step: number, moduleName: string, currentCallStatus: StatusDetails) => {
     switch (step) {
         case 0:
             // TODO: set module name inside page root content to avoid prop drilling
