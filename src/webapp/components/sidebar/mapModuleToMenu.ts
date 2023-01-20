@@ -5,6 +5,8 @@ import { Menu } from "../sidebar-nav/SidebarNav";
 export type GlassModulesState = GlassState<Menu[]>;
 
 export function mapModuleToMenu(module: GlassModule): Menu {
+    // const moduleFolder = module.name.toLowerCase().replace(/\s/g,'');
+    const moduleFolder = module.name;
     return {
         kind: "MenuGroup",
         level: 0,
@@ -17,7 +19,7 @@ export function mapModuleToMenu(module: GlassModule): Menu {
                 kind: "MenuLeaf",
                 level: 0,
                 title: "Current Call",
-                path: `/current-call/${module.name}`,
+                path: `/current-call/${moduleFolder}`,
             },
             {
                 kind: "MenuLeaf",
@@ -29,19 +31,19 @@ export function mapModuleToMenu(module: GlassModule): Menu {
                 kind: "MenuLeaf",
                 level: 0,
                 title: "Upload History",
-                path: `/upload-history/${module.name}`,
+                path: `/upload-history/${moduleFolder}`,
             },
             {
                 kind: "MenuLeaf",
                 level: 0,
                 title: "Calls History",
-                path: `/calls-history/${module.name}`,
+                path: `/calls-history/${moduleFolder}`,
             },
             {
                 kind: "MenuLeaf",
                 level: 0,
                 title: "Country Information",
-                path: `/country-information/${module.name}`,
+                path: `/country-information/${moduleFolder}`,
             },
         ],
     };
