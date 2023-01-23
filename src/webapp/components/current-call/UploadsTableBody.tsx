@@ -3,6 +3,7 @@ import { TableBody, TableCell, TableRow } from "@material-ui/core";
 import styled from "styled-components";
 import { UploadsDataItemProps } from "./UploadsTable";
 import i18n from "@eyeseetea/d2-ui-components/locales";
+import dayjs from "dayjs";
 
 export interface UploadsTableBodyProps {
     rows?: UploadsDataItemProps[];
@@ -15,13 +16,12 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows }) => {
                 <StyledTableBody>
                     {rows.map((row: UploadsDataItemProps) => (
                         <TableRow key={row.id}>
-                            <TableCell>{row.uploaded_date}</TableCell>
-                            <TableCell>{row.date_first}</TableCell>
-                            <TableCell>{row.date_last}</TableCell>
-                            <TableCell>{row.records}</TableCell>
-                            <TableCell>{row.type}</TableCell>
-                            <TableCell>{row.batch_id}</TableCell>
-                            <TableCell>{i18n.t(row.status)}</TableCell>
+                            <TableCell>{dayjs(row.submissionDate).format("DD-MM-YYYY")}</TableCell>
+                            <TableCell>{row.period}</TableCell>
+                            <TableCell>{row.inputLineNb}</TableCell>
+                            <TableCell>{row.fileType}</TableCell>
+                            <TableCell>{row.batchId}</TableCell>
+                            <TableCell>{i18n.t(row.status).toUpperCase()}</TableCell>
                         </TableRow>
                     ))}
                 </StyledTableBody>
