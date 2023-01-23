@@ -2,20 +2,24 @@ import { DataStoreClient } from "./data/data-store/DataStoreClient";
 import { Instance } from "./data/entities/Instance";
 import { GlassModuleDefaultRepository } from "./data/repositories/GlassModuleDefaultRepository";
 import { GlassNewsDefaultRepository } from "./data/repositories/GlassNewsDefaultRepository";
+import { GlassSubmissionsDefaultRepository } from "./data/repositories/GlassSubmissionsDefaultRepository";
 import { InstanceDefaultRepository } from "./data/repositories/InstanceDefaultRepository";
 import { GetCurrentUserUseCase } from "./domain/usecases/GetCurrentUserUseCase";
 import { GetGlassModuleByNameUseCase } from "./domain/usecases/GetGlassModuleByNameUseCase";
 import { GetGlassModulesUseCase } from "./domain/usecases/GetGlassModulesUseCase";
 import { GetGlassNewsUseCase } from "./domain/usecases/GetGlassNewsUseCase";
+import { GetGlassSubmissionsUseCase } from "./domain/usecases/GetGlassSubmissionsUseCase";
 import { GetInstanceVersionUseCase } from "./domain/usecases/GetInstanceVersionUseCase";
 import { ValidateGlassModulesUseCase } from "./domain/usecases/ValidateGlassModulesUseCase";
 import { ValidateGlassNewsUseCase } from "./domain/usecases/ValidateGlassNewsUseCase";
+import { ValidateGlassSubmissionsUseCase } from "./domain/usecases/ValidateGlassSubmissionsUseCase";
 
 export function getCompositionRoot(instance: Instance) {
     const dataStoreClient = new DataStoreClient(instance);
     const instanceRepository = new InstanceDefaultRepository(instance);
     const glassModuleRepository = new GlassModuleDefaultRepository(dataStoreClient);
     const glassNewsRepository = new GlassNewsDefaultRepository(dataStoreClient);
+    const glassSubmissionsRepository = new GlassSubmissionsDefaultRepository(dataStoreClient);
 
     return {
         instance: getExecute({
@@ -30,6 +34,10 @@ export function getCompositionRoot(instance: Instance) {
         glassNews: getExecute({
             getAll: new GetGlassNewsUseCase(glassNewsRepository),
             validate: new ValidateGlassNewsUseCase(glassNewsRepository),
+        }),
+        glassSubmissions: getExecute({
+            getAll: new GetGlassSubmissionsUseCase(glassSubmissionsRepository),
+            validate: new ValidateGlassSubmissionsUseCase(glassSubmissionsRepository),
         }),
     };
 }
