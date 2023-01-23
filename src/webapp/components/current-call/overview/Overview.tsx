@@ -1,38 +1,31 @@
-import React, { useState } from "react";
+import React from "react";
 import styled from "styled-components";
-import { CtaButtons } from "./CtaButtons";
 import { glassColors } from "../../../pages/app/themes/dhis2.theme";
 import { CurrentStatus } from "./CurrentStatus";
+import { StatusDetails } from "./StatusDetails";
+import { Typography } from "@material-ui/core";
 
 interface OverviewProps {
     moduleName: string;
+    currentCallStatus: StatusDetails;
 }
 
-export const Overview: React.FC<OverviewProps> = ({ moduleName }) => {
-    const [screen, setScreen] = useState<string>("status");
-
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const handleScreenChange = (val: string) => {
-        setScreen(val);
-    };
-
+export const Overview: React.FC<OverviewProps> = ({ moduleName, currentCallStatus }) => {
     return (
         <LinedBox>
-            {renderScreen(screen)}
-            {screen === "status" && <CtaButtons moduleName={moduleName} />}
+            {currentCallStatus ? (
+                <CurrentStatus
+                    moduleName={moduleName}
+                    title={currentCallStatus.title}
+                    description={currentCallStatus.description}
+                    statusColor={currentCallStatus.colour}
+                    ctas={currentCallStatus.cta}
+                />
+            ) : (
+                <Typography variant="h6">Call Submission status has errors...</Typography>
+            )}
         </LinedBox>
     );
-};
-
-const renderScreen = (screen: string) => {
-    switch (screen) {
-        case "status":
-            return <CurrentStatus />;
-        case "error":
-            return <p>Uploaded file has errors...</p>;
-        default:
-            return <CurrentStatus />;
-    }
 };
 
 const LinedBox = styled.div`
