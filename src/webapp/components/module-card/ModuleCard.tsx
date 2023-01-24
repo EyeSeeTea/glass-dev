@@ -9,23 +9,19 @@ import i18n from "../../../locales";
 
 interface ModuleCardProps {
     title: string;
-    titleColor: string;
-    iconColor: string;
-    endDays?: number;
+    moduleColor: string;
+    endDays?: number | null;
     filesUploaded: number;
 }
 
-export const ModuleCard: React.FC<ModuleCardProps> = ({ title, titleColor, iconColor, endDays, filesUploaded }) => {
+export const ModuleCard: React.FC<ModuleCardProps> = ({ title, moduleColor, endDays, filesUploaded }) => {
     return (
-        <CustomCard padding="10px">
-            <TitleContainer>
-                <StarIcon htmlColor={iconColor} fontSize="large" />
-                <Box width={10} />
-                <Title textColor={titleColor} variant="h5">
-                    {title}
-                </Title>
+        <CustomCard padding="0">
+            <TitleContainer moduleColor={moduleColor}>
+                <StarIcon />
+                <h3>{title}</h3>
             </TitleContainer>
-            <ContentContainer>
+            <ContentContainer moduleColor={moduleColor}>
                 <Container style={{ padding: 0 }}>
                     {endDays ? (
                         <Box display={"flex"} flexDirection="row">
@@ -49,25 +45,39 @@ export const ModuleCard: React.FC<ModuleCardProps> = ({ title, titleColor, iconC
     );
 };
 
-const TitleContainer = styled.div`
-    border-radius: 10px;
-    padding: 0px 10px;
-    margin: 12px;
+const TitleContainer = styled.div<{ moduleColor: string }>`
+    background-color: ${props => props.moduleColor};
+    padding: 20px;
+    margin: 0;
     display: flex;
     flex-direction: row;
+    gap: 10px;
+    align-items: center;
+    svg {
+        color: white;
+        font-size: 24px;
+    }
+    h3 {
+        margin: 0;
+        font-weight: 500;
+        color: white;
+        font-size: 24px;
+    }
 `;
 
-const Title = styled(Typography)<{ textColor: string }>`
-    color: ${props => props.textColor};
-    font-weight: bold;
-`;
-
-const ContentContainer = styled.div`
+const ContentContainer = styled.div<{ moduleColor: string }>`
     border-radius: 10px;
-    padding: 0px 10px;
+    padding: 15px 10px;
     margin: 12px 20px;
     display: flex;
     flex-direction: row;
     justify-content: space-between;
     align-items: end;
+    button {
+        background-color: ${props => props.moduleColor};
+        &:hover {
+            background-color: ${props => props.moduleColor};
+            box-shadow: none;
+        }
+    }
 `;

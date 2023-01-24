@@ -20,6 +20,7 @@ function mapModuleToMenu(module: GlassModule): Menu {
         kind: "MenuGroup",
         level: 0,
         title: module.name,
+        moduleColor: module.color,
         icon: <FolderIcon htmlColor={module.color} />,
         children: [
             {
@@ -44,7 +45,7 @@ function mapModuleToMenu(module: GlassModule): Menu {
                 kind: "MenuLeaf",
                 level: 0,
                 title: "Calls History",
-                path: "",
+                path: `/calls-history/${module.name}`,
             },
             {
                 kind: "MenuLeaf",
