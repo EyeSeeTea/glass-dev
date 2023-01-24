@@ -1,12 +1,15 @@
-import React from "react";
-import { CircularProgress, Typography } from "@material-ui/core";
-import { useAppContext } from "../../contexts/app-context";
-import { useDataSubmissionSteps } from "../../hooks/useDataSubmissionSteps";
-import { DataSubmissionSteps } from "./DataSubmissionSteps";
 import styled from "styled-components";
+import { useAppContext } from "../../contexts/app-context";
+import { CircularProgress, Typography } from "@material-ui/core";
+import { CallsTable } from "./CallsTable";
+import { useLocation } from "react-router-dom";
+import { data } from "./mock-tables-data.json";
+import { useDataSubmissionSteps } from "../../hooks/useDataSubmissionSteps";
 
-export const CurrentCallContent: React.FC = () => {
+export const CallsHistoryContent: React.FC = () => {
     const { compositionRoot } = useAppContext();
+    const location = useLocation();
+    const params = new URLSearchParams(location.search);
 
     const stepsResult = useDataSubmissionSteps(compositionRoot);
 
@@ -18,7 +21,7 @@ export const CurrentCallContent: React.FC = () => {
         case "loaded":
             return (
                 <ContentWrapper>
-                    <DataSubmissionSteps />
+                    <CallsTable items={data} data-current-module={params.get("userId")} />
                 </ContentWrapper>
             );
     }

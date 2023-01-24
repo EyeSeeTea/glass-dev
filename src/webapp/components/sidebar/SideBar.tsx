@@ -50,7 +50,7 @@ const HomeButtonWrapper = styled.div`
         padding: 10px 25px;
         margin: 0;
         &:hover {
-            background: ${glassColors.gradientLightBg} !important;
+            background: ${glassColors.accentPrimary} !important;
             color: white;
             .star-icon {
                 background: white;
@@ -63,5 +63,5 @@ const StarGradient = styled.div`
     width: 23px;
     height: 23px;
     clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
-    background: ${glassColors.gradientLightBg};
+    background: ${glassColors.accentPrimary};
 `;

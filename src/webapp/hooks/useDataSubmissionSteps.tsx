@@ -18,6 +18,7 @@ export function useDataSubmissionSteps(compositionRoot: CompositionRoot) {
 function mapModuleToDataSubmissionSteps(module: GlassModule): DataSubmissionWizard {
     return {
         moduleName: module.name,
+        moduleColor: module.color,
         children: [
             {
                 stepNumber: 1,

@@ -63,7 +63,7 @@ export const LandingNews: React.FC = () => {
 };
 
 const TitleContainer = styled.div`
-    background: ${glassColors.lightSecondary};
+    background: ${glassColors.mainPrimary};
     color: white;
     border-radius: 20px 20px 0px 0px;
     padding: 14px 34px;
