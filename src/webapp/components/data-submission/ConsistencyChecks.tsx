@@ -4,9 +4,15 @@ import { BlockingErrors } from "./BlockingErrors";
 import styled from "styled-components";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
 import { NonBlockingWarnings } from "./NonBlockingWarnings";
+import ChevronRightIcon from "@material-ui/icons/ChevronRight";
+import i18n from "@eyeseetea/d2-ui-components/locales";
+interface ConsistencyChecksProps {
+    changeStep: (step: number) => void;
+}
 
-export const ConsistencyChecks: React.FC = () => {
+export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({ changeStep }) => {
     const [fileType, setFileType] = useState<string>("ris");
+    const [isValidated, setIsValidated] = useState(true);
 
     const changeType = (fileType: string) => {
         setFileType(fileType);
@@ -27,6 +33,19 @@ export const ConsistencyChecks: React.FC = () => {
                 </Button>
             </div>
             {renderTypeContent(fileType)}
+
+            <div className="bottom">
+                <Button
+                    variant="contained"
+                    color={isValidated ? "primary" : "default"}
+                    disabled={isValidated ? false : true}
+                    endIcon={<ChevronRightIcon />}
+                    onClick={() => changeStep(4)}
+                    disableElevation
+                >
+                    {i18n.t("Continue")}
+                </Button>
+            </div>
         </ContentWrapper>
     );
 };

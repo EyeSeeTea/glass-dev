@@ -1,12 +1,24 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: i18next-conv\n"
-"POT-Creation-Date: 2022-11-25T12:43:47.220Z\n"
+"POT-Creation-Date: 2023-01-13T13:24:20.056Z\n"
 "PO-Revision-Date: 2018-10-25T09:02:35.143Z\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
+
+msgid "Year"
+msgstr ""
+
+msgid "Open / Close"
+msgstr ""
+
+msgid "Status"
+msgstr ""
+
+msgid " "
+msgstr ""
 
 msgid "Add"
 msgstr "Añadir"
@@ -14,37 +26,113 @@ msgstr "Añadir"
 msgid "List"
 msgstr "Listar"
 
-msgid "Base data files"
+msgid "Ask for updating"
 msgstr ""
 
-msgid "Sample and RIS files"
+msgid ""
+"If for any reason you need to pull this file from the platform to upload a "
+"new version of the data you can do it automatically while it is not approved "
+"by WHO."
 msgstr ""
 
-msgid "UPLOAD NEW"
+msgid ""
+"After it the status is “WHO Aproval” or “WHO PUBLISHED” the revoking process "
+"needs to be suppervised by WHO because it can affect ongoing publications"
 msgstr ""
 
-msgid "Date"
+msgid "Request Dataset update"
 msgstr ""
 
-msgid "status"
+msgid "Uploaded"
 msgstr ""
 
-msgid "Details"
+msgid "Date First"
 msgstr ""
 
-msgid "DaDeleted / Incompletedte"
+msgid "Date Last"
 msgstr ""
 
-msgid "Country questionnaire"
+msgid "Records"
 msgstr ""
 
-msgid "NOT COMPLETED"
+msgid "Type"
 msgstr ""
 
-msgid "GO"
+msgid "Batch ID"
+msgstr ""
+
+msgid "Upload dataset"
+msgstr ""
+
+msgid "Go to Questionnaires"
+msgstr ""
+
+msgid "Current Status"
+msgstr ""
+
+msgid "Not Completed"
+msgstr ""
+
+msgid "At least one dataset is missing"
+msgstr ""
+
+msgid "At least one mandatory questionnaire is not submited"
+msgstr ""
+
+msgid ""
+"You need to complete the mandatory uploads before validate the submissions "
+"for this call"
+msgstr ""
+
+msgid "Uploaded file has errors..."
+msgstr ""
+
+msgid "Back to Module"
+msgstr ""
+
+msgid "Go to Validation Report"
+msgstr ""
+
+msgid "Thank! your data for now is uploaded in our system"
+msgstr ""
+
+msgid "Continue"
+msgstr ""
+
+msgid "I need help"
+msgstr ""
+
+msgid "Submit Help Ticket"
+msgstr ""
+
+msgid "I can fix this by myself"
+msgstr ""
+
+msgid "Upload New Data Files"
+msgstr ""
+
+msgid "I'll fix it later"
+msgstr ""
+
+msgid "OK"
+msgstr ""
+
+msgid "Upload file"
+msgstr ""
+
+msgid "Select file"
 msgstr ""
 
 msgid "News from GLASS"
+msgstr ""
+
+msgid "Your Notifications"
+msgstr ""
+
+msgid "Log Out"
+msgstr ""
+
+msgid "GO"
 msgstr ""
 
 msgid "Back"
@@ -56,7 +144,19 @@ msgstr "Ayuda"
 msgid "HOME"
 msgstr ""
 
-msgid "Log Out"
+msgid "List of Calls"
+msgstr ""
+
+msgid "All Calls"
+msgstr ""
+
+msgid "2020 Call"
+msgstr ""
+
+msgid "Yearly data upload"
+msgstr ""
+
+msgid "Missing Data"
 msgstr ""
 
 msgid "Hello {{name}}"

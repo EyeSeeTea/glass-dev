@@ -29,9 +29,9 @@ export const CallsHistoryPageContent: React.FC<CallsHistoryPageProps> = React.me
 
     const result = useGlassModule(compositionRoot, moduleName);
 
-    function handleClick(event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) {
+    const handleClick = (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
         event.preventDefault();
-    }
+    };
 
     switch (result.kind) {
         case "loading":
