@@ -1,6 +1,4 @@
-
 export function useDataSubmissionSteps() {
-
     return [
         {
             stepNumber: 1,
@@ -26,5 +24,5 @@ export function useDataSubmissionSteps() {
             placeholder:
                 "Integer pharetra ligula a lectus viverra volutpat. Donec nec lacus dictum, facilisis ipsum in, imperdiet ex. Duis in mollis eros. Nulla facilisi. Etiam tincidunt tincidunt libero at pretium.",
         },
-    ]
+    ];
 }
