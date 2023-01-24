@@ -54,15 +54,14 @@ export const UploadRis: React.FC<UploadRisProps> = ({ handleValidate }) => {
             body: data,
         })
             .then(res => res.json())
-            // eslint-disable-next-line no-console
-            .then(data => console.log(data))
+            .then(data => console.debug(data))
             .catch(err => console.error(err));
     };
 
     return (
         <ContentWrapper className="ris-file">
             <span className="label">Choose RIS File</span>
-            {fileList && fileList?.length ? (
+            {fileList?.length ? (
                 <Button
                     variant="contained"
                     color="primary"
