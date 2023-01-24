@@ -44,7 +44,6 @@ export const UploadSample: React.FC = () => {
             body: data,
         })
             .then(res => res.json())
-            // eslint-disable-next-line no-console
             .then(data => console.log(data))
             .catch(err => console.error(err));
     };

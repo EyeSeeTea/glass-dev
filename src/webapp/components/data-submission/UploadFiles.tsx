@@ -26,9 +26,13 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({ changeStep }) => {
     return (
         <ContentWrapper>
             <div className="file-fields">
+
                 <UploadRis handleValidate={handleValidate} />
+                
                 <UploadSample />
+                
             </div>
+
             <div className="batch-id">
                 <h3>Batch ID</h3>
                 <FormControl variant="outlined">
@@ -42,6 +46,7 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({ changeStep }) => {
                     </Select>
                 </FormControl>
             </div>
+
             <div className="bottom">
                 <div className="previous-list">
                     <h4>You Previously Submitted: </h4>
