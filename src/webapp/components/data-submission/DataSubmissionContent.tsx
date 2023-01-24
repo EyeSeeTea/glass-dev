@@ -1,19 +1,17 @@
 import React, { useState } from "react";
-import { CircularProgress, Typography } from "@material-ui/core";
 import { DataSubmissionNav } from "./DataSubmissionNav";
-import { useAppContext } from "../../contexts/app-context";
 import { useDataSubmissionSteps } from "../../hooks/useDataSubmissionSteps";
 import { ConsistencyChecks } from "./ConsistencyChecks";
 import styled from "styled-components";
-import i18n from "@eyeseetea/d2-ui-components/locales";
 import { SupportButtons } from "./SupportButtons";
 import { glassColors, palette } from "../../pages/app/themes/dhis2.theme";
 import { UploadFiles } from "./UploadFiles";
 import { ReviewDataSummary } from "./ReviewDataSummary";
 import { Completed } from "./Completed";
 
+
+
 export const DataSubmissionContent: React.FC = () => {
-    const { compositionRoot } = useAppContext();
     const [currentStep, setCurrentStep] = useState(1);
     const [completedSteps, setCompletedSteps] = useState<number[]>([]);
 
@@ -24,34 +22,26 @@ export const DataSubmissionContent: React.FC = () => {
         }
     };
 
-    const stepsResult = useDataSubmissionSteps(compositionRoot);
+    const steps = useDataSubmissionSteps();
 
-    switch (stepsResult.kind) {
-        case "loading":
-            return <CircularProgress />;
-        case "error":
-            return <Typography variant="h6">{stepsResult.message}</Typography>;
-        case "loaded":
-            return (
-                <ContentWrapper>
-                    <DataSubmissionNav
-                        steps={stepsResult.data[0]?.children}
-                        currentStep={currentStep}
-                        changeStep={changeStep}
-                        completedSteps={completedSteps}
-                    />
-                    {stepsResult?.data[0]?.children?.length &&
-                        renderStep(
-                            currentStep,
-                            changeStep,
-                            i18n.t(stepsResult.data[0].children[currentStep - 1]?.content)
-                        )}
-                </ContentWrapper>
-            );
-    }
+    return (
+        <ContentWrapper>
+            <DataSubmissionNav
+                steps={steps}
+                currentStep={currentStep}
+                changeStep={changeStep}
+                completedSteps={completedSteps}
+            />
+            {steps.length &&
+                renderStep(
+                    currentStep,
+                    changeStep
+                )}
+        </ContentWrapper>
+    );
 };
 
-const renderStep = (step: number, changeStep: any, content: string) => {
+const renderStep = (step: number, changeStep: any) => {
     switch (step) {
         case 1:
             return <UploadFiles changeStep={changeStep} />;
@@ -67,7 +57,7 @@ const renderStep = (step: number, changeStep: any, content: string) => {
                 </>
             );
         default:
-            return <p className="intro">{content}</p>;
+            break;
     }
 };
 
