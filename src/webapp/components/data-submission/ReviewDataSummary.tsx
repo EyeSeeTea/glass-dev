@@ -81,7 +81,6 @@ export const ReviewDataSummary: React.FC<ReviewDataSummaryProps> = ({ changeStep
                         control={
                             <Checkbox
                                 checked={state.checkedB}
-                                // eslint-disable-next-line no-console
                                 onChange={handleCheckBox}
                                 name="checkedB"
                                 color="primary"
@@ -98,7 +97,6 @@ export const ReviewDataSummary: React.FC<ReviewDataSummaryProps> = ({ changeStep
                         control={
                             <Checkbox
                                 checked={state.checkedC}
-                                // eslint-disable-next-line no-console
                                 onChange={handleCheckBox}
                                 name="checkedC"
                                 color="primary"
@@ -110,7 +108,6 @@ export const ReviewDataSummary: React.FC<ReviewDataSummaryProps> = ({ changeStep
                         control={
                             <Checkbox
                                 checked={state.checkedD}
-                                // eslint-disable-next-line no-console
                                 onChange={handleCheckBox}
                                 name="checkedD"
                                 color="primary"
