@@ -45,7 +45,7 @@ export const CurrentCallPageContent: React.FC<CurrentCallPageContentProps> = Rea
     const location = useLocation();
     const queryParameters = new URLSearchParams(location.search);
 
-    //TO DO : orgUnit and period will not be fetched from queryParameters, it will be fetched from context.
+    // TODO : orgUnit and period will not be fetched from queryParameters, it will be fetched from context.
     const periodVal = queryParameters?.get("period");
     const orgUnitVal = queryParameters.get("orgUnit");
 
