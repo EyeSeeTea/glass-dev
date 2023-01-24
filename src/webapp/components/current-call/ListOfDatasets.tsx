@@ -3,7 +3,7 @@ import styled from "styled-components";
 import { UploadsTable } from "./UploadsTable";
 import { useAppContext } from "../../contexts/app-context";
 import { GlassSubmissionsState, useGlassSubmissions } from "../../hooks/useGlassSubmissions";
-import { ContentLoader, ContentLoaderValue } from "../content-loader/ContentLoader";
+import { ContentLoader } from "../content-loader/ContentLoader";
 import { UploadsDataItem } from "../../entities/uploads";
 
 function getUploadedItems(submission: GlassSubmissionsState) {
@@ -24,7 +24,7 @@ export const ListOfDatasets: React.FC = () => {
     const submissions = useGlassSubmissions(compositionRoot);
 
     return (
-        <ContentLoader content={submissions as ContentLoaderValue}>
+        <ContentLoader content={submissions}>
             <ContentWrapper>
                 <h3>ContentLoader content</h3>
                 <UploadsTable title="Correct Uploads" items={getUploadedItems(submissions)} />
