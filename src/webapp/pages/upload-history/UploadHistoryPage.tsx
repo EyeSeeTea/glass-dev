@@ -44,12 +44,7 @@ export const UploadHistoryPageContent: React.FC<UploadHistoryPageProps> = React.
                     <PreContent>
                         {/* // TODO: replace this with a global reusable StyledBreadCrumbs component */}
                         <StyledBreadCrumbs aria-label="breadcrumb" separator="">
-                            <Button
-                                component={NavLink}
-                                to={`/current-call/${moduleName}`}
-                                exact={true}
-                                onClick={click}
-                            >
+                            <Button component={NavLink} to={`/current-call/${moduleName}`} exact={true} onClick={click}>
                                 <span>{moduleName} asdd</span>
                             </Button>
                             <ChevronRightIcon />
