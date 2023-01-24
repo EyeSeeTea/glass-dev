@@ -1,7 +1,7 @@
 import React from "react";
 import styled from "styled-components";
 import { CustomCard } from "../custom-card/CustomCard";
-export interface UploadsDataItemProps {
+export interface Questions {
     id: number;
     uploaded_date: string;
     date_first: string;
@@ -12,14 +12,13 @@ export interface UploadsDataItemProps {
     status: string;
 }
 
-export interface UploadsDataProps {
-    items?: UploadsDataItemProps[];
+export interface QuetionnaireCardProps {
+    items?: Questions[];
     className?: string;
 }
 
-export const QuetionnaireCard: React.FC<UploadsDataProps> = ({ items, className }) => {
-    // eslint-disable-next-line no-console
-    console.log("items: ", items);
+export const QuetionnaireCard: React.FC<QuetionnaireCardProps> = ({ items, className }) => {
+    console.debug("items: ", items);
 
     return (
         <ContentWrapper className={className}>

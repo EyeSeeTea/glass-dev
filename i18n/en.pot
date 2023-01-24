@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2023-01-18T12:24:29.887Z\n"
-"PO-Revision-Date: 2023-01-18T12:24:29.887Z\n"
+"POT-Creation-Date: 2023-01-24T08:48:36.305Z\n"
+"PO-Revision-Date: 2023-01-24T08:48:36.305Z\n"
 
 msgid "Year"
 msgstr ""
@@ -44,6 +44,21 @@ msgstr ""
 msgid "Request Dataset update"
 msgstr ""
 
+msgid "Uploaded"
+msgstr ""
+
+msgid "Period"
+msgstr ""
+
+msgid "Records"
+msgstr ""
+
+msgid "Type"
+msgstr ""
+
+msgid "Batch ID"
+msgstr ""
+
 msgid "Display full status history >"
 msgstr ""
 
@@ -57,24 +72,6 @@ msgid "Upload dataset"
 msgstr ""
 
 msgid "Current Status"
-msgstr ""
-
-msgid "Uploaded"
-msgstr ""
-
-msgid "Date First"
-msgstr ""
-
-msgid "Date Last"
-msgstr ""
-
-msgid "Records"
-msgstr ""
-
-msgid "Type"
-msgstr ""
-
-msgid "Batch ID"
 msgstr ""
 
 msgid "Back to Module"
@@ -141,12 +138,6 @@ msgid "Country"
 msgstr ""
 
 msgid "Batch Id"
-msgstr ""
-
-msgid "Start"
-msgstr ""
-
-msgid "End"
 msgstr ""
 
 msgid "Specimens"
