@@ -17,7 +17,7 @@ export const CallsTableBody: React.FC<CallsTableBodyProps> = ({ rows }) => {
     const location = useLocation().pathname.slice(1);
     const moduleName = location.substring(location.indexOf("/") + 1);
 
-    const handleClick = () => {
+    const click = () => {
         history.push(`/current-call/${moduleName}`);
     };
 
@@ -26,7 +26,7 @@ export const CallsTableBody: React.FC<CallsTableBodyProps> = ({ rows }) => {
             {rows && rows.length ? (
                 <StyledTableBody>
                     {rows.map((row: CallsHistoryItemProps) => (
-                        <TableRow key={row.id} onClick={handleClick}>
+                        <TableRow key={row.id} onClick={click}>
                             <TableCell>{row.year}</TableCell>
                             <TableCell>{row.open_status}</TableCell>
                             <TableCell>

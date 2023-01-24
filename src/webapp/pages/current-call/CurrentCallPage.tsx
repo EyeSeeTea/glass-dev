@@ -57,7 +57,7 @@ export const CurrentCallPageContent: React.FC<CurrentCallPageContentProps> = Rea
     const { compositionRoot } = useAppContext();
     const currentCallStatus = useStatusCall(compositionRoot, moduleId, orgUnit, period);
 
-    const handleClick = (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
+    const click = (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
         event.preventDefault();
         setPeriod(0); //new period value
         setOrgUnit("new orgUnit value");
@@ -78,7 +78,7 @@ export const CurrentCallPageContent: React.FC<CurrentCallPageContentProps> = Rea
                                 component={NavLink}
                                 to={`/current-call/${moduleName}`}
                                 exact={true}
-                                onClick={handleClick}
+                                onClick={click}
                             >
                                 <span>{moduleName}</span>
                             </Button>

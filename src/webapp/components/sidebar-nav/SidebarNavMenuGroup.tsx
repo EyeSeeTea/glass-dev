@@ -12,7 +12,7 @@ interface SidebarNavProps {
     className?: string;
     groupName: string;
     currentNaVitem: string[];
-    handleCurrentNavItem: (val: string[]) => void;
+    changeCurrentNavItem: (val: string[]) => void;
     menu: MenuGroup;
 }
 
@@ -21,7 +21,7 @@ const SidebarNavMenuGroup: React.FC<SidebarNavProps> = ({
     groupName,
     className,
     currentNaVitem,
-    handleCurrentNavItem,
+    changeCurrentNavItem,
 }) => {
     const isCurrentModule = (val: string) => {
         if (val) {
@@ -46,7 +46,7 @@ const SidebarNavMenuGroup: React.FC<SidebarNavProps> = ({
     const location = useLocation();
     const [openCollapse, setOpenCollapse] = React.useState(isCurrentNavItem(currentNaVitem));
 
-    const handleExpand = () => {
+    const expand = () => {
         setOpenCollapse(!openCollapse);
     };
 
@@ -61,7 +61,7 @@ const SidebarNavMenuGroup: React.FC<SidebarNavProps> = ({
         <React.Fragment>
             <ListItem
                 className={clsx(classes.root, className)}
-                onClick={handleExpand}
+                onClick={expand}
                 disableGutters
                 style={{ paddingLeft: menu.level * 8 }}
             >
@@ -83,12 +83,12 @@ const SidebarNavMenuGroup: React.FC<SidebarNavProps> = ({
                                         key={child.title}
                                         groupName={groupName}
                                         currentNaVitem={currentNaVitem}
-                                        handleCurrentNavItem={handleCurrentNavItem}
+                                        changeCurrentNavItem={changeCurrentNavItem}
                                     />
                                 ) : (
                                     <SidebarNavMenu
                                         currentNaVitem={currentNaVitem}
-                                        handleCurrentNavItem={handleCurrentNavItem}
+                                        changeCurrentNavItem={changeCurrentNavItem}
                                         menu={child}
                                         key={child.title}
                                         groupName={groupName}

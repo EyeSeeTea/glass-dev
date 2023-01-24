@@ -24,7 +24,6 @@ export function getCompositionRoot(instance: Instance) {
     const glassCallRepository = new GlassCallDefaultRepository(dataStoreClient);
     const glassSubmissionsRepository = new GlassSubmissionsDefaultRepository(dataStoreClient);
 
-
     return {
         instance: getExecute({
             getCurrentUser: new GetCurrentUserUseCase(instanceRepository),

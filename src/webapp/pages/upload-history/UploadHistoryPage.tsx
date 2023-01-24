@@ -29,7 +29,7 @@ export const UploadHistoryPageContent: React.FC<UploadHistoryPageProps> = React.
     // TODO: replace useGlassModule (or parameters) with actual hook to fetch upload history data
     const result = useGlassModule(compositionRoot, moduleName);
 
-    const handleClick = (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
+    const click = (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
         event.preventDefault();
     };
 
@@ -48,7 +48,7 @@ export const UploadHistoryPageContent: React.FC<UploadHistoryPageProps> = React.
                                 component={NavLink}
                                 to={`/current-call/${moduleName}`}
                                 exact={true}
-                                onClick={handleClick}
+                                onClick={click}
                             >
                                 <span>{moduleName} asdd</span>
                             </Button>
