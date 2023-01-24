@@ -22,18 +22,12 @@ export const DataSubmissionPage: React.FC<DataSubmissionPageProps> = React.memo(
 });
 
 export const DataSubmissionPageContent: React.FC<DataSubmissionPageProps> = React.memo(({ moduleName }) => {
-
     return (
         <ContentWrapper>
             <PreContent>
                 {/* // TODO: replace this with a global reusable StyledBreadCrumbs component */}
                 <StyledBreadCrumbs aria-label="breadcrumb" separator="">
-                    <Button
-                        component={NavLink}
-                        to={`/current-call/${moduleName}`}
-                        exact={true}
-                        onClick={() => null}
-                    >
+                    <Button component={NavLink} to={`/current-call/${moduleName}`} exact={true} onClick={() => null}>
                         <span>{moduleName}</span>
                     </Button>
                     <ChevronRightIcon />

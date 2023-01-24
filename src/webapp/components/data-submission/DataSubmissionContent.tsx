@@ -9,8 +9,6 @@ import { UploadFiles } from "./UploadFiles";
 import { ReviewDataSummary } from "./ReviewDataSummary";
 import { Completed } from "./Completed";
 
-
-
 export const DataSubmissionContent: React.FC = () => {
     const [currentStep, setCurrentStep] = useState(1);
     const [completedSteps, setCompletedSteps] = useState<number[]>([]);
@@ -32,11 +30,7 @@ export const DataSubmissionContent: React.FC = () => {
                 changeStep={changeStep}
                 completedSteps={completedSteps}
             />
-            {steps.length &&
-                renderStep(
-                    currentStep,
-                    changeStep
-                )}
+            {steps.length && renderStep(currentStep, changeStep)}
         </ContentWrapper>
     );
 };

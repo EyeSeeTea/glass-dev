@@ -1,7 +1,7 @@
 import React from "react";
 import styled from "styled-components";
 import { CustomCard } from "../custom-card/CustomCard";
-export interface UploadsDataItemProps {
+export interface QuetionnairesGridItem {
     id: number;
     uploaded_date: string;
     date_first: string;
@@ -12,12 +12,12 @@ export interface UploadsDataItemProps {
     status: string;
 }
 
-export interface UploadsDataProps {
-    items?: UploadsDataItemProps[];
+export interface QuetionnairesGridProps {
+    items?: QuetionnairesGridItem[];
     className?: string;
 }
 
-export const QuetionnairesGrid: React.FC<UploadsDataProps> = ({ items, className }) => {
+export const QuetionnairesGrid: React.FC<QuetionnairesGridProps> = ({ items, className }) => {
     // eslint-disable-next-line no-console
     console.log("items: ", items);
 

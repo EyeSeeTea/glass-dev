@@ -14,7 +14,6 @@ export const CurrentCallContent: React.FC<CurrentCallContentProps> = ({ moduleNa
             <DataSubmissionSteps moduleName={moduleName} currentCallStatus={currentCallStatus} />
         </ContentWrapper>
     );
-
 };
 
 const ContentWrapper = styled.div`

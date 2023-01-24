@@ -21,8 +21,6 @@ export const UploadHistoryPage: React.FC<UploadHistoryPageProps> = React.memo(({
 });
 
 export const UploadHistoryPageContent: React.FC<UploadHistoryPageProps> = React.memo(({ moduleName }) => {
-
-
     const handleClick = (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
         event.preventDefault();
     };
@@ -32,12 +30,7 @@ export const UploadHistoryPageContent: React.FC<UploadHistoryPageProps> = React.
             <PreContent>
                 {/* // TODO: replace this with a global reusable StyledBreadCrumbs component */}
                 <StyledBreadCrumbs aria-label="breadcrumb" separator="">
-                    <Button
-                        component={NavLink}
-                        to={`/current-call/${moduleName}`}
-                        exact={true}
-                        onClick={handleClick}
-                    >
+                    <Button component={NavLink} to={`/current-call/${moduleName}`} exact={true} onClick={handleClick}>
                         <span>{moduleName} asdd</span>
                     </Button>
                     <ChevronRightIcon />
