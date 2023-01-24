@@ -18,8 +18,7 @@ export interface UploadsDataProps {
 }
 
 export const QuetionnaireCard: React.FC<UploadsDataProps> = ({ items, className }) => {
-    // eslint-disable-next-line no-console
-    console.log("items: ", items);
+    console.debug("items: ", items);
 
     return (
         <ContentWrapper className={className}>

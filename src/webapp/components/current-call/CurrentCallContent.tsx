@@ -5,7 +5,11 @@ import { useDataSubmissionSteps } from "../../hooks/useDataSubmissionSteps";
 import { DataSubmissionSteps } from "./DataSubmissionSteps";
 import styled from "styled-components";
 
-export const CurrentCallContent: React.FC = () => {
+interface CurrentCallContentProps {
+    moduleName: string;
+}
+
+export const CurrentCallContent: React.FC<CurrentCallContentProps> = ({ moduleName }) => {
     const { compositionRoot } = useAppContext();
 
     const stepsResult = useDataSubmissionSteps(compositionRoot);
@@ -18,7 +22,7 @@ export const CurrentCallContent: React.FC = () => {
         case "loaded":
             return (
                 <ContentWrapper>
-                    <DataSubmissionSteps />
+                    <DataSubmissionSteps moduleName={moduleName} />
                 </ContentWrapper>
             );
     }

@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2022-12-09T22:44:29.637Z\n"
-"PO-Revision-Date: 2022-12-09T22:44:29.637Z\n"
+"POT-Creation-Date: 2023-01-13T13:24:20.056Z\n"
+"PO-Revision-Date: 2023-01-13T13:24:20.056Z\n"
 
 msgid "Year"
 msgstr ""
@@ -44,6 +44,24 @@ msgstr ""
 msgid "Request Dataset update"
 msgstr ""
 
+msgid "Uploaded"
+msgstr ""
+
+msgid "Date First"
+msgstr ""
+
+msgid "Date Last"
+msgstr ""
+
+msgid "Records"
+msgstr ""
+
+msgid "Type"
+msgstr ""
+
+msgid "Batch ID"
+msgstr ""
+
 msgid "Upload dataset"
 msgstr ""
 
@@ -67,22 +85,19 @@ msgid ""
 "for this call"
 msgstr ""
 
-msgid "Uploaded"
+msgid "Uploaded file has errors..."
 msgstr ""
 
-msgid "Date First"
+msgid "Back to Module"
 msgstr ""
 
-msgid "Date Last"
+msgid "Go to Validation Report"
 msgstr ""
 
-msgid "Records"
+msgid "Thank! your data for now is uploaded in our system"
 msgstr ""
 
-msgid "Type"
-msgstr ""
-
-msgid "Batch ID"
+msgid "Continue"
 msgstr ""
 
 msgid "I need help"
@@ -101,6 +116,12 @@ msgid "I'll fix it later"
 msgstr ""
 
 msgid "OK"
+msgstr ""
+
+msgid "Upload file"
+msgstr ""
+
+msgid "Select file"
 msgstr ""
 
 msgid "News from GLASS"
