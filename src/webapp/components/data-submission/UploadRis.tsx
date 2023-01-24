@@ -12,7 +12,7 @@ export const UploadRis: React.FC<UploadRisProps> = ({ handleValidate }) => {
     const [fileList, setFileList] = useState<FileList | null>(null);
 
     useEffect(() => {
-        if (fileList && fileList?.length) {
+        if (fileList?.length) {
             handleValidate(true);
         } else {
             handleValidate(false);

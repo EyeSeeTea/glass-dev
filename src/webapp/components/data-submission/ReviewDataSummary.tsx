@@ -70,7 +70,6 @@ export const ReviewDataSummary: React.FC<ReviewDataSummaryProps> = ({ changeStep
                         control={
                             <Checkbox
                                 checked={state.checkedA}
-                                // eslint-disable-next-line no-console
                                 onChange={handleCheckBox}
                                 name="checkedA"
                                 color="primary"
