@@ -30,7 +30,7 @@ export const DataSubmissionPageContent: React.FC<DataSubmissionPageProps> = Reac
     // TODO: replace useGlassModule (or parameters) with actual hook to fetch data submission data
     const result = useGlassModule(compositionRoot, moduleName);
 
-    function handleClick(event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) {
+    function click(event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) {
         event.preventDefault();
     }
 
@@ -49,7 +49,7 @@ export const DataSubmissionPageContent: React.FC<DataSubmissionPageProps> = Reac
                                 component={NavLink}
                                 to={`/current-call/${moduleName}`}
                                 exact={true}
-                                onClick={handleClick}
+                                onClick={click}
                             >
                                 <span>{moduleName}</span>
                             </Button>

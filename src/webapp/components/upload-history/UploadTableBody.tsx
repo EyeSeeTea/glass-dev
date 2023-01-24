@@ -18,12 +18,12 @@ export const UploadTableBody: React.FC<UploadTableBodyProps> = ({ rows }) => {
     const location = useLocation().pathname.slice(1);
     const moduleName = location.substring(location.indexOf("/") + 1);
 
-    const handleClick = () => {
+    const click = () => {
         history.push(`/data-submission/${moduleName}`);
     };
 
-    const handleDownload = (_url: string) => {
-        //Handle file download
+    const download = (_url: string) => {
+        // TODO: add usecase for filedownload
     };
 
     return (
@@ -31,7 +31,7 @@ export const UploadTableBody: React.FC<UploadTableBodyProps> = ({ rows }) => {
             {rows && rows.length ? (
                 <StyledTableBody>
                     {rows.map((row: UploadHistoryItemProps) => (
-                        <TableRow key={row.id} onClick={handleClick}>
+                        <TableRow key={row.id} onClick={click}>
                             <TableCell>
                                 <ListIcon />
                             </TableCell>
@@ -44,7 +44,7 @@ export const UploadTableBody: React.FC<UploadTableBodyProps> = ({ rows }) => {
                             <TableCell>{dayjs(row.submissionDate).format("YYYY-MM-DD HH:mm:ss")}</TableCell>
                             <TableCell>{row.fileName}</TableCell>
                             <TableCell>
-                                <CloudDownloadIcon color="error" onClick={() => handleDownload(row.fileId)} />
+                                <CloudDownloadIcon color="error" onClick={() => download(row.fileId)} />
                             </TableCell>
                             <TableCell>{row.inputLineNb}</TableCell>
                             <TableCell>{row.outputLineNb}</TableCell>

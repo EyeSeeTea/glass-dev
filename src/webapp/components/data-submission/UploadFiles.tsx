@@ -15,24 +15,24 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({ changeStep }) => {
     const [batchId, setBatchId] = useState("1");
     const [isValidated, setIsValidated] = useState(false);
 
-    const handleChange = (event: React.ChangeEvent<{ value: unknown }>) => {
+    const changeBatchId = (event: React.ChangeEvent<{ value: unknown }>) => {
         setBatchId(event.target.value as string);
     };
 
-    const handleValidate = (val: boolean) => {
+    const validate = (val: boolean) => {
         setIsValidated(val);
     };
 
     return (
         <ContentWrapper>
             <div className="file-fields">
-                <UploadRis handleValidate={handleValidate} />
+                <UploadRis validate={validate} />
                 <UploadSample />
             </div>
             <div className="batch-id">
                 <h3>Batch ID</h3>
                 <FormControl variant="outlined">
-                    <Select value={batchId} onChange={handleChange}>
+                    <Select value={batchId} onChange={changeBatchId}>
                         {/* <MenuItem value="">
                             <em>None</em>
                         </MenuItem> */}

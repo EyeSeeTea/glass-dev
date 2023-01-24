@@ -33,7 +33,7 @@ export const ReviewDataSummary: React.FC<ReviewDataSummaryProps> = ({ changeStep
         setFileType(fileType);
     };
 
-    const handleCheckBox = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const check = (event: React.ChangeEvent<HTMLInputElement>) => {
         setState({ ...state, [event.target.name]: event.target.checked });
     };
 
@@ -68,8 +68,7 @@ export const ReviewDataSummary: React.FC<ReviewDataSummaryProps> = ({ changeStep
                         control={
                             <Checkbox
                                 checked={state.checkedA}
-                                // eslint-disable-next-line no-console
-                                onChange={handleCheckBox}
+                                onChange={check}
                                 name="checkedA"
                                 color="primary"
                             />
@@ -80,8 +79,7 @@ export const ReviewDataSummary: React.FC<ReviewDataSummaryProps> = ({ changeStep
                         control={
                             <Checkbox
                                 checked={state.checkedB}
-                                // eslint-disable-next-line no-console
-                                onChange={handleCheckBox}
+                                onChange={check}
                                 name="checkedB"
                                 color="primary"
                             />
@@ -97,8 +95,7 @@ export const ReviewDataSummary: React.FC<ReviewDataSummaryProps> = ({ changeStep
                         control={
                             <Checkbox
                                 checked={state.checkedC}
-                                // eslint-disable-next-line no-console
-                                onChange={handleCheckBox}
+                                onChange={check}
                                 name="checkedC"
                                 color="primary"
                             />
@@ -109,8 +106,7 @@ export const ReviewDataSummary: React.FC<ReviewDataSummaryProps> = ({ changeStep
                         control={
                             <Checkbox
                                 checked={state.checkedD}
-                                // eslint-disable-next-line no-console
-                                onChange={handleCheckBox}
+                                onChange={check}
                                 name="checkedD"
                                 color="primary"
                             />
