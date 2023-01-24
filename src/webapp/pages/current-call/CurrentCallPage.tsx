@@ -74,12 +74,7 @@ export const CurrentCallPageContent: React.FC<CurrentCallPageContentProps> = Rea
                     <PreContent>
                         {/* // TODO: replace this with a global reusable StyledBreadCrumbs component */}
                         <StyledBreadCrumbs aria-label="breadcrumb" separator="">
-                            <Button
-                                component={NavLink}
-                                to={`/current-call/${moduleName}`}
-                                exact={true}
-                                onClick={click}
-                            >
+                            <Button component={NavLink} to={`/current-call/${moduleName}`} exact={true} onClick={click}>
                                 <span>{moduleName}</span>
                             </Button>
                             <ChevronRightIcon />

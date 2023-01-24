@@ -1,21 +1,16 @@
 import React from "react";
 import styled from "styled-components";
-import { UploadsTable } from "./UploadsTable";
+import { UploadsDataItemProps, UploadsTable } from "./UploadsTable";
 import { useAppContext } from "../../contexts/app-context";
-import { GlassSubmissionsState, useGlassSubmissions } from "../../hooks/useGlassSubmissions";
-import { ContentLoader } from "../content-loader/ContentLoader";
-import { UploadsDataItem } from "../../entities/uploads";
+import { useGlassSubmissions } from "../../hooks/useGlassSubmissions";
+import { CircularProgress, Typography } from "@material-ui/core";
 
-function getUploadedItems(submission: GlassSubmissionsState) {
-    if (submission.kind === "loaded") {
-        return submission.data.filter((row: UploadsDataItem) => row.status.toLowerCase() === "uploaded");
-    }
+function getUploadedItems(rows: UploadsDataItemProps[]) {
+    return rows.filter(row => row.status.toLowerCase() === "uploaded");
 }
 
-function getNonUploadedItems(submission: GlassSubmissionsState) {
-    if (submission.kind === "loaded") {
-        return submission.data.filter((row: UploadsDataItem) => row.status.toLowerCase() !== "uploaded");
-    }
+function getNonUploadedItems(rows: UploadsDataItemProps[]) {
+    return rows.filter(row => row.status.toLowerCase() !== "uploaded");
 }
 
 export const ListOfDatasets: React.FC = () => {
@@ -23,22 +18,26 @@ export const ListOfDatasets: React.FC = () => {
 
     const submissions = useGlassSubmissions(compositionRoot);
 
-    return (
-        <ContentLoader content={submissions}>
-            <ContentWrapper>
-                <h3>ContentLoader content</h3>
-                
-                <UploadsTable title="Correct Uploads" items={getUploadedItems(submissions)} />
-                
-                <UploadsTable
-                    title="Uploads with errors, or discarded"
-                    items={getNonUploadedItems(submissions)}
-                    className="error-group"
-                />
-                
-            </ContentWrapper>
-        </ContentLoader>
-    );
+    switch (submissions.kind) {
+        case "loading":
+            return <CircularProgress />;
+        case "error":
+            return <Typography variant="h6">{submissions.message}</Typography>;
+        case "loaded":
+            return (
+                <ContentWrapper>
+                    <UploadsTable
+                        title="Correct Uploads"
+                        items={getUploadedItems(submissions.data as UploadsDataItemProps[])}
+                    />
+                    <UploadsTable
+                        title="Uploads with errors, or discarded"
+                        items={getNonUploadedItems(submissions.data as UploadsDataItemProps[])}
+                        className="error-group"
+                    />
+                </ContentWrapper>
+            );
+    }
 };
 
 const ContentWrapper = styled.div`
