@@ -19,6 +19,7 @@ export class GetSpecificCallUseCase implements UseCase {
                 //Set to default status- NOT_COMPLETE, so that user can continue with submission workflow
                 else {
                     const defaultCallStatus: GlassCall = {
+                        id: "-1", //TO DO : Generate DHIS format Id
                         module: module,
                         orgUnit: orgUnit,
                         period: period,

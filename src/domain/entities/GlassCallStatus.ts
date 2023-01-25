@@ -7,6 +7,7 @@ export type CallStatusTypes =
     | "PENDING_UPDATE_APPROVAL";
 
 export interface GlassCall {
+    id: string;
     module: string;
     orgUnit: string;
     period: number;

@@ -12,6 +12,7 @@ import { GetGlassNewsUseCase } from "./domain/usecases/GetGlassNewsUseCase";
 import { GetInstanceVersionUseCase } from "./domain/usecases/GetInstanceVersionUseCase";
 import { ValidateGlassModulesUseCase } from "./domain/usecases/ValidateGlassModulesUseCase";
 import { ValidateGlassNewsUseCase } from "./domain/usecases/ValidateGlassNewsUseCase";
+import { GetCallsByModuleUseCase } from "./domain/usecases/GetCallsByModuleUseCase";
 
 export function getCompositionRoot(instance: Instance) {
     const dataStoreClient = new DataStoreClient(instance);
@@ -36,6 +37,7 @@ export function getCompositionRoot(instance: Instance) {
         }),
         glassCall: getExecute({
             getSpecificCall: new GetSpecificCallUseCase(glassCallRepository),
+            getCallsByModule: new GetCallsByModuleUseCase(glassCallRepository),
         }),
     };
 }
