@@ -14,7 +14,7 @@ import { GetGlassSubmissionsUseCase } from "./domain/usecases/GetGlassSubmission
 import { GetInstanceVersionUseCase } from "./domain/usecases/GetInstanceVersionUseCase";
 import { ValidateGlassModulesUseCase } from "./domain/usecases/ValidateGlassModulesUseCase";
 import { ValidateGlassNewsUseCase } from "./domain/usecases/ValidateGlassNewsUseCase";
-import { GetCallsByModuleUseCase } from "./domain/usecases/GetCallsByModuleUseCase";
+import { GetCallsByModuleAndOUUseCase } from "./domain/usecases/GetCallsByModuleAndOUUseCase";
 import { ValidateGlassSubmissionsUseCase } from "./domain/usecases/ValidateGlassSubmissionsUseCase";
 
 export function getCompositionRoot(instance: Instance) {
@@ -42,7 +42,7 @@ export function getCompositionRoot(instance: Instance) {
 
         glassCall: getExecute({
             getSpecificCall: new GetSpecificCallUseCase(glassCallRepository),
-            getCallsByModule: new GetCallsByModuleUseCase(glassCallRepository),
+            getCallsByModule: new GetCallsByModuleAndOUUseCase(glassCallRepository),
         }),
         glassSubmissions: getExecute({
             getAll: new GetGlassSubmissionsUseCase(glassSubmissionsRepository),

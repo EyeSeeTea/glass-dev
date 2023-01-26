@@ -13,15 +13,13 @@ import { GlassCall } from "../../../domain/entities/GlassCallStatus";
 export interface CallsTableProps {
     items?: GlassCall[];
     moduleName: string;
+    orgUnit: string;
 }
 
-export const CallsTable: React.FC<CallsTableProps> = ({ items, moduleName }) => {
+export const CallsTable: React.FC<CallsTableProps> = ({ items, moduleName, orgUnit }) => {
     const history = useHistory();
 
     const handleClick = (period: number) => {
-        //TO DO : The orgUnit should come from a global context which is yet to be implemented. Hardcoding for now
-        const orgUnit = "DVnpk4xiXGJ";
-        //TO DO : The path format is going to change to /current-call?module=<>&period=<>. Changes yet to be implemented
         history.push(`/current-call/${moduleName}?period=${period}&orgUnit=${orgUnit}`);
     };
     return (

@@ -1,7 +1,9 @@
 import { Typography } from "@material-ui/core";
 import { CircularProgress } from "material-ui";
+import { useLocation } from "react-router-dom";
 import { useAppContext } from "../../contexts/app-context";
-import { useGlassCallsByModule } from "../../hooks/useGlassCallsByModule";
+import { useGlassCallsByModuleAndOU } from "../../hooks/useGlassCallsByModuleAndOU";
+
 import { CallsTable } from "./CallsTable";
 
 interface CallsHistoryContentProps {
@@ -11,9 +13,15 @@ interface CallsHistoryContentProps {
 
 export const CallsHistoryContent: React.FC<CallsHistoryContentProps> = ({ moduleId, moduleName }) => {
     const { compositionRoot } = useAppContext();
+    const location = useLocation();
+    const queryParameters = new URLSearchParams(location.search);
+    //TO DO : The orgUnit should come from a global context which is yet to be implemented.
+    const orgUnitVal = queryParameters.get("orgUnit");
+    const orgUnit = orgUnitVal !== null ? orgUnitVal : "";
 
-    const calls = useGlassCallsByModule(compositionRoot, moduleId);
+    const calls = useGlassCallsByModuleAndOU(compositionRoot, moduleId, orgUnit);
 
+    //TO DO : Use global content loader component after its been implemented.
     switch (calls.kind) {
         case "loading":
             return <CircularProgress />;
@@ -22,7 +30,7 @@ export const CallsHistoryContent: React.FC<CallsHistoryContentProps> = ({ module
         case "loaded":
             return (
                 <>
-                    <CallsTable items={calls.data} moduleName={moduleName} />
+                    <CallsTable items={calls.data} moduleName={moduleName} orgUnit={orgUnit} />
                 </>
             );
     }

@@ -5,17 +5,17 @@ import { GlassState } from "./State";
 
 type GlassCallsState = GlassState<GlassCall[]>;
 
-export function useGlassCallsByModule(compositionRoot: CompositionRoot, moduleId: string) {
+export function useGlassCallsByModuleAndOU(compositionRoot: CompositionRoot, moduleId: string, orgUnit: string) {
     const [calls, setCalls] = useState<GlassCallsState>({
         kind: "loading",
     });
 
     useEffect(() => {
-        compositionRoot.glassCall.getCallsByModule(moduleId).run(
+        compositionRoot.glassCall.getCallsByModule(moduleId, orgUnit).run(
             callsByModule => setCalls({ kind: "loaded", data: callsByModule }),
             error => setCalls({ kind: "error", message: error })
         );
-    }, [setCalls, compositionRoot.glassCall, moduleId]);
+    }, [setCalls, compositionRoot.glassCall, moduleId, orgUnit]);
 
     return calls;
 }
