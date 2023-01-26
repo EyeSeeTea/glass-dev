@@ -1,5 +1,6 @@
 import { Typography } from "@material-ui/core";
 import { CircularProgress } from "material-ui";
+import { useState } from "react";
 import { useLocation } from "react-router-dom";
 import { useAppContext } from "../../contexts/app-context";
 import { useGlassCallsByModuleAndOU } from "../../hooks/useGlassCallsByModuleAndOU";
@@ -17,7 +18,7 @@ export const CallsHistoryContent: React.FC<CallsHistoryContentProps> = ({ module
     const queryParameters = new URLSearchParams(location.search);
     //TO DO : The orgUnit should come from a global context which is yet to be implemented.
     const orgUnitVal = queryParameters.get("orgUnit");
-    const orgUnit = orgUnitVal !== null ? orgUnitVal : "";
+    const [orgUnit, setOrgUnit] = useState(orgUnitVal === null ? "" : orgUnitVal);
 
     const calls = useGlassCallsByModuleAndOU(compositionRoot, moduleId, orgUnit);
 
