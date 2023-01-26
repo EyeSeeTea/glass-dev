@@ -33,7 +33,7 @@ export const ReviewDataSummary: React.FC<ReviewDataSummaryProps> = ({ changeStep
         setFileType(fileType);
     };
 
-    const handleCheckBox = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const check = (event: React.ChangeEvent<HTMLInputElement>) => {
         setState({ ...state, [event.target.name]: event.target.checked });
     };
 
@@ -65,27 +65,11 @@ export const ReviewDataSummary: React.FC<ReviewDataSummaryProps> = ({ changeStep
                 <h3>Filter by sample type</h3>
                 <SectionCard className="wrong">
                     <FormControlLabel
-                        control={
-                            <Checkbox
-                                checked={state.checkedA}
-                                // eslint-disable-next-line no-console
-                                onChange={handleCheckBox}
-                                name="checkedA"
-                                color="primary"
-                            />
-                        }
+                        control={<Checkbox checked={state.checkedA} onChange={check} name="checkedA" color="primary" />}
                         label="Blood"
                     />
                     <FormControlLabel
-                        control={
-                            <Checkbox
-                                checked={state.checkedB}
-                                // eslint-disable-next-line no-console
-                                onChange={handleCheckBox}
-                                name="checkedB"
-                                color="primary"
-                            />
-                        }
+                        control={<Checkbox checked={state.checkedB} onChange={check} name="checkedB" color="primary" />}
                         label="Genital"
                     />
                 </SectionCard>
@@ -94,27 +78,11 @@ export const ReviewDataSummary: React.FC<ReviewDataSummaryProps> = ({ changeStep
                 <h3>Compare with data from previous submissions</h3>
                 <SectionCard className="wrong">
                     <FormControlLabel
-                        control={
-                            <Checkbox
-                                checked={state.checkedC}
-                                // eslint-disable-next-line no-console
-                                onChange={handleCheckBox}
-                                name="checkedC"
-                                color="primary"
-                            />
-                        }
+                        control={<Checkbox checked={state.checkedC} onChange={check} name="checkedC" color="primary" />}
                         label="2020"
                     />
                     <FormControlLabel
-                        control={
-                            <Checkbox
-                                checked={state.checkedD}
-                                // eslint-disable-next-line no-console
-                                onChange={handleCheckBox}
-                                name="checkedD"
-                                color="primary"
-                            />
-                        }
+                        control={<Checkbox checked={state.checkedD} onChange={check} name="checkedD" color="primary" />}
                         label="2021"
                     />
                 </SectionCard>

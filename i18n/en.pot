@@ -41,6 +41,21 @@ msgstr ""
 msgid "Request Dataset update"
 msgstr ""
 
+msgid "Uploaded"
+msgstr ""
+
+msgid "Period"
+msgstr ""
+
+msgid "Records"
+msgstr ""
+
+msgid "Type"
+msgstr ""
+
+msgid "Batch ID"
+msgstr ""
+
 msgid "Display full status history >"
 msgstr ""
 
@@ -54,24 +69,6 @@ msgid "Upload dataset"
 msgstr ""
 
 msgid "Current Status"
-msgstr ""
-
-msgid "Uploaded"
-msgstr ""
-
-msgid "Date First"
-msgstr ""
-
-msgid "Date Last"
-msgstr ""
-
-msgid "Records"
-msgstr ""
-
-msgid "Type"
-msgstr ""
-
-msgid "Batch ID"
 msgstr ""
 
 msgid "Back to Module"
@@ -138,12 +135,6 @@ msgid "Country"
 msgstr ""
 
 msgid "Batch Id"
-msgstr ""
-
-msgid "Start"
-msgstr ""
-
-msgid "End"
 msgstr ""
 
 msgid "Specimens"

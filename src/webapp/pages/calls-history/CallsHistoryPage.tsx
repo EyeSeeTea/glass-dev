@@ -30,7 +30,7 @@ export const CallsHistoryPageContent: React.FC<CallsHistoryPageProps> = React.me
     // TODO: replace useGlassModule (or parameters) with actual hook to fetch calls history data
     const result = useGlassModule(compositionRoot, moduleName);
 
-    const handleClick = (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
+    const click = (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
         event.preventDefault();
     };
 
@@ -45,12 +45,7 @@ export const CallsHistoryPageContent: React.FC<CallsHistoryPageProps> = React.me
                     <PreContent>
                         {/* // TODO: replace this with a global reusable StyledBreadCrumbs component */}
                         <StyledBreadCrumbs aria-label="breadcrumb" separator="">
-                            <Button
-                                component={NavLink}
-                                to={`/current-call/${moduleName}`}
-                                exact={true}
-                                onClick={handleClick}
-                            >
+                            <Button component={NavLink} to={`/current-call/${moduleName}`} exact={true} onClick={click}>
                                 <span>{moduleName}</span>
                             </Button>
                             <ChevronRightIcon />

@@ -13,10 +13,10 @@ interface SidebarNavProps {
     groupName?: string;
     menu: MenuLeaf;
     currentNaVitem: string[];
-    handleCurrentNavItem: (val: string[]) => void;
+    changeCurrentNavItem: (val: string[]) => void;
 }
 
-const SidebarNavMenu: React.FC<SidebarNavProps> = ({ menu, className, groupName, handleCurrentNavItem }) => {
+const SidebarNavMenu: React.FC<SidebarNavProps> = ({ menu, className, groupName, changeCurrentNavItem }) => {
     const classes = useStyles(menu.level);
     const location = useLocation();
 
@@ -38,7 +38,7 @@ const SidebarNavMenu: React.FC<SidebarNavProps> = ({ menu, className, groupName,
             style={{ paddingLeft: menu.level * 8 }}
             onClick={() => {
                 if (groupName) {
-                    handleCurrentNavItem([groupName, menu.title]);
+                    changeCurrentNavItem([groupName, menu.title]);
                 }
             }}
         >

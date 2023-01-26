@@ -30,7 +30,7 @@ export const DataSubmissionPageContent: React.FC<DataSubmissionPageProps> = Reac
     // TODO: replace useGlassModule (or parameters) with actual hook to fetch data submission data
     const result = useGlassModule(compositionRoot, moduleName);
 
-    function handleClick(event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) {
+    function click(event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) {
         event.preventDefault();
     }
 
@@ -45,12 +45,7 @@ export const DataSubmissionPageContent: React.FC<DataSubmissionPageProps> = Reac
                     <PreContent>
                         {/* // TODO: replace this with a global reusable StyledBreadCrumbs component */}
                         <StyledBreadCrumbs aria-label="breadcrumb" separator="">
-                            <Button
-                                component={NavLink}
-                                to={`/current-call/${moduleName}`}
-                                exact={true}
-                                onClick={handleClick}
-                            >
+                            <Button component={NavLink} to={`/current-call/${moduleName}`} exact={true} onClick={click}>
                                 <span>{moduleName}</span>
                             </Button>
                             <ChevronRightIcon />
