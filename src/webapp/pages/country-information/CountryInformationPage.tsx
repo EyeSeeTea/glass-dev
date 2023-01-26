@@ -21,7 +21,7 @@ export const CountryInformationPage: React.FC<CountryInformationPageProps> = Rea
 });
 
 export const CountryInformationPageContent: React.FC<CountryInformationPageProps> = React.memo(({ moduleName }) => {
-    const handleClick = (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
+    const click = (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
         event.preventDefault();
     };
 
@@ -30,7 +30,7 @@ export const CountryInformationPageContent: React.FC<CountryInformationPageProps
             <PreContent>
                 {/* // TODO: replace this with a global reusable StyledBreadCrumbs component */}
                 <StyledBreadCrumbs aria-label="breadcrumb" separator="">
-                    <Button component={NavLink} to={`/current-call/${moduleName}`} exact={true} onClick={handleClick}>
+                    <Button component={NavLink} to={`/current-call/${moduleName}`} exact={true} onClick={click}>
                         <span>{moduleName}</span>
                     </Button>
                     <ChevronRightIcon />

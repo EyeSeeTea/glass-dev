@@ -6,6 +6,7 @@ import CloudDownloadIcon from "@material-ui/icons/CloudDownload";
 import ListIcon from "@material-ui/icons/List";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
 import { useHistory, useLocation } from "react-router-dom";
+import dayjs from "dayjs";
 
 export interface UploadTableBodyProps {
     rows?: UploadHistoryItemProps[];
@@ -17,12 +18,12 @@ export const UploadTableBody: React.FC<UploadTableBodyProps> = ({ rows }) => {
     const location = useLocation().pathname.slice(1);
     const moduleName = location.substring(location.indexOf("/") + 1);
 
-    const handleClick = () => {
+    const click = () => {
         history.push(`/data-submission/${moduleName}`);
     };
 
-    const handleDownload = () => {
-        //Handle file download
+    const download = (_url: string) => {
+        // TODO: add usecase for filedownload
     };
 
     return (
@@ -30,25 +31,23 @@ export const UploadTableBody: React.FC<UploadTableBodyProps> = ({ rows }) => {
             {rows && rows.length ? (
                 <StyledTableBody>
                     {rows.map((row: UploadHistoryItemProps) => (
-                        <TableRow key={row.id} onClick={handleClick}>
+                        <TableRow key={row.id} onClick={click}>
                             <TableCell>
                                 <ListIcon />
                             </TableCell>
-                            <TableCell>{row.file_type}</TableCell>
-                            <TableCell>{row.country}</TableCell>
-                            <TableCell>{row.batch_id}</TableCell>
-                            <TableCell>{row.year}</TableCell>
-                            <TableCell>{row.start}</TableCell>
-                            <TableCell>{row.end}</TableCell>
+                            <TableCell>{row.fileType}</TableCell>
+                            <TableCell>{row.countryCode.toUpperCase()}</TableCell>
+                            <TableCell>{row.batchId}</TableCell>
+                            <TableCell>{row.period}</TableCell>
                             <TableCell>{row.specimens.join(", ")}</TableCell>
                             <TableCell>{row.status}</TableCell>
-                            <TableCell>{row.date}</TableCell>
-                            <TableCell>{row.filename}</TableCell>
+                            <TableCell>{dayjs(row.submissionDate).format("YYYY-MM-DD HH:mm:ss")}</TableCell>
+                            <TableCell>{row.fileName}</TableCell>
                             <TableCell>
-                                <CloudDownloadIcon color="error" onClick={handleDownload} />
+                                <CloudDownloadIcon color="error" onClick={() => download(row.fileId)} />
                             </TableCell>
-                            <TableCell>{row.input_line_nb}</TableCell>
-                            <TableCell>{row.output_line_nb}</TableCell>
+                            <TableCell>{row.inputLineNb}</TableCell>
+                            <TableCell>{row.outputLineNb}</TableCell>
                         </TableRow>
                     ))}
                 </StyledTableBody>

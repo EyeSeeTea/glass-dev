@@ -12,7 +12,7 @@ import { useConfig } from "@dhis2/app-runtime";
 export const MainLayout: React.FC = React.memo(({ children }) => {
     const { baseUrl } = useConfig();
 
-    const handleLogout = () => {
+    const logout = () => {
         goToDhis2Url(baseUrl, "/dhis-web-commons-security/logout.action");
     };
 
@@ -26,7 +26,7 @@ export const MainLayout: React.FC = React.memo(({ children }) => {
                         <ButtonContainer>
                             <div>
                                 <StyledButton
-                                    onClick={handleLogout}
+                                    onClick={logout}
                                     variant="contained"
                                     color="default"
                                     startIcon={<ExitToAppIcon />}

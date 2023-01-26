@@ -6,19 +6,20 @@ import i18n from "@eyeseetea/d2-ui-components/locales";
 import { glassColors, palette } from "../../pages/app/themes/dhis2.theme";
 import ArrowUpwardIcon from "@material-ui/icons/ArrowUpward";
 export interface UploadHistoryItemProps {
-    id: number;
-    file_type: string;
-    country: string;
-    batch_id: string;
-    year: string | number;
-    start: string;
-    end: string;
+    id: string;
+    batchId: string;
+    countryCode: string;
+    fileType: string;
+    fileId: string;
+    fileName: string;
+    inputLineNb: number;
+    outputLineNb: number;
+    period: string;
     specimens: string[];
     status: string;
-    date: Date | string;
-    filename: string;
-    input_line_nb: number;
-    output_line_nb: number;
+    submissionDate: Date;
+    call: string;
+    module: string;
 }
 
 export interface UploadTableProps {
@@ -66,25 +67,7 @@ export const UploadTable: React.FC<UploadTableProps> = ({ title, items, classNam
                             </TableCell>
                             <TableCell>
                                 <StyledBox>
-                                    <Typography variant="caption">{i18n.t("Year")}</Typography>
-                                    <ColStatus>
-                                        <ArrowUpwardIcon />
-                                        <sup>1</sup>
-                                    </ColStatus>
-                                </StyledBox>
-                            </TableCell>
-                            <TableCell>
-                                <StyledBox>
-                                    <Typography variant="caption">{i18n.t("Start")}</Typography>
-                                    <ColStatus>
-                                        <ArrowUpwardIcon />
-                                        <sup>1</sup>
-                                    </ColStatus>
-                                </StyledBox>
-                            </TableCell>
-                            <TableCell>
-                                <StyledBox>
-                                    <Typography variant="caption">{i18n.t("End")}</Typography>
+                                    <Typography variant="caption">{i18n.t("Period")}</Typography>
                                     <ColStatus>
                                         <ArrowUpwardIcon />
                                         <sup>1</sup>

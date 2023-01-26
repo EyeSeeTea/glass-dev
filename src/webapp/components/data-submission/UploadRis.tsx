@@ -6,39 +6,39 @@ import BackupIcon from "@material-ui/icons/Backup";
 import CloseIcon from "@material-ui/icons/Close";
 
 interface UploadRisProps {
-    handleValidate: (val: boolean) => void;
+    validate: (val: boolean) => void;
 }
-export const UploadRis: React.FC<UploadRisProps> = ({ handleValidate }) => {
+export const UploadRis: React.FC<UploadRisProps> = ({ validate }) => {
     const [fileList, setFileList] = useState<FileList | null>(null);
 
     useEffect(() => {
-        if (fileList && fileList?.length) {
-            handleValidate(true);
+        if (fileList?.length) {
+            validate(true);
         } else {
-            handleValidate(false);
+            validate(false);
         }
-    }, [fileList, handleValidate]);
+    }, [fileList, validate]);
 
     const inputRef = useRef<HTMLInputElement>(null);
 
     const files = fileList ? [...fileList] : [];
 
-    const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const updateFiles = (e: ChangeEvent<HTMLInputElement>) => {
         setFileList(e.target.files);
     };
 
-    const handleChooseFile = () => {
+    const selectFile = () => {
         if (inputRef.current != null) {
             inputRef.current.click();
         }
     };
 
-    const handleRemoveFiles = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    const removeFiles = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         event.preventDefault();
         setFileList(null);
     };
 
-    const handleUploadFile = () => {
+    const uploadFiles = () => {
         if (!fileList) {
             return;
         }
@@ -54,21 +54,20 @@ export const UploadRis: React.FC<UploadRisProps> = ({ handleValidate }) => {
             body: data,
         })
             .then(res => res.json())
-            // eslint-disable-next-line no-console
-            .then(data => console.log(data))
+            .then(data => console.debug(data))
             .catch(err => console.error(err));
     };
 
     return (
         <ContentWrapper className="ris-file">
             <span className="label">Choose RIS File</span>
-            {fileList && fileList?.length ? (
+            {fileList?.length ? (
                 <Button
                     variant="contained"
                     color="primary"
                     className="choose-file-button"
                     endIcon={<BackupIcon />}
-                    onClick={handleUploadFile}
+                    onClick={uploadFiles}
                 >
                     {i18n.t("Upload file")}
                 </Button>
@@ -78,19 +77,19 @@ export const UploadRis: React.FC<UploadRisProps> = ({ handleValidate }) => {
                     color="primary"
                     className="choose-file-button"
                     endIcon={<BackupIcon />}
-                    onClick={handleChooseFile}
+                    onClick={selectFile}
                 >
                     {i18n.t("Select file")}
                 </Button>
             )}
 
-            <input ref={inputRef} type="file" onChange={handleFileChange} multiple />
+            <input ref={inputRef} type="file" onChange={updateFiles} multiple />
 
             <ul className="uploaded-list">
                 {files.map((file, i) => (
                     <li key={i}>
                         {file.name} - {file.type}
-                        <button className="remove-files" onClick={handleRemoveFiles}>
+                        <button className="remove-files" onClick={removeFiles}>
                             <CloseIcon />
                         </button>
                     </li>
