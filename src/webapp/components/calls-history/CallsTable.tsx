@@ -4,7 +4,7 @@ import styled from "styled-components";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
 import ArrowUpwardIcon from "@material-ui/icons/ArrowUpward";
-import { useHistory, useLocation } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 import { StatusCapsule } from "./StatusCapsule";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import { TableBody } from "material-ui";
@@ -12,17 +12,17 @@ import { GlassCall } from "../../../domain/entities/GlassCallStatus";
 
 export interface CallsTableProps {
     items?: GlassCall[];
+    moduleName: string;
 }
 
-// TODO: replace Table with Datagrid
-export const CallsTable: React.FC<CallsTableProps> = ({ items }) => {
+export const CallsTable: React.FC<CallsTableProps> = ({ items, moduleName }) => {
     const history = useHistory();
-    // TODO: remove the next two lines and create a global hook to get current module
-    const location = useLocation().pathname.slice(1);
-    const moduleName = location.substring(location.indexOf("/") + 1);
 
-    const handleClick = () => {
-        history.push(`/current-call/${moduleName}`);
+    const handleClick = (period: number) => {
+        //TO DO : The orgUnit should come from a global context which is yet to be implemented. Hardcoding for now
+        const orgUnit = "DVnpk4xiXGJ";
+        //TO DO : The path format is going to change to /current-call?module=<>&period=<>. Changes yet to be implemented
+        history.push(`/current-call/${moduleName}?period=${period}&orgUnit=${orgUnit}`);
     };
     return (
         <ContentWrapper>
@@ -51,7 +51,7 @@ export const CallsTable: React.FC<CallsTableProps> = ({ items }) => {
                     {items && items.length ? (
                         <StyledTableBody displayRowCheckbox={false}>
                             {items.map((row: GlassCall) => (
-                                <TableRow key={row.id} onClick={handleClick}>
+                                <TableRow key={row.id} onClick={() => handleClick(row.period)}>
                                     <TableCell>{row.period}</TableCell>
                                     <TableCell>
                                         <StatusCapsule status={row.status} />

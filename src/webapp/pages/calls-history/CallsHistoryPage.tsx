@@ -63,7 +63,7 @@ export const CallsHistoryPageContent: React.FC<CallsHistoryPageProps> = React.me
                         <h2>{i18n.t("All Calls")}</h2>
                     </PageTitle>
                     <CustomCard padding="40px 60px 50px">
-                        <CallsHistoryContent />
+                        <CallsHistoryContent moduleId={result.data.id} moduleName={moduleName} />
                     </CustomCard>
                 </ContentWrapper>
             );

@@ -4,10 +4,15 @@ import { useAppContext } from "../../contexts/app-context";
 import { useGlassCallsByModule } from "../../hooks/useGlassCallsByModule";
 import { CallsTable } from "./CallsTable";
 
-export const CallsHistoryContent: React.FC = () => {
+interface CallsHistoryContentProps {
+    moduleName: string;
+    moduleId: string;
+}
+
+export const CallsHistoryContent: React.FC<CallsHistoryContentProps> = ({ moduleId, moduleName }) => {
     const { compositionRoot } = useAppContext();
 
-    const calls = useGlassCallsByModule(compositionRoot, "CVVp44xiXGJ");
+    const calls = useGlassCallsByModule(compositionRoot, moduleId);
 
     switch (calls.kind) {
         case "loading":
@@ -17,7 +22,7 @@ export const CallsHistoryContent: React.FC = () => {
         case "loaded":
             return (
                 <>
-                    <CallsTable items={calls.data} />
+                    <CallsTable items={calls.data} moduleName={moduleName} />
                 </>
             );
     }
