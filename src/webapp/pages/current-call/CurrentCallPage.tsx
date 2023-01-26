@@ -1,38 +1,32 @@
+/* eslint-disable no-console */
 import { Breadcrumbs, Button, Typography } from "@material-ui/core";
 import { CircularProgress } from "material-ui";
-import React from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
 import { MainLayout } from "../../components/main-layout/MainLayout";
 import { useAppContext } from "../../contexts/app-context";
 import { useGlassModule } from "../../hooks/useGlassModule";
 import { glassColors, palette } from "../app/themes/dhis2.theme";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
-import { NavLink } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 import { CustomCard } from "../../components/custom-card/CustomCard";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { CurrentCallContent } from "../../components/current-call/CurrentCallContent";
+import { useStatusCall } from "../../hooks/useStatusCall";
 
-interface CurrentCallPageContentProps {
+interface CurrentCallPageProps {
     moduleName: string;
 }
 
-export const CurrentCallPage: React.FC<CurrentCallPageContentProps> = React.memo(({ moduleName }) => {
-    return (
-        <MainLayout>
-            <CurrentCallPageContent moduleName={moduleName} />
-        </MainLayout>
-    );
-});
+interface CurrentCallPageContentProps {
+    moduleId: string;
+    moduleName: string;
+}
 
-export const CurrentCallPageContent: React.FC<CurrentCallPageContentProps> = React.memo(({ moduleName }) => {
+export const CurrentCallPage: React.FC<CurrentCallPageProps> = React.memo(({ moduleName }) => {
     const { compositionRoot } = useAppContext();
 
     const result = useGlassModule(compositionRoot, moduleName);
-
-    const handleClick = (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
-        event.preventDefault();
-    };
-
     switch (result.kind) {
         case "loading":
             return <CircularProgress />;
@@ -40,20 +34,52 @@ export const CurrentCallPageContent: React.FC<CurrentCallPageContentProps> = Rea
             return <Typography variant="h6">{result.message}</Typography>;
         case "loaded":
             return (
-                <ContentWrapper moduleColor={result.data.color}>
+                <MainLayout>
+                    <CurrentCallPageContent moduleName={moduleName} moduleId={result.data.id} />
+                </MainLayout>
+            );
+    }
+});
+
+export const CurrentCallPageContent: React.FC<CurrentCallPageContentProps> = React.memo(({ moduleId, moduleName }) => {
+    const location = useLocation();
+    const queryParameters = new URLSearchParams(location.search);
+
+    //TO DO : orgUnit and period will not be fetched from queryParameters, it will be fetched from context.
+    const periodVal = queryParameters?.get("period");
+    const orgUnitVal = queryParameters.get("orgUnit");
+
+    //set default values till the context changes are integrated,
+    //once context is implemented these values will never be null, defaults logic to be decided and implemented in context
+    const [period, setPeriod] = useState(periodVal === null ? new Date().getFullYear() : parseInt(periodVal));
+    const [orgUnit, setOrgUnit] = useState(orgUnitVal === null ? "" : orgUnitVal);
+
+    const { compositionRoot } = useAppContext();
+    const currentCallStatus = useStatusCall(compositionRoot, moduleId, orgUnit, period);
+
+    const click = (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
+        event.preventDefault();
+        setPeriod(0); //new period value
+        setOrgUnit("new orgUnit value");
+    };
+
+    switch (currentCallStatus.kind) {
+        case "loading":
+            return <CircularProgress />;
+        case "error":
+            return <Typography variant="h6">{currentCallStatus.message}</Typography>;
+        case "loaded": {
+            return (
+                <ContentWrapper>
                     <PreContent>
+                        {/* // TODO: replace this with a global reusable StyledBreadCrumbs component */}
                         <StyledBreadCrumbs aria-label="breadcrumb" separator="">
-                            <Button
-                                component={NavLink}
-                                to={`/#/current-call/${moduleName}`}
-                                exact={true}
-                                onClick={handleClick}
-                            >
+                            <Button component={NavLink} to={`/current-call/${moduleName}`} exact={true} onClick={click}>
                                 <span>{moduleName}</span>
                             </Button>
                             <ChevronRightIcon />
-                            <Button>
-                                <span>{i18n.t("2020 Call")}</span>
+                            <Button component={NavLink} to={`/current-call/${moduleName}`} exact={true}>
+                                <span>{i18n.t(`${period} Call`)}</span>
                             </Button>
                         </StyledBreadCrumbs>
                         <div className="info">
@@ -61,25 +87,25 @@ export const CurrentCallPageContent: React.FC<CurrentCallPageContentProps> = Rea
                             <span>Spain</span>
                         </div>
                     </PreContent>
-                    <PageTitle>
-                        <h3>{i18n.t("2020 Call")}</h3>
-                        <div className="status">{i18n.t("Missing Data")}</div>
-                    </PageTitle>
+                    {currentCallStatus && (
+                        <PageTitle statusColor={currentCallStatus.data.colour}>
+                            <h3>{i18n.t(`${period} Call`)}</h3>
+                            <div className="status">{i18n.t(currentCallStatus.data.title)}</div>
+                        </PageTitle>
+                    )}
                     <CustomCard padding="40px 60px 50px">
-                        <CurrentCallContent moduleName={moduleName} />
+                        <CurrentCallContent moduleName={moduleName} currentCallStatus={currentCallStatus.data} />
                     </CustomCard>
                 </ContentWrapper>
             );
+        }
     }
 });
 
-const ContentWrapper = styled.div<{ moduleColor: string }>`
+const ContentWrapper = styled.div`
     display: flex;
     flex-direction: column;
     gap: 20px;
-    .module-bg {
-        background-color: ${props => (props.moduleColor ? props.moduleColor : glassColors.mainPrimary)};
-    }
 `;
 
 const PreContent = styled.div`
@@ -98,7 +124,7 @@ const PreContent = styled.div`
     }
 `;
 
-const PageTitle = styled.div`
+const PageTitle = styled.div<{ statusColor: string }>`
     display: flex;
     flex-direction: row;
     gap: 20px;
@@ -110,7 +136,7 @@ const PageTitle = styled.div`
         display: inline-block;
         border-radius: 5px;
         padding: 3px 15px;
-        background-color: ${glassColors.yellow};
+        background-color: ${props => (props.statusColor ? props.statusColor : glassColors.mainPrimary)};
         color: white;
         text-transform: uppercase;
         font-weight: bold;

@@ -6,7 +6,6 @@ import { OpenCalls } from "./OpenCalls";
 import { YourNotifications } from "./YourNotifications";
 
 export const LandingContent: React.FC = () => {
-
     return (
         <StyledGrid container spacing={4} alignItems="flex-start">
             <OpenCalls />

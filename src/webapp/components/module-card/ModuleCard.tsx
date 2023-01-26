@@ -6,15 +6,17 @@ import StarIcon from "@material-ui/icons/Star";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
 import WarningIcon from "@material-ui/icons/WarningOutlined";
 import i18n from "../../../locales";
+import { NavLink } from "react-router-dom";
 
 interface ModuleCardProps {
     title: string;
     moduleColor: string;
     endDays?: number | null;
     filesUploaded: number;
+    moduleUrl: string;
 }
 
-export const ModuleCard: React.FC<ModuleCardProps> = ({ title, moduleColor, endDays, filesUploaded }) => {
+export const ModuleCard: React.FC<ModuleCardProps> = ({ title, moduleColor, endDays, filesUploaded, moduleUrl }) => {
     return (
         <CustomCard padding="0">
             <TitleContainer moduleColor={moduleColor}>
@@ -37,8 +39,8 @@ export const ModuleCard: React.FC<ModuleCardProps> = ({ title, moduleColor, endD
                     <Typography color="textSecondary">{`${filesUploaded} files uploaded`}</Typography>
                 </Container>
 
-                <Button variant="contained" color="primary">
-                    {i18n.t("GO")}
+                <Button variant="contained" color="primary" component={NavLink} to={moduleUrl} exact={true}>
+                    <span>{i18n.t("GO")}</span>
                 </Button>
             </ContentContainer>
         </CustomCard>
@@ -73,7 +75,8 @@ const ContentContainer = styled.div<{ moduleColor: string }>`
     flex-direction: row;
     justify-content: space-between;
     align-items: end;
-    button {
+    button,
+    a {
         background-color: ${props => props.moduleColor};
         &:hover {
             background-color: ${props => props.moduleColor};

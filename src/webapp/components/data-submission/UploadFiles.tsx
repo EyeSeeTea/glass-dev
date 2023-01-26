@@ -15,28 +15,26 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({ changeStep }) => {
     const [batchId, setBatchId] = useState("1");
     const [isValidated, setIsValidated] = useState(false);
 
-    const handleChange = (event: React.ChangeEvent<{ value: unknown }>) => {
+    const changeBatchId = (event: React.ChangeEvent<{ value: unknown }>) => {
         setBatchId(event.target.value as string);
     };
 
-    const handleValidate = (val: boolean) => {
+    const validate = (val: boolean) => {
         setIsValidated(val);
     };
 
     return (
         <ContentWrapper>
             <div className="file-fields">
+                <UploadRis validate={validate} />
 
-                <UploadRis handleValidate={handleValidate} />
-                
                 <UploadSample />
-                
             </div>
 
             <div className="batch-id">
                 <h3>Batch ID</h3>
                 <FormControl variant="outlined">
-                    <Select value={batchId} onChange={handleChange}>
+                    <Select value={batchId} onChange={changeBatchId}>
                         {/* <MenuItem value="">
                             <em>None</em>
                         </MenuItem> */}
@@ -102,13 +100,19 @@ const ContentWrapper = styled.div`
             padding: 0;
             li {
                 font-size: 14px;
-                display: inline-block;
+                display: inline-flex;
+                gap: 5px;
                 .remove-files {
                     font-size: 13px;
+                    cursor: pointer;
                     border: none;
                     background: none;
                     padding: 0;
                     color: ${glassColors.red};
+                    svg {
+                        width: 20px;
+                        height: 20px;
+                    }
                 }
             }
         }
