@@ -11,7 +11,7 @@ export function useGlassCallsByModuleAndOU(compositionRoot: CompositionRoot, mod
     });
 
     useEffect(() => {
-        compositionRoot.glassCall.getCallsByModule(moduleId, orgUnit).run(
+        compositionRoot.glassCall.getCallsByModuleAndOU(moduleId, orgUnit).run(
             callsByModule => setCalls({ kind: "loaded", data: callsByModule }),
             error => setCalls({ kind: "error", message: error })
         );
