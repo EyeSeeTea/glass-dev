@@ -5,13 +5,10 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2023-01-18T12:24:29.887Z\n"
-"PO-Revision-Date: 2023-01-18T12:24:29.887Z\n"
+"POT-Creation-Date: 2023-01-25T18:09:55.151Z\n"
+"PO-Revision-Date: 2023-01-25T18:09:55.151Z\n"
 
 msgid "Year"
-msgstr ""
-
-msgid "Open / Close"
 msgstr ""
 
 msgid "Status"
