@@ -18,9 +18,6 @@ export interface QuetionnairesGridProps {
 }
 
 export const QuetionnairesGrid: React.FC<QuetionnairesGridProps> = ({ items, className }) => {
-    // eslint-disable-next-line no-console
-    console.log("items: ", items);
-
     return (
         <ContentWrapper className={className}>
             <CustomCard />
