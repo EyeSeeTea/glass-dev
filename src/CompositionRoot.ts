@@ -42,7 +42,7 @@ export function getCompositionRoot(instance: Instance) {
 
         glassCall: getExecute({
             getSpecificCall: new GetSpecificCallUseCase(glassCallRepository),
-            getCallsByModule: new GetCallsByModuleAndOUUseCase(glassCallRepository),
+            getCallsByModuleAndOU: new GetCallsByModuleAndOUUseCase(glassCallRepository),
         }),
         glassSubmissions: getExecute({
             getAll: new GetGlassSubmissionsUseCase(glassSubmissionsRepository),
