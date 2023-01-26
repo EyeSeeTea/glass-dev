@@ -18,14 +18,13 @@ export const UploadHistoryContent: React.FC = () => {
             <ContentWrapper>
                 <Filter />
                 <CustomCard padding="20px 30px 20px">
-                    {submissions.kind === "loaded" &&
+                    {submissions.kind === "loaded" && (
                         <UploadTable items={submissions.data} data-current-module={params.get("userId")} />
-                    }
+                    )}
                 </CustomCard>
             </ContentWrapper>
         </ContentLoader>
     );
-
 };
 
 const ContentWrapper = styled.div`

@@ -1,6 +1,5 @@
 /* eslint-disable no-console */
-import { Breadcrumbs, Button, Typography } from "@material-ui/core";
-import { CircularProgress } from "material-ui";
+import { Breadcrumbs, Button } from "@material-ui/core";
 import React, { useState } from "react";
 import styled from "styled-components";
 import { MainLayout } from "../../components/main-layout/MainLayout";
@@ -32,13 +31,12 @@ export const CurrentCallPage: React.FC<CurrentCallPageProps> = React.memo(({ mod
     return (
         <ContentLoader content={result}>
             <MainLayout>
-                {result.kind === "loaded" &&
+                {result.kind === "loaded" && (
                     <CurrentCallPageContent moduleName={moduleName} moduleId={result.data.id} />
-                }
+                )}
             </MainLayout>
         </ContentLoader>
     );
-
 });
 
 export const CurrentCallPageContent: React.FC<CurrentCallPageContentProps> = React.memo(({ moduleId, moduleName }) => {
@@ -96,7 +94,6 @@ export const CurrentCallPageContent: React.FC<CurrentCallPageContentProps> = Rea
             </ContentWrapper>
         </ContentLoader>
     );
-
 });
 
 const ContentWrapper = styled.div`
