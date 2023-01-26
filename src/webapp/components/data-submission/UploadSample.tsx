@@ -13,22 +13,22 @@ export const UploadSample: React.FC = () => {
 
     const files = fileList ? [...fileList] : [];
 
-    const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const updateFiles = (e: ChangeEvent<HTMLInputElement>) => {
         setFileList(e.target.files);
     };
 
-    const handleRemoveFiles = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    const removeFiles = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         event.preventDefault();
         setFileList(null);
     };
 
-    const handleChooseFile = () => {
+    const selectFiles = () => {
         if (inputRef.current != null) {
             inputRef.current.click();
         }
     };
 
-    const handleUploadFile = () => {
+    const uploadFiles = () => {
         if (!fileList) {
             return;
         }
@@ -59,7 +59,7 @@ export const UploadSample: React.FC = () => {
                     color="primary"
                     className="choose-file-button"
                     endIcon={<BackupIcon />}
-                    onClick={handleUploadFile}
+                    onClick={uploadFiles}
                 >
                     {i18n.t("Upload file")}
                 </Button>
@@ -69,19 +69,19 @@ export const UploadSample: React.FC = () => {
                     color="primary"
                     className="choose-file-button"
                     endIcon={<BackupIcon />}
-                    onClick={handleChooseFile}
+                    onClick={selectFiles}
                 >
                     {i18n.t("Select file")}
                 </Button>
             )}
 
-            <input ref={inputRef} type="file" onChange={handleFileChange} multiple />
+            <input ref={inputRef} type="file" onChange={updateFiles} multiple />
 
             <ul className="uploaded-list">
                 {files.map((file, i) => (
                     <li key={i}>
                         {file.name} - {file.type}
-                        <button className="remove-files" onClick={handleRemoveFiles}>
+                        <button className="remove-files" onClick={removeFiles}>
                             <CloseIcon />
                         </button>
                     </li>

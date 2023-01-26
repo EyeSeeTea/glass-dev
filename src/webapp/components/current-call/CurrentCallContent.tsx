@@ -4,12 +4,14 @@ import { useAppContext } from "../../contexts/app-context";
 import { useDataSubmissionSteps } from "../../hooks/useDataSubmissionSteps";
 import { DataSubmissionSteps } from "./DataSubmissionSteps";
 import styled from "styled-components";
+import { StatusDetails } from "./overview/StatusDetails";
 
 interface CurrentCallContentProps {
     moduleName: string;
+    currentCallStatus: StatusDetails;
 }
 
-export const CurrentCallContent: React.FC<CurrentCallContentProps> = ({ moduleName }) => {
+export const CurrentCallContent: React.FC<CurrentCallContentProps> = ({ moduleName, currentCallStatus }) => {
     const { compositionRoot } = useAppContext();
 
     const stepsResult = useDataSubmissionSteps(compositionRoot);
@@ -22,7 +24,7 @@ export const CurrentCallContent: React.FC<CurrentCallContentProps> = ({ moduleNa
         case "loaded":
             return (
                 <ContentWrapper>
-                    <DataSubmissionSteps moduleName={moduleName} />
+                    <DataSubmissionSteps moduleName={moduleName} currentCallStatus={currentCallStatus} />
                 </ContentWrapper>
             );
     }

@@ -7,12 +7,14 @@ import { Questionnaires } from "./Questionnaires";
 import { Advanced } from "./Advanced";
 import { Validations } from "./Validations";
 import { Overview } from "./overview/Overview";
+import { StatusDetails } from "./overview/StatusDetails";
 
 interface DataSubmissionStepsProps {
     moduleName: string;
+    currentCallStatus: StatusDetails;
 }
 
-export const DataSubmissionSteps: React.FC<DataSubmissionStepsProps> = ({ moduleName }) => {
+export const DataSubmissionSteps: React.FC<DataSubmissionStepsProps> = ({ moduleName, currentCallStatus }) => {
     const [currentStep, setCurrentStep] = useState<number>(0);
 
     return (
@@ -22,7 +24,7 @@ export const DataSubmissionSteps: React.FC<DataSubmissionStepsProps> = ({ module
                     Overview
                 </Button>
                 <Button onClick={() => setCurrentStep(1)} className={currentStep === 1 ? "current" : ""}>
-                    List of Dates
+                    List of Datasets
                 </Button>
                 <Button onClick={() => setCurrentStep(2)} className={currentStep === 2 ? "current" : ""}>
                     Questionnaires
@@ -34,16 +36,16 @@ export const DataSubmissionSteps: React.FC<DataSubmissionStepsProps> = ({ module
                     Advanced
                 </Button>
             </div>
-            {renderTypeContent(currentStep, moduleName)}
+            {renderTypeContent(currentStep, moduleName, currentCallStatus)}
         </ContentWrapper>
     );
 };
 
-const renderTypeContent = (step: number, moduleName: string) => {
+const renderTypeContent = (step: number, moduleName: string, currentCallStatus: StatusDetails) => {
     switch (step) {
         case 0:
             // TODO: set module name inside page root content to avoid prop drilling
-            return <Overview moduleName={moduleName} />;
+            return <Overview moduleName={moduleName} currentCallStatus={currentCallStatus} />;
         case 1:
             return <ListOfDatasets />;
         case 2:

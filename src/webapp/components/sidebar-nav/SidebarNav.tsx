@@ -1,6 +1,6 @@
 /* eslint-disable react/no-multi-comp */
 /* eslint-disable react/display-name */
-import React from "react";
+import React, { useState } from "react";
 import { makeStyles } from "@material-ui/styles";
 import { List, Theme } from "@material-ui/core";
 import clsx from "clsx";
@@ -33,14 +33,33 @@ interface SidebarNavProps {
 
 const SidebarNav: React.FC<SidebarNavProps> = ({ menus, className }) => {
     const classes = useStyles();
+    const [currentNaVitem, setCurrentNavItem] = useState<string[]>([""]);
+
+    const changeCurrentNavItem = (val: string[]) => {
+        // TODO: cleanup this prop drilling and convert this using context API / redux
+        // eslint-disable-next-line no-console
+        console.log("changeCurrentNavItem: ", val);
+        setCurrentNavItem(val);
+    };
 
     return (
         <List className={clsx(classes.root, className)}>
             {menus.map(menu =>
                 menu.kind === "MenuGroup" ? (
-                    <SidebarNavMenuGroup menu={menu} key={menu.title} groupName={menu.title} />
+                    <SidebarNavMenuGroup
+                        menu={menu}
+                        key={menu.title}
+                        groupName={menu.title}
+                        currentNaVitem={currentNaVitem}
+                        changeCurrentNavItem={changeCurrentNavItem}
+                    />
                 ) : (
-                    <SidebarNavMenu menu={menu} key={menu.title} />
+                    <SidebarNavMenu
+                        menu={menu}
+                        key={menu.title}
+                        currentNaVitem={currentNaVitem}
+                        changeCurrentNavItem={changeCurrentNavItem}
+                    />
                 )
             )}
         </List>

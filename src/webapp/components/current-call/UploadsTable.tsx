@@ -5,14 +5,20 @@ import { UploadsTableBody } from "./UploadsTableBody";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { glassColors, palette } from "../../pages/app/themes/dhis2.theme";
 export interface UploadsDataItemProps {
-    id: number;
-    uploaded_date: string;
-    date_first: string;
-    date_last: string;
-    records: number;
-    type: "ris" | "sample";
-    batch_id: string;
+    id: string;
+    batchId: string;
+    countryCode: string;
+    fileType: string;
+    fileId: string;
+    fileName: string;
+    inputLineNb: number;
+    outputLineNb: number;
+    period: string;
+    specimens: string[];
     status: string;
+    submissionDate: Date;
+    call: string;
+    module: string;
 }
 
 export interface UploadsDataProps {
@@ -21,6 +27,7 @@ export interface UploadsDataProps {
     className?: string;
 }
 
+// TODO: replace Table with Datagrid
 export const UploadsTable: React.FC<UploadsDataProps> = ({ title, items, className }) => {
     return (
         <ContentWrapper className={className}>
@@ -31,8 +38,7 @@ export const UploadsTable: React.FC<UploadsDataProps> = ({ title, items, classNa
                     <TableHead>
                         <TableRow>
                             <TableCell>{i18n.t("Uploaded")}</TableCell>
-                            <TableCell>{i18n.t("Date First")}</TableCell>
-                            <TableCell>{i18n.t("Date Last")}</TableCell>
+                            <TableCell>{i18n.t("Period")}</TableCell>
                             <TableCell>{i18n.t("Records")}</TableCell>
                             <TableCell>{i18n.t("Type")}</TableCell>
                             <TableCell>{i18n.t("Batch ID")}</TableCell>

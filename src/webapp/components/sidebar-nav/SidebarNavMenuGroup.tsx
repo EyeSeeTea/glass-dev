@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { makeStyles } from "@material-ui/styles";
 import { List, ListItem, Theme, Collapse, Button, colors } from "@material-ui/core";
 import clsx from "clsx";
@@ -6,34 +6,68 @@ import { ExpandLess, ExpandMore } from "@material-ui/icons";
 import { MenuGroup } from "./SidebarNav";
 import SidebarNavMenu from "./SidebarNavMenu";
 import styled from "styled-components";
+import { useLocation } from "react-router-dom";
 
 interface SidebarNavProps {
     className?: string;
-    groupName?: string;
+    groupName: string;
+    currentNaVitem: string[];
+    changeCurrentNavItem: (val: string[]) => void;
     menu: MenuGroup;
 }
 
-const SidebarNavMenuGroup: React.FC<SidebarNavProps> = ({ menu, groupName, className }) => {
+const SidebarNavMenuGroup: React.FC<SidebarNavProps> = ({
+    menu,
+    groupName,
+    className,
+    currentNaVitem,
+    changeCurrentNavItem,
+}) => {
+    const isCurrentModule = (val: string) => {
+        if (val) {
+            return location.pathname.includes(val);
+        } else {
+            return false;
+        }
+    };
+
+    const isCurrentNavItem = (val: string[]) => {
+        if (isCurrentModule(groupName)) {
+            return true;
+        }
+        if (currentNaVitem && val[0] === groupName) {
+            return true;
+        } else {
+            return false;
+        }
+    };
+
     const classes = useStyles(menu.level);
+    const location = useLocation();
+    const [openCollapse, setOpenCollapse] = React.useState(isCurrentNavItem(currentNaVitem));
 
-    const [openCollapse, setOpenCollapse] = React.useState(false);
-
-    const handleExpand = () => {
+    const expand = () => {
         setOpenCollapse(!openCollapse);
     };
+
+    useEffect(() => {
+        if (isCurrentModule(menu.title)) {
+            setOpenCollapse(true);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [menu]);
 
     return (
         <React.Fragment>
             <ListItem
                 className={clsx(classes.root, className)}
-                onClick={handleExpand}
+                onClick={expand}
                 disableGutters
                 style={{ paddingLeft: menu.level * 8 }}
             >
                 <Button className={classes.button} fullWidth={true}>
                     <div className={classes.icon}>{menu.icon}</div>
                     <span className={classes.title}>{menu.title}</span>
-
                     <div className={classes.expand}>{openCollapse ? <ExpandLess /> : <ExpandMore />}</div>
                 </Button>
             </ListItem>
@@ -44,9 +78,21 @@ const SidebarNavMenuGroup: React.FC<SidebarNavProps> = ({ menu, groupName, class
                         {menu.children &&
                             menu.children.map(child =>
                                 child.kind === "MenuGroup" ? (
-                                    <SidebarNavMenuGroup menu={child} key={child.title} />
+                                    <SidebarNavMenuGroup
+                                        menu={child}
+                                        key={child.title}
+                                        groupName={groupName}
+                                        currentNaVitem={currentNaVitem}
+                                        changeCurrentNavItem={changeCurrentNavItem}
+                                    />
                                 ) : (
-                                    <SidebarNavMenu menu={child} key={child.title} />
+                                    <SidebarNavMenu
+                                        currentNaVitem={currentNaVitem}
+                                        changeCurrentNavItem={changeCurrentNavItem}
+                                        menu={child}
+                                        key={child.title}
+                                        groupName={groupName}
+                                    />
                                 )
                             )}
                     </List>

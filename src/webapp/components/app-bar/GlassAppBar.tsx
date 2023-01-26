@@ -36,11 +36,11 @@ export const GlassAppBar: React.FC = () => {
     const [country, setCountry] = React.useState(1);
     const [action, setAction] = React.useState(1);
 
-    const handleCountryChange = (event: React.ChangeEvent<{ value: unknown }>) => {
+    const changeCountry = (event: React.ChangeEvent<{ value: unknown }>) => {
         setCountry(event.target.value as number);
     };
 
-    const handleActionChange = (event: React.ChangeEvent<{ value: unknown }>) => {
+    const changeAction = (event: React.ChangeEvent<{ value: unknown }>) => {
         setAction(event.target.value as number);
     };
 
@@ -62,13 +62,13 @@ export const GlassAppBar: React.FC = () => {
                         <IconButton aria-label="search" color="primary">
                             <LocationIcon />
                         </IconButton>
-                        <Select value={country} disableUnderline onChange={handleCountryChange}>
+                        <Select value={country} disableUnderline onChange={changeCountry}>
                             <MenuItem value={1}>Spain</MenuItem>
                             <MenuItem value={2}>France</MenuItem>
                         </Select>
                     </SelectContainer>
                     <SelectContainer>
-                        <Select value={action} disableUnderline onChange={handleActionChange}>
+                        <Select value={action} disableUnderline onChange={changeAction}>
                             <MenuItem value={1}>User Profile</MenuItem>
                             <MenuItem value={2}>My Account</MenuItem>
                         </Select>
