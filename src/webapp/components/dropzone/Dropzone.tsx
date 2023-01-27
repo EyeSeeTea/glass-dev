@@ -26,7 +26,9 @@ export const Dropzone = React.forwardRef((props: DropzoneProps, ref: React.Forwa
     return (
         <div {...getRootProps()}>
             <input {...getInputProps()} />
-            <div ref={childrenRef}>{props.children}</div>
+            <div ref={childrenRef} style={{ display: "flex", alignItems: "center" }}>
+                {props.children}
+            </div>
         </div>
     );
 });
