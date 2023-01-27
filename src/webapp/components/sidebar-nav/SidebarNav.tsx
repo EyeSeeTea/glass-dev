@@ -12,7 +12,7 @@ export interface MenuGroup {
     level: number;
     title: string;
     moduleColor: string;
-    icon?: any;
+    icon?: string;
     children?: Menu[];
 }
 
@@ -36,9 +36,6 @@ const SidebarNav: React.FC<SidebarNavProps> = ({ menus, className }) => {
     const [currentNaVitem, setCurrentNavItem] = useState<string[]>([""]);
 
     const changeCurrentNavItem = (val: string[]) => {
-        // TODO: cleanup this prop drilling and convert this using context API / redux
-        // eslint-disable-next-line no-console
-        console.log("changeCurrentNavItem: ", val);
         setCurrentNavItem(val);
     };
 

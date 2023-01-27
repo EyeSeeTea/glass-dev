@@ -1,28 +1,64 @@
-import React from "react";
+import React, { useContext, useEffect, useState } from "react";
 import styled from "styled-components";
-import { Box, Button, Typography } from "@material-ui/core";
+import { Box, Button, CircularProgress, Typography } from "@material-ui/core";
 import { CustomCard } from "../custom-card/CustomCard";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
-import SidebarNav from "../sidebar-nav/SidebarNav";
+import SidebarNav, { Menu } from "../sidebar-nav/SidebarNav";
 import i18n from "../../../locales";
 import { NavLink } from "react-router-dom";
-import sideBarData from "./sidebar-list.json";
-import { mapModuleToMenu } from "../../hooks/useSidebarMenus";
+
+import { useAppContext } from "../../contexts/app-context";
+import { useGlassModules } from "../../hooks/useGlassModules";
+import { SideBarContext } from "../../contexts/sidebar-context";
+import { mapModuleToMenu } from "./mapModuleToMenu";
 
 export const SideBar: React.FC = () => {
-    const menusResult = { kind: "loaded" as const, data: sideBarData.sideBarData.map(mapModuleToMenu) };
+    const { compositionRoot } = useAppContext();
+    const { setMenuData } = useContext(SideBarContext);
+
+    const [isLoaded, setIsLoaded] = useState(false);
+
+    const storedMenuData: Menu[] | null = JSON.parse(localStorage.getItem("glassSideBarData") || "false") || null;
+
+    const modulesResult = useGlassModules(compositionRoot);
+
+    useEffect(() => {
+        // Validate localstorage vs datastore
+        if (isLoaded && modulesResult.kind === "loaded") {
+            if (modulesResult.data.length) {
+                const dsData = modulesResult.data.map(mapModuleToMenu);
+                if (JSON.stringify(dsData) === JSON.stringify(storedMenuData)) {
+                    // No need to update localstorage
+                } else {
+                    localStorage.setItem("glassSideBarData", JSON.stringify(dsData));
+                }
+            }
+        }
+
+        if (!isLoaded && modulesResult.kind === "loaded") {
+            if (modulesResult.data.length) {
+                const menuData = modulesResult.data.map(mapModuleToMenu);
+                localStorage.setItem("glassSideBarData", JSON.stringify(menuData));
+                setIsLoaded(true);
+                setMenuData(menuData);
+            }
+        }
+        return () => {
+            // Cleanup
+        };
+    }, [storedMenuData, modulesResult, isLoaded, setMenuData]);
 
     return (
         <CustomCard minheight="630px" padding="0 0 100px 0" data-test="test2">
             <HomeButtonWrapper>
                 <Button className="home-button" component={NavLink} to="/" exact={true}>
                     <StarGradient className="star-icon" />
-                    <Box width={40} />
+                    <Box width={15} />
                     <Typography>{i18n.t("HOME")}</Typography>
                 </Button>
             </HomeButtonWrapper>
-
-            <SidebarNav menus={menusResult.data} />
+            {!storedMenuData && <StyledCircularProgress />}
+            {storedMenuData && <SidebarNav menus={storedMenuData} />}
 
             <div style={{ flexGrow: 1 }} />
         </CustomCard>
@@ -55,4 +91,8 @@ const StarGradient = styled.div`
     height: 23px;
     clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
     background: ${glassColors.accentPrimary};
+`;
+
+const StyledCircularProgress = styled(CircularProgress)`
+    margin: 30px auto;
 `;
