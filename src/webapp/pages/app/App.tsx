@@ -4,7 +4,6 @@ import _ from "lodash";
 //@ts-ignore
 import OldMuiThemeProvider from "material-ui/styles/MuiThemeProvider";
 import React, { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
 import { appConfig } from "../../../app-config";
 import { getCompositionRoot } from "../../../CompositionRoot";
 import { Instance } from "../../../data/entities/Instance";
@@ -26,8 +25,6 @@ export const App: React.FC<AppProps> = React.memo(function App({ api, d2, instan
     // const [showShareButton, setShowShareButton] = useState(false);
     const [loading, setLoading] = useState(true);
     const [appContext, setAppContext] = useState<AppContextState | null>(null);
-
-    const location = useLocation();
     
     useEffect(() => {
         async function setup() {
@@ -36,23 +33,17 @@ export const App: React.FC<AppProps> = React.memo(function App({ api, d2, instan
             
             if (!currentUser) throw new Error("User not logged in");
 
-            const params = new URLSearchParams(location.search);
-            let currentModule = null;
-            if (params.get("module")) currentModule = params.get("module");
-            let currentOrgUnit = null;
-            if (params.get("orgUnit")) currentOrgUnit = params.get("orgUnit");
-
             await compositionRoot.glassModules.validate().runAsync();
             
             // const isShareButtonVisible = _(appConfig).get("appearance.showShareButton") || false;
 
-            setAppContext({ api, currentUser, currentModule, currentOrgUnit, compositionRoot });
+            setAppContext({ api, currentUser, compositionRoot });
             // setShowShareButton(isShareButtonVisible);
             initFeedbackTool(d2, appConfig);
             setLoading(false);
         }
         setup();
-    }, [d2, api, instance, location]);
+    }, [d2, api, instance]);
 
     if (loading) return null;
 

@@ -6,8 +6,6 @@ import { D2Api } from "../../types/d2-api";
 export interface AppContextState {
     api: D2Api;
     currentUser: User;
-    currentModule: string | null;
-    currentOrgUnit: string | null;
     compositionRoot: CompositionRoot;
 }
 
