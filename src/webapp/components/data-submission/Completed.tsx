@@ -8,7 +8,7 @@ export const Completed: React.FC = () => {
     return (
         <ContentWrapper>
             <p className="intro">{i18n.t("Thank! your data for now is uploaded in our system")}</p>
-            <div className="call-name">
+            <div className="ds-name">
                 <span>2020</span>
                 <span>Spain</span>
             </div>
@@ -36,7 +36,7 @@ const ContentWrapper = styled.div`
         align-items: flex-end;
         width: 100%;
     }
-    .call-name {
+    .ds-name {
         display: flex;
         gap: 40px;
         align-items: center;

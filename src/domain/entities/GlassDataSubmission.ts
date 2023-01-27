@@ -1,4 +1,4 @@
-export type CallStatusTypes =
+export type DataSubmissionStatusTypes =
     | "NOT_COMPLETED"
     | "COMPLETE"
     | "PENDING_APPROVAL"
@@ -6,9 +6,9 @@ export type CallStatusTypes =
     | "REJECTED"
     | "PENDING_UPDATE_APPROVAL";
 
-export interface GlassCall {
+export interface GlassDataSubmission {
     module: string;
     orgUnit: string;
     period: number;
-    status: CallStatusTypes;
+    status: DataSubmissionStatusTypes;
 }

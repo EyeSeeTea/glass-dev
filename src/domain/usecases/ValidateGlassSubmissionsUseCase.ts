@@ -17,7 +17,7 @@ const glassSubmissions = [
         specimens: ["Blood", "Stool"],
         status: "Done",
         submissionDate: new Date("2021-01-10T00:00:00.000Z"),
-        call: "", //to do
+        dataSubmission: "",
     },
 ];
 

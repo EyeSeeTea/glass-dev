@@ -1,15 +1,15 @@
 import styled from "styled-components";
-import { CallsTable } from "./CallsTable";
+import { DataSubmissionsTable } from "./DataSubmissionsTable";
 import { useLocation } from "react-router-dom";
 import { data } from "./mock-tables-data.json";
 
-export const CallsHistoryContent: React.FC = () => {
+export const DataSubmissionsHistoryContent: React.FC = () => {
     const location = useLocation();
     const params = new URLSearchParams(location.search);
 
     return (
         <ContentWrapper>
-            <CallsTable items={data} data-current-module={params.get("userId")} />
+            <DataSubmissionsTable items={data} data-current-module={params.get("userId")} />
         </ContentWrapper>
     );
 };

@@ -2,13 +2,13 @@ import React from "react";
 import { Grid } from "@material-ui/core";
 import { LandingNews } from "./LandingNews";
 import styled from "styled-components";
-import { OpenCalls } from "./OpenCalls";
+import { OpenDataSubmissions } from "./OpenDataSubmissions";
 import { YourNotifications } from "./YourNotifications";
 
 export const LandingContent: React.FC = () => {
     return (
         <StyledGrid container spacing={4} alignItems="flex-start">
-            <OpenCalls />
+            <OpenDataSubmissions />
             <YourNotifications />
             <LandingNews />
         </StyledGrid>
