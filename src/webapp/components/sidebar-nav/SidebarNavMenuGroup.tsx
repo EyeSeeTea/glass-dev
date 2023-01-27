@@ -7,7 +7,7 @@ import { MenuGroup } from "./SidebarNav";
 import SidebarNavMenu from "./SidebarNavMenu";
 import styled from "styled-components";
 import { useLocation } from "react-router-dom";
-
+import FolderIcon from "@material-ui/icons/Folder";
 interface SidebarNavProps {
     className?: string;
     groupName: string;
@@ -23,9 +23,13 @@ const SidebarNavMenuGroup: React.FC<SidebarNavProps> = ({
     currentNaVitem,
     changeCurrentNavItem,
 }) => {
+    // TODO: get current module from page context and remove location parsing below
+    const location = useLocation();
+    const urlModuleName = location.pathname.split("/")[2];
+
     const isCurrentModule = (val: string) => {
-        if (val) {
-            return location.pathname.includes(val);
+        if (val === urlModuleName) {
+            return true;
         } else {
             return false;
         }
@@ -43,10 +47,9 @@ const SidebarNavMenuGroup: React.FC<SidebarNavProps> = ({
     };
 
     const classes = useStyles(menu.level);
-    const location = useLocation();
     const [openCollapse, setOpenCollapse] = React.useState(isCurrentNavItem(currentNaVitem));
 
-    const expand = () => {
+    const handleExpand = () => {
         setOpenCollapse(!openCollapse);
     };
 
@@ -54,6 +57,7 @@ const SidebarNavMenuGroup: React.FC<SidebarNavProps> = ({
         if (isCurrentModule(menu.title)) {
             setOpenCollapse(true);
         }
+
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [menu]);
 
@@ -61,12 +65,14 @@ const SidebarNavMenuGroup: React.FC<SidebarNavProps> = ({
         <React.Fragment>
             <ListItem
                 className={clsx(classes.root, className)}
-                onClick={expand}
+                onClick={handleExpand}
                 disableGutters
                 style={{ paddingLeft: menu.level * 8 }}
             >
                 <Button className={classes.button} fullWidth={true}>
-                    <div className={classes.icon}>{menu.icon}</div>
+                    <div className={classes.icon}>
+                        <FolderIcon htmlColor={menu.moduleColor} />
+                    </div>
                     <span className={classes.title}>{menu.title}</span>
                     <div className={classes.expand}>{openCollapse ? <ExpandLess /> : <ExpandMore />}</div>
                 </Button>
@@ -125,7 +131,7 @@ const useStyles = makeStyles((theme: Theme) => ({
     title: {
         textAlign: "start",
         flexGrow: 1,
-        marginLeft: theme.spacing(4),
+        marginLeft: "10px",
     },
     expand: {
         marginRight: theme.spacing(4),
