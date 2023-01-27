@@ -11,10 +11,13 @@ import { StatusDetails } from "./overview/StatusDetails";
 
 interface DataSubmissionStepsProps {
     moduleName: string;
-    currentCallStatus: StatusDetails;
+    currentDataSubmissionStatus: StatusDetails;
 }
 
-export const DataSubmissionSteps: React.FC<DataSubmissionStepsProps> = ({ moduleName, currentCallStatus }) => {
+export const DataSubmissionSteps: React.FC<DataSubmissionStepsProps> = ({
+    moduleName,
+    currentDataSubmissionStatus,
+}) => {
     const [currentStep, setCurrentStep] = useState<number>(0);
 
     return (
@@ -36,16 +39,16 @@ export const DataSubmissionSteps: React.FC<DataSubmissionStepsProps> = ({ module
                     Advanced
                 </Button>
             </div>
-            {renderTypeContent(currentStep, moduleName, currentCallStatus)}
+            {renderTypeContent(currentStep, moduleName, currentDataSubmissionStatus)}
         </ContentWrapper>
     );
 };
 
-const renderTypeContent = (step: number, moduleName: string, currentCallStatus: StatusDetails) => {
+const renderTypeContent = (step: number, moduleName: string, currentDataSubmissionStatus: StatusDetails) => {
     switch (step) {
         case 0:
             // TODO: set module name inside page root content to avoid prop drilling
-            return <Overview moduleName={moduleName} currentCallStatus={currentCallStatus} />;
+            return <Overview moduleName={moduleName} currentDataSubmissionStatus={currentDataSubmissionStatus} />;
         case 1:
             return <ListOfDatasets />;
         case 2:

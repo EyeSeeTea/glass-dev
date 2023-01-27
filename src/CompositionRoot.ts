@@ -1,12 +1,12 @@
 import { DataStoreClient } from "./data/data-store/DataStoreClient";
 import { Instance } from "./data/entities/Instance";
-import { GlassCallDefaultRepository } from "./data/repositories/GlassCallDefaultRepository";
+import { GlassDataSubmissionsDefaultRepository } from "./data/repositories/GlassDataSubmissionDefaultRepository";
 import { GlassModuleDefaultRepository } from "./data/repositories/GlassModuleDefaultRepository";
 import { GlassNewsDefaultRepository } from "./data/repositories/GlassNewsDefaultRepository";
 import { GlassSubmissionsDefaultRepository } from "./data/repositories/GlassSubmissionsDefaultRepository";
 import { InstanceDefaultRepository } from "./data/repositories/InstanceDefaultRepository";
 import { GetCurrentUserUseCase } from "./domain/usecases/GetCurrentUserUseCase";
-import { GetSpecificCallUseCase } from "./domain/usecases/GetSpecificCallUseCase";
+import { GetSpecificDataSubmissionUseCase } from "./domain/usecases/GetSpecificDataSubmissionUseCase";
 import { GetGlassModuleByNameUseCase } from "./domain/usecases/GetGlassModuleByNameUseCase";
 import { GetGlassModulesUseCase } from "./domain/usecases/GetGlassModulesUseCase";
 import { GetGlassNewsUseCase } from "./domain/usecases/GetGlassNewsUseCase";
@@ -21,7 +21,7 @@ export function getCompositionRoot(instance: Instance) {
     const instanceRepository = new InstanceDefaultRepository(instance);
     const glassModuleRepository = new GlassModuleDefaultRepository(dataStoreClient);
     const glassNewsRepository = new GlassNewsDefaultRepository(dataStoreClient);
-    const glassCallRepository = new GlassCallDefaultRepository(dataStoreClient);
+    const glassDataSubmissionRepository = new GlassDataSubmissionsDefaultRepository(dataStoreClient);
     const glassSubmissionsRepository = new GlassSubmissionsDefaultRepository(dataStoreClient);
 
     return {
@@ -39,8 +39,8 @@ export function getCompositionRoot(instance: Instance) {
             validate: new ValidateGlassNewsUseCase(glassNewsRepository),
         }),
 
-        glassCall: getExecute({
-            getSpecificCall: new GetSpecificCallUseCase(glassCallRepository),
+        glassDataSubmission: getExecute({
+            getSpecificDataSubmission: new GetSpecificDataSubmissionUseCase(glassDataSubmissionRepository),
         }),
         glassSubmissions: getExecute({
             getAll: new GetGlassSubmissionsUseCase(glassSubmissionsRepository),

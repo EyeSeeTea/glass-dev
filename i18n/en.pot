@@ -5,20 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2023-01-24T15:16:26.279Z\n"
-"PO-Revision-Date: 2023-01-24T15:16:26.279Z\n"
-
-msgid "Year"
-msgstr ""
-
-msgid "Open / Close"
-msgstr ""
-
-msgid "Status"
-msgstr ""
-
-msgid " "
-msgstr ""
+"POT-Creation-Date: 2023-01-27T15:52:56.038Z\n"
+"PO-Revision-Date: 2023-01-27T15:52:56.038Z\n"
 
 msgid "Add"
 msgstr ""
@@ -44,6 +32,21 @@ msgstr ""
 msgid "Request Dataset update"
 msgstr ""
 
+msgid "Display full status history >"
+msgstr ""
+
+msgid "Go to questionnaires"
+msgstr ""
+
+msgid "Send to WHO for revision"
+msgstr ""
+
+msgid "Upload dataset"
+msgstr ""
+
+msgid "Current Status"
+msgstr ""
+
 msgid "Uploaded"
 msgstr ""
 
@@ -59,19 +62,7 @@ msgstr ""
 msgid "Batch ID"
 msgstr ""
 
-msgid "Display full status history >"
-msgstr ""
-
-msgid "Go to questionnaires"
-msgstr ""
-
-msgid "Send to WHO for revision"
-msgstr ""
-
-msgid "Upload dataset"
-msgstr ""
-
-msgid "Current Status"
+msgid "Status"
 msgstr ""
 
 msgid "Back to Module"
@@ -108,6 +99,15 @@ msgid "Upload file"
 msgstr ""
 
 msgid "Select file"
+msgstr ""
+
+msgid "Year"
+msgstr ""
+
+msgid "Open / Close"
+msgstr ""
+
+msgid " "
 msgstr ""
 
 msgid "News from GLASS"
@@ -155,19 +155,19 @@ msgstr ""
 msgid "Output Line Nb"
 msgstr ""
 
-msgid "List of Calls"
-msgstr ""
-
-msgid "All Calls"
-msgstr ""
-
 msgid "Country Information"
 msgstr ""
 
 msgid "Yearly data upload"
 msgstr ""
 
-msgid "2022 Call"
+msgid "2022 Data Submission"
+msgstr ""
+
+msgid "List of Data Submissions"
+msgstr ""
+
+msgid "All Data Submissions"
 msgstr ""
 
 msgid "Hello {{name}}"

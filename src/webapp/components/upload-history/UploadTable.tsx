@@ -18,7 +18,7 @@ export interface UploadHistoryItemProps {
     specimens: string[];
     status: string;
     submissionDate: Date;
-    call: string; //TO DO
+    dataSubmission: string;
     module: string;
 }
 

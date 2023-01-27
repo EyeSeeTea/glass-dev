@@ -1,25 +1,25 @@
 import React from "react";
 import { Paper, Table, TableCell, TableContainer, TableHead, TableRow, Typography } from "@material-ui/core";
 import styled from "styled-components";
-import { CallsTableBody } from "./CallsTableBody";
+import { DataSubmissionsTableBody } from "./DataSubmissionsTableBody";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { glassColors, palette } from "../../pages/app/themes/dhis2.theme";
 import ArrowUpwardIcon from "@material-ui/icons/ArrowUpward";
-export interface CallsHistoryItemProps {
+export interface DataSubmissionsHistoryItemProps {
     id: number;
     year: string | number;
     open_status: string;
     status: string;
 }
 
-export interface CallsTableProps {
+export interface DataSubmissionsTableProps {
     title?: string;
-    items?: CallsHistoryItemProps[];
+    items?: DataSubmissionsHistoryItemProps[];
     className?: string;
 }
 
 // TODO: replace Table with Datagrid
-export const CallsTable: React.FC<CallsTableProps> = ({ title, items, className }) => {
+export const DataSubmissionsTable: React.FC<DataSubmissionsTableProps> = ({ title, items, className }) => {
     return (
         <ContentWrapper className={className}>
             {title && <Typography variant="h3">{title}</Typography>}
@@ -53,7 +53,7 @@ export const CallsTable: React.FC<CallsTableProps> = ({ title, items, className 
                         </TableRow>
                     </TableHead>
 
-                    <CallsTableBody rows={items} />
+                    <DataSubmissionsTableBody rows={items} />
                 </Table>
             </TableContainer>
         </ContentWrapper>

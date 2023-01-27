@@ -1,9 +1,9 @@
 import React from "react";
 import { Grid } from "@material-ui/core";
 import { ModuleCard } from "../module-card/ModuleCard";
-import { data } from "./mock-open-calls.json";
+import { data } from "./mock-open-data-submissions.json";
 
-export const OpenCalls: React.FC = () => {
+export const OpenDataSubmissions: React.FC = () => {
     return (
         <>
             <Grid item xs={12}>

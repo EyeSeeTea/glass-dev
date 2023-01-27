@@ -7,22 +7,22 @@ import { Typography } from "@material-ui/core";
 
 interface OverviewProps {
     moduleName: string;
-    currentCallStatus: StatusDetails;
+    currentDataSubmissionStatus: StatusDetails;
 }
 
-export const Overview: React.FC<OverviewProps> = ({ moduleName, currentCallStatus }) => {
+export const Overview: React.FC<OverviewProps> = ({ moduleName, currentDataSubmissionStatus }) => {
     return (
         <LinedBox>
-            {currentCallStatus ? (
+            {currentDataSubmissionStatus ? (
                 <CurrentStatus
                     moduleName={moduleName}
-                    title={currentCallStatus.title}
-                    description={currentCallStatus.description}
-                    statusColor={currentCallStatus.colour}
-                    ctas={currentCallStatus.cta}
+                    title={currentDataSubmissionStatus.title}
+                    description={currentDataSubmissionStatus.description}
+                    statusColor={currentDataSubmissionStatus.colour}
+                    ctas={currentDataSubmissionStatus.cta}
                 />
             ) : (
-                <Typography variant="h6">Call Submission status has errors...</Typography>
+                <Typography variant="h6">Data Submission status has errors...</Typography>
             )}
         </LinedBox>
     );
