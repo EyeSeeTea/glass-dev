@@ -43,9 +43,7 @@ export const SideBar: React.FC = () => {
                 setMenuData(menuData);
             }
         }
-        return () => {
-            // Cleanup
-        };
+        return () => {};
     }, [storedMenuData, modulesResult, isLoaded, setMenuData]);
 
     return (
