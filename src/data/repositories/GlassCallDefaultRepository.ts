@@ -9,7 +9,7 @@ export class GlassCallDefaultRepository implements GlassCallRepository {
 
     getSpecificCall(module: string, orgUnit: string, period: number): FutureData<GlassCall[]> {
         return this.dataStoreClient.getObjectsFilteredByProps<GlassCall>(
-            DataStoreKeys.CALLS,
+            DataStoreKeys.DATA_SUBMISSIONS,
             new Map<keyof GlassCall, unknown>([
                 ["module", module],
                 ["orgUnit", orgUnit],

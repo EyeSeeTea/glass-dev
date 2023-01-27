@@ -8,7 +8,8 @@ export const statusMap = new Map<CallStatusTypes, StatusDetails>([
         "NOT_COMPLETED",
         {
             title: "NOT COMPLETED",
-            description: "You need to send the mandatory uploads before validating the submissions for this call",
+            description:
+                "You need to send the mandatory uploads before validating the submissions for this data submissions",
             colour: glassColors.yellow,
             cta: ["Upload dataset", "Go to questionnaire"],
         },

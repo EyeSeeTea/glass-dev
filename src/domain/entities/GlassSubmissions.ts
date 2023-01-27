@@ -11,6 +11,6 @@ export interface GlassSubmissions {
     specimens: string[];
     status: string;
     submissionDate: Date;
-    call: string;
+    call: string; //TO DO
     module: string;
 }

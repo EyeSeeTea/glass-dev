@@ -18,7 +18,7 @@ export const CallsTableBody: React.FC<CallsTableBodyProps> = ({ rows }) => {
     const moduleName = location.substring(location.indexOf("/") + 1);
 
     const click = () => {
-        history.push(`/current-call/${moduleName}`);
+        history.push(`/current-data-submission/${moduleName}`);
     };
 
     return (

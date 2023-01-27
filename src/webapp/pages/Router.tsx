@@ -21,7 +21,7 @@ export const Router: React.FC = React.memo(() => {
 
                 {/* Default route */}
                 <Route
-                    path="/current-call/:module"
+                    path="/current-data-submission/:module"
                     render={({ match }) => <CurrentCallPage moduleName={match.params.module} />}
                 />
                 <Route
@@ -29,7 +29,7 @@ export const Router: React.FC = React.memo(() => {
                     render={({ match }) => <DataSubmissionPage moduleName={match.params.module} />}
                 />
                 <Route
-                    path="/calls-history/:module"
+                    path="/data-submissions-history/:module"
                     render={({ match }) => <CallsHistoryPage moduleName={match.params.module} />}
                 />
                 <Route

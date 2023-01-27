@@ -15,7 +15,7 @@ export const CompleteButtons: React.FC = () => {
                     variant="contained"
                     color="primary"
                     component={NavLink}
-                    to={`/current-call/${moduleName}`}
+                    to={`/current-data-submission/${moduleName}`}
                     exact={true}
                 >
                     {i18n.t("Back to Module")}

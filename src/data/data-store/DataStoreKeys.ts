@@ -1,6 +1,6 @@
 export const DataStoreKeys = {
     MODULES: "modules",
     NEWS: "news",
-    CALLS: "calls",
+    DATA_SUBMISSIONS: "calls", //TO DO
     SUBMISSIONS: "submissions",
 };

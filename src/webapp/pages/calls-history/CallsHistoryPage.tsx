@@ -45,17 +45,22 @@ export const CallsHistoryPageContent: React.FC<CallsHistoryPageProps> = React.me
                     <PreContent>
                         {/* // TODO: replace this with a global reusable StyledBreadCrumbs component */}
                         <StyledBreadCrumbs aria-label="breadcrumb" separator="">
-                            <Button component={NavLink} to={`/current-call/${moduleName}`} exact={true} onClick={click}>
+                            <Button
+                                component={NavLink}
+                                to={`/current-data-submission/${moduleName}`}
+                                exact={true}
+                                onClick={click}
+                            >
                                 <span>{moduleName}</span>
                             </Button>
                             <ChevronRightIcon />
-                            <Button component={NavLink} to={`/calls-history/${moduleName}`} exact={true}>
-                                <span>{i18n.t("List of Calls")}</span>
+                            <Button component={NavLink} to={`/data-submissions-history/${moduleName}`} exact={true}>
+                                <span>{i18n.t("List of Data Submissions")}</span>
                             </Button>
                         </StyledBreadCrumbs>
                     </PreContent>
                     <PageTitle>
-                        <h2>{i18n.t("All Calls")}</h2>
+                        <h2>{i18n.t("All Data Submissions")}</h2>
                     </PageTitle>
                     <CustomCard padding="40px 60px 50px">
                         <CallsHistoryContent />

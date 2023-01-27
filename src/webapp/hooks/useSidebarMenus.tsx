@@ -26,8 +26,8 @@ export function mapModuleToMenu(module: GlassModule): Menu {
             {
                 kind: "MenuLeaf",
                 level: 0,
-                title: "Current Call",
-                path: `/current-call/${module.name}`,
+                title: "Current Data Submission",
+                path: `/current-data-submission/${module.name}`,
             },
             {
                 kind: "MenuLeaf",
@@ -44,8 +44,8 @@ export function mapModuleToMenu(module: GlassModule): Menu {
             {
                 kind: "MenuLeaf",
                 level: 0,
-                title: "Calls History",
-                path: `/calls-history/${module.name}`,
+                title: "Data Submissions History",
+                path: `/data-submissions-history/${module.name}`,
             },
             {
                 kind: "MenuLeaf",
