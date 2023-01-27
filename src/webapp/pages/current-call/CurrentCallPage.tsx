@@ -74,12 +74,17 @@ export const CurrentCallPageContent: React.FC<CurrentCallPageContentProps> = Rea
                     <PreContent>
                         {/* // TODO: replace this with a global reusable StyledBreadCrumbs component */}
                         <StyledBreadCrumbs aria-label="breadcrumb" separator="">
-                            <Button component={NavLink} to={`/current-call/${moduleName}`} exact={true} onClick={click}>
+                            <Button
+                                component={NavLink}
+                                to={`/current-data-submission/${moduleName}`}
+                                exact={true}
+                                onClick={click}
+                            >
                                 <span>{moduleName}</span>
                             </Button>
                             <ChevronRightIcon />
-                            <Button component={NavLink} to={`/current-call/${moduleName}`} exact={true}>
-                                <span>{i18n.t(`${period} Call`)}</span>
+                            <Button component={NavLink} to={`/current-data-submission/${moduleName}`} exact={true}>
+                                <span>{i18n.t(`${period} Data Submisison`)}</span>
                             </Button>
                         </StyledBreadCrumbs>
                         <div className="info">
@@ -89,7 +94,7 @@ export const CurrentCallPageContent: React.FC<CurrentCallPageContentProps> = Rea
                     </PreContent>
                     {currentCallStatus && (
                         <PageTitle statusColor={currentCallStatus.data.colour}>
-                            <h3>{i18n.t(`${period} Call`)}</h3>
+                            <h3>{i18n.t(`${period} Data Submisison`)}</h3>
                             <div className="status">{i18n.t(currentCallStatus.data.title)}</div>
                         </PageTitle>
                     )}

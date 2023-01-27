@@ -7,7 +7,7 @@ export const OpenCalls: React.FC = () => {
     return (
         <>
             <Grid item xs={12}>
-                <h2 className="section-title">Open Calls</h2>
+                <h2 className="section-title">Open Data Submissions</h2>
             </Grid>
             {data.length ? (
                 data.map(item => (
