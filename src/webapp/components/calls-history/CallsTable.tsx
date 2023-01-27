@@ -1,5 +1,5 @@
 import React from "react";
-import { Paper, Table, TableCell, TableContainer, TableHead, TableRow } from "@material-ui/core";
+import { Paper, Table, TableCell, TableContainer, TableHead, TableRow, TableBody } from "@material-ui/core";
 import styled from "styled-components";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
@@ -7,7 +7,6 @@ import ArrowUpwardIcon from "@material-ui/icons/ArrowUpward";
 import { useHistory } from "react-router-dom";
 import { StatusCapsule } from "./StatusCapsule";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
-import { TableBody } from "material-ui";
 import { GlassCall } from "../../../domain/entities/GlassCallStatus";
 
 export interface CallsTableProps {
@@ -45,10 +44,9 @@ export const CallsTable: React.FC<CallsTableProps> = ({ items, moduleName, orgUn
                             <TableCell>{i18n.t(" ")}</TableCell>
                         </TableRow>
                     </StyledTableHead>
-
-                    {items && items.length ? (
-                        <StyledTableBody displayRowCheckbox={false}>
-                            {items.map((row: GlassCall) => (
+                    <StyledTableBody>
+                        {items && items.length ? (
+                            items.map((row: GlassCall) => (
                                 <TableRow key={row.id} onClick={() => handleClick(row.period)}>
                                     <TableCell>{row.period}</TableCell>
                                     <TableCell>
@@ -58,11 +56,15 @@ export const CallsTable: React.FC<CallsTableProps> = ({ items, moduleName, orgUn
                                         <ChevronRightIcon />
                                     </StyledCTACell>
                                 </TableRow>
-                            ))}
-                        </StyledTableBody>
-                    ) : (
-                        <p>No data found...</p>
-                    )}
+                            ))
+                        ) : (
+                            <TableRow>
+                                <TableCell></TableCell>
+                                <TableCell>No data found</TableCell>
+                                <TableCell></TableCell>
+                            </TableRow>
+                        )}
+                    </StyledTableBody>
                 </Table>
             </TableContainer>
         </ContentWrapper>
