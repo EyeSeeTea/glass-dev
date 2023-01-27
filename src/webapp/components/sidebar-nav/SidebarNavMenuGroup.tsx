@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useCallback, useEffect } from "react";
 import { makeStyles } from "@material-ui/styles";
 import { List, ListItem, Theme, Collapse, Button, colors } from "@material-ui/core";
 import clsx from "clsx";
@@ -27,13 +27,13 @@ const SidebarNavMenuGroup: React.FC<SidebarNavProps> = ({
     const location = useLocation();
     const urlModuleName = location.pathname.split("/")[2];
 
-    const isCurrentModule = (val: string) => {
+    const isCurrentModule = useCallback((val: string) => {
         if (val === urlModuleName) {
             return true;
         } else {
             return false;
         }
-    };
+    }, [urlModuleName]);
 
     const isCurrentNavItem = (val: string[]) => {
         if (isCurrentModule(groupName)) {
@@ -47,25 +47,26 @@ const SidebarNavMenuGroup: React.FC<SidebarNavProps> = ({
     };
 
     const classes = useStyles(menu.level);
-    const [openCollapse, setOpenCollapse] = React.useState(isCurrentNavItem(currentNaVitem));
+    const [expanded, setExapanded] = React.useState(isCurrentNavItem(currentNaVitem));
 
-    const handleExpand = () => {
-        setOpenCollapse(!openCollapse);
+    const toggleExpanded = () => {
+        setExapanded(!expanded);
     };
 
     useEffect(() => {
         if (isCurrentModule(menu.title)) {
-            setOpenCollapse(true);
+            setExapanded(true);
         }
-
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [menu]);
+        return () => {
+            // Cleanup
+        };
+    }, [menu, isCurrentModule]);
 
     return (
         <React.Fragment>
             <ListItem
                 className={clsx(classes.root, className)}
-                onClick={handleExpand}
+                onClick={toggleExpanded}
                 disableGutters
                 style={{ paddingLeft: menu.level * 8 }}
             >
@@ -74,12 +75,12 @@ const SidebarNavMenuGroup: React.FC<SidebarNavProps> = ({
                         <FolderIcon htmlColor={menu.moduleColor} />
                     </div>
                     <span className={classes.title}>{menu.title}</span>
-                    <div className={classes.expand}>{openCollapse ? <ExpandLess /> : <ExpandMore />}</div>
+                    <div className={classes.expand}>{expanded ? <ExpandLess /> : <ExpandMore />}</div>
                 </Button>
             </ListItem>
 
             <ModuleWrap moduleColor={menu.moduleColor}>
-                <Collapse in={openCollapse} timeout="auto" unmountOnExit key={menu.title}>
+                <Collapse in={expanded} timeout="auto" unmountOnExit key={menu.title}>
                     <List component="div" disablePadding data-group-name={groupName}>
                         {menu.children &&
                             menu.children.map(child =>

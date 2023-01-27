@@ -17,6 +17,7 @@ export const UploadRis: React.FC<UploadRisProps> = ({ validate }) => {
         } else {
             validate(false);
         }
+        return () => {};
     }, [fileList, validate]);
 
     const inputRef = useRef<HTMLInputElement>(null);
