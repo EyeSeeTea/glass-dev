@@ -18,7 +18,7 @@ export const CallsHistoryContent: React.FC<CallsHistoryContentProps> = ({ module
     const queryParameters = new URLSearchParams(location.search);
     //TO DO : The orgUnit should come from a global context which is yet to be implemented.
     const orgUnitVal = queryParameters.get("orgUnit");
-    const [orgUnit, setOrgUnit] = useState(orgUnitVal === null ? "" : orgUnitVal);
+    const [orgUnit] = useState(orgUnitVal === null ? "" : orgUnitVal);
 
     const calls = useGlassCallsByModuleAndOU(compositionRoot, moduleId, orgUnit);
 
