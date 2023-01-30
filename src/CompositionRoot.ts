@@ -4,6 +4,7 @@ import { GlassCallDefaultRepository } from "./data/repositories/GlassCallDefault
 import { GlassModuleDefaultRepository } from "./data/repositories/GlassModuleDefaultRepository";
 import { GlassNewsDefaultRepository } from "./data/repositories/GlassNewsDefaultRepository";
 import { GlassSubmissionsDefaultRepository } from "./data/repositories/GlassSubmissionsDefaultRepository";
+import { GlassDocumentsDefaultRepository } from "./data/repositories/GlassDocumentsDefaultRepository";
 import { InstanceDefaultRepository } from "./data/repositories/InstanceDefaultRepository";
 import { GetCurrentUserUseCase } from "./domain/usecases/GetCurrentUserUseCase";
 import { GetSpecificCallUseCase } from "./domain/usecases/GetSpecificCallUseCase";
@@ -11,10 +12,14 @@ import { GetGlassModuleByNameUseCase } from "./domain/usecases/GetGlassModuleByN
 import { GetGlassModulesUseCase } from "./domain/usecases/GetGlassModulesUseCase";
 import { GetGlassNewsUseCase } from "./domain/usecases/GetGlassNewsUseCase";
 import { GetGlassSubmissionsUseCase } from "./domain/usecases/GetGlassSubmissionsUseCase";
+import { GetGlassDocumentsUseCase } from "./domain/usecases/GetGlassDocumentsUseCase";
 import { GetInstanceVersionUseCase } from "./domain/usecases/GetInstanceVersionUseCase";
 import { ValidateGlassModulesUseCase } from "./domain/usecases/ValidateGlassModulesUseCase";
 import { ValidateGlassNewsUseCase } from "./domain/usecases/ValidateGlassNewsUseCase";
 import { ValidateGlassSubmissionsUseCase } from "./domain/usecases/ValidateGlassSubmissionsUseCase";
+import { SetGlassDocumentsUseCase } from "./domain/usecases/SetGlassDocumentsUseCase";
+import { SetGlassSubmissionsUseCase } from "./domain/usecases/SetGlassSubmissionsUseCase";
+import { ValidateGlassDocumentsUseCase } from "./domain/usecases/ValidateGlassDocumentsUseCase";
 
 export function getCompositionRoot(instance: Instance) {
     const dataStoreClient = new DataStoreClient(instance);
@@ -23,6 +28,7 @@ export function getCompositionRoot(instance: Instance) {
     const glassNewsRepository = new GlassNewsDefaultRepository(dataStoreClient);
     const glassCallRepository = new GlassCallDefaultRepository(dataStoreClient);
     const glassSubmissionsRepository = new GlassSubmissionsDefaultRepository(dataStoreClient);
+    const glassDocumentsRepository = new GlassDocumentsDefaultRepository(dataStoreClient);
 
     return {
         instance: getExecute({
@@ -44,7 +50,13 @@ export function getCompositionRoot(instance: Instance) {
         }),
         glassSubmissions: getExecute({
             getAll: new GetGlassSubmissionsUseCase(glassSubmissionsRepository),
+            save: new SetGlassSubmissionsUseCase(glassSubmissionsRepository),
             validate: new ValidateGlassSubmissionsUseCase(glassSubmissionsRepository),
+        }),
+        glassDocuments: getExecute({
+            getAll: new GetGlassDocumentsUseCase(glassDocumentsRepository),
+            save: new SetGlassDocumentsUseCase(glassDocumentsRepository),
+            validate: new ValidateGlassDocumentsUseCase(glassDocumentsRepository),
         }),
     };
 }

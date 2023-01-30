@@ -10,12 +10,10 @@ import { Dropzone, DropzoneRef } from "../dropzone/Dropzone";
 import { useSnackbar } from "@eyeseetea/d2-ui-components";
 import { RemoveContainer, StyledRemoveButton } from "./UploadFiles";
 import { useAppContext } from "../../contexts/app-context";
-import { generateUid } from "../../../utils/uid";
 import { uploadFile } from "../../../utils/uploadFile";
-import { saveToDataStore } from "../../../utils/d2-api";
 
 export const UploadSample: React.FC = () => {
-    const { api } = useAppContext();
+    const { api, compositionRoot } = useAppContext();
     const snackbar = useSnackbar();
 
     const [sampleFile, setSampleFile] = useState<File | null>(null);
@@ -41,24 +39,27 @@ export const UploadSample: React.FC = () => {
                     setIsLoading(true);
                     setSampleFile(uploadedSample);
                     try {
-                        const fileId = await uploadFile(api, uploadedSample);
+                        const existingDocuments = await compositionRoot.glassDocuments.getAll().toPromise();
+                        const document = await uploadFile(api, uploadedSample);
+                        await compositionRoot.glassDocuments.save([...existingDocuments, document]).toPromise();
+                        const existingSubmissions = await compositionRoot.glassSubmissions.getAll().toPromise();
                         const submission = {
-                            id: generateUid(),
+                            id: "",
                             batchId: "Dataset 1",
                             call: "",
                             countryCode: "",
-                            fileId,
+                            fileId: document.id,
                             fileName: uploadedSample.name,
                             fileType: "SAMPLE",
-                            inputLineNb: "",
-                            outputLineNb: "",
+                            inputLineNb: 0,
+                            outputLineNb: 0,
                             module: "",
                             period: "",
                             specimens: [],
                             status: "uploaded",
                             submissionDate: new Date().toISOString(),
                         };
-                        await saveToDataStore({ api, key: "submissions", object: submission });
+                        await compositionRoot.glassSubmissions.save([...existingSubmissions, submission]).toPromise();
                     } catch {
                         snackbar.error(i18n.t("Error in file upload"));
                         setSampleFile(null);
