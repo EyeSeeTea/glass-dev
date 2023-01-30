@@ -10,13 +10,11 @@ import { FileRejection } from "react-dropzone";
 import { RemoveContainer, StyledRemoveButton } from "./UploadFiles";
 import { useAppContext } from "../../contexts/app-context";
 import { uploadFile } from "../../../utils/uploadFile";
-import { saveToDataStore } from "../../../utils/d2-api";
-import { generateUid } from "../../../utils/uid";
 interface UploadRisProps {
     validate: (val: boolean) => void;
 }
 export const UploadRis: React.FC<UploadRisProps> = ({ validate }) => {
-    const { api } = useAppContext();
+    const { api, compositionRoot } = useAppContext();
     const snackbar = useSnackbar();
 
     const [risFile, setRisFile] = useState<File | null>(null);
@@ -50,24 +48,27 @@ export const UploadRis: React.FC<UploadRisProps> = ({ validate }) => {
                     setIsLoading(true);
                     setRisFile(uploadedRisFile);
                     try {
-                        const fileId = await uploadFile(api, uploadedRisFile);
+                        const existingDocuments = await compositionRoot.glassDocuments.getAll().toPromise();
+                        const document = await uploadFile(api, uploadedRisFile);
+                        await compositionRoot.glassDocuments.save([...existingDocuments, document]).toPromise();
+                        const existingSubmissions = await compositionRoot.glassSubmissions.getAll().toPromise();
                         const submission = {
-                            id: generateUid(),
+                            id: "",
                             batchId: "Dataset 1",
                             call: "",
                             countryCode: "",
-                            fileId,
+                            fileId: document.id,
                             fileName: uploadedRisFile.name,
                             fileType: "RIS",
-                            inputLineNb: "",
-                            outputLineNb: "",
+                            inputLineNb: 0,
+                            outputLineNb: 0,
                             module: "",
                             period: "",
                             specimens: [],
                             status: "uploaded",
                             submissionDate: new Date().toISOString(),
                         };
-                        await saveToDataStore({ api, key: "submissions", object: submission });
+                        await compositionRoot.glassSubmissions.save([...existingSubmissions, submission]).toPromise();
                     } catch {
                         snackbar.error(i18n.t("Error in file upload"));
                         setRisFile(null);
@@ -78,7 +79,7 @@ export const UploadRis: React.FC<UploadRisProps> = ({ validate }) => {
                 }
             }
         },
-        [api, snackbar]
+        [api, compositionRoot.glassDocuments, compositionRoot.glassSubmissions, snackbar]
     );
 
     return (

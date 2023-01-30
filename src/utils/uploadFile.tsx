@@ -1,5 +1,4 @@
 import { D2Api } from "../types/d2-api";
-import { saveToDataStore } from "./d2-api";
 
 export const uploadFile = async (api: D2Api, risFile: File) => {
     const { response } = api.files.upload({
@@ -16,7 +15,5 @@ export const uploadFile = async (api: D2Api, risFile: File) => {
         createdAt: new Date().toISOString(),
     };
 
-    await saveToDataStore({ api, key: "documents", object: document });
-
-    return id;
+    return document;
 };

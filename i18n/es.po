@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: i18next-conv\n"
-"POT-Creation-Date: 2023-01-24T15:16:26.279Z\n"
+"POT-Creation-Date: 2023-01-27T17:22:45.816Z\n"
 "PO-Revision-Date: 2018-10-25T09:02:35.143Z\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -103,7 +103,10 @@ msgstr ""
 msgid "OK"
 msgstr ""
 
-msgid "Upload file"
+msgid "Multiple uploads not allowed, please select one file"
+msgstr ""
+
+msgid "Error in file upload"
 msgstr ""
 
 msgid "Select file"

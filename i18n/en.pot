@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2023-01-25T08:11:54.760Z\n"
-"PO-Revision-Date: 2023-01-25T08:11:54.760Z\n"
+"POT-Creation-Date: 2023-01-27T17:22:45.816Z\n"
+"PO-Revision-Date: 2023-01-27T17:22:45.816Z\n"
 
 msgid "Year"
 msgstr ""
@@ -44,21 +44,6 @@ msgstr ""
 msgid "Request Dataset update"
 msgstr ""
 
-msgid "Display full status history >"
-msgstr ""
-
-msgid "Go to questionnaires"
-msgstr ""
-
-msgid "Send to WHO for revision"
-msgstr ""
-
-msgid "Upload dataset"
-msgstr ""
-
-msgid "Current Status"
-msgstr ""
-
 msgid "Uploaded"
 msgstr ""
 
@@ -72,6 +57,21 @@ msgid "Type"
 msgstr ""
 
 msgid "Batch ID"
+msgstr ""
+
+msgid "Display full status history >"
+msgstr ""
+
+msgid "Go to questionnaires"
+msgstr ""
+
+msgid "Send to WHO for revision"
+msgstr ""
+
+msgid "Upload dataset"
+msgstr ""
+
+msgid "Current Status"
 msgstr ""
 
 msgid "Back to Module"
@@ -104,7 +104,10 @@ msgstr ""
 msgid "OK"
 msgstr ""
 
-msgid "Upload file"
+msgid "Multiple uploads not allowed, please select one file"
+msgstr ""
+
+msgid "Error in file upload"
 msgstr ""
 
 msgid "Select file"
