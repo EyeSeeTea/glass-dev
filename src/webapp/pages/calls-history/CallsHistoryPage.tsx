@@ -16,7 +16,7 @@ import { useGlassModuleContext } from "../../contexts/glass-module-context";
 export const CallsHistoryPage: React.FC = React.memo(() => {
     return (
         <MainLayout>
-            <CallsHistoryPageContent  />
+            <CallsHistoryPageContent />
         </MainLayout>
     );
 });
@@ -27,7 +27,7 @@ export const CallsHistoryPageContent: React.FC = React.memo(() => {
     const { module: moduleName, orgUnit } = useGlassModuleContext();
     console.debug(`current module: ${moduleName}`);
     console.debug(`orgUnit: ${orgUnit}`);
-    
+
     // TODO: replace useGlassModule (or parameters) with actual hook to fetch calls history data
     const result = useGlassModule(compositionRoot, moduleName);
 

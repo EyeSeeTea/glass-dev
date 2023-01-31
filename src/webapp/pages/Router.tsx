@@ -12,27 +12,29 @@ export const Router: React.FC = React.memo(() => {
     return (
         <HashRouter>
             <Switch>
-                
                 <GlassModuleContextProvider>
-                    <Route
-                        path="/current-call/:module"
-                        render={({ match }) => <CurrentCallPage moduleName={match.params.module} />}
-                    />
-                    <Route
-                        path="/data-submission/:module"
-                        render={({ match }) => <DataSubmissionPage moduleName={match.params.module} />}
-                    />
                     <Route path="/calls-history/:module/:orgUnit" component={CallsHistoryPage} />
-
-                    <Route
-                        path="/upload-history/:module"
-                        render={({ match }) => <UploadHistoryPage moduleName={match.params.module} />}
-                    />
-                    <Route
-                        path="/country-information/:module"
-                        render={({ match }) => <CountryInformationPage moduleName={match.params.module} />}
-                    />
                 </GlassModuleContextProvider>
+                
+                <Route
+                    path="/current-call/:module"
+                    render={({ match }) => <CurrentCallPage moduleName={match.params.module} />}
+                />
+                <Route
+                    path="/data-submission/:module"
+                    render={({ match }) => <DataSubmissionPage moduleName={match.params.module} />}
+                />
+
+                <Route
+                    path="/upload-history/:module"
+                    render={({ match }) => <UploadHistoryPage moduleName={match.params.module} />}
+                />
+                <Route
+                    path="/country-information/:module"
+                    render={({ match }) => <CountryInformationPage moduleName={match.params.module} />}
+                />
+
+
                 <Route render={() => <LandingPage />} />
             </Switch>
         </HashRouter>
