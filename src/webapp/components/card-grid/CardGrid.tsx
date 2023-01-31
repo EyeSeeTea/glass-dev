@@ -2,6 +2,7 @@ import React from "react";
 import styled from "styled-components";
 import { PageHeader } from "../page-header/PageHeader";
 import { MenuCard, MenuCardProps } from "./MenuCard";
+import i18n from "@eyeseetea/d2-ui-components/locales";
 
 export const CardGrid: React.FC<CardGridProps> = React.memo(({ title, cards, onBackClick }) => {
     return (
@@ -11,7 +12,7 @@ export const CardGrid: React.FC<CardGridProps> = React.memo(({ title, cards, onB
             <Container>
                 {cards.map(({ key, title, children }) => (
                     <div key={key}>
-                        {!!title && <Title>{title}</Title>}
+                        {!!title && <Title>{i18n.t(title)}</Title>}
 
                         {children.map(props => (
                             <MenuCard key={props.name} {...props} />

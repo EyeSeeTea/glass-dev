@@ -22,7 +22,7 @@ export const PageHeader: React.FC<PageHeaderProps> = React.memo(props => {
             )}
 
             <Title variant={variant} gutterBottom data-test={"page-header-title"}>
-                {title}
+                {i18n.t(title)}
             </Title>
 
             {helpText && <HelpButton text={helpText} />}

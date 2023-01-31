@@ -1,3 +1,4 @@
+import i18n from "@eyeseetea/d2-ui-components/locales";
 import styled from "styled-components";
 import { CustomCard } from "../custom-card/CustomCard";
 
@@ -9,15 +10,15 @@ export const CountryInformationContent: React.FC = () => {
                 <InfoTable>
                     <tbody>
                         <tr>
-                            <td>WHO Region</td>
+                            <td>{i18n.t("WHO Region")}</td>
                             <td>WHO African Region</td>
                         </tr>
                         <tr>
-                            <td>Country</td>
+                            <td>{i18n.t("Country")}</td>
                             <td>Algeria</td>
                         </tr>
                         <tr>
-                            <td>Year</td>
+                            <td>{i18n.t("Year")}</td>
                             <td>2021</td>
                         </tr>
                     </tbody>
@@ -28,11 +29,11 @@ export const CountryInformationContent: React.FC = () => {
                 <InfoTable>
                     <tbody>
                         <tr>
-                            <td>Enrolment status</td>
+                            <td>{i18n.t("Enrolment status")}</td>
                             <td>Yes</td>
                         </tr>
                         <tr>
-                            <td>Date of Enrolment</td>
+                            <td>{i18n.t("Date of Enrolment")}</td>
                             <td>11/06/2019</td>
                         </tr>
                     </tbody>
@@ -43,23 +44,23 @@ export const CountryInformationContent: React.FC = () => {
                 <InfoTable>
                     <tbody>
                         <tr>
-                            <td>Family Name *</td>
+                            <td>{i18n.t("Family Name *")}</td>
                             <td>Lorem</td>
                         </tr>
                         <tr>
-                            <td>First Name *</td>
+                            <td>{i18n.t("First Name *")}</td>
                             <td>Ipsum</td>
                         </tr>
                         <tr>
-                            <td>Function *</td>
+                            <td>{i18n.t("Function *")}</td>
                             <td>Dolor sit amet</td>
                         </tr>
                         <tr>
-                            <td>Email Address *</td>
+                            <td>{i18n.t("Email Address *")}</td>
                             <td>loremipsum@gmail.com</td>
                         </tr>
                         <tr>
-                            <td>Preferred Language (notifications) *</td>
+                            <td>{i18n.t("Preferred Language (notifications) *")}</td>
                             <td>English</td>
                         </tr>
                     </tbody>
