@@ -4,31 +4,16 @@ import styled from "styled-components";
 import { UploadsTableBody } from "./UploadsTableBody";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { glassColors, palette } from "../../pages/app/themes/dhis2.theme";
-export interface UploadsDataItemProps {
-    id: string;
-    batchId: string;
-    countryCode: string;
-    fileType: string;
-    fileId: string;
-    fileName: string;
-    inputLineNb: number;
-    outputLineNb: number;
-    period: string;
-    specimens: string[];
-    status: string;
-    submissionDate: Date;
-    call: string;
-    module: string;
-}
+import { UploadsDataItem } from "../../entities/uploads";
 
-export interface UploadsDataProps {
+export interface UploadsTableProps {
     title: string;
-    items?: UploadsDataItemProps[];
+    items?: UploadsDataItem[];
     className?: string;
 }
 
-// TODO: replace Table with Datagrid
-export const UploadsTable: React.FC<UploadsDataProps> = ({ title, items, className }) => {
+// TODO: replace Table with MUI Datagrid
+export const UploadsTable: React.FC<UploadsTableProps> = ({ title, items, className }) => {
     return (
         <ContentWrapper className={className}>
             <Typography variant="h3">{title}</Typography>
