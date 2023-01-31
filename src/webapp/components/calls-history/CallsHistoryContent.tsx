@@ -1,6 +1,8 @@
 import styled from "styled-components";
 import { CallsTable } from "./CallsTable";
 import { useLocation } from "react-router-dom";
+
+// TODO: replace mock date with actual use case for fetch calls history from back-end
 import { data } from "./mock-tables-data.json";
 
 export const CallsHistoryContent: React.FC = () => {
