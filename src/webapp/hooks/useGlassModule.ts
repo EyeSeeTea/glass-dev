@@ -6,9 +6,10 @@ import { GlassState } from "./State";
 
 export type GlassModuleState = GlassState<GlassModule>;
 
-export function useGlassModule(compositionRoot: CompositionRoot) {
+export function useGlassModule(compositionRoot: CompositionRoot, name?: string ) {
     
-    const { module: moduleName } = useGlassModuleContext();
+    const { module } = useGlassModuleContext();
+    const moduleName = name ? name : module;
 
     const [result, setResult] = React.useState<GlassModuleState>({
         kind: "loading",
