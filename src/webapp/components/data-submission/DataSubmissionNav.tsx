@@ -2,6 +2,7 @@ import React from "react";
 import { Button } from "@material-ui/core";
 import styled from "styled-components";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
+import i18n from "@eyeseetea/d2-ui-components/locales";
 export interface DataSubmissionStep {
     stepNumber: number;
     title: string;
@@ -35,7 +36,7 @@ export const DataSubmissionNav: React.FC<DataSubmissionNavProps> = props => {
                             }`}
                         >
                             <div className="number">{step.stepNumber}</div>
-                            <Button onClick={() => changeStep(step.stepNumber)}>{step.title}</Button>
+                            <Button onClick={() => changeStep(step.stepNumber)}>{i18n.t(step.title)}</Button>
                         </li>
                     ))}
                 </ul>

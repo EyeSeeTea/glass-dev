@@ -29,14 +29,14 @@ export const ModuleCard: React.FC<ModuleCardProps> = ({ title, moduleColor, endD
                         <Box display={"flex"} flexDirection="row">
                             <WarningIcon htmlColor={glassColors.mainTertiary} />
                             <Box width={10} />
-                            <Typography
-                                style={{ color: glassColors.mainTertiary }}
-                            >{`END IN ${endDays} DAYS`}</Typography>
+                            <Typography style={{ color: glassColors.mainTertiary }}>
+                                {i18n.t(`END IN ${endDays} DAYS`)}
+                            </Typography>
                         </Box>
                     ) : (
-                        <Typography color="textSecondary">{"OPEN ALL YEAR"}</Typography>
+                        <Typography color="textSecondary">{i18n.t("OPEN ALL YEAR")}</Typography>
                     )}
-                    <Typography color="textSecondary">{`${filesUploaded} files uploaded`}</Typography>
+                    <Typography color="textSecondary">{i18n.t(`${filesUploaded} files uploaded`)}</Typography>
                 </Container>
 
                 <Button variant="contained" color="primary" component={NavLink} to={moduleUrl} exact={true}>

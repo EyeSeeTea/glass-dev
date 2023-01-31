@@ -32,22 +32,22 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({ changeStep }) => {
             </div>
 
             <div className="batch-id">
-                <h3>Batch ID</h3>
+                <h3>{i18n.t("Batch ID")}</h3>
                 <FormControl variant="outlined">
                     <Select value={batchId} onChange={changeBatchId}>
                         {/* <MenuItem value="">
                             <em>None</em>
                         </MenuItem> */}
-                        <MenuItem value={1}>Dataset 1</MenuItem>
-                        <MenuItem value={2}>Dataset 2</MenuItem>
-                        <MenuItem value={3}>Dataset 3</MenuItem>
+                        <MenuItem value={1}>{i18n.t("Dataset 1")}</MenuItem>
+                        <MenuItem value={2}>{i18n.t("Dataset 2")}</MenuItem>
+                        <MenuItem value={3}>{i18n.t("Dataset 3")}</MenuItem>
                     </Select>
                 </FormControl>
             </div>
 
             <div className="bottom">
                 <div className="previous-list">
-                    <h4>You Previously Submitted: </h4>
+                    <h4>{i18n.t("You Previously Submitted:")} </h4>
                     <ul>
                         {previousSubmissions.map((item, i) => (
                             <li key={i}>
