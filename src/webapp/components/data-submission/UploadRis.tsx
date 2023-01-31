@@ -60,7 +60,7 @@ export const UploadRis: React.FC<UploadRisProps> = ({ validate }) => {
 
     return (
         <ContentWrapper className="ris-file">
-            <span className="label">Choose RIS File</span>
+            <span className="label">{i18n.t("Choose RIS File")}</span>
             {fileList?.length ? (
                 <Button
                     variant="contained"

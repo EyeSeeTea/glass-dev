@@ -4,6 +4,7 @@ import { UploadsDataItemProps, UploadsTable } from "./UploadsTable";
 import { useAppContext } from "../../contexts/app-context";
 import { useGlassSubmissions } from "../../hooks/useGlassSubmissions";
 import { CircularProgress, Typography } from "@material-ui/core";
+import i18n from "@eyeseetea/d2-ui-components/locales";
 
 function getUploadedItems(rows: UploadsDataItemProps[]) {
     return rows.filter(row => row.status.toLowerCase() === "uploaded");
@@ -27,11 +28,11 @@ export const ListOfDatasets: React.FC = () => {
             return (
                 <ContentWrapper>
                     <UploadsTable
-                        title="Correct Uploads"
+                        title={i18n.t("Correct Uploads")}
                         items={getUploadedItems(submissions.data as UploadsDataItemProps[])}
                     />
                     <UploadsTable
-                        title="Uploads with errors, or discarded"
+                        title={i18n.t("Uploads with errors, or discarded")}
                         items={getNonUploadedItems(submissions.data as UploadsDataItemProps[])}
                         className="error-group"
                     />
