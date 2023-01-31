@@ -5,7 +5,7 @@ import { useAppContext } from "../../contexts/app-context";
 import { useGlassSubmissions } from "../../hooks/useGlassSubmissions";
 import { Filter } from "./Filter";
 import { CustomCard } from "../custom-card/CustomCard";
-import { CircularProgress, Typography } from "@material-ui/core";
+import { ContentLoader } from "../content-loader/ContentLoader";
 
 export const UploadHistoryContent: React.FC = () => {
     const location = useLocation();
@@ -13,21 +13,18 @@ export const UploadHistoryContent: React.FC = () => {
     const submissions = useGlassSubmissions(compositionRoot);
     const params = new URLSearchParams(location.search);
 
-    switch (submissions.kind) {
-        case "loading":
-            return <CircularProgress />;
-        case "error":
-            return <Typography variant="h6">{submissions.message}</Typography>;
-        case "loaded":
-            return (
-                <ContentWrapper>
-                    <Filter />
-                    <CustomCard padding="20px 30px 20px">
+    return (
+        <ContentLoader content={submissions}>
+            <ContentWrapper>
+                <Filter />
+                <CustomCard padding="20px 30px 20px">
+                    {submissions.kind === "loaded" && (
                         <UploadTable items={submissions.data} data-current-module={params.get("userId")} />
-                    </CustomCard>
-                </ContentWrapper>
-            );
-    }
+                    )}
+                </CustomCard>
+            </ContentWrapper>
+        </ContentLoader>
+    );
 };
 
 const ContentWrapper = styled.div`
