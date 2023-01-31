@@ -4,19 +4,19 @@ import { GlassModuleContext } from "./glass-module-context";
 
 export const GlassModuleContextProvider: React.FC = ({ children }) => {
     const { module = "", orgUnit = "" } = useParams<{
-      module?: string;
-      orgUnit?: string;
+        module?: string;
+        orgUnit?: string;
     }>();
-  
+
     const [glassModule, setGlassModule] = useState({ module, orgUnit });
-  
+
     useEffect(() => {
-      setGlassModule({ module, orgUnit });
+        setGlassModule({ module, orgUnit });
     }, [module, orgUnit]);
-  
+
     return (
-      <GlassModuleContext.Provider value={glassModule}>
-        {children}
-      </GlassModuleContext.Provider>
+        <GlassModuleContext.Provider value={glassModule}>
+            {children}
+        </GlassModuleContext.Provider>
     );
-  };
+};
