@@ -14,9 +14,5 @@ export const GlassModuleContextProvider: React.FC = ({ children }) => {
         setGlassModule({ module, orgUnit });
     }, [module, orgUnit]);
 
-    return (
-        <GlassModuleContext.Provider value={glassModule}>
-            {children}
-        </GlassModuleContext.Provider>
-    );
+    return <GlassModuleContext.Provider value={glassModule}>{children}</GlassModuleContext.Provider>;
 };
