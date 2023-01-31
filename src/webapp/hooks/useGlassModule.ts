@@ -6,8 +6,7 @@ import { GlassState } from "./State";
 
 export type GlassModuleState = GlassState<GlassModule>;
 
-export function useGlassModule(compositionRoot: CompositionRoot, name?: string ) {
-    
+export function useGlassModule(compositionRoot: CompositionRoot, name?: string) {
     const { module } = useGlassModuleContext();
     const moduleName = name ? name : module;
 
@@ -21,7 +20,7 @@ export function useGlassModule(compositionRoot: CompositionRoot, name?: string )
                 module => setResult({ kind: "loaded", data: module }),
                 error => setResult({ kind: "error", message: error })
             );
-         }
+        }
     }, [compositionRoot, moduleName]);
 
     return result;

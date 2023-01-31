@@ -15,7 +15,6 @@ import { useGlassModuleContext } from "../../contexts/glass-module-context";
 // import { useGlassModuleContext } from "../../contexts/glass-module-context";
 
 export const CallsHistoryPage: React.FC = React.memo(() => {
-    
     return (
         <MainLayout>
             <CallsHistoryPageContent />
@@ -24,24 +23,28 @@ export const CallsHistoryPage: React.FC = React.memo(() => {
 });
 
 export const CallsHistoryPageContent: React.FC = React.memo(() => {
-
     const { compositionRoot } = useAppContext();
 
     const { module: moduleName } = useGlassModuleContext();
 
     const result = useGlassModule(compositionRoot);
-    
+
     const click = (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
         event.preventDefault();
     };
-    
+
     return (
         <ContentLoader content={result}>
             <ContentWrapper>
                 <PreContent>
                     {/* // TODO: replace this with a global reusable StyledBreadCrumbs component */}
                     <StyledBreadCrumbs aria-label="breadcrumb" separator="">
-                        <Button component={NavLink} to={`/current-call/?module=${moduleName}`} exact={true} onClick={click}>
+                        <Button
+                            component={NavLink}
+                            to={`/current-call/?module=${moduleName}`}
+                            exact={true}
+                            onClick={click}
+                        >
                             <span>{moduleName}</span>
                         </Button>
                         <ChevronRightIcon />

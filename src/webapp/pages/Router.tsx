@@ -11,9 +11,7 @@ export const Router: React.FC = React.memo(() => {
     return (
         <HashRouter>
             <Switch>
-
                 <Route path="/calls-history/" render={() => <CallsHistoryPage />} />
-
 
                 <Route
                     path="/current-call/:module"

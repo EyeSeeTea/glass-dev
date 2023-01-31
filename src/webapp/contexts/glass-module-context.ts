@@ -6,9 +6,9 @@ export interface ModuleFromUrl {
 }
 
 export const defaultModuleFromUrl = {
-    module: '',
-    orgUnit: '',
-}
+    module: "",
+    orgUnit: "",
+};
 
 export const GlassModuleContext = createContext<ModuleFromUrl>(defaultModuleFromUrl);
 

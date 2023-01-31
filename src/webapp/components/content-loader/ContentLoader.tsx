@@ -17,7 +17,7 @@ export interface ContentLoaderProps {
 
 export const ContentLoader: React.FC<ContentLoaderProps> = props => {
     const { content, children } = props;
-    
+
     switch (content.kind) {
         case "loading":
             return <CircularProgress />;
