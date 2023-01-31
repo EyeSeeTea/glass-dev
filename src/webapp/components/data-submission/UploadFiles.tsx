@@ -152,3 +152,20 @@ const ContentWrapper = styled.div`
         }
     }
 `;
+
+export const StyledRemoveButton = styled.button`
+    font-size: 13px;
+    cursor: pointer;
+    border: none;
+    background: none;
+    padding: 0;
+    color: ${glassColors.red};
+    svg {
+        width: 20px;
+        height: 20px;
+    }
+`;
+
+export const RemoveContainer = styled.div`
+    display: flex;
+`;
