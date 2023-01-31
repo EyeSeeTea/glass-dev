@@ -20,15 +20,16 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({ changeStep
     return (
         <ContentWrapper>
             <p className="intro">
-                Explaining what consistency checks are: Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-                eiusmod tempor incididunt ut labore
+                {i18n.t(
+                    "Explaining what consistency checks are: Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed doeiusmod tempor incididunt ut labore"
+                )}
             </p>
             <div className="toggles">
                 <Button onClick={() => changeType("ris")} className={fileType === "ris" ? "current" : ""}>
-                    RIS File
+                    {i18n.t("RIS File")}
                 </Button>
                 <Button onClick={() => changeType("sample")} className={fileType === "sample" ? "current" : ""}>
-                    Sample File
+                    {i18n.t("Sample File")}
                 </Button>
             </div>
             {renderTypeContent(fileType)}
@@ -50,7 +51,7 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({ changeStep
 const renderTypeContent = (type: string) => {
     switch (type) {
         case "sample":
-            return <p>Sample file uploading content/intructions here...</p>;
+            return <p>{i18n.t("Sample file uploading content/intructions here...")}</p>;
         default:
             return (
                 <>

@@ -2,6 +2,7 @@ import React from "react";
 import styled from "styled-components";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
 import ErrorIcon from "@material-ui/icons/Error";
+import i18n from "@eyeseetea/d2-ui-components/locales";
 
 export interface StatusCapsuleProps {
     status: String;
@@ -21,7 +22,7 @@ export const StatusCapsule: React.FC<StatusCapsuleProps> = ({ status }) => {
                 </Warning>
             );
         default:
-            return <span>status</span>;
+            return <span>{i18n.t("status")}</span>;
     }
 };
 

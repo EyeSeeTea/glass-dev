@@ -1,3 +1,4 @@
+import i18n from "@eyeseetea/d2-ui-components/locales";
 import { Typography } from "@material-ui/core";
 import React from "react";
 import styled from "styled-components";
@@ -7,7 +8,7 @@ export const AppFooter: React.FC = () => {
     return (
         <Wrapper>
             <Typography variant="body2" gutterBottom style={{ color: palette.text.secondary }}>
-                &copy; {new Date().getFullYear()} Lorem ipsum dolor sit amet, consectetur adipiscing elit.{" "}
+                &copy; {new Date().getFullYear()} {i18n.t("Lorem ipsum dolor sit amet, consectetur adipiscing elit.")}{" "}
             </Typography>
         </Wrapper>
     );

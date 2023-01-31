@@ -64,7 +64,7 @@ export const UploadRis: React.FC<UploadRisProps> = ({ validate }) => {
 
     return (
         <ContentWrapper className="ris-file">
-            <span className="label">Choose RIS File</span>
+            <span className="label">{i18n.t("Choose RIS File")}</span>
             {/* Allow only one file upload per dataset */}
             <Dropzone ref={risFileUploadRef} onDrop={risFileUpload} maxFiles={1}>
                 <Button
