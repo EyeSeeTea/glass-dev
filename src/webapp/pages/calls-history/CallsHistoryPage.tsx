@@ -11,22 +11,23 @@ import { CustomCard } from "../../components/custom-card/CustomCard";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { CallsHistoryContent } from "../../components/calls-history/CallsHistoryContent";
 import { ContentLoader } from "../../components/content-loader/ContentLoader";
+import { useGlassModuleContext } from "../../contexts/glass-module-context";
 
-interface CallsHistoryPageProps {
-    moduleName: string;
-}
-
-export const CallsHistoryPage: React.FC<CallsHistoryPageProps> = React.memo(({ moduleName }) => {
+export const CallsHistoryPage: React.FC = React.memo(() => {
     return (
         <MainLayout>
-            <CallsHistoryPageContent moduleName={moduleName} />
+            <CallsHistoryPageContent  />
         </MainLayout>
     );
 });
 
-export const CallsHistoryPageContent: React.FC<CallsHistoryPageProps> = React.memo(({ moduleName }) => {
+export const CallsHistoryPageContent: React.FC = React.memo(() => {
     const { compositionRoot } = useAppContext();
 
+    const { module: moduleName, orgUnit } = useGlassModuleContext();
+    console.debug(`current module: ${moduleName}`);
+    console.debug(`orgUnit: ${orgUnit}`);
+    
     // TODO: replace useGlassModule (or parameters) with actual hook to fetch calls history data
     const result = useGlassModule(compositionRoot, moduleName);
 
