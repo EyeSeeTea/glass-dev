@@ -1,10 +1,7 @@
-import { Breadcrumbs, Button, Typography } from "@material-ui/core";
-import { CircularProgress } from "material-ui";
+import { Breadcrumbs, Button } from "@material-ui/core";
 import React from "react";
 import styled from "styled-components";
 import { MainLayout } from "../../components/main-layout/MainLayout";
-import { useAppContext } from "../../contexts/app-context";
-import { useGlassModule } from "../../hooks/useGlassModule";
 import { glassColors, palette } from "../app/themes/dhis2.theme";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import { NavLink } from "react-router-dom";
@@ -24,39 +21,27 @@ export const UploadHistoryPage: React.FC<UploadHistoryPageProps> = React.memo(({
 });
 
 export const UploadHistoryPageContent: React.FC<UploadHistoryPageProps> = React.memo(({ moduleName }) => {
-    const { compositionRoot } = useAppContext();
-
-    // TODO: replace useGlassModule (or parameters) with actual hook to fetch upload history data
-    const result = useGlassModule(compositionRoot, moduleName);
-
-    const click = (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
+    const handleClick = (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
         event.preventDefault();
     };
 
-    switch (result.kind) {
-        case "loading":
-            return <CircularProgress />;
-        case "error":
-            return <Typography variant="h6">{result.message}</Typography>;
-        case "loaded":
-            return (
-                <ContentWrapper>
-                    <PreContent>
-                        {/* // TODO: replace this with a global reusable StyledBreadCrumbs component */}
-                        <StyledBreadCrumbs aria-label="breadcrumb" separator="">
-                            <Button component={NavLink} to={`/current-call/${moduleName}`} exact={true} onClick={click}>
-                                <span>{moduleName} asdd</span>
-                            </Button>
-                            <ChevronRightIcon />
-                            <Button component={NavLink} to={`/upload-history/${moduleName}`} exact={true}>
-                                <span>{i18n.t("Upload History")}</span>
-                            </Button>
-                        </StyledBreadCrumbs>
-                    </PreContent>
-                    <UploadHistoryContent />
-                </ContentWrapper>
-            );
-    }
+    return (
+        <ContentWrapper>
+            <PreContent>
+                {/* // TODO: replace this with a global reusable StyledBreadCrumbs component */}
+                <StyledBreadCrumbs aria-label="breadcrumb" separator="">
+                    <Button component={NavLink} to={`/current-call/${moduleName}`} exact={true} onClick={handleClick}>
+                        <span>{moduleName} asdd</span>
+                    </Button>
+                    <ChevronRightIcon />
+                    <Button component={NavLink} to={`/upload-history/${moduleName}`} exact={true}>
+                        <span>{i18n.t("Upload History")}</span>
+                    </Button>
+                </StyledBreadCrumbs>
+            </PreContent>
+            <UploadHistoryContent />
+        </ContentWrapper>
+    );
 });
 
 const ContentWrapper = styled.div`

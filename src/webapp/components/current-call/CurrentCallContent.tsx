@@ -1,7 +1,4 @@
 import React from "react";
-import { CircularProgress, Typography } from "@material-ui/core";
-import { useAppContext } from "../../contexts/app-context";
-import { useDataSubmissionSteps } from "../../hooks/useDataSubmissionSteps";
 import { DataSubmissionSteps } from "./DataSubmissionSteps";
 import styled from "styled-components";
 import { StatusDetails } from "./overview/StatusDetails";
@@ -12,22 +9,11 @@ interface CurrentCallContentProps {
 }
 
 export const CurrentCallContent: React.FC<CurrentCallContentProps> = ({ moduleName, currentCallStatus }) => {
-    const { compositionRoot } = useAppContext();
-
-    const stepsResult = useDataSubmissionSteps(compositionRoot);
-
-    switch (stepsResult.kind) {
-        case "loading":
-            return <CircularProgress />;
-        case "error":
-            return <Typography variant="h6">{stepsResult.message}</Typography>;
-        case "loaded":
-            return (
-                <ContentWrapper>
-                    <DataSubmissionSteps moduleName={moduleName} currentCallStatus={currentCallStatus} />
-                </ContentWrapper>
-            );
-    }
+    return (
+        <ContentWrapper>
+            <DataSubmissionSteps moduleName={moduleName} currentCallStatus={currentCallStatus} />
+        </ContentWrapper>
+    );
 };
 
 const ContentWrapper = styled.div`

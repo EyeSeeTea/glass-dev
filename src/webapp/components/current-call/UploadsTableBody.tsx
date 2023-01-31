@@ -1,12 +1,12 @@
 import React from "react";
 import { TableBody, TableCell, TableRow } from "@material-ui/core";
 import styled from "styled-components";
-import { UploadsDataItemProps } from "./UploadsTable";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import dayjs from "dayjs";
+import { UploadsDataItem } from "../../entities/uploads";
 
 export interface UploadsTableBodyProps {
-    rows?: UploadsDataItemProps[];
+    rows?: UploadsDataItem[];
 }
 
 export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows }) => {
@@ -14,7 +14,7 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows }) => {
         <>
             {rows && rows.length ? (
                 <StyledTableBody>
-                    {rows.map((row: UploadsDataItemProps) => (
+                    {rows.map((row: UploadsDataItem) => (
                         <TableRow key={row.id}>
                             <TableCell>{dayjs(row.submissionDate).format("DD-MM-YYYY")}</TableCell>
                             <TableCell>{row.period}</TableCell>
