@@ -1,6 +1,5 @@
 /* eslint-disable no-console */
-import { Breadcrumbs, Button, Typography } from "@material-ui/core";
-import { CircularProgress } from "material-ui";
+import { Breadcrumbs, Button } from "@material-ui/core";
 import React, { useState } from "react";
 import styled from "styled-components";
 import { MainLayout } from "../../components/main-layout/MainLayout";
@@ -13,6 +12,7 @@ import { CustomCard } from "../../components/custom-card/CustomCard";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { CurrentCallContent } from "../../components/current-call/CurrentCallContent";
 import { useStatusCall } from "../../hooks/useStatusCall";
+import { ContentLoader } from "../../components/content-loader/ContentLoader";
 
 interface CurrentCallPageProps {
     moduleName: string;
@@ -27,25 +27,23 @@ export const CurrentCallPage: React.FC<CurrentCallPageProps> = React.memo(({ mod
     const { compositionRoot } = useAppContext();
 
     const result = useGlassModule(compositionRoot, moduleName);
-    switch (result.kind) {
-        case "loading":
-            return <CircularProgress />;
-        case "error":
-            return <Typography variant="h6">{result.message}</Typography>;
-        case "loaded":
-            return (
-                <MainLayout>
+
+    return (
+        <ContentLoader content={result}>
+            <MainLayout>
+                {result.kind === "loaded" && (
                     <CurrentCallPageContent moduleName={moduleName} moduleId={result.data.id} />
-                </MainLayout>
-            );
-    }
+                )}
+            </MainLayout>
+        </ContentLoader>
+    );
 });
 
 export const CurrentCallPageContent: React.FC<CurrentCallPageContentProps> = React.memo(({ moduleId, moduleName }) => {
     const location = useLocation();
     const queryParameters = new URLSearchParams(location.search);
 
-    //TO DO : orgUnit and period will not be fetched from queryParameters, it will be fetched from context.
+    // TODO : orgUnit and period will not be fetched from queryParameters, it will be fetched from context.
     const periodVal = queryParameters?.get("period");
     const orgUnitVal = queryParameters.get("orgUnit");
 
@@ -63,43 +61,39 @@ export const CurrentCallPageContent: React.FC<CurrentCallPageContentProps> = Rea
         setOrgUnit("new orgUnit value");
     };
 
-    switch (currentCallStatus.kind) {
-        case "loading":
-            return <CircularProgress />;
-        case "error":
-            return <Typography variant="h6">{currentCallStatus.message}</Typography>;
-        case "loaded": {
-            return (
-                <ContentWrapper>
-                    <PreContent>
-                        {/* // TODO: replace this with a global reusable StyledBreadCrumbs component */}
-                        <StyledBreadCrumbs aria-label="breadcrumb" separator="">
-                            <Button component={NavLink} to={`/current-call/${moduleName}`} exact={true} onClick={click}>
-                                <span>{moduleName}</span>
-                            </Button>
-                            <ChevronRightIcon />
-                            <Button component={NavLink} to={`/current-call/${moduleName}`} exact={true}>
-                                <span>{i18n.t(`${period} Call`)}</span>
-                            </Button>
-                        </StyledBreadCrumbs>
-                        <div className="info">
-                            <span>{i18n.t("Yearly data upload")}</span>, &nbsp;
-                            <span>Spain</span>
-                        </div>
-                    </PreContent>
-                    {currentCallStatus && (
+    return (
+        <ContentLoader content={currentCallStatus}>
+            <ContentWrapper>
+                <PreContent>
+                    {/* // TODO: replace this with a global reusable StyledBreadCrumbs component */}
+                    <StyledBreadCrumbs aria-label="breadcrumb" separator="">
+                        <Button component={NavLink} to={`/current-call/${moduleName}`} exact={true} onClick={click}>
+                            <span>{moduleName}</span>
+                        </Button>
+                        <ChevronRightIcon />
+                        <Button component={NavLink} to={`/current-call/${moduleName}`} exact={true}>
+                            <span>{i18n.t(`${period} Call`)}</span>
+                        </Button>
+                    </StyledBreadCrumbs>
+                    <div className="info">
+                        <span>{i18n.t("Yearly data upload")}</span>, &nbsp;
+                        <span>Spain</span>
+                    </div>
+                </PreContent>
+                {currentCallStatus.kind === "loaded" && (
+                    <>
                         <PageTitle statusColor={currentCallStatus.data.colour}>
                             <h3>{i18n.t(`${period} Call`)}</h3>
                             <div className="status">{i18n.t(currentCallStatus.data.title)}</div>
                         </PageTitle>
-                    )}
-                    <CustomCard padding="40px 60px 50px">
-                        <CurrentCallContent moduleName={moduleName} currentCallStatus={currentCallStatus.data} />
-                    </CustomCard>
-                </ContentWrapper>
-            );
-        }
-    }
+                        <CustomCard padding="40px 60px 50px">
+                            <CurrentCallContent moduleName={moduleName} currentCallStatus={currentCallStatus.data} />
+                        </CustomCard>
+                    </>
+                )}
+            </ContentWrapper>
+        </ContentLoader>
+    );
 });
 
 const ContentWrapper = styled.div`
