@@ -12,8 +12,10 @@ import i18n from "@eyeseetea/d2-ui-components/locales";
 import { CallsHistoryContent } from "../../components/calls-history/CallsHistoryContent";
 import { ContentLoader } from "../../components/content-loader/ContentLoader";
 import { useGlassModuleContext } from "../../contexts/glass-module-context";
+// import { useGlassModuleContext } from "../../contexts/glass-module-context";
 
 export const CallsHistoryPage: React.FC = React.memo(() => {
+    
     return (
         <MainLayout>
             <CallsHistoryPageContent />
@@ -22,30 +24,28 @@ export const CallsHistoryPage: React.FC = React.memo(() => {
 });
 
 export const CallsHistoryPageContent: React.FC = React.memo(() => {
+
     const { compositionRoot } = useAppContext();
 
-    const { module: moduleName, orgUnit } = useGlassModuleContext();
-    console.debug(`current module: ${moduleName}`);
-    console.debug(`orgUnit: ${orgUnit}`);
+    const { module: moduleName } = useGlassModuleContext();
 
-    // TODO: replace useGlassModule (or parameters) with actual hook to fetch calls history data
-    const result = useGlassModule(compositionRoot, moduleName);
-
+    const result = useGlassModule(compositionRoot);
+    
     const click = (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
         event.preventDefault();
     };
-
+    
     return (
         <ContentLoader content={result}>
             <ContentWrapper>
                 <PreContent>
                     {/* // TODO: replace this with a global reusable StyledBreadCrumbs component */}
                     <StyledBreadCrumbs aria-label="breadcrumb" separator="">
-                        <Button component={NavLink} to={`/current-call/${moduleName}`} exact={true} onClick={click}>
+                        <Button component={NavLink} to={`/current-call/?module=${moduleName}`} exact={true} onClick={click}>
                             <span>{moduleName}</span>
                         </Button>
                         <ChevronRightIcon />
-                        <Button component={NavLink} to={`/calls-history/${moduleName}`} exact={true}>
+                        <Button component={NavLink} to={`/calls-history/?module=${moduleName}`} exact={true}>
                             <span>{i18n.t("List of Calls")}</span>
                         </Button>
                     </StyledBreadCrumbs>

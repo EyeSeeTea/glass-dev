@@ -1,13 +1,15 @@
 import { createContext, useContext } from "react";
 
-export interface UrlModuleParams {
+export interface ModuleFromUrl {
     module: string;
     orgUnit: string;
 }
 
-export const GlassModuleContext = createContext<UrlModuleParams>({
-    module: "",
-    orgUnit: "",
-});
+export const defaultModuleFromUrl = {
+    module: '',
+    orgUnit: '',
+}
+
+export const GlassModuleContext = createContext<ModuleFromUrl>(defaultModuleFromUrl);
 
 export const useGlassModuleContext = () => useContext(GlassModuleContext);
