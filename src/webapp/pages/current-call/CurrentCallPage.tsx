@@ -24,18 +24,19 @@ interface CurrentCallPageContentProps {
 }
 
 export const CurrentCallPage: React.FC<CurrentCallPageProps> = React.memo(({ moduleName }) => {
+    
     const { compositionRoot } = useAppContext();
 
-    const result = useGlassModule(compositionRoot);
+    const result = useGlassModule(compositionRoot, moduleName);
 
     return (
-        <ContentLoader content={result}>
-            <MainLayout>
+        <MainLayout>
+            <ContentLoader content={result}>
                 {result.kind === "loaded" && (
                     <CurrentCallPageContent moduleName={moduleName} moduleId={result.data.id} />
                 )}
-            </MainLayout>
-        </ContentLoader>
+            </ContentLoader>
+        </MainLayout>
     );
 });
 
