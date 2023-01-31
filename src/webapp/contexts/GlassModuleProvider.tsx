@@ -1,18 +1,22 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import { GlassModuleContext } from "./glass-module-context";
+import { getUrlParam } from "../utils/helpers";
+import { defaultModuleFromUrl, GlassModuleContext, ModuleFromUrl } from "./glass-module-context";
 
 export const GlassModuleContextProvider: React.FC = ({ children }) => {
-    const { module = "", orgUnit = "" } = useParams<{
-        module?: string;
-        orgUnit?: string;
-    }>();
 
-    const [glassModule, setGlassModule] = useState({ module, orgUnit });
+    const [glassModule, setGlassModule] = useState<ModuleFromUrl>(defaultModuleFromUrl);
+
+    console.debug('GlassModuleContextProvider: ', glassModule);
 
     useEffect(() => {
-        setGlassModule({ module, orgUnit });
-    }, [module, orgUnit]);
+        const moduleName = getUrlParam("module") || '';
+        const orgUnit = getUrlParam('orgUnit') || '';
+        setGlassModule({
+            module: moduleName,
+            orgUnit: orgUnit
+        });
+
+    }, []);
 
     return <GlassModuleContext.Provider value={glassModule}>{children}</GlassModuleContext.Provider>;
 };

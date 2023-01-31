@@ -1,6 +1,5 @@
 import React from "react";
 import { HashRouter, Route, Switch } from "react-router-dom";
-import { GlassModuleContextProvider } from "../contexts/GlassModuleProvider";
 import { CallsHistoryPage } from "./calls-history/CallsHistoryPage";
 import { CountryInformationPage } from "./country-information/CountryInformationPage";
 import { CurrentCallPage } from "./current-call/CurrentCallPage";
@@ -12,10 +11,10 @@ export const Router: React.FC = React.memo(() => {
     return (
         <HashRouter>
             <Switch>
-                <GlassModuleContextProvider>
-                    <Route path="/calls-history/:module/:orgUnit" component={CallsHistoryPage} />
-                </GlassModuleContextProvider>
-                
+
+                <Route path="/calls-history/" render={() => <CallsHistoryPage />} />
+
+
                 <Route
                     path="/current-call/:module"
                     render={({ match }) => <CurrentCallPage moduleName={match.params.module} />}
@@ -33,7 +32,6 @@ export const Router: React.FC = React.memo(() => {
                     path="/country-information/:module"
                     render={({ match }) => <CountryInformationPage moduleName={match.params.module} />}
                 />
-
 
                 <Route render={() => <LandingPage />} />
             </Switch>

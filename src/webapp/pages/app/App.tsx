@@ -9,6 +9,7 @@ import { getCompositionRoot } from "../../../CompositionRoot";
 import { Instance } from "../../../data/entities/Instance";
 import { D2Api } from "../../../types/d2-api";
 import { AppContext, AppContextState } from "../../contexts/app-context";
+import { GlassModuleContextProvider } from "../../contexts/GlassModuleProvider";
 import { Router } from "../Router";
 import "./App.css";
 import { AppConfig } from "./AppConfig";
@@ -55,7 +56,9 @@ export const App: React.FC<AppProps> = React.memo(function App({ api, d2, instan
 
                     <div id="app" className="content">
                         <AppContext.Provider value={appContext}>
-                            <Router />
+                            <GlassModuleContextProvider>
+                                <Router />
+                            </GlassModuleContextProvider>
                         </AppContext.Provider>
                     </div>
 

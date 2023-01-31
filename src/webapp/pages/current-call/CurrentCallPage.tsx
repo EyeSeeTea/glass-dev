@@ -26,7 +26,7 @@ interface CurrentCallPageContentProps {
 export const CurrentCallPage: React.FC<CurrentCallPageProps> = React.memo(({ moduleName }) => {
     const { compositionRoot } = useAppContext();
 
-    const result = useGlassModule(compositionRoot, moduleName);
+    const result = useGlassModule(compositionRoot);
 
     return (
         <ContentLoader content={result}>
