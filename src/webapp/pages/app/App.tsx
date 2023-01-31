@@ -9,7 +9,7 @@ import { getCompositionRoot } from "../../../CompositionRoot";
 import { Instance } from "../../../data/entities/Instance";
 import { D2Api } from "../../../types/d2-api";
 import { AppContext, AppContextState } from "../../contexts/app-context";
-import { GlassModuleContextProvider } from "../../contexts/GlassModuleProvider";
+import { GlassModuleContextProvider } from "../../context-providers/GlassModuleProvider";
 import { Router } from "../Router";
 import "./App.css";
 import { AppConfig } from "./AppConfig";
