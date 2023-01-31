@@ -56,7 +56,7 @@ const renderTypeContent = (step: number, moduleName: string, currentCallStatus: 
         case 4:
             return <Advanced />;
         default:
-            return <p>No Data uploaded...</p>;
+            return <p>{i18n.t("No Data uploaded...")}</p>;
     }
 };
 
