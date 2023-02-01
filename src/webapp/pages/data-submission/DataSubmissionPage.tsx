@@ -8,42 +8,37 @@ import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import { NavLink } from "react-router-dom";
 import { CustomCard } from "../../components/custom-card/CustomCard";
 import i18n from "@eyeseetea/d2-ui-components/locales";
+import { useGlassModuleContext } from "../../contexts/glass-module-context";
 
-interface DataSubmissionPageProps {
-    moduleName: string;
-}
 
-export const DataSubmissionPage: React.FC<DataSubmissionPageProps> = React.memo(({ moduleName }) => {
+export const DataSubmissionPage: React.FC = React.memo(() => {
+
+    const { module: moduleName } = useGlassModuleContext();
+    
     return (
         <MainLayout>
-            <DataSubmissionPageContent moduleName={moduleName} />
+            <ContentWrapper>
+                <PreContent>
+                    {/* // TODO: replace this with a global reusable StyledBreadCrumbs component */}
+                    <StyledBreadCrumbs aria-label="breadcrumb" separator="">
+                        <Button component={NavLink} to={`/current-call/?module=${moduleName}`} exact={true} onClick={() => null}>
+                            <span>{moduleName}</span>
+                        </Button>
+                        <ChevronRightIcon />
+                        <Button component={NavLink} to={`/data-submission/${moduleName}`} exact={true}>
+                            <span>{i18n.t("2022 Call")}</span>
+                        </Button>
+                    </StyledBreadCrumbs>
+                    <div className="info">
+                        <span>{i18n.t("Yearly data upload")}</span>, &nbsp;
+                        <span>Spain</span>
+                    </div>
+                </PreContent>
+                <CustomCard padding="40px 60px 50px">
+                    <DataSubmissionContent />
+                </CustomCard>
+            </ContentWrapper>
         </MainLayout>
-    );
-});
-
-export const DataSubmissionPageContent: React.FC<DataSubmissionPageProps> = React.memo(({ moduleName }) => {
-    return (
-        <ContentWrapper>
-            <PreContent>
-                {/* // TODO: replace this with a global reusable StyledBreadCrumbs component */}
-                <StyledBreadCrumbs aria-label="breadcrumb" separator="">
-                    <Button component={NavLink} to={`/current-call/${moduleName}`} exact={true} onClick={() => null}>
-                        <span>{moduleName}</span>
-                    </Button>
-                    <ChevronRightIcon />
-                    <Button component={NavLink} to={`/data-submission/${moduleName}`} exact={true}>
-                        <span>{i18n.t("2022 Call")}</span>
-                    </Button>
-                </StyledBreadCrumbs>
-                <div className="info">
-                    <span>{i18n.t("Yearly data upload")}</span>, &nbsp;
-                    <span>{i18n.t("Spain")}</span>
-                </div>
-            </PreContent>
-            <CustomCard padding="40px 60px 50px">
-                <DataSubmissionContent />
-            </CustomCard>
-        </ContentWrapper>
     );
 });
 

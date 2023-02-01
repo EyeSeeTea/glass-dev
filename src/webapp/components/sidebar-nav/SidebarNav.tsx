@@ -1,9 +1,5 @@
-/* eslint-disable react/no-multi-comp */
-/* eslint-disable react/display-name */
-import React, { useState } from "react";
-import { makeStyles } from "@material-ui/styles";
-import { List, Theme } from "@material-ui/core";
-import clsx from "clsx";
+import React from "react";
+import { List } from "@material-ui/core";
 import SidebarNavMenu from "./SidebarNavMenu";
 import SidebarNavMenuGroup from "./SidebarNavMenuGroup";
 
@@ -32,30 +28,20 @@ interface SidebarNavProps {
 }
 
 const SidebarNav: React.FC<SidebarNavProps> = ({ menus, className }) => {
-    const classes = useStyles();
-    const [currentNaVitem, setCurrentNavItem] = useState<string[]>([""]);
-
-    const changeCurrentNavItem = (val: string[]) => {
-        setCurrentNavItem(val);
-    };
 
     return (
-        <List className={clsx(classes.root, className)}>
+        <List className={className}>
             {menus.map(menu =>
                 menu.kind === "MenuGroup" ? (
                     <SidebarNavMenuGroup
                         menu={menu}
                         key={menu.title}
                         groupName={menu.title}
-                        currentNaVitem={currentNaVitem}
-                        changeCurrentNavItem={changeCurrentNavItem}
                     />
                 ) : (
                     <SidebarNavMenu
                         menu={menu}
                         key={menu.title}
-                        currentNaVitem={currentNaVitem}
-                        changeCurrentNavItem={changeCurrentNavItem}
                     />
                 )
             )}
@@ -64,9 +50,3 @@ const SidebarNav: React.FC<SidebarNavProps> = ({ menus, className }) => {
 };
 
 export default SidebarNav;
-
-const useStyles = makeStyles((theme: Theme) => ({
-    root: {
-        padding: theme.spacing(0),
-    },
-}));

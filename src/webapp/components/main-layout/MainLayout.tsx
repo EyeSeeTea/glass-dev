@@ -8,9 +8,9 @@ import i18n from "@eyeseetea/d2-ui-components/locales";
 import { AppFooter } from "../app-footer/AppFooter";
 import { goToDhis2Url } from "../../utils/helpers";
 import { useConfig } from "@dhis2/app-runtime";
-import { SideBarProvider } from "../sidebar/SideBarProvider";
+import { SideBarProvider } from "../../context-providers/SideBarProvider";
 
-export const MainLayout: React.FC = React.memo(({ children }) => {
+export const MainLayout: React.FC = ({ children }) => {
     const { baseUrl } = useConfig();
 
     const logout = () => {
@@ -46,7 +46,7 @@ export const MainLayout: React.FC = React.memo(({ children }) => {
             </LandingContainer>
         </SideBarProvider>
     );
-});
+};
 
 const RootGrid = styled(Grid)`
     @media (max-width: 1024px) {

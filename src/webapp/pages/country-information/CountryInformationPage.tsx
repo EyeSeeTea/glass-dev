@@ -7,41 +7,35 @@ import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import { NavLink } from "react-router-dom";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { CountryInformationContent } from "../../components/country-information/CountryInformationContent";
+import { useGlassModuleContext } from "../../contexts/glass-module-context";
 
-interface CountryInformationPageProps {
-    moduleName: string;
-}
+export const CountryInformationPage: React.FC = React.memo(() => {
 
-export const CountryInformationPage: React.FC<CountryInformationPageProps> = React.memo(({ moduleName }) => {
-    return (
-        <MainLayout>
-            <CountryInformationPageContent moduleName={moduleName} />
-        </MainLayout>
-    );
-});
+    const { module: moduleName } = useGlassModuleContext();
 
-export const CountryInformationPageContent: React.FC<CountryInformationPageProps> = React.memo(({ moduleName }) => {
     const click = (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
         event.preventDefault();
     };
 
     return (
-        <ContentWrapper>
-            <PreContent>
-                {/* // TODO: replace this with a global reusable StyledBreadCrumbs component */}
-                <StyledBreadCrumbs aria-label="breadcrumb" separator="">
-                    <Button component={NavLink} to={`/current-call/${moduleName}`} exact={true} onClick={click}>
-                        <span>{moduleName}</span>
-                    </Button>
-                    <ChevronRightIcon />
-                    <Button component={NavLink} to={`/country-information/${moduleName}`} exact={true}>
-                        <span>{i18n.t("Country Information")}</span>
-                    </Button>
-                </StyledBreadCrumbs>
-            </PreContent>
+        <MainLayout>
+            <ContentWrapper>
+                <PreContent>
+                    {/* // TODO: replace this with a global reusable StyledBreadCrumbs component */}
+                    <StyledBreadCrumbs aria-label="breadcrumb" separator="">
+                        <Button component={NavLink} to={`/current-call/?module=${moduleName}`} exact={true} onClick={click}>
+                            <span>{moduleName}</span>
+                        </Button>
+                        <ChevronRightIcon />
+                        <Button component={NavLink} to={`/country-information/${moduleName}`} exact={true}>
+                            <span>{i18n.t("Country Information")}</span>
+                        </Button>
+                    </StyledBreadCrumbs>
+                </PreContent>
 
-            <CountryInformationContent />
-        </ContentWrapper>
+                <CountryInformationContent />
+            </ContentWrapper>
+        </MainLayout>
     );
 });
 

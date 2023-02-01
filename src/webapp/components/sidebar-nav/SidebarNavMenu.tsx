@@ -13,20 +13,20 @@ interface SidebarNavProps {
     className?: string;
     groupName?: string;
     menu: MenuLeaf;
-    currentNaVitem: string[];
-    changeCurrentNavItem: (val: string[]) => void;
 }
 
-const SidebarNavMenu: React.FC<SidebarNavProps> = ({ menu, className, groupName, changeCurrentNavItem }) => {
+const SidebarNavMenu: React.FC<SidebarNavProps> = ({ menu, className, groupName }) => {
     const classes = useStyles(menu.level);
     const location = useLocation();
 
-    const isCurrentPage = (val: string) => {
-        if (location.pathname.includes(`data-submission/${groupName}`) && menu.title === "Current Call") {
+    const fullPath = location.pathname + location.search;
+
+    const isCurrentPage = (menuPath: string) => {
+        if (fullPath.includes(`data-submission/?module=${groupName}`) && menu.title === "Current Call") {
             return true;
         }
-        if (val) {
-            return location.pathname.includes(val);
+        if (menuPath) {
+            return fullPath.includes(menuPath);
         } else {
             return false;
         }
@@ -37,11 +37,6 @@ const SidebarNavMenu: React.FC<SidebarNavProps> = ({ menu, className, groupName,
             className={clsx(classes.root, className)}
             disableGutters
             style={{ paddingLeft: menu.level * 8 }}
-            onClick={() => {
-                if (groupName) {
-                    changeCurrentNavItem([groupName, menu.title]);
-                }
-            }}
         >
             <Button
                 className={classes.button}

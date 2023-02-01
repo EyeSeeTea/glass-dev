@@ -27,7 +27,7 @@ export const CallsHistoryPageContent: React.FC = React.memo(() => {
 
     const { module: moduleName } = useGlassModuleContext();
 
-    const result = useGlassModule(compositionRoot);
+    const result = useGlassModule(compositionRoot, moduleName);
 
     const click = (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
         event.preventDefault();
