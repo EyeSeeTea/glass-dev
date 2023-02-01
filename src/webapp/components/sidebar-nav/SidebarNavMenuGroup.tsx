@@ -8,6 +8,8 @@ import SidebarNavMenu from "./SidebarNavMenu";
 import styled from "styled-components";
 import { useLocation } from "react-router-dom";
 import FolderIcon from "@material-ui/icons/Folder";
+import i18n from "@eyeseetea/d2-ui-components/locales";
+
 interface SidebarNavProps {
     className?: string;
     groupName: string;
@@ -74,7 +76,7 @@ const SidebarNavMenuGroup: React.FC<SidebarNavProps> = ({
                     <div className={classes.icon}>
                         <FolderIcon htmlColor={menu.moduleColor} />
                     </div>
-                    <span className={classes.title}>{menu.title}</span>
+                    <span className={classes.title}>{i18n.t(menu.title)}</span>
                     <div className={classes.expand}>{expanded ? <ExpandLess /> : <ExpandMore />}</div>
                 </Button>
             </ListItem>

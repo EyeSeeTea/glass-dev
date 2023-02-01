@@ -16,9 +16,9 @@ export const MenuCard: React.FC<MenuCardProps> = React.memo(
     ({ name, description, addAction, listAction = () => {} }) => {
         return (
             <Card>
-                <Header onClick={listAction} title={name} />
+                <Header onClick={listAction} title={i18n.t(name)} />
 
-                <Content>{description}</Content>
+                <Content>{description && i18n.t(description)}</Content>
 
                 <Actions disableSpacing>
                     {addAction && (

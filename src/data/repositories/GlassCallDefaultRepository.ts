@@ -17,4 +17,14 @@ export class GlassCallDefaultRepository implements GlassCallRepository {
             ])
         );
     }
+
+    getCallsByModuleAndOU(module: string, orgUnit: string): FutureData<GlassCall[]> {
+        return this.dataStoreClient.getObjectsFilteredByProps<GlassCall>(
+            DataStoreKeys.CALLS,
+            new Map<keyof GlassCall, unknown>([
+                ["module", module],
+                ["orgUnit", orgUnit],
+            ])
+        );
+    }
 }
