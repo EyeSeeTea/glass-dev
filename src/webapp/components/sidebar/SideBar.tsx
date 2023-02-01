@@ -28,9 +28,7 @@ export const SideBar: React.FC = () => {
         if (isLoaded && modulesResult.kind === "loaded") {
             if (modulesResult.data.length) {
                 const dsData = modulesResult.data.map(mapModuleToMenu);
-                if (JSON.stringify(dsData) === JSON.stringify(storedMenuData)) {
-                    // No need to update localstorage
-                } else {
+                if (JSON.stringify(dsData) !== JSON.stringify(storedMenuData)) {
                     localStorage.setItem("glassSideBarData", JSON.stringify(dsData));
                 }
             }
