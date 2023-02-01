@@ -5,13 +5,10 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2023-01-25T08:11:54.760Z\n"
-"PO-Revision-Date: 2023-01-25T08:11:54.760Z\n"
+"POT-Creation-Date: 2023-01-31T13:51:45.546Z\n"
+"PO-Revision-Date: 2023-01-31T13:51:45.546Z\n"
 
 msgid "Year"
-msgstr ""
-
-msgid "Open / Close"
 msgstr ""
 
 msgid "Status"
@@ -104,7 +101,10 @@ msgstr ""
 msgid "OK"
 msgstr ""
 
-msgid "Upload file"
+msgid "Multiple uploads not allowed, please select one file"
+msgstr ""
+
+msgid "Error in file upload"
 msgstr ""
 
 msgid "Select file"
