@@ -6,6 +6,7 @@ import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
 import { StatusCapsule } from "./StatusCapsule";
 import { useHistory, useLocation } from "react-router-dom";
+import i18n from "@eyeseetea/d2-ui-components/locales";
 
 export interface DataSubmissionsTableBodyProps {
     rows?: DataSubmissionsHistoryItemProps[];
@@ -39,7 +40,7 @@ export const DataSubmissionsTableBody: React.FC<DataSubmissionsTableBodyProps> =
                     ))}
                 </StyledTableBody>
             ) : (
-                <p>No data found...</p>
+                <p>{i18n.t("No data found...")}</p>
             )}
         </>
     );

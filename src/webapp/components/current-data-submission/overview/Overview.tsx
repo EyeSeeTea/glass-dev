@@ -4,6 +4,7 @@ import { glassColors } from "../../../pages/app/themes/dhis2.theme";
 import { CurrentStatus } from "./CurrentStatus";
 import { StatusDetails } from "./StatusDetails";
 import { Typography } from "@material-ui/core";
+import i18n from "@eyeseetea/d2-ui-components/locales";
 
 interface OverviewProps {
     moduleName: string;
@@ -22,7 +23,7 @@ export const Overview: React.FC<OverviewProps> = ({ moduleName, currentDataSubmi
                     ctas={currentDataSubmissionStatus.cta}
                 />
             ) : (
-                <Typography variant="h6">Data Submission status has errors...</Typography>
+                <Typography variant="h6">{i18n.t("Data Submission status has errors...")}</Typography>
             )}
         </LinedBox>
     );

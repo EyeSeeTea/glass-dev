@@ -1,7 +1,4 @@
 import React from "react";
-import { CircularProgress, Typography } from "@material-ui/core";
-import { useAppContext } from "../../contexts/app-context";
-import { useDataSubmissionSteps } from "../../hooks/useDataSubmissionSteps";
 import { DataSubmissionSteps } from "./DataSubmissionSteps";
 import styled from "styled-components";
 import { StatusDetails } from "./overview/StatusDetails";
@@ -15,25 +12,11 @@ export const CurrentDataSubmissionContent: React.FC<CurrentDataSubmissionContent
     moduleName,
     currentDataSubmissionStatus,
 }) => {
-    const { compositionRoot } = useAppContext();
-
-    const stepsResult = useDataSubmissionSteps(compositionRoot);
-
-    switch (stepsResult.kind) {
-        case "loading":
-            return <CircularProgress />;
-        case "error":
-            return <Typography variant="h6">{stepsResult.message}</Typography>;
-        case "loaded":
-            return (
-                <ContentWrapper>
-                    <DataSubmissionSteps
-                        moduleName={moduleName}
-                        currentDataSubmissionStatus={currentDataSubmissionStatus}
-                    />
-                </ContentWrapper>
-            );
-    }
+    return (
+        <ContentWrapper>
+            <DataSubmissionSteps moduleName={moduleName} currentDataSubmissionStatus={currentDataSubmissionStatus} />
+        </ContentWrapper>
+    );
 };
 
 const ContentWrapper = styled.div`

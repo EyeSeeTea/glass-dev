@@ -8,6 +8,7 @@ import { Advanced } from "./Advanced";
 import { Validations } from "./Validations";
 import { Overview } from "./overview/Overview";
 import { StatusDetails } from "./overview/StatusDetails";
+import i18n from "@eyeseetea/d2-ui-components/locales";
 
 interface DataSubmissionStepsProps {
     moduleName: string;
@@ -24,19 +25,19 @@ export const DataSubmissionSteps: React.FC<DataSubmissionStepsProps> = ({
         <ContentWrapper>
             <div className="toggles">
                 <Button onClick={() => setCurrentStep(0)} className={currentStep === 0 ? "current" : ""}>
-                    Overview
+                    {i18n.t("Overview")}
                 </Button>
                 <Button onClick={() => setCurrentStep(1)} className={currentStep === 1 ? "current" : ""}>
-                    List of Datasets
+                    {i18n.t("List of Datasets")}
                 </Button>
                 <Button onClick={() => setCurrentStep(2)} className={currentStep === 2 ? "current" : ""}>
-                    Questionnaires
+                    {i18n.t("Questionnaires")}
                 </Button>
                 <Button onClick={() => setCurrentStep(3)} className={currentStep === 3 ? "current" : ""}>
-                    Validation
+                    {i18n.t("Validation")}
                 </Button>
                 <Button onClick={() => setCurrentStep(4)} className={currentStep === 4 ? "current" : ""}>
-                    Advanced
+                    {i18n.t("Advanced")}
                 </Button>
             </div>
             {renderTypeContent(currentStep, moduleName, currentDataSubmissionStatus)}
@@ -58,7 +59,7 @@ const renderTypeContent = (step: number, moduleName: string, currentDataSubmissi
         case 4:
             return <Advanced />;
         default:
-            return <p>No Data uploaded...</p>;
+            return <p>{i18n.t("No Data uploaded...")}</p>;
     }
 };
 

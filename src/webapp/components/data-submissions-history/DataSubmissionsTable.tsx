@@ -22,7 +22,7 @@ export interface DataSubmissionsTableProps {
 export const DataSubmissionsTable: React.FC<DataSubmissionsTableProps> = ({ title, items, className }) => {
     return (
         <ContentWrapper className={className}>
-            {title && <Typography variant="h3">{title}</Typography>}
+            {title && <Typography variant="h3">{i18n.t(title)}</Typography>}
 
             <TableContainer component={Paper}>
                 <Table className={"blocking-table"} aria-label="simple table">
