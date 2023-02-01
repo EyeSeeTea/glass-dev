@@ -20,7 +20,8 @@ export function useStatusDataSubmission(
         compositionRoot.glassDataSubmission.getSpecificDataSubmission(moduleId, orgUnit, period).run(
             currentDataSubmission => {
                 const dataSubmissionStatusDetails = statusMap.get(currentDataSubmission.status);
-                if (dataSubmissionStatusDetails) setDataSubmissionStatus({ kind: "loaded", data: dataSubmissionStatusDetails });
+                if (dataSubmissionStatusDetails)
+                    setDataSubmissionStatus({ kind: "loaded", data: dataSubmissionStatusDetails });
             },
             error => {
                 setDataSubmissionStatus({ kind: "error", message: error });
