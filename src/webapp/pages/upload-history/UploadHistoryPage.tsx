@@ -10,7 +10,6 @@ import { UploadHistoryContent } from "../../components/upload-history/UploadHist
 import { useGlassModuleContext } from "../../contexts/glass-module-context";
 
 export const UploadHistoryPage: React.FC = React.memo(() => {
-
     const { module: moduleName } = useGlassModuleContext();
     const click = (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
         event.preventDefault();
@@ -21,7 +20,12 @@ export const UploadHistoryPage: React.FC = React.memo(() => {
                 <PreContent>
                     {/* // TODO: replace this with a global reusable StyledBreadCrumbs component */}
                     <StyledBreadCrumbs aria-label="breadcrumb" separator="">
-                        <Button component={NavLink} to={`/current-call/?module=${moduleName}`} exact={true} onClick={click}>
+                        <Button
+                            component={NavLink}
+                            to={`/current-call/?module=${moduleName}`}
+                            exact={true}
+                            onClick={click}
+                        >
                             <span>{moduleName}</span>
                         </Button>
                         <ChevronRightIcon />

@@ -28,21 +28,13 @@ interface SidebarNavProps {
 }
 
 const SidebarNav: React.FC<SidebarNavProps> = ({ menus, className }) => {
-
     return (
         <List className={className}>
             {menus.map(menu =>
                 menu.kind === "MenuGroup" ? (
-                    <SidebarNavMenuGroup
-                        menu={menu}
-                        key={menu.title}
-                        groupName={menu.title}
-                    />
+                    <SidebarNavMenuGroup menu={menu} key={menu.title} groupName={menu.title} />
                 ) : (
-                    <SidebarNavMenu
-                        menu={menu}
-                        key={menu.title}
-                    />
+                    <SidebarNavMenu menu={menu} key={menu.title} />
                 )
             )}
         </List>

@@ -14,9 +14,9 @@ import { mapModuleToMenu } from "./mapModuleToMenu";
 
 export const SideBar: React.FC = () => {
     const { compositionRoot } = useAppContext();
-    
-    const { setMenuData} = useSideBarContext();
-    
+
+    const { setMenuData } = useSideBarContext();
+
     const [isLoaded, setIsLoaded] = useState(false);
 
     const storedMenuData: Menu[] | null = JSON.parse(localStorage.getItem("glassSideBarData") || "false") || null;
