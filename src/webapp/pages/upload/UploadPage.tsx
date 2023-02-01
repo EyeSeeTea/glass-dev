@@ -1,7 +1,7 @@
 import { Breadcrumbs, Button } from "@material-ui/core";
 import React from "react";
 import styled from "styled-components";
-import { DataSubmissionContent } from "../../components/data-submission/DataSubmissionContent";
+import { UploadContent } from "../../components/upload/UploadContent";
 import { MainLayout } from "../../components/main-layout/MainLayout";
 import { glassColors, palette } from "../app/themes/dhis2.theme";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
@@ -9,19 +9,19 @@ import { NavLink } from "react-router-dom";
 import { CustomCard } from "../../components/custom-card/CustomCard";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 
-interface DataSubmissionPageProps {
+interface UploadPageProps {
     moduleName: string;
 }
 
-export const DataSubmissionPage: React.FC<DataSubmissionPageProps> = React.memo(({ moduleName }) => {
+export const UploadPage: React.FC<UploadPageProps> = React.memo(({ moduleName }) => {
     return (
         <MainLayout>
-            <DataSubmissionPageContent moduleName={moduleName} />
+            <UploadPageContent moduleName={moduleName} />
         </MainLayout>
     );
 });
 
-export const DataSubmissionPageContent: React.FC<DataSubmissionPageProps> = React.memo(({ moduleName }) => {
+export const UploadPageContent: React.FC<UploadPageProps> = React.memo(({ moduleName }) => {
     return (
         <ContentWrapper>
             <PreContent>
@@ -36,7 +36,7 @@ export const DataSubmissionPageContent: React.FC<DataSubmissionPageProps> = Reac
                         <span>{moduleName}</span>
                     </Button>
                     <ChevronRightIcon />
-                    <Button component={NavLink} to={`/data-submission/${moduleName}`} exact={true}>
+                    <Button component={NavLink} to={`/upload/${moduleName}`} exact={true}>
                         <span>{i18n.t("2022 Data Submisison")}</span>
                     </Button>
                 </StyledBreadCrumbs>
@@ -46,7 +46,7 @@ export const DataSubmissionPageContent: React.FC<DataSubmissionPageProps> = Reac
                 </div>
             </PreContent>
             <CustomCard padding="40px 60px 50px">
-                <DataSubmissionContent />
+                <UploadContent />
             </CustomCard>
         </ContentWrapper>
     );

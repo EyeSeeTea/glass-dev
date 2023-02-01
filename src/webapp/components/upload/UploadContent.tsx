@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { DataSubmissionNav } from "./DataSubmissionNav";
-import { useDataSubmissionSteps } from "../../hooks/useDataSubmissionSteps";
+import { UploadNav } from "./UploadNav";
+import { useUploadSteps } from "../../hooks/useUploadSteps";
 import { ConsistencyChecks } from "./ConsistencyChecks";
 import styled from "styled-components";
 import { SupportButtons } from "./SupportButtons";
@@ -9,7 +9,7 @@ import { UploadFiles } from "./UploadFiles";
 import { ReviewDataSummary } from "./ReviewDataSummary";
 import { Completed } from "./Completed";
 
-export const DataSubmissionContent: React.FC = () => {
+export const UploadContent: React.FC = () => {
     const [currentStep, setCurrentStep] = useState(1);
     const [completedSteps, setCompletedSteps] = useState<number[]>([]);
 
@@ -20,11 +20,11 @@ export const DataSubmissionContent: React.FC = () => {
         }
     };
 
-    const steps = useDataSubmissionSteps();
+    const steps = useUploadSteps();
 
     return (
         <ContentWrapper>
-            <DataSubmissionNav
+            <UploadNav
                 steps={steps}
                 currentStep={currentStep}
                 changeStep={changeStep}

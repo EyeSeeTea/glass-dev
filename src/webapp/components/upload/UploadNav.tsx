@@ -3,25 +3,25 @@ import { Button } from "@material-ui/core";
 import styled from "styled-components";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
 import i18n from "@eyeseetea/d2-ui-components/locales";
-export interface DataSubmissionStep {
+export interface UploadStep {
     stepNumber: number;
     title: string;
     content?: any;
 }
-export interface DataSubmissionWizard {
+export interface UploadWizard {
     moduleName: string;
     moduleColor: string;
-    children?: DataSubmissionStep[];
+    children?: UploadStep[];
 }
 
-interface DataSubmissionNavProps {
-    steps?: DataSubmissionStep[];
+interface UploadNavProps {
+    steps?: UploadStep[];
     currentStep: number;
     completedSteps: number[];
     changeStep: (step: number) => void;
 }
 
-export const DataSubmissionNav: React.FC<DataSubmissionNavProps> = props => {
+export const UploadNav: React.FC<UploadNavProps> = props => {
     const { steps, currentStep, changeStep, completedSteps } = props;
 
     return (

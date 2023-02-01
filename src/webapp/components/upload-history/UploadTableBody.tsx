@@ -19,7 +19,7 @@ export const UploadTableBody: React.FC<UploadTableBodyProps> = ({ rows }) => {
     const moduleName = location.substring(location.indexOf("/") + 1);
 
     const click = () => {
-        history.push(`/data-submission/${moduleName}`);
+        history.push(`/upload/${moduleName}`);
     };
 
     const download = (_url: string) => {
@@ -41,7 +41,7 @@ export const UploadTableBody: React.FC<UploadTableBodyProps> = ({ rows }) => {
                             <TableCell>{row.period}</TableCell>
                             <TableCell>{row.specimens.join(", ")}</TableCell>
                             <TableCell>{row.status}</TableCell>
-                            <TableCell>{dayjs(row.submissionDate).format("YYYY-MM-DD HH:mm:ss")}</TableCell>
+                            <TableCell>{dayjs(row.uploadDate).format("YYYY-MM-DD HH:mm:ss")}</TableCell>
                             <TableCell>{row.fileName}</TableCell>
                             <TableCell>
                                 <CloudDownloadIcon color="error" onClick={() => download(row.fileId)} />

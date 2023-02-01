@@ -22,7 +22,7 @@ const SidebarNavMenu: React.FC<SidebarNavProps> = ({ menu, className, groupName,
     const location = useLocation();
 
     const isCurrentPage = (val: string) => {
-        if (location.pathname.includes(`data-submission/${groupName}`) && menu.title === "Current Data Submission") {
+        if (location.pathname.includes(`upload/${groupName}`) && menu.title === "Current Data Submission") {
             return true;
         }
         if (val) {

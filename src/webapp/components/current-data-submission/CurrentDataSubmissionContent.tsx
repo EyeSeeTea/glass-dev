@@ -1,5 +1,5 @@
 import React from "react";
-import { DataSubmissionSteps } from "./DataSubmissionSteps";
+import { UploadSteps } from "./UploadSteps";
 import styled from "styled-components";
 import { StatusDetails } from "./overview/StatusDetails";
 
@@ -14,7 +14,7 @@ export const CurrentDataSubmissionContent: React.FC<CurrentDataSubmissionContent
 }) => {
     return (
         <ContentWrapper>
-            <DataSubmissionSteps moduleName={moduleName} currentDataSubmissionStatus={currentDataSubmissionStatus} />
+            <UploadSteps moduleName={moduleName} currentDataSubmissionStatus={currentDataSubmissionStatus} />
         </ContentWrapper>
     );
 };

@@ -16,7 +16,7 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows }) => {
                 <StyledTableBody>
                     {rows.map((row: UploadsDataItem) => (
                         <TableRow key={row.id}>
-                            <TableCell>{dayjs(row.submissionDate).format("DD-MM-YYYY")}</TableCell>
+                            <TableCell>{dayjs(row.uploadDate).format("DD-MM-YYYY")}</TableCell>
                             <TableCell>{row.period}</TableCell>
                             <TableCell>{row.inputLineNb}</TableCell>
                             <TableCell>{row.fileType}</TableCell>

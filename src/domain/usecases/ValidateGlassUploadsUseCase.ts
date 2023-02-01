@@ -1,8 +1,8 @@
 import { UseCase } from "../../CompositionRoot";
 import { Future, FutureData } from "../entities/Future";
-import { GlassSubmissionsRepository } from "../repositories/GlassSubmissionsRepository";
+import { GlassUploadsRepository } from "../repositories/GlassUploadsRepository";
 
-const glassSubmissions = [
+const glassUploads = [
     {
         id: "4663764e-9ca6-4a68-ac49-e0605482384c",
         module: "AVnpk4xiXGG",
@@ -16,19 +16,19 @@ const glassSubmissions = [
         period: "2022Q1",
         specimens: ["Blood", "Stool"],
         status: "Done",
-        submissionDate: new Date("2021-01-10T00:00:00.000Z"),
+        uploadDate: new Date("2021-01-10T00:00:00.000Z"),
         dataSubmission: "",
     },
 ];
 
-export class ValidateGlassSubmissionsUseCase implements UseCase {
-    constructor(private glassModuleRepository: GlassSubmissionsRepository) {}
+export class ValidateGlassUploadsUseCase implements UseCase {
+    constructor(private glassModuleRepository: GlassUploadsRepository) {}
 
     public execute(): FutureData<void> {
         return this.glassModuleRepository
             .getAll()
             .flatMap(data =>
-                data.length === 0 ? this.glassModuleRepository.save(glassSubmissions) : Future.success(undefined)
+                data.length === 0 ? this.glassModuleRepository.save(glassUploads) : Future.success(undefined)
             );
     }
 }

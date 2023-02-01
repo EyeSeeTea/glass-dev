@@ -1,4 +1,4 @@
-export interface GlassSubmissions {
+export interface GlassUploads {
     id: string;
     batchId: string;
     countryCode: string;
@@ -10,7 +10,7 @@ export interface GlassSubmissions {
     period: string;
     specimens: string[];
     status: string;
-    submissionDate: Date;
+    uploadDate: Date;
     dataSubmission: string;
     module: string;
 }

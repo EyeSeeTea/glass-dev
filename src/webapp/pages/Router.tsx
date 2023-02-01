@@ -3,7 +3,7 @@ import { HashRouter, Route, Switch } from "react-router-dom";
 import { DataSubmissionsHistoryPage } from "./data-submissions-history/DataSubmissionsHistoryPage";
 import { CountryInformationPage } from "./country-information/CountryInformationPage";
 import { CurrentDataSubmissionPage } from "./current-data-submission/CurrentDataSubmissionPage";
-import { DataSubmissionPage } from "./data-submission/DataSubmissionPage";
+import { UploadPage } from "./upload/UploadPage";
 import { FakeLandingPage } from "./landing/FakeLandingPage";
 import { UploadHistoryPage } from "./upload-history/UploadHistoryPage";
 
@@ -24,10 +24,7 @@ export const Router: React.FC = React.memo(() => {
                     path="/current-data-submission/:module"
                     render={({ match }) => <CurrentDataSubmissionPage moduleName={match.params.module} />}
                 />
-                <Route
-                    path="/data-submission/:module"
-                    render={({ match }) => <DataSubmissionPage moduleName={match.params.module} />}
-                />
+                <Route path="/upload/:module" render={({ match }) => <UploadPage moduleName={match.params.module} />} />
                 <Route
                     path="/data-submissions-history/:module"
                     render={({ match }) => <DataSubmissionsHistoryPage moduleName={match.params.module} />}
