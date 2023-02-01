@@ -62,9 +62,6 @@ msgstr ""
 msgid "Batch ID"
 msgstr ""
 
-msgid "Status"
-msgstr ""
-
 msgid "Back to Module"
 msgstr ""
 

@@ -1,6 +1,8 @@
 import styled from "styled-components";
 import { DataSubmissionsTable } from "./DataSubmissionsTable";
 import { useLocation } from "react-router-dom";
+
+// TODO: replace mock date with actual use case for fetch data submissions history from back-end
 import { data } from "./mock-tables-data.json";
 
 export const DataSubmissionsHistoryContent: React.FC = () => {

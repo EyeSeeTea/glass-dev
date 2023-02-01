@@ -2,6 +2,7 @@ import React from "react";
 import { Grid } from "@material-ui/core";
 import { ModuleCard } from "../module-card/ModuleCard";
 import { data } from "./mock-open-data-submissions.json";
+import i18n from "@eyeseetea/d2-ui-components/locales";
 
 export const OpenDataSubmissions: React.FC = () => {
     return (
@@ -22,7 +23,7 @@ export const OpenDataSubmissions: React.FC = () => {
                     </Grid>
                 ))
             ) : (
-                <p>No Data loaded...</p>
+                <p>{i18n.t("No Data loaded...")}</p>
             )}
         </>
     );

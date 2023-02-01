@@ -4,64 +4,65 @@ import { glassColors } from "../../pages/app/themes/dhis2.theme";
 import { Button } from "@material-ui/core";
 import CheckIcon from "@material-ui/icons/Check";
 import WarningIcon from "@material-ui/icons/Warning";
+import i18n from "@eyeseetea/d2-ui-components/locales";
 
 export const Validations: React.FC = () => {
     return (
         <ValidationsGrid>
             <ValidationCard>
                 <div className="head">
-                    <h3>Validation Alpha</h3>
+                    <h3>{i18n.t("Validation Alpha")}</h3>
                 </div>
-                <span className="status">no validation</span>
+                <span className="status">{i18n.t("no validation")}</span>
                 <div className="buttons">
-                    <Button>Report</Button>
+                    <Button>{i18n.t("Report")}</Button>
                     <Button variant="contained" color="primary">
-                        Run Validation
+                        {i18n.t("Run Validation")}
                     </Button>
                 </div>
             </ValidationCard>
             <ValidationCard className="correct">
                 <div className="head">
-                    <h3>Validation Bravo</h3>
+                    <h3>{i18n.t("Validation Bravo")}</h3>
                 </div>
                 <span className="status correct">
                     <CheckIcon />
-                    10 - 10 - 2020 VALIDATION CORRECT
+                    {i18n.t("10 - 10 - 2020 VALIDATION CORRECT")}
                 </span>
                 <div className="buttons">
-                    <Button>Report</Button>
+                    <Button>{i18n.t("Report")}</Button>
                     <Button variant="contained" color="primary">
-                        Re-run Validation
+                        {i18n.t("Re-run Validation")}
                     </Button>
                 </div>
             </ValidationCard>
             <ValidationCard className="wrong">
                 <div className="head">
-                    <h3>Validation Charlie</h3>
+                    <h3>{i18n.t("Validation Charlie")}</h3>
                 </div>
                 <span className="status wrong">
                     <WarningIcon />
-                    10 - 10 - 2021 VALIDATION wrong
+                    {i18n.t("10 - 10 - 2021 VALIDATION wrong")}
                 </span>
                 <div className="buttons">
-                    <Button>Report</Button>
+                    <Button>{i18n.t("Report")}</Button>
                     <Button variant="contained" color="primary">
-                        Re-run Validation
+                        {i18n.t("Re-run Validation")}
                     </Button>
                 </div>
             </ValidationCard>
             <ValidationCard className="correct">
                 <div className="head">
-                    <h3>Validation Echo</h3>
+                    <h3>{i18n.t("Validation Echo")}</h3>
                 </div>
                 <span className="status correct">
                     <CheckIcon />
-                    09 - 12 - 2021 VALIDATION CORRECT
+                    {i18n.t("09 - 12 - 2021 VALIDATION CORRECT")}
                 </span>
                 <div className="buttons">
-                    <Button>Report</Button>
+                    <Button>{i18n.t("Report")}</Button>
                     <Button variant="contained" color="primary">
-                        Re-run Validation
+                        {i18n.t("Re-run Validation")}
                     </Button>
                 </div>
             </ValidationCard>
