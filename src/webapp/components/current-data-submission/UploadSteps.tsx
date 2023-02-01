@@ -10,15 +10,12 @@ import { Overview } from "./overview/Overview";
 import { StatusDetails } from "./overview/StatusDetails";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 
-interface DataSubmissionStepsProps {
+interface UploadStepsProps {
     moduleName: string;
     currentDataSubmissionStatus: StatusDetails;
 }
 
-export const DataSubmissionSteps: React.FC<DataSubmissionStepsProps> = ({
-    moduleName,
-    currentDataSubmissionStatus,
-}) => {
+export const UploadSteps: React.FC<UploadStepsProps> = ({ moduleName, currentDataSubmissionStatus }) => {
     const [currentStep, setCurrentStep] = useState<number>(0);
 
     return (

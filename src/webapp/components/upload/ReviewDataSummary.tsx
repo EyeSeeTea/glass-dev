@@ -75,7 +75,7 @@ export const ReviewDataSummary: React.FC<ReviewDataSummaryProps> = ({ changeStep
                 </SectionCard>
             </Section>
             <Section className="compare">
-                <h3>{i18n.t("Compare with data from previous submissions")}</h3>
+                <h3>{i18n.t("Compare with data from previous uploads")}</h3>
                 <SectionCard className="wrong">
                     <FormControlLabel
                         control={<Checkbox checked={state.checkedC} onChange={check} name="checkedC" color="primary" />}

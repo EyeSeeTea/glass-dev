@@ -1,4 +1,4 @@
-export function useDataSubmissionSteps() {
+export function useUploadSteps() {
     return [
         {
             stepNumber: 1,

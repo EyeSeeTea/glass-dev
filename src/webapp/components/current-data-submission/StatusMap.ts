@@ -2,14 +2,14 @@ import { DataSubmissionStatusTypes } from "../../../domain/entities/GlassDataSub
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
 import { StatusDetails } from "./overview/StatusDetails";
 
-//Map of Submission statuses with correponding UI details.
+//Map of data submission statuses with correponding UI details.
 export const statusMap = new Map<DataSubmissionStatusTypes, StatusDetails>([
     [
         "NOT_COMPLETED",
         {
             title: "NOT COMPLETED",
             description:
-                "You need to send the mandatory uploads before validating the submissions for this data submissions",
+                "You need to complete the mandatory uploads before validating the uploads for this data submission",
             colour: glassColors.yellow,
             cta: ["Upload dataset", "Go to questionnaire"],
         },
@@ -19,7 +19,7 @@ export const statusMap = new Map<DataSubmissionStatusTypes, StatusDetails>([
         {
             title: "DATA TO BE APROVED BY COUNTRY",
             description:
-                "ACTION REQUIRED. Datasets are already uploaded with all test passed. You must approve the submission for WHO revision to continue the process.",
+                "ACTION REQUIRED. Datasets are already uploaded with all test passed. You must approve the upload for WHO revision to continue the process.",
             colour: glassColors.accentPrimary,
             cta: ["Send to WHO for revision"],
         },

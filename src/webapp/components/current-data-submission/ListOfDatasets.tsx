@@ -2,35 +2,35 @@ import React from "react";
 import styled from "styled-components";
 import { UploadsTable } from "./UploadsTable";
 import { useAppContext } from "../../contexts/app-context";
-import { GlassSubmissionsState, useGlassSubmissions } from "../../hooks/useGlassSubmissions";
+import { GlassUploadsState, useGlassUploads } from "../../hooks/useGlassUploads";
 import { ContentLoader } from "../content-loader/ContentLoader";
 import { UploadsDataItem } from "../../entities/uploads";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 
-function getUploadedItems(submission: GlassSubmissionsState) {
-    if (submission.kind === "loaded") {
-        return submission.data.filter((row: UploadsDataItem) => row.status.toLowerCase() === "uploaded");
+function getUploadedItems(upload: GlassUploadsState) {
+    if (upload.kind === "loaded") {
+        return upload.data.filter((row: UploadsDataItem) => row.status.toLowerCase() === "uploaded");
     }
 }
 
-function getNonUploadedItems(submission: GlassSubmissionsState) {
-    if (submission.kind === "loaded") {
-        return submission.data.filter((row: UploadsDataItem) => row.status.toLowerCase() !== "uploaded");
+function getNonUploadedItems(upload: GlassUploadsState) {
+    if (upload.kind === "loaded") {
+        return upload.data.filter((row: UploadsDataItem) => row.status.toLowerCase() !== "uploaded");
     }
 }
 
 export const ListOfDatasets: React.FC = () => {
     const { compositionRoot } = useAppContext();
 
-    const submissions = useGlassSubmissions(compositionRoot);
+    const uploads = useGlassUploads(compositionRoot);
 
     return (
-        <ContentLoader content={submissions}>
+        <ContentLoader content={uploads}>
             <ContentWrapper>
-                <UploadsTable title={i18n.t("Correct Uploads")} items={getUploadedItems(submissions)} />
+                <UploadsTable title={i18n.t("Correct Uploads")} items={getUploadedItems(uploads)} />
                 <UploadsTable
                     title={i18n.t("Uploads with errors, or discarded")}
-                    items={getNonUploadedItems(submissions)}
+                    items={getNonUploadedItems(uploads)}
                     className="error-group"
                 />
             </ContentWrapper>

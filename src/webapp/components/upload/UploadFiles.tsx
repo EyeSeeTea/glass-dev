@@ -4,7 +4,7 @@ import styled from "styled-components";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
-import { data as previousSubmissions } from "./mock-previous-submissions.json";
+import { data as previousUploads } from "./mock-previous-uploads.json";
 import { UploadRis } from "./UploadRis";
 import { UploadSample } from "./UploadSample";
 interface UploadFilesProps {
@@ -49,7 +49,7 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({ changeStep }) => {
                 <div className="previous-list">
                     <h4>{i18n.t("You Previously Submitted:")} </h4>
                     <ul>
-                        {previousSubmissions.map((item, i) => (
+                        {previousUploads.map((item, i) => (
                             <li key={i}>
                                 {item.name} - {item.id}
                             </li>

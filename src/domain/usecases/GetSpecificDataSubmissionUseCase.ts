@@ -16,7 +16,7 @@ export class GetSpecificDataSubmissionUseCase implements UseCase {
                     return Future.success(data[0]);
                 }
                 //Specific data-submission not found,
-                //Set to default status- NOT_COMPLETE, so that user can continue with submission workflow
+                //Set to default status- NOT_COMPLETE, so that user can continue with upload workflow
                 //TO DO : Save new data-submission to datastore
                 else {
                     const defaultDataSubmission: GlassDataSubmission = {
