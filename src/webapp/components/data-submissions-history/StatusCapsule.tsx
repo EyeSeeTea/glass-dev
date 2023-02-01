@@ -2,20 +2,22 @@ import React from "react";
 import styled from "styled-components";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
 import ErrorIcon from "@material-ui/icons/Error";
+import { DataSubmissionStatusTypes } from "../../../domain/entities/GlassDataSubmission";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 
 export interface StatusCapsuleProps {
-    status: String;
+    status: DataSubmissionStatusTypes;
 }
 
 export const StatusCapsule: React.FC<StatusCapsuleProps> = ({ status }) => {
     switch (status) {
-        case "approved":
-            return <Approved>{status.toUpperCase()}</Approved>;
-        case "waiting WHO approval":
+        case "COMPLETE":
+        case "APPROVED":
             return <Approved>{status}</Approved>;
-        case "not submitted":
-            // eslint-disable-next-line react/jsx-no-undef
+        case "NOT_COMPLETED":
+        case "PENDING_APPROVAL":
+        case "PENDING_UPDATE_APPROVAL":
+        case "REJECTED":
             return (
                 <Warning>
                     <ErrorIcon /> {status}

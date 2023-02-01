@@ -64,7 +64,7 @@ export const DataSubmissionsHistoryPageContent: React.FC<DataSubmissionsHistoryP
                             <h2>{i18n.t("All Data Submissions")}</h2>
                         </PageTitle>
                         <CustomCard padding="40px 60px 50px">
-                            <DataSubmissionsHistoryContent />
+                            <DataSubmissionsHistoryContent moduleId={result.data.id} moduleName={moduleName} />
                         </CustomCard>
                     </ContentWrapper>
                 );

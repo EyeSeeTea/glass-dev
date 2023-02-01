@@ -1,30 +1,32 @@
-import styled from "styled-components";
 import { DataSubmissionsTable } from "./DataSubmissionsTable";
+import { useState } from "react";
 import { useLocation } from "react-router-dom";
+import { useAppContext } from "../../contexts/app-context";
+import { useGlassDataSubmissionsByModuleAndOU } from "../../hooks/useGlassDataSubmissionsByModuleAndOU";
+import { ContentLoader } from "../content-loader/ContentLoader";
 
-// TODO: replace mock date with actual use case for fetch data submissions history from back-end
-import { data } from "./mock-tables-data.json";
+interface DataSubmissionsHistoryContentProps {
+    moduleName: string;
+    moduleId: string;
+}
 
-export const DataSubmissionsHistoryContent: React.FC = () => {
+export const DataSubmissionsHistoryContent: React.FC<DataSubmissionsHistoryContentProps> = ({
+    moduleId,
+    moduleName,
+}) => {
+    const { compositionRoot } = useAppContext();
     const location = useLocation();
-    const params = new URLSearchParams(location.search);
+    const queryParameters = new URLSearchParams(location.search);
+    //TO DO : The orgUnit should come from a global context which is yet to be implemented.
+    const orgUnitVal = queryParameters.get("orgUnit");
+    const [orgUnit] = useState(orgUnitVal === null ? "" : orgUnitVal);
+    const dataSubmissions = useGlassDataSubmissionsByModuleAndOU(compositionRoot, moduleId, orgUnit);
 
     return (
-        <ContentWrapper>
-            <DataSubmissionsTable items={data} data-current-module={params.get("userId")} />
-        </ContentWrapper>
+        <ContentLoader content={dataSubmissions}>
+            {dataSubmissions.kind === "loaded" && (
+                <DataSubmissionsTable items={dataSubmissions.data} moduleName={moduleName} orgUnit={orgUnit} />
+            )}
+        </ContentLoader>
     );
 };
-
-const ContentWrapper = styled.div`
-    display: flex;
-    flex-direction: column;
-    gap: 40px;
-    p.intro {
-        text-align: left;
-        max-width: 730px;
-        margin: 0 auto;
-        font-weight: 300px;
-        line-height: 1.4;
-    }
-`;

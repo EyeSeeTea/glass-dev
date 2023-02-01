@@ -8,6 +8,7 @@ import i18n from "@eyeseetea/d2-ui-components/locales";
 import { AppFooter } from "../app-footer/AppFooter";
 import { goToDhis2Url } from "../../utils/helpers";
 import { useConfig } from "@dhis2/app-runtime";
+import { SideBarProvider } from "../sidebar/SideBarProvider";
 
 export const MainLayout: React.FC = React.memo(({ children }) => {
     const { baseUrl } = useConfig();
@@ -17,7 +18,7 @@ export const MainLayout: React.FC = React.memo(({ children }) => {
     };
 
     return (
-        <React.Fragment>
+        <SideBarProvider>
             <GlassAppBar />
             <LandingContainer>
                 <RootGrid container spacing={6}>
@@ -43,7 +44,7 @@ export const MainLayout: React.FC = React.memo(({ children }) => {
                     </Grid>
                 </RootGrid>
             </LandingContainer>
-        </React.Fragment>
+        </SideBarProvider>
     );
 });
 
