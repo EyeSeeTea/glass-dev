@@ -39,8 +39,7 @@ export const CurrentCallPageContent: React.FC<CurrentCallPageContentProps> = Rea
 
     const { module: moduleName } = useGlassModuleContext();
     
-    console.debug("CurrentCallPageContent: ", moduleName);
-    // TODO : orgUnit and period will not be fetched from queryParameters, it will be fetched from context.
+    // TODO : orgUnit and period will be stored context.
     const periodVal = queryParameters?.get("period");
     const orgUnitVal = queryParameters.get("orgUnit");
 
