@@ -14,19 +14,10 @@ export const Router: React.FC = React.memo(() => {
                 <Route path="/calls-history/" render={() => <CallsHistoryPage />} />
 
                 <Route path="/current-call/" render={() => <CurrentCallPage />} />
-                <Route
-                    path="/data-submission/"
-                    render={() => <DataSubmissionPage />}
-                />
+                <Route path="/data-submission/" render={() => <DataSubmissionPage />} />
 
-                <Route
-                    path="/upload-history"
-                    render={() => <UploadHistoryPage />}
-                />
-                <Route
-                    path="/country-information"
-                    render={() => <CountryInformationPage />}
-                />
+                <Route path="/upload-history" render={() => <UploadHistoryPage />} />
+                <Route path="/country-information" render={() => <CountryInformationPage />} />
 
                 <Route render={() => <LandingPage />} />
             </Switch>

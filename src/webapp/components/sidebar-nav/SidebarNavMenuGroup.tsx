@@ -16,11 +16,7 @@ interface SidebarNavProps {
     menu: MenuGroup;
 }
 
-const SidebarNavMenuGroup: React.FC<SidebarNavProps> = ({
-    menu,
-    groupName,
-    className,
-}) => {
+const SidebarNavMenuGroup: React.FC<SidebarNavProps> = ({ menu, groupName, className }) => {
     const classes = useStyles(menu.level);
     const moduleName = getUrlParam("module") || "";
 
@@ -53,17 +49,9 @@ const SidebarNavMenuGroup: React.FC<SidebarNavProps> = ({
                         {menu.children &&
                             menu.children.map(child =>
                                 child.kind === "MenuGroup" ? (
-                                    <SidebarNavMenuGroup
-                                        menu={child}
-                                        key={child.title}
-                                        groupName={groupName}
-                                    />
+                                    <SidebarNavMenuGroup menu={child} key={child.title} groupName={groupName} />
                                 ) : (
-                                    <SidebarNavMenu
-                                        menu={child}
-                                        key={child.title}
-                                        groupName={groupName}
-                                    />
+                                    <SidebarNavMenu menu={child} key={child.title} groupName={groupName} />
                                 )
                             )}
                     </List>

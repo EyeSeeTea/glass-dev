@@ -2,10 +2,10 @@ import React, { useState } from "react";
 import { CurrentMenuItem, SideBarContext, SideBarContextProps } from "../contexts/sidebar-context";
 import { Menu } from "../components/sidebar-nav/SidebarNav";
 
-export const defaultState:SideBarContextProps = {
+export const defaultState: SideBarContextProps = {
     loaded: false,
     menuData: [{ kind: "MenuLeaf", level: 0, title: "", path: "" }],
-    currentNavItem: ["",""],
+    currentNavItem: ["", ""],
     setLoaded: () => {},
     setMenuData: () => {},
     setCurrentNavItem: () => {},
@@ -16,7 +16,6 @@ interface SideBarProviderProps {
 }
 
 export const SideBarProvider = ({ children }: SideBarProviderProps) => {
-
     const [menuData, setMenuData] = useState<Menu[]>(defaultState.menuData);
     const [currentNavItem, setCurrentNavItem] = useState<CurrentMenuItem>(defaultState.currentNavItem);
     const [loaded, setLoaded] = useState<boolean>(false);

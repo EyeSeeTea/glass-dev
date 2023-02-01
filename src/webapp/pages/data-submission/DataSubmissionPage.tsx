@@ -10,18 +10,21 @@ import { CustomCard } from "../../components/custom-card/CustomCard";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { useGlassModuleContext } from "../../contexts/glass-module-context";
 
-
 export const DataSubmissionPage: React.FC = React.memo(() => {
-
     const { module: moduleName } = useGlassModuleContext();
-    
+
     return (
         <MainLayout>
             <ContentWrapper>
                 <PreContent>
                     {/* // TODO: replace this with a global reusable StyledBreadCrumbs component */}
                     <StyledBreadCrumbs aria-label="breadcrumb" separator="">
-                        <Button component={NavLink} to={`/current-call/?module=${moduleName}`} exact={true} onClick={() => null}>
+                        <Button
+                            component={NavLink}
+                            to={`/current-call/?module=${moduleName}`}
+                            exact={true}
+                            onClick={() => null}
+                        >
                             <span>{moduleName}</span>
                         </Button>
                         <ChevronRightIcon />
