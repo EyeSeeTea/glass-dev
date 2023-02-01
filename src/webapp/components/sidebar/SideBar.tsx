@@ -15,8 +15,6 @@ import { mapModuleToMenu } from "./mapModuleToMenu";
 export const SideBar: React.FC = () => {
     const { compositionRoot } = useAppContext();
 
-    const { setMenuData } = useSideBarContext();
-
     const [isLoaded, setIsLoaded] = useState(false);
 
     const storedMenuData: Menu[] | null = JSON.parse(localStorage.getItem("glassSideBarData") || "false") || null;
@@ -39,11 +37,10 @@ export const SideBar: React.FC = () => {
                 const menuData = modulesResult.data.map(mapModuleToMenu);
                 localStorage.setItem("glassSideBarData", JSON.stringify(menuData));
                 setIsLoaded(true);
-                setMenuData(menuData);
             }
         }
         return () => {};
-    }, [storedMenuData, modulesResult, isLoaded, setMenuData]);
+    }, [storedMenuData, modulesResult, isLoaded]);
 
     return (
         <CustomCard minheight="630px" padding="0 0 100px 0" data-test="test2">
