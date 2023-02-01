@@ -39,7 +39,6 @@ export const SideBar: React.FC = () => {
                 setIsLoaded(true);
             }
         }
-        return () => {};
     }, [storedMenuData, modulesResult, isLoaded]);
 
     return (
