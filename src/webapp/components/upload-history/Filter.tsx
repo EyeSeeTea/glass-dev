@@ -2,6 +2,7 @@ import { useState } from "react";
 import styled from "styled-components";
 import { Box, FormControl, MenuItem, Select, Typography, InputLabel, withStyles, makeStyles } from "@material-ui/core";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
+import i18n from "@eyeseetea/d2-ui-components/locales";
 
 const useStyles = makeStyles(theme => ({
     formControl: {
@@ -70,20 +71,20 @@ export const Filter: React.FC = () => {
 
     return (
         <Box mb={5}>
-            <BlackTypography variant="h5">Filters</BlackTypography>
+            <BlackTypography variant="h5">{i18n.t("Filters")}</BlackTypography>
             <Box>
                 <FormControl className={classes.formControl}>
-                    <StyledInputLabel id="year-label">Select Year</StyledInputLabel>
+                    <StyledInputLabel id="year-label">{i18n.t("Select Year")}</StyledInputLabel>
                     <Select labelId="year-label" value={year} onChange={e => setYear(e.target.value as number)}>
                         {yearOptions.map(yearItem => (
                             <MenuItem key={yearItem.value} value={yearItem.value}>
-                                {yearItem.label}
+                                {i18n.t(yearItem.label)}
                             </MenuItem>
                         ))}
                     </Select>
                 </FormControl>
                 <FormControl className={classes.formControl}>
-                    <StyledInputLabel id="status">Select Status</StyledInputLabel>
+                    <StyledInputLabel id="status">{i18n.t("Select Status")}</StyledInputLabel>
                     <Select
                         labelId="status"
                         value={status}
@@ -92,7 +93,7 @@ export const Filter: React.FC = () => {
                     >
                         {statusOptions.map(statusItem => (
                             <MenuItem key={statusItem.value} value={statusItem.value}>
-                                {statusItem.label}
+                                {i18n.t(statusItem.label)}
                             </MenuItem>
                         ))}
                     </Select>

@@ -16,7 +16,7 @@ export interface UploadsTableProps {
 export const UploadsTable: React.FC<UploadsTableProps> = ({ title, items, className }) => {
     return (
         <ContentWrapper className={className}>
-            <Typography variant="h3">{title}</Typography>
+            <Typography variant="h3">{i18n.t(title)}</Typography>
 
             <TableContainer component={Paper}>
                 <Table className={"blocking-table"} aria-label="simple table">

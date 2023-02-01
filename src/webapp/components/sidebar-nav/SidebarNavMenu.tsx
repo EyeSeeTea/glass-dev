@@ -7,6 +7,7 @@ import { ListItem, Button, colors, Theme, Typography } from "@material-ui/core";
 import clsx from "clsx";
 import { MenuLeaf } from "./SidebarNav";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
+import i18n from "@eyeseetea/d2-ui-components/locales";
 
 interface SidebarNavProps {
     className?: string;
@@ -51,7 +52,7 @@ const SidebarNavMenu: React.FC<SidebarNavProps> = ({ menu, className, groupName,
             >
                 <div className={classes.icon}>{menu.icon}</div>
                 <Typography variant="body1" style={{ color: glassColors.greyBlack }}>
-                    {menu.title}
+                    {i18n.t(menu.title)}
                 </Typography>
             </Button>
         </ListItem>

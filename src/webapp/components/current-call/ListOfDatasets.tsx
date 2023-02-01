@@ -5,6 +5,7 @@ import { useAppContext } from "../../contexts/app-context";
 import { GlassSubmissionsState, useGlassSubmissions } from "../../hooks/useGlassSubmissions";
 import { ContentLoader } from "../content-loader/ContentLoader";
 import { UploadsDataItem } from "../../entities/uploads";
+import i18n from "@eyeseetea/d2-ui-components/locales";
 
 function getUploadedItems(submission: GlassSubmissionsState) {
     if (submission.kind === "loaded") {
@@ -26,10 +27,9 @@ export const ListOfDatasets: React.FC = () => {
     return (
         <ContentLoader content={submissions}>
             <ContentWrapper>
-                <h3>ContentLoader content</h3>
-                <UploadsTable title="Correct Uploads" items={getUploadedItems(submissions)} />
+                <UploadsTable title={i18n.t("Correct Uploads")} items={getUploadedItems(submissions)} />
                 <UploadsTable
-                    title="Uploads with errors, or discarded"
+                    title={i18n.t("Uploads with errors, or discarded")}
                     items={getNonUploadedItems(submissions)}
                     className="error-group"
                 />

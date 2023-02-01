@@ -42,28 +42,28 @@ export const ReviewDataSummary: React.FC<ReviewDataSummaryProps> = ({ changeStep
         <ContentWrapper>
             <div className="toggles">
                 <Button onClick={() => changeType("ris")} className={fileType === "ris" ? "current" : ""}>
-                    RIS File
+                    {i18n.t("RIS File")}
                 </Button>
                 <Button onClick={() => changeType("sample")} className={fileType === "sample" ? "current" : ""}>
-                    Sample File
+                    {i18n.t("Sample File")}
                 </Button>
             </div>
             <Section className="summary">
-                <h3>Summary</h3>
+                <h3>{i18n.t("Summary")}</h3>
                 <SectionCard className="wrong">
                     <ul>
-                        <li>130 Subjects</li>
+                        <li>{i18n.t("130 Subjects")}</li>
                         <li>
-                            <b>First Sample</b> 1-20-2020
+                            <b>{i18n.t("First Sample")}</b> 1-20-2020
                         </li>
                         <li>
-                            <b>Last Sample</b> 1-20-2020
+                            <b>{i18n.t("Last Sample")}</b> 1-20-2020
                         </li>
                     </ul>
                 </SectionCard>
             </Section>
             <Section className="filter">
-                <h3>Filter by sample type</h3>
+                <h3>{i18n.t("Filter by sample type")}</h3>
                 <SectionCard className="wrong">
                     <FormControlLabel
                         control={<Checkbox checked={state.checkedA} onChange={check} name="checkedA" color="primary" />}
@@ -76,7 +76,7 @@ export const ReviewDataSummary: React.FC<ReviewDataSummaryProps> = ({ changeStep
                 </SectionCard>
             </Section>
             <Section className="compare">
-                <h3>Compare with data from previous submissions</h3>
+                <h3>{i18n.t("Compare with data from previous submissions")}</h3>
                 <SectionCard className="wrong">
                     <FormControlLabel
                         control={<Checkbox checked={state.checkedC} onChange={check} name="checkedC" color="primary" />}
@@ -89,7 +89,7 @@ export const ReviewDataSummary: React.FC<ReviewDataSummaryProps> = ({ changeStep
                 </SectionCard>
             </Section>
             <Section className="charts">
-                <h3>Charts</h3>
+                <h3>{i18n.t("Charts")}</h3>
                 <SectionCard className="wrong">
                     <img src={sampleCharts} alt="Sample Charts" />
                     {/* <h3>All required charts to load here...</h3> */}
