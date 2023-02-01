@@ -5,13 +5,16 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2023-02-01T06:31:50.495Z\n"
-"PO-Revision-Date: 2023-02-01T06:31:50.495Z\n"
+"POT-Creation-Date: 2023-02-01T18:43:24.025Z\n"
+"PO-Revision-Date: 2023-02-01T18:43:24.025Z\n"
 
 msgid "Spain"
 msgstr ""
 
-msgid "Status"
+msgid "France"
+msgstr ""
+
+msgid "User Profile"
 msgstr ""
 
 msgid "My Account"
@@ -72,24 +75,6 @@ msgid ""
 msgstr ""
 
 msgid "Request Dataset update"
-msgstr ""
-
-msgid "Overview"
-msgstr ""
-
-msgid "List of Datasets"
-msgstr ""
-
-msgid "Questionnaires"
-msgstr ""
-
-msgid "Validation"
-msgstr ""
-
-msgid "Advanced"
-msgstr ""
-
-msgid "No Data uploaded..."
 msgstr ""
 
 msgid "Correct Uploads"
@@ -161,6 +146,24 @@ msgstr ""
 msgid "Status"
 msgstr ""
 
+msgid "Overview"
+msgstr ""
+
+msgid "List of Datasets"
+msgstr ""
+
+msgid "Questionnaires"
+msgstr ""
+
+msgid "Validation"
+msgstr ""
+
+msgid "Advanced"
+msgstr ""
+
+msgid "No Data uploaded..."
+msgstr ""
+
 msgid "Validation Alpha"
 msgstr ""
 
@@ -192,6 +195,39 @@ msgid "Validation Echo"
 msgstr ""
 
 msgid "09 - 12 - 2021 VALIDATION CORRECT"
+msgstr ""
+
+msgid " "
+msgstr ""
+
+msgid "status"
+msgstr ""
+
+msgid "News from GLASS"
+msgstr ""
+
+msgid "No Data loaded..."
+msgstr ""
+
+msgid "Your Notifications"
+msgstr ""
+
+msgid "Log Out"
+msgstr ""
+
+msgid "OPEN ALL YEAR"
+msgstr ""
+
+msgid "GO"
+msgstr ""
+
+msgid "Back"
+msgstr ""
+
+msgid "Help"
+msgstr ""
+
+msgid "HOME"
 msgstr ""
 
 msgid "Blocking Errors"
@@ -251,7 +287,7 @@ msgstr ""
 msgid "Filter by sample type"
 msgstr ""
 
-msgid "Compare with data from previous submissions"
+msgid "Compare with data from previous uploads"
 msgstr ""
 
 msgid "Charts"
@@ -275,10 +311,22 @@ msgstr ""
 msgid "OK"
 msgstr ""
 
+msgid "Dataset 1"
+msgstr ""
+
+msgid "Dataset 2"
+msgstr ""
+
+msgid "Dataset 3"
+msgstr ""
+
 msgid "Multiple uploads not allowed, please select one file"
 msgstr ""
 
 msgid "Error in file upload"
+msgstr ""
+
+msgid "Choose RIS File"
 msgstr ""
 
 msgid "Select file"
@@ -288,45 +336,6 @@ msgid "SAMPLE File"
 msgstr ""
 
 msgid "not required"
-msgstr ""
-
-msgid "Open / Close"
-msgstr ""
-
-msgid " "
-msgstr ""
-
-msgid "No data found..."
-msgstr ""
-
-msgid "status"
-msgstr ""
-
-msgid "News from GLASS"
-msgstr ""
-
-msgid "No Data loaded..."
-msgstr ""
-
-msgid "Your Notifications"
-msgstr ""
-
-msgid "Log Out"
-msgstr ""
-
-msgid "OPEN ALL YEAR"
-msgstr ""
-
-msgid "GO"
-msgstr ""
-
-msgid "Back"
-msgstr ""
-
-msgid "Help"
-msgstr ""
-
-msgid "HOME"
 msgstr ""
 
 msgid "Filters"
@@ -365,9 +374,6 @@ msgstr ""
 msgid "Yearly data upload"
 msgstr ""
 
-msgid "2022 Data Submisison"
-msgstr ""
-
 msgid "List of Data Submissions"
 msgstr ""
 
@@ -378,6 +384,9 @@ msgid "Hello {{name}}"
 msgstr ""
 
 msgid "Detail page"
+msgstr ""
+
+msgid "2022 Data Submisison"
 msgstr ""
 
 msgid "Upload History"
