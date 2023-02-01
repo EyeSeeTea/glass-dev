@@ -16,7 +16,7 @@ export interface QuetionnairesGridProps {
     items?: QuetionnairesGridItem[];
     className?: string;
 }
-
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const QuetionnairesGrid: React.FC<QuetionnairesGridProps> = ({ items, className }) => {
     return (
         <ContentWrapper className={className}>
