@@ -1,12 +1,27 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: i18next-conv\n"
-"POT-Creation-Date: 2023-01-31T13:45:28.611Z\n"
+"POT-Creation-Date: 2023-02-01T19:29:52.667Z\n"
 "PO-Revision-Date: 2018-10-25T09:02:35.143Z\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
+
+msgid "Spain"
+msgstr ""
+
+msgid "France"
+msgstr ""
+
+msgid "User Profile"
+msgstr ""
+
+msgid "My Account"
+msgstr ""
+
+msgid "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
+msgstr ""
 
 msgid "Year"
 msgstr ""
@@ -17,11 +32,41 @@ msgstr ""
 msgid " "
 msgstr ""
 
+msgid "status"
+msgstr ""
+
 msgid "Add"
 msgstr "Añadir"
 
 msgid "List"
 msgstr "Listar"
+
+msgid "WHO Region"
+msgstr ""
+
+msgid "Country"
+msgstr ""
+
+msgid "Enrolment status"
+msgstr ""
+
+msgid "Date of Enrolment"
+msgstr ""
+
+msgid "Family Name *"
+msgstr ""
+
+msgid "First Name *"
+msgstr ""
+
+msgid "Function *"
+msgstr ""
+
+msgid "Email Address *"
+msgstr ""
+
+msgid "Preferred Language (notifications) *"
+msgstr ""
 
 msgid "Ask for updating"
 msgstr ""
@@ -40,6 +85,57 @@ msgstr ""
 msgid "Request Dataset update"
 msgstr ""
 
+msgid "Overview"
+msgstr ""
+
+msgid "List of Datasets"
+msgstr ""
+
+msgid "Questionnaires"
+msgstr ""
+
+msgid "Validation"
+msgstr ""
+
+msgid "Advanced"
+msgstr ""
+
+msgid "No Data uploaded..."
+msgstr ""
+
+msgid "Correct Uploads"
+msgstr ""
+
+msgid "Uploads with errors, or discarded"
+msgstr ""
+
+msgid "Questionnaire 1"
+msgstr ""
+
+msgid "Description"
+msgstr ""
+
+msgid "mandatory"
+msgstr ""
+
+msgid "Not completed"
+msgstr ""
+
+msgid "View"
+msgstr ""
+
+msgid "Go"
+msgstr ""
+
+msgid "Questionnaire 2"
+msgstr ""
+
+msgid "Questionnaire 3"
+msgstr ""
+
+msgid "Completed"
+msgstr ""
+
 msgid "Uploaded"
 msgstr ""
 
@@ -53,6 +149,39 @@ msgid "Type"
 msgstr ""
 
 msgid "Batch ID"
+msgstr ""
+
+msgid "Validation Alpha"
+msgstr ""
+
+msgid "no validation"
+msgstr ""
+
+msgid "Report"
+msgstr ""
+
+msgid "Run Validation"
+msgstr ""
+
+msgid "Validation Bravo"
+msgstr ""
+
+msgid "10 - 10 - 2020 VALIDATION CORRECT"
+msgstr ""
+
+msgid "Re-run Validation"
+msgstr ""
+
+msgid "Validation Charlie"
+msgstr ""
+
+msgid "10 - 10 - 2021 VALIDATION wrong"
+msgstr ""
+
+msgid "Validation Echo"
+msgstr ""
+
+msgid "09 - 12 - 2021 VALIDATION CORRECT"
 msgstr ""
 
 msgid "Display full status history >"
@@ -70,6 +199,21 @@ msgstr ""
 msgid "Current Status"
 msgstr ""
 
+msgid "Call Submission status has errors..."
+msgstr ""
+
+msgid "Blocking Errors"
+msgstr ""
+
+msgid "Name"
+msgstr ""
+
+msgid "Count"
+msgstr ""
+
+msgid "Details"
+msgstr ""
+
 msgid "Back to Module"
 msgstr ""
 
@@ -79,7 +223,46 @@ msgstr ""
 msgid "Thank! your data for now is uploaded in our system"
 msgstr ""
 
+msgid "Any other userful information here?"
+msgstr ""
+
+msgid "Info abou the previously updated quarter and the missing quarters"
+msgstr ""
+
+msgid "RIS File"
+msgstr ""
+
+msgid "Sample File"
+msgstr ""
+
 msgid "Continue"
+msgstr ""
+
+msgid "Sample file uploading content/intructions here..."
+msgstr ""
+
+msgid "Non-blocking warnings"
+msgstr ""
+
+msgid "Summary"
+msgstr ""
+
+msgid "130 Subjects"
+msgstr ""
+
+msgid "First Sample"
+msgstr ""
+
+msgid "Last Sample"
+msgstr ""
+
+msgid "Filter by sample type"
+msgstr ""
+
+msgid "Compare with data from previous submissions"
+msgstr ""
+
+msgid "Charts"
 msgstr ""
 
 msgid "I need help"
@@ -100,22 +283,46 @@ msgstr ""
 msgid "OK"
 msgstr ""
 
+msgid "Dataset 1"
+msgstr ""
+
+msgid "Dataset 2"
+msgstr ""
+
+msgid "Dataset 3"
+msgstr ""
+
 msgid "Multiple uploads not allowed, please select one file"
 msgstr ""
 
 msgid "Error in file upload"
 msgstr ""
 
+msgid "Choose RIS File"
+msgstr ""
+
 msgid "Select file"
 msgstr ""
 
+msgid "SAMPLE File"
+msgstr ""
+
+msgid "not required"
+msgstr ""
+
 msgid "News from GLASS"
+msgstr ""
+
+msgid "No Data loaded..."
 msgstr ""
 
 msgid "Your Notifications"
 msgstr ""
 
 msgid "Log Out"
+msgstr ""
+
+msgid "OPEN ALL YEAR"
 msgstr ""
 
 msgid "GO"
@@ -130,10 +337,16 @@ msgstr "Ayuda"
 msgid "HOME"
 msgstr ""
 
-msgid "File Type"
+msgid "Filters"
 msgstr ""
 
-msgid "Country"
+msgid "Select Year"
+msgstr ""
+
+msgid "Select Status"
+msgstr ""
+
+msgid "File Type"
 msgstr ""
 
 msgid "Batch Id"

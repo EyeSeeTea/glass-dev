@@ -10,7 +10,6 @@ export function useGlassModule(compositionRoot: CompositionRoot, name?: string) 
     const { module } = useGlassModuleContext();
     const moduleName = name ? name : module;
 
-    console.debug("useGlassModule: ", moduleName);
     const [result, setResult] = React.useState<GlassModuleState>({
         kind: "loading",
     });

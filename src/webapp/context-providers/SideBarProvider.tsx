@@ -21,7 +21,6 @@ export const SideBarProvider = ({ children }: SideBarProviderProps) => {
     const [currentNavItem, setCurrentNavItem] = useState<CurrentMenuItem>(defaultState.currentNavItem);
     const [loaded, setLoaded] = useState<boolean>(false);
 
-    console.debug("SideBarProvider currentNavItem: ", currentNavItem);
     return (
         <SideBarContext.Provider
             value={{ loaded, setLoaded, menuData, setMenuData, currentNavItem, setCurrentNavItem }}
