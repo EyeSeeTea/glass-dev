@@ -7,6 +7,7 @@ import { MenuGroup } from "./SidebarNav";
 import SidebarNavMenu from "./SidebarNavMenu";
 import styled from "styled-components";
 import { useLocation } from "react-router-dom";
+import i18n from "@eyeseetea/d2-ui-components/locales";
 
 interface SidebarNavProps {
     className?: string;
@@ -67,7 +68,7 @@ const SidebarNavMenuGroup: React.FC<SidebarNavProps> = ({
             >
                 <Button className={classes.button} fullWidth={true}>
                     <div className={classes.icon}>{menu.icon}</div>
-                    <span className={classes.title}>{menu.title}</span>
+                    <span className={classes.title}>{i18n.t(menu.title)}</span>
                     <div className={classes.expand}>{openCollapse ? <ExpandLess /> : <ExpandMore />}</div>
                 </Button>
             </ListItem>

@@ -77,7 +77,7 @@ export const CurrentCallPageContent: React.FC<CurrentCallPageContentProps> = Rea
                     </StyledBreadCrumbs>
                     <div className="info">
                         <span>{i18n.t("Yearly data upload")}</span>, &nbsp;
-                        <span>Spain</span>
+                        <span>{i18n.t("Spain")}</span>
                     </div>
                 </PreContent>
                 {currentCallStatus.kind === "loaded" && (

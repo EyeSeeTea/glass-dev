@@ -3,6 +3,7 @@ import styled from "styled-components";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
 import ErrorIcon from "@material-ui/icons/Error";
 import { CallStatusTypes } from "../../../domain/entities/GlassCallStatus";
+import i18n from "@eyeseetea/d2-ui-components/locales";
 
 export interface StatusCapsuleProps {
     status: CallStatusTypes;
@@ -22,8 +23,10 @@ export const StatusCapsule: React.FC<StatusCapsuleProps> = ({ status }) => {
                     <ErrorIcon /> {status}
                 </Warning>
             );
+        default:
+            return <span>{i18n.t("status")}</span>;
     }
-};
+}
 
 const Approved = styled.div`
     color: ${glassColors.green};
