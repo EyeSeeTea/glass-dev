@@ -1,6 +1,7 @@
 import { UseCase } from "../../CompositionRoot";
 import { Future, FutureData } from "../entities/Future";
 import { GlassDataSubmission } from "../entities/GlassDataSubmission";
+import { generateId } from "../entities/Ref";
 import { GlassDataSubmissionsRepository } from "../repositories/GlassDataSubmissionRepository";
 
 export class GetSpecificDataSubmissionUseCase implements UseCase {
@@ -20,6 +21,7 @@ export class GetSpecificDataSubmissionUseCase implements UseCase {
                 //TO DO : Save new data-submission to datastore
                 else {
                     const defaultDataSubmission: GlassDataSubmission = {
+                        id: generateId(),
                         module: module,
                         orgUnit: orgUnit,
                         period: period,

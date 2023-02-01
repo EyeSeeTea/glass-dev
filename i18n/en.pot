@@ -11,10 +11,7 @@ msgstr ""
 msgid "Spain"
 msgstr ""
 
-msgid "France"
-msgstr ""
-
-msgid "User Profile"
+msgid "Status"
 msgstr ""
 
 msgid "My Account"
@@ -278,22 +275,10 @@ msgstr ""
 msgid "OK"
 msgstr ""
 
-msgid "Dataset 1"
-msgstr ""
-
-msgid "Dataset 2"
-msgstr ""
-
-msgid "Dataset 3"
-msgstr ""
-
 msgid "Multiple uploads not allowed, please select one file"
 msgstr ""
 
 msgid "Error in file upload"
-msgstr ""
-
-msgid "Choose RIS File"
 msgstr ""
 
 msgid "Select file"

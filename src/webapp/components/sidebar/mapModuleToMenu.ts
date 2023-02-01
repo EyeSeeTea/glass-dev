@@ -1,33 +1,24 @@
-import { CompositionRoot } from "../../CompositionRoot";
-import { GlassModule } from "../../domain/entities/GlassModule";
-import { Menu } from "../components/sidebar-nav/SidebarNav";
-import { GlassState } from "./State";
-import { useGlassModules } from "./useGlassModules";
-import FolderIcon from "@material-ui/icons/Folder";
+import { GlassModule } from "../../../domain/entities/GlassModule";
+import { GlassState } from "../../hooks/State";
+import { Menu } from "../sidebar-nav/SidebarNav";
 
 export type GlassModulesState = GlassState<Menu[]>;
 
-export function useSidebarMenus(compositionRoot: CompositionRoot) {
-    const modulesResult = useGlassModules(compositionRoot);
-
-    return modulesResult.kind === "loaded"
-        ? { kind: "loaded" as const, data: modulesResult.data.map(mapModuleToMenu) }
-        : modulesResult;
-}
-
 export function mapModuleToMenu(module: GlassModule): Menu {
+    // const moduleFolder = module.name.toLowerCase().replace(/\s/g,'');
+    const moduleFolder = module.name;
     return {
         kind: "MenuGroup",
         level: 0,
         title: module.name,
         moduleColor: module.color,
-        icon: <FolderIcon htmlColor={module.color} />,
+        icon: "folder",
         children: [
             {
                 kind: "MenuLeaf",
                 level: 0,
                 title: "Current Data Submission",
-                path: `/current-data-submission/${module.name}`,
+                path: `/current-data-submission/${moduleFolder}`,
             },
             {
                 kind: "MenuLeaf",
@@ -39,19 +30,19 @@ export function mapModuleToMenu(module: GlassModule): Menu {
                 kind: "MenuLeaf",
                 level: 0,
                 title: "Upload History",
-                path: `/upload-history/${module.name}`,
+                path: `/upload-history/${moduleFolder}`,
             },
             {
                 kind: "MenuLeaf",
                 level: 0,
                 title: "Data Submissions History",
-                path: `/data-submissions-history/${module.name}`,
+                path: `/data-submissions-history/${moduleFolder}`,
             },
             {
                 kind: "MenuLeaf",
                 level: 0,
                 title: "Country Information",
-                path: `/country-information/${module.name}`,
+                path: `/country-information/${moduleFolder}`,
             },
         ],
     };

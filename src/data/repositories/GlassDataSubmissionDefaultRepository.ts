@@ -17,4 +17,14 @@ export class GlassDataSubmissionsDefaultRepository implements GlassDataSubmissio
             ])
         );
     }
+
+    getDataSubmissionsByModuleAndOU(module: string, orgUnit: string): FutureData<GlassDataSubmission[]> {
+        return this.dataStoreClient.getObjectsFilteredByProps<GlassDataSubmission>(
+            DataStoreKeys.DATA_SUBMISSIONS,
+            new Map<keyof GlassDataSubmission, unknown>([
+                ["module", module],
+                ["orgUnit", orgUnit],
+            ])
+        );
+    }
 }
