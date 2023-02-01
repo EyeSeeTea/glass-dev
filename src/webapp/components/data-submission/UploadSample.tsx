@@ -55,7 +55,7 @@ export const UploadSample: React.FC = () => {
     return (
         <ContentWrapper className="ris-file">
             <span className="label">
-                SAMPLE File <small>(not required)</small> <HelpIcon />
+                {i18n.t("SAMPLE File")} <small>({i18n.t("not required")})</small> <HelpIcon />
             </span>
             {/* Allow only one file upload per dataset */}
             <Dropzone ref={sampleFileUploadRef} onDrop={sampleFileUpload} maxFiles={1}>

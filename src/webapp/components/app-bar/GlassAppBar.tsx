@@ -9,6 +9,7 @@ import whoLogo from "../../assets/who-logo-blue.png";
 import glassLogo from "../../assets/glass-logo.png";
 import { Box, MenuItem, Select } from "@material-ui/core";
 import styled from "styled-components";
+import i18n from "@eyeseetea/d2-ui-components/locales";
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -63,14 +64,14 @@ export const GlassAppBar: React.FC = () => {
                             <LocationIcon />
                         </IconButton>
                         <Select value={country} disableUnderline onChange={changeCountry}>
-                            <MenuItem value={1}>Spain</MenuItem>
-                            <MenuItem value={2}>France</MenuItem>
+                            <MenuItem value={1}>{i18n.t("Spain")}</MenuItem>
+                            <MenuItem value={2}>{i18n.t("France")}</MenuItem>
                         </Select>
                     </SelectContainer>
                     <SelectContainer>
                         <Select value={action} disableUnderline onChange={changeAction}>
-                            <MenuItem value={1}>User Profile</MenuItem>
-                            <MenuItem value={2}>My Account</MenuItem>
+                            <MenuItem value={1}>{i18n.t("User Profile")}</MenuItem>
+                            <MenuItem value={2}>{i18n.t("My Account")}</MenuItem>
                         </Select>
                     </SelectContainer>
                 </Toolbar>

@@ -1,3 +1,4 @@
+import i18n from "@eyeseetea/d2-ui-components/locales";
 import { Button } from "@material-ui/core";
 import React from "react";
 import styled from "styled-components";
@@ -8,41 +9,41 @@ export const Questionnaires: React.FC = () => {
         <QuestionnairesGrid>
             <QuestionnaireCard>
                 <div className="head">
-                    <h3>Questionnaire 1</h3>
-                    <span className="desc">Description</span>
+                    <h3>{i18n.t("Questionnaire 1")}</h3>
+                    <span className="desc">{i18n.t("Description")}</span>
                 </div>
-                <span className="mand">mandatory</span>
-                <span className="comp">Not completed</span>
+                <span className="mand">{i18n.t("mandatory")}</span>
+                <span className="comp">{i18n.t("Not completed")}</span>
                 <div className="buttons">
-                    <Button>View</Button>
+                    <Button>{i18n.t("View")}</Button>
                     <Button variant="contained" color="primary">
-                        Go
+                        {i18n.t("Go")}
                     </Button>
                 </div>
             </QuestionnaireCard>
             <QuestionnaireCard>
                 <div className="head">
-                    <h3>Questionnaire 2</h3>
-                    <span className="desc">Description</span>
+                    <h3>{i18n.t("Questionnaire 2")}</h3>
+                    <span className="desc">{i18n.t("Description")}</span>
                 </div>
-                <span className="comp">Not completed</span>
+                <span className="comp">{i18n.t("Not completed")}</span>
                 <div className="buttons">
-                    <Button>View</Button>
+                    <Button>{i18n.t("View")}</Button>
                     <Button variant="contained" color="primary">
-                        Go
+                        {i18n.t("Go")}
                     </Button>
                 </div>
             </QuestionnaireCard>
             <QuestionnaireCard>
                 <div className="head">
-                    <h3>Questionnaire 3</h3>
-                    <span className="desc">Description</span>
+                    <h3>{i18n.t("Questionnaire 3")}</h3>
+                    <span className="desc">{i18n.t("Description")}</span>
                 </div>
-                <span className="comp completed">Completed</span>
+                <span className="comp completed">{i18n.t("Completed")}</span>
                 <div className="buttons">
-                    <Button>View</Button>
+                    <Button>{i18n.t("View")}</Button>
                     <Button variant="contained" color="primary">
-                        Go
+                        {i18n.t("Go")}
                     </Button>
                 </div>
             </QuestionnaireCard>
