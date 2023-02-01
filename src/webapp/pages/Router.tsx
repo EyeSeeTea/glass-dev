@@ -13,22 +13,19 @@ export const Router: React.FC = React.memo(() => {
             <Switch>
                 <Route path="/calls-history/" render={() => <CallsHistoryPage />} />
 
+                <Route path="/current-call/" render={() => <CurrentCallPage />} />
                 <Route
-                    path="/current-call/:module"
-                    render={({ match }) => <CurrentCallPage moduleName={match.params.module} />}
-                />
-                <Route
-                    path="/data-submission/:module"
-                    render={({ match }) => <DataSubmissionPage moduleName={match.params.module} />}
+                    path="/data-submission/"
+                    render={() => <DataSubmissionPage />}
                 />
 
                 <Route
-                    path="/upload-history/:module"
-                    render={({ match }) => <UploadHistoryPage moduleName={match.params.module} />}
+                    path="/upload-history"
+                    render={() => <UploadHistoryPage />}
                 />
                 <Route
-                    path="/country-information/:module"
-                    render={({ match }) => <CountryInformationPage moduleName={match.params.module} />}
+                    path="/country-information"
+                    render={() => <CountryInformationPage />}
                 />
 
                 <Route render={() => <LandingPage />} />

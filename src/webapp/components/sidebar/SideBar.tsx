@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { Box, Button, CircularProgress, Typography } from "@material-ui/core";
 import { CustomCard } from "../custom-card/CustomCard";
@@ -9,12 +9,15 @@ import { NavLink } from "react-router-dom";
 
 import { useAppContext } from "../../contexts/app-context";
 import { useGlassModules } from "../../hooks/useGlassModules";
-import { SideBarContext } from "../../contexts/sidebar-context";
+import { useSideBarContext } from "../../contexts/sidebar-context";
 import { mapModuleToMenu } from "./mapModuleToMenu";
 
 export const SideBar: React.FC = () => {
     const { compositionRoot } = useAppContext();
-    const { setMenuData } = useContext(SideBarContext);
+    
+    const { setMenuData, currentNavItem} = useSideBarContext();
+    
+    console.debug("init SideBar > currentNavItem:", currentNavItem );
 
     const [isLoaded, setIsLoaded] = useState(false);
 

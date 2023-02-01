@@ -1,19 +1,25 @@
-import { createContext, Dispatch, SetStateAction } from "react";
+import { createContext, useContext } from "react";
 import { Menu } from "../components/sidebar-nav/SidebarNav";
-import { defaultState } from "../components/sidebar/SideBarProvider";
 
-export interface CurrentMenuItem {
-    groupName: string;
-    name: string;
-}
-
+export type CurrentMenuItem = string[];
 export interface SideBarContextProps {
     loaded: boolean;
     menuData: Menu[];
     currentNavItem: CurrentMenuItem;
-    setLoaded: Dispatch<SetStateAction<boolean>>;
-    setMenuData: Dispatch<SetStateAction<Menu[]>>;
-    setCurrentNavItem: Dispatch<SetStateAction<CurrentMenuItem>>;
+    setLoaded: (newLoaded: boolean) => void;
+    setMenuData: (newMenuData: Menu[]) => void;
+    setCurrentNavItem: (newCurrentNavItem: CurrentMenuItem) => void;
 }
 
-export const SideBarContext = createContext<SideBarContextProps>(defaultState);
+export const SideBarContext = createContext<SideBarContextProps | null>(null);
+
+export function useSideBarContext() {
+    const context = useContext(SideBarContext);
+    if (context) {
+        return context;
+    } else {
+        throw new Error("SideBar context uninitialized");
+    }
+}
+
+// export const useSideBarContext = () => useContext(SideBarContext);

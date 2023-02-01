@@ -19,7 +19,7 @@ export const UploadTableBody: React.FC<UploadTableBodyProps> = ({ rows }) => {
     const moduleName = location.substring(location.indexOf("/") + 1);
 
     const click = () => {
-        history.push(`/data-submission/${moduleName}`);
+        history.push(`/data-submission/?module=${moduleName}`);
     };
 
     const download = (_url: string) => {
