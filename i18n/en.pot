@@ -11,9 +11,6 @@ msgstr ""
 msgid "Year"
 msgstr ""
 
-msgid "Open / Close"
-msgstr ""
-
 msgid "Status"
 msgstr ""
 

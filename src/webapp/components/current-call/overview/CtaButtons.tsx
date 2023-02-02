@@ -12,7 +12,7 @@ export interface CtaButtonsProps {
 
 export const CtaButtons: React.FC<CtaButtonsProps> = ({ moduleName, ctas }) => {
     const getCTAButton = (cta: StatusCTAs) => {
-        //TO DO : Button click event handlers to be added as corresponding feature developed.
+        // TODO : Button click event handlers to be added as corresponding feature developed.
         switch (cta) {
             case "Display full status history":
                 return (

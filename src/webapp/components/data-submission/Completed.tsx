@@ -10,13 +10,13 @@ export const Completed: React.FC = () => {
             <p className="intro">{i18n.t("Thank! your data for now is uploaded in our system")}</p>
             <div className="call-name">
                 <span>2020</span>
-                <span>Spain</span>
+                <span>{i18n.t("Spain")}</span>
             </div>
             <Section className="summary">
-                <p>Any other userful information here?</p>
+                <p>{i18n.t("Any other userful information here?")}</p>
             </Section>
             <Section className="summary">
-                <p>Info abou the previously updated quarter and the missing quarters</p>
+                <p>{i18n.t("Info abou the previously updated quarter and the missing quarters")}</p>
             </Section>
             <CompleteButtons />
         </ContentWrapper>
