@@ -17,9 +17,8 @@ import { GetInstanceVersionUseCase } from "./domain/usecases/GetInstanceVersionU
 import { ValidateGlassModulesUseCase } from "./domain/usecases/ValidateGlassModulesUseCase";
 import { ValidateGlassNewsUseCase } from "./domain/usecases/ValidateGlassNewsUseCase";
 import { ValidateGlassSubmissionsUseCase } from "./domain/usecases/ValidateGlassSubmissionsUseCase";
-import { SetGlassDocumentsUseCase } from "./domain/usecases/SetGlassDocumentsUseCase";
-import { SetGlassSubmissionsUseCase } from "./domain/usecases/SetGlassSubmissionsUseCase";
 import { ValidateGlassDocumentsUseCase } from "./domain/usecases/ValidateGlassDocumentsUseCase";
+import { UploadDocumentUseCase } from "./domain/usecases/UploadDocumentUseCase";
 
 export function getCompositionRoot(instance: Instance) {
     const dataStoreClient = new DataStoreClient(instance);
@@ -28,7 +27,7 @@ export function getCompositionRoot(instance: Instance) {
     const glassNewsRepository = new GlassNewsDefaultRepository(dataStoreClient);
     const glassCallRepository = new GlassCallDefaultRepository(dataStoreClient);
     const glassSubmissionsRepository = new GlassSubmissionsDefaultRepository(dataStoreClient);
-    const glassDocumentsRepository = new GlassDocumentsDefaultRepository(dataStoreClient);
+    const glassDocumentsRepository = new GlassDocumentsDefaultRepository(dataStoreClient, instance);
 
     return {
         instance: getExecute({
@@ -50,13 +49,12 @@ export function getCompositionRoot(instance: Instance) {
         }),
         glassSubmissions: getExecute({
             getAll: new GetGlassSubmissionsUseCase(glassSubmissionsRepository),
-            save: new SetGlassSubmissionsUseCase(glassSubmissionsRepository),
             validate: new ValidateGlassSubmissionsUseCase(glassSubmissionsRepository),
         }),
         glassDocuments: getExecute({
             getAll: new GetGlassDocumentsUseCase(glassDocumentsRepository),
-            save: new SetGlassDocumentsUseCase(glassDocumentsRepository),
             validate: new ValidateGlassDocumentsUseCase(glassDocumentsRepository),
+            upload: new UploadDocumentUseCase(glassDocumentsRepository, glassSubmissionsRepository),
         }),
     };
 }

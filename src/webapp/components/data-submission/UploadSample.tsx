@@ -10,10 +10,9 @@ import { Dropzone, DropzoneRef } from "../dropzone/Dropzone";
 import { useSnackbar } from "@eyeseetea/d2-ui-components";
 import { RemoveContainer, StyledRemoveButton } from "./UploadFiles";
 import { useAppContext } from "../../contexts/app-context";
-import { uploadFile } from "../../../utils/uploadFile";
 
 export const UploadSample: React.FC = () => {
-    const { api, compositionRoot } = useAppContext();
+    const { compositionRoot } = useAppContext();
     const snackbar = useSnackbar();
 
     const [sampleFile, setSampleFile] = useState<File | null>(null);
@@ -38,39 +37,14 @@ export const UploadSample: React.FC = () => {
                 if (uploadedSample) {
                     setIsLoading(true);
                     setSampleFile(uploadedSample);
-                    try {
-                        const existingDocuments = await compositionRoot.glassDocuments.getAll().toPromise();
-                        const document = await uploadFile(api, uploadedSample);
-                        await compositionRoot.glassDocuments.save([...existingDocuments, document]).toPromise();
-                        const existingSubmissions = await compositionRoot.glassSubmissions.getAll().toPromise();
-                        const submission = {
-                            id: "",
-                            batchId: "Dataset 1",
-                            call: "",
-                            countryCode: "",
-                            fileId: document.id,
-                            fileName: uploadedSample.name,
-                            fileType: "SAMPLE",
-                            inputLineNb: 0,
-                            outputLineNb: 0,
-                            module: "",
-                            period: "",
-                            specimens: [],
-                            status: "uploaded",
-                            submissionDate: new Date().toISOString(),
-                        };
-                        await compositionRoot.glassSubmissions.save([...existingSubmissions, submission]).toPromise();
-                    } catch {
-                        snackbar.error(i18n.t("Error in file upload"));
-                        setSampleFile(null);
-                    }
+                    await compositionRoot.glassDocuments.upload(uploadedSample).toPromise();
                     setIsLoading(false);
                 } else {
                     snackbar.error(i18n.t("Error in file upload"));
                 }
             }
         },
-        [api, snackbar]
+        [compositionRoot.glassDocuments, snackbar]
     );
 
     return (
