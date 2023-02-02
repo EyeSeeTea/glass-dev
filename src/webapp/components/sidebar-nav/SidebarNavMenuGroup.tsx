@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useCallback, useEffect } from "react";
 import { makeStyles } from "@material-ui/styles";
 import { List, ListItem, Theme, Collapse, Button, colors } from "@material-ui/core";
 import clsx from "clsx";
@@ -7,6 +7,8 @@ import { MenuGroup } from "./SidebarNav";
 import SidebarNavMenu from "./SidebarNavMenu";
 import styled from "styled-components";
 import { useLocation } from "react-router-dom";
+import FolderIcon from "@material-ui/icons/Folder";
+import i18n from "@eyeseetea/d2-ui-components/locales";
 
 interface SidebarNavProps {
     className?: string;
@@ -23,13 +25,17 @@ const SidebarNavMenuGroup: React.FC<SidebarNavProps> = ({
     currentNaVitem,
     changeCurrentNavItem,
 }) => {
-    const isCurrentModule = (val: string) => {
-        if (val) {
-            return location.pathname.includes(val);
+    // TODO: get current module from page context and remove location parsing below
+    const location = useLocation();
+    const urlModuleName = location.pathname.split("/")[2];
+
+    const isCurrentModule = useCallback((val: string) => {
+        if (val === urlModuleName) {
+            return true;
         } else {
             return false;
         }
-    };
+    }, [urlModuleName]);
 
     const isCurrentNavItem = (val: string[]) => {
         if (isCurrentModule(groupName)) {
@@ -43,37 +49,40 @@ const SidebarNavMenuGroup: React.FC<SidebarNavProps> = ({
     };
 
     const classes = useStyles(menu.level);
-    const location = useLocation();
-    const [openCollapse, setOpenCollapse] = React.useState(isCurrentNavItem(currentNaVitem));
+    const [expanded, setExapanded] = React.useState(isCurrentNavItem(currentNaVitem));
 
-    const expand = () => {
-        setOpenCollapse(!openCollapse);
+    const toggleExpanded = () => {
+        setExapanded(!expanded);
     };
 
     useEffect(() => {
         if (isCurrentModule(menu.title)) {
-            setOpenCollapse(true);
+            setExapanded(true);
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [menu]);
+        return () => {
+            // Cleanup
+        };
+    }, [menu, isCurrentModule]);
 
     return (
         <React.Fragment>
             <ListItem
                 className={clsx(classes.root, className)}
-                onClick={expand}
+                onClick={toggleExpanded}
                 disableGutters
                 style={{ paddingLeft: menu.level * 8 }}
             >
                 <Button className={classes.button} fullWidth={true}>
-                    <div className={classes.icon}>{menu.icon}</div>
-                    <span className={classes.title}>{menu.title}</span>
-                    <div className={classes.expand}>{openCollapse ? <ExpandLess /> : <ExpandMore />}</div>
+                    <div className={classes.icon}>
+                        <FolderIcon htmlColor={menu.moduleColor} />
+                    </div>
+                    <span className={classes.title}>{i18n.t(menu.title)}</span>
+                    <div className={classes.expand}>{expanded ? <ExpandLess /> : <ExpandMore />}</div>
                 </Button>
             </ListItem>
 
             <ModuleWrap moduleColor={menu.moduleColor}>
-                <Collapse in={openCollapse} timeout="auto" unmountOnExit key={menu.title}>
+                <Collapse in={expanded} timeout="auto" unmountOnExit key={menu.title}>
                     <List component="div" disablePadding data-group-name={groupName}>
                         {menu.children &&
                             menu.children.map(child =>
@@ -125,7 +134,7 @@ const useStyles = makeStyles((theme: Theme) => ({
     title: {
         textAlign: "start",
         flexGrow: 1,
-        marginLeft: theme.spacing(4),
+        marginLeft: "10px",
     },
     expand: {
         marginRight: theme.spacing(4),

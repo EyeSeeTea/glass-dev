@@ -1,5 +1,4 @@
-import { Breadcrumbs, Button, Typography } from "@material-ui/core";
-import { CircularProgress } from "material-ui";
+import { Breadcrumbs, Button } from "@material-ui/core";
 import React from "react";
 import styled from "styled-components";
 import { MainLayout } from "../../components/main-layout/MainLayout";
@@ -11,6 +10,7 @@ import { NavLink } from "react-router-dom";
 import { CustomCard } from "../../components/custom-card/CustomCard";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { CallsHistoryContent } from "../../components/calls-history/CallsHistoryContent";
+import { ContentLoader } from "../../components/content-loader/ContentLoader";
 
 interface CallsHistoryPageProps {
     moduleName: string;
@@ -34,35 +34,30 @@ export const CallsHistoryPageContent: React.FC<CallsHistoryPageProps> = React.me
         event.preventDefault();
     };
 
-    switch (result.kind) {
-        case "loading":
-            return <CircularProgress />;
-        case "error":
-            return <Typography variant="h6">{result.message}</Typography>;
-        case "loaded":
-            return (
-                <ContentWrapper>
-                    <PreContent>
-                        {/* // TODO: replace this with a global reusable StyledBreadCrumbs component */}
-                        <StyledBreadCrumbs aria-label="breadcrumb" separator="">
-                            <Button component={NavLink} to={`/current-call/${moduleName}`} exact={true} onClick={click}>
-                                <span>{moduleName}</span>
-                            </Button>
-                            <ChevronRightIcon />
-                            <Button component={NavLink} to={`/calls-history/${moduleName}`} exact={true}>
-                                <span>{i18n.t("List of Calls")}</span>
-                            </Button>
-                        </StyledBreadCrumbs>
-                    </PreContent>
-                    <PageTitle>
-                        <h2>{i18n.t("All Calls")}</h2>
-                    </PageTitle>
-                    <CustomCard padding="40px 60px 50px">
-                        <CallsHistoryContent />
-                    </CustomCard>
-                </ContentWrapper>
-            );
-    }
+    return (
+        <ContentLoader content={result}>
+            <ContentWrapper>
+                <PreContent>
+                    {/* // TODO: replace this with a global reusable StyledBreadCrumbs component */}
+                    <StyledBreadCrumbs aria-label="breadcrumb" separator="">
+                        <Button component={NavLink} to={`/current-call/${moduleName}`} exact={true} onClick={click}>
+                            <span>{moduleName}</span>
+                        </Button>
+                        <ChevronRightIcon />
+                        <Button component={NavLink} to={`/calls-history/${moduleName}`} exact={true}>
+                            <span>{i18n.t("List of Calls")}</span>
+                        </Button>
+                    </StyledBreadCrumbs>
+                </PreContent>
+                <PageTitle>
+                    <h2>{i18n.t("All Calls")}</h2>
+                </PageTitle>
+                <CustomCard padding="40px 60px 50px">
+                {result.kind === "loaded" &&  <CallsHistoryContent moduleId={result.data.id} moduleName={moduleName} />}
+                </CustomCard>
+            </ContentWrapper>
+        </ContentLoader>
+    );
 });
 
 const ContentWrapper = styled.div`

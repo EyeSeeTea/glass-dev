@@ -1,3 +1,5 @@
+import { Id } from "./Ref";
+
 export type CallStatusTypes =
     | "NOT_COMPLETED"
     | "COMPLETE"
@@ -7,6 +9,7 @@ export type CallStatusTypes =
     | "PENDING_UPDATE_APPROVAL";
 
 export interface GlassCall {
+    id: Id;
     module: string;
     orgUnit: string;
     period: number;

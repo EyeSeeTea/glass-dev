@@ -1,6 +1,7 @@
 import { UseCase } from "../../CompositionRoot";
 import { Future, FutureData } from "../entities/Future";
 import { GlassCall } from "../entities/GlassCallStatus";
+import { generateId } from "../entities/Ref";
 import { GlassCallRepository } from "../repositories/GlassCallRepository";
 
 export class GetSpecificCallUseCase implements UseCase {
@@ -19,6 +20,7 @@ export class GetSpecificCallUseCase implements UseCase {
                 //Set to default status- NOT_COMPLETE, so that user can continue with submission workflow
                 else {
                     const defaultCallStatus: GlassCall = {
+                        id: generateId(),
                         module: module,
                         orgUnit: orgUnit,
                         period: period,
