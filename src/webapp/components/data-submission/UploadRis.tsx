@@ -9,12 +9,11 @@ import { Dropzone, DropzoneRef } from "../dropzone/Dropzone";
 import { FileRejection } from "react-dropzone";
 import { RemoveContainer, StyledRemoveButton } from "./UploadFiles";
 import { useAppContext } from "../../contexts/app-context";
-import { uploadFile } from "../../../utils/uploadFile";
 interface UploadRisProps {
     validate: (val: boolean) => void;
 }
 export const UploadRis: React.FC<UploadRisProps> = ({ validate }) => {
-    const { api, compositionRoot } = useAppContext();
+    const { compositionRoot } = useAppContext();
     const snackbar = useSnackbar();
 
     const [risFile, setRisFile] = useState<File | null>(null);
@@ -47,39 +46,14 @@ export const UploadRis: React.FC<UploadRisProps> = ({ validate }) => {
                 if (uploadedRisFile) {
                     setIsLoading(true);
                     setRisFile(uploadedRisFile);
-                    try {
-                        const existingDocuments = await compositionRoot.glassDocuments.getAll().toPromise();
-                        const document = await uploadFile(api, uploadedRisFile);
-                        await compositionRoot.glassDocuments.save([...existingDocuments, document]).toPromise();
-                        const existingSubmissions = await compositionRoot.glassSubmissions.getAll().toPromise();
-                        const submission = {
-                            id: "",
-                            batchId: "Dataset 1",
-                            call: "",
-                            countryCode: "",
-                            fileId: document.id,
-                            fileName: uploadedRisFile.name,
-                            fileType: "RIS",
-                            inputLineNb: 0,
-                            outputLineNb: 0,
-                            module: "",
-                            period: "",
-                            specimens: [],
-                            status: "uploaded",
-                            submissionDate: new Date().toISOString(),
-                        };
-                        await compositionRoot.glassSubmissions.save([...existingSubmissions, submission]).toPromise();
-                    } catch {
-                        snackbar.error(i18n.t("Error in file upload"));
-                        setRisFile(null);
-                    }
+                    await compositionRoot.glassDocuments.upload(uploadedRisFile).toPromise();
                     setIsLoading(false);
                 } else {
                     snackbar.error(i18n.t("Error in file upload"));
                 }
             }
         },
-        [api, compositionRoot.glassDocuments, compositionRoot.glassSubmissions, snackbar]
+        [compositionRoot.glassDocuments, snackbar]
     );
 
     return (
