@@ -13,31 +13,32 @@ import i18n from "@eyeseetea/d2-ui-components/locales";
 import { CurrentCallContent } from "../../components/current-call/CurrentCallContent";
 import { useStatusCall } from "../../hooks/useStatusCall";
 import { ContentLoader } from "../../components/content-loader/ContentLoader";
-import { useGlassModuleContext } from "../../contexts/glass-module-context";
+import { getUrlParam } from "../../utils/helpers";
 
 interface CurrentCallPageContentProps {
     moduleId: string;
+    moduleName: string;
 }
 
 export const CurrentCallPage: React.FC = React.memo(() => {
     const { compositionRoot } = useAppContext();
 
-    const result = useGlassModule(compositionRoot);
+    const moduleName = getUrlParam("module") || "";
+
+    const result = useGlassModule(compositionRoot, moduleName);
 
     return (
         <MainLayout>
             <ContentLoader content={result}>
-                {result.kind === "loaded" && <CurrentCallPageContent moduleId={result.data.id} />}
+                {result.kind === "loaded" && <CurrentCallPageContent moduleId={result.data.id} moduleName={moduleName} />}
             </ContentLoader>
         </MainLayout>
     );
 });
 
-export const CurrentCallPageContent: React.FC<CurrentCallPageContentProps> = React.memo(({ moduleId }) => {
+export const CurrentCallPageContent: React.FC<CurrentCallPageContentProps> = React.memo(({ moduleId, moduleName }) => {
     const location = useLocation();
     const queryParameters = new URLSearchParams(location.search);
-
-    const { module: moduleName } = useGlassModuleContext();
     
     // TODO : orgUnit and period will be stored context.
     const periodVal = queryParameters?.get("period");

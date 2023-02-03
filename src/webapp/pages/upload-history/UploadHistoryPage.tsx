@@ -7,10 +7,12 @@ import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import { NavLink } from "react-router-dom";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { UploadHistoryContent } from "../../components/upload-history/UploadHistoryContent";
-import { useGlassModuleContext } from "../../contexts/glass-module-context";
+import { getUrlParam } from "../../utils/helpers";
 
 export const UploadHistoryPage: React.FC = React.memo(() => {
-    const { module: moduleName } = useGlassModuleContext();
+
+    const moduleName = getUrlParam("module") || "";
+
     const click = (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
         event.preventDefault();
     };

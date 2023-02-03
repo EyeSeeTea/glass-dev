@@ -8,10 +8,11 @@ import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import { NavLink } from "react-router-dom";
 import { CustomCard } from "../../components/custom-card/CustomCard";
 import i18n from "@eyeseetea/d2-ui-components/locales";
-import { useGlassModuleContext } from "../../contexts/glass-module-context";
+import { getUrlParam } from "../../utils/helpers";
 
 export const DataSubmissionPage: React.FC = React.memo(() => {
-    const { module: moduleName } = useGlassModuleContext();
+
+    const moduleName = getUrlParam("module") || "";
 
     return (
         <MainLayout>
@@ -28,7 +29,7 @@ export const DataSubmissionPage: React.FC = React.memo(() => {
                             <span>{moduleName}</span>
                         </Button>
                         <ChevronRightIcon />
-                        <Button component={NavLink} to={`/data-submission/${moduleName}`} exact={true}>
+                        <Button component={NavLink} to={`/data-submission/?module=${moduleName}`} exact={true}>
                             <span>{i18n.t("2022 Call")}</span>
                         </Button>
                     </StyledBreadCrumbs>

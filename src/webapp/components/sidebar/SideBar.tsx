@@ -9,7 +9,6 @@ import { NavLink } from "react-router-dom";
 
 import { useAppContext } from "../../contexts/app-context";
 import { useGlassModules } from "../../hooks/useGlassModules";
-import { useSideBarContext } from "../../contexts/sidebar-context";
 import { mapModuleToMenu } from "./mapModuleToMenu";
 
 export const SideBar: React.FC = () => {

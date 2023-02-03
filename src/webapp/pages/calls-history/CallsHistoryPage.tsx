@@ -11,8 +11,7 @@ import { CustomCard } from "../../components/custom-card/CustomCard";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { CallsHistoryContent } from "../../components/calls-history/CallsHistoryContent";
 import { ContentLoader } from "../../components/content-loader/ContentLoader";
-import { useGlassModuleContext } from "../../contexts/glass-module-context";
-// import { useGlassModuleContext } from "../../contexts/glass-module-context";
+import { getUrlParam } from "../../utils/helpers";
 
 export const CallsHistoryPage: React.FC = React.memo(() => {
     return (
@@ -25,7 +24,7 @@ export const CallsHistoryPage: React.FC = React.memo(() => {
 export const CallsHistoryPageContent: React.FC = React.memo(() => {
     const { compositionRoot } = useAppContext();
 
-    const { module: moduleName } = useGlassModuleContext();
+    const moduleName = getUrlParam("module") || "";
 
     const result = useGlassModule(compositionRoot, moduleName);
 
