@@ -1,4 +1,4 @@
-import { createContext, useContext } from "react";
+import { createContext, useState } from "react";
 
 export interface ModuleFromUrl {
     module: string;
@@ -12,4 +12,11 @@ export const defaultModuleFromUrl = {
 
 export const GlassModuleContext = createContext<ModuleFromUrl>(defaultModuleFromUrl);
 
-export const useGlassModuleContext = () => useContext(GlassModuleContext);
+export const useGlassModuleContext = () => {
+    const [state, setState] = useState<ModuleFromUrl>(defaultModuleFromUrl);
+    return {
+        ...state,
+        setModule: (module: string) => setState({ ...state, module }),
+        setOrgUnit: (orgUnit: string) => setState({ ...state, orgUnit }),
+    };
+};

@@ -8,6 +8,7 @@ import clsx from "clsx";
 import { MenuLeaf } from "./SidebarNav";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
 import i18n from "@eyeseetea/d2-ui-components/locales";
+import { useGlassModuleContext } from "../../contexts/glass-module-context";
 
 interface SidebarNavProps {
     className?: string;
@@ -21,6 +22,8 @@ const SidebarNavMenu: React.FC<SidebarNavProps> = ({ menu, className, groupName 
 
     const fullPath = location.pathname + location.search;
 
+    const { setModule } = useGlassModuleContext();
+
     const isCurrentPage = (menuPath: string) => {
         if (fullPath.includes(`data-submission/?module=${groupName}`) && menu.title === "Current Call") {
             return true;
@@ -32,6 +35,10 @@ const SidebarNavMenu: React.FC<SidebarNavProps> = ({ menu, className, groupName 
         }
     };
 
+    const changeModule = (moduleName: string) => {
+        setModule(moduleName);
+    }
+
     return (
         <ListItem className={clsx(classes.root, className)} disableGutters style={{ paddingLeft: menu.level * 8 }}>
             <Button
@@ -40,11 +47,12 @@ const SidebarNavMenu: React.FC<SidebarNavProps> = ({ menu, className, groupName 
                 to={menu.path}
                 exact={true}
                 data-is-page-current={isCurrentPage(menu.path)}
+                onClick={() => changeModule(groupName || '')}
             >
-                <div className={classes.icon}>{menu.icon}</div>
-                <Typography variant="body1" style={{ color: glassColors.greyBlack }}>
-                    {i18n.t(menu.title)}
-                </Typography>
+                    <div className={classes.icon}>{menu.icon}</div>
+                    <Typography variant="body1" style={{ color: glassColors.greyBlack }}>
+                        {i18n.t(menu.title)}
+                    </Typography>
             </Button>
         </ListItem>
     );
