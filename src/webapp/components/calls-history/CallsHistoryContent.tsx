@@ -24,5 +24,5 @@ export const CallsHistoryContent: React.FC<CallsHistoryContentProps> = ({ module
         <ContentLoader content={calls}>
             {calls.kind === "loaded" && <CallsTable items={calls.data} moduleName={moduleName} orgUnit={orgUnit} />}
         </ContentLoader>
-    )
+    );
 };

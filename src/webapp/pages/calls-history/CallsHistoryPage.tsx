@@ -56,7 +56,9 @@ export const CallsHistoryPageContent: React.FC = React.memo(() => {
                     <h2>{i18n.t("All Calls")}</h2>
                 </PageTitle>
                 <CustomCard padding="40px 60px 50px">
-                {result.kind === "loaded" &&  <CallsHistoryContent moduleId={result.data.id} moduleName={moduleName} />}
+                    {result.kind === "loaded" && (
+                        <CallsHistoryContent moduleId={result.data.id} moduleName={moduleName} />
+                    )}
                 </CustomCard>
             </ContentWrapper>
         </ContentLoader>

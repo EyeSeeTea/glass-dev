@@ -19,8 +19,7 @@ export const Router: React.FC = React.memo(() => {
 
                 <Route path="/upload-history" render={() => <UploadHistoryPage />} />
                 <Route path="/country-information" render={() => <CountryInformationPage />} />
-				<Route path="/test-context/" render={() => <TestPage />} />
-
+                <Route path="/test-context/" render={() => <TestPage />} />
 
                 <Route render={() => <LandingPage />} />
             </Switch>
