@@ -11,7 +11,7 @@ import { D2Api } from "../../../types/d2-api";
 import { AppContext, AppContextState } from "../../contexts/app-context";
 import { GlassModuleContextProvider } from "../../context-providers/GlassModuleProvider";
 import { Router } from "../Router";
-import { TestContextProvider } from "../test-context/TestProvider";
+import { TestContextProvider } from "../../context-providers/TestProvider";
 import "./App.css";
 import { AppConfig } from "./AppConfig";
 import muiThemeLegacy from "./themes/dhis2-legacy.theme";

@@ -7,18 +7,22 @@ export interface CurrentMenuItem {
 }
 
 export interface TestContextProps {
+    isDark: boolean;
     loaded: boolean;
     menuData: Menu[];
     currentNavItem: CurrentMenuItem;
-    setLoaded: Dispatch<SetStateAction<boolean>>;
-    setMenuData: Dispatch<SetStateAction<Menu[]>>;
-    setCurrentNavItem: Dispatch<SetStateAction<CurrentMenuItem>>;
+    setIsDark: (newLoaded: boolean) => void;
+    setLoaded: (newLoaded: boolean) => void;
+    setMenuData: (newMenuData: Menu[]) => void;
+    setCurrentNavItem: (newCurrentNavItem: CurrentMenuItem) => void;
 }
 
 export const defaultTestState = {
+    isDark: false,
     loaded: false,
     menuData: [{ kind: "MenuLeaf", level: 0, title: "", path: "" }],
     currentNavItem: { groupName: "", name: "" },
+    setIsDark: () => {},
     setLoaded: () => {},
     setMenuData: () => {},
     setCurrentNavItem: () => {},

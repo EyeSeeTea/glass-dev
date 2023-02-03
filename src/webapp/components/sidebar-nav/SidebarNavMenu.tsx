@@ -9,6 +9,7 @@ import { MenuLeaf } from "./SidebarNav";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { useGlassModuleContext } from "../../contexts/glass-module-context";
+import { useTestContext } from "../../contexts/test-context";
 
 interface SidebarNavProps {
     className?: string;
@@ -23,6 +24,7 @@ const SidebarNavMenu: React.FC<SidebarNavProps> = ({ menu, className, groupName 
     const fullPath = location.pathname + location.search;
 
     const { setModule } = useGlassModuleContext();
+    const { currentNavItem } = useTestContext();
 
     const isCurrentPage = (menuPath: string) => {
         if (fullPath.includes(`data-submission/?module=${groupName}`) && menu.title === "Current Call") {
