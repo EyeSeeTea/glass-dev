@@ -11,6 +11,7 @@ import { D2Api } from "../../../types/d2-api";
 import { AppContext, AppContextState } from "../../contexts/app-context";
 import { GlassModuleContextProvider } from "../../context-providers/GlassModuleProvider";
 import { Router } from "../Router";
+import { TestContextProvider } from "../test-context/TestProvider";
 import "./App.css";
 import { AppConfig } from "./AppConfig";
 import muiThemeLegacy from "./themes/dhis2-legacy.theme";
@@ -56,8 +57,10 @@ export const App: React.FC<AppProps> = React.memo(function App({ api, d2, instan
 
                     <div id="app" className="content">
                         <AppContext.Provider value={appContext}>
-                            <GlassModuleContextProvider>
-                                <Router />
+							<GlassModuleContextProvider>
+                            	<TestContextProvider>
+                                	<Router />
+	                            </TestContextProvider>
                             </GlassModuleContextProvider>
                         </AppContext.Provider>
                     </div>
