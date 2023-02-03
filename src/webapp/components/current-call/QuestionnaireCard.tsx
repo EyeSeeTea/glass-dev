@@ -18,7 +18,6 @@ export interface QuetionnaireCardProps {
 }
 
 export const QuetionnaireCard: React.FC<QuetionnaireCardProps> = ({ items, className }) => {
-    console.debug("items: ", items);
 
     return (
         <ContentWrapper className={className}>

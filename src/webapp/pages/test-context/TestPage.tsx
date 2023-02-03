@@ -14,7 +14,6 @@ export const TestPage: React.FC = React.memo(() => {
 
     const submit = (e: React.FormEvent) => {
         e.preventDefault();
-        console.debug(val);
         setCurrentNavItem({
             groupName: val[0] || "",
             name: val[1] || "",
@@ -23,7 +22,6 @@ export const TestPage: React.FC = React.memo(() => {
 
     const submit2 = (e: React.FormEvent) => {
         e.preventDefault();
-        console.debug(val);
         setModule(val2[0] || "");
         setOrgUnit(val2[1] || "");
     };

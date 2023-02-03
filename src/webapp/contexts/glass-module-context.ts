@@ -14,10 +14,10 @@ export const defaultGlassContextState = {
     setOrgUnit: () => {},
 };
 
-export const GlassModuleContext = createContext<GlassModuleContextProps>(defaultGlassContextState);
+export const CurrentModuleContext = createContext<GlassModuleContextProps>(defaultGlassContextState);
 
 export function useGlassModuleContext() {
-    const context = useContext(GlassModuleContext);
+    const context = useContext(CurrentModuleContext);
     if (context) {
         return context;
     } else {
