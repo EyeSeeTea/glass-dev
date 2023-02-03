@@ -38,12 +38,9 @@ export class GlassDocumentsDefaultRepository implements GlassDocumentsRepository
             };
 
             const newDocuments = [...data[1], document];
-            return Future.join2(
-                this.dataStoreClient.saveObject(DataStoreKeys.DOCUMENTS, newDocuments),
-                Future.success(document.id)
-            ).map(result => {
-                return result[1];
-            });
+            return this.dataStoreClient
+                .saveObject(DataStoreKeys.DOCUMENTS, newDocuments)
+                .flatMap(() => Future.success(document.id));
         });
     }
 }
