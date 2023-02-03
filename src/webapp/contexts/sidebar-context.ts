@@ -21,5 +21,3 @@ export function useSideBarContext() {
         throw new Error("SideBar context uninitialized");
     }
 }
-
-// export const useSideBarContext = () => useContext(SideBarContext);

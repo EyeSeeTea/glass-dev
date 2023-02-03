@@ -9,7 +9,7 @@ import styled from "styled-components";
 import FolderIcon from "@material-ui/icons/Folder";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 
-import { getUrlParam } from "../../utils/helpers";
+import { useGlassModuleContext } from "../../contexts/glass-module-context";
 interface SidebarNavProps {
     className?: string;
     groupName: string;
@@ -18,12 +18,13 @@ interface SidebarNavProps {
 
 const SidebarNavMenuGroup: React.FC<SidebarNavProps> = ({ menu, groupName, className }) => {
     const classes = useStyles(menu.level);
-    const moduleName = getUrlParam("module") || "";
 
-    const [expanded, setExapanded] = React.useState(moduleName === groupName);
+    const { module } = useGlassModuleContext();
+
+    const [expanded, setExpanded] = React.useState(module === groupName);
 
     const toggleExpanded = () => {
-        setExapanded(!expanded);
+        setExpanded(!expanded);
     };
 
     return (
@@ -38,6 +39,7 @@ const SidebarNavMenuGroup: React.FC<SidebarNavProps> = ({ menu, groupName, class
                     <div className={classes.icon}>
                         <FolderIcon htmlColor={menu.moduleColor} />
                     </div>
+                    {/* {`${moduleName} | ${currentNavItem.groupName} | ${groupName}`} */}
                     <span className={classes.title}>{i18n.t(menu.title)}</span>
                     <div className={classes.expand}>{expanded ? <ExpandLess /> : <ExpandMore />}</div>
                 </Button>

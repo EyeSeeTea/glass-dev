@@ -1,22 +1,26 @@
-import { createContext, useState } from "react";
+import { createContext, useContext, useState } from "react";
 
-export interface ModuleFromUrl {
+export interface GlassModuleContextProps {
     module: string;
     orgUnit: string;
+    setModule: (newModule: string) => void;
+    setOrgUnit: (newOrgUnit: string) => void;
 }
 
-export const defaultModuleFromUrl = {
+export const defaultGlassContextState = {
     module: "",
     orgUnit: "",
+    setModule: () => {},
+    setOrgUnit: () => {},
 };
 
-export const GlassModuleContext = createContext<ModuleFromUrl>(defaultModuleFromUrl);
+export const GlassModuleContext = createContext<GlassModuleContextProps>(defaultGlassContextState);
 
-export const useGlassModuleContext = () => {
-    const [state, setState] = useState<ModuleFromUrl>(defaultModuleFromUrl);
-    return {
-        ...state,
-        setModule: (module: string) => setState({ ...state, module }),
-        setOrgUnit: (orgUnit: string) => setState({ ...state, orgUnit }),
-    };
-};
+export function useGlassModuleContext() {
+    const context = useContext(GlassModuleContext);
+    if (context) {
+        return context;
+    } else {
+        throw new Error("Glass Module Context uninitialized");
+    }
+}
