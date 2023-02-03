@@ -23,7 +23,7 @@ export function mapModuleToMenu(module: GlassModule): Menu {
                 kind: "MenuLeaf",
                 level: 0,
                 title: "Reports",
-                path: "",
+                path: `/reports/?module=${moduleName}`,
             },
             {
                 kind: "MenuLeaf",

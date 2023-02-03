@@ -30,7 +30,9 @@ export const CurrentCallPage: React.FC = React.memo(() => {
     return (
         <MainLayout>
             <ContentLoader content={result}>
-                {result.kind === "loaded" && <CurrentCallPageContent moduleId={result.data.id} moduleName={moduleName} />}
+                {result.kind === "loaded" && (
+                    <CurrentCallPageContent moduleId={result.data.id} moduleName={moduleName} />
+                )}
             </ContentLoader>
         </MainLayout>
     );
@@ -39,7 +41,7 @@ export const CurrentCallPage: React.FC = React.memo(() => {
 export const CurrentCallPageContent: React.FC<CurrentCallPageContentProps> = React.memo(({ moduleId, moduleName }) => {
     const location = useLocation();
     const queryParameters = new URLSearchParams(location.search);
-    
+
     // TODO : orgUnit and period will be stored context.
     const periodVal = queryParameters?.get("period");
     const orgUnitVal = queryParameters.get("orgUnit");

@@ -9,7 +9,6 @@ import { MenuLeaf } from "./SidebarNav";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { useGlassModuleContext } from "../../contexts/glass-module-context";
-import { useTestContext } from "../../contexts/test-context";
 
 interface SidebarNavProps {
     className?: string;
@@ -22,24 +21,16 @@ const SidebarNavMenu: React.FC<SidebarNavProps> = ({ menu, className, groupName 
     const location = useLocation();
 
     const fullPath = location.pathname + location.search;
-
     const { setModule } = useGlassModuleContext();
-    const { currentNavItem } = useTestContext();
 
     const isCurrentPage = (menuPath: string) => {
+        console.debug("fullPath: ", fullPath);
+        console.debug("menuPath: ", menuPath);
         if (fullPath.includes(`data-submission/?module=${groupName}`) && menu.title === "Current Call") {
             return true;
         }
-        if (menuPath) {
-            return fullPath.includes(menuPath);
-        } else {
-            return false;
-        }
+        return fullPath.includes(menuPath);
     };
-
-    const changeModule = (moduleName: string) => {
-        setModule(moduleName);
-    }
 
     return (
         <ListItem className={clsx(classes.root, className)} disableGutters style={{ paddingLeft: menu.level * 8 }}>
@@ -49,12 +40,12 @@ const SidebarNavMenu: React.FC<SidebarNavProps> = ({ menu, className, groupName 
                 to={menu.path}
                 exact={true}
                 data-is-page-current={isCurrentPage(menu.path)}
-                onClick={() => changeModule(groupName || '')}
+                onClick={() => setModule(groupName || "")}
             >
-                    <div className={classes.icon}>{menu.icon}</div>
-                    <Typography variant="body1" style={{ color: glassColors.greyBlack }}>
-                        {i18n.t(menu.title)}
-                    </Typography>
+                <div className={classes.icon}>{menu.icon}</div>
+                <Typography variant="body1" style={{ color: glassColors.greyBlack }}>
+                    {i18n.t(menu.title)}
+                </Typography>
             </Button>
         </ListItem>
     );

@@ -21,7 +21,7 @@ const SidebarNavMenuGroup: React.FC<SidebarNavProps> = ({ menu, groupName, class
 
     const { module } = useGlassModuleContext();
 
-    const [expanded, setExpanded] = React.useState(module === groupName);
+    const [expanded, setExpanded] = React.useState(module === menu.title);
 
     const toggleExpanded = () => {
         setExpanded(!expanded);

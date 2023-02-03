@@ -10,7 +10,6 @@ import { UploadHistoryContent } from "../../components/upload-history/UploadHist
 import { getUrlParam } from "../../utils/helpers";
 
 export const UploadHistoryPage: React.FC = React.memo(() => {
-
     const moduleName = getUrlParam("module") || "";
 
     const click = (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {

@@ -10,7 +10,6 @@ import { CountryInformationContent } from "../../components/country-information/
 import { getUrlParam } from "../../utils/helpers";
 
 export const CountryInformationPage: React.FC = React.memo(() => {
-
     const moduleName = getUrlParam("module") || "";
 
     const click = (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {

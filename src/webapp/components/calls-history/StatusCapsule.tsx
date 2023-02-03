@@ -26,7 +26,7 @@ export const StatusCapsule: React.FC<StatusCapsuleProps> = ({ status }) => {
         default:
             return <span>{i18n.t("status")}</span>;
     }
-}
+};
 
 const Approved = styled.div`
     color: ${glassColors.green};

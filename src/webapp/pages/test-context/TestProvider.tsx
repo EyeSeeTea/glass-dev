@@ -7,13 +7,14 @@ interface SideBarProviderProps {
 }
 
 export const TestContextProvider = ({ children }: SideBarProviderProps) => {
+    const [isDark, setIsDark] = useState(false);
     const [loaded, setLoaded] = useState(false);
     const [menuData, setMenuData] = useState<Menu[]>(defaultTestState.menuData);
     const [currentNavItem, setCurrentNavItem] = useState<CurrentMenuItem>(defaultTestState.currentNavItem);
 
     return (
         <TestContext.Provider
-            value={{ loaded, setLoaded, menuData, setMenuData, currentNavItem, setCurrentNavItem }}
+            value={{ isDark, setIsDark, loaded, setLoaded, menuData, setMenuData, currentNavItem, setCurrentNavItem }}
         >
             {children}
         </TestContext.Provider>
