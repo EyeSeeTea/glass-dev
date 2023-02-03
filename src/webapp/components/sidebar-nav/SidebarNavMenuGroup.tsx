@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { makeStyles } from "@material-ui/styles";
 import { List, ListItem, Theme, Collapse, Button, colors } from "@material-ui/core";
 import clsx from "clsx";
@@ -20,12 +20,24 @@ const SidebarNavMenuGroup: React.FC<SidebarNavProps> = ({ menu, groupName, class
     const classes = useStyles(menu.level);
 
     const { module } = useGlassModuleContext();
-
-    const [expanded, setExpanded] = React.useState(module === menu.title);
-
+    
+    const isCurrent = (name: string) => {
+        return module ? module === name : false;
+    }
+    const [expanded, setExpanded] = React.useState(isCurrent(groupName));
+    
+    useEffect(() => {
+        
+        if(module === menu.title) {
+            setExpanded(true);
+        }
+    }, [menu.title, module])
+    
     const toggleExpanded = () => {
         setExpanded(!expanded);
     };
+
+
 
     return (
         <React.Fragment>
@@ -33,6 +45,8 @@ const SidebarNavMenuGroup: React.FC<SidebarNavProps> = ({ menu, groupName, class
                 className={clsx(classes.root, className)}
                 onClick={toggleExpanded}
                 disableGutters
+                data-current-module={module}
+                data-current-group-name={menu.title}
                 style={{ paddingLeft: menu.level * 8 }}
             >
                 <Button className={classes.button} fullWidth={true}>

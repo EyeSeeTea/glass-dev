@@ -11,8 +11,6 @@ import { Box, MenuItem, Select } from "@material-ui/core";
 import styled from "styled-components";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { useTestContext } from "../../contexts/test-context";
-import { useGlassModuleContext } from "../../contexts/glass-module-context";
-import { useSideBarContext } from "../../contexts/sidebar-context";
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -44,8 +42,6 @@ export const GlassAppBar: React.FC = () => {
 
     const [country, setCountry] = React.useState(1);
     const [action, setAction] = React.useState(1);
-    const { module, orgUnit } = useGlassModuleContext();
-    const { currentNavItem } = useSideBarContext();
 
     const changeCountry = (event: React.ChangeEvent<{ value: unknown }>) => {
         setCountry(event.target.value as number);
@@ -84,7 +80,6 @@ export const GlassAppBar: React.FC = () => {
                             <MenuItem value={2}>{i18n.t("My Account")}</MenuItem>
                         </Select>
                     </SelectContainer>
-
                 </Toolbar>
             </AppBar>
         </div>

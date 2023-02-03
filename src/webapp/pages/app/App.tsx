@@ -9,13 +9,13 @@ import { getCompositionRoot } from "../../../CompositionRoot";
 import { Instance } from "../../../data/entities/Instance";
 import { D2Api } from "../../../types/d2-api";
 import { AppContext, AppContextState } from "../../contexts/app-context";
-import { GlassModuleContextProvider } from "../../context-providers/GlassModuleProvider";
 import { Router } from "../Router";
 import { TestContextProvider } from "../../context-providers/TestProvider";
 import "./App.css";
 import { AppConfig } from "./AppConfig";
 import muiThemeLegacy from "./themes/dhis2-legacy.theme";
 import { muiTheme } from "./themes/dhis2.theme";
+import { CurrentModuleContextProvider } from "../../context-providers/CurrentModuleProvider";
 
 export interface AppProps {
     api: D2Api;
@@ -57,11 +57,11 @@ export const App: React.FC<AppProps> = React.memo(function App({ api, d2, instan
 
                     <div id="app" className="content">
                         <AppContext.Provider value={appContext}>
-                            <GlassModuleContextProvider>
+                            <CurrentModuleContextProvider>
                                 <TestContextProvider>
                                     <Router />
                                 </TestContextProvider>
-                            </GlassModuleContextProvider>
+                            </CurrentModuleContextProvider>
                         </AppContext.Provider>
                     </div>
 

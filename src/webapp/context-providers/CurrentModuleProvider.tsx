@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { getUrlParam } from "../utils/helpers";
-import { defaultGlassContextState, GlassModuleContext } from "../contexts/glass-module-context";
+import { defaultGlassContextState, CurrentModuleContext } from "../contexts/glass-module-context";
 
-export const GlassModuleContextProvider: React.FC = ({ children }) => {
+export const CurrentModuleContextProvider: React.FC = ({ children }) => {
     const [module, setModule] = useState<string>(defaultGlassContextState.module);
     const [orgUnit, setOrgUnit] = useState<string>("");
 
@@ -14,8 +14,8 @@ export const GlassModuleContextProvider: React.FC = ({ children }) => {
     }, []);
 
     return (
-        <GlassModuleContext.Provider value={{ module, orgUnit, setModule, setOrgUnit }}>
+        <CurrentModuleContext.Provider value={{ module, orgUnit, setModule, setOrgUnit }}>
             {children}
-        </GlassModuleContext.Provider>
+        </CurrentModuleContext.Provider>
     );
 };
