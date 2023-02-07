@@ -13,7 +13,10 @@ export class GlassSubmissionsDefaultRepository implements GlassSubmissionsReposi
         return this.dataStoreClient.listCollection<GlassSubmissions>(DataStoreKeys.SUBMISSIONS);
     }
 
-    save(submissions: GlassSubmissions[]): FutureData<void> {
-        return this.dataStoreClient.saveObject(DataStoreKeys.SUBMISSIONS, submissions);
+    save(submission: GlassSubmissions): FutureData<void> {
+        return this.dataStoreClient.listCollection(DataStoreKeys.SUBMISSIONS).flatMap(submissions => {
+            const newSubmissions = [...submissions, submission];
+            return this.dataStoreClient.saveObject(DataStoreKeys.SUBMISSIONS, newSubmissions);
+        });
     }
 }
