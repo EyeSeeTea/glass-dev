@@ -6,15 +6,35 @@ import { glassColors } from "../../pages/app/themes/dhis2.theme";
 import { NonBlockingWarnings } from "./NonBlockingWarnings";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import i18n from "@eyeseetea/d2-ui-components/locales";
+import { useAppContext } from "../../contexts/app-context";
 interface ConsistencyChecksProps {
     changeStep: (step: number) => void;
 }
 
+const COMPLETED_STATUS = "COMPLETED";
+
 export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({ changeStep }) => {
+    const { compositionRoot } = useAppContext();
     const [fileType, setFileType] = useState<string>("ris");
 
     const changeType = (fileType: string) => {
         setFileType(fileType);
+    };
+
+    const goToFinalStep = async () => {
+        const risSubmissionId = localStorage.getItem("risSubmissionId");
+        const sampleSubmissionId = localStorage.getItem("sampleSubmissionId");
+        if (risSubmissionId) {
+            await compositionRoot.glassSubmissions
+                .setStatus({ id: risSubmissionId, status: COMPLETED_STATUS })
+                .toPromise();
+        }
+        if (sampleSubmissionId) {
+            await compositionRoot.glassSubmissions
+                .setStatus({ id: sampleSubmissionId, status: COMPLETED_STATUS })
+                .toPromise();
+        }
+        changeStep(4);
     };
 
     return (
@@ -35,12 +55,7 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({ changeStep
             {renderTypeContent(fileType)}
 
             <div className="bottom">
-                <Button
-                    variant="contained"
-                    endIcon={<ChevronRightIcon />}
-                    onClick={() => changeStep(4)}
-                    disableElevation
-                >
+                <Button variant="contained" endIcon={<ChevronRightIcon />} onClick={goToFinalStep} disableElevation>
                     {i18n.t("Continue")}
                 </Button>
             </div>

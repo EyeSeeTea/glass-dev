@@ -11,8 +11,12 @@ import { RemoveContainer, StyledRemoveButton } from "./UploadFiles";
 import { useAppContext } from "../../contexts/app-context";
 interface UploadRisProps {
     validate: (val: boolean) => void;
+    batchId: string;
 }
-export const UploadRis: React.FC<UploadRisProps> = ({ validate }) => {
+
+const RIS_FILE_TYPE = "RIS";
+
+export const UploadRis: React.FC<UploadRisProps> = ({ validate, batchId }) => {
     const { compositionRoot } = useAppContext();
     const snackbar = useSnackbar();
 
@@ -46,14 +50,21 @@ export const UploadRis: React.FC<UploadRisProps> = ({ validate }) => {
                 if (uploadedRisFile) {
                     setIsLoading(true);
                     setRisFile(uploadedRisFile);
-                    await compositionRoot.glassDocuments.upload(uploadedRisFile).toPromise();
+                    const data = {
+                        batchId,
+                        fileType: RIS_FILE_TYPE,
+                    };
+                    const submissionId = await compositionRoot.glassDocuments
+                        .upload({ file: uploadedRisFile, data })
+                        .toPromise();
+                    localStorage.setItem("risSubmissionId", submissionId);
                     setIsLoading(false);
                 } else {
                     snackbar.error(i18n.t("Error in file upload"));
                 }
             }
         },
-        [compositionRoot.glassDocuments, snackbar]
+        [batchId, compositionRoot.glassDocuments, snackbar]
     );
 
     return (
