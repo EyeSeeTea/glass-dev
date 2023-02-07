@@ -20,24 +20,21 @@ const SidebarNavMenuGroup: React.FC<SidebarNavProps> = ({ menu, groupName, class
     const classes = useStyles(menu.level);
 
     const { module } = useGlassModuleContext();
-    
+
     const isCurrent = (name: string) => {
         return module ? module === name : false;
-    }
+    };
     const [expanded, setExpanded] = React.useState(isCurrent(groupName));
-    
+
     useEffect(() => {
-        
-        if(module === menu.title) {
+        if (module === menu.title) {
             setExpanded(true);
         }
-    }, [menu.title, module])
-    
+    }, [menu.title, module]);
+
     const toggleExpanded = () => {
         setExpanded(!expanded);
     };
-
-
 
     return (
         <React.Fragment>

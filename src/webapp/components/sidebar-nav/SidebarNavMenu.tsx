@@ -21,9 +21,9 @@ const SidebarNavMenu: React.FC<SidebarNavProps> = ({ menu, className, groupName 
     const location = useLocation();
 
     const { module, setModule } = useGlassModuleContext();
-    
-    const isCurrentPage = (menuPath: string ) => {
-        return menuPath.includes(location.pathname) && groupName === module; 
+
+    const isCurrentPage = (menuPath: string) => {
+        return menuPath.includes(location.pathname) && groupName === module;
     };
 
     return (
@@ -34,7 +34,7 @@ const SidebarNavMenu: React.FC<SidebarNavProps> = ({ menu, className, groupName 
                 to={menu.path}
                 exact={true}
                 data-is-page-current={isCurrentPage(menu.path)}
-                onClick={() => setModule(groupName||"")}
+                onClick={() => setModule(groupName || "")}
             >
                 <div className={classes.icon}>{menu.icon}</div>
                 <Typography variant="body1" style={{ color: glassColors.greyBlack }}>

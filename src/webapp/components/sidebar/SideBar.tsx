@@ -22,24 +22,15 @@ export const SideBar: React.FC = () => {
     const modulesResult = useGlassModules(compositionRoot);
 
     const { setModule } = useGlassModuleContext();
-    
+
     useEffect(() => {
         // Validate localstorage vs datastore
-        if (isLoaded && modulesResult.kind === "loaded") {
-            if (modulesResult.data.length) {
-                const dsData = modulesResult.data.map(mapModuleToMenu);
-                if (JSON.stringify(dsData) !== JSON.stringify(storedMenuData)) {
-                    localStorage.setItem("glassSideBarData", JSON.stringify(dsData));
-                }
-            }
-        }
-
-        if (!isLoaded && modulesResult.kind === "loaded") {
-            if (modulesResult.data.length) {
-                const menuData = modulesResult.data.map(mapModuleToMenu);
+        if (modulesResult.kind === "loaded" && modulesResult.data.length) {
+            const menuData = modulesResult.data.map(mapModuleToMenu);
+            if (!isLoaded || JSON.stringify(menuData) !== JSON.stringify(storedMenuData)) {
                 localStorage.setItem("glassSideBarData", JSON.stringify(menuData));
-                setIsLoaded(true);
             }
+            setIsLoaded(true);
         }
     }, [storedMenuData, modulesResult, isLoaded]);
 
