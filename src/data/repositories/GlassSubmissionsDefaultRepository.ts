@@ -1,4 +1,4 @@
-import { FutureData } from "../../domain/entities/Future";
+import { Future, FutureData } from "../../domain/entities/Future";
 import { GlassSubmissions } from "../../domain/entities/GlassSubmissions";
 import { GlassSubmissionsRepository } from "../../domain/repositories/GlassSubmissionsRepository";
 import { cache } from "../../utils/cache";
@@ -17,6 +17,18 @@ export class GlassSubmissionsDefaultRepository implements GlassSubmissionsReposi
         return this.dataStoreClient.listCollection(DataStoreKeys.SUBMISSIONS).flatMap(submissions => {
             const newSubmissions = [...submissions, submission];
             return this.dataStoreClient.saveObject(DataStoreKeys.SUBMISSIONS, newSubmissions);
+        });
+    }
+
+    setStatus(id: string, status: string): FutureData<void> {
+        return this.dataStoreClient.listCollection<GlassSubmissions>(DataStoreKeys.SUBMISSIONS).flatMap(submissions => {
+            const submission = submissions?.find(submission => submission.id === id);
+            if (submission) {
+                (submissions.find(submission => submission.id === id) as GlassSubmissions).status = status;
+                return this.dataStoreClient.saveObject(DataStoreKeys.SUBMISSIONS, submissions);
+            } else {
+                return Future.error("Submission does not exist");
+            }
         });
     }
 }
