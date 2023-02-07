@@ -29,13 +29,16 @@ const SidebarNavMenuGroup: React.FC<SidebarNavProps> = ({
     const location = useLocation();
     const urlModuleName = location.pathname.split("/")[2];
 
-    const isCurrentModule = useCallback((val: string) => {
-        if (val === urlModuleName) {
-            return true;
-        } else {
-            return false;
-        }
-    }, [urlModuleName]);
+    const isCurrentModule = useCallback(
+        (val: string) => {
+            if (val === urlModuleName) {
+                return true;
+            } else {
+                return false;
+            }
+        },
+        [urlModuleName]
+    );
 
     const isCurrentNavItem = (val: string[]) => {
         if (isCurrentModule(groupName)) {

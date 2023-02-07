@@ -10,7 +10,7 @@ export interface GlassSubmissions {
     period: string;
     specimens: string[];
     status: string;
-    submissionDate: Date;
+    submissionDate: string;
     call: string;
     module: string;
 }
