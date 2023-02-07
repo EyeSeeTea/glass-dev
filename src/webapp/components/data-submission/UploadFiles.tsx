@@ -47,6 +47,7 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({ changeStep }) => {
     const [isValidated, setIsValidated] = useState(false);
     const [isFileValid, setIsFileValid] = useState(false);
     const [previousSubmissions, setPreviousSubmissions] = useState<GlassSubmissions[]>([]);
+    const [previousSubmissionsBatchIds, setPreviousSubmissionsBatchIds] = useState<string[]>([]);
 
     useEffect(() => {
         const fetchPreviousSubmission = async (): Promise<GlassSubmissions[]> => {
@@ -64,6 +65,11 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({ changeStep }) => {
             setIsValidated(false);
         }
     }, [batchId, isFileValid]);
+
+    useEffect(() => {
+        const batchIds = previousSubmissions.map(submission => submission.batchId);
+        setPreviousSubmissionsBatchIds([...new Set(batchIds)]);
+    }, [previousSubmissions]);
 
     const changeBatchId = (event: React.ChangeEvent<{ value: unknown }>) => {
         setBatchId(event.target.value as string);
@@ -95,7 +101,7 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({ changeStep }) => {
                                 key={value}
                                 value={value}
                                 hidden={true}
-                                disabled={!!previousSubmissions.find(submission => submission.batchId === value)}
+                                disabled={!!previousSubmissionsBatchIds.includes(value)}
                             >
                                 {i18n.t(label)}
                             </MenuItem>
@@ -109,8 +115,8 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({ changeStep }) => {
                     <div className="previous-list">
                         <h4>{i18n.t("You Previously Submitted:")} </h4>
                         <ul>
-                            {previousSubmissions.slice(-5).map((item, i) => (
-                                <li key={i}>{`Batch Id ${item.batchId}`}</li>
+                            {previousSubmissionsBatchIds.map(batchId => (
+                                <li key={batchId}>{`Batch Id ${batchId}`}</li>
                             ))}
                         </ul>
                     </div>
