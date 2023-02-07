@@ -34,7 +34,7 @@ export class UploadDocumentUseCase implements UseCase {
                 module: "",
                 period: "",
                 specimens: [],
-                status: "uploaded",
+                status: "UPLOADED",
                 submissionDate: new Date().toISOString(),
             };
             return this.glassSubmissionsRepository.save(submission).flatMap(() => Future.success(submission.id));
