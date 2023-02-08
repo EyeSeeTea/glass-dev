@@ -52,7 +52,7 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({ changeStep }) => {
     useEffect(() => {
         const fetchPreviousSubmission = async (): Promise<GlassUploads[]> => {
             //TODO: Hardcoded dataSubmissionsId to current data submission: replace by dynamic data submission the user is on.
-            return await compositionRoot.glassUploads.getByCall("THy2NqRXJT2").toPromise();
+            return await compositionRoot.glassUploads.getByDataSubmission("THy2NqRXJT2").toPromise();
         };
 
         fetchPreviousSubmission().then(uploads => setPreviousGlassUploads(uploads));
