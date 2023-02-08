@@ -22,17 +22,13 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({ changeStep
     };
 
     const goToFinalStep = async () => {
-        const risSubmissionId = localStorage.getItem("risSubmissionId");
-        const sampleSubmissionId = localStorage.getItem("sampleSubmissionId");
-        if (risSubmissionId) {
-            await compositionRoot.glassSubmissions
-                .setStatus({ id: risSubmissionId, status: COMPLETED_STATUS })
-                .toPromise();
+        const risUploadId = localStorage.getItem("risUploadId");
+        const sampleUploadId = localStorage.getItem("sampleUploadId");
+        if (risUploadId) {
+            await compositionRoot.glassUploads.setStatus({ id: risUploadId, status: COMPLETED_STATUS }).toPromise();
         }
-        if (sampleSubmissionId) {
-            await compositionRoot.glassSubmissions
-                .setStatus({ id: sampleSubmissionId, status: COMPLETED_STATUS })
-                .toPromise();
+        if (sampleUploadId) {
+            await compositionRoot.glassUploads.setStatus({ id: sampleUploadId, status: COMPLETED_STATUS }).toPromise();
         }
         changeStep(4);
     };
@@ -55,7 +51,13 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({ changeStep
             {renderTypeContent(fileType)}
 
             <div className="bottom">
-                <Button variant="contained" color="primary" endIcon={<ChevronRightIcon />} onClick={goToFinalStep} disableElevation>
+                <Button
+                    variant="contained"
+                    color="primary"
+                    endIcon={<ChevronRightIcon />}
+                    onClick={goToFinalStep}
+                    disableElevation
+                >
                     {i18n.t("Continue")}
                 </Button>
             </div>
