@@ -6,7 +6,7 @@
             "module_color": "#A6228F",
             "files_uploaded": 0,
             "end_in_days": null,
-            "moduleUrl": "/current-data-submission/AMR"
+            "moduleUrl": "/current-data-submission/?module=AMR"
         },
         {
             "id": 2,
@@ -14,7 +14,7 @@
             "module_color": "#FF6A1E",
             "files_uploaded": 2,
             "end_in_days": 4,
-            "moduleUrl": "/current-data-submission/AMC"
+            "moduleUrl": "/current-data-submission/?module=AMC"
         },
         {
             "id": 3,
@@ -22,7 +22,7 @@
             "module_color": "#4A2675",
             "files_uploaded": 0,
             "end_in_days": null,
-            "moduleUrl": "/current-data-submission/EGASP"
+            "moduleUrl": "/current-data-submission/?module=EGASP"
         },
         {
             "id": 4,
@@ -30,7 +30,7 @@
             "module_color": "#A6228F",
             "files_uploaded": 0,
             "end_in_days": 2,
-            "moduleUrl": "/current-data-submission/AMR"
+            "moduleUrl": "/current-data-submission/?module=AMR"
         }
     ]
 }

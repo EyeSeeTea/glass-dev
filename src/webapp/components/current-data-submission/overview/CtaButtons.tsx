@@ -41,7 +41,7 @@ export const CtaButtons: React.FC<CtaButtonsProps> = ({ moduleName, ctas }) => {
                         variant="contained"
                         color="primary"
                         component={NavLink}
-                        to={`/upload/${moduleName}`}
+                        to={`/upload/?module=${moduleName}`}
                         exact={true}
                     >
                         {i18n.t("Upload dataset")}

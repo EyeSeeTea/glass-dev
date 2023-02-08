@@ -1,5 +1,4 @@
-import { Breadcrumbs, Button, Typography } from "@material-ui/core";
-import { CircularProgress } from "material-ui";
+import { Breadcrumbs, Button } from "@material-ui/core";
 import React from "react";
 import styled from "styled-components";
 import { MainLayout } from "../../components/main-layout/MainLayout";
@@ -11,52 +10,45 @@ import { NavLink } from "react-router-dom";
 import { CustomCard } from "../../components/custom-card/CustomCard";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { DataSubmissionsHistoryContent } from "../../components/data-submissions-history/DataSubmissionsHistoryContent";
+import { ContentLoader } from "../../components/content-loader/ContentLoader";
+import { getUrlParam } from "../../utils/helpers";
 
-interface DataSubmissionsHistoryPageProps {
-    moduleName: string;
-}
-
-export const DataSubmissionsHistoryPage: React.FC<DataSubmissionsHistoryPageProps> = React.memo(({ moduleName }) => {
+export const DataSubmissionsHistoryPage: React.FC = React.memo(() => {
     return (
         <MainLayout>
-            <DataSubmissionsHistoryPageContent moduleName={moduleName} />
+            <DataSubmissionsHistoryPageContent />
         </MainLayout>
     );
 });
 
-export const DataSubmissionsHistoryPageContent: React.FC<DataSubmissionsHistoryPageProps> = React.memo(
-    ({ moduleName }) => {
+export const DataSubmissionsHistoryPageContent: React.FC = React.memo(() => {
         const { compositionRoot } = useAppContext();
 
-        // TODO: replace useGlassModule (or parameters) with actual hook to fetch data submissions history data
+    const moduleName = getUrlParam("module") || "";
+
         const result = useGlassModule(compositionRoot, moduleName);
 
         const click = (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
             event.preventDefault();
         };
 
-        switch (result.kind) {
-            case "loading":
-                return <CircularProgress />;
-            case "error":
-                return <Typography variant="h6">{result.message}</Typography>;
-            case "loaded":
                 return (
+        <ContentLoader content={result}>
                     <ContentWrapper>
                         <PreContent>
                             {/* // TODO: replace this with a global reusable StyledBreadCrumbs component */}
                             <StyledBreadCrumbs aria-label="breadcrumb" separator="">
                                 <Button
                                     component={NavLink}
-                                    to={`/current-data-submission/${moduleName}`}
+                            to={`/current-call/?module=${moduleName}`}
                                     exact={true}
                                     onClick={click}
                                 >
                                     <span>{moduleName}</span>
                                 </Button>
                                 <ChevronRightIcon />
-                                <Button component={NavLink} to={`/data-submissions-history/${moduleName}`} exact={true}>
-                                    <span>{i18n.t("List of Data Submissions")}</span>
+                        <Button component={NavLink} to={`/calls-history/?module=${moduleName}`} exact={true}>
+                            <span>{i18n.t("List of Calls")}</span>
                                 </Button>
                             </StyledBreadCrumbs>
                         </PreContent>
@@ -64,12 +56,14 @@ export const DataSubmissionsHistoryPageContent: React.FC<DataSubmissionsHistoryP
                             <h2>{i18n.t("All Data Submissions")}</h2>
                         </PageTitle>
                         <CustomCard padding="40px 60px 50px">
-                            <DataSubmissionsHistoryContent moduleId={result.data.id} moduleName={moduleName} />
+                    {result.kind === "loaded" && (
+                        <DataSubmissionsHistoryContent moduleId={result.data.id} moduleName={moduleName} />
+                    )}
                         </CustomCard>
                     </ContentWrapper>
+        </ContentLoader>
                 );
         }
-    }
 );
 
 const ContentWrapper = styled.div`
