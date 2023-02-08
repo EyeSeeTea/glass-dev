@@ -22,49 +22,48 @@ export const DataSubmissionsHistoryPage: React.FC = React.memo(() => {
 });
 
 export const DataSubmissionsHistoryPageContent: React.FC = React.memo(() => {
-        const { compositionRoot } = useAppContext();
+    const { compositionRoot } = useAppContext();
 
     const moduleName = getUrlParam("module") || "";
 
-        const result = useGlassModule(compositionRoot, moduleName);
+    const result = useGlassModule(compositionRoot, moduleName);
 
-        const click = (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
-            event.preventDefault();
-        };
+    const click = (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
+        event.preventDefault();
+    };
 
-                return (
+    return (
         <ContentLoader content={result}>
-                    <ContentWrapper>
-                        <PreContent>
-                            {/* // TODO: replace this with a global reusable StyledBreadCrumbs component */}
-                            <StyledBreadCrumbs aria-label="breadcrumb" separator="">
-                                <Button
-                                    component={NavLink}
+            <ContentWrapper>
+                <PreContent>
+                    {/* // TODO: replace this with a global reusable StyledBreadCrumbs component */}
+                    <StyledBreadCrumbs aria-label="breadcrumb" separator="">
+                        <Button
+                            component={NavLink}
                             to={`/current-call/?module=${moduleName}`}
-                                    exact={true}
-                                    onClick={click}
-                                >
-                                    <span>{moduleName}</span>
-                                </Button>
-                                <ChevronRightIcon />
+                            exact={true}
+                            onClick={click}
+                        >
+                            <span>{moduleName}</span>
+                        </Button>
+                        <ChevronRightIcon />
                         <Button component={NavLink} to={`/calls-history/?module=${moduleName}`} exact={true}>
                             <span>{i18n.t("List of Calls")}</span>
-                                </Button>
-                            </StyledBreadCrumbs>
-                        </PreContent>
-                        <PageTitle>
-                            <h2>{i18n.t("All Data Submissions")}</h2>
-                        </PageTitle>
-                        <CustomCard padding="40px 60px 50px">
+                        </Button>
+                    </StyledBreadCrumbs>
+                </PreContent>
+                <PageTitle>
+                    <h2>{i18n.t("All Data Submissions")}</h2>
+                </PageTitle>
+                <CustomCard padding="40px 60px 50px">
                     {result.kind === "loaded" && (
                         <DataSubmissionsHistoryContent moduleId={result.data.id} moduleName={moduleName} />
                     )}
-                        </CustomCard>
-                    </ContentWrapper>
+                </CustomCard>
+            </ContentWrapper>
         </ContentLoader>
-                );
-        }
-);
+    );
+});
 
 const ContentWrapper = styled.div`
     display: flex;

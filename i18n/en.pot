@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2023-02-08T06:48:11.806Z\n"
-"PO-Revision-Date: 2023-02-08T06:48:11.806Z\n"
+"POT-Creation-Date: 2023-02-08T10:35:03.067Z\n"
+"PO-Revision-Date: 2023-02-08T10:35:03.067Z\n"
 
 msgid "Spain"
 msgstr ""
@@ -383,7 +383,7 @@ msgstr ""
 msgid "Yearly data upload"
 msgstr ""
 
-msgid "List of Data Submissions"
+msgid "List of Calls"
 msgstr ""
 
 msgid "All Data Submissions"
@@ -395,7 +395,7 @@ msgstr ""
 msgid "Detail page"
 msgstr ""
 
-msgid "2022 Data Submisison"
+msgid "2022 Data Submission"
 msgstr ""
 
 msgid "Upload History"
