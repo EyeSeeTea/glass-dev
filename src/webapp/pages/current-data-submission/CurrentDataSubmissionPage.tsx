@@ -1,6 +1,5 @@
 /* eslint-disable no-console */
-import { Breadcrumbs, Button, Typography } from "@material-ui/core";
-import { CircularProgress } from "material-ui";
+import { Breadcrumbs, Button } from "@material-ui/core";
 import React, { useState } from "react";
 import styled from "styled-components";
 import { MainLayout } from "../../components/main-layout/MainLayout";
@@ -13,32 +12,30 @@ import { CustomCard } from "../../components/custom-card/CustomCard";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { CurrentDataSubmissionContent } from "../../components/current-data-submission/CurrentDataSubmissionContent";
 import { useStatusDataSubmission } from "../../hooks/useStatusDataSubmission";
-
-interface CurrentDataSubmissionPageProps {
-    moduleName: string;
-}
+import { ContentLoader } from "../../components/content-loader/ContentLoader";
+import { getUrlParam } from "../../utils/helpers";
 
 interface CurrentDataSubmissionPageContentProps {
     moduleId: string;
     moduleName: string;
 }
 
-export const CurrentDataSubmissionPage: React.FC<CurrentDataSubmissionPageProps> = React.memo(({ moduleName }) => {
+export const CurrentDataSubmissionPage: React.FC = React.memo(() => {
     const { compositionRoot } = useAppContext();
 
+    const moduleName = getUrlParam("module") || "";
+
     const result = useGlassModule(compositionRoot, moduleName);
-    switch (result.kind) {
-        case "loading":
-            return <CircularProgress />;
-        case "error":
-            return <Typography variant="h6">{result.message}</Typography>;
-        case "loaded":
-            return (
-                <MainLayout>
-                    <CurrentDataSubmissionPageContent moduleName={moduleName} moduleId={result.data.id} />
-                </MainLayout>
-            );
-    }
+
+    return (
+        <MainLayout>
+            <ContentLoader content={result}>
+                {result.kind === "loaded" && (
+                    <CurrentDataSubmissionPageContent moduleId={result.data.id} moduleName={moduleName} />
+                )}
+            </ContentLoader>
+        </MainLayout>
+    );
 });
 
 export const CurrentDataSubmissionPageContent: React.FC<CurrentDataSubmissionPageContentProps> = React.memo(
@@ -46,7 +43,7 @@ export const CurrentDataSubmissionPageContent: React.FC<CurrentDataSubmissionPag
         const location = useLocation();
         const queryParameters = new URLSearchParams(location.search);
 
-        //TO DO : orgUnit and period will not be fetched from queryParameters, it will be fetched from context.
+        // TODO : orgUnit and period will be stored context.
         const periodVal = queryParameters?.get("period");
         const orgUnitVal = queryParameters.get("orgUnit");
 
@@ -64,51 +61,51 @@ export const CurrentDataSubmissionPageContent: React.FC<CurrentDataSubmissionPag
             setOrgUnit("new orgUnit value");
         };
 
-        switch (currentDataSubmissionStatus.kind) {
-            case "loading":
-                return <CircularProgress />;
-            case "error":
-                return <Typography variant="h6">{currentDataSubmissionStatus.message}</Typography>;
-            case "loaded": {
-                return (
-                    <ContentWrapper>
-                        <PreContent>
-                            {/* // TODO: replace this with a global reusable StyledBreadCrumbs component */}
-                            <StyledBreadCrumbs aria-label="breadcrumb" separator="">
-                                <Button
-                                    component={NavLink}
-                                    to={`/current-data-submission/${moduleName}`}
-                                    exact={true}
-                                    onClick={click}
-                                >
-                                    <span>{moduleName}</span>
-                                </Button>
-                                <ChevronRightIcon />
-                                <Button component={NavLink} to={`/current-data-submission/${moduleName}`} exact={true}>
-                                    <span>{i18n.t(`${period} Data Submisison`)}</span>
-                                </Button>
-                            </StyledBreadCrumbs>
-                            <div className="info">
-                                <span>{i18n.t("Yearly data upload")}</span>, &nbsp;
-                                <span>Spain</span>
-                            </div>
-                        </PreContent>
-                        {currentDataSubmissionStatus && (
+        return (
+            <ContentLoader content={currentDataSubmissionStatus}>
+                <ContentWrapper>
+                    <PreContent>
+                        {/* // TODO: replace this with a global reusable StyledBreadCrumbs component */}
+                        <StyledBreadCrumbs aria-label="breadcrumb" separator="">
+                            <Button
+                                component={NavLink}
+                                to={`/current-data-submission/?module=${moduleName}`}
+                                exact={true}
+                                onClick={click}
+                            >
+                                <span>{moduleName}</span>
+                            </Button>
+                            <ChevronRightIcon />
+                            <Button
+                                component={NavLink}
+                                to={`/current-data-submission/?module=${moduleName}`}
+                                exact={true}
+                            >
+                                <span>{i18n.t(`${period} Data Submission`)}</span>
+                            </Button>
+                        </StyledBreadCrumbs>
+                        <div className="info">
+                            <span>{i18n.t("Yearly data upload")}</span>, &nbsp;
+                            <span>{i18n.t("Spain")}</span>
+                        </div>
+                    </PreContent>
+                    {currentDataSubmissionStatus.kind === "loaded" && (
+                        <>
                             <PageTitle statusColor={currentDataSubmissionStatus.data.colour}>
-                                <h3>{i18n.t(`${period} Data Submisison`)}</h3>
+                                <h3>{i18n.t(`${period} Data Submission`)}</h3>
                                 <div className="status">{i18n.t(currentDataSubmissionStatus.data.title)}</div>
                             </PageTitle>
-                        )}
-                        <CustomCard padding="40px 60px 50px">
-                            <CurrentDataSubmissionContent
-                                moduleName={moduleName}
-                                currentDataSubmissionStatus={currentDataSubmissionStatus.data}
-                            />
-                        </CustomCard>
-                    </ContentWrapper>
-                );
-            }
-        }
+                            <CustomCard padding="40px 60px 50px">
+                                <CurrentDataSubmissionContent
+                                    moduleName={moduleName}
+                                    currentDataSubmissionStatus={currentDataSubmissionStatus.data}
+                                />
+                            </CustomCard>
+                        </>
+                    )}
+                </ContentWrapper>
+            </ContentLoader>
+        );
     }
 );
 

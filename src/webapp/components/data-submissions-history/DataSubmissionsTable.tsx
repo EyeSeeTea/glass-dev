@@ -19,7 +19,7 @@ export const DataSubmissionsTable: React.FC<DataSubmissionsTableProps> = ({ item
     const history = useHistory();
 
     const handleClick = (period: number) => {
-        history.push(`/current-data-submission/${moduleName}?period=${period}&orgUnit=${orgUnit}`);
+        history.push(`/current-data-submission/?module=${moduleName}&period=${period}&orgUnit=${orgUnit}`);
     };
     return (
         <ContentWrapper>

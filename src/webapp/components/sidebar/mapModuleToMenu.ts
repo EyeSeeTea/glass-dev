@@ -5,8 +5,7 @@ import { Menu } from "../sidebar-nav/SidebarNav";
 export type GlassModulesState = GlassState<Menu[]>;
 
 export function mapModuleToMenu(module: GlassModule): Menu {
-    // const moduleFolder = module.name.toLowerCase().replace(/\s/g,'');
-    const moduleFolder = module.name;
+    const moduleName = module.name;
     return {
         kind: "MenuGroup",
         level: 0,
@@ -18,31 +17,31 @@ export function mapModuleToMenu(module: GlassModule): Menu {
                 kind: "MenuLeaf",
                 level: 0,
                 title: "Current Data Submission",
-                path: `/current-data-submission/${moduleFolder}`,
+                path: `/current-data-submission/?module=${moduleName}`,
             },
             {
                 kind: "MenuLeaf",
                 level: 0,
                 title: "Reports",
-                path: "",
+                path: `/reports/?module=${moduleName}`,
             },
             {
                 kind: "MenuLeaf",
                 level: 0,
                 title: "Upload History",
-                path: `/upload-history/${moduleFolder}`,
+                path: `/upload-history/?module=${moduleName}`,
             },
             {
                 kind: "MenuLeaf",
                 level: 0,
                 title: "Data Submissions History",
-                path: `/data-submissions-history/${moduleFolder}`,
+                path: `/data-submissions-history/?module=${moduleName}`,
             },
             {
                 kind: "MenuLeaf",
                 level: 0,
                 title: "Country Information",
-                path: `/country-information/${moduleFolder}`,
+                path: `/country-information/?module=${moduleName}`,
             },
         ],
     };

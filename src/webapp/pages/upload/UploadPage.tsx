@@ -8,47 +8,40 @@ import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import { NavLink } from "react-router-dom";
 import { CustomCard } from "../../components/custom-card/CustomCard";
 import i18n from "@eyeseetea/d2-ui-components/locales";
+import { getUrlParam } from "../../utils/helpers";
 
-interface UploadPageProps {
-    moduleName: string;
-}
+export const UploadPage: React.FC = React.memo(() => {
+    const moduleName = getUrlParam("module") || "";
 
-export const UploadPage: React.FC<UploadPageProps> = React.memo(({ moduleName }) => {
     return (
         <MainLayout>
-            <UploadPageContent moduleName={moduleName} />
+            <ContentWrapper>
+                <PreContent>
+                    {/* // TODO: replace this with a global reusable StyledBreadCrumbs component */}
+                    <StyledBreadCrumbs aria-label="breadcrumb" separator="">
+                        <Button
+                            component={NavLink}
+                            to={`/current-data-submission/?module=${moduleName}`}
+                            exact={true}
+                            onClick={() => null}
+                        >
+                            <span>{moduleName}</span>
+                        </Button>
+                        <ChevronRightIcon />
+                        <Button component={NavLink} to={`/upload/?module=${moduleName}`} exact={true}>
+                            <span>{i18n.t("2022 Data Submission")}</span>
+                        </Button>
+                    </StyledBreadCrumbs>
+                    <div className="info">
+                        <span>{i18n.t("Yearly data upload")}</span>, &nbsp;
+                        <span>Spain</span>
+                    </div>
+                </PreContent>
+                <CustomCard padding="40px 60px 50px">
+                    <UploadContent />
+                </CustomCard>
+            </ContentWrapper>
         </MainLayout>
-    );
-});
-
-export const UploadPageContent: React.FC<UploadPageProps> = React.memo(({ moduleName }) => {
-    return (
-        <ContentWrapper>
-            <PreContent>
-                {/* // TODO: replace this with a global reusable StyledBreadCrumbs component */}
-                <StyledBreadCrumbs aria-label="breadcrumb" separator="">
-                    <Button
-                        component={NavLink}
-                        to={`/current-data-submission/${moduleName}`}
-                        exact={true}
-                        onClick={() => null}
-                    >
-                        <span>{moduleName}</span>
-                    </Button>
-                    <ChevronRightIcon />
-                    <Button component={NavLink} to={`/upload/${moduleName}`} exact={true}>
-                        <span>{i18n.t("2022 Data Submisison")}</span>
-                    </Button>
-                </StyledBreadCrumbs>
-                <div className="info">
-                    <span>{i18n.t("Yearly data upload")}</span>, &nbsp;
-                    <span>{i18n.t("Spain")}</span>
-                </div>
-            </PreContent>
-            <CustomCard padding="40px 60px 50px">
-                <UploadContent />
-            </CustomCard>
-        </ContentWrapper>
     );
 });
 
