@@ -27,7 +27,6 @@ export const ReviewDataSummary: React.FC<ReviewDataSummaryProps> = ({ changeStep
         } else {
             setIsValidated(false);
         }
-        return () => {};
     }, [state]);
 
     const changeType = (fileType: string) => {

@@ -14,6 +14,7 @@ import "./App.css";
 import { AppConfig } from "./AppConfig";
 import muiThemeLegacy from "./themes/dhis2-legacy.theme";
 import { muiTheme } from "./themes/dhis2.theme";
+import { CurrentModuleContextProvider } from "../../context-providers/CurrentModuleProvider";
 
 export interface AppProps {
     api: D2Api;
@@ -30,6 +31,7 @@ export const App: React.FC<AppProps> = React.memo(function App({ api, d2, instan
         async function setup() {
             const compositionRoot = getCompositionRoot(instance);
             const { data: currentUser } = await compositionRoot.instance.getCurrentUser().runAsync();
+
             if (!currentUser) throw new Error("User not logged in");
 
             await compositionRoot.glassModules.validate().runAsync();
@@ -54,7 +56,9 @@ export const App: React.FC<AppProps> = React.memo(function App({ api, d2, instan
 
                     <div id="app" className="content">
                         <AppContext.Provider value={appContext}>
-                            <Router />
+                            <CurrentModuleContextProvider>
+                                    <Router />
+                            </CurrentModuleContextProvider>
                         </AppContext.Provider>
                     </div>
 
