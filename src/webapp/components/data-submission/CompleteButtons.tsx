@@ -6,7 +6,6 @@ import { NavLink } from "react-router-dom";
 import { getUrlParam } from "../../utils/helpers";
 
 export const CompleteButtons: React.FC = () => {
-
     const moduleName = getUrlParam("module");
 
     return (
