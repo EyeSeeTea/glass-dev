@@ -71,8 +71,18 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({ changeStep }) => {
         setPreviousUploadsBatchIds([...new Set(batchIds)]);
     }, [previousUploads]);
 
-    const changeBatchId = (event: React.ChangeEvent<{ value: unknown }>) => {
-        setBatchId(event.target.value as string);
+    const changeBatchId = async (event: React.ChangeEvent<{ value: unknown }>) => {
+        const batchId = event.target.value as string;
+        const risUploadId = localStorage.getItem("risUploadId");
+        const sampleUploadId = localStorage.getItem("sampleUploadId");
+        setBatchId(batchId);
+
+        if (risUploadId) {
+            await compositionRoot.glassUploads.setBatchId({ id: risUploadId, batchId }).toPromise();
+        }
+        if (sampleUploadId) {
+            await compositionRoot.glassUploads.setBatchId({ id: sampleUploadId, batchId }).toPromise();
+        }
     };
 
     return (

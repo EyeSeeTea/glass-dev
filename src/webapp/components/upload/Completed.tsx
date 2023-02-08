@@ -6,8 +6,8 @@ import { CompleteButtons } from "./CompleteButtons";
 
 export const Completed: React.FC = () => {
     useEffect(() => {
-        localStorage.removeItem("risSubmissionId");
-        localStorage.removeItem("sampleSubmissionId");
+        localStorage.removeItem("risUploadId");
+        localStorage.removeItem("sampleUploadId");
     });
 
     return (

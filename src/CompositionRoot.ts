@@ -22,6 +22,7 @@ import { ValidateGlassDocumentsUseCase } from "./domain/usecases/ValidateGlassDo
 import { UploadDocumentUseCase } from "./domain/usecases/UploadDocumentUseCase";
 import { SetUploadStatusUseCase } from "./domain/usecases/SetUploadStatusUseCase";
 import { GetGlassUploadsByDataSubmissionUseCase } from "./domain/usecases/GetGlassUploadsByDataSubmissionUseCase";
+import { SetUploadBatchIdUseCase } from "./domain/usecases/SetUploadBatchIdUseCase";
 
 export function getCompositionRoot(instance: Instance) {
     const dataStoreClient = new DataStoreClient(instance);
@@ -56,6 +57,7 @@ export function getCompositionRoot(instance: Instance) {
             validate: new ValidateGlassUploadsUseCase(glassUploadsRepository),
             setStatus: new SetUploadStatusUseCase(glassUploadsRepository),
             getByDataSubmission: new GetGlassUploadsByDataSubmissionUseCase(glassUploadsRepository),
+            setBatchId: new SetUploadBatchIdUseCase(glassUploadsRepository),
         }),
         glassDocuments: getExecute({
             getAll: new GetGlassDocumentsUseCase(glassDocumentsRepository),
