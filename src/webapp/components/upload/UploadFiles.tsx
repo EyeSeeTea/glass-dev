@@ -35,12 +35,12 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({ changeStep }) => {
                 <h3>{i18n.t("Batch ID")}</h3>
                 <FormControl variant="outlined">
                     <Select value={batchId} onChange={changeBatchId}>
-                        {/* <MenuItem value="">
-                            <em>None</em>
-                        </MenuItem> */}
                         <MenuItem value={1}>{i18n.t("Dataset 1")}</MenuItem>
                         <MenuItem value={2}>{i18n.t("Dataset 2")}</MenuItem>
                         <MenuItem value={3}>{i18n.t("Dataset 3")}</MenuItem>
+                        <MenuItem value={4}>{i18n.t("Dataset 4")}</MenuItem>
+                        <MenuItem value={5}>{i18n.t("Dataset 5")}</MenuItem>
+                        <MenuItem value={6}>{i18n.t("Dataset 6")}</MenuItem>
                     </Select>
                 </FormControl>
             </div>
@@ -144,12 +144,6 @@ const ContentWrapper = styled.div`
         margin: 0 auto 30px auto;
         align-items: flex-end;
         width: 100%;
-        .previous-list {
-            ul {
-                margin: 0;
-                padding: 0 0 0 20px;
-            }
-        }
     }
 `;
 

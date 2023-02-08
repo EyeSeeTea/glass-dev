@@ -13,7 +13,10 @@ export class GlassUploadsDefaultRepository implements GlassUploadsRepository {
         return this.dataStoreClient.listCollection<GlassUploads>(DataStoreKeys.UPLOADS);
     }
 
-    save(uploads: GlassUploads[]): FutureData<void> {
-        return this.dataStoreClient.saveObject(DataStoreKeys.UPLOADS, uploads);
+    save(upload: GlassUploads): FutureData<void> {
+        return this.dataStoreClient.listCollection(DataStoreKeys.UPLOADS).flatMap(uploads => {
+            const newUploads = [...uploads, upload];
+            return this.dataStoreClient.saveObject(DataStoreKeys.UPLOADS, newUploads);
+        });
     }
 }
