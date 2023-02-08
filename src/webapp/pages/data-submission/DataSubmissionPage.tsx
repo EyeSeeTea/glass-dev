@@ -11,7 +11,7 @@ import i18n from "@eyeseetea/d2-ui-components/locales";
 import { getUrlParam } from "../../utils/helpers";
 
 export const DataSubmissionPage: React.FC = React.memo(() => {
-    const moduleName = getUrlParam("module") || "";
+    const moduleName = getUrlParam("module");
 
     return (
         <MainLayout>

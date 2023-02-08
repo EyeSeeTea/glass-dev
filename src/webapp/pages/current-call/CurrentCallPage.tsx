@@ -23,7 +23,7 @@ interface CurrentCallPageContentProps {
 export const CurrentCallPage: React.FC = React.memo(() => {
     const { compositionRoot } = useAppContext();
 
-    const moduleName = getUrlParam("module") || "";
+    const moduleName = getUrlParam("module");
 
     const result = useGlassModule(compositionRoot, moduleName);
 
