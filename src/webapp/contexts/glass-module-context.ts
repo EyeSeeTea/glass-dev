@@ -21,6 +21,6 @@ export function useGlassModuleContext() {
     if (context) {
         return context;
     } else {
-        throw new Error("Glass Module Context uninitialized");
+        throw new Error("Current Glass Module Context uninitialized");
     }
 }
