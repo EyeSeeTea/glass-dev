@@ -21,7 +21,6 @@ import { GetGlassDocumentsUseCase } from "./domain/usecases/GetGlassDocumentsUse
 import { ValidateGlassDocumentsUseCase } from "./domain/usecases/ValidateGlassDocumentsUseCase";
 import { UploadDocumentUseCase } from "./domain/usecases/UploadDocumentUseCase";
 
-
 export function getCompositionRoot(instance: Instance) {
     const dataStoreClient = new DataStoreClient(instance);
     const instanceRepository = new InstanceDefaultRepository(instance);
