@@ -24,14 +24,14 @@ export const CountryInformationPage: React.FC = React.memo(() => {
                     <StyledBreadCrumbs aria-label="breadcrumb" separator="">
                         <Button
                             component={NavLink}
-                            to={`/current-call/?module=${moduleName}`}
+                            to={`/current-data-submission/?module=${moduleName}`}
                             exact={true}
                             onClick={click}
                         >
                             <span>{moduleName}</span>
                         </Button>
                         <ChevronRightIcon />
-                        <Button component={NavLink} to={`/country-information/${moduleName}`} exact={true}>
+                        <Button component={NavLink} to={`/country-information?module=${moduleName}`} exact={true}>
                             <span>{i18n.t("Country Information")}</span>
                         </Button>
                     </StyledBreadCrumbs>

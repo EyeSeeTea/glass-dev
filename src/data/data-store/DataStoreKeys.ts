@@ -1,7 +1,7 @@
 export const DataStoreKeys = {
     MODULES: "modules",
     NEWS: "news",
-    CALLS: "calls",
-    SUBMISSIONS: "submissions",
+    DATA_SUBMISSIONS: "data-submissions",
+    UPLOADS: "uploads",
     DOCUMENTS: "documents",
 };

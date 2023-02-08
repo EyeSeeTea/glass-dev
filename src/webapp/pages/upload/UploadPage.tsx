@@ -1,20 +1,18 @@
 import { Breadcrumbs, Button } from "@material-ui/core";
 import React from "react";
 import styled from "styled-components";
+import { UploadContent } from "../../components/upload/UploadContent";
 import { MainLayout } from "../../components/main-layout/MainLayout";
 import { glassColors, palette } from "../app/themes/dhis2.theme";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import { NavLink } from "react-router-dom";
+import { CustomCard } from "../../components/custom-card/CustomCard";
 import i18n from "@eyeseetea/d2-ui-components/locales";
-import { UploadHistoryContent } from "../../components/upload-history/UploadHistoryContent";
 import { getUrlParam } from "../../utils/helpers";
 
-export const UploadHistoryPage: React.FC = React.memo(() => {
+export const UploadPage: React.FC = React.memo(() => {
     const moduleName = getUrlParam("module");
 
-    const click = (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
-        event.preventDefault();
-    };
     return (
         <MainLayout>
             <ContentWrapper>
@@ -25,17 +23,23 @@ export const UploadHistoryPage: React.FC = React.memo(() => {
                             component={NavLink}
                             to={`/current-data-submission/?module=${moduleName}`}
                             exact={true}
-                            onClick={click}
+                            onClick={() => null}
                         >
                             <span>{moduleName}</span>
                         </Button>
                         <ChevronRightIcon />
-                        <Button component={NavLink} to={`/upload-history/?module=${moduleName}`} exact={true}>
-                            <span>{i18n.t("Upload History")}</span>
+                        <Button component={NavLink} to={`/upload/?module=${moduleName}`} exact={true}>
+                            <span>{i18n.t("2022 Data Submission")}</span>
                         </Button>
                     </StyledBreadCrumbs>
+                    <div className="info">
+                        <span>{i18n.t("Yearly data upload")}</span>, &nbsp;
+                        <span>Spain</span>
+                    </div>
                 </PreContent>
-                <UploadHistoryContent />
+                <CustomCard padding="40px 60px 50px">
+                    <UploadContent />
+                </CustomCard>
             </ContentWrapper>
         </MainLayout>
     );

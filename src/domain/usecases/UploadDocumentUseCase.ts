@@ -2,12 +2,12 @@ import { UseCase } from "../../CompositionRoot";
 import { generateUid } from "../../utils/uid";
 import { FutureData } from "../entities/Future";
 import { GlassDocumentsRepository } from "../repositories/GlassDocumentsRepository";
-import { GlassSubmissionsRepository } from "../repositories/GlassSubmissionsRepository";
+import { GlassUploadsRepository } from "../repositories/GlassUploadsRepository";
 
 export class UploadDocumentUseCase implements UseCase {
     constructor(
         private glassDocumentsRepository: GlassDocumentsRepository,
-        private glassSubmissionsRepository: GlassSubmissionsRepository
+        private glassUploadsRepository: GlassUploadsRepository
     ) {}
 
     public execute(file: File): FutureData<void> {
@@ -15,7 +15,7 @@ export class UploadDocumentUseCase implements UseCase {
             const submission = {
                 id: generateUid(),
                 batchId: "Dataset 1",
-                call: "",
+                dataSubmission: "",
                 countryCode: "",
                 fileId,
                 fileName: file.name,
@@ -26,9 +26,9 @@ export class UploadDocumentUseCase implements UseCase {
                 period: "",
                 specimens: [],
                 status: "uploaded",
-                submissionDate: new Date().toISOString(),
+                uploadDate: new Date().toISOString(),
             };
-            return this.glassSubmissionsRepository.save(submission);
+            return this.glassUploadsRepository.save(submission);
         });
     }
 }
