@@ -2,7 +2,7 @@ import { UseCase } from "../../CompositionRoot";
 import { generateUid } from "../../utils/uid";
 import { Future, FutureData } from "../entities/Future";
 import { GlassDocumentsRepository } from "../repositories/GlassDocumentsRepository";
-import { GlassSubmissionsRepository } from "../repositories/GlassSubmissionsRepository";
+import { GlassUploadsRepository } from "../repositories/GlassUploadsRepository";
 
 type UploadType = {
     file: File;
@@ -15,7 +15,7 @@ type UploadType = {
 export class UploadDocumentUseCase implements UseCase {
     constructor(
         private glassDocumentsRepository: GlassDocumentsRepository,
-        private glassSubmissionsRepository: GlassSubmissionsRepository
+        private glassUploadsRepository: GlassUploadsRepository
     ) {}
 
     public execute({ file, data }: UploadType): FutureData<string> {
@@ -24,7 +24,7 @@ export class UploadDocumentUseCase implements UseCase {
             const submission = {
                 id: generateUid(),
                 batchId: data.batchId,
-                call: "THy2NqRXJT2",
+                dataSubmission: "THy2NqRXJT2",
                 countryCode: "",
                 fileId,
                 fileName: file.name,
@@ -35,9 +35,9 @@ export class UploadDocumentUseCase implements UseCase {
                 period: "",
                 specimens: [],
                 status: "UPLOADED",
-                submissionDate: new Date().toISOString(),
+                uploadDate: new Date().toISOString(),
             };
-            return this.glassSubmissionsRepository.save(submission).flatMap(() => Future.success(submission.id));
+            return this.glassUploadsRepository.save(submission).flatMap(() => Future.success(submission.id));
         });
     }
 }

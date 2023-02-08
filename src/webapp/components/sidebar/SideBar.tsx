@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { Box, Button, CircularProgress, Typography } from "@material-ui/core";
 import { CustomCard } from "../custom-card/CustomCard";
@@ -9,12 +9,11 @@ import { NavLink } from "react-router-dom";
 
 import { useAppContext } from "../../contexts/app-context";
 import { useGlassModules } from "../../hooks/useGlassModules";
-import { SideBarContext } from "../../contexts/sidebar-context";
 import { mapModuleToMenu } from "./mapModuleToMenu";
+import { useGlassModuleContext } from "../../contexts/glass-module-context";
 
 export const SideBar: React.FC = () => {
     const { compositionRoot } = useAppContext();
-    const { setMenuData } = useContext(SideBarContext);
 
     const [isLoaded, setIsLoaded] = useState(false);
 
@@ -22,34 +21,23 @@ export const SideBar: React.FC = () => {
 
     const modulesResult = useGlassModules(compositionRoot);
 
+    const { setModule } = useGlassModuleContext();
+
     useEffect(() => {
         // Validate localstorage vs datastore
-        if (isLoaded && modulesResult.kind === "loaded") {
-            if (modulesResult.data.length) {
-                const dsData = modulesResult.data.map(mapModuleToMenu);
-                if (JSON.stringify(dsData) === JSON.stringify(storedMenuData)) {
-                    // No need to update localstorage
-                } else {
-                    localStorage.setItem("glassSideBarData", JSON.stringify(dsData));
-                }
-            }
-        }
-
-        if (!isLoaded && modulesResult.kind === "loaded") {
-            if (modulesResult.data.length) {
-                const menuData = modulesResult.data.map(mapModuleToMenu);
+        if (modulesResult.kind === "loaded" && modulesResult.data.length) {
+            const menuData = modulesResult.data.map(mapModuleToMenu);
+            if (!isLoaded || JSON.stringify(menuData) !== JSON.stringify(storedMenuData)) {
                 localStorage.setItem("glassSideBarData", JSON.stringify(menuData));
-                setIsLoaded(true);
-                setMenuData(menuData);
             }
+            setIsLoaded(true);
         }
-        return () => {};
-    }, [storedMenuData, modulesResult, isLoaded, setMenuData]);
+    }, [storedMenuData, modulesResult, isLoaded]);
 
     return (
         <CustomCard minheight="630px" padding="0 0 100px 0" data-test="test2">
             <HomeButtonWrapper>
-                <Button className="home-button" component={NavLink} to="/" exact={true}>
+                <Button className="home-button" component={NavLink} to="/" exact={true} onClick={() => setModule("")}>
                     <StarGradient className="star-icon" />
                     <Box width={15} />
                     <Typography>{i18n.t("HOME")}</Typography>
