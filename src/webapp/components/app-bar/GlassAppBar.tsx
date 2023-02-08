@@ -10,7 +10,6 @@ import glassLogo from "../../assets/glass-logo.png";
 import { Box, MenuItem, Select } from "@material-ui/core";
 import styled from "styled-components";
 import i18n from "@eyeseetea/d2-ui-components/locales";
-import { useTestContext } from "../../contexts/test-context";
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -38,8 +37,6 @@ const useStyles = makeStyles(theme => ({
 export const GlassAppBar: React.FC = () => {
     const classes = useStyles();
 
-    const { isDark } = useTestContext();
-
     const [country, setCountry] = React.useState(1);
     const [action, setAction] = React.useState(1);
 
@@ -54,7 +51,7 @@ export const GlassAppBar: React.FC = () => {
     return (
         <div className={classes.root}>
             <AppBar position="static">
-                <Toolbar className={`${classes.toolbar} ${isDark && classes.isDark}`}>
+                <Toolbar className={`${classes.toolbar}`}>
                     <IconButton edge="start" className={classes.menuButton} color="primary" aria-label="open drawer">
                         <MenuIcon />
                     </IconButton>

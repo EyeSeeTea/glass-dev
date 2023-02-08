@@ -4,7 +4,6 @@ import { CallsHistoryPage } from "./calls-history/CallsHistoryPage";
 import { CountryInformationPage } from "./country-information/CountryInformationPage";
 import { CurrentCallPage } from "./current-call/CurrentCallPage";
 import { DataSubmissionPage } from "./data-submission/DataSubmissionPage";
-import { TestPage } from "./test-context/TestPage";
 import { LandingPage } from "./landing/LandingPage";
 import { UploadHistoryPage } from "./upload-history/UploadHistoryPage";
 
@@ -19,7 +18,6 @@ export const Router: React.FC = React.memo(() => {
 
                 <Route path="/upload-history" render={() => <UploadHistoryPage />} />
                 <Route path="/country-information" render={() => <CountryInformationPage />} />
-                <Route path="/test-context/" render={() => <TestPage />} />
 
                 <Route render={() => <LandingPage />} />
             </Switch>
