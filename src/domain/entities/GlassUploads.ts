@@ -1,4 +1,4 @@
-export interface UploadsDataItem {
+export interface GlassUploads {
     id: string;
     batchId: string;
     countryCode: string;

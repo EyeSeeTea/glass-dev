@@ -2,21 +2,38 @@ import { Breadcrumbs, Button } from "@material-ui/core";
 import React from "react";
 import styled from "styled-components";
 import { MainLayout } from "../../components/main-layout/MainLayout";
+import { useAppContext } from "../../contexts/app-context";
+import { useGlassModule } from "../../hooks/useGlassModule";
 import { glassColors, palette } from "../app/themes/dhis2.theme";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import { NavLink } from "react-router-dom";
+import { CustomCard } from "../../components/custom-card/CustomCard";
 import i18n from "@eyeseetea/d2-ui-components/locales";
-import { UploadHistoryContent } from "../../components/upload-history/UploadHistoryContent";
+import { DataSubmissionsHistoryContent } from "../../components/data-submissions-history/DataSubmissionsHistoryContent";
+import { ContentLoader } from "../../components/content-loader/ContentLoader";
 import { getUrlParam } from "../../utils/helpers";
 
-export const UploadHistoryPage: React.FC = React.memo(() => {
+export const DataSubmissionsHistoryPage: React.FC = React.memo(() => {
+    return (
+        <MainLayout>
+            <DataSubmissionsHistoryPageContent />
+        </MainLayout>
+    );
+});
+
+export const DataSubmissionsHistoryPageContent: React.FC = React.memo(() => {
+    const { compositionRoot } = useAppContext();
+
     const moduleName = getUrlParam("module");
+
+    const result = useGlassModule(compositionRoot, moduleName);
 
     const click = (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
         event.preventDefault();
     };
+
     return (
-        <MainLayout>
+        <ContentLoader content={result}>
             <ContentWrapper>
                 <PreContent>
                     {/* // TODO: replace this with a global reusable StyledBreadCrumbs component */}
@@ -30,14 +47,21 @@ export const UploadHistoryPage: React.FC = React.memo(() => {
                             <span>{moduleName}</span>
                         </Button>
                         <ChevronRightIcon />
-                        <Button component={NavLink} to={`/upload-history/?module=${moduleName}`} exact={true}>
-                            <span>{i18n.t("Upload History")}</span>
+                        <Button component={NavLink} to={`/data-submissions-history/?module=${moduleName}`} exact={true}>
+                            <span>{i18n.t("List of Data Submissions")}</span>
                         </Button>
                     </StyledBreadCrumbs>
                 </PreContent>
-                <UploadHistoryContent />
+                <PageTitle>
+                    <h2>{i18n.t("All Data Submissions")}</h2>
+                </PageTitle>
+                <CustomCard padding="40px 60px 50px">
+                    {result.kind === "loaded" && (
+                        <DataSubmissionsHistoryContent moduleId={result.data.id} moduleName={moduleName} />
+                    )}
+                </CustomCard>
             </ContentWrapper>
-        </MainLayout>
+        </ContentLoader>
     );
 });
 
@@ -60,6 +84,27 @@ const PreContent = styled.div`
             color: ${glassColors.green};
             opacity: 1;
         }
+    }
+`;
+
+const PageTitle = styled.div`
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+    align-items: center;
+    h2 {
+        margin: 0;
+        text-transform: uppercase;
+    }
+    .status {
+        display: inline-block;
+        border-radius: 5px;
+        padding: 3px 15px;
+        background-color: ${glassColors.yellow};
+        color: white;
+        text-transform: uppercase;
+        font-weight: bold;
+        font-size: 12px;
     }
 `;
 

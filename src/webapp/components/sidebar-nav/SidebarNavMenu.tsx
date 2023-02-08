@@ -23,14 +23,12 @@ const SidebarNavMenu: React.FC<SidebarNavProps> = ({ menu, className, groupName 
     const { module, setModule } = useGlassModuleContext();
 
     /* 
-        TODO: determine through context which call is "current call" as of date and only highlight "Current call" if so, 
+        TODO: determine through context which data submission is "current data submission" as of date and only highlight "Current data submission" if so, 
         otherwise highlight "uploads history menu"
     */
     const isCurrentPage = (menuPath: string) => {
         return (
-            (menu.title === "Upload History" &&
-                location.pathname.includes("data-submission") &&
-                groupName === module) ||
+            (menu.title === "Upload History" && location.pathname.includes("upload") && groupName === module) ||
             (menuPath.includes(location.pathname) && groupName === module)
         );
     };
