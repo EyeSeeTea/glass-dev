@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Button, FormControl, MenuItem, Select } from "@material-ui/core";
+import React, { useEffect, useState } from "react";
+import { Button, FormControl, InputLabel, MenuItem, Select } from "@material-ui/core";
 import styled from "styled-components";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
@@ -7,7 +7,7 @@ import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import { UploadRis } from "./UploadRis";
 import { UploadSample } from "./UploadSample";
 import { useAppContext } from "../../contexts/app-context";
-import { GlassSubmissions } from "../../../domain/entities/GlassSubmissions";
+import { GlassUploads } from "../../../domain/entities/GlassUploads";
 
 interface UploadFilesProps {
     changeStep: (step: number) => void;
@@ -46,17 +46,17 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({ changeStep }) => {
     const [batchId, setBatchId] = useState("");
     const [isValidated, setIsValidated] = useState(false);
     const [isFileValid, setIsFileValid] = useState(false);
-    const [previousSubmissions, setPreviousSubmissions] = useState<GlassSubmissions[]>([]);
-    const [previousSubmissionsBatchIds, setPreviousSubmissionsBatchIds] = useState<string[]>([]);
+    const [previousUploads, setPreviousGlassUploads] = useState<GlassUploads[]>([]);
+    const [previousUploadsBatchIds, setPreviousUploadsBatchIds] = useState<string[]>([]);
 
     useEffect(() => {
-        const fetchPreviousSubmission = async (): Promise<GlassSubmissions[]> => {
-            //TODO: Hardcoded callId to current call: replace by dynamic call the user is on.
-            return await compositionRoot.glassSubmissions.getByCall("THy2NqRXJT2").toPromise();
+        const fetchPreviousSubmission = async (): Promise<GlassUploads[]> => {
+            //TODO: Hardcoded dataSubmissionsId to current data submission: replace by dynamic data submission the user is on.
+            return await compositionRoot.glassUploads.getByCall("THy2NqRXJT2").toPromise();
         };
 
-        fetchPreviousSubmission().then(submissions => setPreviousSubmissions(submissions));
-    }, [compositionRoot.glassSubmissions]);
+        fetchPreviousSubmission().then(uploads => setPreviousGlassUploads(uploads));
+    }, [compositionRoot.glassUploads]);
 
     useEffect(() => {
         if (batchId && isFileValid) {
@@ -67,9 +67,9 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({ changeStep }) => {
     }, [batchId, isFileValid]);
 
     useEffect(() => {
-        const batchIds = previousSubmissions.map(submission => submission.batchId);
-        setPreviousSubmissionsBatchIds([...new Set(batchIds)]);
-    }, [previousSubmissions]);
+        const batchIds = previousUploads.map(uploads => uploads.batchId);
+        setPreviousUploadsBatchIds([...new Set(batchIds)]);
+    }, [previousUploads]);
 
     const changeBatchId = (event: React.ChangeEvent<{ value: unknown }>) => {
         setBatchId(event.target.value as string);
@@ -101,7 +101,7 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({ changeStep }) => {
                                 key={value}
                                 value={value}
                                 hidden={true}
-                                disabled={!!previousSubmissionsBatchIds.includes(value)}
+                                disabled={!!previousUploadsBatchIds.includes(value)}
                             >
                                 {i18n.t(label)}
                             </MenuItem>
@@ -111,11 +111,11 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({ changeStep }) => {
             </div>
 
             <div className="bottom">
-                {previousSubmissions.length !== 0 && (
+                {previousUploads.length !== 0 && (
                     <div className="previous-list">
                         <h4>{i18n.t("You Previously Submitted:")} </h4>
                         <ul>
-                            {previousSubmissionsBatchIds.map(batchId => (
+                            {previousUploadsBatchIds.map(batchId => (
                                 <li key={batchId}>{`Batch Id ${batchId}`}</li>
                             ))}
                         </ul>
