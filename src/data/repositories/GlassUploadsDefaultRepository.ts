@@ -31,4 +31,24 @@ export class GlassUploadsDefaultRepository implements GlassUploadsRepository {
             }
         });
     }
+
+    setBatchId(id: string, batchId: string): FutureData<void> {
+        return this.dataStoreClient.listCollection<GlassUploads>(DataStoreKeys.UPLOADS).flatMap(uploads => {
+            const upload = uploads.find(el => el.id === id);
+            if (upload) {
+                uploads.splice(uploads.indexOf(upload));
+                upload.batchId = batchId;
+                let newUploads: GlassUploads[] = [];
+
+                if (uploads && uploads.length > 0) {
+                    newUploads = [...uploads, upload];
+                } else {
+                    newUploads = [upload];
+                }
+                return this.dataStoreClient.saveObject(DataStoreKeys.UPLOADS, newUploads);
+            } else {
+                return Future.error("Upload not found");
+            }
+        });
+    }
 }
