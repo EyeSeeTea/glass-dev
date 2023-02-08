@@ -16,7 +16,7 @@ export function useGlassDataSubmissionsByModuleAndOU(
 
     useEffect(() => {
         compositionRoot.glassDataSubmission.getDataSubmissionsByModuleAndOU(moduleId, orgUnit).run(
-            callsByModule => setDataSubmissions({ kind: "loaded", data: callsByModule }),
+            dataSubmissionsByModule => setDataSubmissions({ kind: "loaded", data: dataSubmissionsByModule }),
             error => setDataSubmissions({ kind: "error", message: error })
         );
     }, [setDataSubmissions, compositionRoot.glassDataSubmission, moduleId, orgUnit]);
