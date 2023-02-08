@@ -3,7 +3,7 @@ import { FutureData } from "../entities/Future";
 import { GlassUploads } from "../entities/GlassUploads";
 import { GlassUploadsRepository } from "../repositories/GlassUploadsRepository";
 
-export class GetGlassUploadsByCallUseCase implements UseCase {
+export class GetGlassUploadsByDataSubmissionUseCase implements UseCase {
     constructor(private glassUploadsRepository: GlassUploadsRepository) {}
 
     public execute(dataSubmissionId: string): FutureData<GlassUploads[]> {
