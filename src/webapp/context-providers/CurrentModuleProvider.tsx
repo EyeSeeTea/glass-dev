@@ -7,7 +7,7 @@ export const CurrentModuleContextProvider: React.FC = ({ children }) => {
     const [orgUnit, setOrgUnit] = useState<string>("");
 
     useEffect(() => {
-        const module = getUrlParam("module") || "";
+        const module = getUrlParam("module");
         const orgUnit = getUrlParam("orgUnit") || "";
         setModule(module);
         setOrgUnit(orgUnit);

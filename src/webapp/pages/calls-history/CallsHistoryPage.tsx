@@ -24,7 +24,7 @@ export const CallsHistoryPage: React.FC = React.memo(() => {
 export const CallsHistoryPageContent: React.FC = React.memo(() => {
     const { compositionRoot } = useAppContext();
 
-    const moduleName = getUrlParam("module") || "";
+    const moduleName = getUrlParam("module");
 
     const result = useGlassModule(compositionRoot, moduleName);
 

@@ -5,8 +5,9 @@ import { UploadHistoryItemProps } from "./UploadTable";
 import CloudDownloadIcon from "@material-ui/icons/CloudDownload";
 import ListIcon from "@material-ui/icons/List";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
-import { useHistory, useLocation } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 import dayjs from "dayjs";
+import { getUrlParam } from "../../utils/helpers";
 
 export interface UploadTableBodyProps {
     rows?: UploadHistoryItemProps[];
@@ -14,9 +15,8 @@ export interface UploadTableBodyProps {
 
 export const UploadTableBody: React.FC<UploadTableBodyProps> = ({ rows }) => {
     const history = useHistory();
-    // TODO: remove the next two lines and create a global hook to get current module
-    const location = useLocation().pathname.slice(1);
-    const moduleName = location.substring(location.indexOf("/") + 1);
+
+    const moduleName = getUrlParam("module");
 
     const click = () => {
         history.push(`/data-submission/?module=${moduleName}`);
