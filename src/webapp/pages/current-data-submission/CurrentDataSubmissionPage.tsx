@@ -23,7 +23,7 @@ interface CurrentDataSubmissionPageContentProps {
 export const CurrentDataSubmissionPage: React.FC = React.memo(() => {
     const { compositionRoot } = useAppContext();
 
-    const moduleName = getUrlParam("module") || "";
+    const moduleName = getUrlParam("module");
 
     const result = useGlassModule(compositionRoot, moduleName);
 
@@ -49,7 +49,7 @@ export const CurrentDataSubmissionPageContent: React.FC<CurrentDataSubmissionPag
 
         //set default values till the context changes are integrated,
         //once context is implemented these values will never be null, defaults logic to be decided and implemented in context
-        const [period, setPeriod] = useState(periodVal === null ? new Date().getFullYear() : parseInt(periodVal));
+        const [period, setPeriod] = useState(periodVal === null ? new Date().getFullYear() - 1 : parseInt(periodVal));
         const [orgUnit, setOrgUnit] = useState(orgUnitVal === null ? "" : orgUnitVal);
 
         const { compositionRoot } = useAppContext();

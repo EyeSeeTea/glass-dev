@@ -24,7 +24,7 @@ export const DataSubmissionsHistoryPage: React.FC = React.memo(() => {
 export const DataSubmissionsHistoryPageContent: React.FC = React.memo(() => {
     const { compositionRoot } = useAppContext();
 
-    const moduleName = getUrlParam("module") || "";
+    const moduleName = getUrlParam("module");
 
     const result = useGlassModule(compositionRoot, moduleName);
 
@@ -40,15 +40,15 @@ export const DataSubmissionsHistoryPageContent: React.FC = React.memo(() => {
                     <StyledBreadCrumbs aria-label="breadcrumb" separator="">
                         <Button
                             component={NavLink}
-                            to={`/current-call/?module=${moduleName}`}
+                            to={`/current-data-submission/?module=${moduleName}`}
                             exact={true}
                             onClick={click}
                         >
                             <span>{moduleName}</span>
                         </Button>
                         <ChevronRightIcon />
-                        <Button component={NavLink} to={`/calls-history/?module=${moduleName}`} exact={true}>
-                            <span>{i18n.t("List of Calls")}</span>
+                        <Button component={NavLink} to={`/data-submissions-history/?module=${moduleName}`} exact={true}>
+                            <span>{i18n.t("List of Data Submissions")}</span>
                         </Button>
                     </StyledBreadCrumbs>
                 </PreContent>

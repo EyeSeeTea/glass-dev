@@ -37,9 +37,9 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({ changeStep
             <div className="bottom">
                 <Button
                     variant="contained"
+                    color="primary"
                     endIcon={<ChevronRightIcon />}
                     onClick={() => changeStep(4)}
-                    disableElevation
                 >
                     {i18n.t("Continue")}
                 </Button>

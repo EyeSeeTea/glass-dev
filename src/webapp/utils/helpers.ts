@@ -12,5 +12,5 @@ export const getUrlParam = (param: string) => {
         const queryString = window.location.hash;
         params = new URLSearchParams(queryString.toString().split("?")[1]);
     }
-    return params.get(param);
+    return params.get(param) || "";
 };
