@@ -2,11 +2,12 @@ import React from "react";
 import { Button } from "@material-ui/core";
 import styled from "styled-components";
 import i18n from "@eyeseetea/d2-ui-components/locales";
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink } from "react-router-dom";
+import { getUrlParam } from "../../utils/helpers";
 
 export const CompleteButtons: React.FC = () => {
-    const location = useLocation().pathname.slice(1);
-    const moduleName = location.substring(location.indexOf("/") + 1);
+
+    const moduleName = getUrlParam("module");
 
     return (
         <ContentWrapper>
