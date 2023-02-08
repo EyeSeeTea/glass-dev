@@ -8,47 +8,42 @@ import clsx from "clsx";
 import { MenuLeaf } from "./SidebarNav";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
 import i18n from "@eyeseetea/d2-ui-components/locales";
+import { useGlassModuleContext } from "../../contexts/glass-module-context";
 
 interface SidebarNavProps {
     className?: string;
     groupName?: string;
     menu: MenuLeaf;
-    currentNaVitem: string[];
-    changeCurrentNavItem: (val: string[]) => void;
 }
 
-const SidebarNavMenu: React.FC<SidebarNavProps> = ({ menu, className, groupName, changeCurrentNavItem }) => {
+const SidebarNavMenu: React.FC<SidebarNavProps> = ({ menu, className, groupName }) => {
     const classes = useStyles(menu.level);
     const location = useLocation();
 
-    const isCurrentPage = (val: string) => {
-        if (location.pathname.includes(`data-submission/${groupName}`) && menu.title === "Current Call") {
-            return true;
-        }
-        if (val) {
-            return location.pathname.includes(val);
-        } else {
-            return false;
-        }
+    const { module, setModule } = useGlassModuleContext();
+
+    /* 
+        TODO: determine through context which call is "current call" as of date and only highlight "Current call" if so, 
+        otherwise highlight "uploads history menu"
+    */
+    const isCurrentPage = (menuPath: string) => {
+        return (
+            (menu.title === "Upload History" &&
+                location.pathname.includes("data-submission") &&
+                groupName === module) ||
+            (menuPath.includes(location.pathname) && groupName === module)
+        );
     };
 
     return (
-        <ListItem
-            className={clsx(classes.root, className)}
-            disableGutters
-            style={{ paddingLeft: menu.level * 8 }}
-            onClick={() => {
-                if (groupName) {
-                    changeCurrentNavItem([groupName, menu.title]);
-                }
-            }}
-        >
+        <ListItem className={clsx(classes.root, className)} disableGutters style={{ paddingLeft: menu.level * 8 }}>
             <Button
                 className={classes.button}
                 component={NavLink}
                 to={menu.path}
                 exact={true}
                 data-is-page-current={isCurrentPage(menu.path)}
+                onClick={() => setModule(groupName || "")}
             >
                 <div className={classes.icon}>{menu.icon}</div>
                 <Typography variant="body1" style={{ color: glassColors.greyBlack }}>

@@ -13,29 +13,28 @@ import i18n from "@eyeseetea/d2-ui-components/locales";
 import { CurrentCallContent } from "../../components/current-call/CurrentCallContent";
 import { useStatusCall } from "../../hooks/useStatusCall";
 import { ContentLoader } from "../../components/content-loader/ContentLoader";
-
-interface CurrentCallPageProps {
-    moduleName: string;
-}
+import { getUrlParam } from "../../utils/helpers";
 
 interface CurrentCallPageContentProps {
     moduleId: string;
     moduleName: string;
 }
 
-export const CurrentCallPage: React.FC<CurrentCallPageProps> = React.memo(({ moduleName }) => {
+export const CurrentCallPage: React.FC = React.memo(() => {
     const { compositionRoot } = useAppContext();
+
+    const moduleName = getUrlParam("module");
 
     const result = useGlassModule(compositionRoot, moduleName);
 
     return (
-        <ContentLoader content={result}>
-            <MainLayout>
+        <MainLayout>
+            <ContentLoader content={result}>
                 {result.kind === "loaded" && (
-                    <CurrentCallPageContent moduleName={moduleName} moduleId={result.data.id} />
+                    <CurrentCallPageContent moduleId={result.data.id} moduleName={moduleName} />
                 )}
-            </MainLayout>
-        </ContentLoader>
+            </ContentLoader>
+        </MainLayout>
     );
 });
 
@@ -43,7 +42,7 @@ export const CurrentCallPageContent: React.FC<CurrentCallPageContentProps> = Rea
     const location = useLocation();
     const queryParameters = new URLSearchParams(location.search);
 
-    // TODO : orgUnit and period will not be fetched from queryParameters, it will be fetched from context.
+    // TODO : orgUnit and period will be stored context.
     const periodVal = queryParameters?.get("period");
     const orgUnitVal = queryParameters.get("orgUnit");
 
@@ -67,11 +66,16 @@ export const CurrentCallPageContent: React.FC<CurrentCallPageContentProps> = Rea
                 <PreContent>
                     {/* // TODO: replace this with a global reusable StyledBreadCrumbs component */}
                     <StyledBreadCrumbs aria-label="breadcrumb" separator="">
-                        <Button component={NavLink} to={`/current-call/${moduleName}`} exact={true} onClick={click}>
+                        <Button
+                            component={NavLink}
+                            to={`/current-call/?module=${moduleName}`}
+                            exact={true}
+                            onClick={click}
+                        >
                             <span>{moduleName}</span>
                         </Button>
                         <ChevronRightIcon />
-                        <Button component={NavLink} to={`/current-call/${moduleName}`} exact={true}>
+                        <Button component={NavLink} to={`/current-call/?module=${moduleName}`} exact={true}>
                             <span>{i18n.t(`${period} Call`)}</span>
                         </Button>
                     </StyledBreadCrumbs>
