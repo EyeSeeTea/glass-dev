@@ -28,7 +28,9 @@ const SidebarNavMenu: React.FC<SidebarNavProps> = ({ menu, className, groupName 
     */
     const isCurrentPage = (menuPath: string) => {
         return (
-            (menu.title === "Upload History" && location.pathname.includes("data-submission") && groupName === module) ||
+            (menu.title === "Upload History" &&
+                location.pathname.includes("data-submission") &&
+                groupName === module) ||
             (menuPath.includes(location.pathname) && groupName === module)
         );
     };
