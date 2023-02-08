@@ -199,7 +199,7 @@ msgstr ""
 msgid "Current Status"
 msgstr ""
 
-msgid "Call Submission status has errors..."
+msgid "Data Submission status has errors..."
 msgstr ""
 
 msgid "Blocking Errors"
@@ -376,10 +376,10 @@ msgstr ""
 msgid "Output Line Nb"
 msgstr ""
 
-msgid "List of Calls"
+msgid "List of Data Submissions"
 msgstr ""
 
-msgid "All Calls"
+msgid "All Data Submissions"
 msgstr ""
 
 msgid "Country Information"
@@ -388,7 +388,7 @@ msgstr ""
 msgid "Yearly data upload"
 msgstr ""
 
-msgid "2022 Call"
+msgid "2022 Data Submission"
 msgstr ""
 
 msgid "Hello {{name}}"

@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2023-02-02T11:18:00.537Z\n"
-"PO-Revision-Date: 2023-02-02T11:18:00.537Z\n"
+"POT-Creation-Date: 2023-02-08T10:35:03.067Z\n"
+"PO-Revision-Date: 2023-02-08T10:35:03.067Z\n"
 
 msgid "Spain"
 msgstr ""
@@ -23,18 +23,6 @@ msgstr ""
 msgid "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
 msgstr ""
 
-msgid "Year"
-msgstr ""
-
-msgid "Status"
-msgstr ""
-
-msgid " "
-msgstr ""
-
-msgid "status"
-msgstr ""
-
 msgid "Add"
 msgstr ""
 
@@ -45,6 +33,9 @@ msgid "WHO Region"
 msgstr ""
 
 msgid "Country"
+msgstr ""
+
+msgid "Year"
 msgstr ""
 
 msgid "Enrolment status"
@@ -86,28 +77,28 @@ msgstr ""
 msgid "Request Dataset update"
 msgstr ""
 
-msgid "Overview"
-msgstr ""
-
-msgid "List of Datasets"
-msgstr ""
-
-msgid "Questionnaires"
-msgstr ""
-
-msgid "Validation"
-msgstr ""
-
-msgid "Advanced"
-msgstr ""
-
-msgid "No Data uploaded..."
-msgstr ""
-
 msgid "Correct Uploads"
 msgstr ""
 
 msgid "Uploads with errors, or discarded"
+msgstr ""
+
+msgid "Display full status history >"
+msgstr ""
+
+msgid "Go to questionnaires"
+msgstr ""
+
+msgid "Send to WHO for revision"
+msgstr ""
+
+msgid "Upload dataset"
+msgstr ""
+
+msgid "Current Status"
+msgstr ""
+
+msgid "Data Submission status has errors..."
 msgstr ""
 
 msgid "Questionnaire 1"
@@ -152,6 +143,27 @@ msgstr ""
 msgid "Batch ID"
 msgstr ""
 
+msgid "Status"
+msgstr ""
+
+msgid "Overview"
+msgstr ""
+
+msgid "List of Datasets"
+msgstr ""
+
+msgid "Questionnaires"
+msgstr ""
+
+msgid "Validation"
+msgstr ""
+
+msgid "Advanced"
+msgstr ""
+
+msgid "No Data uploaded..."
+msgstr ""
+
 msgid "Validation Alpha"
 msgstr ""
 
@@ -185,22 +197,37 @@ msgstr ""
 msgid "09 - 12 - 2021 VALIDATION CORRECT"
 msgstr ""
 
-msgid "Display full status history >"
+msgid " "
 msgstr ""
 
-msgid "Go to questionnaires"
+msgid "status"
 msgstr ""
 
-msgid "Send to WHO for revision"
+msgid "News from GLASS"
 msgstr ""
 
-msgid "Upload dataset"
+msgid "No Data loaded..."
 msgstr ""
 
-msgid "Current Status"
+msgid "Your Notifications"
 msgstr ""
 
-msgid "Call Submission status has errors..."
+msgid "Log Out"
+msgstr ""
+
+msgid "OPEN ALL YEAR"
+msgstr ""
+
+msgid "GO"
+msgstr ""
+
+msgid "Back"
+msgstr ""
+
+msgid "Help"
+msgstr ""
+
+msgid "HOME"
 msgstr ""
 
 msgid "Blocking Errors"
@@ -260,7 +287,7 @@ msgstr ""
 msgid "Filter by sample type"
 msgstr ""
 
-msgid "Compare with data from previous submissions"
+msgid "Compare with data from previous uploads"
 msgstr ""
 
 msgid "Charts"
@@ -320,33 +347,6 @@ msgstr ""
 msgid "not required"
 msgstr ""
 
-msgid "News from GLASS"
-msgstr ""
-
-msgid "No Data loaded..."
-msgstr ""
-
-msgid "Your Notifications"
-msgstr ""
-
-msgid "Log Out"
-msgstr ""
-
-msgid "OPEN ALL YEAR"
-msgstr ""
-
-msgid "GO"
-msgstr ""
-
-msgid "Back"
-msgstr ""
-
-msgid "Help"
-msgstr ""
-
-msgid "HOME"
-msgstr ""
-
 msgid "Filters"
 msgstr ""
 
@@ -377,25 +377,25 @@ msgstr ""
 msgid "Output Line Nb"
 msgstr ""
 
-msgid "List of Calls"
-msgstr ""
-
-msgid "All Calls"
-msgstr ""
-
 msgid "Country Information"
 msgstr ""
 
 msgid "Yearly data upload"
 msgstr ""
 
-msgid "2022 Call"
+msgid "List of Calls"
+msgstr ""
+
+msgid "All Data Submissions"
 msgstr ""
 
 msgid "Hello {{name}}"
 msgstr ""
 
 msgid "Detail page"
+msgstr ""
+
+msgid "2022 Data Submission"
 msgstr ""
 
 msgid "Upload History"

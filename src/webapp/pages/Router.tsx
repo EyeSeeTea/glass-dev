@@ -1,47 +1,22 @@
 import React from "react";
 import { HashRouter, Route, Switch } from "react-router-dom";
-import { CallsHistoryPage } from "./calls-history/CallsHistoryPage";
+import { DataSubmissionsHistoryPage } from "./data-submissions-history/DataSubmissionsHistoryPage";
 import { CountryInformationPage } from "./country-information/CountryInformationPage";
-import { CurrentCallPage } from "./current-call/CurrentCallPage";
-import { DataSubmissionPage } from "./data-submission/DataSubmissionPage";
-import { FakeLandingPage } from "./landing/FakeLandingPage";
+import { CurrentDataSubmissionPage } from "./current-data-submission/CurrentDataSubmissionPage";
+import { UploadPage } from "./upload/UploadPage";
+import { LandingPage } from "./landing/LandingPage";
 import { UploadHistoryPage } from "./upload-history/UploadHistoryPage";
 
 export const Router: React.FC = React.memo(() => {
     return (
         <HashRouter>
             <Switch>
-                {/* <Route
-                    path="/for/:name?"
-                    render={({ match }) => <ExamplePage name={match.params.name ?? "Stranger"} />}
-                />
-
-          
-                <Route render={() => <LandingPage />} /> */}
-
-                {/* Default route */}
-                <Route
-                    path="/current-call/:module"
-                    render={({ match }) => <CurrentCallPage moduleName={match.params.module} />}
-                />
-                <Route
-                    path="/data-submission/:module"
-                    render={({ match }) => <DataSubmissionPage moduleName={match.params.module} />}
-                />
-                <Route
-                    path="/calls-history/:module"
-                    render={({ match }) => <CallsHistoryPage moduleName={match.params.module} />}
-                />
-                <Route
-                    path="/upload-history/:module"
-                    render={({ match }) => <UploadHistoryPage moduleName={match.params.module} />}
-                />
-                <Route
-                    path="/country-information/:module"
-                    render={({ match }) => <CountryInformationPage moduleName={match.params.module} />}
-                />
-
-                <Route render={() => <FakeLandingPage />} />
+                <Route path="/data-submissions-history/" render={() => <DataSubmissionsHistoryPage />} />
+                <Route path="/current-data-submission/" render={() => <CurrentDataSubmissionPage />} />
+                <Route path="/upload/" render={() => <UploadPage />} />
+                <Route path="/upload-history" render={() => <UploadHistoryPage />} />
+                <Route path="/country-information" render={() => <CountryInformationPage />} />
+                <Route render={() => <LandingPage />} />
             </Switch>
         </HashRouter>
     );

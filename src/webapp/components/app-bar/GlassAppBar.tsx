@@ -29,6 +29,9 @@ const useStyles = makeStyles(theme => ({
         flexGrow: 1,
         alignSelf: "flex-end",
     },
+    isDark: {
+        background: "black",
+    },
 }));
 
 export const GlassAppBar: React.FC = () => {
@@ -48,7 +51,7 @@ export const GlassAppBar: React.FC = () => {
     return (
         <div className={classes.root}>
             <AppBar position="static">
-                <Toolbar className={classes.toolbar}>
+                <Toolbar className={`${classes.toolbar}`}>
                     <IconButton edge="start" className={classes.menuButton} color="primary" aria-label="open drawer">
                         <MenuIcon />
                     </IconButton>

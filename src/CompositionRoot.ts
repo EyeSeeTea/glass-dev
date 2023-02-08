@@ -1,23 +1,23 @@
 import { DataStoreClient } from "./data/data-store/DataStoreClient";
 import { Instance } from "./data/entities/Instance";
-import { GlassCallDefaultRepository } from "./data/repositories/GlassCallDefaultRepository";
+import { GlassDataSubmissionsDefaultRepository } from "./data/repositories/GlassDataSubmissionDefaultRepository";
 import { GlassModuleDefaultRepository } from "./data/repositories/GlassModuleDefaultRepository";
 import { GlassNewsDefaultRepository } from "./data/repositories/GlassNewsDefaultRepository";
-import { GlassSubmissionsDefaultRepository } from "./data/repositories/GlassSubmissionsDefaultRepository";
+import { GlassUploadsDefaultRepository } from "./data/repositories/GlassUploadsDefaultRepository";
 import { GlassDocumentsDefaultRepository } from "./data/repositories/GlassDocumentsDefaultRepository";
 import { InstanceDefaultRepository } from "./data/repositories/InstanceDefaultRepository";
 import { GetCurrentUserUseCase } from "./domain/usecases/GetCurrentUserUseCase";
-import { GetSpecificCallUseCase } from "./domain/usecases/GetSpecificCallUseCase";
+import { GetSpecificDataSubmissionUseCase } from "./domain/usecases/GetSpecificDataSubmissionUseCase";
 import { GetGlassModuleByNameUseCase } from "./domain/usecases/GetGlassModuleByNameUseCase";
 import { GetGlassModulesUseCase } from "./domain/usecases/GetGlassModulesUseCase";
 import { GetGlassNewsUseCase } from "./domain/usecases/GetGlassNewsUseCase";
-import { GetGlassSubmissionsUseCase } from "./domain/usecases/GetGlassSubmissionsUseCase";
-import { GetGlassDocumentsUseCase } from "./domain/usecases/GetGlassDocumentsUseCase";
+import { GetGlassUploadsUseCase } from "./domain/usecases/GetGlassUploadsUseCase";
 import { GetInstanceVersionUseCase } from "./domain/usecases/GetInstanceVersionUseCase";
 import { ValidateGlassModulesUseCase } from "./domain/usecases/ValidateGlassModulesUseCase";
 import { ValidateGlassNewsUseCase } from "./domain/usecases/ValidateGlassNewsUseCase";
-import { GetCallsByModuleAndOUUseCase } from "./domain/usecases/GetCallsByModuleAndOUUseCase";
-import { ValidateGlassSubmissionsUseCase } from "./domain/usecases/ValidateGlassSubmissionsUseCase";
+import { ValidateGlassUploadsUseCase } from "./domain/usecases/ValidateGlassUploadsUseCase";
+import { GetDataSubmissionsByModuleAndOUUseCase } from "./domain/usecases/GetDataSubmissionsByModuleAndOUUseCase";
+import { GetGlassDocumentsUseCase } from "./domain/usecases/GetGlassDocumentsUseCase";
 import { ValidateGlassDocumentsUseCase } from "./domain/usecases/ValidateGlassDocumentsUseCase";
 import { UploadDocumentUseCase } from "./domain/usecases/UploadDocumentUseCase";
 import { SetSubmissionStatusUseCase } from "./domain/usecases/SetSubmissionStatusUseCase";
@@ -28,8 +28,8 @@ export function getCompositionRoot(instance: Instance) {
     const instanceRepository = new InstanceDefaultRepository(instance);
     const glassModuleRepository = new GlassModuleDefaultRepository(dataStoreClient);
     const glassNewsRepository = new GlassNewsDefaultRepository(dataStoreClient);
-    const glassCallRepository = new GlassCallDefaultRepository(dataStoreClient);
-    const glassSubmissionsRepository = new GlassSubmissionsDefaultRepository(dataStoreClient);
+    const glassDataSubmissionRepository = new GlassDataSubmissionsDefaultRepository(dataStoreClient);
+    const glassUploadsRepository = new GlassUploadsDefaultRepository(dataStoreClient);
     const glassDocumentsRepository = new GlassDocumentsDefaultRepository(dataStoreClient, instance);
 
     return {
@@ -47,20 +47,20 @@ export function getCompositionRoot(instance: Instance) {
             validate: new ValidateGlassNewsUseCase(glassNewsRepository),
         }),
 
-        glassCall: getExecute({
-            getSpecificCall: new GetSpecificCallUseCase(glassCallRepository),
-            getCallsByModuleAndOU: new GetCallsByModuleAndOUUseCase(glassCallRepository),
+        glassDataSubmission: getExecute({
+            getSpecificDataSubmission: new GetSpecificDataSubmissionUseCase(glassDataSubmissionRepository),
+            getDataSubmissionsByModuleAndOU: new GetDataSubmissionsByModuleAndOUUseCase(glassDataSubmissionRepository),
         }),
-        glassSubmissions: getExecute({
-            getAll: new GetGlassSubmissionsUseCase(glassSubmissionsRepository),
-            validate: new ValidateGlassSubmissionsUseCase(glassSubmissionsRepository),
+        glassUploads: getExecute({
+            getAll: new GetGlassUploadsUseCase(glassUploadsRepository),
+            validate: new ValidateGlassUploadsUseCase(glassUploadsRepository),
             setStatus: new SetSubmissionStatusUseCase(glassSubmissionsRepository),
             getByCall: new GetGlassSubmissionsByCallUseCase(glassSubmissionsRepository),
         }),
         glassDocuments: getExecute({
             getAll: new GetGlassDocumentsUseCase(glassDocumentsRepository),
             validate: new ValidateGlassDocumentsUseCase(glassDocumentsRepository),
-            upload: new UploadDocumentUseCase(glassDocumentsRepository, glassSubmissionsRepository),
+            upload: new UploadDocumentUseCase(glassDocumentsRepository, glassUploadsRepository),
         }),
     };
 }

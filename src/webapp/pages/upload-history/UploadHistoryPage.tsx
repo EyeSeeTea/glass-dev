@@ -7,40 +7,37 @@ import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import { NavLink } from "react-router-dom";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { UploadHistoryContent } from "../../components/upload-history/UploadHistoryContent";
+import { getUrlParam } from "../../utils/helpers";
 
-interface UploadHistoryPageProps {
-    moduleName: string;
-}
+export const UploadHistoryPage: React.FC = React.memo(() => {
+    const moduleName = getUrlParam("module");
 
-export const UploadHistoryPage: React.FC<UploadHistoryPageProps> = React.memo(({ moduleName }) => {
-    return (
-        <MainLayout>
-            <UploadHistoryPageContent moduleName={moduleName} />
-        </MainLayout>
-    );
-});
-
-export const UploadHistoryPageContent: React.FC<UploadHistoryPageProps> = React.memo(({ moduleName }) => {
-    const handleClick = (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
+    const click = (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
         event.preventDefault();
     };
-
     return (
-        <ContentWrapper>
-            <PreContent>
-                {/* // TODO: replace this with a global reusable StyledBreadCrumbs component */}
-                <StyledBreadCrumbs aria-label="breadcrumb" separator="">
-                    <Button component={NavLink} to={`/current-call/${moduleName}`} exact={true} onClick={handleClick}>
-                        <span>{moduleName} asdd</span>
-                    </Button>
-                    <ChevronRightIcon />
-                    <Button component={NavLink} to={`/upload-history/${moduleName}`} exact={true}>
-                        <span>{i18n.t("Upload History")}</span>
-                    </Button>
-                </StyledBreadCrumbs>
-            </PreContent>
-            <UploadHistoryContent />
-        </ContentWrapper>
+        <MainLayout>
+            <ContentWrapper>
+                <PreContent>
+                    {/* // TODO: replace this with a global reusable StyledBreadCrumbs component */}
+                    <StyledBreadCrumbs aria-label="breadcrumb" separator="">
+                        <Button
+                            component={NavLink}
+                            to={`/current-data-submission/?module=${moduleName}`}
+                            exact={true}
+                            onClick={click}
+                        >
+                            <span>{moduleName}</span>
+                        </Button>
+                        <ChevronRightIcon />
+                        <Button component={NavLink} to={`/upload-history/?module=${moduleName}`} exact={true}>
+                            <span>{i18n.t("Upload History")}</span>
+                        </Button>
+                    </StyledBreadCrumbs>
+                </PreContent>
+                <UploadHistoryContent />
+            </ContentWrapper>
+        </MainLayout>
     );
 });
 
