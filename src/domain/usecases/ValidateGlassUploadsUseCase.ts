@@ -2,33 +2,31 @@ import { UseCase } from "../../CompositionRoot";
 import { Future, FutureData } from "../entities/Future";
 import { GlassUploadsRepository } from "../repositories/GlassUploadsRepository";
 
-const glassUploads = [
-    {
-        id: "4663764e-9ca6-4a68-ac49-e0605482384c",
-        module: "AVnpk4xiXGG",
-        batchId: "Data set 1",
-        countryCode: "DZA",
-        fileId: "",
-        fileName: "DZA2010RIS.txt",
-        fileType: "RIS",
-        inputLineNb: 250,
-        outputLineNb: 100,
-        period: "2022Q1",
-        specimens: ["Blood", "Stool"],
-        status: "Done",
-        uploadDate: new Date("2021-01-10T00:00:00.000Z"),
-        dataSubmission: "",
-    },
-];
+const submission = {
+    id: "ACe2e4xiXG3",
+    batchId: "Dataset 1",
+    dataSubmission: "ACndiso120S",
+    countryCode: "",
+    fileId: "",
+    fileName: "test.ris",
+    fileType: "RIS",
+    inputLineNb: 0,
+    outputLineNb: 0,
+    module: "AVnpk4xiXGG",
+    period: "",
+    specimens: [],
+    status: "uploaded",
+    uploadDate: new Date().toISOString(),
+};
 
 export class ValidateGlassUploadsUseCase implements UseCase {
-    constructor(private glassModuleRepository: GlassUploadsRepository) {}
+    constructor(private glassUploadsRepository: GlassUploadsRepository) {}
 
     public execute(): FutureData<void> {
-        return this.glassModuleRepository
+        return this.glassUploadsRepository
             .getAll()
             .flatMap(data =>
-                data.length === 0 ? this.glassModuleRepository.save(glassUploads) : Future.success(undefined)
+                data.length === 0 ? this.glassUploadsRepository.save(submission) : Future.success(undefined)
             );
     }
 }

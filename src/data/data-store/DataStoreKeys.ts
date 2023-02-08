@@ -3,4 +3,5 @@ export const DataStoreKeys = {
     NEWS: "news",
     DATA_SUBMISSIONS: "data-submissions",
     UPLOADS: "uploads",
+    DOCUMENTS: "documents",
 };

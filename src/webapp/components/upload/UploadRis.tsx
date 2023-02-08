@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { Button } from "@material-ui/core";
+import { Button, CircularProgress } from "@material-ui/core";
 import styled from "styled-components";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import BackupIcon from "@material-ui/icons/Backup";
@@ -8,13 +8,16 @@ import { useSnackbar } from "@eyeseetea/d2-ui-components";
 import { Dropzone, DropzoneRef } from "../dropzone/Dropzone";
 import { FileRejection } from "react-dropzone";
 import { RemoveContainer, StyledRemoveButton } from "./UploadFiles";
-
+import { useAppContext } from "../../contexts/app-context";
 interface UploadRisProps {
     validate: (val: boolean) => void;
 }
 export const UploadRis: React.FC<UploadRisProps> = ({ validate }) => {
+    const { compositionRoot } = useAppContext();
     const snackbar = useSnackbar();
+
     const [risFile, setRisFile] = useState<File | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
     const risFileUploadRef = useRef<DropzoneRef>(null);
 
     const openFileUploadDialog = useCallback(async () => {
@@ -41,25 +44,16 @@ export const UploadRis: React.FC<UploadRisProps> = ({ validate }) => {
             } else {
                 const uploadedRisFile = files[0];
                 if (uploadedRisFile) {
-                    // Create new FormData object and append files
-                    const data = new FormData();
-                    data.append(`file-`, uploadedRisFile, uploadedRisFile.name);
+                    setIsLoading(true);
                     setRisFile(uploadedRisFile);
-
-                    // TEST: Uploading the files using the fetch API to mock bin server
-                    fetch("https://httpbin.org/post", {
-                        method: "POST",
-                        body: data,
-                    })
-                        .then(res => res.json())
-                        .then(data => console.debug(data))
-                        .catch(err => console.debug(err));
+                    await compositionRoot.glassDocuments.upload(uploadedRisFile).toPromise();
+                    setIsLoading(false);
                 } else {
                     snackbar.error(i18n.t("Error in file upload"));
                 }
             }
         },
-        [snackbar]
+        [compositionRoot.glassDocuments, snackbar]
     );
 
     return (
@@ -77,6 +71,7 @@ export const UploadRis: React.FC<UploadRisProps> = ({ validate }) => {
                 >
                     {i18n.t("Select file")}
                 </Button>
+                {isLoading && <CircularProgress size={25} />}
             </Dropzone>
             {risFile && (
                 <RemoveContainer>

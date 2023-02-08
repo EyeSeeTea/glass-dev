@@ -4,6 +4,7 @@ import { GlassDataSubmissionsDefaultRepository } from "./data/repositories/Glass
 import { GlassModuleDefaultRepository } from "./data/repositories/GlassModuleDefaultRepository";
 import { GlassNewsDefaultRepository } from "./data/repositories/GlassNewsDefaultRepository";
 import { GlassUploadsDefaultRepository } from "./data/repositories/GlassUploadsDefaultRepository";
+import { GlassDocumentsDefaultRepository } from "./data/repositories/GlassDocumentsDefaultRepository";
 import { InstanceDefaultRepository } from "./data/repositories/InstanceDefaultRepository";
 import { GetCurrentUserUseCase } from "./domain/usecases/GetCurrentUserUseCase";
 import { GetSpecificDataSubmissionUseCase } from "./domain/usecases/GetSpecificDataSubmissionUseCase";
@@ -16,6 +17,10 @@ import { ValidateGlassModulesUseCase } from "./domain/usecases/ValidateGlassModu
 import { ValidateGlassNewsUseCase } from "./domain/usecases/ValidateGlassNewsUseCase";
 import { ValidateGlassUploadsUseCase } from "./domain/usecases/ValidateGlassUploadsUseCase";
 import { GetDataSubmissionsByModuleAndOUUseCase } from "./domain/usecases/GetDataSubmissionsByModuleAndOUUseCase";
+import { GetGlassDocumentsUseCase } from "./domain/usecases/GetGlassDocumentsUseCase";
+import { ValidateGlassDocumentsUseCase } from "./domain/usecases/ValidateGlassDocumentsUseCase";
+import { UploadDocumentUseCase } from "./domain/usecases/UploadDocumentUseCase";
+
 
 export function getCompositionRoot(instance: Instance) {
     const dataStoreClient = new DataStoreClient(instance);
@@ -24,6 +29,7 @@ export function getCompositionRoot(instance: Instance) {
     const glassNewsRepository = new GlassNewsDefaultRepository(dataStoreClient);
     const glassDataSubmissionRepository = new GlassDataSubmissionsDefaultRepository(dataStoreClient);
     const glassUploadsRepository = new GlassUploadsDefaultRepository(dataStoreClient);
+    const glassDocumentsRepository = new GlassDocumentsDefaultRepository(dataStoreClient, instance);
 
     return {
         instance: getExecute({
@@ -47,6 +53,11 @@ export function getCompositionRoot(instance: Instance) {
         glassUploads: getExecute({
             getAll: new GetGlassUploadsUseCase(glassUploadsRepository),
             validate: new ValidateGlassUploadsUseCase(glassUploadsRepository),
+        }),
+        glassDocuments: getExecute({
+            getAll: new GetGlassDocumentsUseCase(glassDocumentsRepository),
+            validate: new ValidateGlassDocumentsUseCase(glassDocumentsRepository),
+            upload: new UploadDocumentUseCase(glassDocumentsRepository, glassUploadsRepository),
         }),
     };
 }
