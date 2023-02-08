@@ -36,15 +36,10 @@ export class GlassUploadsDefaultRepository implements GlassUploadsRepository {
         return this.dataStoreClient.listCollection<GlassUploads>(DataStoreKeys.UPLOADS).flatMap(uploads => {
             const upload = uploads.find(el => el.id === id);
             if (upload) {
-                uploads.splice(uploads.indexOf(upload));
+                uploads.splice(uploads.indexOf(upload), 1);
                 upload.batchId = batchId;
-                let newUploads: GlassUploads[] = [];
+                const newUploads = [...uploads, upload];
 
-                if (uploads && uploads.length > 0) {
-                    newUploads = [...uploads, upload];
-                } else {
-                    newUploads = [upload];
-                }
                 return this.dataStoreClient.saveObject(DataStoreKeys.UPLOADS, newUploads);
             } else {
                 return Future.error("Upload not found");
