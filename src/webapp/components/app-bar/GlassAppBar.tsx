@@ -54,8 +54,18 @@ export const GlassAppBar: React.FC = () => {
                 changeCurrentOrgUnitAccess(defaultOrgUnit);
                 setOrgUnit(defaultOrgUnit.name);
             }
+        } else if (orgUnit !== currentOrgUnitAccess.name) {
+            //if orgUnit has been changed manually in url
+            setOrgUnit(currentOrgUnitAccess.name);
         }
-    }, [setOrgUnit, currentOrgUnitAccess?.id, currentUser.userOrgUnitsAccess, changeCurrentOrgUnitAccess]);
+    }, [
+        orgUnit,
+        setOrgUnit,
+        currentOrgUnitAccess?.id,
+        currentUser.userOrgUnitsAccess,
+        changeCurrentOrgUnitAccess,
+        currentOrgUnitAccess.name,
+    ]);
 
     const changeOrgUnit = (orgUnit: unknown) => {
         setOrgUnit(orgUnit as string);
