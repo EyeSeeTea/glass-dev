@@ -50,9 +50,9 @@ export const CurrentDataSubmissionPageContent: React.FC<CurrentDataSubmissionPag
         const { currentOrgUnitAccess, changeCurrentOrgUnitAccess } = useCurrentAccessContext();
         const orgUnitQueryParam = queryParameters?.get("orgUnit");
 
-        if (orgUnitQueryParam && orgUnitQueryParam !== currentOrgUnitAccess.name) {
+        if (orgUnitQueryParam && orgUnitQueryParam !== currentOrgUnitAccess.id) {
             //user changed the url to update orgUnit, so update orgUnit access context.
-            const newCurrentOrgUnit = currentUser.userOrgUnitsAccess.find(ou => ou.name === orgUnitQueryParam);
+            const newCurrentOrgUnit = currentUser.userOrgUnitsAccess.find(ou => ou.id === orgUnitQueryParam);
             if (newCurrentOrgUnit) {
                 changeCurrentOrgUnitAccess(newCurrentOrgUnit);
             }
