@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext, useEffect } from "react";
 import AppBar from "@material-ui/core/AppBar";
 import Toolbar from "@material-ui/core/Toolbar";
 import IconButton from "@material-ui/core/IconButton";
@@ -10,6 +10,8 @@ import glassLogo from "../../assets/glass-logo.png";
 import { Box, MenuItem, Select } from "@material-ui/core";
 import styled from "styled-components";
 import i18n from "@eyeseetea/d2-ui-components/locales";
+import { useAppContext } from "../../contexts/app-context";
+import { CurrentAccessContext } from "../../contexts/current-access-context";
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -37,11 +39,28 @@ const useStyles = makeStyles(theme => ({
 export const GlassAppBar: React.FC = () => {
     const classes = useStyles();
 
-    const [country, setCountry] = React.useState(1);
+    const { currentUser } = useAppContext();
+    const { currentOrgUnitAccess, changeCurrentOrgUnitAccess } = useContext(CurrentAccessContext);
     const [action, setAction] = React.useState(1);
 
-    const changeCountry = (event: React.ChangeEvent<{ value: unknown }>) => {
-        setCountry(event.target.value as number);
+    const [orgUnit, setOrgUnit] = React.useState(currentOrgUnitAccess.name);
+
+    useEffect(() => {
+        //If the currentOrgUnitAccess is not yet set, then set it
+        if (currentOrgUnitAccess?.id === "") {
+            //Set the first org unit in list as default
+            const defaultOrgUnit = currentUser.userOrgUnitsAccess?.at(0);
+            if (defaultOrgUnit) {
+                changeCurrentOrgUnitAccess(defaultOrgUnit);
+                setOrgUnit(defaultOrgUnit.name);
+            }
+        }
+    }, [setOrgUnit, currentOrgUnitAccess?.id, currentUser.userOrgUnitsAccess, changeCurrentOrgUnitAccess]);
+
+    const changeOrgUnit = (orgUnit: unknown) => {
+        setOrgUnit(orgUnit as string);
+        const currentOrgUnitAccess = currentUser.userOrgUnitsAccess?.find(ou => ou.name === orgUnit);
+        if (currentOrgUnitAccess) changeCurrentOrgUnitAccess(currentOrgUnitAccess);
     };
 
     const changeAction = (event: React.ChangeEvent<{ value: unknown }>) => {
@@ -66,10 +85,15 @@ export const GlassAppBar: React.FC = () => {
                         <IconButton aria-label="search" color="primary">
                             <LocationIcon />
                         </IconButton>
-                        <Select value={country} disableUnderline onChange={changeCountry}>
-                            <MenuItem value={1}>{i18n.t("Spain")}</MenuItem>
-                            <MenuItem value={2}>{i18n.t("France")}</MenuItem>
-                        </Select>
+                        {currentUser?.userOrgUnitsAccess && (
+                            <Select value={orgUnit} disableUnderline onChange={e => changeOrgUnit(e?.target?.value)}>
+                                {currentUser.userOrgUnitsAccess.map(orgUnit => (
+                                    <MenuItem key={orgUnit.id} value={orgUnit.name}>
+                                        {i18n.t(orgUnit.name)}
+                                    </MenuItem>
+                                ))}
+                            </Select>
+                        )}
                     </SelectContainer>
                     <SelectContainer>
                         <Select value={action} disableUnderline onChange={changeAction}>

@@ -9,7 +9,7 @@ import styled from "styled-components";
 import FolderIcon from "@material-ui/icons/Folder";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 
-import { useGlassModuleContext } from "../../contexts/glass-module-context";
+import { useCurrentAccessContext } from "../../contexts/current-access-context";
 interface SidebarNavProps {
     className?: string;
     groupName: string;
@@ -19,7 +19,7 @@ interface SidebarNavProps {
 const SidebarNavMenuGroup: React.FC<SidebarNavProps> = ({ menu, groupName, className }) => {
     const classes = useStyles(menu.level);
 
-    const { module } = useGlassModuleContext();
+    const { module } = useCurrentAccessContext();
 
     const isCurrent = (name: string) => {
         return module ? module === name : false;

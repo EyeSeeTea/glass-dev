@@ -10,29 +10,34 @@ import { NavLink } from "react-router-dom";
 import { useAppContext } from "../../contexts/app-context";
 import { useGlassModules } from "../../hooks/useGlassModules";
 import { mapModuleToMenu } from "./mapModuleToMenu";
-import { useGlassModuleContext } from "../../contexts/glass-module-context";
+import { useCurrentAccessContext } from "../../contexts/current-access-context";
 
 export const SideBar: React.FC = () => {
     const { compositionRoot } = useAppContext();
 
     const [isLoaded, setIsLoaded] = useState(false);
 
-    const storedMenuData: Menu[] | null = JSON.parse(localStorage.getItem("glassSideBarData") || "false") || null;
+    const localStoredMenu = localStorage.getItem("glassSideBarData");
+    const [storedMenuData, setstoredMenuData] = useState<Menu[] | null>(
+        localStoredMenu !== null ? JSON.parse(localStoredMenu) : null
+    );
 
     const modulesResult = useGlassModules(compositionRoot);
 
-    const { setModule } = useGlassModuleContext();
+    const { setModule } = useCurrentAccessContext();
+    const { currentOrgUnitAccess } = useCurrentAccessContext();
 
     useEffect(() => {
         // Validate localstorage vs datastore
         if (modulesResult.kind === "loaded" && modulesResult.data.length) {
-            const menuData = modulesResult.data.map(mapModuleToMenu);
+            const menuData = modulesResult.data.map(module => mapModuleToMenu(module, currentOrgUnitAccess.id));
             if (!isLoaded || JSON.stringify(menuData) !== JSON.stringify(storedMenuData)) {
                 localStorage.setItem("glassSideBarData", JSON.stringify(menuData));
+                setstoredMenuData(menuData);
             }
             setIsLoaded(true);
         }
-    }, [storedMenuData, modulesResult, isLoaded]);
+    }, [storedMenuData, modulesResult, isLoaded, currentOrgUnitAccess.id]);
 
     return (
         <CustomCard minheight="630px" padding="0 0 100px 0" data-test="test2">
