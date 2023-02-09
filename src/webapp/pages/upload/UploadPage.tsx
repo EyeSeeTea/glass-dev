@@ -9,9 +9,11 @@ import { NavLink } from "react-router-dom";
 import { CustomCard } from "../../components/custom-card/CustomCard";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { getUrlParam } from "../../utils/helpers";
+import { useCurrentAccessContext } from "../../contexts/current-access-context";
 
 export const UploadPage: React.FC = React.memo(() => {
     const moduleName = getUrlParam("module");
+    const { currentOrgUnitAccess } = useCurrentAccessContext();
 
     return (
         <MainLayout>
@@ -21,7 +23,7 @@ export const UploadPage: React.FC = React.memo(() => {
                     <StyledBreadCrumbs aria-label="breadcrumb" separator="">
                         <Button
                             component={NavLink}
-                            to={`/current-data-submission/?module=${moduleName}`}
+                            to={`/current-data-submission/?module=${moduleName}&orgUnit=${currentOrgUnitAccess.id}`}
                             exact={true}
                             onClick={() => null}
                         >
@@ -34,7 +36,7 @@ export const UploadPage: React.FC = React.memo(() => {
                     </StyledBreadCrumbs>
                     <div className="info">
                         <span>{i18n.t("Yearly data upload")}</span>, &nbsp;
-                        <span>Spain</span>
+                        <span>{i18n.t(currentOrgUnitAccess.name)}</span>
                     </div>
                 </PreContent>
                 <CustomCard padding="40px 60px 50px">

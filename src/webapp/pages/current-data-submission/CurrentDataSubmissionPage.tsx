@@ -14,6 +14,7 @@ import { CurrentDataSubmissionContent } from "../../components/current-data-subm
 import { useStatusDataSubmission } from "../../hooks/useStatusDataSubmission";
 import { ContentLoader } from "../../components/content-loader/ContentLoader";
 import { getUrlParam } from "../../utils/helpers";
+import { useCurrentAccessContext } from "../../contexts/current-access-context";
 
 interface CurrentDataSubmissionPageContentProps {
     moduleId: string;
@@ -42,23 +43,31 @@ export const CurrentDataSubmissionPageContent: React.FC<CurrentDataSubmissionPag
     ({ moduleId, moduleName }) => {
         const location = useLocation();
         const queryParameters = new URLSearchParams(location.search);
-
-        // TODO : orgUnit and period will be stored context.
         const periodVal = queryParameters?.get("period");
-        const orgUnitVal = queryParameters.get("orgUnit");
-
-        //set default values till the context changes are integrated,
-        //once context is implemented these values will never be null, defaults logic to be decided and implemented in context
         const [period, setPeriod] = useState(periodVal === null ? new Date().getFullYear() - 1 : parseInt(periodVal));
-        const [orgUnit, setOrgUnit] = useState(orgUnitVal === null ? "" : orgUnitVal);
 
-        const { compositionRoot } = useAppContext();
-        const currentDataSubmissionStatus = useStatusDataSubmission(compositionRoot, moduleId, orgUnit, period);
+        const { compositionRoot, currentUser } = useAppContext();
+        const { currentOrgUnitAccess, changeCurrentOrgUnitAccess } = useCurrentAccessContext();
+        const orgUnitQueryParam = queryParameters?.get("orgUnit");
+
+        if (orgUnitQueryParam && orgUnitQueryParam !== currentOrgUnitAccess.name) {
+            //user changed the url to update orgUnit, so update orgUnit access context.
+            const newCurrentOrgUnit = currentUser.userOrgUnitsAccess.find(ou => ou.name === orgUnitQueryParam);
+            if (newCurrentOrgUnit) {
+                changeCurrentOrgUnitAccess(newCurrentOrgUnit);
+            }
+        }
+
+        const currentDataSubmissionStatus = useStatusDataSubmission(
+            compositionRoot,
+            moduleId,
+            currentOrgUnitAccess.id,
+            period
+        );
 
         const click = (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
             event.preventDefault();
             setPeriod(0); //new period value
-            setOrgUnit("new orgUnit value");
         };
 
         return (
@@ -69,7 +78,7 @@ export const CurrentDataSubmissionPageContent: React.FC<CurrentDataSubmissionPag
                         <StyledBreadCrumbs aria-label="breadcrumb" separator="">
                             <Button
                                 component={NavLink}
-                                to={`/current-data-submission/?module=${moduleName}`}
+                                to={`/current-data-submission/?module=${moduleName}&orgUnit=${currentOrgUnitAccess.id}`}
                                 exact={true}
                                 onClick={click}
                             >
@@ -78,7 +87,7 @@ export const CurrentDataSubmissionPageContent: React.FC<CurrentDataSubmissionPag
                             <ChevronRightIcon />
                             <Button
                                 component={NavLink}
-                                to={`/current-data-submission/?module=${moduleName}`}
+                                to={`/current-data-submission/?module=${moduleName}&orgUnit=${currentOrgUnitAccess.id}`}
                                 exact={true}
                             >
                                 <span>{i18n.t(`${period} Data Submission`)}</span>
@@ -86,7 +95,7 @@ export const CurrentDataSubmissionPageContent: React.FC<CurrentDataSubmissionPag
                         </StyledBreadCrumbs>
                         <div className="info">
                             <span>{i18n.t("Yearly data upload")}</span>, &nbsp;
-                            <span>{i18n.t("Spain")}</span>
+                            <span>{i18n.t(currentOrgUnitAccess.name)}</span>
                         </div>
                     </PreContent>
                     {currentDataSubmissionStatus.kind === "loaded" && (

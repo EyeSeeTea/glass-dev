@@ -5,15 +5,17 @@ import { getCompositionRoot } from "../CompositionRoot";
 import { getMockApi } from "../types/d2-api";
 import { AppContext, AppContextState } from "../webapp/contexts/app-context";
 import { Instance } from "../data/entities/Instance";
-import { User } from "../domain/entities/User";
+import { UserAccessInfo } from "../domain/entities/User";
 
-export function getTestUser(): User {
+export function getTestUser(): UserAccessInfo {
     return {
         id: "xE7jOejl9FI",
         name: "John Traore",
         username: "admin",
         userGroups: [],
         userRoles: [],
+        userOrgUnitsAccess: [],
+        userModulesAccess: [],
     };
 }
 

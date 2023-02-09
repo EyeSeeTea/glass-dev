@@ -8,7 +8,7 @@ import clsx from "clsx";
 import { MenuLeaf } from "./SidebarNav";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
 import i18n from "@eyeseetea/d2-ui-components/locales";
-import { useGlassModuleContext } from "../../contexts/glass-module-context";
+import { useCurrentAccessContext } from "../../contexts/current-access-context";
 
 interface SidebarNavProps {
     className?: string;
@@ -17,10 +17,10 @@ interface SidebarNavProps {
 }
 
 const SidebarNavMenu: React.FC<SidebarNavProps> = ({ menu, className, groupName }) => {
-    const classes = useStyles(menu.level);
+    const classes = useStyles(menu?.level);
     const location = useLocation();
 
-    const { module, setModule } = useGlassModuleContext();
+    const { module, setModule } = useCurrentAccessContext();
 
     /* 
         TODO: determine through context which data submission is "current data submission" as of date and only highlight "Current data submission" if so, 
@@ -34,7 +34,7 @@ const SidebarNavMenu: React.FC<SidebarNavProps> = ({ menu, className, groupName 
     };
 
     return (
-        <ListItem className={clsx(classes.root, className)} disableGutters style={{ paddingLeft: menu.level * 8 }}>
+        <ListItem className={clsx(classes.root, className)} disableGutters style={{ paddingLeft: menu?.level * 8 }}>
             <Button
                 className={classes.button}
                 component={NavLink}

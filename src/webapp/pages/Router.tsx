@@ -6,18 +6,21 @@ import { CurrentDataSubmissionPage } from "./current-data-submission/CurrentData
 import { UploadPage } from "./upload/UploadPage";
 import { LandingPage } from "./landing/LandingPage";
 import { UploadHistoryPage } from "./upload-history/UploadHistoryPage";
+import { UserAccessContextProvider } from "../context-providers/CurrentAccessContextProvider";
 
 export const Router: React.FC = React.memo(() => {
     return (
         <HashRouter>
-            <Switch>
-                <Route path="/data-submissions-history/" render={() => <DataSubmissionsHistoryPage />} />
-                <Route path="/current-data-submission/" render={() => <CurrentDataSubmissionPage />} />
-                <Route path="/upload/" render={() => <UploadPage />} />
-                <Route path="/upload-history" render={() => <UploadHistoryPage />} />
-                <Route path="/country-information" render={() => <CountryInformationPage />} />
-                <Route render={() => <LandingPage />} />
-            </Switch>
+            <UserAccessContextProvider>
+                <Switch>
+                    <Route path="/data-submissions-history/" render={() => <DataSubmissionsHistoryPage />} />
+                    <Route path="/current-data-submission/" render={() => <CurrentDataSubmissionPage />} />
+                    <Route path="/upload/" render={() => <UploadPage />} />
+                    <Route path="/upload-history" render={() => <UploadHistoryPage />} />
+                    <Route path="/country-information" render={() => <CountryInformationPage />} />
+                    <Route render={() => <LandingPage />} />
+                </Switch>
+            </UserAccessContextProvider>
         </HashRouter>
     );
 });

@@ -4,8 +4,9 @@ import { Menu } from "../sidebar-nav/SidebarNav";
 
 export type GlassModulesState = GlassState<Menu[]>;
 
-export function mapModuleToMenu(module: GlassModule): Menu {
+export function mapModuleToMenu(module: GlassModule, orgUnitId: string): Menu {
     const moduleName = module.name;
+
     return {
         kind: "MenuGroup",
         level: 0,
@@ -17,7 +18,7 @@ export function mapModuleToMenu(module: GlassModule): Menu {
                 kind: "MenuLeaf",
                 level: 0,
                 title: "Current Data Submission",
-                path: `/current-data-submission/?module=${moduleName}`,
+                path: `/current-data-submission/?module=${moduleName}&orgUnit=${orgUnitId}`,
             },
             {
                 kind: "MenuLeaf",

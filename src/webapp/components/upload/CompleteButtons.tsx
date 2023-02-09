@@ -4,9 +4,11 @@ import styled from "styled-components";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { NavLink } from "react-router-dom";
 import { getUrlParam } from "../../utils/helpers";
+import { useCurrentAccessContext } from "../../contexts/current-access-context";
 
 export const CompleteButtons: React.FC = () => {
     const moduleName = getUrlParam("module");
+    const { currentOrgUnitAccess } = useCurrentAccessContext();
 
     return (
         <ContentWrapper>
@@ -15,7 +17,7 @@ export const CompleteButtons: React.FC = () => {
                     variant="contained"
                     color="primary"
                     component={NavLink}
-                    to={`/current-data-submission/?module=${moduleName}`}
+                    to={`/current-data-submission/?module=${moduleName}&orgUnit=${currentOrgUnitAccess.id}`}
                     exact={true}
                 >
                     {i18n.t("Back to Module")}

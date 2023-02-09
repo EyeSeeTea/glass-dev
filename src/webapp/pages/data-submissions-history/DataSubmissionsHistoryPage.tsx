@@ -12,6 +12,7 @@ import i18n from "@eyeseetea/d2-ui-components/locales";
 import { DataSubmissionsHistoryContent } from "../../components/data-submissions-history/DataSubmissionsHistoryContent";
 import { ContentLoader } from "../../components/content-loader/ContentLoader";
 import { getUrlParam } from "../../utils/helpers";
+import { useCurrentAccessContext } from "../../contexts/current-access-context";
 
 export const DataSubmissionsHistoryPage: React.FC = React.memo(() => {
     return (
@@ -23,6 +24,7 @@ export const DataSubmissionsHistoryPage: React.FC = React.memo(() => {
 
 export const DataSubmissionsHistoryPageContent: React.FC = React.memo(() => {
     const { compositionRoot } = useAppContext();
+    const { currentOrgUnitAccess } = useCurrentAccessContext();
 
     const moduleName = getUrlParam("module");
 
@@ -40,7 +42,7 @@ export const DataSubmissionsHistoryPageContent: React.FC = React.memo(() => {
                     <StyledBreadCrumbs aria-label="breadcrumb" separator="">
                         <Button
                             component={NavLink}
-                            to={`/current-data-submission/?module=${moduleName}`}
+                            to={`/current-data-submission/?module=${moduleName}&orgUnit=${currentOrgUnitAccess.id}`}
                             exact={true}
                             onClick={click}
                         >
