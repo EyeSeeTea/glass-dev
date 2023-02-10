@@ -2,7 +2,6 @@ import i18n from "@eyeseetea/d2-ui-components/locales";
 import styled from "styled-components";
 import { CustomCard } from "../custom-card/CustomCard";
 
-// TODO: refactor InfoTable content to json object format and parse rows
 export const CountryInformationContent: React.FC = () => {
     return (
         <ContentWrapper>
