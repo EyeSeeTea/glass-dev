@@ -23,6 +23,7 @@ import { UploadDocumentUseCase } from "./domain/usecases/UploadDocumentUseCase";
 import { SetUploadStatusUseCase } from "./domain/usecases/SetUploadStatusUseCase";
 import { GetGlassUploadsByDataSubmissionUseCase } from "./domain/usecases/GetGlassUploadsByDataSubmissionUseCase";
 import { SetUploadBatchIdUseCase } from "./domain/usecases/SetUploadBatchIdUseCase";
+import { DeleteDocumentInfoByUploadIdUseCase } from "./domain/usecases/DeleteDocumentInfoByUploadIdUseCase";
 
 export function getCompositionRoot(instance: Instance) {
     const dataStoreClient = new DataStoreClient(instance);
@@ -63,6 +64,7 @@ export function getCompositionRoot(instance: Instance) {
             getAll: new GetGlassDocumentsUseCase(glassDocumentsRepository),
             validate: new ValidateGlassDocumentsUseCase(glassDocumentsRepository),
             upload: new UploadDocumentUseCase(glassDocumentsRepository, glassUploadsRepository),
+            deleteByUploadId: new DeleteDocumentInfoByUploadIdUseCase(glassDocumentsRepository, glassUploadsRepository),
         }),
     };
 }
