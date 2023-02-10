@@ -24,7 +24,7 @@ export class GlassUploadsDefaultRepository implements GlassUploadsRepository {
         return this.dataStoreClient.listCollection<GlassUploads>(DataStoreKeys.UPLOADS).flatMap(uploads => {
             const upload = uploads?.find(upload => upload.id === id);
             if (upload) {
-                (uploads.find(upload => upload.id === id) as GlassUploads).status = status;
+                upload.status = status;
                 return this.dataStoreClient.saveObject(DataStoreKeys.UPLOADS, uploads);
             } else {
                 return Future.error("Upload does not exist");
@@ -36,13 +36,27 @@ export class GlassUploadsDefaultRepository implements GlassUploadsRepository {
         return this.dataStoreClient.listCollection<GlassUploads>(DataStoreKeys.UPLOADS).flatMap(uploads => {
             const upload = uploads.find(el => el.id === id);
             if (upload) {
-                uploads.splice(uploads.indexOf(upload), 1);
                 upload.batchId = batchId;
-                const newUploads = [...uploads, upload];
-
-                return this.dataStoreClient.saveObject(DataStoreKeys.UPLOADS, newUploads);
+                return this.dataStoreClient.saveObject(DataStoreKeys.UPLOADS, uploads);
             } else {
                 return Future.error("Upload not found");
+            }
+        });
+    }
+
+    resetFileInfo(id: string): FutureData<string> {
+        return this.dataStoreClient.listCollection<GlassUploads>(DataStoreKeys.UPLOADS).flatMap(uploads => {
+            const upload = uploads?.find(upload => upload.id === id);
+            if (upload) {
+                const documentId = upload.fileId;
+                upload.fileId = "";
+                upload.fileName = "";
+                upload.fileType = "";
+                return this.dataStoreClient
+                    .saveObject(DataStoreKeys.UPLOADS, uploads)
+                    .flatMap(() => Future.success(documentId));
+            } else {
+                return Future.error("Upload does not exist");
             }
         });
     }

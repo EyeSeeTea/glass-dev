@@ -43,4 +43,16 @@ export class GlassDocumentsDefaultRepository implements GlassDocumentsRepository
                 .flatMap(() => Future.success(document.id));
         });
     }
+
+    delete(id: string): FutureData<void> {
+        return this.dataStoreClient.listCollection<GlassDocuments>(DataStoreKeys.DOCUMENTS).flatMap(documents => {
+            const document = documents.find(document => document.id === id);
+            if (document) {
+                documents.splice(documents.indexOf(document), 1);
+                return this.dataStoreClient.saveObject(DataStoreKeys.DOCUMENTS, documents);
+            } else {
+                return Future.error("Document could not be found");
+            }
+        });
+    }
 }
