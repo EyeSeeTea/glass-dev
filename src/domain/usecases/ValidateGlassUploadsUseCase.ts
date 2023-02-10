@@ -15,7 +15,7 @@ const submission = {
     module: "AVnpk4xiXGG",
     period: "",
     specimens: [],
-    status: "uploaded",
+    status: "UPLOADED",
     uploadDate: new Date().toISOString(),
 };
 
