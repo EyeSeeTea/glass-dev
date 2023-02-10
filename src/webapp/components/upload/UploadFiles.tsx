@@ -1,61 +1,137 @@
-import React, { useState } from "react";
-import { Button, FormControl, MenuItem, Select } from "@material-ui/core";
+import React, { useEffect, useState } from "react";
+import { Button, FormControl, InputLabel, MenuItem, Select } from "@material-ui/core";
 import styled from "styled-components";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
-import { data as previousUploads } from "./mock-previous-uploads.json";
 import { UploadRis } from "./UploadRis";
 import { UploadSample } from "./UploadSample";
+import { useAppContext } from "../../contexts/app-context";
+import { GlassUploads } from "../../../domain/entities/GlassUploads";
+
 interface UploadFilesProps {
     changeStep: (step: number) => void;
 }
 
+const datasetOptions = [
+    {
+        label: "Dataset 1",
+        value: "1",
+    },
+    {
+        label: "Dataset 2",
+        value: "2",
+    },
+    {
+        label: "Dataset 3",
+        value: "3",
+    },
+    {
+        label: "Dataset 4",
+        value: "4",
+    },
+    {
+        label: "Dataset 5",
+        value: "5",
+    },
+    {
+        label: "Dataset 6",
+        value: "6",
+    },
+];
+
 export const UploadFiles: React.FC<UploadFilesProps> = ({ changeStep }) => {
-    const [batchId, setBatchId] = useState("1");
+    const { compositionRoot } = useAppContext();
+
+    const [batchId, setBatchId] = useState("");
     const [isValidated, setIsValidated] = useState(false);
+    const [isFileValid, setIsFileValid] = useState(false);
+    const [previousUploads, setPreviousGlassUploads] = useState<GlassUploads[]>([]);
+    const [previousUploadsBatchIds, setPreviousUploadsBatchIds] = useState<string[]>([]);
 
-    const changeBatchId = (event: React.ChangeEvent<{ value: unknown }>) => {
-        setBatchId(event.target.value as string);
-    };
+    useEffect(() => {
+        const fetchPreviousSubmission = async (): Promise<GlassUploads[]> => {
+            //TODO: Hardcoded dataSubmissionsId to current data submission: replace by dynamic data submission the user is on.
+            return await compositionRoot.glassUploads.getByDataSubmission("THy2NqRXJT2").toPromise();
+        };
 
-    const validate = (val: boolean) => {
-        setIsValidated(val);
+        fetchPreviousSubmission().then(uploads => setPreviousGlassUploads(uploads));
+    }, [compositionRoot.glassUploads]);
+
+    useEffect(() => {
+        if (batchId && isFileValid) {
+            setIsValidated(true);
+        } else {
+            setIsValidated(false);
+        }
+    }, [batchId, isFileValid]);
+
+    useEffect(() => {
+        const batchIds = previousUploads.map(uploads => uploads.batchId);
+        setPreviousUploadsBatchIds([...new Set(batchIds)]);
+    }, [previousUploads]);
+
+    const changeBatchId = async (event: React.ChangeEvent<{ value: unknown }>) => {
+        const batchId = event.target.value as string;
+        const risUploadId = localStorage.getItem("risUploadId");
+        const sampleUploadId = localStorage.getItem("sampleUploadId");
+        setBatchId(batchId);
+
+        if (risUploadId) {
+            await compositionRoot.glassUploads.setBatchId({ id: risUploadId, batchId }).toPromise();
+        }
+        if (sampleUploadId) {
+            await compositionRoot.glassUploads.setBatchId({ id: sampleUploadId, batchId }).toPromise();
+        }
     };
 
     return (
         <ContentWrapper>
             <div className="file-fields">
-                <UploadRis validate={validate} />
+                <UploadRis validate={setIsFileValid} batchId={batchId} />
 
-                <UploadSample />
+                <UploadSample batchId={batchId} />
             </div>
 
             <div className="batch-id">
                 <h3>{i18n.t("Batch ID")}</h3>
-                <FormControl variant="outlined">
-                    <Select value={batchId} onChange={changeBatchId}>
-                        <MenuItem value={1}>{i18n.t("Dataset 1")}</MenuItem>
-                        <MenuItem value={2}>{i18n.t("Dataset 2")}</MenuItem>
-                        <MenuItem value={3}>{i18n.t("Dataset 3")}</MenuItem>
-                        <MenuItem value={4}>{i18n.t("Dataset 4")}</MenuItem>
-                        <MenuItem value={5}>{i18n.t("Dataset 5")}</MenuItem>
-                        <MenuItem value={6}>{i18n.t("Dataset 6")}</MenuItem>
+                <FormControl variant="outlined" style={{ minWidth: 180 }}>
+                    <InputLabel id="dataset-label">{i18n.t("Choose a Dataset")}</InputLabel>
+                    <Select
+                        value={batchId}
+                        onChange={changeBatchId}
+                        label={i18n.t("Choose a Dataset")}
+                        labelId="dataset-label"
+                    >
+                        <MenuItem value="">
+                            <em>{i18n.t("None")}</em>
+                        </MenuItem>
+                        {datasetOptions.map(({ label, value }) => (
+                            <MenuItem
+                                key={value}
+                                value={value}
+                                hidden={true}
+                                disabled={!!previousUploadsBatchIds.includes(value)}
+                            >
+                                {i18n.t(label)}
+                            </MenuItem>
+                        ))}
                     </Select>
                 </FormControl>
             </div>
 
             <div className="bottom">
-                <div className="previous-list">
-                    <h4>{i18n.t("You Previously Submitted:")} </h4>
-                    <ul>
-                        {previousUploads.map((item, i) => (
-                            <li key={i}>
-                                {item.name} - {item.id}
-                            </li>
-                        ))}
-                    </ul>
-                </div>
+                {previousUploads.length !== 0 && (
+                    <div className="previous-list">
+                        <h4>{i18n.t("You Previously Submitted:")} </h4>
+                        <ul>
+                            {previousUploadsBatchIds.map(batchId => (
+                                <li key={batchId}>{`Batch Id ${batchId}`}</li>
+                            ))}
+                        </ul>
+                    </div>
+                )}
+
                 <Button
                     variant="contained"
                     color={isValidated ? "primary" : "default"}

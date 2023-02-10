@@ -11,7 +11,13 @@ import { useSnackbar } from "@eyeseetea/d2-ui-components";
 import { RemoveContainer, StyledRemoveButton } from "./UploadFiles";
 import { useAppContext } from "../../contexts/app-context";
 
-export const UploadSample: React.FC = () => {
+interface UploadSampleProps {
+    batchId: string;
+}
+
+const SAMPLE_FILE_TYPE = "SAMPLE";
+
+export const UploadSample: React.FC<UploadSampleProps> = ({ batchId }) => {
     const { compositionRoot } = useAppContext();
     const snackbar = useSnackbar();
 
@@ -37,14 +43,21 @@ export const UploadSample: React.FC = () => {
                 if (uploadedSample) {
                     setIsLoading(true);
                     setSampleFile(uploadedSample);
-                    await compositionRoot.glassDocuments.upload(uploadedSample).toPromise();
+                    const data = {
+                        batchId,
+                        fileType: SAMPLE_FILE_TYPE,
+                    };
+                    const submissionId = await compositionRoot.glassDocuments
+                        .upload({ file: uploadedSample, data })
+                        .toPromise();
+                    localStorage.setItem("sampleUploadId", submissionId);
                     setIsLoading(false);
                 } else {
                     snackbar.error(i18n.t("Error in file upload"));
                 }
             }
         },
-        [compositionRoot.glassDocuments, snackbar]
+        [batchId, compositionRoot.glassDocuments, snackbar]
     );
 
     return (

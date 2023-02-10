@@ -1,10 +1,15 @@
-import React from "react";
+import React, { useEffect } from "react";
 import styled from "styled-components";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { CompleteButtons } from "./CompleteButtons";
 
 export const Completed: React.FC = () => {
+    useEffect(() => {
+        localStorage.removeItem("risUploadId");
+        localStorage.removeItem("sampleUploadId");
+    });
+
     return (
         <ContentWrapper>
             <p className="intro">{i18n.t("Thank! your data for now is uploaded in our system")}</p>
