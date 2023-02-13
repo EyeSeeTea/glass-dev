@@ -67,8 +67,10 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({ changeStep }) => {
     }, [batchId, isFileValid]);
 
     useEffect(() => {
-        const batchIds = previousUploads.map(uploads => uploads.batchId);
-        setPreviousUploadsBatchIds([...new Set(batchIds)]);
+        const uniqueBatchIds = [...new Set(previousUploads.map(uploads => uploads.batchId))];
+        setPreviousUploadsBatchIds(uniqueBatchIds);
+        const firstSelectableBatchId = datasetOptions.find(({ value }) => !uniqueBatchIds.includes(value))?.value;
+        setBatchId(firstSelectableBatchId || "");
     }, [previousUploads]);
 
     const changeBatchId = async (event: React.ChangeEvent<{ value: unknown }>) => {
@@ -103,16 +105,8 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({ changeStep }) => {
                         label={i18n.t("Choose a Dataset")}
                         labelId="dataset-label"
                     >
-                        <MenuItem value="">
-                            <em>{i18n.t("None")}</em>
-                        </MenuItem>
                         {datasetOptions.map(({ label, value }) => (
-                            <MenuItem
-                                key={value}
-                                value={value}
-                                hidden={true}
-                                disabled={!!previousUploadsBatchIds.includes(value)}
-                            >
+                            <MenuItem key={value} value={value} disabled={!!previousUploadsBatchIds.includes(value)}>
                                 {i18n.t(label)}
                             </MenuItem>
                         ))}
