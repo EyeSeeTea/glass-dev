@@ -30,7 +30,7 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({ changeStep
         if (sampleUploadId) {
             await compositionRoot.glassUploads.setStatus({ id: sampleUploadId, status: COMPLETED_STATUS }).toPromise();
         }
-        changeStep(4);
+        changeStep(3);
     };
 
     return (
