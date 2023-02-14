@@ -57,7 +57,7 @@ export const App: React.FC<AppProps> = React.memo(function App({ api, d2, instan
                     <div id="app" className="content">
                         <AppContext.Provider value={appContext}>
                             <CurrentModuleContextProvider>
-                                    <Router />
+                                <Router />
                             </CurrentModuleContextProvider>
                         </AppContext.Provider>
                     </div>
