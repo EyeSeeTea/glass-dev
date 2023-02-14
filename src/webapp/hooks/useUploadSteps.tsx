@@ -8,15 +8,15 @@ export function useUploadSteps() {
         },
         {
             stepNumber: 2,
-            title: "Review Data Summary",
-            placeholder:
-                "Vestibulum vulputate massa eu tellus egestas feugiat. Maecenas non dapibus quam. Nam suscipit imperdiet tincidunt. Nullam nec massa quis nulla dapibus porta. Maecenas blandit fringilla lacinia. Integer a mi vel tortor iaculis egestas dapibus ac mauris. Praesent sodales ultricies scelerisque.",
-        },
-        {
-            stepNumber: 3,
             title: "Consistency Checks",
             placeholder:
                 "Explaining what consistency checks are: Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore",
+        },
+        {
+            stepNumber: 3,
+            title: "Review Data Summary",
+            placeholder:
+                "Vestibulum vulputate massa eu tellus egestas feugiat. Maecenas non dapibus quam. Nam suscipit imperdiet tincidunt. Nullam nec massa quis nulla dapibus porta. Maecenas blandit fringilla lacinia. Integer a mi vel tortor iaculis egestas dapibus ac mauris. Praesent sodales ultricies scelerisque.",
         },
         {
             stepNumber: 4,
