@@ -106,7 +106,7 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({ changeStep }) => {
                         labelId="dataset-label"
                     >
                         {datasetOptions.map(({ label, value }) => (
-                            <MenuItem key={value} value={value} disabled={!!previousUploadsBatchIds.includes(value)}>
+                            <MenuItem key={value} value={value} disabled={previousUploadsBatchIds.includes(value)}>
                                 {i18n.t(label)}
                             </MenuItem>
                         ))}
