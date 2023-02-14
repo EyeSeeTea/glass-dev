@@ -100,7 +100,7 @@ export const ReviewDataSummary: React.FC<ReviewDataSummaryProps> = ({ changeStep
                     color={isValidated ? "primary" : "default"}
                     disabled={isValidated ? false : true}
                     endIcon={<ChevronRightIcon />}
-                    onClick={() => changeStep(3)}
+                    onClick={() => changeStep(4)}
                     disableElevation
                 >
                     {i18n.t("Continue")}
