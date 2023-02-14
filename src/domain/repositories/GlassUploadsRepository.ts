@@ -6,5 +6,5 @@ export interface GlassUploadsRepository {
     save(upload: GlassUploads): FutureData<void>;
     setStatus(id: string, status: string): FutureData<void>;
     setBatchId(id: string, batchId: string): FutureData<void>;
-    resetFileInfo(id: string): FutureData<string>;
+    delete(id: string): FutureData<string>;
 }

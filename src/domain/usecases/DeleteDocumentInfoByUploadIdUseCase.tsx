@@ -10,7 +10,7 @@ export class DeleteDocumentInfoByUploadIdUseCase implements UseCase {
     ) {}
 
     public execute(uploadId: string): FutureData<void> {
-        return this.GlassUploadsRepository.resetFileInfo(uploadId).flatMap(documentId => {
+        return this.GlassUploadsRepository.delete(uploadId).flatMap(documentId => {
             return this.glassDocumentsRepository.delete(documentId);
         });
     }

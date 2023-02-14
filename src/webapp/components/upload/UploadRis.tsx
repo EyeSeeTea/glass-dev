@@ -42,6 +42,7 @@ export const UploadRis: React.FC<UploadRisProps> = ({ validate, batchId }) => {
         if (risUploadId) {
             await compositionRoot.glassDocuments.deleteByUploadId(risUploadId).toPromise();
         }
+        localStorage.removeItem("risUploadId");
         setRisFile(null);
     };
 

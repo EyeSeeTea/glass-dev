@@ -35,6 +35,7 @@ export const UploadSample: React.FC<UploadSampleProps> = ({ batchId }) => {
         if (sampleUploadId) {
             await compositionRoot.glassDocuments.deleteByUploadId(sampleUploadId).toPromise();
         }
+        localStorage.removeItem("sampleUploadId");
         setSampleFile(null);
     };
 
