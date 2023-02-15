@@ -36,8 +36,13 @@ export const UploadRis: React.FC<UploadRisProps> = ({ validate, batchId }) => {
         }
     }, [risFile, validate]);
 
-    const removeFiles = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    const removeFiles = async (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         event.preventDefault();
+        const risUploadId = localStorage.getItem("risUploadId");
+        if (risUploadId) {
+            await compositionRoot.glassDocuments.deleteByUploadId(risUploadId).toPromise();
+        }
+        localStorage.removeItem("risUploadId");
         setRisFile(null);
     };
 
