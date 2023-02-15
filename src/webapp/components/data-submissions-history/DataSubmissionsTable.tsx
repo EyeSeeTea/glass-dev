@@ -16,7 +16,6 @@ export interface DataSubmissionsTableProps {
 export const DataSubmissionsTable: React.FC<DataSubmissionsTableProps> = ({ items }) => {
     const history = useHistory();
 
-    //TO DO : SNeha, test this navigate.
     const handleClick = (period: number) => {
         history.push(`/current-data-submission/?period=${period}`);
     };

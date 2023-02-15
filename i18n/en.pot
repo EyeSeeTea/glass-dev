@@ -5,14 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2023-02-08T10:35:03.067Z\n"
-"PO-Revision-Date: 2023-02-08T10:35:03.067Z\n"
-
-msgid "Spain"
-msgstr ""
-
-msgid "France"
-msgstr ""
+"POT-Creation-Date: 2023-02-15T08:27:18.722Z\n"
+"PO-Revision-Date: 2023-02-15T08:27:18.722Z\n"
 
 msgid "User Profile"
 msgstr ""
@@ -311,22 +305,10 @@ msgstr ""
 msgid "OK"
 msgstr ""
 
-msgid "Dataset 1"
+msgid "Choose a Dataset"
 msgstr ""
 
-msgid "Dataset 2"
-msgstr ""
-
-msgid "Dataset 3"
-msgstr ""
-
-msgid "Dataset 4"
-msgstr ""
-
-msgid "Dataset 5"
-msgstr ""
-
-msgid "Dataset 6"
+msgid "None"
 msgstr ""
 
 msgid "Multiple uploads not allowed, please select one file"
@@ -383,7 +365,7 @@ msgstr ""
 msgid "Yearly data upload"
 msgstr ""
 
-msgid "List of Calls"
+msgid "List of Data Submissions"
 msgstr ""
 
 msgid "All Data Submissions"
