@@ -29,8 +29,13 @@ export const UploadSample: React.FC<UploadSampleProps> = ({ batchId }) => {
         sampleFileUploadRef.current?.openDialog();
     }, [sampleFileUploadRef]);
 
-    const removeFiles = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    const removeFiles = async (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         event.preventDefault();
+        const sampleUploadId = localStorage.getItem("sampleUploadId");
+        if (sampleUploadId) {
+            await compositionRoot.glassDocuments.deleteByUploadId(sampleUploadId).toPromise();
+        }
+        localStorage.removeItem("sampleUploadId");
         setSampleFile(null);
     };
 
