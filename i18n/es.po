@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: i18next-conv\n"
-"POT-Creation-Date: 2023-02-02T11:18:00.537Z\n"
+"POT-Creation-Date: 2023-02-14T13:39:20.127Z\n"
 "PO-Revision-Date: 2018-10-25T09:02:35.143Z\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -23,18 +23,6 @@ msgstr ""
 msgid "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
 msgstr ""
 
-msgid "Year"
-msgstr ""
-
-msgid "Status"
-msgstr ""
-
-msgid " "
-msgstr ""
-
-msgid "status"
-msgstr ""
-
 msgid "Add"
 msgstr "Añadir"
 
@@ -45,6 +33,9 @@ msgid "WHO Region"
 msgstr ""
 
 msgid "Country"
+msgstr ""
+
+msgid "Year"
 msgstr ""
 
 msgid "Enrolment status"
@@ -85,24 +76,6 @@ msgstr ""
 msgid "Request Dataset update"
 msgstr ""
 
-msgid "Overview"
-msgstr ""
-
-msgid "List of Datasets"
-msgstr ""
-
-msgid "Questionnaires"
-msgstr ""
-
-msgid "Validation"
-msgstr ""
-
-msgid "Advanced"
-msgstr ""
-
-msgid "No Data uploaded..."
-msgstr ""
-
 msgid "Correct Uploads"
 msgstr ""
 
@@ -136,6 +109,24 @@ msgstr ""
 msgid "Completed"
 msgstr ""
 
+msgid "Overview"
+msgstr ""
+
+msgid "List of Datasets"
+msgstr ""
+
+msgid "Questionnaires"
+msgstr ""
+
+msgid "Validation"
+msgstr ""
+
+msgid "Advanced"
+msgstr ""
+
+msgid "No Data uploaded..."
+msgstr ""
+
 msgid "Uploaded"
 msgstr ""
 
@@ -149,6 +140,9 @@ msgid "Type"
 msgstr ""
 
 msgid "Batch ID"
+msgstr ""
+
+msgid "Status"
 msgstr ""
 
 msgid "Validation Alpha"
@@ -200,6 +194,39 @@ msgid "Current Status"
 msgstr ""
 
 msgid "Data Submission status has errors..."
+msgstr ""
+
+msgid " "
+msgstr ""
+
+msgid "status"
+msgstr ""
+
+msgid "News from GLASS"
+msgstr ""
+
+msgid "No Data loaded..."
+msgstr ""
+
+msgid "Your Notifications"
+msgstr ""
+
+msgid "Log Out"
+msgstr ""
+
+msgid "OPEN ALL YEAR"
+msgstr ""
+
+msgid "GO"
+msgstr ""
+
+msgid "Back"
+msgstr "Volver"
+
+msgid "Help"
+msgstr "Ayuda"
+
+msgid "HOME"
 msgstr ""
 
 msgid "Blocking Errors"
@@ -259,7 +286,7 @@ msgstr ""
 msgid "Filter by sample type"
 msgstr ""
 
-msgid "Compare with data from previous submissions"
+msgid "Compare with data from previous uploads"
 msgstr ""
 
 msgid "Charts"
@@ -283,22 +310,7 @@ msgstr ""
 msgid "OK"
 msgstr ""
 
-msgid "Dataset 1"
-msgstr ""
-
-msgid "Dataset 2"
-msgstr ""
-
-msgid "Dataset 3"
-msgstr ""
-
-msgid "Dataset 4"
-msgstr ""
-
-msgid "Dataset 5"
-msgstr ""
-
-msgid "Dataset 6"
+msgid "Choose a Dataset"
 msgstr ""
 
 msgid "Multiple uploads not allowed, please select one file"
@@ -317,33 +329,6 @@ msgid "SAMPLE File"
 msgstr ""
 
 msgid "not required"
-msgstr ""
-
-msgid "News from GLASS"
-msgstr ""
-
-msgid "No Data loaded..."
-msgstr ""
-
-msgid "Your Notifications"
-msgstr ""
-
-msgid "Log Out"
-msgstr ""
-
-msgid "OPEN ALL YEAR"
-msgstr ""
-
-msgid "GO"
-msgstr ""
-
-msgid "Back"
-msgstr "Volver"
-
-msgid "Help"
-msgstr "Ayuda"
-
-msgid "HOME"
 msgstr ""
 
 msgid "Filters"
@@ -376,25 +361,25 @@ msgstr ""
 msgid "Output Line Nb"
 msgstr ""
 
-msgid "List of Data Submissions"
-msgstr ""
-
-msgid "All Data Submissions"
-msgstr ""
-
 msgid "Country Information"
 msgstr ""
 
 msgid "Yearly data upload"
 msgstr ""
 
-msgid "2022 Data Submission"
+msgid "List of Data Submissions"
+msgstr ""
+
+msgid "All Data Submissions"
 msgstr ""
 
 msgid "Hello {{name}}"
 msgstr "Hola {{name}}"
 
 msgid "Detail page"
+msgstr ""
+
+msgid "2022 Data Submission"
 msgstr ""
 
 msgid "Upload History"
