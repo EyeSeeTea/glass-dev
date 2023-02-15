@@ -3,10 +3,10 @@ import styled from "styled-components";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { CompleteButtons } from "./CompleteButtons";
-import { useCurrentAccessContext } from "../../contexts/current-access-context";
+import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context";
 
 export const Completed: React.FC = () => {
-    const { currentOrgUnitAccess } = useCurrentAccessContext();
+    const { currentOrgUnitAccess } = useCurrentOrgUnitContext();
     useEffect(() => {
         localStorage.removeItem("risUploadId");
         localStorage.removeItem("sampleUploadId");

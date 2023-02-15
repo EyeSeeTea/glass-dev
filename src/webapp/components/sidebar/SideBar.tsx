@@ -10,7 +10,8 @@ import { NavLink } from "react-router-dom";
 import { useAppContext } from "../../contexts/app-context";
 import { useGlassModules } from "../../hooks/useGlassModules";
 import { mapModuleToMenu } from "./mapModuleToMenu";
-import { useCurrentAccessContext } from "../../contexts/current-access-context";
+import { defaultModuleContextState, useCurrentModuleContext } from "../../contexts/current-module-context";
+import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context";
 
 export const SideBar: React.FC = () => {
     const { compositionRoot } = useAppContext();
@@ -24,13 +25,13 @@ export const SideBar: React.FC = () => {
 
     const modulesResult = useGlassModules(compositionRoot);
 
-    const { setModule } = useCurrentAccessContext();
-    const { currentOrgUnitAccess } = useCurrentAccessContext();
+    const { changeCurrentModuleAccess } = useCurrentModuleContext();
+    const { currentOrgUnitAccess } = useCurrentOrgUnitContext();
 
     useEffect(() => {
         // Validate localstorage vs datastore
         if (modulesResult.kind === "loaded" && modulesResult.data.length) {
-            const menuData = modulesResult.data.map(module => mapModuleToMenu(module, currentOrgUnitAccess.id));
+            const menuData = modulesResult.data.map(module => mapModuleToMenu(module));
             if (!isLoaded || JSON.stringify(menuData) !== JSON.stringify(storedMenuData)) {
                 localStorage.setItem("glassSideBarData", JSON.stringify(menuData));
                 setstoredMenuData(menuData);
@@ -42,7 +43,13 @@ export const SideBar: React.FC = () => {
     return (
         <CustomCard minheight="630px" padding="0 0 100px 0" data-test="test2">
             <HomeButtonWrapper>
-                <Button className="home-button" component={NavLink} to="/" exact={true} onClick={() => setModule("")}>
+                <Button
+                    className="home-button"
+                    component={NavLink}
+                    to="/"
+                    exact={true}
+                    onClick={() => changeCurrentModuleAccess(defaultModuleContextState.currentModuleAccess)}
+                >
                     <StarGradient className="star-icon" />
                     <Box width={15} />
                     <Typography>{i18n.t("HOME")}</Typography>
