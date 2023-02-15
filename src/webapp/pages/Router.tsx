@@ -6,21 +6,24 @@ import { CurrentDataSubmissionPage } from "./current-data-submission/CurrentData
 import { UploadPage } from "./upload/UploadPage";
 import { LandingPage } from "./landing/LandingPage";
 import { UploadHistoryPage } from "./upload-history/UploadHistoryPage";
-import { UserAccessContextProvider } from "../context-providers/CurrentAccessContextProvider";
+import { CurrentOrgUnitContextProvider } from "../context-providers/CurrentOrgUnitContextProvider";
+import { CurrentModuleContextProvider } from "../context-providers/CurrentModuleContextProvider";
 
 export const Router: React.FC = React.memo(() => {
     return (
         <HashRouter>
-            <UserAccessContextProvider>
-                <Switch>
-                    <Route path="/data-submissions-history/" render={() => <DataSubmissionsHistoryPage />} />
-                    <Route path="/current-data-submission/" render={() => <CurrentDataSubmissionPage />} />
-                    <Route path="/upload/" render={() => <UploadPage />} />
-                    <Route path="/upload-history" render={() => <UploadHistoryPage />} />
-                    <Route path="/country-information" render={() => <CountryInformationPage />} />
-                    <Route render={() => <LandingPage />} />
-                </Switch>
-            </UserAccessContextProvider>
+            <CurrentOrgUnitContextProvider>
+                <CurrentModuleContextProvider>
+                    <Switch>
+                        <Route path="/data-submissions-history/" render={() => <DataSubmissionsHistoryPage />} />
+                        <Route path="/current-data-submission/" render={() => <CurrentDataSubmissionPage />} />
+                        <Route path="/upload/" render={() => <UploadPage />} />
+                        <Route path="/upload-history" render={() => <UploadHistoryPage />} />
+                        <Route path="/country-information" render={() => <CountryInformationPage />} />
+                        <Route render={() => <LandingPage />} />
+                    </Switch>
+                </CurrentModuleContextProvider>
+            </CurrentOrgUnitContextProvider>
         </HashRouter>
     );
 });

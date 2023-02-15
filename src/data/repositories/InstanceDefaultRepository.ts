@@ -51,8 +51,131 @@ export class InstanceDefaultRepository implements InstanceRepository {
             }
         >[]
     ): UserGroupAccess[] => {
-        console.debug(userGroups);
-        return [];
+        return userGroups.map(ug => {
+            switch (ug.name) {
+                case "AMR-EGASP access":
+                case "AMR-EGASP admin":
+                    return {
+                        id: ug.id,
+                        name: ug.name,
+                        moduleName: "EGASP",
+                        moduleId: "CVVp44xiXGJ",
+                        viewAccess: true,
+                        captureAccess: true,
+                    };
+                case "AMR-EGASP data capture":
+                    return {
+                        id: ug.id,
+                        name: ug.name,
+                        moduleName: "EGASP",
+                        moduleId: "CVVp44xiXGJ",
+                        viewAccess: false,
+                        captureAccess: true,
+                    };
+                case "AMR-EGASP data visualizer":
+                    return {
+                        id: ug.id,
+                        name: ug.name,
+                        moduleName: "EGASP",
+                        moduleId: "CVVp44xiXGJ",
+                        viewAccess: true,
+                        captureAccess: false,
+                    };
+                case "AMR-EGASP user management":
+                    return {
+                        id: ug.id,
+                        name: ug.name,
+                        moduleName: "EGASP",
+                        moduleId: "CVVp44xiXGJ",
+                        viewAccess: false,
+                        captureAccess: false,
+                    };
+
+                case "AMR-AMC access":
+                case "AMR-AMC admin":
+                    return {
+                        id: ug.id,
+                        name: ug.name,
+                        moduleName: "AMC",
+                        moduleId: "BVnik5xiXGJ",
+                        viewAccess: true,
+                        captureAccess: true,
+                    };
+                case "AMR-AMC data capture":
+                    return {
+                        id: ug.id,
+                        name: ug.name,
+                        moduleName: "AMC",
+                        moduleId: "BVnik5xiXGJ",
+                        viewAccess: false,
+                        captureAccess: true,
+                    };
+                case "AMR-AMC data visualizer":
+                    return {
+                        id: ug.id,
+                        name: ug.name,
+                        moduleName: "AMC",
+                        moduleId: "BVnik5xiXGJ",
+                        viewAccess: true,
+                        captureAccess: false,
+                    };
+                case "AMR-AMC user management":
+                    return {
+                        id: ug.id,
+                        name: ug.name,
+                        moduleName: "AMC",
+                        moduleId: "BVnik5xiXGJ",
+                        viewAccess: false,
+                        captureAccess: false,
+                    };
+                case "AMR-AMR access":
+                case "AMR-AMR admin":
+                    return {
+                        id: ug.id,
+                        name: ug.name,
+                        moduleName: "AMR",
+                        moduleId: "AVnpk4xiXGG",
+                        viewAccess: true,
+                        captureAccess: true,
+                    };
+                case "AMR-AMR data capture":
+                    return {
+                        id: ug.id,
+                        name: ug.name,
+                        moduleName: "AMR",
+                        moduleId: "AVnpk4xiXGG",
+                        viewAccess: false,
+                        captureAccess: true,
+                    };
+                case "AMR-AMR data visualizer":
+                    return {
+                        id: ug.id,
+                        name: ug.name,
+                        moduleName: "AMR",
+                        moduleId: "AVnpk4xiXGG",
+                        viewAccess: true,
+                        captureAccess: false,
+                    };
+                case "AMR-AMR user management":
+                    return {
+                        id: ug.id,
+                        name: ug.name,
+                        moduleName: "AMR",
+                        moduleId: "AVnpk4xiXGG",
+                        viewAccess: false,
+                        captureAccess: false,
+                    };
+                default:
+                    return {
+                        id: ug.id,
+                        name: ug.name,
+                        moduleName: "",
+                        moduleId: "",
+                        viewAccess: false,
+                        captureAccess: false,
+                    };
+            }
+        });
     };
 
     @cache()

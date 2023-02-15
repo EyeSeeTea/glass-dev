@@ -9,7 +9,7 @@ import styled from "styled-components";
 import FolderIcon from "@material-ui/icons/Folder";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 
-import { useCurrentAccessContext } from "../../contexts/current-access-context";
+import { useCurrentModuleContext } from "../../contexts/current-module-context";
 interface SidebarNavProps {
     className?: string;
     groupName: string;
@@ -19,18 +19,18 @@ interface SidebarNavProps {
 const SidebarNavMenuGroup: React.FC<SidebarNavProps> = ({ menu, groupName, className }) => {
     const classes = useStyles(menu.level);
 
-    const { module } = useCurrentAccessContext();
+    const { currentModuleAccess } = useCurrentModuleContext();
 
     const isCurrent = (name: string) => {
-        return module ? module === name : false;
+        return currentModuleAccess ? currentModuleAccess.moduleName === name : false;
     };
     const [expanded, setExpanded] = React.useState(isCurrent(groupName));
 
     useEffect(() => {
-        if (module === menu.title) {
+        if (currentModuleAccess.moduleName === menu.title) {
             setExpanded(true);
         }
-    }, [menu.title, module]);
+    }, [menu.title, currentModuleAccess.moduleName]);
 
     const toggleExpanded = () => {
         setExpanded(!expanded);

@@ -11,15 +11,14 @@ import { GlassDataSubmission } from "../../../domain/entities/GlassDataSubmissio
 
 export interface DataSubmissionsTableProps {
     items?: GlassDataSubmission[];
-    moduleName: string;
-    orgUnit: string;
 }
 
-export const DataSubmissionsTable: React.FC<DataSubmissionsTableProps> = ({ items, moduleName, orgUnit }) => {
+export const DataSubmissionsTable: React.FC<DataSubmissionsTableProps> = ({ items }) => {
     const history = useHistory();
 
+    //TO DO : SNeha, test this navigate.
     const handleClick = (period: number) => {
-        history.push(`/current-data-submission/?module=${moduleName}&period=${period}&orgUnit=${orgUnit}`);
+        history.push(`/current-data-submission/?period=${period}`);
     };
     return (
         <ContentWrapper>

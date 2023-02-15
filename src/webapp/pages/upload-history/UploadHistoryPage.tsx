@@ -7,12 +7,10 @@ import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import { NavLink } from "react-router-dom";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { UploadHistoryContent } from "../../components/upload-history/UploadHistoryContent";
-import { getUrlParam } from "../../utils/helpers";
-import { useCurrentAccessContext } from "../../contexts/current-access-context";
+import { useCurrentModuleContext } from "../../contexts/current-module-context";
 
 export const UploadHistoryPage: React.FC = React.memo(() => {
-    const moduleName = getUrlParam("module");
-    const { currentOrgUnitAccess } = useCurrentAccessContext();
+    const { currentModuleAccess } = useCurrentModuleContext();
 
     const click = (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
         event.preventDefault();
@@ -23,16 +21,11 @@ export const UploadHistoryPage: React.FC = React.memo(() => {
                 <PreContent>
                     {/* // TODO: replace this with a global reusable StyledBreadCrumbs component */}
                     <StyledBreadCrumbs aria-label="breadcrumb" separator="">
-                        <Button
-                            component={NavLink}
-                            to={`/current-data-submission/?module=${moduleName}&orgUnit=${currentOrgUnitAccess.id}`}
-                            exact={true}
-                            onClick={click}
-                        >
-                            <span>{moduleName}</span>
+                        <Button component={NavLink} to={`/current-data-submission`} exact={true} onClick={click}>
+                            <span>{currentModuleAccess.moduleName}</span>
                         </Button>
                         <ChevronRightIcon />
-                        <Button component={NavLink} to={`/upload-history/?module=${moduleName}`} exact={true}>
+                        <Button component={NavLink} to={`/upload-history`} exact={true}>
                             <span>{i18n.t("Upload History")}</span>
                         </Button>
                     </StyledBreadCrumbs>

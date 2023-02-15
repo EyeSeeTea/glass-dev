@@ -7,7 +7,6 @@ import ListIcon from "@material-ui/icons/List";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
 import { useHistory } from "react-router-dom";
 import dayjs from "dayjs";
-import { getUrlParam } from "../../utils/helpers";
 
 export interface UploadTableBodyProps {
     rows?: UploadHistoryItemProps[];
@@ -16,10 +15,8 @@ export interface UploadTableBodyProps {
 export const UploadTableBody: React.FC<UploadTableBodyProps> = ({ rows }) => {
     const history = useHistory();
 
-    const moduleName = getUrlParam("module");
-
     const click = () => {
-        history.push(`/upload/?module=${moduleName}`);
+        history.push(`/upload`);
     };
 
     const download = (_url: string) => {

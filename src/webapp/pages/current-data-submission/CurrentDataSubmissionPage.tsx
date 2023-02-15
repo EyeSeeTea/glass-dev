@@ -4,7 +4,6 @@ import React, { useState } from "react";
 import styled from "styled-components";
 import { MainLayout } from "../../components/main-layout/MainLayout";
 import { useAppContext } from "../../contexts/app-context";
-import { useGlassModule } from "../../hooks/useGlassModule";
 import { glassColors, palette } from "../app/themes/dhis2.theme";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import { NavLink, useLocation } from "react-router-dom";
@@ -13,8 +12,9 @@ import i18n from "@eyeseetea/d2-ui-components/locales";
 import { CurrentDataSubmissionContent } from "../../components/current-data-submission/CurrentDataSubmissionContent";
 import { useStatusDataSubmission } from "../../hooks/useStatusDataSubmission";
 import { ContentLoader } from "../../components/content-loader/ContentLoader";
-import { getUrlParam } from "../../utils/helpers";
-import { useCurrentAccessContext } from "../../contexts/current-access-context";
+
+import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context";
+import { useCurrentModuleContext } from "../../contexts/current-module-context";
 
 interface CurrentDataSubmissionPageContentProps {
     moduleId: string;
@@ -22,19 +22,14 @@ interface CurrentDataSubmissionPageContentProps {
 }
 
 export const CurrentDataSubmissionPage: React.FC = React.memo(() => {
-    const { compositionRoot } = useAppContext();
-
-    const moduleName = getUrlParam("module");
-
-    const result = useGlassModule(compositionRoot, moduleName);
+    const { currentModuleAccess } = useCurrentModuleContext();
 
     return (
         <MainLayout>
-            <ContentLoader content={result}>
-                {result.kind === "loaded" && (
-                    <CurrentDataSubmissionPageContent moduleId={result.data.id} moduleName={moduleName} />
-                )}
-            </ContentLoader>
+            <CurrentDataSubmissionPageContent
+                moduleId={currentModuleAccess.moduleId}
+                moduleName={currentModuleAccess.moduleName}
+            />
         </MainLayout>
     );
 });
@@ -46,17 +41,8 @@ export const CurrentDataSubmissionPageContent: React.FC<CurrentDataSubmissionPag
         const periodVal = queryParameters?.get("period");
         const [period, setPeriod] = useState(periodVal === null ? new Date().getFullYear() - 1 : parseInt(periodVal));
 
-        const { compositionRoot, currentUser } = useAppContext();
-        const { currentOrgUnitAccess, changeCurrentOrgUnitAccess } = useCurrentAccessContext();
-        const orgUnitQueryParam = queryParameters?.get("orgUnit");
-
-        if (orgUnitQueryParam && orgUnitQueryParam !== currentOrgUnitAccess.id) {
-            //user changed the url to update orgUnit, so update orgUnit access context.
-            const newCurrentOrgUnit = currentUser.userOrgUnitsAccess.find(ou => ou.id === orgUnitQueryParam);
-            if (newCurrentOrgUnit) {
-                changeCurrentOrgUnitAccess(newCurrentOrgUnit);
-            }
-        }
+        const { compositionRoot } = useAppContext();
+        const { currentOrgUnitAccess } = useCurrentOrgUnitContext();
 
         const currentDataSubmissionStatus = useStatusDataSubmission(
             compositionRoot,
@@ -76,20 +62,11 @@ export const CurrentDataSubmissionPageContent: React.FC<CurrentDataSubmissionPag
                     <PreContent>
                         {/* // TODO: replace this with a global reusable StyledBreadCrumbs component */}
                         <StyledBreadCrumbs aria-label="breadcrumb" separator="">
-                            <Button
-                                component={NavLink}
-                                to={`/current-data-submission/?module=${moduleName}&orgUnit=${currentOrgUnitAccess.id}`}
-                                exact={true}
-                                onClick={click}
-                            >
+                            <Button component={NavLink} to={`/current-data-submission`} exact={true} onClick={click}>
                                 <span>{moduleName}</span>
                             </Button>
                             <ChevronRightIcon />
-                            <Button
-                                component={NavLink}
-                                to={`/current-data-submission/?module=${moduleName}&orgUnit=${currentOrgUnitAccess.id}`}
-                                exact={true}
-                            >
+                            <Button component={NavLink} to={`/current-data-submission`} exact={true}>
                                 <span>{i18n.t(`${period} Data Submission`)}</span>
                             </Button>
                         </StyledBreadCrumbs>

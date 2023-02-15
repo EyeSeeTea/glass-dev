@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from "react";
+import React from "react";
 import AppBar from "@material-ui/core/AppBar";
 import Toolbar from "@material-ui/core/Toolbar";
 import IconButton from "@material-ui/core/IconButton";
@@ -11,7 +11,7 @@ import { Box, MenuItem, Select } from "@material-ui/core";
 import styled from "styled-components";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { useAppContext } from "../../contexts/app-context";
-import { CurrentAccessContext } from "../../contexts/current-access-context";
+import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context";
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -40,32 +40,10 @@ export const GlassAppBar: React.FC = () => {
     const classes = useStyles();
 
     const { currentUser } = useAppContext();
-    const { currentOrgUnitAccess, changeCurrentOrgUnitAccess } = useContext(CurrentAccessContext);
+    const { currentOrgUnitAccess, changeCurrentOrgUnitAccess } = useCurrentOrgUnitContext();
     const [action, setAction] = React.useState(1);
 
     const [orgUnit, setOrgUnit] = React.useState(currentOrgUnitAccess.name);
-
-    useEffect(() => {
-        //If the currentOrgUnitAccess is not yet set, then set it
-        if (currentOrgUnitAccess?.id === "") {
-            //Set the first org unit in list as default
-            const defaultOrgUnit = currentUser.userOrgUnitsAccess?.at(0);
-            if (defaultOrgUnit) {
-                changeCurrentOrgUnitAccess(defaultOrgUnit);
-                setOrgUnit(defaultOrgUnit.name);
-            }
-        } else if (orgUnit !== currentOrgUnitAccess.name) {
-            //if orgUnit has been changed manually in url
-            setOrgUnit(currentOrgUnitAccess.name);
-        }
-    }, [
-        orgUnit,
-        setOrgUnit,
-        currentOrgUnitAccess?.id,
-        currentUser.userOrgUnitsAccess,
-        changeCurrentOrgUnitAccess,
-        currentOrgUnitAccess.name,
-    ]);
 
     const changeOrgUnit = (orgUnit: unknown) => {
         setOrgUnit(orgUnit as string);
