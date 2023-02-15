@@ -4,4 +4,5 @@ import { GlassDocuments } from "../entities/GlassDocuments";
 export interface GlassDocumentsRepository {
     getAll(): FutureData<GlassDocuments[]>;
     save(file: File): FutureData<string>;
+    delete(id: string): FutureData<void>;
 }

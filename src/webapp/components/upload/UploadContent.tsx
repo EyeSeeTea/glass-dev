@@ -40,16 +40,16 @@ const renderStep = (step: number, changeStep: any) => {
         case 1:
             return <UploadFiles changeStep={changeStep} />;
         case 2:
-            return <ReviewDataSummary changeStep={changeStep} />;
-        case 4:
-            return <Completed />;
-        case 3:
             return (
                 <>
                     <ConsistencyChecks changeStep={changeStep} />
                     <SupportButtons changeStep={changeStep} />
                 </>
             );
+        case 3:
+            return <ReviewDataSummary changeStep={changeStep} />;
+        case 4:
+            return <Completed />;
         default:
             break;
     }

@@ -30,12 +30,12 @@ const SidebarNavMenu: React.FC<SidebarNavProps> = ({ menu, className, groupName 
     */
     const isCurrentPage = (menuPath: string) => {
         return (
-            (menu.title === "Upload History" &&
-                location.pathname.includes("upload") &&
+            (menu.title === "Current Data Submission" &&
+                location.pathname.includes("upload/") &&
                 groupName === currentModuleAccess.moduleName) ||
             (menuPath.includes(location.pathname) && groupName === currentModuleAccess.moduleName)
         );
-    };
+    }; 
 
     const updateModuleContext = (module: string) => {
         const currentModuleAccess = currentUser.userModulesAccess?.find(ma => ma.moduleName === module);
