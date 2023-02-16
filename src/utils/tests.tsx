@@ -6,7 +6,7 @@ import { getMockApi } from "../types/d2-api";
 import { AppContext, AppContextState } from "../webapp/contexts/app-context";
 import { Instance } from "../data/entities/Instance";
 import { UserAccessInfo } from "../domain/entities/User";
-import { FutureData, Future } from "../domain/entities/Future";
+import { Future } from "../domain/entities/Future";
 
 export function getTestUser(): UserAccessInfo {
     return {
