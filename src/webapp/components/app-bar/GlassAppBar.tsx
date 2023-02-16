@@ -46,31 +46,16 @@ export const GlassAppBar: React.FC = () => {
     const [orgUnit, setOrgUnit] = React.useState(currentOrgUnitAccess.orgUnitName);
 
     useEffect(() => {
-        //If the currentOrgUnitAccess is not yet set, then set it
-        if (currentOrgUnitAccess?.orgUnitId === "") {
-            //Set the first org unit in list as default
-            const defaultOrgUnit = currentUser.userOrgUnitsAccess?.at(0);
-            if (defaultOrgUnit) {
-                changeCurrentOrgUnitAccess(defaultOrgUnit);
-                setOrgUnit(defaultOrgUnit.orgUnitName);
-            }
-        } else if (orgUnit !== currentOrgUnitAccess.orgUnitName) {
+        if (orgUnit !== currentOrgUnitAccess.orgUnitName) {
             //if orgUnit has been changed manually in url
             setOrgUnit(currentOrgUnitAccess.orgUnitName);
         }
-    }, [
-        orgUnit,
-        setOrgUnit,
-        currentOrgUnitAccess?.orgUnitId,
-        currentUser.userOrgUnitsAccess,
-        changeCurrentOrgUnitAccess,
-        currentOrgUnitAccess.orgUnitName,
-    ]);
+    }, [orgUnit, setOrgUnit, currentOrgUnitAccess.orgUnitName]);
 
-    const changeOrgUnit = (orgUnit: unknown) => {
-        setOrgUnit(orgUnit as string);
-        const currentOrgUnitAccess = currentUser.userOrgUnitsAccess?.find(ou => ou.orgUnitName === orgUnit);
-        if (currentOrgUnitAccess) changeCurrentOrgUnitAccess(currentOrgUnitAccess);
+    const changeOrgUnit = (e: React.ChangeEvent<{ name?: string | undefined; value: unknown }>) => {
+        if (e.target?.value) setOrgUnit(e.target?.value as string);
+        const orgUnitId = (e.currentTarget as HTMLInputElement).getAttribute("data-key");
+        if (orgUnitId) changeCurrentOrgUnitAccess(orgUnitId);
     };
 
     const changeAction = (event: React.ChangeEvent<{ value: unknown }>) => {
@@ -96,9 +81,13 @@ export const GlassAppBar: React.FC = () => {
                             <LocationIcon />
                         </IconButton>
                         {currentUser?.userOrgUnitsAccess && (
-                            <Select value={orgUnit} disableUnderline onChange={e => changeOrgUnit(e?.target?.value)}>
+                            <Select value={orgUnit} disableUnderline onChange={e => changeOrgUnit(e)}>
                                 {currentUser.userOrgUnitsAccess.map(orgUnit => (
-                                    <MenuItem key={orgUnit.orgUnitId} value={orgUnit.orgUnitName}>
+                                    <MenuItem
+                                        key={orgUnit.orgUnitId}
+                                        data-key={orgUnit.orgUnitId}
+                                        value={orgUnit.orgUnitName}
+                                    >
                                         {i18n.t(orgUnit.orgUnitName)}
                                     </MenuItem>
                                 ))}

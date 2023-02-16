@@ -4,6 +4,7 @@ import { ModuleAccess } from "../../domain/entities/User";
 export interface CurrentModuleContextState {
     currentModuleAccess: ModuleAccess;
     changeCurrentModuleAccess: (module: string) => void;
+    resetCurrentModuleAccess: () => void;
 }
 
 export const defaultModuleContextState = {
@@ -15,6 +16,7 @@ export const defaultModuleContextState = {
         usergroups: [],
     },
     changeCurrentModuleAccess: () => {},
+    resetCurrentModuleAccess: () => {},
 };
 
 export const CurrentModuleContext = createContext<CurrentModuleContextState>(defaultModuleContextState);

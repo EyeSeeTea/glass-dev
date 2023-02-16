@@ -12,31 +12,35 @@ export const CurrentOrgUnitContextProvider: React.FC = ({ children }) => {
 
     const { currentUser } = useAppContext();
 
-    const [currentOrgUnitAccess, setCurrentOrgUnitAccess] = useState<OrgUnitAccess>(
-        defaultOrgUnitContextState.currentOrgUnitAccess
-    );
+    //Set default org unit to the first org unit in list
+    const defaultOrgUnit: OrgUnitAccess = currentUser.userOrgUnitsAccess[0]
+        ? currentUser.userOrgUnitsAccess[0]
+        : defaultOrgUnitContextState.currentOrgUnitAccess;
+    const [currentOrgUnitAccess, setCurrentOrgUnitAccess] = useState<OrgUnitAccess>(defaultOrgUnit);
 
     const changeCurrentOrgUnitAccess = useCallback(
-        (updated: OrgUnitAccess) => {
-            setCurrentOrgUnitAccess(updated);
-            if (queryParameters.get("orgUnit")) {
-                queryParameters.set("orgUnit", updated.orgUnitId);
-                history.push({ search: queryParameters.toString() });
+        (updatedOrgUnit: string) => {
+            const currentOrgUnitAccess = currentUser.userOrgUnitsAccess.find(ou => ou.orgUnitId === updatedOrgUnit);
+            if (currentOrgUnitAccess) {
+                setCurrentOrgUnitAccess(currentOrgUnitAccess);
+                if (queryParameters.get("orgUnit")) {
+                    queryParameters.set("orgUnit", currentOrgUnitAccess.orgUnitId);
+                    history.replace({ search: queryParameters.toString() });
+                }
             }
         },
-        [history, queryParameters]
+        [history, queryParameters, currentUser.userOrgUnitsAccess]
     );
 
     useEffect(() => {
         //If the org unit param has not yet been set, set it.
         if (orgUnitQueryParam === null && currentOrgUnitAccess.orgUnitId !== "") {
             queryParameters.set("orgUnit", currentOrgUnitAccess.orgUnitId);
-            history.push({ search: queryParameters.toString() });
+            history.replace({ search: queryParameters.toString() });
         }
         //If user has manually changed the url, then update the orgUnit context with it.
         else if (orgUnitQueryParam !== null && orgUnitQueryParam !== currentOrgUnitAccess.orgUnitId) {
-            const newCurrentOrgUnit = currentUser.userOrgUnitsAccess.find(ou => ou.orgUnitId === orgUnitQueryParam);
-            if (newCurrentOrgUnit) changeCurrentOrgUnitAccess(newCurrentOrgUnit);
+            changeCurrentOrgUnitAccess(orgUnitQueryParam);
         }
     }, [
         changeCurrentOrgUnitAccess,

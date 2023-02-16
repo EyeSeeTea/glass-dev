@@ -31,7 +31,9 @@ const SidebarNavMenu: React.FC<SidebarNavProps> = ({ menu, className, groupName 
             (menu.title === "Current Data Submission" &&
                 location.pathname.includes("upload/") &&
                 groupName === currentModuleAccess.moduleName) ||
-            (menuPath.includes(location.pathname) && groupName === currentModuleAccess.moduleName)
+            (location.pathname !== "/" &&
+                menuPath.includes(location.pathname) &&
+                groupName === currentModuleAccess.moduleName)
         );
     };
 
