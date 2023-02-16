@@ -10,7 +10,7 @@ import { NavLink } from "react-router-dom";
 import { useAppContext } from "../../contexts/app-context";
 import { useGlassModules } from "../../hooks/useGlassModules";
 import { mapModuleToMenu } from "./mapModuleToMenu";
-import { defaultModuleContextState, useCurrentModuleContext } from "../../contexts/current-module-context";
+import { useCurrentModuleContext } from "../../contexts/current-module-context";
 import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context";
 
 export const SideBar: React.FC = () => {
@@ -38,7 +38,7 @@ export const SideBar: React.FC = () => {
             }
             setIsLoaded(true);
         }
-    }, [storedMenuData, modulesResult, isLoaded, currentOrgUnitAccess.id]);
+    }, [storedMenuData, modulesResult, isLoaded, currentOrgUnitAccess.orgUnitId]);
 
     return (
         <CustomCard minheight="630px" padding="0 0 100px 0" data-test="test2">
@@ -48,7 +48,7 @@ export const SideBar: React.FC = () => {
                     component={NavLink}
                     to="/"
                     exact={true}
-                    onClick={() => changeCurrentModuleAccess(defaultModuleContextState.currentModuleAccess)}
+                    onClick={() => changeCurrentModuleAccess("")}
                 >
                     <StarGradient className="star-icon" />
                     <Box width={15} />

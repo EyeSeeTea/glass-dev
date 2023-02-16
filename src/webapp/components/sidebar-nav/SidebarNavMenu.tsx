@@ -9,7 +9,6 @@ import { MenuLeaf } from "./SidebarNav";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { useCurrentModuleContext } from "../../contexts/current-module-context";
-import { useAppContext } from "../../contexts/app-context";
 
 interface SidebarNavProps {
     className?: string;
@@ -21,7 +20,6 @@ const SidebarNavMenu: React.FC<SidebarNavProps> = ({ menu, className, groupName 
     const classes = useStyles(menu?.level);
     const location = useLocation();
 
-    const { currentUser } = useAppContext();
     const { currentModuleAccess, changeCurrentModuleAccess } = useCurrentModuleContext();
 
     /* 
@@ -35,11 +33,10 @@ const SidebarNavMenu: React.FC<SidebarNavProps> = ({ menu, className, groupName 
                 groupName === currentModuleAccess.moduleName) ||
             (menuPath.includes(location.pathname) && groupName === currentModuleAccess.moduleName)
         );
-    }; 
+    };
 
     const updateModuleContext = (module: string) => {
-        const currentModuleAccess = currentUser.userModulesAccess?.find(ma => ma.moduleName === module);
-        if (currentModuleAccess) changeCurrentModuleAccess(currentModuleAccess);
+        changeCurrentModuleAccess(module);
     };
 
     return (

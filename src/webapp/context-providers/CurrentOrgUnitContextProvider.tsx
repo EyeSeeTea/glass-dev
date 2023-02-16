@@ -20,7 +20,7 @@ export const CurrentOrgUnitContextProvider: React.FC = ({ children }) => {
         (updated: OrgUnitAccess) => {
             setCurrentOrgUnitAccess(updated);
             if (queryParameters.get("orgUnit")) {
-                queryParameters.set("orgUnit", updated.id);
+                queryParameters.set("orgUnit", updated.orgUnitId);
                 history.push({ search: queryParameters.toString() });
             }
         },
@@ -29,18 +29,18 @@ export const CurrentOrgUnitContextProvider: React.FC = ({ children }) => {
 
     useEffect(() => {
         //If the org unit param has not yet been set, set it.
-        if (orgUnitQueryParam === null && currentOrgUnitAccess.id !== "") {
-            queryParameters.set("orgUnit", currentOrgUnitAccess.id);
+        if (orgUnitQueryParam === null && currentOrgUnitAccess.orgUnitId !== "") {
+            queryParameters.set("orgUnit", currentOrgUnitAccess.orgUnitId);
             history.push({ search: queryParameters.toString() });
         }
         //If user has manually changed the url, then update the orgUnit context with it.
-        else if (orgUnitQueryParam !== null && orgUnitQueryParam !== currentOrgUnitAccess.id) {
-            const newCurrentOrgUnit = currentUser.userOrgUnitsAccess.find(ou => ou.id === orgUnitQueryParam);
+        else if (orgUnitQueryParam !== null && orgUnitQueryParam !== currentOrgUnitAccess.orgUnitId) {
+            const newCurrentOrgUnit = currentUser.userOrgUnitsAccess.find(ou => ou.orgUnitId === orgUnitQueryParam);
             if (newCurrentOrgUnit) changeCurrentOrgUnitAccess(newCurrentOrgUnit);
         }
     }, [
         changeCurrentOrgUnitAccess,
-        currentOrgUnitAccess.id,
+        currentOrgUnitAccess.orgUnitId,
         currentUser.userOrgUnitsAccess,
         history,
         orgUnitQueryParam,

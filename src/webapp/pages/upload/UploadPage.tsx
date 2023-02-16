@@ -31,7 +31,7 @@ export const UploadPage: React.FC = React.memo(() => {
                     </StyledBreadCrumbs>
                     <div className="info">
                         <span>{i18n.t("Yearly data upload")}</span>, &nbsp;
-                        <span>{i18n.t(currentOrgUnitAccess.name)}</span>
+                        <span>{i18n.t(currentOrgUnitAccess.orgUnitName)}</span>
                     </div>
                 </PreContent>
                 <CustomCard padding="40px 60px 50px">

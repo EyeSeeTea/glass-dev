@@ -17,7 +17,7 @@ export const Completed: React.FC = () => {
             <p className="intro">{i18n.t("Thank! your data for now is uploaded in our system")}</p>
             <div className="ds-name">
                 <span>2020</span>
-                <span>{i18n.t(currentOrgUnitAccess.name)}</span>
+                <span>{i18n.t(currentOrgUnitAccess.orgUnitName)}</span>
             </div>
             <Section className="summary">
                 <p>{i18n.t("Any other userful information here?")}</p>
