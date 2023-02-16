@@ -11,7 +11,6 @@ import { useAppContext } from "../../contexts/app-context";
 import { useGlassModules } from "../../hooks/useGlassModules";
 import { mapModuleToMenu } from "./mapModuleToMenu";
 import { useCurrentModuleContext } from "../../contexts/current-module-context";
-import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context";
 
 export const SideBar: React.FC = () => {
     const { compositionRoot } = useAppContext();
@@ -25,7 +24,6 @@ export const SideBar: React.FC = () => {
 
     const modulesResult = useGlassModules(compositionRoot);
 
-    const { currentOrgUnitAccess } = useCurrentOrgUnitContext();
     const { resetCurrentModuleAccess } = useCurrentModuleContext();
 
     useEffect(() => {
@@ -38,7 +36,7 @@ export const SideBar: React.FC = () => {
             }
             setIsLoaded(true);
         }
-    }, [storedMenuData, modulesResult, isLoaded, currentOrgUnitAccess.orgUnitId]);
+    }, [storedMenuData, modulesResult, isLoaded]);
 
     return (
         <CustomCard minheight="630px" padding="0 0 100px 0" data-test="test2">
