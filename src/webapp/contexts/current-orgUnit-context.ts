@@ -3,7 +3,7 @@ import { OrgUnitAccess } from "../../domain/entities/User";
 
 export interface CurrentOrgUnitContextState {
     currentOrgUnitAccess: OrgUnitAccess;
-    changeCurrentOrgUnitAccess: (orgUnitAccess: OrgUnitAccess) => void;
+    changeCurrentOrgUnitAccess: (orgUnit: string) => void;
 }
 
 export const defaultOrgUnitContextState = {

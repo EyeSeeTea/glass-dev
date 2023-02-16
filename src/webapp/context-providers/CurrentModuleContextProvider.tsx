@@ -25,27 +25,31 @@ export const CurrentModuleContextProvider: React.FC = ({ children }) => {
                 setCurrentModuleAccess(currentModuleAccess);
                 if (queryParameters.get("module")) {
                     queryParameters.set("module", currentModuleAccess.moduleName);
-                    history.push({ search: queryParameters.toString() });
+                    history.replace({ search: queryParameters.toString() });
                 }
-            } else {
-                setCurrentModuleAccess(defaultModuleContextState.currentModuleAccess);
             }
         },
         [history, queryParameters, userModulesAccess]
     );
 
+    const resetCurrentModuleAccess = () => {
+        setCurrentModuleAccess(defaultModuleContextState.currentModuleAccess);
+        queryParameters.delete("module");
+    };
+
     useEffect(() => {
-        async function setup() {
-            if (userModulesAccess === null) {
-                const { data: moduleAccessList } = await currentUser.userModulesAccess.runAsync();
-                if (moduleAccessList) setUserModulesAccess(moduleAccessList);
-            }
+        async function initModuleAccess() {
+            const { data: moduleAccessList } = await currentUser.userModulesAccess.runAsync();
+            if (moduleAccessList) setUserModulesAccess(moduleAccessList);
         }
-        setup();
+        //Since userModulesAccess is a Future, fetch and initilize module access asynchronously.
+        if (userModulesAccess === null) {
+            initModuleAccess();
+        }
         //If the module query parameter has not yet been set, set it.
         if (moduleQueryParam === null && currentModuleAccess.moduleName !== "") {
             queryParameters.set("module", currentModuleAccess.moduleName);
-            history.push({ search: queryParameters.toString() });
+            history.replace({ search: queryParameters.toString() });
         }
         //If user has manually changed the url, then update the orgUnit context with it.
         else if (moduleQueryParam !== null && moduleQueryParam !== currentModuleAccess.moduleName) {
@@ -66,6 +70,7 @@ export const CurrentModuleContextProvider: React.FC = ({ children }) => {
             value={{
                 currentModuleAccess,
                 changeCurrentModuleAccess,
+                resetCurrentModuleAccess,
             }}
         >
             {children}

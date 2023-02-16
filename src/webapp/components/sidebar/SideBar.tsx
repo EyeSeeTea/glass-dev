@@ -25,8 +25,8 @@ export const SideBar: React.FC = () => {
 
     const modulesResult = useGlassModules(compositionRoot);
 
-    const { changeCurrentModuleAccess } = useCurrentModuleContext();
     const { currentOrgUnitAccess } = useCurrentOrgUnitContext();
+    const { resetCurrentModuleAccess } = useCurrentModuleContext();
 
     useEffect(() => {
         // Validate localstorage vs datastore
@@ -48,7 +48,7 @@ export const SideBar: React.FC = () => {
                     component={NavLink}
                     to="/"
                     exact={true}
-                    onClick={() => changeCurrentModuleAccess("")}
+                    onClick={() => resetCurrentModuleAccess()}
                 >
                     <StarGradient className="star-icon" />
                     <Box width={15} />
