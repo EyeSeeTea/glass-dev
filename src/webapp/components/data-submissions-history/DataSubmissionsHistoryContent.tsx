@@ -12,7 +12,7 @@ export const DataSubmissionsHistoryContent: React.FC = () => {
     const dataSubmissions = useGlassDataSubmissionsByModuleAndOU(
         compositionRoot,
         currentModuleAccess.moduleId,
-        currentOrgUnitAccess.id
+        currentOrgUnitAccess.orgUnitId
     );
 
     return (

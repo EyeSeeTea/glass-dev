@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo, useCallback } from "react";
-import { UserGroupAccess } from "../../domain/entities/User";
+import { ModuleAccess } from "../../domain/entities/User";
 import { useHistory, useLocation } from "react-router-dom";
 import { defaultModuleContextState, CurrentModuleContext } from "../contexts/current-module-context";
 
@@ -12,22 +12,36 @@ export const CurrentModuleContextProvider: React.FC = ({ children }) => {
     const moduleQueryParam = queryParameters.get("module");
     const { currentUser } = useAppContext();
 
-    const [currentModuleAccess, setCurrentModuleAccess] = useState<UserGroupAccess>(
+    const [currentModuleAccess, setCurrentModuleAccess] = useState<ModuleAccess>(
         defaultModuleContextState.currentModuleAccess
     );
 
+    const [userModulesAccess, setUserModulesAccess] = useState<ModuleAccess[] | null>(null);
+
     const changeCurrentModuleAccess = useCallback(
-        (updated: UserGroupAccess) => {
-            setCurrentModuleAccess(updated);
-            if (queryParameters.get("module")) {
-                queryParameters.set("module", updated.moduleName);
-                history.push({ search: queryParameters.toString() });
+        (updated: string) => {
+            const currentModuleAccess = userModulesAccess?.find(m => m.moduleName === updated);
+            if (currentModuleAccess) {
+                setCurrentModuleAccess(currentModuleAccess);
+                if (queryParameters.get("module")) {
+                    queryParameters.set("module", currentModuleAccess.moduleName);
+                    history.push({ search: queryParameters.toString() });
+                }
+            } else {
+                setCurrentModuleAccess(defaultModuleContextState.currentModuleAccess);
             }
         },
-        [history, queryParameters]
+        [history, queryParameters, userModulesAccess]
     );
 
     useEffect(() => {
+        async function setup() {
+            if (userModulesAccess === null) {
+                const { data: moduleAccessList } = await currentUser.userModulesAccess.runAsync();
+                if (moduleAccessList) setUserModulesAccess(moduleAccessList);
+            }
+        }
+        setup();
         //If the module query parameter has not yet been set, set it.
         if (moduleQueryParam === null && currentModuleAccess.moduleName !== "") {
             queryParameters.set("module", currentModuleAccess.moduleName);
@@ -35,10 +49,7 @@ export const CurrentModuleContextProvider: React.FC = ({ children }) => {
         }
         //If user has manually changed the url, then update the orgUnit context with it.
         else if (moduleQueryParam !== null && moduleQueryParam !== currentModuleAccess.moduleName) {
-            const newCurrentModule = currentUser.userModulesAccess.find(
-                module => module.moduleName === moduleQueryParam
-            );
-            if (newCurrentModule) changeCurrentModuleAccess(newCurrentModule);
+            changeCurrentModuleAccess(moduleQueryParam);
         }
     }, [
         changeCurrentModuleAccess,
@@ -47,6 +58,7 @@ export const CurrentModuleContextProvider: React.FC = ({ children }) => {
         history,
         moduleQueryParam,
         queryParameters,
+        userModulesAccess,
     ]);
 
     return (

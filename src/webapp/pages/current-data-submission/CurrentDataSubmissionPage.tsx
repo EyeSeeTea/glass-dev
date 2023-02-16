@@ -47,7 +47,7 @@ export const CurrentDataSubmissionPageContent: React.FC<CurrentDataSubmissionPag
         const currentDataSubmissionStatus = useStatusDataSubmission(
             compositionRoot,
             moduleId,
-            currentOrgUnitAccess.id,
+            currentOrgUnitAccess.orgUnitId,
             period
         );
 
@@ -72,7 +72,7 @@ export const CurrentDataSubmissionPageContent: React.FC<CurrentDataSubmissionPag
                         </StyledBreadCrumbs>
                         <div className="info">
                             <span>{i18n.t("Yearly data upload")}</span>, &nbsp;
-                            <span>{i18n.t(currentOrgUnitAccess.name)}</span>
+                            <span>{i18n.t(currentOrgUnitAccess.orgUnitName)}</span>
                         </div>
                     </PreContent>
                     {currentDataSubmissionStatus.kind === "loaded" && (

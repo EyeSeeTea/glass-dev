@@ -1,13 +1,19 @@
 import { createContext, useContext } from "react";
-import { UserGroupAccess } from "../../domain/entities/User";
+import { ModuleAccess } from "../../domain/entities/User";
 
 export interface CurrentModuleContextState {
-    currentModuleAccess: UserGroupAccess;
-    changeCurrentModuleAccess: (moduleAccess: UserGroupAccess) => void;
+    currentModuleAccess: ModuleAccess;
+    changeCurrentModuleAccess: (module: string) => void;
 }
 
 export const defaultModuleContextState = {
-    currentModuleAccess: { id: "", name: "", moduleId: "", moduleName: "", viewAccess: false, captureAccess: false },
+    currentModuleAccess: {
+        moduleId: "",
+        moduleName: "",
+        readAccess: false,
+        captureAccess: false,
+        usergroups: [],
+    },
     changeCurrentModuleAccess: () => {},
 };
 
