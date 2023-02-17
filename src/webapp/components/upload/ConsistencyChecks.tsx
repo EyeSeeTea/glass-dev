@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import { Button } from "@material-ui/core";
 import { BlockingErrors } from "./BlockingErrors";
 import styled from "styled-components";
@@ -7,6 +7,8 @@ import { NonBlockingWarnings } from "./NonBlockingWarnings";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { useAppContext } from "../../contexts/app-context";
+import { useSnackbar } from "@eyeseetea/d2-ui-components";
+import { useCallbackEffect } from "../../hooks/use-callback-effect";
 interface ConsistencyChecksProps {
     changeStep: (step: number) => void;
 }
@@ -15,23 +17,41 @@ const COMPLETED_STATUS = "COMPLETED";
 
 export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({ changeStep }) => {
     const { compositionRoot } = useAppContext();
+    const snackbar = useSnackbar();
     const [fileType, setFileType] = useState<string>("ris");
 
     const changeType = (fileType: string) => {
         setFileType(fileType);
     };
 
-    const goToFinalStep = async () => {
+    const goToFinalStep = useCallback(() => {
         const risUploadId = localStorage.getItem("risUploadId");
         const sampleUploadId = localStorage.getItem("sampleUploadId");
         if (risUploadId) {
-            await compositionRoot.glassUploads.setStatus({ id: risUploadId, status: COMPLETED_STATUS }).toPromise();
+            return compositionRoot.glassUploads.setStatus({ id: risUploadId, status: COMPLETED_STATUS }).run(
+                () => {
+                    if (!sampleUploadId) {
+                        changeStep(3);
+                    }
+                },
+                errorMessage => {
+                    snackbar.error(i18n.t(errorMessage));
+                }
+            );
         }
         if (sampleUploadId) {
-            await compositionRoot.glassUploads.setStatus({ id: sampleUploadId, status: COMPLETED_STATUS }).toPromise();
+            return compositionRoot.glassUploads.setStatus({ id: sampleUploadId, status: COMPLETED_STATUS }).run(
+                () => {
+                    changeStep(3);
+                },
+                errorMessage => {
+                    snackbar.error(i18n.t(errorMessage));
+                }
+            );
         }
-        changeStep(3);
-    };
+    }, [changeStep, compositionRoot.glassUploads, snackbar]);
+
+    const goToFinalStepEffect = useCallbackEffect(goToFinalStep);
 
     return (
         <ContentWrapper>
@@ -55,7 +75,7 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({ changeStep
                     variant="contained"
                     color="primary"
                     endIcon={<ChevronRightIcon />}
-                    onClick={goToFinalStep}
+                    onClick={goToFinalStepEffect}
                     disableElevation
                 >
                     {i18n.t("Continue")}
