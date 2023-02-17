@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Box, Button, Container, Typography } from "@material-ui/core";
 import styled from "styled-components";
 import { CustomCard } from "../custom-card/CustomCard";
@@ -7,43 +7,72 @@ import { glassColors } from "../../pages/app/themes/dhis2.theme";
 import WarningIcon from "@material-ui/icons/WarningOutlined";
 import i18n from "../../../locales";
 import { NavLink } from "react-router-dom";
+import { useGlassModules } from "../../hooks/useGlassModules";
+import { useAppContext } from "../../contexts/app-context";
+import { ContentLoader } from "../content-loader/ContentLoader";
+import { GlassModule } from "../../../domain/entities/GlassModule";
+import { useCurrentModuleContext } from "../../contexts/current-module-context";
 
 interface ModuleCardProps {
-    title: string;
-    moduleColor: string;
-    endDays?: number | null;
-    filesUploaded: number;
-    moduleUrl: string;
+    moduleId: string;
+    period: number;
 }
 
-export const ModuleCard: React.FC<ModuleCardProps> = ({ title, moduleColor, endDays, filesUploaded, moduleUrl }) => {
-    return (
-        <CustomCard padding="0">
-            <TitleContainer moduleColor={moduleColor}>
-                <StarIcon />
-                <h3>{title}</h3>
-            </TitleContainer>
-            <ContentContainer moduleColor={moduleColor}>
-                <Container style={{ padding: 0 }}>
-                    {endDays ? (
-                        <Box display={"flex"} flexDirection="row">
-                            <WarningIcon htmlColor={glassColors.mainTertiary} />
-                            <Box width={10} />
-                            <Typography style={{ color: glassColors.mainTertiary }}>
-                                {i18n.t(`END IN ${endDays} DAYS`)}
-                            </Typography>
-                        </Box>
-                    ) : (
-                        <Typography color="textSecondary">{i18n.t("OPEN ALL YEAR")}</Typography>
-                    )}
-                    <Typography color="textSecondary">{i18n.t(`${filesUploaded} files uploaded`)}</Typography>
-                </Container>
+export const ModuleCard: React.FC<ModuleCardProps> = ({ moduleId, period }) => {
+    const { compositionRoot } = useAppContext();
+    const modules = useGlassModules(compositionRoot);
+    const { changeCurrentModuleAccess } = useCurrentModuleContext();
 
-                <Button variant="contained" color="primary" component={NavLink} to={moduleUrl} exact={true}>
-                    <span>{i18n.t("GO")}</span>
-                </Button>
-            </ContentContainer>
-        </CustomCard>
+    const [module, setModule] = useState<GlassModule>();
+
+    const endDays = 0; //TO DO : Calculate days left in the open period. Need confirmation on open and close days.
+    const filesUploaded = 0; //TO DO : Fetch number of files uplaoded for data submission.
+
+    useEffect(() => {
+        if (modules.kind === "loaded" && modules.data.length) {
+            const cardModule = modules.data.find(m => m.id === moduleId);
+            if (cardModule) setModule(cardModule);
+        }
+    }, [moduleId, modules]);
+
+    return (
+        <ContentLoader content={modules}>
+            {modules.kind === "loaded" && (
+                <CustomCard padding="0">
+                    <TitleContainer moduleColor={module?.color || ""}>
+                        <StarIcon />
+                        <h3>{`${module?.name} ${period}`}</h3>
+                    </TitleContainer>
+                    <ContentContainer moduleColor={module?.color || ""}>
+                        <Container style={{ padding: 0 }}>
+                            {endDays ? (
+                                <Box display={"flex"} flexDirection="row">
+                                    <WarningIcon htmlColor={glassColors.mainTertiary} />
+                                    <Box width={10} />
+                                    <Typography style={{ color: glassColors.mainTertiary }}>
+                                        {i18n.t(`END IN ${endDays} DAYS`)}
+                                    </Typography>
+                                </Box>
+                            ) : (
+                                <Typography color="textSecondary">{i18n.t("OPEN ALL YEAR")}</Typography>
+                            )}
+                            <Typography color="textSecondary">{i18n.t(`${filesUploaded} files uploaded`)}</Typography>
+                        </Container>
+
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            component={NavLink}
+                            to={`/current-data-submission`}
+                            onClick={() => changeCurrentModuleAccess(module?.name || "")}
+                            exact={true}
+                        >
+                            <span>{i18n.t("GO")}</span>
+                        </Button>
+                    </ContentContainer>
+                </CustomCard>
+            )}
+        </ContentLoader>
     );
 };
 
