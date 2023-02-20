@@ -22,7 +22,7 @@ const SidebarNavMenuGroup: React.FC<SidebarNavProps> = ({ menu, groupName, class
     const { currentModuleAccess } = useCurrentModuleContext();
 
     const isCurrent = (name: string) => {
-        return currentModuleAccess ? currentModuleAccess.moduleName === name : false;
+        return currentModuleAccess.moduleName === name;
     };
     const [expanded, setExpanded] = React.useState(isCurrent(groupName));
 

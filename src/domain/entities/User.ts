@@ -1,20 +1,20 @@
 import _ from "lodash";
 import { FutureData } from "./Future";
-import { NamedRef } from "./Ref";
+import { Id, NamedRef } from "./Ref";
 
 export interface OrgUnitAccess {
-    orgUnitId: string;
+    orgUnitId: Id;
     orgUnitName: string;
     readAccess: boolean;
     captureAccess: boolean;
 }
 
 export interface UserGroup {
-    id: string;
+    id: Id;
     name: string;
 }
 export interface ModuleAccess {
-    moduleId: string;
+    moduleId: Id;
     moduleName: string;
     readAccess: boolean;
     captureAccess: boolean;
@@ -22,7 +22,7 @@ export interface ModuleAccess {
 }
 
 export interface UserAccessInfo {
-    id: string;
+    id: Id;
     name: string;
     username: string;
     userRoles: UserRole[];

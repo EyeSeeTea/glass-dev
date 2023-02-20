@@ -43,17 +43,17 @@ export const GlassAppBar: React.FC = () => {
     const { currentOrgUnitAccess, changeCurrentOrgUnitAccess } = useCurrentOrgUnitContext();
     const [action, setAction] = React.useState(1);
 
-    const [orgUnit, setOrgUnit] = React.useState(currentOrgUnitAccess.orgUnitName);
+    const [orgUnitName, setOrgUnitName] = React.useState(currentOrgUnitAccess.orgUnitName);
 
     useEffect(() => {
-        if (orgUnit !== currentOrgUnitAccess.orgUnitName) {
+        if (orgUnitName !== currentOrgUnitAccess.orgUnitName) {
             //if orgUnit has been changed manually in url
-            setOrgUnit(currentOrgUnitAccess.orgUnitName);
+            setOrgUnitName(currentOrgUnitAccess.orgUnitName);
         }
-    }, [orgUnit, setOrgUnit, currentOrgUnitAccess.orgUnitName]);
+    }, [orgUnitName, setOrgUnitName, currentOrgUnitAccess.orgUnitName]);
 
     const changeOrgUnit = (e: React.ChangeEvent<{ name?: string | undefined; value: unknown }>) => {
-        if (e.target?.value) setOrgUnit(e.target?.value as string);
+        if (e.target?.value) setOrgUnitName(e.target?.value as string);
         const orgUnitId = (e.currentTarget as HTMLInputElement).getAttribute("data-key");
         if (orgUnitId) changeCurrentOrgUnitAccess(orgUnitId);
     };
@@ -81,7 +81,7 @@ export const GlassAppBar: React.FC = () => {
                             <LocationIcon />
                         </IconButton>
                         {currentUser?.userOrgUnitsAccess && (
-                            <Select value={orgUnit} disableUnderline onChange={e => changeOrgUnit(e)}>
+                            <Select value={orgUnitName} disableUnderline onChange={changeOrgUnit}>
                                 {currentUser.userOrgUnitsAccess.map(orgUnit => (
                                     <MenuItem
                                         key={orgUnit.orgUnitId}
