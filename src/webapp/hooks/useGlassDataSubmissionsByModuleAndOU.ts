@@ -1,15 +1,12 @@
 import { useEffect, useState } from "react";
-import { CompositionRoot } from "../../CompositionRoot";
 import { GlassDataSubmission } from "../../domain/entities/GlassDataSubmission";
+import { useAppContext } from "../contexts/app-context";
 import { GlassState } from "./State";
 
 type GlassDataSubmissionsState = GlassState<GlassDataSubmission[]>;
 
-export function useGlassDataSubmissionsByModuleAndOU(
-    compositionRoot: CompositionRoot,
-    moduleId: string,
-    orgUnit: string
-) {
+export function useGlassDataSubmissionsByModuleAndOU(moduleId: string, orgUnit: string) {
+    const { compositionRoot } = useAppContext();
     const [dataSubmissions, setDataSubmissions] = useState<GlassDataSubmissionsState>({
         kind: "loading",
     });

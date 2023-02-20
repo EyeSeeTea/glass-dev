@@ -46,7 +46,7 @@ export const SideBar: React.FC = () => {
                     component={NavLink}
                     to="/"
                     exact={true}
-                    onClick={() => resetCurrentModuleAccess()}
+                    onClick={resetCurrentModuleAccess}
                 >
                     <StarGradient className="star-icon" />
                     <Box width={15} />
