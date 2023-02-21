@@ -15,9 +15,6 @@ export function useGlassCaptureAccess() {
         currentOrgUnitAccess: { captureAccess: orgUnitCaptureAccess },
     } = useCurrentOrgUnitContext();
 
-    console.log("currentModuleAccess:", useCurrentModuleContext().currentModuleAccess);
-    console.log("currentOrgUnitAccess", useCurrentOrgUnitContext().currentOrgUnitAccess);
-
     useEffect(() => {
         setHasCaptureAccess(moduleCaptureAccess && orgUnitCaptureAccess);
     }, [moduleCaptureAccess, orgUnitCaptureAccess]);
