@@ -24,6 +24,7 @@ import { SetUploadStatusUseCase } from "./domain/usecases/SetUploadStatusUseCase
 import { GetGlassUploadsByDataSubmissionUseCase } from "./domain/usecases/GetGlassUploadsByDataSubmissionUseCase";
 import { SetUploadBatchIdUseCase } from "./domain/usecases/SetUploadBatchIdUseCase";
 import { DeleteDocumentInfoByUploadIdUseCase } from "./domain/usecases/DeleteDocumentInfoByUploadIdUseCase";
+import { GetCurrentUserModulesAccessUseCase } from "./domain/usecases/GetCurrentUserModulesAccessUseCase";
 
 export function getCompositionRoot(instance: Instance) {
     const dataStoreClient = new DataStoreClient(instance);
@@ -37,6 +38,7 @@ export function getCompositionRoot(instance: Instance) {
     return {
         instance: getExecute({
             getCurrentUser: new GetCurrentUserUseCase(instanceRepository),
+            getCurrentUserModulesAccess: new GetCurrentUserModulesAccessUseCase(instanceRepository),
             getVersion: new GetInstanceVersionUseCase(instanceRepository),
         }),
         glassModules: getExecute({

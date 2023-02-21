@@ -21,6 +21,33 @@ export class InstanceDefaultRepository implements InstanceRepository {
     public getBaseUrl(): string {
         return this.api.baseUrl;
     }
+    public getCurrentUserModuleAccessData(userGroups: NamedRef[]): FutureData<ModuleAccess[]> {
+        return this.dataStoreClient.listCollection<GlassModule>(DataStoreKeys.MODULES).flatMap(modules => {
+            //Iterate through modules and populate access for each
+            const moduleAccess = modules.map(module => {
+                const readAccess = module.userGroups.readAccess.some(moduleReadUserGroup =>
+                    userGroups.some(ug => ug.id === moduleReadUserGroup.id)
+                );
+
+                const writeAccess = module.userGroups.captureAccess.some(moduleCaptureUserGroup =>
+                    userGroups.some(ug => ug.id === moduleCaptureUserGroup.id)
+                );
+                return {
+                    moduleId: module.id,
+                    moduleName: module.name,
+                    readAccess: readAccess,
+                    captureAccess: writeAccess,
+                    usergroups: [...module.userGroups.captureAccess, ...module.userGroups.readAccess],
+                };
+            });
+
+            //TO DO: TEMP - For testing the Module Access implementation, consoling the moduleAccess.
+            //TO DO: Remove once permission implementation done.
+            console.debug("Module Access Permissions : " + JSON.stringify(moduleAccess));
+
+            return Future.success(moduleAccess);
+        });
+    }
 
     mapUserOrgUnitsAccess = (organisationUnits: NamedRef[], dataViewOrganisationUnits: NamedRef[]): OrgUnitAccess[] => {
         let orgUnitsAccess = organisationUnits.map(ou => ({
@@ -48,32 +75,6 @@ export class InstanceDefaultRepository implements InstanceRepository {
         return orgUnitsAccess;
     };
 
-    mapUserGroupAccess = (userGroups: NamedRef[]): FutureData<ModuleAccess[]> => {
-        return this.dataStoreClient.listCollection<GlassModule>(DataStoreKeys.MODULES).flatMap(modules => {
-            //Iterate through modules and populate access for each
-            const moduleAccess = modules.map(module => {
-                const readAccess = module.userGroups.readAccess.some(moduleReadUserGroup =>
-                    userGroups.some(ug => ug.id === moduleReadUserGroup.id)
-                );
-
-                const writeAccess = module.userGroups.captureAccess.some(moduleCaptureUserGroup =>
-                    userGroups.some(ug => ug.id === moduleCaptureUserGroup.id)
-                );
-                return {
-                    moduleId: module.id,
-                    moduleName: module.name,
-                    readAccess: readAccess,
-                    captureAccess: writeAccess,
-                    usergroups: [...module.userGroups.captureAccess, ...module.userGroups.readAccess],
-                };
-            });
-            //TO DO: TEMP - For testing the Module Access implementation, consoling the moduleAccess.
-            //TO DO: Remove once permission implementation done.
-            console.debug("Module Access Permissions : " + JSON.stringify(moduleAccess));
-            return Future.success(moduleAccess);
-        });
-    };
-
     @cache()
     public getCurrentUser(): FutureData<UserAccessInfo> {
         return apiToFuture(
@@ -93,14 +94,15 @@ export class InstanceDefaultRepository implements InstanceRepository {
                     dataViewOrganisationUnits: { id: true, name: true },
                 },
             })
-        ).map(user => ({
-            id: user.id,
-            name: user.displayName,
-            userGroups: user.userGroups,
-            ...user.userCredentials,
-            userOrgUnitsAccess: this.mapUserOrgUnitsAccess(user.organisationUnits, user.dataViewOrganisationUnits),
-            userModulesAccess: this.mapUserGroupAccess(user.userGroups),
-        }));
+        ).map(user => {
+            return {
+                id: user.id,
+                name: user.displayName,
+                userGroups: user.userGroups,
+                ...user.userCredentials,
+                userOrgUnitsAccess: this.mapUserOrgUnitsAccess(user.organisationUnits, user.dataViewOrganisationUnits),
+            };
+        });
     }
 
     @cache()

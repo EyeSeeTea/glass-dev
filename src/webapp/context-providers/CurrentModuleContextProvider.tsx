@@ -10,17 +10,15 @@ export const CurrentModuleContextProvider: React.FC = ({ children }) => {
     const location = useLocation();
     const queryParameters = useMemo(() => new URLSearchParams(location.search), [location]);
     const moduleQueryParam = queryParameters.get("module");
-    const { currentUser } = useAppContext();
+    const { currentUserModulesAccess } = useAppContext();
 
     const [currentModuleAccess, setCurrentModuleAccess] = useState<ModuleAccess>(
         defaultModuleContextState.currentModuleAccess
     );
 
-    const [userModulesAccess, setUserModulesAccess] = useState<ModuleAccess[] | undefined>(undefined);
-
     const changeCurrentModuleAccess = useCallback(
         (updated: string) => {
-            const currentModuleAccess = userModulesAccess?.find(m => m.moduleName === updated);
+            const currentModuleAccess = currentUserModulesAccess?.find(m => m.moduleName === updated);
             if (currentModuleAccess) {
                 setCurrentModuleAccess(currentModuleAccess);
                 if (queryParameters.get("module")) {
@@ -29,7 +27,7 @@ export const CurrentModuleContextProvider: React.FC = ({ children }) => {
                 }
             }
         },
-        [history, queryParameters, userModulesAccess]
+        [history, queryParameters, currentUserModulesAccess]
     );
 
     const resetCurrentModuleAccess = () => {
@@ -38,14 +36,6 @@ export const CurrentModuleContextProvider: React.FC = ({ children }) => {
     };
 
     useEffect(() => {
-        async function initModuleAccess() {
-            const { data: moduleAccessList } = await currentUser.userModulesAccess.runAsync();
-            if (moduleAccessList) setUserModulesAccess(moduleAccessList);
-        }
-        //Since userModulesAccess is a Future, fetch and initilize module access asynchronously.
-        if (!userModulesAccess) {
-            initModuleAccess();
-        }
         //If the module query parameter has not yet been set, set it.
         if (moduleQueryParam === null && currentModuleAccess.moduleName !== "") {
             queryParameters.set("module", currentModuleAccess.moduleName);
@@ -55,15 +45,7 @@ export const CurrentModuleContextProvider: React.FC = ({ children }) => {
         else if (moduleQueryParam !== null && moduleQueryParam !== currentModuleAccess.moduleName) {
             changeCurrentModuleAccess(moduleQueryParam);
         }
-    }, [
-        changeCurrentModuleAccess,
-        currentUser.userModulesAccess,
-        currentModuleAccess.moduleName,
-        history,
-        moduleQueryParam,
-        queryParameters,
-        userModulesAccess,
-    ]);
+    }, [changeCurrentModuleAccess, currentModuleAccess.moduleName, history, moduleQueryParam, queryParameters]);
 
     return (
         <CurrentModuleContext.Provider

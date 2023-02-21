@@ -7,6 +7,7 @@ import React, { useEffect, useState } from "react";
 import { appConfig } from "../../../app-config";
 import { getCompositionRoot } from "../../../CompositionRoot";
 import { Instance } from "../../../data/entities/Instance";
+import { ModuleAccess } from "../../../domain/entities/User";
 import { D2Api } from "../../../types/d2-api";
 import { AppContext, AppContextState } from "../../contexts/app-context";
 import { Router } from "../Router";
@@ -31,13 +32,21 @@ export const App: React.FC<AppProps> = React.memo(function App({ api, d2, instan
             const compositionRoot = getCompositionRoot(instance);
             const { data: currentUser } = await compositionRoot.instance.getCurrentUser().runAsync();
 
+            let currentUserModulesAccess: ModuleAccess[] = [];
+            if (currentUser?.userGroups) {
+                const { data } = await compositionRoot.instance
+                    .getCurrentUserModulesAccess(currentUser.userGroups)
+                    .runAsync();
+                if (data) currentUserModulesAccess = data;
+            }
+
             if (!currentUser) throw new Error("User not logged in");
 
             await compositionRoot.glassModules.validate().runAsync();
 
             // const isShareButtonVisible = _(appConfig).get("appearance.showShareButton") || false;
 
-            setAppContext({ api, currentUser, compositionRoot });
+            setAppContext({ api, currentUser, compositionRoot, currentUserModulesAccess });
             // setShowShareButton(isShareButtonVisible);
             initFeedbackTool(d2, appConfig);
             setLoading(false);
