@@ -1,5 +1,4 @@
 import _ from "lodash";
-import { FutureData } from "./Future";
 import { Id, NamedRef } from "./Ref";
 
 export interface OrgUnitAccess {
