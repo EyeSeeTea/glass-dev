@@ -28,7 +28,7 @@ export interface UserAccessInfo {
     userRoles: UserRole[];
     userGroups: NamedRef[];
     userOrgUnitsAccess: OrgUnitAccess[];
-    userModulesAccess: FutureData<ModuleAccess[]>;
+    userModulesAccess: ModuleAccess[];
 }
 
 export interface UserRole extends NamedRef {

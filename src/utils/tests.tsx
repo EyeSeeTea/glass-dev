@@ -16,7 +16,7 @@ export function getTestUser(): UserAccessInfo {
         userGroups: [],
         userRoles: [],
         userOrgUnitsAccess: [],
-        userModulesAccess: Future.success([]),
+        userModulesAccess: [],
     };
 }
 
