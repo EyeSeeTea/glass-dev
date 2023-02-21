@@ -1,7 +1,7 @@
-import { D2Api, D2OrganisationUnitSchema, D2UserGroupSchema, SelectedPick } from "@eyeseetea/d2-api/2.34";
-
+import { D2Api } from "@eyeseetea/d2-api/2.34";
 import { FutureData, Future } from "../../domain/entities/Future";
 import { GlassModule } from "../../domain/entities/GlassModule";
+import { NamedRef } from "../../domain/entities/Ref";
 import { OrgUnitAccess, UserAccessInfo, ModuleAccess } from "../../domain/entities/User";
 import { InstanceRepository } from "../../domain/repositories/InstanceRepository";
 import { cache } from "../../utils/cache";
@@ -22,40 +22,25 @@ export class InstanceDefaultRepository implements InstanceRepository {
         return this.api.baseUrl;
     }
 
-    mapUserOrgUnitsAccess = (
-        organisationUnits: SelectedPick<
-            D2OrganisationUnitSchema,
-            {
-                id: true;
-                name: true;
-            }
-        >[],
-        dataViewOrganisationUnits: SelectedPick<
-            D2OrganisationUnitSchema,
-            {
-                id: true;
-                name: true;
-            }
-        >[]
-    ): OrgUnitAccess[] => {
-        const orgUnitsAccess = organisationUnits.map(ou => ({
+    mapUserOrgUnitsAccess = (organisationUnits: NamedRef[], dataViewOrganisationUnits: NamedRef[]): OrgUnitAccess[] => {
+        let orgUnitsAccess = organisationUnits.map(ou => ({
             orgUnitId: ou.id,
             orgUnitName: ou.name,
-            readAccess: dataViewOrganisationUnits.findIndex(dvou => dvou.id === ou.id) > -1 ? true : false,
+            readAccess: dataViewOrganisationUnits.some(dvou => dvou.id === ou.id),
             captureAccess: true,
         }));
 
         //Setting view access for org units that are present in dataViewOrganisationUnits and not organisationUnits
-        dataViewOrganisationUnits.forEach(dvou => {
-            if (orgUnitsAccess.findIndex(ou => ou.orgUnitId === dvou.id) === -1) {
-                orgUnitsAccess.push({
-                    orgUnitId: dvou.id,
-                    orgUnitName: dvou.name,
-                    readAccess: true,
-                    captureAccess: false, //orgUnits in dataViewOrganisationUnits dont have capture access
-                });
-            }
-        });
+        const readOnlyAccessOrgUnits = dataViewOrganisationUnits
+            .filter(dvou => orgUnitsAccess.every(oua => oua.orgUnitId !== dvou.id))
+            .map(raou => ({
+                orgUnitId: raou.id,
+                orgUnitName: raou.name,
+                readAccess: true,
+                captureAccess: false, //orgUnits in dataViewOrganisationUnits dont have capture access
+            }));
+
+        orgUnitsAccess = [...orgUnitsAccess, ...readOnlyAccessOrgUnits];
 
         //TO DO: TEMP - For testing the OrgUnit Access implementation, consoling the orgUnitAccess.
         //TO DO: Remove once permission implementation done.
@@ -63,37 +48,17 @@ export class InstanceDefaultRepository implements InstanceRepository {
         return orgUnitsAccess;
     };
 
-    mapUserGroupAccess = (
-        userGroups: SelectedPick<
-            D2UserGroupSchema,
-            {
-                id: true;
-                name: true;
-            }
-        >[]
-    ): FutureData<ModuleAccess[]> => {
+    mapUserGroupAccess = (userGroups: NamedRef[]): FutureData<ModuleAccess[]> => {
         return this.dataStoreClient.listCollection<GlassModule>(DataStoreKeys.MODULES).flatMap(modules => {
             //Iterate through modules and populate access for each
             const moduleAccess = modules.map(module => {
-                let readAccess = false;
-                let writeAccess = false;
-                userGroups.forEach(userGroup => {
-                    if (
-                        module.userGroups.readAccess.find(
-                            moduleReadUserGroup => moduleReadUserGroup.id === userGroup.id
-                        )
-                    ) {
-                        readAccess = true;
-                    }
-                    if (
-                        module.userGroups.captureAccess.find(
-                            moduleCaptureUserGroup => moduleCaptureUserGroup.id === userGroup.id
-                        )
-                    ) {
-                        writeAccess = true;
-                    }
-                });
+                const readAccess = module.userGroups.readAccess.some(moduleReadUserGroup =>
+                    userGroups.some(ug => ug.id === moduleReadUserGroup.id)
+                );
 
+                const writeAccess = module.userGroups.captureAccess.some(moduleCaptureUserGroup =>
+                    userGroups.some(ug => ug.id === moduleCaptureUserGroup.id)
+                );
                 return {
                     moduleId: module.id,
                     moduleName: module.name,
