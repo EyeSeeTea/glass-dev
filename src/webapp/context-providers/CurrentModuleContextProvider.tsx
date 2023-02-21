@@ -16,7 +16,7 @@ export const CurrentModuleContextProvider: React.FC = ({ children }) => {
         defaultModuleContextState.currentModuleAccess
     );
 
-    const [userModulesAccess, setUserModulesAccess] = useState<ModuleAccess[] | null>(null);
+    const [userModulesAccess, setUserModulesAccess] = useState<ModuleAccess[] | undefined>(undefined);
 
     const changeCurrentModuleAccess = useCallback(
         (updated: string) => {
@@ -43,7 +43,7 @@ export const CurrentModuleContextProvider: React.FC = ({ children }) => {
             if (moduleAccessList) setUserModulesAccess(moduleAccessList);
         }
         //Since userModulesAccess is a Future, fetch and initilize module access asynchronously.
-        if (userModulesAccess === null) {
+        if (!userModulesAccess) {
             initModuleAccess();
         }
         //If the module query parameter has not yet been set, set it.
