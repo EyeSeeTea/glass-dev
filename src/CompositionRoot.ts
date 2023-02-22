@@ -27,7 +27,7 @@ import { DeleteDocumentInfoByUploadIdUseCase } from "./domain/usecases/DeleteDoc
 
 export function getCompositionRoot(instance: Instance) {
     const dataStoreClient = new DataStoreClient(instance);
-    const instanceRepository = new InstanceDefaultRepository(instance);
+    const instanceRepository = new InstanceDefaultRepository(instance, dataStoreClient);
     const glassModuleRepository = new GlassModuleDefaultRepository(dataStoreClient);
     const glassNewsRepository = new GlassNewsDefaultRepository(dataStoreClient);
     const glassDataSubmissionRepository = new GlassDataSubmissionsDefaultRepository(dataStoreClient);

@@ -7,10 +7,10 @@ import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import { NavLink } from "react-router-dom";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { CountryInformationContent } from "../../components/country-information/CountryInformationContent";
-import { getUrlParam } from "../../utils/helpers";
+import { useCurrentModuleContext } from "../../contexts/current-module-context";
 
 export const CountryInformationPage: React.FC = React.memo(() => {
-    const moduleName = getUrlParam("module");
+    const { currentModuleAccess } = useCurrentModuleContext();
 
     const click = (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
         event.preventDefault();
@@ -22,16 +22,11 @@ export const CountryInformationPage: React.FC = React.memo(() => {
                 <PreContent>
                     {/* // TODO: replace this with a global reusable StyledBreadCrumbs component */}
                     <StyledBreadCrumbs aria-label="breadcrumb" separator="">
-                        <Button
-                            component={NavLink}
-                            to={`/current-data-submission/?module=${moduleName}`}
-                            exact={true}
-                            onClick={click}
-                        >
-                            <span>{moduleName}</span>
+                        <Button component={NavLink} to={`/current-data-submission`} exact={true} onClick={click}>
+                            <span>{currentModuleAccess.moduleName}</span>
                         </Button>
                         <ChevronRightIcon />
-                        <Button component={NavLink} to={`/country-information?module=${moduleName}`} exact={true}>
+                        <Button component={NavLink} to={`/country-information`} exact={true}>
                             <span>{i18n.t("Country Information")}</span>
                         </Button>
                     </StyledBreadCrumbs>

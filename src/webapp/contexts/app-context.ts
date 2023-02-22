@@ -1,11 +1,11 @@
 import React, { useContext } from "react";
 import { CompositionRoot } from "../../CompositionRoot";
-import { User } from "../../domain/entities/User";
+import { UserAccessInfo } from "../../domain/entities/User";
 import { D2Api } from "../../types/d2-api";
 
 export interface AppContextState {
     api: D2Api;
-    currentUser: User;
+    currentUser: UserAccessInfo;
     compositionRoot: CompositionRoot;
 }
 

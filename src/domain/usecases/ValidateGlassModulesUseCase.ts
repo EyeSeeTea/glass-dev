@@ -8,16 +8,28 @@ const glassModules = [
         id: "AVnpk4xiXGG",
         name: "AMR",
         color: glassColors.lightSecondary,
+        userGroups: {
+            readAccess: [],
+            captureAccess: [],
+        },
     },
     {
         id: "BVnik5xiXGJ",
         name: "AMC",
         color: glassColors.lightTertiary,
+        userGroups: {
+            readAccess: [],
+            captureAccess: [],
+        },
     },
     {
         id: "CVVp44xiXGJ",
         name: "EGASP",
         color: glassColors.lightPrimary,
+        userGroups: {
+            readAccess: [],
+            captureAccess: [],
+        },
     },
 ];
 

@@ -8,10 +8,12 @@ import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import { NavLink } from "react-router-dom";
 import { CustomCard } from "../../components/custom-card/CustomCard";
 import i18n from "@eyeseetea/d2-ui-components/locales";
-import { getUrlParam } from "../../utils/helpers";
+import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context";
+import { useCurrentModuleContext } from "../../contexts/current-module-context";
 
 export const UploadPage: React.FC = React.memo(() => {
-    const moduleName = getUrlParam("module");
+    const { currentOrgUnitAccess } = useCurrentOrgUnitContext();
+    const { currentModuleAccess } = useCurrentModuleContext();
 
     return (
         <MainLayout>
@@ -19,22 +21,17 @@ export const UploadPage: React.FC = React.memo(() => {
                 <PreContent>
                     {/* // TODO: replace this with a global reusable StyledBreadCrumbs component */}
                     <StyledBreadCrumbs aria-label="breadcrumb" separator="">
-                        <Button
-                            component={NavLink}
-                            to={`/current-data-submission/?module=${moduleName}`}
-                            exact={true}
-                            onClick={() => null}
-                        >
-                            <span>{moduleName}</span>
+                        <Button component={NavLink} to={`/current-data-submission`} exact={true} onClick={() => null}>
+                            <span>{currentModuleAccess.moduleName}</span>
                         </Button>
                         <ChevronRightIcon />
-                        <Button component={NavLink} to={`/upload/?module=${moduleName}`} exact={true}>
+                        <Button component={NavLink} to={`/upload`} exact={true}>
                             <span>{i18n.t("2022 Data Submission")}</span>
                         </Button>
                     </StyledBreadCrumbs>
                     <div className="info">
                         <span>{i18n.t("Yearly data upload")}</span>, &nbsp;
-                        <span>Spain</span>
+                        <span>{i18n.t(currentOrgUnitAccess.orgUnitName)}</span>
                     </div>
                 </PreContent>
                 <CustomCard padding="40px 60px 50px">

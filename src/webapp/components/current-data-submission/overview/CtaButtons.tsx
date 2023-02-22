@@ -6,11 +6,10 @@ import { NavLink } from "react-router-dom";
 import { StatusCTAs } from "./StatusDetails";
 
 export interface CtaButtonsProps {
-    moduleName: string;
     ctas: StatusCTAs[];
 }
 
-export const CtaButtons: React.FC<CtaButtonsProps> = ({ moduleName, ctas }) => {
+export const CtaButtons: React.FC<CtaButtonsProps> = ({ ctas }) => {
     const getCTAButton = (cta: StatusCTAs) => {
         // TODO : Button click event handlers to be added as corresponding feature developed.
         switch (cta) {
@@ -36,14 +35,7 @@ export const CtaButtons: React.FC<CtaButtonsProps> = ({ moduleName, ctas }) => {
                 );
             case "Upload dataset":
                 return (
-                    <Button
-                        key={3}
-                        variant="contained"
-                        color="primary"
-                        component={NavLink}
-                        to={`/upload/?module=${moduleName}`}
-                        exact={true}
-                    >
+                    <Button key={3} variant="contained" color="primary" component={NavLink} to={`/upload`} exact={true}>
                         {i18n.t("Upload dataset")}
                     </Button>
                 );
