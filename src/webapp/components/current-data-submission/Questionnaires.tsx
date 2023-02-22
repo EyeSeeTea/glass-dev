@@ -18,11 +18,9 @@ export const Questionnaires: React.FC = () => {
                 <span className="comp">{i18n.t("Not completed")}</span>
                 <div className="buttons">
                     <Button>{i18n.t("View")}</Button>
-                    {hasCurrentUserCaptureAccess && (
-                        <Button variant="contained" color="primary">
-                            {i18n.t("Go")}
-                        </Button>
-                    )}
+                    <Button variant="contained" color="primary" disabled={!hasCurrentUserCaptureAccess}>
+                        {i18n.t("Go")}
+                    </Button>
                 </div>
             </QuestionnaireCard>
             <QuestionnaireCard>
@@ -33,11 +31,9 @@ export const Questionnaires: React.FC = () => {
                 <span className="comp">{i18n.t("Not completed")}</span>
                 <div className="buttons">
                     <Button>{i18n.t("View")}</Button>
-                    {hasCurrentUserCaptureAccess && (
-                        <Button variant="contained" color="primary">
-                            {i18n.t("Go")}
-                        </Button>
-                    )}
+                    <Button variant="contained" color="primary" disabled={!hasCurrentUserCaptureAccess}>
+                        {i18n.t("Go")}
+                    </Button>
                 </div>
             </QuestionnaireCard>
             <QuestionnaireCard>
@@ -48,11 +44,9 @@ export const Questionnaires: React.FC = () => {
                 <span className="comp completed">{i18n.t("Completed")}</span>
                 <div className="buttons">
                     <Button>{i18n.t("View")}</Button>
-                    {hasCurrentUserCaptureAccess && (
-                        <Button variant="contained" color="primary">
-                            {i18n.t("Go")}
-                        </Button>
-                    )}
+                    <Button variant="contained" color="primary" disabled={!hasCurrentUserCaptureAccess}>
+                        {i18n.t("Go")}
+                    </Button>
                 </div>
             </QuestionnaireCard>
         </QuestionnairesGrid>

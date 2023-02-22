@@ -9,13 +9,11 @@ export const AdvancedButtons: React.FC = () => {
     const hasCurrentUserCaptureAccess = useGlassCaptureAccess();
     return (
         <ContentWrapper className="cta-buttons">
-            {hasCurrentUserCaptureAccess && (
-                <div>
-                    <Button variant="contained" color="primary">
-                        {i18n.t("Request Dataset update")}
-                    </Button>
-                </div>
-            )}
+            <div>
+                <Button variant="contained" color="primary" disabled={!hasCurrentUserCaptureAccess}>
+                    {i18n.t("Request Dataset update")}
+                </Button>
+            </div>
         </ContentWrapper>
     );
 };
