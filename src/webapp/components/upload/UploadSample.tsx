@@ -52,10 +52,10 @@ export const UploadSample: React.FC<UploadSampleProps> = ({ batchId }) => {
                         batchId,
                         fileType: SAMPLE_FILE_TYPE,
                     };
-                    const submissionId = await compositionRoot.glassDocuments
+                    const uploadId = await compositionRoot.glassDocuments
                         .upload({ file: uploadedSample, data })
                         .toPromise();
-                    localStorage.setItem("sampleUploadId", submissionId);
+                    localStorage.setItem("sampleUploadId", uploadId);
                     setIsLoading(false);
                 } else {
                     snackbar.error(i18n.t("Error in file upload"));

@@ -4,7 +4,6 @@ import React, { useState } from "react";
 import styled from "styled-components";
 import { MainLayout } from "../../components/main-layout/MainLayout";
 import { useAppContext } from "../../contexts/app-context";
-import { useGlassModule } from "../../hooks/useGlassModule";
 import { glassColors, palette } from "../app/themes/dhis2.theme";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import { NavLink, useLocation } from "react-router-dom";
@@ -13,7 +12,9 @@ import i18n from "@eyeseetea/d2-ui-components/locales";
 import { CurrentDataSubmissionContent } from "../../components/current-data-submission/CurrentDataSubmissionContent";
 import { useStatusDataSubmission } from "../../hooks/useStatusDataSubmission";
 import { ContentLoader } from "../../components/content-loader/ContentLoader";
-import { getUrlParam } from "../../utils/helpers";
+
+import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context";
+import { useCurrentModuleContext } from "../../contexts/current-module-context";
 
 interface CurrentDataSubmissionPageContentProps {
     moduleId: string;
@@ -21,19 +22,14 @@ interface CurrentDataSubmissionPageContentProps {
 }
 
 export const CurrentDataSubmissionPage: React.FC = React.memo(() => {
-    const { compositionRoot } = useAppContext();
-
-    const moduleName = getUrlParam("module");
-
-    const result = useGlassModule(compositionRoot, moduleName);
+    const { currentModuleAccess } = useCurrentModuleContext();
 
     return (
         <MainLayout>
-            <ContentLoader content={result}>
-                {result.kind === "loaded" && (
-                    <CurrentDataSubmissionPageContent moduleId={result.data.id} moduleName={moduleName} />
-                )}
-            </ContentLoader>
+            <CurrentDataSubmissionPageContent
+                moduleId={currentModuleAccess.moduleId}
+                moduleName={currentModuleAccess.moduleName}
+            />
         </MainLayout>
     );
 });
@@ -42,23 +38,22 @@ export const CurrentDataSubmissionPageContent: React.FC<CurrentDataSubmissionPag
     ({ moduleId, moduleName }) => {
         const location = useLocation();
         const queryParameters = new URLSearchParams(location.search);
-
-        // TODO : orgUnit and period will be stored context.
         const periodVal = queryParameters?.get("period");
-        const orgUnitVal = queryParameters.get("orgUnit");
-
-        //set default values till the context changes are integrated,
-        //once context is implemented these values will never be null, defaults logic to be decided and implemented in context
         const [period, setPeriod] = useState(periodVal === null ? new Date().getFullYear() - 1 : parseInt(periodVal));
-        const [orgUnit, setOrgUnit] = useState(orgUnitVal === null ? "" : orgUnitVal);
 
         const { compositionRoot } = useAppContext();
-        const currentDataSubmissionStatus = useStatusDataSubmission(compositionRoot, moduleId, orgUnit, period);
+        const { currentOrgUnitAccess } = useCurrentOrgUnitContext();
+
+        const currentDataSubmissionStatus = useStatusDataSubmission(
+            compositionRoot,
+            moduleId,
+            currentOrgUnitAccess.orgUnitId,
+            period
+        );
 
         const click = (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
             event.preventDefault();
             setPeriod(0); //new period value
-            setOrgUnit("new orgUnit value");
         };
 
         return (
@@ -67,26 +62,17 @@ export const CurrentDataSubmissionPageContent: React.FC<CurrentDataSubmissionPag
                     <PreContent>
                         {/* // TODO: replace this with a global reusable StyledBreadCrumbs component */}
                         <StyledBreadCrumbs aria-label="breadcrumb" separator="">
-                            <Button
-                                component={NavLink}
-                                to={`/current-data-submission/?module=${moduleName}`}
-                                exact={true}
-                                onClick={click}
-                            >
+                            <Button component={NavLink} to={`/current-data-submission`} exact={true} onClick={click}>
                                 <span>{moduleName}</span>
                             </Button>
                             <ChevronRightIcon />
-                            <Button
-                                component={NavLink}
-                                to={`/current-data-submission/?module=${moduleName}`}
-                                exact={true}
-                            >
+                            <Button component={NavLink} to={`/current-data-submission`} exact={true}>
                                 <span>{i18n.t(`${period} Data Submission`)}</span>
                             </Button>
                         </StyledBreadCrumbs>
                         <div className="info">
                             <span>{i18n.t("Yearly data upload")}</span>, &nbsp;
-                            <span>{i18n.t("Spain")}</span>
+                            <span>{i18n.t(currentOrgUnitAccess.orgUnitName)}</span>
                         </div>
                     </PreContent>
                     {currentDataSubmissionStatus.kind === "loaded" && (

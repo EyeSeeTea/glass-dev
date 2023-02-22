@@ -1,14 +1,14 @@
 import React from "react";
 import { CompositionRoot } from "../../CompositionRoot";
 import { GlassModule } from "../../domain/entities/GlassModule";
-import { useGlassModuleContext } from "../contexts/glass-module-context";
+import { useCurrentModuleContext } from "../contexts/current-module-context";
 import { GlassState } from "./State";
 
 export type GlassModuleState = GlassState<GlassModule>;
 
-export function useGlassModule(compositionRoot: CompositionRoot, name?: string) {
-    const { module } = useGlassModuleContext();
-    const moduleName = name ? name : module;
+export function useGlassModule(compositionRoot: CompositionRoot) {
+    const { currentModuleAccess } = useCurrentModuleContext();
+    const moduleName = currentModuleAccess.moduleName;
 
     const [result, setResult] = React.useState<GlassModuleState>({
         kind: "loading",
