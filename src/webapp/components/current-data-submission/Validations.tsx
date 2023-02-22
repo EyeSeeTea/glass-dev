@@ -18,11 +18,9 @@ export const Validations: React.FC = () => {
                 <span className="status">{i18n.t("no validation")}</span>
                 <div className="buttons">
                     <Button>{i18n.t("Report")}</Button>
-                    {hasCurrentUserCaptureAccess && (
-                        <Button variant="contained" color="primary">
-                            {i18n.t("Run Validation")}
-                        </Button>
-                    )}
+                    <Button variant="contained" color="primary" disabled={!hasCurrentUserCaptureAccess}>
+                        {i18n.t("Run Validation")}
+                    </Button>
                 </div>
             </ValidationCard>
             <ValidationCard className="correct">
@@ -35,11 +33,9 @@ export const Validations: React.FC = () => {
                 </span>
                 <div className="buttons">
                     <Button>{i18n.t("Report")}</Button>
-                    {hasCurrentUserCaptureAccess && (
-                        <Button variant="contained" color="primary">
-                            {i18n.t("Re-run Validation")}
-                        </Button>
-                    )}
+                    <Button variant="contained" color="primary" disabled={!hasCurrentUserCaptureAccess}>
+                        {i18n.t("Re-run Validation")}
+                    </Button>
                 </div>
             </ValidationCard>
             <ValidationCard className="wrong">
@@ -52,11 +48,9 @@ export const Validations: React.FC = () => {
                 </span>
                 <div className="buttons">
                     <Button>{i18n.t("Report")}</Button>
-                    {hasCurrentUserCaptureAccess && (
-                        <Button variant="contained" color="primary">
-                            {i18n.t("Re-run Validation")}
-                        </Button>
-                    )}
+                    <Button variant="contained" color="primary" disabled={!hasCurrentUserCaptureAccess}>
+                        {i18n.t("Re-run Validation")}
+                    </Button>
                 </div>
             </ValidationCard>
             <ValidationCard className="correct">
@@ -69,11 +63,9 @@ export const Validations: React.FC = () => {
                 </span>
                 <div className="buttons">
                     <Button>{i18n.t("Report")}</Button>
-                    {hasCurrentUserCaptureAccess && (
-                        <Button variant="contained" color="primary">
-                            {i18n.t("Re-run Validation")}
-                        </Button>
-                    )}
+                    <Button variant="contained" color="primary" disabled={!hasCurrentUserCaptureAccess}>
+                        {i18n.t("Re-run Validation")}
+                    </Button>
                 </div>
             </ValidationCard>
         </ValidationsGrid>

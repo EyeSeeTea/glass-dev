@@ -37,18 +37,17 @@ export const CtaButtons: React.FC<CtaButtonsProps> = ({ ctas }) => {
                 );
             case "Upload dataset":
                 return (
-                    hasCurrentUserCaptureAccess && (
-                        <Button
-                            key={3}
-                            variant="contained"
-                            color="primary"
-                            component={NavLink}
-                            to={`/upload`}
-                            exact={true}
-                        >
-                            {i18n.t("Upload dataset")}
-                        </Button>
-                    )
+                    <Button
+                        key={3}
+                        variant="contained"
+                        color="primary"
+                        component={NavLink}
+                        to={`/upload`}
+                        exact={true}
+                        disabled={!hasCurrentUserCaptureAccess}
+                    >
+                        {i18n.t("Upload dataset")}
+                    </Button>
                 );
         }
     };
