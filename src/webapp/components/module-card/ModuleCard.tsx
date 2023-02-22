@@ -7,23 +7,27 @@ import { glassColors } from "../../pages/app/themes/dhis2.theme";
 import WarningIcon from "@material-ui/icons/WarningOutlined";
 import i18n from "../../../locales";
 import { NavLink } from "react-router-dom";
+import { GlassModule } from "../../../domain/entities/GlassModule";
+import { useCurrentModuleContext } from "../../contexts/current-module-context";
 
 interface ModuleCardProps {
-    title: string;
-    moduleColor: string;
-    endDays?: number | null;
-    filesUploaded: number;
-    moduleUrl: string;
+    period: number;
+    module: GlassModule;
 }
 
-export const ModuleCard: React.FC<ModuleCardProps> = ({ title, moduleColor, endDays, filesUploaded, moduleUrl }) => {
+export const ModuleCard: React.FC<ModuleCardProps> = ({ period, module }) => {
+    const { changeCurrentModuleAccess } = useCurrentModuleContext();
+
+    const endDays = 0; //TO DO : Calculate days left in the open period. Need confirmation on open and close days.
+    const filesUploaded = 0; //TO DO : Fetch number of files uplaoded for data submission.
+
     return (
         <CustomCard padding="0">
-            <TitleContainer moduleColor={moduleColor}>
+            <TitleContainer moduleColor={module?.color || ""}>
                 <StarIcon />
-                <h3>{title}</h3>
+                <h3>{`${module?.name} ${period}`}</h3>
             </TitleContainer>
-            <ContentContainer moduleColor={moduleColor}>
+            <ContentContainer moduleColor={module?.color || ""}>
                 <Container style={{ padding: 0 }}>
                     {endDays ? (
                         <Box display={"flex"} flexDirection="row">
@@ -39,7 +43,14 @@ export const ModuleCard: React.FC<ModuleCardProps> = ({ title, moduleColor, endD
                     <Typography color="textSecondary">{i18n.t(`${filesUploaded} files uploaded`)}</Typography>
                 </Container>
 
-                <Button variant="contained" color="primary" component={NavLink} to={moduleUrl} exact={true}>
+                <Button
+                    variant="contained"
+                    color="primary"
+                    component={NavLink}
+                    to={`/current-data-submission`}
+                    onClick={() => changeCurrentModuleAccess(module?.name || "")}
+                    exact={true}
+                >
                     <span>{i18n.t("GO")}</span>
                 </Button>
             </ContentContainer>
