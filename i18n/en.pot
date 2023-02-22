@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2023-02-15T10:56:09.248Z\n"
-"PO-Revision-Date: 2023-02-15T10:56:09.248Z\n"
+"POT-Creation-Date: 2023-02-22T14:21:41.830Z\n"
+"PO-Revision-Date: 2023-02-22T14:21:41.830Z\n"
 
 msgid "User Profile"
 msgstr ""
@@ -77,24 +77,6 @@ msgstr ""
 msgid "Uploads with errors, or discarded"
 msgstr ""
 
-msgid "Display full status history >"
-msgstr ""
-
-msgid "Go to questionnaires"
-msgstr ""
-
-msgid "Send to WHO for revision"
-msgstr ""
-
-msgid "Upload dataset"
-msgstr ""
-
-msgid "Current Status"
-msgstr ""
-
-msgid "Data Submission status has errors..."
-msgstr ""
-
 msgid "Questionnaire 1"
 msgstr ""
 
@@ -122,24 +104,6 @@ msgstr ""
 msgid "Completed"
 msgstr ""
 
-msgid "Uploaded"
-msgstr ""
-
-msgid "Period"
-msgstr ""
-
-msgid "Records"
-msgstr ""
-
-msgid "Type"
-msgstr ""
-
-msgid "Batch ID"
-msgstr ""
-
-msgid "Status"
-msgstr ""
-
 msgid "Overview"
 msgstr ""
 
@@ -156,6 +120,24 @@ msgid "Advanced"
 msgstr ""
 
 msgid "No Data uploaded..."
+msgstr ""
+
+msgid "Uploaded"
+msgstr ""
+
+msgid "Period"
+msgstr ""
+
+msgid "Records"
+msgstr ""
+
+msgid "Type"
+msgstr ""
+
+msgid "Batch ID"
+msgstr ""
+
+msgid "Status"
 msgstr ""
 
 msgid "Validation Alpha"
@@ -189,6 +171,24 @@ msgid "Validation Echo"
 msgstr ""
 
 msgid "09 - 12 - 2021 VALIDATION CORRECT"
+msgstr ""
+
+msgid "Display full status history >"
+msgstr ""
+
+msgid "Go to questionnaires"
+msgstr ""
+
+msgid "Send to WHO for revision"
+msgstr ""
+
+msgid "Upload dataset"
+msgstr ""
+
+msgid "Current Status"
+msgstr ""
+
+msgid "Data Submission status has errors..."
 msgstr ""
 
 msgid " "
