@@ -7,6 +7,7 @@ import ListIcon from "@material-ui/icons/List";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
 import { useHistory } from "react-router-dom";
 import dayjs from "dayjs";
+import { useGlassCaptureAccess } from "../../hooks/useGlassCaptureAccess";
 
 export interface UploadTableBodyProps {
     rows?: UploadHistoryItemProps[];
@@ -14,9 +15,12 @@ export interface UploadTableBodyProps {
 
 export const UploadTableBody: React.FC<UploadTableBodyProps> = ({ rows }) => {
     const history = useHistory();
+    const hasCurrentUserCaptureAccess = useGlassCaptureAccess();
 
     const click = () => {
-        history.push(`/upload`);
+        if (hasCurrentUserCaptureAccess) {
+            history.push(`/upload`);
+        }
     };
 
     const download = (_url: string) => {
