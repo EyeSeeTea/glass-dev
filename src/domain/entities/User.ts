@@ -1,5 +1,4 @@
 import _ from "lodash";
-import { FutureData } from "./Future";
 import { Id, NamedRef } from "./Ref";
 
 export interface OrgUnitAccess {
@@ -28,7 +27,7 @@ export interface UserAccessInfo {
     userRoles: UserRole[];
     userGroups: NamedRef[];
     userOrgUnitsAccess: OrgUnitAccess[];
-    userModulesAccess: FutureData<ModuleAccess[]>;
+    userModulesAccess: ModuleAccess[];
 }
 
 export interface UserRole extends NamedRef {
