@@ -93,14 +93,21 @@ export class InstanceDefaultRepository implements InstanceRepository {
                     dataViewOrganisationUnits: { id: true, name: true },
                 },
             })
-        ).map(user => ({
-            id: user.id,
-            name: user.displayName,
-            userGroups: user.userGroups,
-            ...user.userCredentials,
-            userOrgUnitsAccess: this.mapUserOrgUnitsAccess(user.organisationUnits, user.dataViewOrganisationUnits),
-            userModulesAccess: this.mapUserGroupAccess(user.userGroups),
-        }));
+        ).flatMap(user => {
+            return this.mapUserGroupAccess(user.userGroups).map((userModulesAccess): UserAccessInfo => {
+                return {
+                    id: user.id,
+                    name: user.displayName,
+                    userGroups: user.userGroups,
+                    ...user.userCredentials,
+                    userOrgUnitsAccess: this.mapUserOrgUnitsAccess(
+                        user.organisationUnits,
+                        user.dataViewOrganisationUnits
+                    ),
+                    userModulesAccess: userModulesAccess,
+                };
+            });
+        });
     }
 
     @cache()
