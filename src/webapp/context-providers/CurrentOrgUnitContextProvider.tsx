@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { OrgUnitAccess } from "../../domain/entities/User";
 import { useHistory, useLocation } from "react-router-dom";
 import { CurrentOrgUnitContext, defaultOrgUnitContextState } from "../contexts/current-orgUnit-context";
@@ -7,8 +7,7 @@ import { useAppContext } from "../contexts/app-context";
 export const CurrentOrgUnitContextProvider: React.FC = ({ children }) => {
     const history = useHistory();
     const location = useLocation();
-    const queryParameters = useMemo(() => new URLSearchParams(location.search), [location]);
-    const orgUnitQueryParam = queryParameters.get("orgUnit");
+    const orgUnitQueryParam = new URLSearchParams(location.search).get("orgUnit");
 
     const { currentUser } = useAppContext();
 
@@ -23,18 +22,20 @@ export const CurrentOrgUnitContextProvider: React.FC = ({ children }) => {
             const currentOrgUnitAccess = currentUser.userOrgUnitsAccess.find(ou => ou.orgUnitId === updatedOrgUnit);
             if (currentOrgUnitAccess) {
                 setCurrentOrgUnitAccess(currentOrgUnitAccess);
-                if (queryParameters.get("orgUnit")) {
+                if (orgUnitQueryParam) {
+                    const queryParameters = new URLSearchParams(location.search);
                     queryParameters.set("orgUnit", currentOrgUnitAccess.orgUnitId);
                     history.replace({ search: queryParameters.toString() });
                 }
             }
         },
-        [history, queryParameters, currentUser.userOrgUnitsAccess]
+        [history, location.search, currentUser.userOrgUnitsAccess, orgUnitQueryParam]
     );
 
     useEffect(() => {
         //If the org unit param has not yet been set, set it.
         if (orgUnitQueryParam === null && currentOrgUnitAccess.orgUnitId !== "") {
+            const queryParameters = new URLSearchParams(location.search);
             queryParameters.set("orgUnit", currentOrgUnitAccess.orgUnitId);
             history.replace({ search: queryParameters.toString() });
         }
@@ -47,8 +48,8 @@ export const CurrentOrgUnitContextProvider: React.FC = ({ children }) => {
         currentOrgUnitAccess.orgUnitId,
         currentUser.userOrgUnitsAccess,
         history,
+        location.search,
         orgUnitQueryParam,
-        queryParameters,
     ]);
 
     return (

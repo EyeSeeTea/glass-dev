@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo, useCallback } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { ModuleAccess } from "../../domain/entities/User";
 import { useHistory, useLocation } from "react-router-dom";
 import { defaultModuleContextState, CurrentModuleContext } from "../contexts/current-module-context";
@@ -8,46 +8,38 @@ import { useAppContext } from "../contexts/app-context";
 export const CurrentModuleContextProvider: React.FC = ({ children }) => {
     const history = useHistory();
     const location = useLocation();
-    const queryParameters = useMemo(() => new URLSearchParams(location.search), [location]);
-    const moduleQueryParam = queryParameters.get("module");
+    const moduleQueryParam = new URLSearchParams(location.search).get("module");
     const { currentUser } = useAppContext();
 
     const [currentModuleAccess, setCurrentModuleAccess] = useState<ModuleAccess>(
         defaultModuleContextState.currentModuleAccess
     );
 
-    const [userModulesAccess, setUserModulesAccess] = useState<ModuleAccess[] | null>(null);
-
     const changeCurrentModuleAccess = useCallback(
         (updated: string) => {
-            const currentModuleAccess = userModulesAccess?.find(m => m.moduleName === updated);
+            const currentModuleAccess = currentUser.userModulesAccess?.find(m => m.moduleName === updated);
             if (currentModuleAccess) {
                 setCurrentModuleAccess(currentModuleAccess);
-                if (queryParameters.get("module")) {
+                if (moduleQueryParam) {
+                    const queryParameters = new URLSearchParams(location.search);
                     queryParameters.set("module", currentModuleAccess.moduleName);
                     history.replace({ search: queryParameters.toString() });
                 }
             }
         },
-        [history, queryParameters, userModulesAccess]
+        [history, location.search, currentUser.userModulesAccess, moduleQueryParam]
     );
 
     const resetCurrentModuleAccess = () => {
         setCurrentModuleAccess(defaultModuleContextState.currentModuleAccess);
+        const queryParameters = new URLSearchParams(location.search);
         queryParameters.delete("module");
     };
 
     useEffect(() => {
-        async function initModuleAccess() {
-            const { data: moduleAccessList } = await currentUser.userModulesAccess.runAsync();
-            if (moduleAccessList) setUserModulesAccess(moduleAccessList);
-        }
-        //Since userModulesAccess is a Future, fetch and initilize module access asynchronously.
-        if (userModulesAccess === null) {
-            initModuleAccess();
-        }
         //If the module query parameter has not yet been set, set it.
         if (moduleQueryParam === null && currentModuleAccess.moduleName !== "") {
+            const queryParameters = new URLSearchParams(location.search);
             queryParameters.set("module", currentModuleAccess.moduleName);
             history.replace({ search: queryParameters.toString() });
         }
@@ -60,9 +52,8 @@ export const CurrentModuleContextProvider: React.FC = ({ children }) => {
         currentUser.userModulesAccess,
         currentModuleAccess.moduleName,
         history,
+        location.search,
         moduleQueryParam,
-        queryParameters,
-        userModulesAccess,
     ]);
 
     return (
