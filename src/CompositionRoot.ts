@@ -25,8 +25,15 @@ import { GetGlassUploadsByDataSubmissionUseCase } from "./domain/usecases/GetGla
 import { SetUploadBatchIdUseCase } from "./domain/usecases/SetUploadBatchIdUseCase";
 import { DeleteDocumentInfoByUploadIdUseCase } from "./domain/usecases/DeleteDocumentInfoByUploadIdUseCase";
 import { GetOpenDataSubmissionsByOUUseCase } from "./domain/usecases/GetOpenDataSubmissionsByOUUseCase";
+import { DataFormD2Repository } from "./data/repositories/DataFormD2Repository";
+import { DataValueD2Repository } from "./data/repositories/DataValueD2Repository";
+import { getD2APiFromInstance } from "./utils/d2-api";
+import { GetDataFormUseCase } from "./domain/usecases/GetDataFormUseCase";
+import { GetDataFormValuesUseCase } from "./domain/usecases/GetDataFormValuesUseCase";
+import { SaveDataFormValueUseCase } from "./domain/usecases/SaveDataFormValue";
 
 export function getCompositionRoot(instance: Instance) {
+    const api = getD2APiFromInstance(instance);
     const dataStoreClient = new DataStoreClient(instance);
     const instanceRepository = new InstanceDefaultRepository(instance, dataStoreClient);
     const glassModuleRepository = new GlassModuleDefaultRepository(dataStoreClient);
@@ -34,6 +41,8 @@ export function getCompositionRoot(instance: Instance) {
     const glassDataSubmissionRepository = new GlassDataSubmissionsDefaultRepository(dataStoreClient);
     const glassUploadsRepository = new GlassUploadsDefaultRepository(dataStoreClient);
     const glassDocumentsRepository = new GlassDocumentsDefaultRepository(dataStoreClient, instance);
+    const dataFormRepository = new DataFormD2Repository(api);
+    const dataValueRepository = new DataValueD2Repository(api);
 
     return {
         instance: getExecute({
@@ -67,6 +76,11 @@ export function getCompositionRoot(instance: Instance) {
             validate: new ValidateGlassDocumentsUseCase(glassDocumentsRepository),
             upload: new UploadDocumentUseCase(glassDocumentsRepository, glassUploadsRepository),
             deleteByUploadId: new DeleteDocumentInfoByUploadIdUseCase(glassDocumentsRepository, glassUploadsRepository),
+        }),
+        dataForms: getExecute({
+            get: new GetDataFormUseCase(dataFormRepository),
+            getValues: new GetDataFormValuesUseCase(dataValueRepository),
+            saveValue: new SaveDataFormValueUseCase(dataValueRepository),
         }),
     };
 }
