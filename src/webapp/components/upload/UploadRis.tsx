@@ -10,17 +10,18 @@ import { FileRejection } from "react-dropzone";
 import { RemoveContainer, StyledRemoveButton } from "./UploadFiles";
 import { useAppContext } from "../../contexts/app-context";
 interface UploadRisProps {
+    risFile: File | null;
+    setRisFile: React.Dispatch<React.SetStateAction<File | null>>;
     validate: (val: boolean) => void;
     batchId: string;
 }
 
 const RIS_FILE_TYPE = "RIS";
 
-export const UploadRis: React.FC<UploadRisProps> = ({ validate, batchId }) => {
+export const UploadRis: React.FC<UploadRisProps> = ({ risFile, setRisFile, validate, batchId }) => {
     const { compositionRoot } = useAppContext();
     const snackbar = useSnackbar();
 
-    const [risFile, setRisFile] = useState<File | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const risFileUploadRef = useRef<DropzoneRef>(null);
 
@@ -59,17 +60,17 @@ export const UploadRis: React.FC<UploadRisProps> = ({ validate, batchId }) => {
                         batchId,
                         fileType: RIS_FILE_TYPE,
                     };
-                    const uploadId = await compositionRoot.glassDocuments
-                        .upload({ file: uploadedRisFile, data })
-                        .toPromise();
-                    localStorage.setItem("risUploadId", uploadId);
+                    // const uploadId = await compositionRoot.glassDocuments
+                    //     .upload({ file: uploadedRisFile, data })
+                    //     .toPromise();
+                    localStorage.setItem("risUploadId", "123");
                     setIsLoading(false);
                 } else {
                     snackbar.error(i18n.t("Error in file upload"));
                 }
             }
         },
-        [batchId, compositionRoot.glassDocuments, snackbar]
+        [batchId, compositionRoot.glassDocuments, snackbar, setRisFile]
     );
 
     return (

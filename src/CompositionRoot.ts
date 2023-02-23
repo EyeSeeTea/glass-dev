@@ -24,6 +24,8 @@ import { SetUploadStatusUseCase } from "./domain/usecases/SetUploadStatusUseCase
 import { GetGlassUploadsByDataSubmissionUseCase } from "./domain/usecases/GetGlassUploadsByDataSubmissionUseCase";
 import { SetUploadBatchIdUseCase } from "./domain/usecases/SetUploadBatchIdUseCase";
 import { DeleteDocumentInfoByUploadIdUseCase } from "./domain/usecases/DeleteDocumentInfoByUploadIdUseCase";
+import { GlassImportRISFileDefaultRepository } from "./data/repositories/GlassImportRISFileDefaultRepository";
+import { ImportRISFileUseCase } from "./domain/usecases/ImportRISFileUseCase";
 
 export function getCompositionRoot(instance: Instance) {
     const dataStoreClient = new DataStoreClient(instance);
@@ -33,6 +35,7 @@ export function getCompositionRoot(instance: Instance) {
     const glassDataSubmissionRepository = new GlassDataSubmissionsDefaultRepository(dataStoreClient);
     const glassUploadsRepository = new GlassUploadsDefaultRepository(dataStoreClient);
     const glassDocumentsRepository = new GlassDocumentsDefaultRepository(dataStoreClient, instance);
+    const glassRisFileRepository = new GlassImportRISFileDefaultRepository(instance);
 
     return {
         instance: getExecute({
@@ -65,6 +68,9 @@ export function getCompositionRoot(instance: Instance) {
             validate: new ValidateGlassDocumentsUseCase(glassDocumentsRepository),
             upload: new UploadDocumentUseCase(glassDocumentsRepository, glassUploadsRepository),
             deleteByUploadId: new DeleteDocumentInfoByUploadIdUseCase(glassDocumentsRepository, glassUploadsRepository),
+        }),
+        glassRisFile: getExecute({
+            importFile: new ImportRISFileUseCase(glassRisFileRepository),
         }),
     };
 }

@@ -8,6 +8,8 @@ import { UploadRis } from "./UploadRis";
 import { UploadSample } from "./UploadSample";
 import { useAppContext } from "../../contexts/app-context";
 import { GlassUploads } from "../../../domain/entities/GlassUploads";
+import { GlassState } from "../../hooks/State";
+import { DataValueSetsPostResponse } from "@eyeseetea/d2-api/api";
 
 interface UploadFilesProps {
     changeStep: (step: number) => void;
@@ -39,7 +41,7 @@ const datasetOptions = [
         value: "6",
     },
 ];
-
+export type DataBalueSetsPostResponseState = GlassState<DataValueSetsPostResponse>;
 export const UploadFiles: React.FC<UploadFilesProps> = ({ changeStep }) => {
     const { compositionRoot } = useAppContext();
 
@@ -48,6 +50,8 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({ changeStep }) => {
     const [isFileValid, setIsFileValid] = useState(false);
     const [previousUploads, setPreviousGlassUploads] = useState<GlassUploads[]>([]);
     const [previousUploadsBatchIds, setPreviousUploadsBatchIds] = useState<string[]>([]);
+    const [risFile, setRisFile] = useState<File | null>(null);
+    const [result, setResult] = React.useState<DataValueSetsPostResponse[]>([]);
 
     useEffect(() => {
         const fetchPreviousUpload = async (): Promise<GlassUploads[]> => {
@@ -87,10 +91,34 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({ changeStep }) => {
         }
     };
 
+    const uploadDatasetAndChangeStep = () => {
+        if (risFile) {
+            compositionRoot.glassRisFile.importFile(risFile).then(results => {
+                results.map(res =>
+                    res.then(r =>
+                        r.run(
+                            data => {
+                                setResult(prevResult => {
+                                    const updated = [...prevResult, data];
+                                    return updated;
+                                });
+                            },
+                            error => {
+                                console.debug(error);
+                            }
+                        )
+                    )
+                );
+            });
+        }
+
+        // changeStep(2);
+    };
+
     return (
         <ContentWrapper>
             <div className="file-fields">
-                <UploadRis validate={setIsFileValid} batchId={batchId} />
+                <UploadRis validate={setIsFileValid} batchId={batchId} risFile={risFile} setRisFile={setRisFile} />
 
                 <UploadSample batchId={batchId} />
             </div>
@@ -129,10 +157,10 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({ changeStep }) => {
                 <Button
                     variant="contained"
                     color={isValidated ? "primary" : "default"}
-                    disabled={isValidated ? false : true}
+                    disabled={isValidated ? false : false}
                     endIcon={<ChevronRightIcon />}
                     disableElevation
-                    onClick={() => changeStep(2)}
+                    onClick={uploadDatasetAndChangeStep}
                 >
                     {i18n.t("Continue")}
                 </Button>
