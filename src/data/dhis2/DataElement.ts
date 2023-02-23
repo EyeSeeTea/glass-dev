@@ -1,30 +1,41 @@
 import { Maybe } from "../../types/utils";
-import { Id } from "./Base";
+import { Id } from "../../domain/entities/Base";
 
 export type DataElement = DataElementBoolean | DataElementNumber | DataElementText;
 
 interface DataElementBase {
     id: Id;
     name: string;
+    disaggregation: Disaggregation[];
+}
+
+export interface Disaggregation {
+    id: Id;
+    name: string;
 }
 
 export interface DataElementBoolean extends DataElementBase {
     type: "BOOLEAN";
-    options: Options;
+    options: Maybe<Options>;
 }
 
 export interface DataElementNumber extends DataElementBase {
     type: "NUMBER";
     numberType: NumberType;
-    options: Options;
+    options: Maybe<Options>;
 }
 
 export interface DataElementText extends DataElementBase {
     type: "TEXT";
-    options: Options;
+    options: Maybe<Options>;
+    multiline: boolean;
 }
 
-type Options = Maybe<{ isMultiple: boolean; items: Option<string>[] }>;
+interface Options {
+    id: Id; // On DHIS2: ID of categoryCombo or optionSet
+    isMultiple: boolean;
+    items: Option<string>[];
+}
 
 type NumberType =
     | "NUMBER"

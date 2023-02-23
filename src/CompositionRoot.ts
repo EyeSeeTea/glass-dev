@@ -25,12 +25,12 @@ import { GetGlassUploadsByDataSubmissionUseCase } from "./domain/usecases/GetGla
 import { SetUploadBatchIdUseCase } from "./domain/usecases/SetUploadBatchIdUseCase";
 import { DeleteDocumentInfoByUploadIdUseCase } from "./domain/usecases/DeleteDocumentInfoByUploadIdUseCase";
 import { GetOpenDataSubmissionsByOUUseCase } from "./domain/usecases/GetOpenDataSubmissionsByOUUseCase";
-import { DataFormD2Repository } from "./data/repositories/DataFormD2Repository";
-import { DataValueD2Repository } from "./data/repositories/DataValueD2Repository";
 import { getD2APiFromInstance } from "./utils/d2-api";
-import { GetDataFormUseCase } from "./domain/usecases/GetDataFormUseCase";
-import { GetDataFormValuesUseCase } from "./domain/usecases/GetDataFormValuesUseCase";
-import { SaveDataFormValueUseCase } from "./domain/usecases/SaveDataFormValue";
+import { QuestionnaireD2Repository } from "./data/repositories/QuestionnaireD2Repository";
+import { GetQuestionnaireUseCase } from "./domain/usecases/GetQuestionnaireUseCase";
+import { SaveQuestionnaireResponseUseCase } from "./domain/usecases/SaveQuestionUseCase";
+import { SetAsQuestionnaireAsCompletedUseCase } from "./domain/usecases/SetAsCompletedUseCase";
+import { GetQuestionnaireListUseCase } from "./domain/usecases/GetQuestionnaireListUseCase";
 
 export function getCompositionRoot(instance: Instance) {
     const api = getD2APiFromInstance(instance);
@@ -41,8 +41,7 @@ export function getCompositionRoot(instance: Instance) {
     const glassDataSubmissionRepository = new GlassDataSubmissionsDefaultRepository(dataStoreClient);
     const glassUploadsRepository = new GlassUploadsDefaultRepository(dataStoreClient);
     const glassDocumentsRepository = new GlassDocumentsDefaultRepository(dataStoreClient, instance);
-    const dataFormRepository = new DataFormD2Repository(api);
-    const dataValueRepository = new DataValueD2Repository(api);
+    const questionnaireD2Repository = new QuestionnaireD2Repository(api);
 
     return {
         instance: getExecute({
@@ -77,10 +76,11 @@ export function getCompositionRoot(instance: Instance) {
             upload: new UploadDocumentUseCase(glassDocumentsRepository, glassUploadsRepository),
             deleteByUploadId: new DeleteDocumentInfoByUploadIdUseCase(glassDocumentsRepository, glassUploadsRepository),
         }),
-        dataForms: getExecute({
-            get: new GetDataFormUseCase(dataFormRepository),
-            getValues: new GetDataFormValuesUseCase(dataValueRepository),
-            saveValue: new SaveDataFormValueUseCase(dataValueRepository),
+        questionnaires: getExecute({
+            get: new GetQuestionnaireUseCase(questionnaireD2Repository),
+            getList: new GetQuestionnaireListUseCase(questionnaireD2Repository),
+            saveResponse: new SaveQuestionnaireResponseUseCase(questionnaireD2Repository),
+            setAsCompleted: new SetAsQuestionnaireAsCompletedUseCase(questionnaireD2Repository),
         }),
     };
 }
