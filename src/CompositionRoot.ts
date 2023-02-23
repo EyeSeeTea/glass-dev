@@ -25,6 +25,8 @@ import { GetGlassUploadsByDataSubmissionUseCase } from "./domain/usecases/GetGla
 import { SetUploadBatchIdUseCase } from "./domain/usecases/SetUploadBatchIdUseCase";
 import { DeleteDocumentInfoByUploadIdUseCase } from "./domain/usecases/DeleteDocumentInfoByUploadIdUseCase";
 import { GetOpenDataSubmissionsByOUUseCase } from "./domain/usecases/GetOpenDataSubmissionsByOUUseCase";
+import { GetNotificationsUseCase } from "./domain/usecases/GetNotificationsUseCase";
+import { NotificationDefaultRepository } from "./data/repositories/NotificationDefaultRepository";
 
 export function getCompositionRoot(instance: Instance) {
     const dataStoreClient = new DataStoreClient(instance);
@@ -34,6 +36,7 @@ export function getCompositionRoot(instance: Instance) {
     const glassDataSubmissionRepository = new GlassDataSubmissionsDefaultRepository(dataStoreClient);
     const glassUploadsRepository = new GlassUploadsDefaultRepository(dataStoreClient);
     const glassDocumentsRepository = new GlassDocumentsDefaultRepository(dataStoreClient, instance);
+    const notificationRepository = new NotificationDefaultRepository(instance);
 
     return {
         instance: getExecute({
@@ -67,6 +70,9 @@ export function getCompositionRoot(instance: Instance) {
             validate: new ValidateGlassDocumentsUseCase(glassDocumentsRepository),
             upload: new UploadDocumentUseCase(glassDocumentsRepository, glassUploadsRepository),
             deleteByUploadId: new DeleteDocumentInfoByUploadIdUseCase(glassDocumentsRepository, glassUploadsRepository),
+        }),
+        notifications: getExecute({
+            get: new GetNotificationsUseCase(notificationRepository),
         }),
     };
 }
