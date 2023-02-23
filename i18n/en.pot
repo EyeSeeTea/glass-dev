@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2023-02-22T14:38:11.428Z\n"
-"PO-Revision-Date: 2023-02-22T14:38:11.428Z\n"
+"POT-Creation-Date: 2023-02-23T10:15:14.145Z\n"
+"PO-Revision-Date: 2023-02-23T10:15:14.145Z\n"
 
 msgid "User Profile"
 msgstr ""
@@ -189,6 +189,21 @@ msgid "Current Status"
 msgstr ""
 
 msgid "Data Submission status has errors..."
+msgstr ""
+
+msgid "Loading..."
+msgstr ""
+
+msgid "There are no sections in this data set. Check README for more details"
+msgstr ""
+
+msgid "Yes"
+msgstr ""
+
+msgid "No"
+msgstr ""
+
+msgid "Select"
 msgstr ""
 
 msgid " "
