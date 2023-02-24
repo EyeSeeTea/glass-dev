@@ -4,6 +4,7 @@ import { Radio } from "@dhis2/ui";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { Maybe } from "../../../types/utils";
 import { BaseWidgetProps } from "./BaseWidget";
+import { makeStyles } from "@material-ui/core";
 
 export interface SingleSelectWidgetProps extends BaseWidgetProps<boolean> {
     value: Maybe<boolean>;
@@ -20,8 +21,10 @@ const SingleSelectWidget: React.FC<SingleSelectWidgetProps> = props => {
         [onValueChange, value]
     );
 
+    const classes = useStyles();
+
     return (
-        <>
+        <div className={classes.wrapper}>
             <Radio
                 checked={value === true}
                 label={i18n.t("Yes")}
@@ -35,8 +38,12 @@ const SingleSelectWidget: React.FC<SingleSelectWidgetProps> = props => {
                 disabled={props.disabled}
                 onChange={() => notifyChange(false)}
             />
-        </>
+        </div>
     );
 };
+
+const useStyles = makeStyles({
+    wrapper: { display: "flex", gap: 10 },
+});
 
 export default React.memo(SingleSelectWidget);

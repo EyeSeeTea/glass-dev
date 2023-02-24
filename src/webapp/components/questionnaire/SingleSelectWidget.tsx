@@ -4,6 +4,7 @@ import { Radio } from "@dhis2/ui";
 import { Id } from "../../../domain/entities/Base";
 import { Maybe } from "../../../types/utils";
 import { BaseWidgetProps } from "./BaseWidget";
+import { makeStyles } from "@material-ui/core";
 
 export interface SingleSelectWidgetProps extends BaseWidgetProps<Option> {
     value: Maybe<Id>;
@@ -24,8 +25,10 @@ const SingleSelectWidget: React.FC<SingleSelectWidgetProps> = props => {
         [onValueChange, options, value]
     );
 
+    const classes = useStyles();
+
     return (
-        <>
+        <div className={classes.wrapper}>
             {options.map(option => (
                 <Radio
                     key={option.id}
@@ -35,8 +38,12 @@ const SingleSelectWidget: React.FC<SingleSelectWidgetProps> = props => {
                     onChange={() => notifyChange(option.id)}
                 />
             ))}
-        </>
+        </div>
     );
 };
+
+const useStyles = makeStyles({
+    wrapper: { display: "flex", gap: 10 },
+});
 
 export default React.memo(SingleSelectWidget);
