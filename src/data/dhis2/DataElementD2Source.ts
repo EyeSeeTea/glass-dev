@@ -1,7 +1,7 @@
 import "lodash.product";
 import _ from "lodash";
 import { getId, Id } from "../../domain/entities/Base";
-import { DataElement, Disaggregation } from "./DataElement";
+import { CategoryOptionCombo, DataElement } from "./DataElement";
 import { D2Api, MetadataPick } from "../../types/d2-api";
 import { Maybe } from "../../types/utils";
 import { FutureData } from "../../domain/entities/Future";
@@ -62,13 +62,13 @@ function getDataElement(d2DataElement: D2DataElement, d2CategoryCombo: D2Categor
     const { valueType } = d2DataElement;
 
     const optionSet = getOptionSet(d2DataElement);
-    const optionsFromDataElementCategoryCombo = getOptionsCategoryCombo(d2CategoryCombo);
+    const disaggregation = getOptionsCategoryCombo(d2CategoryCombo);
 
     const base: Pick<DataElement, "id" | "name" | "options" | "disaggregation"> = {
         id: d2DataElement.id,
         name: d2DataElement.formName || d2DataElement.displayName,
         options: optionSet ? { id: optionSet.id, isMultiple: false, items: optionSet.options } : undefined,
-        disaggregation: optionsFromDataElementCategoryCombo,
+        disaggregation: disaggregation,
     };
 
     switch (valueType) {
@@ -108,7 +108,7 @@ function getOptionsCategoryCombo(categoryCombo: D2CategoryCombo) {
 
     return categoryOptionsCartesian.flatMap(categoryOptions => {
         return _(categoryCombo.categoryOptionCombos)
-            .map((coc): Maybe<Disaggregation> => {
+            .map((coc): Maybe<CategoryOptionCombo> => {
                 const allCategoryOptionsMatch = _(categoryOptions).differenceBy(coc.categoryOptions, getId).isEmpty();
 
                 return allCategoryOptionsMatch

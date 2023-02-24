@@ -6,10 +6,10 @@ export type DataElement = DataElementBoolean | DataElementNumber | DataElementTe
 interface DataElementBase {
     id: Id;
     name: string;
-    disaggregation: Disaggregation[];
+    disaggregation: CategoryOptionCombo[];
 }
 
-export interface Disaggregation {
+export interface CategoryOptionCombo {
     id: Id;
     name: string;
 }
