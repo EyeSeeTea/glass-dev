@@ -128,32 +128,30 @@ export class QuestionnaireD2Repository implements QuestionnaireRepository {
 
     private getQuestion(dataElement: DataElement, dataValues: DataValueSetsDataValue[]): QuestionnaireQuestion | null {
         const dataValue = _.first(dataValues);
-
-        const selectedCocId = _(dataValues)
-            .map(dv => (dv.value === "true" ? dv.categoryOptionCombo : null))
-            .compact()
-            .first();
-
-        const isDefault = dataElement.disaggregation.length && dataElement.disaggregation[0]?.name === "default";
+        const { disaggregation } = dataElement;
 
         switch (dataElement.type) {
             case "BOOLEAN": {
-                if (!isDefault) {
-                    const value = dataElement.disaggregation.find(dis => dis.id === selectedCocId);
+                const isDefaultDisaggregation = disaggregation.length && disaggregation[0]?.name === "default";
 
+                const selectedCoc = dataElement.disaggregation.find(coc =>
+                    _(dataValues).some(dv => dv.value === "true" && dv.categoryOptionCombo === coc.id)
+                );
+
+                if (isDefaultDisaggregation) {
                     return {
                         id: dataElement.id,
                         text: dataElement.name,
-                        type: "select",
-                        value: value,
-                        options: dataElement.disaggregation,
+                        type: "boolean",
+                        value: Boolean(selectedCoc),
                     };
                 } else {
                     return {
                         id: dataElement.id,
                         text: dataElement.name,
-                        type: "boolean",
-                        value: Boolean(selectedCocId),
+                        type: "select",
+                        value: selectedCoc,
+                        options: dataElement.disaggregation,
                     };
                 }
             }
