@@ -27,4 +27,14 @@ export class GlassDataSubmissionsDefaultRepository implements GlassDataSubmissio
             ])
         );
     }
+
+    getOpenDataSubmissionsByOU(orgUnit: string): FutureData<GlassDataSubmission[]> {
+        return this.dataStoreClient.getObjectsFilteredByProps<GlassDataSubmission>(
+            DataStoreKeys.DATA_SUBMISSIONS,
+            new Map<keyof GlassDataSubmission, unknown>([
+                ["period", new Date().getFullYear() - 1], //Open Data Submissions are for the previous year
+                ["orgUnit", orgUnit],
+            ])
+        );
+    }
 }

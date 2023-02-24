@@ -26,6 +26,9 @@ import { SetUploadBatchIdUseCase } from "./domain/usecases/SetUploadBatchIdUseCa
 import { DeleteDocumentInfoByUploadIdUseCase } from "./domain/usecases/DeleteDocumentInfoByUploadIdUseCase";
 import { GlassImportRISFileDefaultRepository } from "./data/repositories/GlassImportRISFileDefaultRepository";
 import { ImportRISFileUseCase } from "./domain/usecases/ImportRISFileUseCase";
+import { GetOpenDataSubmissionsByOUUseCase } from "./domain/usecases/GetOpenDataSubmissionsByOUUseCase";
+import { GetNotificationsUseCase } from "./domain/usecases/GetNotificationsUseCase";
+import { NotificationDefaultRepository } from "./data/repositories/NotificationDefaultRepository";
 
 export function getCompositionRoot(instance: Instance) {
     const dataStoreClient = new DataStoreClient(instance);
@@ -36,6 +39,7 @@ export function getCompositionRoot(instance: Instance) {
     const glassUploadsRepository = new GlassUploadsDefaultRepository(dataStoreClient);
     const glassDocumentsRepository = new GlassDocumentsDefaultRepository(dataStoreClient, instance);
     const glassRisFileRepository = new GlassImportRISFileDefaultRepository(instance);
+    const notificationRepository = new NotificationDefaultRepository(instance);
 
     return {
         instance: getExecute({
@@ -55,6 +59,7 @@ export function getCompositionRoot(instance: Instance) {
         glassDataSubmission: getExecute({
             getSpecificDataSubmission: new GetSpecificDataSubmissionUseCase(glassDataSubmissionRepository),
             getDataSubmissionsByModuleAndOU: new GetDataSubmissionsByModuleAndOUUseCase(glassDataSubmissionRepository),
+            getOpenDataSubmissionsByOU: new GetOpenDataSubmissionsByOUUseCase(glassDataSubmissionRepository),
         }),
         glassUploads: getExecute({
             getAll: new GetGlassUploadsUseCase(glassUploadsRepository),
@@ -71,6 +76,9 @@ export function getCompositionRoot(instance: Instance) {
         }),
         glassRisFile: getExecute({
             importFile: new ImportRISFileUseCase(glassRisFileRepository),
+        }),
+        notifications: getExecute({
+            get: new GetNotificationsUseCase(notificationRepository),
         }),
     };
 }
