@@ -52,46 +52,14 @@ export const CountryInformationContent: React.FC<CountryInformationContentProps>
                     <CustomCard title="National Focal Point" key={nationalFocalPoint.id}>
                         <InfoTable>
                             <tbody>
-                                <tr>
-                                    <td>{i18n.t("Family Name *")}</td>
-                                    <td>{nationalFocalPoint.familyName}</td>
-                                </tr>
-                                <tr>
-                                    <td>{i18n.t("First Name *")}</td>
-                                    <td>{nationalFocalPoint.firstName}</td>
-                                </tr>
-                                <tr>
-                                    <td>{i18n.t("Function *")}</td>
-                                    <td>{nationalFocalPoint.function}</td>
-                                </tr>
-                                <tr>
-                                    <td>{i18n.t("Email Address *")}</td>
-                                    <td>{nationalFocalPoint.emailAddress}</td>
-                                </tr>
-                                <tr>
-                                    <td>{i18n.t("Preferred Language (notifications) *")}</td>
-                                    <td>{nationalFocalPoint.preferredLanguage}</td>
-                                </tr>
-                                <tr>
-                                    <td>{i18n.t("Telephone *")}</td>
-                                    <td>{nationalFocalPoint.telephone}</td>
-                                </tr>
-                                <tr>
-                                    <td>{i18n.t("Institution *")}</td>
-                                    <td>{nationalFocalPoint.institution}</td>
-                                </tr>
-                                <tr>
-                                    <td>{i18n.t("Institution address *")}</td>
-                                    <td>{nationalFocalPoint.institutionAddress}</td>
-                                </tr>
-                                <tr>
-                                    <td>{i18n.t("City *")}</td>
-                                    <td>{nationalFocalPoint.city}</td>
-                                </tr>
-                                <tr>
-                                    <td>{i18n.t("Zip Code *")}</td>
-                                    <td>{nationalFocalPoint.zipCode}</td>
-                                </tr>
+                                {nationalFocalPoint.values.map(value => {
+                                    return (
+                                        <tr key={value.id}>
+                                            <td>{`${value.name} *`}</td>
+                                            <td>{value.value}</td>
+                                        </tr>
+                                    );
+                                })}
                             </tbody>
                         </InfoTable>
                     </CustomCard>
