@@ -25,12 +25,12 @@ export const Router: React.FC = React.memo(() => {
                             path="/questionnaire"
                             render={() => (
                                 <QuestionnaireForm
+                                    mode="edit"
                                     id="OYc0CihXiSn"
                                     orgUnitId="PdB4jUjgRj6"
                                     year={2022}
                                     onBackClick={console.debug}
                                     onSave={console.debug}
-                                    disabled={false}
                                 />
                             )}
                         />

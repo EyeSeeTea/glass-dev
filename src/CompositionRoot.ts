@@ -29,7 +29,7 @@ import { getD2APiFromInstance } from "./utils/d2-api";
 import { QuestionnaireD2Repository } from "./data/repositories/QuestionnaireD2Repository";
 import { GetQuestionnaireUseCase } from "./domain/usecases/GetQuestionnaireUseCase";
 import { SaveQuestionnaireResponseUseCase } from "./domain/usecases/SaveQuestionUseCase";
-import { SetAsQuestionnaireAsCompletedUseCase } from "./domain/usecases/SetAsCompletedUseCase";
+import { SetAsQuestionnaireCompletionUseCase } from "./domain/usecases/SetAsQuestionnaireCompletionUseCase";
 import { GetQuestionnaireListUseCase } from "./domain/usecases/GetQuestionnaireListUseCase";
 import { GetNotificationsUseCase } from "./domain/usecases/GetNotificationsUseCase";
 import { NotificationDefaultRepository } from "./data/repositories/NotificationDefaultRepository";
@@ -83,7 +83,7 @@ export function getCompositionRoot(instance: Instance) {
             get: new GetQuestionnaireUseCase(questionnaireD2Repository),
             getList: new GetQuestionnaireListUseCase(questionnaireD2Repository),
             saveResponse: new SaveQuestionnaireResponseUseCase(questionnaireD2Repository),
-            setAsCompleted: new SetAsQuestionnaireAsCompletedUseCase(questionnaireD2Repository),
+            setAsCompleted: new SetAsQuestionnaireCompletionUseCase(questionnaireD2Repository),
         }),
         notifications: getExecute({
             get: new GetNotificationsUseCase(notificationRepository),

@@ -38,55 +38,11 @@ export class DataElementD2Source {
     }
 }
 
-const dataElementFields = {
-    id: true,
-    code: true,
-    displayName: true,
-    formName: true,
-    valueType: true,
-    optionSet: {
-        id: true,
-        options: { id: true, displayName: true, code: true },
-    },
-    categoryCombo: {
-        id: true,
-        categories: { id: true, categoryOptions: { id: true, displayName: true } },
-        categoryOptionCombos: { id: true, categoryOptions: { id: true } },
-    },
-} as const;
-
-type D2DataElement = MetadataPick<{
-    dataElements: { fields: typeof dataElementFields };
-}>["dataElements"][number];
-
 function getDataElement(dataElement: D2DataElement): DataElement | null {
     const { valueType } = dataElement;
-    const optionSet = dataElement.optionSet
-        ? {
-              ...dataElement.optionSet,
-              options: dataElement.optionSet.options.map(option => ({
-                  name: option.displayName,
-                  value: option.code,
-              })),
-          }
-        : null;
 
-    const categoryOptionsCartesian = _.product(
-        ...dataElement.categoryCombo.categories.map(category => category.categoryOptions)
-    );
-
-    const optionsFromDataElementCategoryCombo = categoryOptionsCartesian.flatMap(categoryOptions => {
-        return _(dataElement.categoryCombo.categoryOptionCombos)
-            .map((coc): Maybe<Disaggregation> => {
-                const allCategoryOptionsMatch = _(categoryOptions).differenceBy(coc.categoryOptions, getId).isEmpty();
-
-                return allCategoryOptionsMatch
-                    ? { id: coc.id, name: categoryOptions.map(co => co.displayName).join(", ") }
-                    : undefined;
-            })
-            .compact()
-            .value();
-    });
+    const optionSet = getOptionSet(dataElement);
+    const optionsFromDataElementCategoryCombo = getOptionsCategoryCombo(dataElement);
 
     const base: Pick<DataElement, "id" | "name" | "options" | "disaggregation"> = {
         id: dataElement.id,
@@ -115,3 +71,54 @@ function getDataElement(dataElement: D2DataElement): DataElement | null {
             return null;
     }
 }
+function getOptionSet(dataElement: D2DataElement) {
+    return dataElement.optionSet
+        ? {
+              ...dataElement.optionSet,
+              options: dataElement.optionSet.options.map(option => ({
+                  name: option.displayName,
+                  value: option.code,
+              })),
+          }
+        : null;
+}
+
+function getOptionsCategoryCombo(dataElement: D2DataElement) {
+    const categoryOptionsCartesian = _.product(
+        ...dataElement.categoryCombo.categories.map(category => category.categoryOptions)
+    );
+
+    return categoryOptionsCartesian.flatMap(categoryOptions => {
+        return _(dataElement.categoryCombo.categoryOptionCombos)
+            .map((coc): Maybe<Disaggregation> => {
+                const allCategoryOptionsMatch = _(categoryOptions).differenceBy(coc.categoryOptions, getId).isEmpty();
+
+                return allCategoryOptionsMatch
+                    ? { id: coc.id, name: categoryOptions.map(co => co.displayName).join(", ") }
+                    : undefined;
+            })
+            .compact()
+            .value();
+    });
+}
+
+const dataElementFields = {
+    id: true,
+    code: true,
+    displayName: true,
+    formName: true,
+    valueType: true,
+    optionSet: {
+        id: true,
+        options: { id: true, displayName: true, code: true },
+    },
+    categoryCombo: {
+        id: true,
+        categories: { id: true, categoryOptions: { id: true, displayName: true } },
+        categoryOptionCombos: { id: true, categoryOptions: { id: true } },
+    },
+} as const;
+
+type D2DataElement = MetadataPick<{
+    dataElements: { fields: typeof dataElementFields };
+}>["dataElements"][number];

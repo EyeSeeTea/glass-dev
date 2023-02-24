@@ -14,102 +14,62 @@ import QuestionnarieForm, { QuestionnarieFormProps } from "../questionnaire/Ques
 
 export const Questionnaires: React.FC = () => {
     const hasCurrentUserCaptureAccess = useGlassCaptureAccess();
+    const [questionnaires, updateQuestionnarie] = useQuestionnaires();
+    const { orgUnitId, year } = useSelector();
+    const [formState, actions] = useFormState();
 
-    const { compositionRoot } = useAppContext();
-    const module = useGlassModule(compositionRoot);
-    const [questionnaires, setQuestionnaires] = React.useState<QuestionnaireSimple[]>();
-    const snackbar = useSnackbar();
-
-    const { currentOrgUnitAccess } = useCurrentOrgUnitContext();
-    const { orgUnitId } = currentOrgUnitAccess;
-    const year = 2022; // TODO: dynamic
-
-    React.useEffect(() => {
-        if (module.kind !== "loaded") return;
-
-        return compositionRoot.questionnaires
-            .getList(module.data, {
-                orgUnitId: orgUnitId,
-                year: year,
-            })
-            .run(setQuestionnaires, err => snackbar.error(err));
-    }, [compositionRoot, snackbar, module, orgUnitId, year]);
-
-    type QuestionnaireFormState = { mode: "closed" } | { mode: "show"; id: Id } | { mode: "edit"; id: Id };
-
-    const [formState, setFormState] = React.useState<QuestionnaireFormState>({ mode: "closed" });
-
-    const goToQuestionnarie = React.useCallback(
-        (questionnaire: QuestionnaireSimple, options: { mode: "show" | "edit" }) => {
-            setFormState({ mode: options.mode, id: questionnaire.id });
-        },
-        []
-    );
-
-    const closeQuestionnarie = React.useCallback(() => {
-        setFormState({ mode: "closed" });
-    }, []);
-
-    const updateQuestionnarie = React.useCallback<QuestionnarieFormProps["onSave"]>(updatedQuestionnaire => {
-        setQuestionnaires(prevQuestionnaries =>
-            prevQuestionnaries?.map(questionnarire =>
-                questionnarire.id === updatedQuestionnaire.id ? updatedQuestionnaire : questionnarire
-            )
-        );
-    }, []);
-
-    if (!questionnaires) return <LinearProgress />;
-
-    if (formState.mode !== "closed") {
+    if (!questionnaires) {
+        return <LinearProgress />;
+    } else if (formState.mode !== "closed") {
         return (
             <QuestionnarieForm
                 id={formState.id}
                 orgUnitId={orgUnitId}
                 year={year}
-                onBackClick={closeQuestionnarie}
-                disabled={formState.mode === "show"}
+                onBackClick={actions.closeQuestionnarie}
+                mode={formState.mode}
                 onSave={updateQuestionnarie}
             />
         );
-    }
+    } else {
+        return (
+            <QuestionnairesGrid>
+                {questionnaires.map(questionnaire => (
+                    <QuestionnaireCard key={questionnaire.id}>
+                        <div className="head">
+                            <h3>{questionnaire.name}</h3>
+                            <span className="desc">{questionnaire.description}</span>
+                        </div>
 
-    return (
-        <QuestionnairesGrid>
-            {questionnaires.map(questionnaire => (
-                <QuestionnaireCard key={questionnaire.id}>
-                    <div className="head">
-                        <h3>{questionnaire.name}</h3>
-                        <span className="desc">{questionnaire.description}</span>
-                    </div>
+                        {questionnaire.isMandatory && <span className="mand">{i18n.t("mandatory")}</span>}
 
-                    {questionnaire.isMandatory && <span className="mand">{i18n.t("mandatory")}</span>}
-
-                    {questionnaire.isCompleted ? (
-                        <span className="comp completed">{i18n.t("Completed")}</span>
-                    ) : (
-                        <span className="comp">{i18n.t("Not completed")}</span>
-                    )}
-
-                    <div className="buttons">
-                        {questionnaire.isCompleted && (
-                            <Button onClick={() => goToQuestionnarie(questionnaire, { mode: "show" })}>
-                                {i18n.t("View")}
-                            </Button>
+                        {questionnaire.isCompleted ? (
+                            <span className="comp completed">{i18n.t("Completed")}</span>
+                        ) : (
+                            <span className="comp">{i18n.t("Not completed")}</span>
                         )}
 
-                        <Button
-                            variant="contained"
-                            color="primary"
-                            disabled={!hasCurrentUserCaptureAccess}
-                            onClick={() => goToQuestionnarie(questionnaire, { mode: "edit" })}
-                        >
-                            {i18n.t("Go")}
-                        </Button>
-                    </div>
-                </QuestionnaireCard>
-            ))}
-        </QuestionnairesGrid>
-    );
+                        <div className="buttons">
+                            {questionnaire.isCompleted && (
+                                <Button onClick={() => actions.goToQuestionnarie(questionnaire, { mode: "show" })}>
+                                    {i18n.t("View")}
+                                </Button>
+                            )}
+
+                            <Button
+                                variant="contained"
+                                color="primary"
+                                disabled={!hasCurrentUserCaptureAccess}
+                                onClick={() => actions.goToQuestionnarie(questionnaire, { mode: "edit" })}
+                            >
+                                {i18n.t("Go")}
+                            </Button>
+                        </div>
+                    </QuestionnaireCard>
+                ))}
+            </QuestionnairesGrid>
+        );
+    }
 };
 
 const QuestionnairesGrid = styled.div`
@@ -159,3 +119,56 @@ const QuestionnaireCard = styled.div`
         color: ${glassColors.mainPrimary};
     }
 `;
+
+function useSelector() {
+    const { currentOrgUnitAccess } = useCurrentOrgUnitContext();
+    const { orgUnitId } = currentOrgUnitAccess;
+    const year = 2022; // TODO: dynamic
+    return { orgUnitId, year };
+}
+
+function useQuestionnaires() {
+    const { compositionRoot } = useAppContext();
+
+    const module = useGlassModule(compositionRoot);
+    const [questionnaires, setQuestionnaires] = React.useState<QuestionnaireSimple[]>();
+    const snackbar = useSnackbar();
+    const { orgUnitId, year } = useSelector();
+
+    React.useEffect(() => {
+        if (module.kind !== "loaded") return;
+
+        return compositionRoot.questionnaires
+            .getList(module.data, { orgUnitId: orgUnitId, year: year })
+            .run(setQuestionnaires, err => snackbar.error(err));
+    }, [compositionRoot, snackbar, module, orgUnitId, year]);
+
+    const updateQuestionnarie = React.useCallback<QuestionnarieFormProps["onSave"]>(updatedQuestionnaire => {
+        setQuestionnaires(prevQuestionnaries =>
+            prevQuestionnaries?.map(questionnarire =>
+                questionnarire.id === updatedQuestionnaire.id ? updatedQuestionnaire : questionnarire
+            )
+        );
+    }, []);
+
+    return [questionnaires, updateQuestionnarie] as const;
+}
+
+type QuestionnaireFormState = { mode: "closed" } | { mode: "show"; id: Id } | { mode: "edit"; id: Id };
+
+function useFormState() {
+    const [formState, setFormState] = React.useState<QuestionnaireFormState>({ mode: "closed" });
+
+    const goToQuestionnarie = React.useCallback(
+        (questionnaire: QuestionnaireSimple, options: { mode: "show" | "edit" }) => {
+            setFormState({ mode: options.mode, id: questionnaire.id });
+        },
+        []
+    );
+
+    const closeQuestionnarie = React.useCallback(() => {
+        setFormState({ mode: "closed" });
+    }, []);
+
+    return [formState, { goToQuestionnarie, closeQuestionnarie }] as const;
+}
