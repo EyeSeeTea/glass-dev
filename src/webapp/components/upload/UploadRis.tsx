@@ -60,10 +60,10 @@ export const UploadRis: React.FC<UploadRisProps> = ({ risFile, setRisFile, valid
                         batchId,
                         fileType: RIS_FILE_TYPE,
                     };
-                    // const uploadId = await compositionRoot.glassDocuments
-                    //     .upload({ file: uploadedRisFile, data })
-                    //     .toPromise();
-                    localStorage.setItem("risUploadId", "123");
+                    const uploadId = await compositionRoot.glassDocuments
+                        .upload({ file: uploadedRisFile, data })
+                        .toPromise();
+                    localStorage.setItem("risUploadId", uploadId);
                     setIsLoading(false);
                 } else {
                     snackbar.error(i18n.t("Error in file upload"));

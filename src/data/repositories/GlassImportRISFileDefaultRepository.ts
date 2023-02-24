@@ -40,25 +40,6 @@ export class GlassImportRISFileDefaultRepository implements GlassImportRISFileRe
         return orgUnitId.objects.at(0)?.id;
     }
 
-    async getDataElementId(dataElementShortName: string): Promise<string | undefined> {
-        const capitalisedDataElementName = dataElementShortName[0] + dataElementShortName.toLowerCase().slice(1);
-
-        const dataElementId = await this.api.models.dataElements
-            .get({
-                paging: false,
-                fields: {
-                    id: true,
-                    shortName: true,
-                },
-                filter: {
-                    shortName: { ilike: capitalisedDataElementName },
-                },
-            })
-            .getData();
-
-        return dataElementId.objects.at(0)?.id;
-    }
-
     async getDataElementsAndAttributeCombo(
         datasetId: string
     ): Promise<{ dataElements: { id: string; code: string }[]; attributeOptionComboList: string[] }> {
@@ -129,50 +110,13 @@ export class GlassImportRISFileDefaultRepository implements GlassImportRISFileRe
 
         let commonCategoryOptionCombos = categoryOptions.objects.at(0)?.categoryOptionCombos;
         categoryOptions.objects.map(co => {
-            commonCategoryOptionCombos = co.categoryOptionCombos.filter(co =>
+            return (commonCategoryOptionCombos = co.categoryOptionCombos.filter(co =>
                 commonCategoryOptionCombos?.some(c => c.id === co.id)
-            );
+            ));
         });
 
         if (commonCategoryOptionCombos?.length === 1) {
             return commonCategoryOptionCombos.at(0)?.id;
         } else return "";
-    }
-
-    importSampleFile(): void {
-        apiToFuture(
-            this.api.dataValues.postSet(
-                {},
-                {
-                    dataSet: "OcAB7oaC072",
-                    period: "2022",
-                    orgUnit: "YlLjz6ORYAA",
-                    attributeOptionCombo: "B8rWn9cn3qH",
-                    dataValues: [
-                        {
-                            dataElement: "aekGyhFjAa4",
-                            categoryOptionCombo: "gN6FbsmLGPc",
-                            value: "0",
-                            comment: "Sneha AMR_AMR_DEA_NUMINFECTED Test",
-                        },
-                        {
-                            dataElement: "KEic7InoCBI",
-                            categoryOptionCombo: "OwKsZQnHCJu",
-                            value: "0",
-                            comment: "Sneha AMR_AMR_DEA_NUMSAMPLEDPATIENTS Test",
-                        },
-                        {
-                            dataElement: "nfp6LOOuJ5j",
-                            categoryOptionCombo: "OwKsZQnHCJu",
-                            value: "BLOOD",
-                            comment: "Sneha AMR_AMR_DEA_SPECIMEN_TYPE_SAMPLE Test",
-                        },
-                    ],
-                }
-            )
-        ).run(
-            response => console.debug(response),
-            error => console.debug(error)
-        );
     }
 }

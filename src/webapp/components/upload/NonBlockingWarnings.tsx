@@ -2,10 +2,9 @@ import React from "react";
 import { Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@material-ui/core";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
 import styled from "styled-components";
-import VisibilityIcon from "@material-ui/icons/Visibility";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 
-export interface NonBlockingWarningsProps {
+interface NonBlockingWarningsProps {
     rows: Map<string, number>;
 }
 export const NonBlockingWarnings: React.FC<NonBlockingWarningsProps> = ({ rows }) => {
