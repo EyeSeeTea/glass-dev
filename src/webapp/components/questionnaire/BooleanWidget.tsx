@@ -33,7 +33,7 @@ const SingleSelectWidget: React.FC<SingleSelectWidgetProps> = props => {
                 checked={value === false}
                 label={i18n.t("No")}
                 disabled={props.disabled}
-                onClick={() => notifyChange(false)}
+                onChange={() => notifyChange(false)}
             />
         </>
     );

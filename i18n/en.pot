@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2023-02-24T10:10:07.575Z\n"
-"PO-Revision-Date: 2023-02-24T10:10:07.575Z\n"
+"POT-Creation-Date: 2023-02-24T12:52:56.118Z\n"
+"PO-Revision-Date: 2023-02-24T12:52:56.118Z\n"
 
 msgid "Error saving registration status"
 msgstr ""
@@ -78,6 +78,9 @@ msgid "Correct Uploads"
 msgstr ""
 
 msgid "Uploads with errors, or discarded"
+msgstr ""
+
+msgid "There are no questionnaries for this module"
 msgstr ""
 
 msgid "mandatory"
@@ -219,9 +222,6 @@ msgid "Yes"
 msgstr ""
 
 msgid "No"
-msgstr ""
-
-msgid "Back to list"
 msgstr ""
 
 msgid "Set as incomplete"

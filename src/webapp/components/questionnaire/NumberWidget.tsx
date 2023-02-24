@@ -18,10 +18,10 @@ const NumberWidget: React.FC<NumberWidgetProps> = props => {
     }, []);
 
     const notifyChange = React.useCallback(
-        ({ value }: { value: string }) => {
-            onValueChange(value);
+        ({ value: newValue }: { value: string }) => {
+            if (value !== newValue) onValueChange(newValue);
         },
-        [onValueChange]
+        [onValueChange, value]
     );
 
     return (
