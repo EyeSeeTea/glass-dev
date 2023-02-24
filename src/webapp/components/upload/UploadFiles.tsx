@@ -8,11 +8,11 @@ import { UploadRis } from "./UploadRis";
 import { UploadSample } from "./UploadSample";
 import { useAppContext } from "../../contexts/app-context";
 import { GlassUploads } from "../../../domain/entities/GlassUploads";
-import { GlassState } from "../../hooks/State";
-import { DataValueSetsPostResponse } from "@eyeseetea/d2-api/api";
 
 interface UploadFilesProps {
     changeStep: (step: number) => void;
+    risFile: File | null;
+    setRisFile: React.Dispatch<React.SetStateAction<File | null>>;
 }
 
 const datasetOptions = [
@@ -41,17 +41,14 @@ const datasetOptions = [
         value: "6",
     },
 ];
-export type DataBalueSetsPostResponseState = GlassState<DataValueSetsPostResponse>;
-export const UploadFiles: React.FC<UploadFilesProps> = ({ changeStep }) => {
-    const { compositionRoot } = useAppContext();
 
+export const UploadFiles: React.FC<UploadFilesProps> = ({ changeStep, risFile, setRisFile }) => {
+    const { compositionRoot } = useAppContext();
     const [batchId, setBatchId] = useState("");
     const [isValidated, setIsValidated] = useState(false);
     const [isFileValid, setIsFileValid] = useState(false);
     const [previousUploads, setPreviousGlassUploads] = useState<GlassUploads[]>([]);
     const [previousUploadsBatchIds, setPreviousUploadsBatchIds] = useState<string[]>([]);
-    const [risFile, setRisFile] = useState<File | null>(null);
-    const [result, setResult] = React.useState<DataValueSetsPostResponse[]>([]);
 
     useEffect(() => {
         const fetchPreviousUpload = async (): Promise<GlassUploads[]> => {
@@ -91,28 +88,8 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({ changeStep }) => {
         }
     };
 
-    const uploadDatasetAndChangeStep = () => {
-        if (risFile) {
-            compositionRoot.glassRisFile.importFile(risFile).then(results => {
-                results.map(res =>
-                    res.then(r =>
-                        r.run(
-                            data => {
-                                setResult(prevResult => {
-                                    const updated = [...prevResult, data];
-                                    return updated;
-                                });
-                            },
-                            error => {
-                                console.debug(error);
-                            }
-                        )
-                    )
-                );
-            });
-        }
-
-        // changeStep(2);
+    const uploadDatasetAndChangeStep = async () => {
+        changeStep(2);
     };
 
     return (

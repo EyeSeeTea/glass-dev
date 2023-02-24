@@ -12,6 +12,7 @@ import { Completed } from "./Completed";
 export const UploadContent: React.FC = () => {
     const [currentStep, setCurrentStep] = useState(1);
     const [completedSteps, setCompletedSteps] = useState<number[]>([]);
+    const [risFile, setRisFile] = useState<File | null>(null);
 
     const changeStep = (step: number) => {
         setCurrentStep(step);
@@ -30,19 +31,24 @@ export const UploadContent: React.FC = () => {
                 changeStep={changeStep}
                 completedSteps={completedSteps}
             />
-            {steps.length && renderStep(currentStep, changeStep)}
+            {steps.length && renderStep(currentStep, changeStep, risFile, setRisFile)}
         </ContentWrapper>
     );
 };
 
-const renderStep = (step: number, changeStep: any) => {
+const renderStep = (
+    step: number,
+    changeStep: any,
+    risFile: File | null,
+    setRisFile: React.Dispatch<React.SetStateAction<File | null>>
+) => {
     switch (step) {
         case 1:
-            return <UploadFiles changeStep={changeStep} />;
+            return <UploadFiles changeStep={changeStep} risFile={risFile} setRisFile={setRisFile} />;
         case 2:
             return (
                 <>
-                    <ConsistencyChecks changeStep={changeStep} />
+                    <ConsistencyChecks changeStep={changeStep} risFile={risFile} />
                     <SupportButtons changeStep={changeStep} />
                 </>
             );
