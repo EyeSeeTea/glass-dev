@@ -1,4 +1,4 @@
-import { Maybe } from "../../types/utils";
+import { assertUnreachable, Maybe } from "../../types/utils";
 import { Id, NamedRef, Ref } from "./Base";
 
 export interface QuestionnaireSimple {
@@ -41,6 +41,13 @@ export interface SelectQuestion extends QuestionBase {
 
 export interface NumberQuestion extends QuestionBase {
     type: "number";
+    numberType:
+        | "NUMBER"
+        | "INTEGER_ZERO_OR_POSITIVE"
+        | "INTEGER"
+        | "INTEGER_NEGATIVE"
+        | "INTEGER_POSITIVE"
+        | "INTEGER_ZERO_OR_POSITIVE";
     value: string; // Use string representation to avoid problems with rounding
 }
 
@@ -63,8 +70,25 @@ export class QuestionnarieM {
     }
 }
 
-export class QuestionM {
-    static setValue<Q extends QuestionnaireQuestion>(question: Q): Q {
-        return question;
+export class QuestionnaireQuestionM {
+    static isValidNumberValue(s: string, numberType: NumberQuestion["numberType"]): boolean {
+        switch (numberType) {
+            case "INTEGER":
+                return isInteger(s);
+            case "NUMBER":
+                return true;
+            case "INTEGER_ZERO_OR_POSITIVE":
+                return isInteger(s) && parseInt(s) >= 0;
+            case "INTEGER_NEGATIVE":
+                return isInteger(s) && parseInt(s) < 0;
+            case "INTEGER_POSITIVE":
+                return isInteger(s) && parseInt(s) > 0;
+            default:
+                assertUnreachable(numberType);
+        }
     }
+}
+
+function isInteger(s: string): boolean {
+    return Boolean(s.match(/^-?\d*$/));
 }

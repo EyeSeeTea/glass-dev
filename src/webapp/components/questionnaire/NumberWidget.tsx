@@ -2,13 +2,15 @@ import React from "react";
 // @ts-ignore
 import { Input } from "@dhis2/ui";
 import { BaseWidgetProps } from "./BaseWidget";
+import { NumberQuestion, QuestionnaireQuestionM } from "../../../domain/entities/Questionnaire";
 
 export interface NumberWidgetProps extends BaseWidgetProps<string> {
     value: string;
+    numberType: NumberQuestion["numberType"];
 }
 
 const NumberWidget: React.FC<NumberWidgetProps> = props => {
-    const { onValueChange, value } = props;
+    const { onValueChange, value, numberType } = props;
 
     const [stateValue, setStateValue] = React.useState(value);
     React.useEffect(() => setStateValue(value), [value]);
@@ -19,9 +21,13 @@ const NumberWidget: React.FC<NumberWidgetProps> = props => {
 
     const notifyChange = React.useCallback(
         ({ value: newValue }: { value: string }) => {
-            if (value !== newValue) onValueChange(newValue);
+            if (!QuestionnaireQuestionM.isValidNumberValue(newValue, numberType)) {
+                setStateValue(value);
+            } else if (value !== newValue) {
+                onValueChange(newValue);
+            }
         },
-        [onValueChange, value]
+        [onValueChange, value, numberType]
     );
 
     return (
