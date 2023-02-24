@@ -16,8 +16,8 @@ export const YourNotifications: React.FC = () => {
 
     return (
         <ContentLoader content={notifications}>
-            {notifications.kind === "loaded" && notifications.data.length ? (
-                <Grid item xs={12}>
+            <Grid item xs={12}>
+                {notifications.kind === "loaded" && notifications.data.length ? (
                     <CustomCard>
                         <TitleContainer>
                             <Typography variant="h5">{i18n.t("Your Notifications")}</Typography>
@@ -37,10 +37,10 @@ export const YourNotifications: React.FC = () => {
                             })}
                         </NotificationsList>
                     </CustomCard>
-                </Grid>
-            ) : (
-                <StyledNoData>{i18n.t("No notifications")}</StyledNoData>
-            )}
+                ) : (
+                    <Typography>{i18n.t("No notifications")}</Typography>
+                )}
+            </Grid>
         </ContentLoader>
     );
 };
