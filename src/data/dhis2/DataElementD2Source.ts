@@ -4,32 +4,52 @@ import { getId, Id } from "../../domain/entities/Base";
 import { DataElement, Disaggregation } from "./DataElement";
 import { D2Api, MetadataPick } from "../../types/d2-api";
 import { Maybe } from "../../types/utils";
-import { Future, FutureData } from "../../domain/entities/Future";
+import { FutureData } from "../../domain/entities/Future";
 import { apiToFuture } from "../../utils/futures";
+import { D2DataElement, D2DataSet } from "./DataFormD2Source";
 
 export class DataElementD2Source {
     constructor(private api: D2Api) {}
 
-    get(ids: Id[]): FutureData<Record<Id, DataElement>> {
-        const idGroups = _(ids).uniq().chunk(100).value();
+    get(dataForm: D2DataSet): FutureData<Record<Id, DataElement>> {
+        const categoryComboIds = _(dataForm.sections)
+            .flatMap(section => section.dataElements)
+            .map(dataElement => dataElement.categoryCombo.id)
+            .concat(dataForm.dataSetElements.map(dse => dse.categoryCombo?.id))
+            .compact()
+            .uniq()
+            .value();
 
-        const resList$ = Future.sequential(
-            idGroups.map(idsGroup =>
-                apiToFuture(
-                    this.api.metadata.get({
-                        dataElements: {
-                            fields: dataElementFields,
-                            filter: { id: { in: idsGroup } },
-                        },
-                    })
-                )
-            )
-        );
+        const categoryCombos$ = apiToFuture(
+            this.api.metadata.get({
+                categoryCombos: {
+                    fields: categoryComboFields,
+                    filter: { id: { in: categoryComboIds } },
+                },
+            })
+        ).map(res => res.categoryCombos);
 
-        return resList$.map(resList => {
-            return _(resList)
-                .flatMap(res => res.dataElements)
-                .map(d2DataElement => getDataElement(d2DataElement))
+        return categoryCombos$.map(categoryCombos => {
+            const categoryComboById = _.keyBy(categoryCombos, getId);
+            const categoryComboMapping = _(dataForm.dataSetElements)
+                .map(dse => {
+                    const customCategoryCombo = categoryComboById[dse.categoryCombo?.id];
+                    return customCategoryCombo
+                        ? ([dse.dataElement.id, customCategoryCombo] as [Id, D2CategoryCombo])
+                        : undefined;
+                })
+                .compact()
+                .fromPairs()
+                .value();
+
+            return _(dataForm.sections)
+                .flatMap(section => section.dataElements)
+                .map(d2DataElement => {
+                    const customCategoryCombo = categoryComboMapping[d2DataElement.id];
+                    const dataElementCategoryCombo = categoryComboById[d2DataElement.categoryCombo.id];
+                    const categoryCombo = customCategoryCombo || dataElementCategoryCombo;
+                    return categoryCombo ? getDataElement(d2DataElement, categoryCombo) : undefined;
+                })
                 .compact()
                 .map(dataElement => [dataElement.id, dataElement] as [Id, typeof dataElement])
                 .fromPairs()
@@ -38,15 +58,15 @@ export class DataElementD2Source {
     }
 }
 
-function getDataElement(dataElement: D2DataElement): DataElement | null {
-    const { valueType } = dataElement;
+function getDataElement(d2DataElement: D2DataElement, d2CategoryCombo: D2CategoryCombo): DataElement | null {
+    const { valueType } = d2DataElement;
 
-    const optionSet = getOptionSet(dataElement);
-    const optionsFromDataElementCategoryCombo = getOptionsCategoryCombo(dataElement);
+    const optionSet = getOptionSet(d2DataElement);
+    const optionsFromDataElementCategoryCombo = getOptionsCategoryCombo(d2CategoryCombo);
 
     const base: Pick<DataElement, "id" | "name" | "options" | "disaggregation"> = {
-        id: dataElement.id,
-        name: dataElement.formName || dataElement.displayName,
+        id: d2DataElement.id,
+        name: d2DataElement.formName || d2DataElement.displayName,
         options: optionSet ? { id: optionSet.id, isMultiple: false, items: optionSet.options } : undefined,
         disaggregation: optionsFromDataElementCategoryCombo,
     };
@@ -66,7 +86,7 @@ function getDataElement(dataElement: D2DataElement): DataElement | null {
             return { type: "BOOLEAN", ...base };
         default:
             console.error(
-                `Data element [formName=${dataElement.formName}, id=${dataElement.id}, valueType=${dataElement.valueType}] skipped, valueType is not supported`
+                `Data element [formName=${d2DataElement.formName}, id=${d2DataElement.id}, valueType=${d2DataElement.valueType}] skipped, valueType is not supported`
             );
             return null;
     }
@@ -83,13 +103,11 @@ function getOptionSet(dataElement: D2DataElement) {
         : null;
 }
 
-function getOptionsCategoryCombo(dataElement: D2DataElement) {
-    const categoryOptionsCartesian = _.product(
-        ...dataElement.categoryCombo.categories.map(category => category.categoryOptions)
-    );
+function getOptionsCategoryCombo(categoryCombo: D2CategoryCombo) {
+    const categoryOptionsCartesian = _.product(...categoryCombo.categories.map(category => category.categoryOptions));
 
     return categoryOptionsCartesian.flatMap(categoryOptions => {
-        return _(dataElement.categoryCombo.categoryOptionCombos)
+        return _(categoryCombo.categoryOptionCombos)
             .map((coc): Maybe<Disaggregation> => {
                 const allCategoryOptionsMatch = _(categoryOptions).differenceBy(coc.categoryOptions, getId).isEmpty();
 
@@ -102,23 +120,12 @@ function getOptionsCategoryCombo(dataElement: D2DataElement) {
     });
 }
 
-const dataElementFields = {
+const categoryComboFields = {
     id: true,
-    code: true,
-    displayName: true,
-    formName: true,
-    valueType: true,
-    optionSet: {
-        id: true,
-        options: { id: true, displayName: true, code: true },
-    },
-    categoryCombo: {
-        id: true,
-        categories: { id: true, categoryOptions: { id: true, displayName: true } },
-        categoryOptionCombos: { id: true, categoryOptions: { id: true } },
-    },
-} as const;
+    categories: { id: true, categoryOptions: { id: true, displayName: true } },
+    categoryOptionCombos: { id: true, categoryOptions: { id: true } },
+};
 
-type D2DataElement = MetadataPick<{
-    dataElements: { fields: typeof dataElementFields };
-}>["dataElements"][number];
+type D2CategoryCombo = MetadataPick<{
+    categoryCombos: { fields: typeof categoryComboFields };
+}>["categoryCombos"][number];
