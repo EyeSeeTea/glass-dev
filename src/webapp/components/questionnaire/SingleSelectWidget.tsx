@@ -27,14 +27,13 @@ const SingleSelectWidget: React.FC<SingleSelectWidgetProps> = props => {
     return (
         <>
             {options.map(option => (
-                <div onClick={props.disabled ? undefined : () => notifyChange(option.id)} key={option.id}>
-                    <Radio
-                        key={option.id}
-                        checked={value === option.id}
-                        label={option.name}
-                        disabled={props.disabled}
-                    />
-                </div>
+                <Radio
+                    key={option.id}
+                    checked={value === option.id}
+                    label={option.name}
+                    disabled={props.disabled}
+                    onChange={() => notifyChange(option.id)}
+                />
             ))}
         </>
     );

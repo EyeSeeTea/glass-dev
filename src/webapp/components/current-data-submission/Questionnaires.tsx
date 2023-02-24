@@ -2,6 +2,7 @@ import { useSnackbar } from "@eyeseetea/d2-ui-components";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { Button, LinearProgress } from "@material-ui/core";
 import React from "react";
+import { useLocation } from "react-router-dom";
 import styled from "styled-components";
 import { Id } from "../../../domain/entities/Base";
 import { QuestionnaireSimple } from "../../../domain/entities/Questionnaire";
@@ -34,6 +35,8 @@ export const Questionnaires: React.FC = () => {
     } else {
         return (
             <QuestionnairesGrid>
+                {questionnaires.length === 0 && <h3>{i18n.t("There are no questionnaries for this module")}</h3>}
+
                 {questionnaires.map(questionnaire => (
                     <QuestionnaireCard key={questionnaire.id}>
                         <div className="head">
@@ -123,7 +126,12 @@ const QuestionnaireCard = styled.div`
 function useSelector() {
     const { currentOrgUnitAccess } = useCurrentOrgUnitContext();
     const { orgUnitId } = currentOrgUnitAccess;
-    const year = 2022; // TODO: dynamic
+
+    const location = useLocation();
+    const queryParameters = new URLSearchParams(location.search);
+    const periodFromUrl = parseInt(queryParameters.get("period") || "");
+    const year = periodFromUrl || new Date().getFullYear() - 1;
+
     return { orgUnitId, year };
 }
 
