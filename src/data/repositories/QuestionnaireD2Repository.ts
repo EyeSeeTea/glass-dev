@@ -161,6 +161,7 @@ export class QuestionnaireD2Repository implements QuestionnaireRepository {
                     text: dataElement.name,
                     type: "number",
                     value: dataValue?.value || "",
+                    numberType: dataElement.numberType,
                 };
 
             case "TEXT":
@@ -227,7 +228,7 @@ export class QuestionnaireD2Repository implements QuestionnaireRepository {
 
     private postDataValues(d2DataValues: D2DataValue[]): FutureData<void> {
         return apiToFuture(this.api.dataValues.postSet({}, { dataValues: d2DataValues })).flatMap(res =>
-            res.status === "SUCCESS" ? Future.success(undefined) : Future.error(res.description)
+            res.status === "SUCCESS" ? Future.success(undefined) : Future.error(res.status)
         );
     }
 
