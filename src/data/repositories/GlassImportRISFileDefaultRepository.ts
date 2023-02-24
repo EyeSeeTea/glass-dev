@@ -56,9 +56,54 @@ export class GlassImportRISFileDefaultRepository implements GlassImportRISFileRe
             })
             .getData();
 
-        console.debug(dataElementId.objects.at(0)?.id);
-
         return dataElementId.objects.at(0)?.id;
+    }
+
+    async getDataElementsAndAttributeCombo(
+        datasetId: string
+    ): Promise<{ dataElements: { id: string; code: string }[]; attributeOptionComboList: string[] }> {
+        const dataSet = await this.api.models.dataSets
+            .get({
+                paging: false,
+                fields: {
+                    id: true,
+                    shortName: true,
+                    dataSetElements: {
+                        dataElement: {
+                            id: true,
+                            shortName: true,
+                            code: true,
+                        },
+                    },
+                    categoryCombo: {
+                        id: true,
+                        categories: {
+                            id: true,
+                            code: true,
+                            shortName: true,
+                        },
+                    },
+                },
+                filter: {
+                    id: { eq: datasetId },
+                },
+            })
+            .getData();
+
+        //On filtering by id, only one dataset should be returned
+        if (dataSet.objects.length === 1) {
+            const dataElements = dataSet.objects.at(0)?.dataSetElements.map(de => {
+                return {
+                    id: de.dataElement.id,
+                    code: de.dataElement.code,
+                };
+            });
+
+            const attributeOptionComboCodeList = dataSet.objects.at(0)?.categoryCombo.categories.map(c => c.code);
+            if (dataElements && attributeOptionComboCodeList)
+                return { dataElements, attributeOptionComboList: attributeOptionComboCodeList };
+        }
+        return { dataElements: [], attributeOptionComboList: [] };
     }
 
     async getCategoryOptionCombo(codeList: string[]): Promise<string | undefined> {
@@ -88,7 +133,6 @@ export class GlassImportRISFileDefaultRepository implements GlassImportRISFileRe
                 commonCategoryOptionCombos?.some(c => c.id === co.id)
             );
         });
-        console.debug(commonCategoryOptionCombos?.length, commonCategoryOptionCombos?.at(0)?.id);
 
         if (commonCategoryOptionCombos?.length === 1) {
             return commonCategoryOptionCombos.at(0)?.id;

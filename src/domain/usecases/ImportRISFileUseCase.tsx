@@ -8,11 +8,12 @@ const AMR_AMR_DS_INPUT_FILES_RIS_ID = "CeQPmXgrhHF";
 export class ImportRISFileUseCase implements UseCase {
     constructor(private glassImportRISFile: GlassImportRISFileDefaultRepository) {}
 
-    public async execute(inputFile: File): Promise<Promise<FutureData<DataValueSetsPostResponse>>[]> {
+    public async execute(inputFile: File): Promise<FutureData<DataValueSetsPostResponse>[] | undefined> {
         const spreadsheet = await new SpreadsheetXlsxDataSource().read(inputFile);
+        const sheet = spreadsheet.sheets[0]; //Only one sheet for AMR RIS
 
-        return await spreadsheet.sheets.flatMap(sheet => {
-            return sheet.rows.flatMap(async row => {
+        if (sheet !== undefined) {
+            const responses = sheet.rows.map(async row => {
                 const request: DataValueSetsPostRequest = {
                     dataSet: AMR_AMR_DS_INPUT_FILES_RIS_ID,
                     period: "",
@@ -22,14 +23,22 @@ export class ImportRISFileUseCase implements UseCase {
                 };
                 let categoryOptionCombo: string | undefined = "";
 
-                //TO DO : instead of using fixed column index, get the column number from header
                 if (row.COUNTRY) request.orgUnit = await this.glassImportRISFile.getOrgUnit(row.COUNTRY);
                 if (row.YEAR) request.period = row.YEAR;
-                if (row.PATHOGEN && row.ANTIBIOTIC)
-                    request.attributeOptionCombo = await this.glassImportRISFile.getCategoryOptionCombo([
-                        row.PATHOGEN,
-                        row.ANTIBIOTIC,
-                    ]);
+
+                const { dataElements, attributeOptionComboList } =
+                    await this.glassImportRISFile.getDataElementsAndAttributeCombo(AMR_AMR_DS_INPUT_FILES_RIS_ID);
+
+                const attributeOptionComboCodes = attributeOptionComboList.map(cc => {
+                    return row[cc] || "";
+                });
+                request.attributeOptionCombo = await this.glassImportRISFile.getCategoryOptionCombo(
+                    attributeOptionComboCodes
+                );
+
+                //TO DO : The same categoryCombo is used for each dataElement.
+                //So  making only one call to server. Should we make a call for each dataElement?
+                //Is there a better way to do this
                 if (row.SPECIMEN && row.GENDER && row.ORIGIN && row.AGEGROUP) {
                     categoryOptionCombo = await this.glassImportRISFile.getCategoryOptionCombo([
                         row.SPECIMEN,
@@ -39,89 +48,39 @@ export class ImportRISFileUseCase implements UseCase {
                     ]);
                 }
 
-                if (row.ANTIBIOTIC !== undefined) {
-                    const dataElementId = await this.glassImportRISFile.getDataElementId("Antibiotic (DEA)"); //TO DO : get from header
-                    request.dataValues.push({
-                        dataElement: dataElementId || "",
-                        value: row.ANTIBIOTIC,
+                const dataValues = dataElements.map(de => {
+                    //There is an conflict in excel. SPECIMEN, PATHOGEN and ANTIBIOTIC are both
+                    //category  and data element. For now, hardcode this handling.
+                    //Ideally, if both are required, either there should be 2 columns with same value and different column headers
+                    //Or category  and data element should have same code.
+                    let dataElementCode = de.code;
+                    if (dataElementCode === "ANTIBIOTIC_DEA") {
+                        dataElementCode = "ANTIBIOTIC";
+                    } else if (dataElementCode === "AMR_AMR_DEA_PATHOGEN") {
+                        dataElementCode = "PATHOGEN";
+                    } else if (dataElementCode === "AMR_AMR_DEA_SPECIMEN_TYPE_RIS") {
+                        dataElementCode = "SPECIMEN";
+                    }
+                    const rowValue = row[dataElementCode];
+
+                    return {
+                        dataElement: de.id,
                         categoryOptionCombo: categoryOptionCombo,
-                    });
-                }
+                        value: rowValue !== undefined ? rowValue : "",
+                    };
+                });
 
-                if (row.PATHOGEN !== undefined) {
-                    const dataElementId = await this.glassImportRISFile.getDataElementId("Pathogen (DEA)"); //TO DO : get from header
-                    request.dataValues.push({
-                        dataElement: dataElementId || "",
-                        value: row.PATHOGEN,
-                        categoryOptionCombo: categoryOptionCombo,
-                    });
-                }
+                request.dataValues = dataValues;
 
-                if (row.SPECIMEN !== undefined) {
-                    const dataElementId = await this.glassImportRISFile.getDataElementId("Specimen type RIS"); //TO DO : get from header
-                    request.dataValues.push({
-                        dataElement: dataElementId || "",
-                        value: row.SPECIMEN,
-                        categoryOptionCombo: categoryOptionCombo,
-                    });
-                }
-
-                if (row.RESISTANT !== undefined) {
-                    const dataElementId = await this.glassImportRISFile.getDataElementId("RESISTANT"); //TO DO : get from header
-                    request.dataValues.push({
-                        dataElement: dataElementId || "",
-                        value: row.RESISTANT,
-                        categoryOptionCombo: categoryOptionCombo,
-                    });
-                }
-
-                if (row.INTERMEDIATE !== undefined) {
-                    const dataElementId = await this.glassImportRISFile.getDataElementId("INTERMEDIATE"); //TO DO : get from header
-                    request.dataValues.push({
-                        dataElement: dataElementId || "",
-                        value: row.INTERMEDIATE,
-                        categoryOptionCombo: categoryOptionCombo,
-                    });
-                }
-
-                if (row.NONSUSCEPTIBLE !== undefined) {
-                    const dataElementId = await this.glassImportRISFile.getDataElementId("NON-SUSCEPTIBLE"); //TO DO : get from header
-                    request.dataValues.push({
-                        dataElement: dataElementId || "",
-                        value: row.NONSUSCEPTIBLE,
-                        categoryOptionCombo,
-                    });
-                }
-
-                if (row.SUSCEPTIBLE !== undefined) {
-                    const dataElementId = await this.glassImportRISFile.getDataElementId("SUSCEPTIBLE"); //TO DO : get from header
-                    request.dataValues.push({
-                        dataElement: dataElementId || "",
-                        value: row.SUSCEPTIBLE,
-                        categoryOptionCombo,
-                    });
-                }
-
-                if (row.UNKNOWN_NO_AST !== undefined) {
-                    const dataElementId = await this.glassImportRISFile.getDataElementId("Unknown no AST"); //TO DO : get from header
-                    request.dataValues.push({
-                        dataElement: dataElementId || "",
-                        value: row.UNKNOWN_NO_AST,
-                        categoryOptionCombo,
-                    });
-                }
-
-                if (row.UNKNOWN_NO_BREAKPOINTS !== undefined) {
-                    const dataElementId = await this.glassImportRISFile.getDataElementId("UNKNOWN_NO_BREAKPOINTS"); //TO DO : get from header
-                    request.dataValues.push({
-                        dataElement: dataElementId || "",
-                        value: row.UNKNOWN_NO_BREAKPOINTS,
-                        categoryOptionCombo,
-                    });
-                }
-
-                return await this.glassImportRISFile.importRISFile({ importStrategy: "CREATE_AND_UPDATE" }, request);
+                const importResult = await this.glassImportRISFile.importRISFile(
+                    { importStrategy: "CREATE_AND_UPDATE" },
+                    request
+                );
+                return importResult;
             });
-        });
+
+            const resolvedResponses = await Promise.all(responses);
+            return resolvedResponses;
+        }
     }
 }

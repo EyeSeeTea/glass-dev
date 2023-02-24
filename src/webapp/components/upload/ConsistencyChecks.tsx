@@ -1,21 +1,77 @@
-import React, { useState } from "react";
-import { Button } from "@material-ui/core";
-import { BlockingErrors } from "./BlockingErrors";
+import React, { useEffect, useState } from "react";
+import { Button, CircularProgress } from "@material-ui/core";
+import { BlockingErrors, BlockingErrorsProps } from "./BlockingErrors";
 import styled from "styled-components";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
-import { NonBlockingWarnings } from "./NonBlockingWarnings";
+import { NonBlockingWarnings, NonBlockingWarningsProps } from "./NonBlockingWarnings";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { useAppContext } from "../../contexts/app-context";
+import { useCurrentModuleContext } from "../../contexts/current-module-context";
+
 interface ConsistencyChecksProps {
     changeStep: (step: number) => void;
+    risFile: File | null;
 }
 
 const COMPLETED_STATUS = "COMPLETED";
 
-export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({ changeStep }) => {
+export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({ changeStep, risFile }) => {
     const { compositionRoot } = useAppContext();
+    const { currentModuleAccess } = useCurrentModuleContext();
     const [fileType, setFileType] = useState<string>("ris");
+    const [isDataSetUploading, setIsDataSetUploading] = useState<boolean>(false);
+    const [blockingErrors, setBlockingErrors] = useState<Map<string, number>>(new Map<string, number>());
+    const [warningErrors, setWarningErrors] = useState<Map<string, number>>(new Map<string, number>());
+
+    useEffect(() => {
+        async function uploadDatasets() {
+            if (risFile && currentModuleAccess.moduleName === "AMR") {
+                setIsDataSetUploading(true);
+                await compositionRoot.glassRisFile.importFile(risFile).then(responses => {
+                    responses?.forEach((response, index) => {
+                        response.run(
+                            importStatus => {
+                                if (importStatus.status === "WARNING") {
+                                    setWarningErrors(prev => {
+                                        const updated = prev;
+                                        importStatus?.conflicts?.forEach(element => {
+                                            const count = updated.get(element.value);
+                                            if (count !== undefined && count >= 0) {
+                                                updated.set(element.value, count + 1);
+                                            } else {
+                                                updated.set(element.value, 1);
+                                            }
+                                        });
+                                        return updated;
+                                    });
+                                } else if (importStatus.status === "ERROR") {
+                                    setBlockingErrors(prev => {
+                                        const updated = prev;
+                                        importStatus?.conflicts?.forEach(element => {
+                                            const count = updated.get(element.value);
+                                            if (count !== undefined && count >= 0) {
+                                                updated.set(element.value, count + 1);
+                                            } else {
+                                                updated.set(element.value, 1);
+                                            }
+                                        });
+                                        return updated;
+                                    });
+                                }
+                                if (index === responses.length - 1) {
+                                    setIsDataSetUploading(false);
+                                }
+                            },
+                            _error => setIsDataSetUploading(false)
+                        );
+                    });
+                });
+            }
+        }
+
+        uploadDatasets();
+    }, []);
 
     const changeType = (fileType: string) => {
         setFileType(fileType);
@@ -33,47 +89,52 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({ changeStep
         changeStep(3);
     };
 
-    return (
-        <ContentWrapper>
-            <p className="intro">
-                {i18n.t(
-                    "Explaining what consistency checks are: Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed doeiusmod tempor incididunt ut labore"
-                )}
-            </p>
-            <div className="toggles">
-                <Button onClick={() => changeType("ris")} className={fileType === "ris" ? "current" : ""}>
-                    {i18n.t("RIS File")}
-                </Button>
-                <Button onClick={() => changeType("sample")} className={fileType === "sample" ? "current" : ""}>
-                    {i18n.t("Sample File")}
-                </Button>
-            </div>
-            {renderTypeContent(fileType)}
-
-            <div className="bottom">
-                <Button
-                    variant="contained"
-                    color="primary"
-                    endIcon={<ChevronRightIcon />}
-                    onClick={goToFinalStep}
-                    disableElevation
-                >
-                    {i18n.t("Continue")}
-                </Button>
-            </div>
-        </ContentWrapper>
-    );
+    if (isDataSetUploading) return <CircularProgress size={25} />;
+    else
+        return (
+            <ContentWrapper>
+                <p className="intro">
+                    {i18n.t(
+                        "Explaining what consistency checks are: Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed doeiusmod tempor incididunt ut labore"
+                    )}
+                </p>
+                <div className="toggles">
+                    <Button onClick={() => changeType("ris")} className={fileType === "ris" ? "current" : ""}>
+                        {i18n.t("RIS File")}
+                    </Button>
+                    <Button onClick={() => changeType("sample")} className={fileType === "sample" ? "current" : ""}>
+                        {i18n.t("Sample File")}
+                    </Button>
+                </div>
+                {renderTypeContent(fileType, blockingErrors, warningErrors)}
+                <div className="bottom">
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        endIcon={<ChevronRightIcon />}
+                        onClick={goToFinalStep}
+                        disableElevation
+                    >
+                        {i18n.t("Continue")}
+                    </Button>
+                </div>
+            </ContentWrapper>
+        );
 };
 
-const renderTypeContent = (type: string) => {
+const renderTypeContent = (
+    type: string,
+    blockingErrors: Map<string, number> | undefined,
+    warningErrors: Map<string, number> | undefined
+) => {
     switch (type) {
         case "sample":
             return <p>{i18n.t("Sample file uploading content/intructions here...")}</p>;
         default:
             return (
                 <>
-                    <BlockingErrors />
-                    <NonBlockingWarnings />
+                    {blockingErrors && <BlockingErrors rows={blockingErrors} />}
+                    {warningErrors && <NonBlockingWarnings rows={warningErrors} />}
                 </>
             );
     }

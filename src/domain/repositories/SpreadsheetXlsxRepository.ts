@@ -30,7 +30,6 @@ export class SpreadsheetXlsxDataSource implements SpreadsheetDataSource {
             const sheets = _(workbook.Sheets)
                 .toPairs()
                 .map(([sheetName, worksheet]): Sheet => {
-                    console.debug(worksheet);
                     const rows = XLSX.utils.sheet_to_json<Row<string>>(worksheet, { raw: true, skipHidden: false });
 
                     return {
@@ -47,7 +46,6 @@ export class SpreadsheetXlsxDataSource implements SpreadsheetDataSource {
 
             return spreadsheet;
         } catch (e) {
-            console.debug(e);
             return { name: "", sheets: [] };
         }
     }
