@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { Button, CircularProgress } from "@material-ui/core";
-import { BlockingErrors, BlockingErrorsProps } from "./BlockingErrors";
+import { BlockingErrors } from "./BlockingErrors";
 import styled from "styled-components";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
-import { NonBlockingWarnings, NonBlockingWarningsProps } from "./NonBlockingWarnings";
+import { NonBlockingWarnings } from "./NonBlockingWarnings";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { useAppContext } from "../../contexts/app-context";
@@ -71,7 +71,7 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({ changeStep
         }
 
         uploadDatasets();
-    }, []);
+    }, [compositionRoot.glassRisFile, currentModuleAccess.moduleName, risFile]);
 
     const changeType = (fileType: string) => {
         setFileType(fileType);

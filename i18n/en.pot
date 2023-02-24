@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2023-02-15T10:56:09.248Z\n"
-"PO-Revision-Date: 2023-02-15T10:56:09.248Z\n"
+"POT-Creation-Date: 2023-02-24T15:12:19.090Z\n"
+"PO-Revision-Date: 2023-02-24T15:12:19.090Z\n"
 
 msgid "User Profile"
 msgstr ""
@@ -231,9 +231,6 @@ msgid "Name"
 msgstr ""
 
 msgid "Count"
-msgstr ""
-
-msgid "Details"
 msgstr ""
 
 msgid "Back to Module"

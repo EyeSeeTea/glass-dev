@@ -3,7 +3,7 @@ import { Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow
 import styled from "styled-components";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 
-export interface BlockingErrorsProps {
+interface BlockingErrorsProps {
     rows: Map<string, number>;
 }
 export const BlockingErrors: React.FC<BlockingErrorsProps> = ({ rows }) => {
