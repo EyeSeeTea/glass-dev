@@ -113,6 +113,7 @@ function useQuestionnaire(options: QuestionnarieFormProps) {
     const [isSaving, savingActions] = useBooleanState(false);
 
     const { onSave, id, orgUnitId, year } = options;
+    const selector = React.useMemo(() => ({ id, orgUnitId, year }), [id, orgUnitId, year]);
     const [questionnaire, setQuestionnaire] = useState<Questionnaire>();
 
     const [isCompleted, setIsCompleted] = React.useState(questionnaire?.isCompleted || false);
@@ -123,11 +124,9 @@ function useQuestionnaire(options: QuestionnarieFormProps) {
     useEffect(() => {
         if (module.kind !== "loaded") return;
         return compositionRoot.questionnaires
-            .get(module.data, options)
+            .get(module.data, selector)
             .run(setQuestionnaire, err => snackbar.error(err));
-    }, [compositionRoot, options, snackbar, module]);
-
-    const selector = React.useMemo(() => ({ id, orgUnitId, year }), [id, orgUnitId, year]);
+    }, [compositionRoot, snackbar, selector, module]);
 
     const setAsCompleted = useCallbackEffect(
         React.useCallback(
