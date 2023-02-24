@@ -235,13 +235,15 @@ export class QuestionnaireD2Repository implements QuestionnaireRepository {
         ids: Id[],
         options: { orgUnitId: Id; year: number }
     ): FutureData<CompleteDataSetRegistration[]> {
+        if (_.isEmpty(ids)) return Future.success([]);
+
         return apiToFuture(
             this.api.get<CompleteDataSetRegistrationsResponse>("/completeDataSetRegistrations", {
                 dataSet: ids,
                 orgUnit: options.orgUnitId,
                 period: options.year.toString(),
             })
-        ).map(res => res.completeDataSetRegistrations);
+        ).map(res => res.completeDataSetRegistrations || []);
     }
 }
 
@@ -262,5 +264,5 @@ interface CompleteDataSetRegistration {
 }
 
 interface CompleteDataSetRegistrationsResponse {
-    completeDataSetRegistrations: CompleteDataSetRegistration[];
+    completeDataSetRegistrations?: CompleteDataSetRegistration[];
 }

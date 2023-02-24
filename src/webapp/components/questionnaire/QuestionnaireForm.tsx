@@ -1,12 +1,8 @@
 import { useSnackbar } from "@eyeseetea/d2-ui-components";
-import { Button, LinearProgress, makeStyles } from "@material-ui/core";
+import { Button, CircularProgress, LinearProgress, makeStyles } from "@material-ui/core";
 import React, { useEffect, useState } from "react";
 import { Id } from "../../../domain/entities/Base";
-import {
-    Questionnaire,
-    QuestionnaireSimple,
-    QuestionnarieM,
-} from "../../../domain/entities/Questionnaire";
+import { Questionnaire, QuestionnaireSimple, QuestionnarieM } from "../../../domain/entities/Questionnaire";
 import { useAppContext } from "../../contexts/app-context";
 // @ts-ignore
 import { DataTable, TableHead, DataTableRow, DataTableColumnHeader, TableBody, DataTableCell } from "@dhis2/ui";
@@ -17,6 +13,7 @@ import { PageHeader } from "../page-header/PageHeader";
 import styled from "styled-components";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
 import { useGlassModule } from "../../hooks/useGlassModule";
+import { useBooleanState } from "../../hooks/useBooleanState";
 
 export interface QuestionnarieFormProps {
     id: Id;
@@ -29,7 +26,7 @@ export interface QuestionnarieFormProps {
 
 const QuestionnaireFormComp: React.FC<QuestionnarieFormProps> = props => {
     const { onBackClick, mode } = props;
-    const [questionnaire, setAsCompleted] = useQuestionnaire(props);
+    const [questionnaire, setAsCompleted, isSaving] = useQuestionnaire(props);
     const classes = useStyles();
     const isCompleted = questionnaire?.isCompleted;
     const disabled = isCompleted ? true : mode === "show";
@@ -49,6 +46,8 @@ const QuestionnaireFormComp: React.FC<QuestionnarieFormProps> = props => {
 
                 {mode === "edit" && (
                     <div className="buttons">
+                        {isSaving && <CircularProgress size={22} />}
+
                         {isCompleted ? (
                             <Button onClick={() => setAsCompleted(false)} variant="contained" color="secondary">
                                 {i18n.t("Set as incomplete")}
@@ -111,6 +110,7 @@ function useQuestionnaire(options: QuestionnarieFormProps) {
     const { compositionRoot } = useAppContext();
     const module = useGlassModule(compositionRoot);
     const snackbar = useSnackbar();
+    const [isSaving, savingActions] = useBooleanState(false);
 
     const { onSave, id, orgUnitId, year } = options;
     const [questionnaire, setQuestionnaire] = useState<Questionnaire>();
@@ -132,17 +132,23 @@ function useQuestionnaire(options: QuestionnarieFormProps) {
     const setAsCompleted = useCallbackEffect(
         React.useCallback(
             (isCompleted: boolean) => {
+                savingActions.enable();
+
                 return compositionRoot.questionnaires.setAsCompleted(selector, isCompleted).run(
                     () => {
+                        savingActions.disable();
                         if (!questionnaire) return;
                         const questionnaireUpdated = QuestionnarieM.setAsComplete(questionnaire, isCompleted);
                         onSave(questionnaireUpdated);
                         setIsCompleted(isCompleted);
                     },
-                    err => snackbar.error(err)
+                    err => {
+                        savingActions.disable();
+                        return snackbar.error(err);
+                    }
                 );
             },
-            [compositionRoot, snackbar, selector, onSave, questionnaire]
+            [compositionRoot, snackbar, selector, onSave, questionnaire, savingActions]
         )
     );
 
@@ -151,7 +157,7 @@ function useQuestionnaire(options: QuestionnarieFormProps) {
         [questionnaire, isCompleted]
     );
 
-    return [questionnaireWithCompleted, setAsCompleted] as const;
+    return [questionnaireWithCompleted, setAsCompleted, isSaving] as const;
 }
 
 const useStyles = makeStyles({

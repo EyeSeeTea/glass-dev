@@ -22,13 +22,19 @@ const SingleSelectWidget: React.FC<SingleSelectWidgetProps> = props => {
 
     return (
         <>
-            <div onClick={props.disabled ? undefined : () => notifyChange(true)}>
-                <Radio checked={value === true} label={i18n.t("Yes")} disabled={props.disabled} />
-            </div>
+            <Radio
+                checked={value === true}
+                label={i18n.t("Yes")}
+                disabled={props.disabled}
+                onChange={() => notifyChange(true)}
+            />
 
-            <div onClick={props.disabled ? undefined : () => notifyChange(false)}>
-                <Radio checked={value === false} label={i18n.t("No")} disabled={props.disabled} />
-            </div>
+            <Radio
+                checked={value === false}
+                label={i18n.t("No")}
+                disabled={props.disabled}
+                onClick={() => notifyChange(false)}
+            />
         </>
     );
 };
