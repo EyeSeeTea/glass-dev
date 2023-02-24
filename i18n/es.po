@@ -196,6 +196,9 @@ msgstr ""
 msgid "Your Notifications"
 msgstr ""
 
+msgid "No notifications"
+msgstr ""
+
 msgid "Log Out"
 msgstr ""
 
