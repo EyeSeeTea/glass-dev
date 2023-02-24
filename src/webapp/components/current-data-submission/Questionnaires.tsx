@@ -123,6 +123,7 @@ const QuestionnaireCard = styled.div`
     }
 `;
 
+// This should be abstracted to a common hook
 function useSelector() {
     const { currentOrgUnitAccess } = useCurrentOrgUnitContext();
     const { orgUnitId } = currentOrgUnitAccess;

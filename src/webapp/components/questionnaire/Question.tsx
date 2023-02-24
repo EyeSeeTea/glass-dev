@@ -2,11 +2,7 @@ import { useSnackbar } from "@eyeseetea/d2-ui-components";
 import { makeStyles } from "@material-ui/core";
 import React from "react";
 import { NamedRef } from "../../../domain/entities/Base";
-import {
-    Questionnaire,
-    QuestionnaireQuestion,
-    QuestionnaireSelector,
-} from "../../../domain/entities/Questionnaire";
+import { Questionnaire, QuestionnaireQuestion, QuestionnaireSelector } from "../../../domain/entities/Questionnaire";
 import { assertUnreachable, Maybe } from "../../../types/utils";
 import { useAppContext } from "../../contexts/app-context";
 import { useCallbackEffect } from "../../hooks/useCallbackEffect";

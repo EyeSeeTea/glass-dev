@@ -16,10 +16,14 @@ type Option = { id: string; name: string };
 const SingleSelectWidget: React.FC<SingleSelectWidgetProps> = props => {
     const { onValueChange, value, options } = props;
 
+    const [stateValue, setStateValue] = React.useState(value);
+    React.useEffect(() => setStateValue(value), [value]);
+
     const notifyChange = React.useCallback(
         (selectedId: Id) => {
             const option = options.find(option => option.id === selectedId);
             const sameSelected = value === selectedId;
+            setStateValue(selectedId);
             onValueChange(sameSelected ? undefined : option);
         },
         [onValueChange, options, value]
@@ -32,7 +36,7 @@ const SingleSelectWidget: React.FC<SingleSelectWidgetProps> = props => {
             {options.map(option => (
                 <Radio
                     key={option.id}
-                    checked={value === option.id}
+                    checked={stateValue === option.id}
                     label={option.name}
                     disabled={props.disabled}
                     onChange={() => notifyChange(option.id)}

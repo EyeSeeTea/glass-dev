@@ -13,9 +13,13 @@ export interface SingleSelectWidgetProps extends BaseWidgetProps<boolean> {
 const SingleSelectWidget: React.FC<SingleSelectWidgetProps> = props => {
     const { onValueChange, value } = props;
 
+    const [stateValue, setStateValue] = React.useState(value);
+    React.useEffect(() => setStateValue(value), [value]);
+
     const notifyChange = React.useCallback(
         (newValue: boolean) => {
             const sameSelected = value === newValue;
+            setStateValue(newValue);
             onValueChange(sameSelected ? undefined : newValue);
         },
         [onValueChange, value]
@@ -26,14 +30,14 @@ const SingleSelectWidget: React.FC<SingleSelectWidgetProps> = props => {
     return (
         <div className={classes.wrapper}>
             <Radio
-                checked={value === true}
+                checked={stateValue === true}
                 label={i18n.t("Yes")}
                 disabled={props.disabled}
                 onChange={() => notifyChange(true)}
             />
 
             <Radio
-                checked={value === false}
+                checked={stateValue === false}
                 label={i18n.t("No")}
                 disabled={props.disabled}
                 onChange={() => notifyChange(false)}
