@@ -1,5 +1,5 @@
 import _ from "lodash";
-import { getId, Id } from "../../domain/entities/Base";
+import { Id } from "../../domain/entities/Base";
 import { DataForm, Section } from "./DataForm";
 import { Future, FutureData } from "../../domain/entities/Future";
 import { D2Api, MetadataPick } from "../../types/d2-api";
@@ -32,12 +32,7 @@ export class DataFormD2Source {
     }
 
     private getSections(dataSet: D2DataSet): FutureData<Section[]> {
-        const dataElementIds = _(dataSet.sections)
-            .flatMap(section => section.dataElements)
-            .map(getId)
-            .value();
-
-        return new DataElementD2Source(this.api).get(dataElementIds).map(dataElements => {
+        return new DataElementD2Source(this.api).get(dataSet).map(dataElements => {
             return dataSet.sections.map((section): Section => {
                 return {
                     id: section.id,
@@ -53,18 +48,31 @@ export class DataFormD2Source {
 }
 
 type Metadata = MetadataPick<{ dataSets: { fields: typeof dataSetFields } }>;
-type D2DataSet = Metadata["dataSets"][number];
+export type D2DataSet = Metadata["dataSets"][number];
+export type D2DataElement = D2DataSet["sections"][number]["dataElements"][number];
 
 const dataSetFields = {
     id: true,
     displayName: true,
     displayDescription: true,
     code: true,
+    dataSetElements: { dataElement: { id: true }, categoryCombo: { id: true } },
     sections: {
         id: true,
         code: true,
         displayName: true,
-        dataElements: { id: true },
+        dataElements: {
+            id: true,
+            code: true,
+            displayName: true,
+            formName: true,
+            valueType: true,
+            categoryCombo: { id: true },
+            optionSet: {
+                id: true,
+                options: { id: true, displayName: true, code: true },
+            },
+        },
     },
 } as const;
 
