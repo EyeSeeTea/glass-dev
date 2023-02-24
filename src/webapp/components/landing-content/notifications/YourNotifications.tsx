@@ -83,7 +83,3 @@ const Item = styled.div`
         }
     }
 `;
-
-const StyledNoData = styled(Typography)`
-    padding-left: 20px;
-`;
