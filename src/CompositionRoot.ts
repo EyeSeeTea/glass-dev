@@ -31,6 +31,8 @@ import { GetQuestionnaireUseCase } from "./domain/usecases/GetQuestionnaireUseCa
 import { SaveQuestionnaireResponseUseCase } from "./domain/usecases/SaveQuestionUseCase";
 import { SetAsQuestionnaireAsCompletedUseCase } from "./domain/usecases/SetAsCompletedUseCase";
 import { GetQuestionnaireListUseCase } from "./domain/usecases/GetQuestionnaireListUseCase";
+import { GetNotificationsUseCase } from "./domain/usecases/GetNotificationsUseCase";
+import { NotificationDefaultRepository } from "./data/repositories/NotificationDefaultRepository";
 
 export function getCompositionRoot(instance: Instance) {
     const api = getD2APiFromInstance(instance);
@@ -42,6 +44,7 @@ export function getCompositionRoot(instance: Instance) {
     const glassUploadsRepository = new GlassUploadsDefaultRepository(dataStoreClient);
     const glassDocumentsRepository = new GlassDocumentsDefaultRepository(dataStoreClient, instance);
     const questionnaireD2Repository = new QuestionnaireD2Repository(api);
+    const notificationRepository = new NotificationDefaultRepository(instance);
 
     return {
         instance: getExecute({
@@ -81,6 +84,9 @@ export function getCompositionRoot(instance: Instance) {
             getList: new GetQuestionnaireListUseCase(questionnaireD2Repository),
             saveResponse: new SaveQuestionnaireResponseUseCase(questionnaireD2Repository),
             setAsCompleted: new SetAsQuestionnaireAsCompletedUseCase(questionnaireD2Repository),
+        }),
+        notifications: getExecute({
+            get: new GetNotificationsUseCase(notificationRepository),
         }),
     };
 }
