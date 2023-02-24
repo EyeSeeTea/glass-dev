@@ -71,5 +71,5 @@ const dataSetFields = {
 function getMetadataQuery(options: { dataSetId: Id }) {
     return {
         dataSets: { fields: dataSetFields, filter: { id: { eq: options.dataSetId } } },
-    } as const;
+    };
 }

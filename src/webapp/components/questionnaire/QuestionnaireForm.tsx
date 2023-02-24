@@ -4,7 +4,6 @@ import React, { useEffect, useState } from "react";
 import { Id } from "../../../domain/entities/Base";
 import {
     Questionnaire,
-    QuestionnaireSelector,
     QuestionnaireSimple,
     QuestionnarieM,
 } from "../../../domain/entities/Questionnaire";
@@ -24,31 +23,33 @@ export interface QuestionnarieFormProps {
     orgUnitId: Id;
     year: number;
     onBackClick(): void;
-    disabled: boolean;
+    mode: "show" | "edit";
     onSave(questionnaire: QuestionnaireSimple): void;
 }
 
 const QuestionnaireFormComp: React.FC<QuestionnarieFormProps> = props => {
-    const { onBackClick, disabled } = props;
+    const { onBackClick, mode } = props;
     const [questionnaire, setAsCompleted] = useQuestionnaire(props);
     const classes = useStyles();
+    const isCompleted = questionnaire?.isCompleted;
+    const disabled = isCompleted ? true : mode === "show";
 
     if (!questionnaire) return <LinearProgress />;
 
     return (
         <Wrapper>
-            <PageHeader title={i18n.t("Back to list")} onBackClick={onBackClick} />
+            <PageHeader title={questionnaire.name} onBackClick={onBackClick} />
 
             <Header>
-                {questionnaire.isCompleted ? (
+                {isCompleted ? (
                     <span className="comp completed">{i18n.t("Completed")}</span>
                 ) : (
                     <span className="comp">{i18n.t("Not completed")}</span>
                 )}
 
-                {disabled ? null : (
-                    <div>
-                        {questionnaire.isCompleted ? (
+                {mode === "edit" && (
+                    <div className="buttons">
+                        {isCompleted ? (
                             <Button onClick={() => setAsCompleted(false)} variant="contained" color="secondary">
                                 {i18n.t("Set as incomplete")}
                             </Button>
@@ -61,7 +62,6 @@ const QuestionnaireFormComp: React.FC<QuestionnarieFormProps> = props => {
                 )}
 
                 <div className="head">
-                    <h3>{questionnaire.name}</h3>
                     <span className="desc">{questionnaire.description}</span>
                 </div>
             </Header>
@@ -109,10 +109,16 @@ const Wrapper = styled.div`
 
 function useQuestionnaire(options: QuestionnarieFormProps) {
     const { compositionRoot } = useAppContext();
-    const snackbar = useSnackbar();
-    const [questionnaire, setQuestionnaire] = useState<Questionnaire>();
-    const { onSave, id, orgUnitId, year } = options;
     const module = useGlassModule(compositionRoot);
+    const snackbar = useSnackbar();
+
+    const { onSave, id, orgUnitId, year } = options;
+    const [questionnaire, setQuestionnaire] = useState<Questionnaire>();
+
+    const [isCompleted, setIsCompleted] = React.useState(questionnaire?.isCompleted || false);
+    React.useEffect(() => {
+        setIsCompleted(questionnaire?.isCompleted || false);
+    }, [questionnaire?.isCompleted]);
 
     useEffect(() => {
         if (module.kind !== "loaded") return;
@@ -121,28 +127,31 @@ function useQuestionnaire(options: QuestionnarieFormProps) {
             .run(setQuestionnaire, err => snackbar.error(err));
     }, [compositionRoot, options, snackbar, module]);
 
-    const selector = React.useMemo<QuestionnaireSelector>(() => ({ id, orgUnitId, year }), [id, orgUnitId, year]);
+    const selector = React.useMemo(() => ({ id, orgUnitId, year }), [id, orgUnitId, year]);
 
     const setAsCompleted = useCallbackEffect(
         React.useCallback(
             (isCompleted: boolean) => {
                 return compositionRoot.questionnaires.setAsCompleted(selector, isCompleted).run(
                     () => {
-                        setQuestionnaire(prevQuestionnarire => {
-                            if (!prevQuestionnarire) return;
-                            const questionnaireUpdated = QuestionnarieM.setAsComplete(prevQuestionnarire, isCompleted);
-                            onSave(questionnaireUpdated);
-                            return questionnaireUpdated;
-                        });
+                        if (!questionnaire) return;
+                        const questionnaireUpdated = QuestionnarieM.setAsComplete(questionnaire, isCompleted);
+                        onSave(questionnaireUpdated);
+                        setIsCompleted(isCompleted);
                     },
                     err => snackbar.error(err)
                 );
             },
-            [compositionRoot, snackbar, selector, onSave]
+            [compositionRoot, snackbar, selector, onSave, questionnaire]
         )
     );
 
-    return [questionnaire, setAsCompleted] as const;
+    const questionnaireWithCompleted = React.useMemo(
+        () => (questionnaire ? QuestionnarieM.setAsComplete(questionnaire, isCompleted) : undefined),
+        [questionnaire, isCompleted]
+    );
+
+    return [questionnaireWithCompleted, setAsCompleted] as const;
 }
 
 const useStyles = makeStyles({
@@ -161,13 +170,18 @@ const Header = styled.div`
         width: 100%;
         text-align: right;
         float: right;
-        height: 0;
         text-transform: uppercase;
+        margin-bottom: 5px;
         font-size: 12px;
         color: ${glassColors.orange};
         &.completed {
             color: ${glassColors.green};
         }
+    }
+
+    .buttons {
+        text-align: right;
+        margin-bottom: 15px;
     }
 `;
 

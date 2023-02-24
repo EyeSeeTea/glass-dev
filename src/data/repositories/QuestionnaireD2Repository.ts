@@ -10,9 +10,10 @@ import {
     QuestionnaireSimple,
 } from "../../domain/entities/Questionnaire";
 import { QuestionnaireRepository } from "../../domain/repositories/QuestionnaireRepository";
-import { D2Api, DataValueSetsPostRequest } from "../../types/d2-api";
+import { D2Api, DataValueSetsDataValue, DataValueSetsPostRequest } from "../../types/d2-api";
 import { assertUnreachable } from "../../types/utils";
 import { apiToFuture } from "../../utils/futures";
+import { DataElement } from "../dhis2/DataElement";
 import { DataFormD2Source } from "../dhis2/DataFormD2Source";
 
 export class QuestionnaireD2Repository implements QuestionnaireRepository {
@@ -31,11 +32,9 @@ export class QuestionnaireD2Repository implements QuestionnaireRepository {
             })
         ).map(res => res.dataSets);
 
-        const dataSetsInfo$ = this.getDataSetsInfo(dataSetIds, options);
-
         const data = {
             dataSets: dataSets$,
-            dataSetsInfo: dataSetsInfo$,
+            dataSetsInfo: this.getDataSetsInfo(dataSetIds, options),
         };
 
         return Future.joinObj(data).map(({ dataSets, dataSetsInfo }) => {
@@ -55,98 +54,43 @@ export class QuestionnaireD2Repository implements QuestionnaireRepository {
         });
     }
 
-    get(module: GlassModule, options: QuestionnaireSelector): FutureData<Questionnaire> {
+    get(module: GlassModule, selector: QuestionnaireSelector): FutureData<Questionnaire> {
         const dataFormRepository = new DataFormD2Source(this.api);
-        const config = module.questionnaires.find(q => q.id === options.id);
-
-        const dataForm$ = dataFormRepository.get({ id: options.id });
+        const config = module.questionnaires.find(q => q.id === selector.id);
+        const dataForm$ = dataFormRepository.get({ id: selector.id });
 
         const dataValues$ = apiToFuture(
             this.api.dataValues.getSet({
-                dataSet: [options.id],
-                orgUnit: [options.orgUnitId],
-                period: [options.year.toString()],
+                dataSet: [selector.id],
+                orgUnit: [selector.orgUnitId],
+                period: [selector.year.toString()],
             })
         ).map(res => res.dataValues);
 
         const data = {
             dataForm: dataForm$,
             dataValues: dataValues$,
-            dataSetInfo: this.getDataSetsInfo([options.id], options).map(_.first),
+            dataSetInfo: this.getDataSetsInfo([selector.id], selector).map(_.first),
         };
 
         return Future.joinObj(data).map(({ dataForm, dataValues, dataSetInfo }): Questionnaire => {
             const dataValuesByDataElementId = _.groupBy(dataValues, dv => dv.dataElement);
 
             const sections = dataForm.sections.map((section): QuestionnaireSection => {
-                const questions = section.dataElements.map((dataElement): QuestionnaireQuestion | null => {
+                const questions = section.dataElements.map(dataElement => {
                     const dataValues = dataValuesByDataElementId[dataElement.id] || [];
-                    const dataValue = _.first(dataValues);
-
-                    switch (dataElement.type) {
-                        case "BOOLEAN": {
-                            const selectedCocId = _(dataValues)
-                                .map(dv => (dv.value === "true" ? dv.categoryOptionCombo : null))
-                                .compact()
-                                .first();
-
-                            const isDefault =
-                                dataElement.disaggregation.length && dataElement.disaggregation[0]?.name === "default";
-
-                            if (!isDefault) {
-                                const value = dataElement.disaggregation.find(dis => dis.id === selectedCocId);
-
-                                return {
-                                    id: dataElement.id,
-                                    text: dataElement.name,
-                                    type: "select",
-                                    value: value,
-                                    options: dataElement.disaggregation,
-                                };
-                            } else {
-                                return {
-                                    id: dataElement.id,
-                                    text: dataElement.name,
-                                    type: "boolean",
-                                    value: Boolean(selectedCocId),
-                                };
-                            }
-                        }
-                        case "NUMBER":
-                            return {
-                                id: dataElement.id,
-                                text: dataElement.name,
-                                type: "number",
-                                value: dataValue?.value || "",
-                            };
-
-                        case "TEXT":
-                            return {
-                                id: dataElement.id,
-                                text: dataElement.name,
-                                multiline: dataElement.multiline,
-                                type: "text",
-                                value: dataValue?.value || "",
-                            };
-
-                        default:
-                            console.error("Unsupported data element", dataElement);
-                            return null;
-                    }
+                    return this.getQuestion(dataElement, dataValues);
                 });
 
-                return {
-                    title: section.name,
-                    questions: _.compact(questions),
-                };
+                return { title: section.name, questions: _.compact(questions) };
             });
 
             return {
-                id: options.id,
+                id: selector.id,
                 name: dataForm.name,
                 description: dataForm.description,
-                orgUnit: { id: options.orgUnitId },
-                year: options.year,
+                orgUnit: { id: selector.orgUnitId },
+                year: selector.year,
                 sections: sections,
                 isCompleted: dataSetInfo?.completed || false,
                 isMandatory: config?.mandatory || false,
@@ -154,7 +98,7 @@ export class QuestionnaireD2Repository implements QuestionnaireRepository {
         });
     }
 
-    setCompleted(selector: QuestionnaireSelector, value: boolean): FutureData<void> {
+    setCompletion(selector: QuestionnaireSelector, value: boolean): FutureData<void> {
         return apiToFuture(
             this.api.post<{ status: "SUCCESS" | "WARNING" | "ERROR" }>(
                 "/completeDataSetRegistrations",
@@ -178,23 +122,83 @@ export class QuestionnaireD2Repository implements QuestionnaireRepository {
     }
 
     saveResponse(questionnaire: QuestionnaireSelector, question: QuestionnaireQuestion): FutureData<void> {
-        const dataValues = this.getDataValues(questionnaire, question);
-
+        const dataValues = this.getDataValuesForQuestion(questionnaire, question);
         return this.postDataValues(dataValues);
     }
 
-    private getDataValues(questionnaire: QuestionnaireSelector, question: QuestionnaireQuestion): D2DataValue[] {
+    private getQuestion(dataElement: DataElement, dataValues: DataValueSetsDataValue[]): QuestionnaireQuestion | null {
+        const dataValue = _.first(dataValues);
+
+        const selectedCocId = _(dataValues)
+            .map(dv => (dv.value === "true" ? dv.categoryOptionCombo : null))
+            .compact()
+            .first();
+
+        const isDefault = dataElement.disaggregation.length && dataElement.disaggregation[0]?.name === "default";
+
+        switch (dataElement.type) {
+            case "BOOLEAN": {
+                if (!isDefault) {
+                    const value = dataElement.disaggregation.find(dis => dis.id === selectedCocId);
+
+                    return {
+                        id: dataElement.id,
+                        text: dataElement.name,
+                        type: "select",
+                        value: value,
+                        options: dataElement.disaggregation,
+                    };
+                } else {
+                    return {
+                        id: dataElement.id,
+                        text: dataElement.name,
+                        type: "boolean",
+                        value: Boolean(selectedCocId),
+                    };
+                }
+            }
+            case "NUMBER":
+                return {
+                    id: dataElement.id,
+                    text: dataElement.name,
+                    type: "number",
+                    value: dataValue?.value || "",
+                };
+
+            case "TEXT":
+                return {
+                    id: dataElement.id,
+                    text: dataElement.name,
+                    multiline: dataElement.multiline,
+                    type: "text",
+                    value: dataValue?.value || "",
+                };
+
+            default:
+                console.error("Unsupported data element", dataElement);
+                return null;
+        }
+    }
+
+    private getDataValuesForQuestion(
+        questionnaire: QuestionnaireSelector,
+        question: QuestionnaireQuestion
+    ): D2DataValue[] {
         const { type } = question;
         const { orgUnitId, year } = questionnaire;
+
+        const base = {
+            orgUnit: orgUnitId,
+            dataElement: question.id,
+            period: year.toString(),
+        };
 
         switch (type) {
             case "select":
                 return question.options.map((option): D2DataValue => {
                     const isSelected = question.value?.id === option.id;
                     return {
-                        orgUnit: orgUnitId,
-                        dataElement: question.id,
-                        period: year.toString(),
+                        ...base,
                         value: isSelected ? "true" : "",
                         deleted: !isSelected,
                         categoryOptionCombo: option.id,
@@ -203,30 +207,16 @@ export class QuestionnaireD2Repository implements QuestionnaireRepository {
             case "boolean":
                 return [
                     {
-                        orgUnit: orgUnitId,
-                        dataElement: question.id,
-                        period: year.toString(),
+                        ...base,
                         value: question.value ? "true" : "",
                         deleted: !question.value,
                     },
                 ];
             case "number":
-                return [
-                    {
-                        orgUnit: orgUnitId,
-                        dataElement: question.id,
-                        period: year.toString(),
-                        value: question.value,
-                        deleted: !question.value,
-                    },
-                ];
-
             case "text":
                 return [
                     {
-                        orgUnit: orgUnitId,
-                        dataElement: question.id,
-                        period: year.toString(),
+                        ...base,
                         value: question.value,
                         deleted: !question.value,
                     },
@@ -238,9 +228,7 @@ export class QuestionnaireD2Repository implements QuestionnaireRepository {
     }
 
     private postDataValues(d2DataValues: D2DataValue[]): FutureData<void> {
-        const res$ = apiToFuture(this.api.dataValues.postSet({}, { dataValues: d2DataValues }));
-
-        return res$.flatMap(res =>
+        return apiToFuture(this.api.dataValues.postSet({}, { dataValues: d2DataValues })).flatMap(res =>
             res.status === "SUCCESS" ? Future.success(undefined) : Future.error(res.description)
         );
     }
