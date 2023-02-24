@@ -27,6 +27,8 @@ import { DeleteDocumentInfoByUploadIdUseCase } from "./domain/usecases/DeleteDoc
 import { GetOpenDataSubmissionsByOUUseCase } from "./domain/usecases/GetOpenDataSubmissionsByOUUseCase";
 import { GetNotificationsUseCase } from "./domain/usecases/GetNotificationsUseCase";
 import { NotificationDefaultRepository } from "./data/repositories/NotificationDefaultRepository";
+import { GetCountryInformationUseCase } from "./domain/usecases/GetCountryInformationUseCase";
+import { CountryInformationDefaultRepository } from "./data/repositories/CountryInformationDefaultRepository";
 
 export function getCompositionRoot(instance: Instance) {
     const dataStoreClient = new DataStoreClient(instance);
@@ -37,6 +39,7 @@ export function getCompositionRoot(instance: Instance) {
     const glassUploadsRepository = new GlassUploadsDefaultRepository(dataStoreClient);
     const glassDocumentsRepository = new GlassDocumentsDefaultRepository(dataStoreClient, instance);
     const notificationRepository = new NotificationDefaultRepository(instance);
+    const countryInformationRepository = new CountryInformationDefaultRepository(instance);
 
     return {
         instance: getExecute({
@@ -73,6 +76,9 @@ export function getCompositionRoot(instance: Instance) {
         }),
         notifications: getExecute({
             get: new GetNotificationsUseCase(notificationRepository),
+        }),
+        countries: getExecute({
+            getInformation: new GetCountryInformationUseCase(countryInformationRepository),
         }),
     };
 }
