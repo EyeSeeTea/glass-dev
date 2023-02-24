@@ -1,12 +1,15 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: i18next-conv\n"
-"POT-Creation-Date: 2023-02-23T10:15:14.145Z\n"
+"POT-Creation-Date: 2023-02-24T10:10:07.575Z\n"
 "PO-Revision-Date: 2018-10-25T09:02:35.143Z\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
+
+msgid "Error saving registration status"
+msgstr ""
 
 msgid "User Profile"
 msgstr ""
@@ -76,13 +79,10 @@ msgstr ""
 msgid "Uploads with errors, or discarded"
 msgstr ""
 
-msgid "Questionnaire 1"
-msgstr ""
-
-msgid "Description"
-msgstr ""
-
 msgid "mandatory"
+msgstr ""
+
+msgid "Completed"
 msgstr ""
 
 msgid "Not completed"
@@ -92,15 +92,6 @@ msgid "View"
 msgstr ""
 
 msgid "Go"
-msgstr ""
-
-msgid "Questionnaire 2"
-msgstr ""
-
-msgid "Questionnaire 3"
-msgstr ""
-
-msgid "Completed"
 msgstr ""
 
 msgid "Overview"
@@ -190,21 +181,6 @@ msgstr ""
 msgid "Data Submission status has errors..."
 msgstr ""
 
-msgid "Loading..."
-msgstr ""
-
-msgid "There are no sections in this data set. Check README for more details"
-msgstr ""
-
-msgid "Yes"
-msgstr ""
-
-msgid "No"
-msgstr ""
-
-msgid "Select"
-msgstr ""
-
 msgid " "
 msgstr ""
 
@@ -235,6 +211,21 @@ msgstr "Volver"
 msgid "Help"
 msgstr "Ayuda"
 
+msgid "Yes"
+msgstr ""
+
+msgid "No"
+msgstr ""
+
+msgid "Back to list"
+msgstr ""
+
+msgid "Set as incomplete"
+msgstr ""
+
+msgid "Set as completed"
+msgstr ""
+
 msgid "HOME"
 msgstr ""
 
@@ -263,6 +254,11 @@ msgid "Any other userful information here?"
 msgstr ""
 
 msgid "Info abou the previously updated quarter and the missing quarters"
+msgstr ""
+
+msgid ""
+"Explaining what consistency checks are: Lorem ipsum dolor sit amet, "
+"consectetur adipiscing elit, sed doeiusmod tempor incididunt ut labore"
 msgstr ""
 
 msgid "RIS File"
