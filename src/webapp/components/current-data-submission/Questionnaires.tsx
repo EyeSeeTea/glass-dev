@@ -2,9 +2,11 @@ import i18n from "@eyeseetea/d2-ui-components/locales";
 import { Button } from "@material-ui/core";
 import React from "react";
 import styled from "styled-components";
+import { useGlassCaptureAccess } from "../../hooks/useGlassCaptureAccess";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
 
 export const Questionnaires: React.FC = () => {
+    const hasCurrentUserCaptureAccess = useGlassCaptureAccess();
     return (
         <QuestionnairesGrid>
             <QuestionnaireCard>
@@ -16,7 +18,7 @@ export const Questionnaires: React.FC = () => {
                 <span className="comp">{i18n.t("Not completed")}</span>
                 <div className="buttons">
                     <Button>{i18n.t("View")}</Button>
-                    <Button variant="contained" color="primary">
+                    <Button variant="contained" color="primary" disabled={!hasCurrentUserCaptureAccess}>
                         {i18n.t("Go")}
                     </Button>
                 </div>
@@ -29,7 +31,7 @@ export const Questionnaires: React.FC = () => {
                 <span className="comp">{i18n.t("Not completed")}</span>
                 <div className="buttons">
                     <Button>{i18n.t("View")}</Button>
-                    <Button variant="contained" color="primary">
+                    <Button variant="contained" color="primary" disabled={!hasCurrentUserCaptureAccess}>
                         {i18n.t("Go")}
                     </Button>
                 </div>
@@ -42,7 +44,7 @@ export const Questionnaires: React.FC = () => {
                 <span className="comp completed">{i18n.t("Completed")}</span>
                 <div className="buttons">
                     <Button>{i18n.t("View")}</Button>
-                    <Button variant="contained" color="primary">
+                    <Button variant="contained" color="primary" disabled={!hasCurrentUserCaptureAccess}>
                         {i18n.t("Go")}
                     </Button>
                 </div>
