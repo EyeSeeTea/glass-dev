@@ -80,7 +80,7 @@ const QuestionnaireFormComp: React.FC<QuestionnarieFormProps> = props => {
                             <TableBody>
                                 {section.questions.map(question => (
                                     <DataTableRow key={question.id}>
-                                        <DataTableCell>
+                                        <DataTableCell width="60%">
                                             <span>{question.text}</span>
                                         </DataTableCell>
 
