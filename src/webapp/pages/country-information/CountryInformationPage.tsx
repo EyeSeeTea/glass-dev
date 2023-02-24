@@ -9,7 +9,7 @@ import i18n from "@eyeseetea/d2-ui-components/locales";
 import { CountryInformationContent } from "../../components/country-information/CountryInformationContent";
 import { useCurrentModuleContext } from "../../contexts/current-module-context";
 import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context";
-import { useCountryInformation } from "../../components/country-information/useCountryInformation";
+import { useCountryInformation } from "./useCountryInformation";
 import { useAppContext } from "../../contexts/app-context";
 import { ContentLoader } from "../../components/content-loader/ContentLoader";
 
