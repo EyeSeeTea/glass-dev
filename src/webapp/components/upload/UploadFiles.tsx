@@ -88,10 +88,6 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({ changeStep, risFile, s
         }
     };
 
-    const uploadDatasetAndChangeStep = async () => {
-        changeStep(2);
-    };
-
     return (
         <ContentWrapper>
             <div className="file-fields">
@@ -134,10 +130,10 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({ changeStep, risFile, s
                 <Button
                     variant="contained"
                     color={isValidated ? "primary" : "default"}
-                    disabled={isValidated ? false : false}
+                    disabled={isValidated ? false : true}
                     endIcon={<ChevronRightIcon />}
                     disableElevation
-                    onClick={uploadDatasetAndChangeStep}
+                    onClick={() => changeStep(2)}
                 >
                     {i18n.t("Continue")}
                 </Button>

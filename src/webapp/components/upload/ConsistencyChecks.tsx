@@ -8,6 +8,7 @@ import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { useAppContext } from "../../contexts/app-context";
 import { useCurrentModuleContext } from "../../contexts/current-module-context";
+import { DataValueSetsPostResponse } from "@eyeseetea/d2-api/api";
 
 interface ConsistencyChecksProps {
     changeStep: (step: number) => void;
@@ -16,54 +17,102 @@ interface ConsistencyChecksProps {
 
 const COMPLETED_STATUS = "COMPLETED";
 
+export type ErrorCount = {
+    error: string;
+    count: number;
+};
+
 export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({ changeStep, risFile }) => {
     const { compositionRoot } = useAppContext();
     const { currentModuleAccess } = useCurrentModuleContext();
     const [fileType, setFileType] = useState<string>("ris");
     const [isDataSetUploading, setIsDataSetUploading] = useState<boolean>(false);
-    const [blockingErrors, setBlockingErrors] = useState<Map<string, number>>(new Map<string, number>());
-    const [warningErrors, setWarningErrors] = useState<Map<string, number>>(new Map<string, number>());
+    const [blockingErrors, setBlockingErrors] = useState<ErrorCount[]>([]);
+    const [nonBlockingErrors, setNonBlockingErrors] = useState<ErrorCount[]>([]);
 
+    const updateErrorCounts = (errors: ErrorCount[], datasetImportStatus: DataValueSetsPostResponse) => {
+        const updatedNonBLockingErrors = datasetImportStatus.conflicts?.map(status => {
+            const existingError = errors.filter(nbe => nbe.error === status.value);
+            //Add only unique errors, so only one of each kind of error will exist in array
+            if (existingError[0]) {
+                return {
+                    error: existingError[0]?.error,
+                    count: existingError[0]?.count + 1,
+                };
+            } else {
+                return {
+                    error: status.value,
+                    count: 1,
+                };
+            }
+        });
+
+        if (updatedNonBLockingErrors) {
+            const uniqueErrors = errors.filter(nbe => updatedNonBLockingErrors.every(e => e.error !== nbe.error));
+            return [...uniqueErrors, ...updatedNonBLockingErrors];
+        } else {
+            return [...errors];
+        }
+    };
     useEffect(() => {
         async function uploadDatasets() {
             if (risFile && currentModuleAccess.moduleName === "AMR") {
                 setIsDataSetUploading(true);
-                await compositionRoot.glassRisFile.importFile(risFile).then(responses => {
-                    responses?.forEach((response, index) => {
-                        response.run(
-                            importStatus => {
-                                if (importStatus.status === "WARNING") {
-                                    setWarningErrors(prev => {
-                                        const updated = prev;
-                                        importStatus?.conflicts?.forEach(element => {
-                                            const count = updated.get(element.value);
-                                            if (count !== undefined && count >= 0) {
-                                                updated.set(element.value, count + 1);
-                                            } else {
-                                                updated.set(element.value, 1);
-                                            }
+                await compositionRoot.glassRisFile.importFile(risFile).then(uploadResults => {
+                    uploadResults?.forEach((result, index) => {
+                        result.run(
+                            datasetImportStatus => {
+                                //Warning considered non-blocking
+                                if (datasetImportStatus.status === "WARNING") {
+                                    if (datasetImportStatus.conflicts && datasetImportStatus.conflicts.length) {
+                                        setNonBlockingErrors(prev => {
+                                            return updateErrorCounts(prev, datasetImportStatus);
                                         });
-                                        return updated;
-                                    });
-                                } else if (importStatus.status === "ERROR") {
-                                    setBlockingErrors(prev => {
-                                        const updated = prev;
-                                        importStatus?.conflicts?.forEach(element => {
-                                            const count = updated.get(element.value);
-                                            if (count !== undefined && count >= 0) {
-                                                updated.set(element.value, count + 1);
-                                            } else {
-                                                updated.set(element.value, 1);
-                                            }
+                                    }
+                                }
+
+                                //Errors considered blocking
+                                else if (datasetImportStatus.status === "ERROR") {
+                                    if (datasetImportStatus.conflicts && datasetImportStatus.conflicts.length) {
+                                        setBlockingErrors(prev => {
+                                            return updateErrorCounts(prev, datasetImportStatus);
                                         });
-                                        return updated;
+                                    }
+                                }
+                                //consider any ignored imports as blocking error.
+                                if (datasetImportStatus.importCount.ignored > 0) {
+                                    setBlockingErrors(blockingErrors => {
+                                        const ignoredError = blockingErrors.filter(be => be.error === "Import Ignored");
+                                        if (ignoredError[0]) {
+                                            return [
+                                                ...blockingErrors.filter(be => be.error !== "Import Ignored"),
+                                                {
+                                                    error: ignoredError[0].error,
+                                                    count:
+                                                        ignoredError[0].count + datasetImportStatus.importCount.ignored,
+                                                },
+                                            ];
+                                        } else {
+                                            return [
+                                                ...blockingErrors,
+                                                {
+                                                    error: "Import Ignored",
+                                                    count: datasetImportStatus.importCount.ignored,
+                                                },
+                                            ];
+                                        }
                                     });
                                 }
-                                if (index === responses.length - 1) {
+                                if (index === uploadResults.length - 1) {
                                     setIsDataSetUploading(false);
                                 }
                             },
-                            _error => setIsDataSetUploading(false)
+                            error => {
+                                setBlockingErrors(blockingErrors => {
+                                    return [...blockingErrors, { error: error, count: 1 }];
+                                });
+                                setIsDataSetUploading(false);
+                            }
                         );
                     });
                 });
@@ -106,7 +155,7 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({ changeStep
                         {i18n.t("Sample File")}
                     </Button>
                 </div>
-                {renderTypeContent(fileType, blockingErrors, warningErrors)}
+                {renderTypeContent(fileType, blockingErrors, nonBlockingErrors)}
                 <div className="bottom">
                     <Button
                         variant="contained"
@@ -114,6 +163,7 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({ changeStep
                         endIcon={<ChevronRightIcon />}
                         onClick={goToFinalStep}
                         disableElevation
+                        disabled={blockingErrors.length ? true : false}
                     >
                         {i18n.t("Continue")}
                     </Button>
@@ -122,11 +172,7 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({ changeStep
         );
 };
 
-const renderTypeContent = (
-    type: string,
-    blockingErrors: Map<string, number> | undefined,
-    warningErrors: Map<string, number> | undefined
-) => {
+const renderTypeContent = (type: string, blockingErrors: ErrorCount[], warningErrors: ErrorCount[]) => {
     switch (type) {
         case "sample":
             return <p>{i18n.t("Sample file uploading content/intructions here...")}</p>;
