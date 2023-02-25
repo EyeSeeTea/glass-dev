@@ -2,9 +2,10 @@ import React from "react";
 // @ts-ignore
 import { Input, TextArea } from "@dhis2/ui";
 import { BaseWidgetProps } from "./BaseWidget";
+import { Maybe } from "../../../types/utils";
 
 export interface TextWidgetProps extends BaseWidgetProps<string> {
-    value: string;
+    value: Maybe<string>;
     multiline: boolean;
 }
 
@@ -28,9 +29,19 @@ const TextWidget: React.FC<TextWidgetProps> = props => {
     return (
         <>
             {props.multiline ? (
-                <TextArea onBlur={notifyChange} onChange={updateState} value={stateValue} disabled={props.disabled} />
+                <TextArea
+                    onBlur={notifyChange}
+                    onChange={updateState}
+                    value={stateValue || ""}
+                    disabled={props.disabled}
+                />
             ) : (
-                <Input onBlur={notifyChange} onChange={updateState} value={stateValue} disabled={props.disabled} />
+                <Input
+                    onBlur={notifyChange}
+                    onChange={updateState}
+                    value={stateValue || ""}
+                    disabled={props.disabled}
+                />
             )}
         </>
     );

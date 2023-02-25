@@ -3,9 +3,10 @@ import React from "react";
 import { Input } from "@dhis2/ui";
 import { BaseWidgetProps } from "./BaseWidget";
 import { NumberQuestion, QuestionnaireQuestionM } from "../../../domain/entities/Questionnaire";
+import { Maybe } from "../../../types/utils";
 
 export interface NumberWidgetProps extends BaseWidgetProps<string> {
-    value: string;
+    value: Maybe<string>;
     numberType: NumberQuestion["numberType"];
 }
 
@@ -36,7 +37,7 @@ const NumberWidget: React.FC<NumberWidgetProps> = props => {
                 type="number"
                 onBlur={notifyChange}
                 onChange={updateState}
-                value={stateValue}
+                value={stateValue || ""}
                 disabled={props.disabled}
             />
         </>
