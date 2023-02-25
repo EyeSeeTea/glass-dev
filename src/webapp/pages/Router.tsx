@@ -8,6 +8,7 @@ import { LandingPage } from "./landing/LandingPage";
 import { UploadHistoryPage } from "./upload-history/UploadHistoryPage";
 import { CurrentOrgUnitContextProvider } from "../context-providers/CurrentOrgUnitContextProvider";
 import { CurrentModuleContextProvider } from "../context-providers/CurrentModuleContextProvider";
+import { PrivateRoute } from "../components/private-route/PrivateRoute";
 
 export const Router: React.FC = React.memo(() => {
     return (
@@ -15,11 +16,46 @@ export const Router: React.FC = React.memo(() => {
             <CurrentOrgUnitContextProvider>
                 <CurrentModuleContextProvider>
                     <Switch>
-                        <Route path="/data-submissions-history/" render={() => <DataSubmissionsHistoryPage />} />
-                        <Route path="/current-data-submission/" render={() => <CurrentDataSubmissionPage />} />
-                        <Route path="/upload/" render={() => <UploadPage />} />
-                        <Route path="/upload-history" render={() => <UploadHistoryPage />} />
-                        <Route path="/country-information" render={() => <CountryInformationPage />} />
+                        <Route
+                            path="/data-submissions-history/"
+                            render={({ location }) => (
+                                <PrivateRoute pathname={location.pathname}>
+                                    <DataSubmissionsHistoryPage />
+                                </PrivateRoute>
+                            )}
+                        />
+                        <Route
+                            path="/current-data-submission/"
+                            render={({ location }) => (
+                                <PrivateRoute pathname={location.pathname}>
+                                    <CurrentDataSubmissionPage />
+                                </PrivateRoute>
+                            )}
+                        />
+                        <Route
+                            path="/upload/"
+                            render={({ location }) => (
+                                <PrivateRoute pathname={location.pathname}>
+                                    <UploadPage />
+                                </PrivateRoute>
+                            )}
+                        />
+                        <Route
+                            path="/upload-history"
+                            render={({ location }) => (
+                                <PrivateRoute pathname={location.pathname}>
+                                    <UploadHistoryPage />
+                                </PrivateRoute>
+                            )}
+                        />
+                        <Route
+                            path="/country-information"
+                            render={({ location }) => (
+                                <PrivateRoute pathname={location.pathname}>
+                                    <CountryInformationPage />
+                                </PrivateRoute>
+                            )}
+                        />
                         <Route render={() => <LandingPage />} />
                     </Switch>
                 </CurrentModuleContextProvider>
