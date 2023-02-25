@@ -2,10 +2,14 @@ import { useSnackbar } from "@eyeseetea/d2-ui-components";
 import { makeStyles } from "@material-ui/core";
 import React from "react";
 import { NamedRef } from "../../../domain/entities/Base";
-import { Questionnaire, QuestionnaireQuestion, QuestionnaireSelector } from "../../../domain/entities/Questionnaire";
+import {
+    Questionnaire,
+    QuestionnaireQuestion,
+    QuestionnaireQuestionM,
+    QuestionnaireSelector,
+} from "../../../domain/entities/Questionnaire";
 import { assertUnreachable, Maybe } from "../../../types/utils";
 import { useAppContext } from "../../contexts/app-context";
-import { useCallbackEffect } from "../../hooks/useCallbackEffect";
 import BooleanWidget from "./BooleanWidget";
 import NumberWidget from "./NumberWidget";
 import SingleSelect from "./SingleSelectWidget";
@@ -15,16 +19,16 @@ export interface DataElementItemProps {
     questionnaire: Questionnaire;
     question: QuestionnaireQuestion;
     disabled: boolean;
+    setQuestion(newQuestion: QuestionnaireQuestion): void;
 }
 
 const Question: React.FC<DataElementItemProps> = React.memo(props => {
-    const { question, questionnaire, disabled } = props;
     const classes = useStyles();
 
     return (
         <div className={classes.valueWrapper}>
             <div className={classes.valueInput}>
-                <QuestionInput question={question} questionnaire={questionnaire} disabled={disabled} />
+                <QuestionInput {...props} />
             </div>
         </div>
     );
@@ -33,8 +37,8 @@ const Question: React.FC<DataElementItemProps> = React.memo(props => {
 export type QuestionInputProps = DataElementItemProps;
 
 export const QuestionInput: React.FC<QuestionInputProps> = React.memo(props => {
-    const { questionnaire, disabled } = props;
-    const [question, actions] = useSaveActions(questionnaire, props.question);
+    const { question, disabled } = props;
+    const actions = useSaveActions(props);
     const { type } = question;
 
     switch (type) {
@@ -72,58 +76,56 @@ export const QuestionInput: React.FC<QuestionInputProps> = React.memo(props => {
     }
 });
 
-function useSaveActions(questionnaire: Questionnaire, propQuestion: QuestionnaireQuestion) {
+function useSaveActions(options: DataElementItemProps) {
+    const { setQuestion, question } = options;
+
     const { compositionRoot } = useAppContext();
     const snackbar = useSnackbar();
-    const { id, orgUnit, year } = questionnaire;
-    const [question, setQuestion] = React.useState(propQuestion);
+    const { id, orgUnit, year } = options.questionnaire;
 
     const selector = React.useMemo<QuestionnaireSelector>(
         () => ({ id, orgUnitId: orgUnit.id, year }),
         [id, orgUnit.id, year]
     );
 
-    const save = React.useCallback(
-        (question: QuestionnaireQuestion) => {
-            return compositionRoot.questionnaires.saveResponse(selector, question).run(
-                () => setQuestion(question),
-                err => snackbar.error(err)
-            );
+    const [questionToSave, setQuestionToSave] = React.useState<QuestionnaireQuestion>();
+
+    const saveOption = React.useCallback(
+        (value: Maybe<NamedRef>) => {
+            return question.type === "select"
+                ? setQuestionToSave(QuestionnaireQuestionM.update(question, value))
+                : undefined;
         },
-        [compositionRoot, snackbar, selector]
+        [question]
     );
 
-    const saveOption = useCallbackEffect(
-        React.useCallback(
-            (option: Maybe<NamedRef>) => {
-                return propQuestion.type === "select" ? save({ ...propQuestion, value: option }) : undefined;
-            },
-            [propQuestion, save]
-        )
+    const saveBoolean = React.useCallback(
+        (value: Maybe<boolean>) => {
+            return question.type === "boolean"
+                ? setQuestionToSave(QuestionnaireQuestionM.update(question, value))
+                : undefined;
+        },
+        [question]
     );
 
-    const saveBoolean = useCallbackEffect(
-        React.useCallback(
-            (value: Maybe<boolean>) => {
-                return propQuestion.type === "boolean" ? save({ ...propQuestion, value: value }) : undefined;
-            },
-            [propQuestion, save]
-        )
+    const saveString = React.useCallback(
+        (value: string) => {
+            return question.type === "text" || question.type === "number"
+                ? setQuestionToSave(QuestionnaireQuestionM.update(question, value))
+                : undefined;
+        },
+        [question]
     );
 
-    const saveString = useCallbackEffect(
-        React.useCallback(
-            (value: string) => {
-                return propQuestion.type === "text" || propQuestion.type === "number"
-                    ? save({ ...propQuestion, value: value })
-                    : undefined;
-            },
-            [propQuestion, save]
-        )
-    );
+    React.useEffect(() => {
+        if (!questionToSave) return;
+        return compositionRoot.questionnaires.saveResponse(selector, questionToSave).run(
+            () => setQuestion(questionToSave),
+            err => snackbar.error(err)
+        );
+    }, [compositionRoot, snackbar, selector, setQuestion, questionToSave]);
 
-    const actions = { saveOption, saveBoolean, saveString, saveNumber: saveString };
-    return [question, actions] as const;
+    return { saveOption, saveBoolean, saveString, saveNumber: saveString };
 }
 
 const useStyles = makeStyles({

@@ -68,6 +68,18 @@ export class QuestionnarieM {
     static setAsComplete(questionnarie: Questionnaire, value: boolean): Questionnaire {
         return { ...questionnarie, isCompleted: value };
     }
+
+    static updateQuestion(questionnaire: Questionnaire, questionUpdated: QuestionnaireQuestion): Questionnaire {
+        return {
+            ...questionnaire,
+            sections: questionnaire.sections.map(section => ({
+                ...section,
+                questions: section.questions.map(question =>
+                    question.id === questionUpdated.id ? questionUpdated : question
+                ),
+            })),
+        };
+    }
 }
 
 export class QuestionnaireQuestionM {
@@ -86,6 +98,10 @@ export class QuestionnaireQuestionM {
             default:
                 assertUnreachable(numberType);
         }
+    }
+
+    static update<Q extends QuestionnaireQuestion>(question: Q, value: Q["value"]): Q {
+        return { ...question, value };
     }
 }
 
