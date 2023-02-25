@@ -82,8 +82,9 @@ function getDataElement(d2DataElement: D2DataElement, d2CategoryCombo: D2Categor
         case "NUMBER":
             return { type: "NUMBER", numberType: valueType, ...base };
         case "BOOLEAN":
+            return { type: "BOOLEAN", storeFalse: true, ...base };
         case "TRUE_ONLY":
-            return { type: "BOOLEAN", ...base };
+            return { type: "BOOLEAN", storeFalse: false, ...base };
         default:
             console.error(
                 `Data element [formName=${d2DataElement.formName}, id=${d2DataElement.id}, valueType=${d2DataElement.valueType}] skipped, valueType is not supported`

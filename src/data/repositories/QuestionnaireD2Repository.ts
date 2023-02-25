@@ -134,23 +134,27 @@ export class QuestionnaireD2Repository implements QuestionnaireRepository {
             case "BOOLEAN": {
                 const isDefaultDisaggregation = disaggregation.length && disaggregation[0]?.name === "default";
 
-                const selectedCoc = dataElement.disaggregation.find(coc =>
-                    _(dataValues).some(dv => dv.value === "true" && dv.categoryOptionCombo === coc.id)
-                );
-
                 if (isDefaultDisaggregation) {
+                    const stringToValue: Record<string, boolean> = { true: true, false: false };
+                    const dataValue = dataValues.find(dv =>
+                        _(dataElement.disaggregation).some(coc => dv.categoryOptionCombo === coc.id)
+                    )?.value;
+
                     return {
                         id: dataElement.id,
                         text: dataElement.name,
                         type: "boolean",
-                        value: Boolean(selectedCoc),
+                        value: dataValue ? stringToValue[dataValue] : undefined,
+                        storeFalse: dataElement.storeFalse,
                     };
                 } else {
                     return {
                         id: dataElement.id,
                         text: dataElement.name,
                         type: "select",
-                        value: selectedCoc,
+                        value: dataElement.disaggregation.find(coc =>
+                            _(dataValues).some(dv => dv.value === "true" && dv.categoryOptionCombo === coc.id)
+                        ),
                         options: dataElement.disaggregation,
                     };
                 }
@@ -203,20 +207,22 @@ export class QuestionnaireD2Repository implements QuestionnaireRepository {
                         categoryOptionCombo: option.id,
                     };
                 });
-            case "boolean":
+            case "boolean": {
+                const strValue = question.value ? "true" : question.storeFalse ? "false" : "";
                 return [
                     {
                         ...base,
-                        value: question.value ? "true" : "",
-                        deleted: !question.value,
+                        value: strValue,
+                        deleted: !strValue,
                     },
                 ];
+            }
             case "number":
             case "text":
                 return [
                     {
                         ...base,
-                        value: question.value,
+                        value: question.value ?? "",
                         deleted: !question.value,
                     },
                 ];

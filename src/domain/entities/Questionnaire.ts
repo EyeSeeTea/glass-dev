@@ -48,18 +48,19 @@ export interface NumberQuestion extends QuestionBase {
         | "INTEGER_NEGATIVE"
         | "INTEGER_POSITIVE"
         | "INTEGER_ZERO_OR_POSITIVE";
-    value: string; // Use string representation to avoid problems with rounding
+    value: Maybe<string>; // Use string representation to avoid problems with rounding
 }
 
 export interface TextQuestion extends QuestionBase {
     type: "text";
-    value: string;
+    value: Maybe<string>;
     multiline: boolean;
 }
 
 export interface BooleanQuestion extends QuestionBase {
     type: "boolean";
     value: Maybe<boolean>;
+    storeFalse: boolean;
 }
 
 export type QuestionOption = NamedRef;
@@ -84,6 +85,8 @@ export class QuestionnarieM {
 
 export class QuestionnaireQuestionM {
     static isValidNumberValue(s: string, numberType: NumberQuestion["numberType"]): boolean {
+        if (!s) return true;
+
         switch (numberType) {
             case "INTEGER":
                 return isInteger(s);

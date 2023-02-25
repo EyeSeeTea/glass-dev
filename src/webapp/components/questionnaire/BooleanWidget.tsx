@@ -1,53 +1,28 @@
 import React from "react";
 // @ts-ignore
-import { Radio } from "@dhis2/ui";
-import i18n from "@eyeseetea/d2-ui-components/locales";
+import { Checkbox } from "@dhis2/ui";
 import { Maybe } from "../../../types/utils";
 import { BaseWidgetProps } from "./BaseWidget";
-import { makeStyles } from "@material-ui/core";
 
-export interface SingleSelectWidgetProps extends BaseWidgetProps<boolean> {
+export interface BooleanWidgetProps extends BaseWidgetProps<boolean> {
     value: Maybe<boolean>;
 }
 
-const SingleSelectWidget: React.FC<SingleSelectWidgetProps> = props => {
+const BooleanWidget: React.FC<BooleanWidgetProps> = props => {
     const { onValueChange, value } = props;
 
     const [stateValue, setStateValue] = React.useState(value);
     React.useEffect(() => setStateValue(value), [value]);
 
     const notifyChange = React.useCallback(
-        (newValue: boolean) => {
-            const sameSelected = value === newValue;
+        ({ checked: newValue }: { checked: boolean }) => {
             setStateValue(newValue);
-            onValueChange(sameSelected ? undefined : newValue);
+            onValueChange(newValue);
         },
-        [onValueChange, value]
+        [onValueChange]
     );
 
-    const classes = useStyles();
-
-    return (
-        <div className={classes.wrapper}>
-            <Radio
-                checked={stateValue === true}
-                label={i18n.t("Yes")}
-                disabled={props.disabled}
-                onChange={() => notifyChange(true)}
-            />
-
-            <Radio
-                checked={stateValue === false}
-                label={i18n.t("No")}
-                disabled={props.disabled}
-                onChange={() => notifyChange(false)}
-            />
-        </div>
-    );
+    return <Checkbox checked={stateValue === true} disabled={props.disabled} onChange={notifyChange} />;
 };
 
-const useStyles = makeStyles({
-    wrapper: { display: "flex", gap: 10 },
-});
-
-export default React.memo(SingleSelectWidget);
+export default React.memo(BooleanWidget);
