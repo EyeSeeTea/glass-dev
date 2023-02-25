@@ -17,6 +17,7 @@ export interface CategoryOptionCombo {
 export interface DataElementBoolean extends DataElementBase {
     type: "BOOLEAN";
     options: Maybe<Options>;
+    storeFalse: boolean;
 }
 
 export interface DataElementNumber extends DataElementBase {
