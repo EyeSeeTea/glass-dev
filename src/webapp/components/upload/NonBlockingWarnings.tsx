@@ -3,9 +3,10 @@ import { Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
 import styled from "styled-components";
 import i18n from "@eyeseetea/d2-ui-components/locales";
+import { ErrorCount } from "./ConsistencyChecks";
 
 interface NonBlockingWarningsProps {
-    rows: Map<string, number>;
+    rows: ErrorCount[];
 }
 export const NonBlockingWarnings: React.FC<NonBlockingWarningsProps> = ({ rows }) => {
     return (
@@ -21,12 +22,12 @@ export const NonBlockingWarnings: React.FC<NonBlockingWarningsProps> = ({ rows }
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {[...rows].map(key => (
-                            <TableRow key={key[0]}>
+                        {rows.map(row => (
+                            <TableRow key={row.error}>
                                 <TableCell align="left" className="text-gold">
-                                    {key[0]}
+                                    {row.error}
                                 </TableCell>
-                                <TableCell>{key[1]}</TableCell>
+                                <TableCell>{row.count}</TableCell>
                             </TableRow>
                         ))}
                     </TableBody>

@@ -2,9 +2,10 @@ import React from "react";
 import { Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@material-ui/core";
 import styled from "styled-components";
 import i18n from "@eyeseetea/d2-ui-components/locales";
+import { ErrorCount } from "./ConsistencyChecks";
 
 interface BlockingErrorsProps {
-    rows: Map<string, number>;
+    rows: ErrorCount[];
 }
 export const BlockingErrors: React.FC<BlockingErrorsProps> = ({ rows }) => {
     return (
@@ -20,11 +21,11 @@ export const BlockingErrors: React.FC<BlockingErrorsProps> = ({ rows }) => {
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {[...rows].map((value, key) => {
+                        {rows.map(row => {
                             return (
-                                <TableRow key={key}>
-                                    <TableCell align="left">{value}</TableCell>
-                                    <TableCell>{key}</TableCell>
+                                <TableRow key={row.error}>
+                                    <TableCell align="left">{row.error}</TableCell>
+                                    <TableCell>{row.count}</TableCell>
                                 </TableRow>
                             );
                         })}
