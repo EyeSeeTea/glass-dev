@@ -1,6 +1,6 @@
 import React from "react";
 // @ts-ignore
-import { Radio } from "@dhis2/ui";
+import { Radio, Button } from "@dhis2/ui";
 import { Id } from "../../../domain/entities/Base";
 import { Maybe } from "../../../types/utils";
 import { BaseWidgetProps } from "./BaseWidget";
@@ -20,13 +20,12 @@ const SingleSelectWidget: React.FC<SingleSelectWidgetProps> = props => {
     React.useEffect(() => setStateValue(value), [value]);
 
     const notifyChange = React.useCallback(
-        (selectedId: Id) => {
+        (selectedId: Maybe<Id>) => {
             const option = options.find(option => option.id === selectedId);
-            const sameSelected = value === selectedId;
             setStateValue(selectedId);
-            onValueChange(sameSelected ? undefined : option);
+            onValueChange(option);
         },
-        [onValueChange, options, value]
+        [onValueChange, options]
     );
 
     const classes = useStyles();
@@ -42,6 +41,10 @@ const SingleSelectWidget: React.FC<SingleSelectWidgetProps> = props => {
                     onChange={() => notifyChange(option.id)}
                 />
             ))}
+
+            <Button small onClick={() => notifyChange(undefined)}>
+                ✕
+            </Button>
         </div>
     );
 };
