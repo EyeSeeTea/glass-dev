@@ -45,6 +45,8 @@ export class InstanceDefaultRepository implements InstanceRepository {
         //TO DO: TEMP - For testing the OrgUnit Access implementation, consoling the orgUnitAccess.
         //TO DO: Remove once permission implementation done.
         console.debug("Org Unit Access Permissions : " + JSON.stringify(orgUnitsAccess));
+        console.log("orgUnitsAccess", orgUnitsAccess);
+
         return orgUnitsAccess;
     };
 
@@ -89,11 +91,37 @@ export class InstanceDefaultRepository implements InstanceRepository {
                     organisationUnits: {
                         id: true,
                         name: true,
+                        children: true,
+                        level: true,
                     },
                     dataViewOrganisationUnits: { id: true, name: true },
                 },
             })
         ).flatMap(user => {
+            const { organisationUnits } = user;
+
+            const countryOrgUnits: { name: string; id: string }[] = [];
+            for (const orgUnit of organisationUnits) {
+                if (orgUnit.level < 2) {
+                    apiToFuture(
+                        this.api.models.organisationUnits.get({
+                            filter: { "parent.id": { eq: orgUnit.id } },
+                            fields: {
+                                id: true,
+                                name: true,
+                            },
+                        })
+                    ).run(
+                        ({ objects }) => {
+                            objects.forEach(orgUnit => countryOrgUnits.push(orgUnit));
+                        },
+                        () => {}
+                    );
+                } else {
+                    countryOrgUnits.push({ name: orgUnit.name, id: orgUnit.id });
+                }
+            }
+
             return this.mapUserGroupAccess(user.userGroups).map((userModulesAccess): UserAccessInfo => {
                 return {
                     id: user.id,
@@ -101,7 +129,7 @@ export class InstanceDefaultRepository implements InstanceRepository {
                     userGroups: user.userGroups,
                     ...user.userCredentials,
                     userOrgUnitsAccess: this.mapUserOrgUnitsAccess(
-                        user.organisationUnits,
+                        [...new Set(countryOrgUnits)],
                         user.dataViewOrganisationUnits
                     ),
                     userModulesAccess: userModulesAccess,
