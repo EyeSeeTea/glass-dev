@@ -16,7 +16,7 @@ import QuestionnarieForm, { QuestionnarieFormProps } from "../questionnaire/Ques
 export const Questionnaires: React.FC = () => {
     const hasCurrentUserCaptureAccess = useGlassCaptureAccess();
     const [questionnaires, updateQuestionnarie] = useQuestionnaires();
-    const { orgUnitId, year } = useSelector();
+    const { orgUnit, year } = useSelector();
     const [formState, actions] = useFormState();
 
     if (!questionnaires) {
@@ -25,7 +25,7 @@ export const Questionnaires: React.FC = () => {
         return (
             <QuestionnarieForm
                 id={formState.id}
-                orgUnitId={orgUnitId}
+                orgUnitId={orgUnit.id}
                 year={year}
                 onBackClick={actions.closeQuestionnarie}
                 mode={formState.mode}
@@ -123,17 +123,18 @@ const QuestionnaireCard = styled.div`
     }
 `;
 
-// This should be abstracted to a common hook
+// This should be probably abstracted to a common hook (with a more descriptive name)
 function useSelector() {
     const { currentOrgUnitAccess } = useCurrentOrgUnitContext();
-    const { orgUnitId } = currentOrgUnitAccess;
+    const { orgUnitId, orgUnitName } = currentOrgUnitAccess;
+    const orgUnit = React.useMemo(() => ({ id: orgUnitId, name: orgUnitName }), [orgUnitId, orgUnitName]);
 
     const location = useLocation();
     const queryParameters = new URLSearchParams(location.search);
     const periodFromUrl = parseInt(queryParameters.get("period") || "");
     const year = periodFromUrl || new Date().getFullYear() - 1;
 
-    return { orgUnitId, year };
+    return { orgUnit, year };
 }
 
 function useQuestionnaires() {
@@ -142,15 +143,15 @@ function useQuestionnaires() {
     const module = useGlassModule(compositionRoot);
     const [questionnaires, setQuestionnaires] = React.useState<QuestionnaireBase[]>();
     const snackbar = useSnackbar();
-    const { orgUnitId, year } = useSelector();
+    const { orgUnit, year } = useSelector();
 
     React.useEffect(() => {
         if (module.kind !== "loaded") return;
 
         return compositionRoot.questionnaires
-            .getList(module.data, { orgUnitId: orgUnitId, year: year })
+            .getList(module.data, { orgUnitId: orgUnit.id, year: year })
             .run(setQuestionnaires, err => snackbar.error(err));
-    }, [compositionRoot, snackbar, module, orgUnitId, year]);
+    }, [compositionRoot, snackbar, module, orgUnit, year]);
 
     const updateQuestionnarie = React.useCallback<QuestionnarieFormProps["onSave"]>(updatedQuestionnaire => {
         setQuestionnaires(prevQuestionnaries =>

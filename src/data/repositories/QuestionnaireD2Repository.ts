@@ -19,7 +19,7 @@ import { DataFormD2Source } from "../dhis2/DataFormD2Source";
 export class QuestionnaireD2Repository implements QuestionnaireRepository {
     constructor(private api: D2Api) {}
 
-    getMany(module: GlassModule, options: { orgUnitId: Id; year: number }): FutureData<QuestionnaireBase[]> {
+    getList(module: GlassModule, options: { orgUnitId: Id; year: number }): FutureData<QuestionnaireBase[]> {
         const dataSetIds = module.questionnaires.map(getId);
         const configByDataSetId = _.keyBy(module.questionnaires, getId);
 

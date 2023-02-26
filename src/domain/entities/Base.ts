@@ -28,6 +28,16 @@ export function keyById<T extends Ref>(objs: T[]): Record<Id, T> {
 
 export function sortByName<T extends Named>(strings: T[]): T[] {
     const strings2 = Array.from(strings);
-    strings2.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, ignorePunctuation: true }));
+    strings2.sort((a, b) => {
+        return a.name.localeCompare(b.name, undefined, { numeric: true, ignorePunctuation: true });
+    });
     return strings2;
+}
+
+export function updateCollection<Obj extends Ref>(objs: Obj[], obj: Obj) {
+    if (_(objs).some(o => o.id === obj.id)) {
+        return objs.map(o => (o.id === obj.id ? obj : o));
+    } else {
+        return objs;
+    }
 }

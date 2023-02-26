@@ -13,8 +13,8 @@ export function useCallbackEffect<Args extends any[]>(
 ): (...args: Args) => void {
     const [args, setArgs] = React.useState<Args>();
 
-    // Use a reference to effect getter function to avoid infinite loops.
-    // We wil be using the function passed when the effect begins.
+    // By using a reference to the getEffect function, we avoid infinite loops on useEffect
+    // and the function passed when the effect begins is called.
     const getEffectLastRef = useLatest(getEffect);
 
     React.useEffect(() => {
