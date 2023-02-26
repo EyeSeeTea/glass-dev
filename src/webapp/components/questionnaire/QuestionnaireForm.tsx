@@ -10,7 +10,7 @@ import {
 } from "../../../domain/entities/Questionnaire";
 import { useAppContext } from "../../contexts/app-context";
 // @ts-ignore
-import { DataTable, TableHead, DataTableRow, DataTableColumnHeader, TableBody, DataTableCell } from "@dhis2/ui";
+import { DataTable, TableHead, DataTableRow, DataTableColumnHeader, TableBody } from "@dhis2/ui";
 import Question from "./Question";
 import { useCallbackEffect } from "../../hooks/useCallbackEffect";
 import i18n from "@eyeseetea/d2-ui-components/locales";
@@ -84,20 +84,13 @@ const QuestionnaireFormComp: React.FC<QuestionnarieFormProps> = props => {
 
                             <TableBody>
                                 {section.questions.map(question => (
-                                    <DataTableRow key={question.id}>
-                                        <DataTableCell width="60%">
-                                            <span>{question.text}</span>
-                                        </DataTableCell>
-
-                                        <DataTableCell key={question.id}>
-                                            <Question
-                                                questionnaire={questionnaire}
-                                                disabled={disabled}
-                                                question={question}
-                                                setQuestion={actions.setQuestion}
-                                            />
-                                        </DataTableCell>
-                                    </DataTableRow>
+                                    <Question
+                                        key={question.id}
+                                        questionnaire={questionnaire}
+                                        disabled={disabled}
+                                        question={question}
+                                        setQuestion={actions.setQuestion}
+                                    />
                                 ))}
                             </TableBody>
                         </DataTable>
