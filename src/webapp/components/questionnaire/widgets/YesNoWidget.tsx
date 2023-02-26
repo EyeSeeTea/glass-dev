@@ -2,7 +2,7 @@ import React from "react";
 // @ts-ignore
 import { Radio } from "@dhis2/ui";
 import i18n from "@eyeseetea/d2-ui-components/locales";
-import { Maybe } from "../../../types/utils";
+import { Maybe } from "../../../../types/utils";
 import { BaseWidgetProps } from "./BaseWidget";
 import { makeStyles } from "@material-ui/core";
 
@@ -11,7 +11,7 @@ export interface YesNoWidgetProps extends BaseWidgetProps<boolean> {
 }
 
 const YesNoWidget: React.FC<YesNoWidgetProps> = props => {
-    const { onValueChange, value } = props;
+    const { onChange: onValueChange, value } = props;
 
     const [stateValue, setStateValue] = React.useState(value);
     React.useEffect(() => setStateValue(value), [value]);

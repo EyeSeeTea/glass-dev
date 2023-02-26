@@ -2,8 +2,8 @@ import React from "react";
 // @ts-ignore
 import { Input } from "@dhis2/ui";
 import { BaseWidgetProps } from "./BaseWidget";
-import { NumberQuestion, QuestionnaireQuestionM } from "../../../domain/entities/Questionnaire";
-import { Maybe } from "../../../types/utils";
+import { NumberQuestion, QuestionnaireQuestionM } from "../../../../domain/entities/Questionnaire";
+import { Maybe } from "../../../../types/utils";
 
 export interface NumberWidgetProps extends BaseWidgetProps<string> {
     value: Maybe<string>;
@@ -11,7 +11,7 @@ export interface NumberWidgetProps extends BaseWidgetProps<string> {
 }
 
 const NumberWidget: React.FC<NumberWidgetProps> = props => {
-    const { onValueChange, value, numberType } = props;
+    const { onChange: onValueChange, value, numberType } = props;
 
     const [stateValue, setStateValue] = React.useState(value);
     React.useEffect(() => setStateValue(value), [value]);
@@ -22,7 +22,7 @@ const NumberWidget: React.FC<NumberWidgetProps> = props => {
 
     const notifyChange = React.useCallback(
         ({ value: newValue }: { value: string }) => {
-            if (!QuestionnaireQuestionM.isValidNumberValue(newValue, numberType)) {
+            if (!isValidNumberValue(newValue, numberType)) {
                 setStateValue(value);
             } else if (value !== newValue) {
                 onValueChange(newValue);
@@ -43,5 +43,7 @@ const NumberWidget: React.FC<NumberWidgetProps> = props => {
         </>
     );
 };
+
+const { isValidNumberValue } = QuestionnaireQuestionM;
 
 export default React.memo(NumberWidget);

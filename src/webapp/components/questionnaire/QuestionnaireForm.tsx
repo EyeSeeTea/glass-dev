@@ -2,16 +2,11 @@ import { useSnackbar } from "@eyeseetea/d2-ui-components";
 import { Button, CircularProgress, LinearProgress, makeStyles } from "@material-ui/core";
 import React, { useEffect, useState } from "react";
 import { Id } from "../../../domain/entities/Base";
-import {
-    Questionnaire,
-    QuestionnaireQuestion,
-    QuestionnaireSimple,
-    QuestionnarieM,
-} from "../../../domain/entities/Questionnaire";
+import { Questionnaire, Question, QuestionnaireBase, QuestionnarieM } from "../../../domain/entities/Questionnaire";
 import { useAppContext } from "../../contexts/app-context";
 // @ts-ignore
 import { DataTable, TableHead, DataTableRow, DataTableColumnHeader, TableBody } from "@dhis2/ui";
-import Question from "./Question";
+import QuestionRow from "./QuestionRow";
 import { useCallbackEffect } from "../../hooks/useCallbackEffect";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { PageHeader } from "../page-header/PageHeader";
@@ -26,10 +21,10 @@ export interface QuestionnarieFormProps {
     year: number;
     onBackClick(): void;
     mode: "show" | "edit";
-    onSave(questionnaire: QuestionnaireSimple): void;
+    onSave(questionnaire: QuestionnaireBase): void;
 }
 
-const QuestionnaireFormComp: React.FC<QuestionnarieFormProps> = props => {
+const QuestionnaireForm: React.FC<QuestionnarieFormProps> = props => {
     const { onBackClick, mode } = props;
     const [questionnaire, actions, isSaving] = useQuestionnaire(props);
     const classes = useStyles();
@@ -84,7 +79,7 @@ const QuestionnaireFormComp: React.FC<QuestionnarieFormProps> = props => {
 
                             <TableBody>
                                 {section.questions.map(question => (
-                                    <Question
+                                    <QuestionRow
                                         key={question.id}
                                         questionnaire={questionnaire}
                                         disabled={disabled}
@@ -148,7 +143,7 @@ function useQuestionnaire(options: QuestionnarieFormProps) {
         )
     );
 
-    const setQuestion = React.useCallback((newQuestion: QuestionnaireQuestion) => {
+    const setQuestion = React.useCallback((newQuestion: Question) => {
         setQuestionnaire(questionnaire => {
             return questionnaire ? QuestionnarieM.updateQuestion(questionnaire, newQuestion) : undefined;
         });
@@ -171,6 +166,7 @@ const Header = styled.div`
             display: block;
         }
     }
+
     .comp {
         width: 100%;
         text-align: right;
@@ -190,4 +186,4 @@ const Header = styled.div`
     }
 `;
 
-export default React.memo(QuestionnaireFormComp);
+export default React.memo(QuestionnaireForm);

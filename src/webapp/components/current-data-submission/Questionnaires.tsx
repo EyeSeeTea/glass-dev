@@ -5,7 +5,7 @@ import React from "react";
 import { useLocation } from "react-router-dom";
 import styled from "styled-components";
 import { Id } from "../../../domain/entities/Base";
-import { QuestionnaireSimple } from "../../../domain/entities/Questionnaire";
+import { QuestionnaireBase } from "../../../domain/entities/Questionnaire";
 import { useAppContext } from "../../contexts/app-context";
 import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context";
 import { useGlassCaptureAccess } from "../../hooks/useGlassCaptureAccess";
@@ -140,7 +140,7 @@ function useQuestionnaires() {
     const { compositionRoot } = useAppContext();
 
     const module = useGlassModule(compositionRoot);
-    const [questionnaires, setQuestionnaires] = React.useState<QuestionnaireSimple[]>();
+    const [questionnaires, setQuestionnaires] = React.useState<QuestionnaireBase[]>();
     const snackbar = useSnackbar();
     const { orgUnitId, year } = useSelector();
 
@@ -169,7 +169,7 @@ function useFormState() {
     const [formState, setFormState] = React.useState<QuestionnaireFormState>({ mode: "closed" });
 
     const goToQuestionnarie = React.useCallback(
-        (questionnaire: QuestionnaireSimple, options: { mode: "show" | "edit" }) => {
+        (questionnaire: QuestionnaireBase, options: { mode: "show" | "edit" }) => {
             setFormState({ mode: options.mode, id: questionnaire.id });
         },
         []

@@ -3,29 +3,19 @@ import { makeStyles } from "@material-ui/core";
 import React from "react";
 // @ts-ignore
 import { DataTableRow, DataTableCell } from "@dhis2/ui";
-import {
-    Questionnaire,
-    QuestionnaireQuestion,
-    QuestionnaireQuestionM,
-    QuestionnaireSelector,
-} from "../../../domain/entities/Questionnaire";
-import { assertUnreachable } from "../../../types/utils";
+import { Questionnaire, Question, QuestionnaireSelector } from "../../../domain/entities/Questionnaire";
 import { useAppContext } from "../../contexts/app-context";
-import BooleanWidget from "./BooleanWidget";
-import NumberWidget from "./NumberWidget";
-import SingleSelect from "./SingleSelectWidget";
-import TextWidget from "./TextWidget";
-import YesNoWidget from "./YesNoWidget";
 import styled from "styled-components";
+import { QuestionWidget } from "./QuestionInput";
 
 export interface DataElementItemProps {
     questionnaire: Questionnaire;
-    question: QuestionnaireQuestion;
+    question: Question;
     disabled: boolean;
-    setQuestion(newQuestion: QuestionnaireQuestion): void;
+    setQuestion(newQuestion: Question): void;
 }
 
-const Question: React.FC<DataElementItemProps> = React.memo(props => {
+const QuestionRow: React.FC<DataElementItemProps> = React.memo(props => {
     const { question } = props;
     const classes = useStyles();
     const [saveState, setQuestionToSave] = useSaveActions(props);
@@ -39,64 +29,12 @@ const Question: React.FC<DataElementItemProps> = React.memo(props => {
             <DataTableCell>
                 <div className={classes.valueWrapper}>
                     <div className={classes.valueInput}>
-                        <QuestionInput {...props} setQuestionToSave={setQuestionToSave} />
+                        <QuestionWidget {...props} onChange={setQuestionToSave} />
                     </div>
                 </div>
             </DataTableCell>
         </DataTableRowWithSavingFeedback>
     );
-});
-
-export interface QuestionInputProps extends DataElementItemProps {
-    setQuestionToSave: React.Dispatch<React.SetStateAction<QuestionnaireQuestion | undefined>>;
-}
-
-export const QuestionInput: React.FC<QuestionInputProps> = React.memo(props => {
-    const { question, disabled, setQuestionToSave } = props;
-    const { type } = question;
-    const { update } = QuestionnaireQuestionM;
-
-    switch (type) {
-        case "select":
-            return (
-                <SingleSelect
-                    value={question.value?.id}
-                    options={question.options}
-                    onValueChange={value => setQuestionToSave(update(question, value))}
-                    disabled={disabled}
-                />
-            );
-        case "boolean": {
-            const BooleanComponent = question.storeFalse ? YesNoWidget : BooleanWidget;
-            return (
-                <BooleanComponent
-                    value={question.value}
-                    onValueChange={value => setQuestionToSave(update(question, value))}
-                    disabled={disabled}
-                />
-            );
-        }
-        case "number":
-            return (
-                <NumberWidget
-                    value={question.value}
-                    onValueChange={value => setQuestionToSave(update(question, value))}
-                    disabled={disabled}
-                    numberType={question.numberType}
-                />
-            );
-        case "text":
-            return (
-                <TextWidget
-                    value={question.value}
-                    onValueChange={value => setQuestionToSave(update(question, value))}
-                    disabled={disabled}
-                    multiline={question.multiline}
-                />
-            );
-        default:
-            assertUnreachable(type);
-    }
 });
 
 function useSaveActions(options: DataElementItemProps) {
@@ -112,8 +50,7 @@ function useSaveActions(options: DataElementItemProps) {
     );
 
     const [saveState, setSaveState] = React.useState<SaveState>("original");
-
-    const [questionToSave, setQuestionToSave] = React.useState<QuestionnaireQuestion>();
+    const [questionToSave, setQuestionToSave] = React.useState<Question>();
 
     React.useEffect(() => {
         if (!questionToSave) return;
@@ -162,4 +99,4 @@ const colorByState: Record<SaveState, string> = {
     saveError: "rgb(255, 225, 225)",
 };
 
-export default React.memo(Question);
+export default React.memo(QuestionRow);
