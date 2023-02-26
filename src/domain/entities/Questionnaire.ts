@@ -1,7 +1,7 @@
 import { assertUnreachable, Maybe } from "../../types/utils";
 import { Id, NamedRef, Ref } from "./Base";
 
-export interface QuestionnaireSimple {
+export interface QuestionnaireBase {
     id: Id;
     name: string;
     description: string;
@@ -17,16 +17,16 @@ export interface QuestionnaireSelector {
     year: number;
 }
 
-export interface Questionnaire extends QuestionnaireSimple {
+export interface Questionnaire extends QuestionnaireBase {
     sections: QuestionnaireSection[];
 }
 
 export interface QuestionnaireSection {
     title: string;
-    questions: QuestionnaireQuestion[];
+    questions: Question[];
 }
 
-export type QuestionnaireQuestion = SelectQuestion | NumberQuestion | TextQuestion | BooleanQuestion;
+export type Question = SelectQuestion | NumberQuestion | TextQuestion | BooleanQuestion;
 
 export interface QuestionBase {
     id: Id;
@@ -59,8 +59,8 @@ export interface TextQuestion extends QuestionBase {
 
 export interface BooleanQuestion extends QuestionBase {
     type: "boolean";
-    value: Maybe<boolean>;
     storeFalse: boolean;
+    value: Maybe<boolean>;
 }
 
 export type QuestionOption = NamedRef;
@@ -70,7 +70,7 @@ export class QuestionnarieM {
         return { ...questionnarie, isCompleted: value };
     }
 
-    static updateQuestion(questionnaire: Questionnaire, questionUpdated: QuestionnaireQuestion): Questionnaire {
+    static updateQuestion(questionnaire: Questionnaire, questionUpdated: Question): Questionnaire {
         return {
             ...questionnaire,
             sections: questionnaire.sections.map(section => ({
@@ -103,7 +103,7 @@ export class QuestionnaireQuestionM {
         }
     }
 
-    static update<Q extends QuestionnaireQuestion>(question: Q, value: Q["value"]): Q {
+    static update<Q extends Question>(question: Q, value: Q["value"]): Q {
         return { ...question, value };
     }
 }

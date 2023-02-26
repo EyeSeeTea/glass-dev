@@ -2,7 +2,7 @@ import React from "react";
 // @ts-ignore
 import { Input, TextArea } from "@dhis2/ui";
 import { BaseWidgetProps } from "./BaseWidget";
-import { Maybe } from "../../../types/utils";
+import { Maybe } from "../../../../types/utils";
 
 export interface TextWidgetProps extends BaseWidgetProps<string> {
     value: Maybe<string>;
@@ -10,7 +10,7 @@ export interface TextWidgetProps extends BaseWidgetProps<string> {
 }
 
 const TextWidget: React.FC<TextWidgetProps> = props => {
-    const { onValueChange, value } = props;
+    const { onChange: onValueChange, value } = props;
 
     const [stateValue, setStateValue] = React.useState(value);
     React.useEffect(() => setStateValue(value), [value]);

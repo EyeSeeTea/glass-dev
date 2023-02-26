@@ -4,10 +4,10 @@ import { Future, FutureData } from "../../domain/entities/Future";
 import { GlassModule } from "../../domain/entities/GlassModule";
 import {
     Questionnaire,
-    QuestionnaireQuestion,
+    Question,
     QuestionnaireSection,
     QuestionnaireSelector,
-    QuestionnaireSimple,
+    QuestionnaireBase,
 } from "../../domain/entities/Questionnaire";
 import { QuestionnaireRepository } from "../../domain/repositories/QuestionnaireRepository";
 import { D2Api, DataValueSetsDataValue, DataValueSetsPostRequest } from "../../types/d2-api";
@@ -19,7 +19,7 @@ import { DataFormD2Source } from "../dhis2/DataFormD2Source";
 export class QuestionnaireD2Repository implements QuestionnaireRepository {
     constructor(private api: D2Api) {}
 
-    getMany(module: GlassModule, options: { orgUnitId: Id; year: number }): FutureData<QuestionnaireSimple[]> {
+    getMany(module: GlassModule, options: { orgUnitId: Id; year: number }): FutureData<QuestionnaireBase[]> {
         const dataSetIds = module.questionnaires.map(getId);
         const configByDataSetId = _.keyBy(module.questionnaires, getId);
 
@@ -38,7 +38,7 @@ export class QuestionnaireD2Repository implements QuestionnaireRepository {
         };
 
         return Future.joinObj(data).map(({ dataSets, dataSetsInfo }) => {
-            return dataSets.map((dataSet): QuestionnaireSimple => {
+            return dataSets.map((dataSet): QuestionnaireBase => {
                 const dataSetInfo = dataSetsInfo.find(info => info.dataSet === dataSet.id);
 
                 return {
@@ -121,12 +121,12 @@ export class QuestionnaireD2Repository implements QuestionnaireRepository {
         );
     }
 
-    saveResponse(questionnaire: QuestionnaireSelector, question: QuestionnaireQuestion): FutureData<void> {
+    saveResponse(questionnaire: QuestionnaireSelector, question: Question): FutureData<void> {
         const dataValues = this.getDataValuesForQuestion(questionnaire, question);
         return this.postDataValues(dataValues);
     }
 
-    private getQuestion(dataElement: DataElement, dataValues: DataValueSetsDataValue[]): QuestionnaireQuestion | null {
+    private getQuestion(dataElement: DataElement, dataValues: DataValueSetsDataValue[]): Question | null {
         const dataValue = _.first(dataValues);
         const { disaggregation } = dataElement;
 
@@ -183,10 +183,7 @@ export class QuestionnaireD2Repository implements QuestionnaireRepository {
         }
     }
 
-    private getDataValuesForQuestion(
-        questionnaire: QuestionnaireSelector,
-        question: QuestionnaireQuestion
-    ): D2DataValue[] {
+    private getDataValuesForQuestion(questionnaire: QuestionnaireSelector, question: Question): D2DataValue[] {
         const { type } = question;
         const { orgUnitId, year } = questionnaire;
 
