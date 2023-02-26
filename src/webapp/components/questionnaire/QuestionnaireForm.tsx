@@ -1,5 +1,5 @@
 import { useSnackbar } from "@eyeseetea/d2-ui-components";
-import { Button, CircularProgress, LinearProgress, makeStyles } from "@material-ui/core";
+import { LinearProgress, makeStyles } from "@material-ui/core";
 import React, { useEffect, useState } from "react";
 import { Id } from "../../../domain/entities/Base";
 import { Questionnaire, Question, QuestionnaireBase, QuestionnarieM } from "../../../domain/entities/Questionnaire";
@@ -8,62 +8,40 @@ import { useAppContext } from "../../contexts/app-context";
 import { DataTable, TableHead, DataTableRow, DataTableColumnHeader, TableBody } from "@dhis2/ui";
 import QuestionRow from "./QuestionRow";
 import { useCallbackEffect } from "../../hooks/useCallbackEffect";
-import i18n from "@eyeseetea/d2-ui-components/locales";
 import { PageHeader } from "../page-header/PageHeader";
 import styled from "styled-components";
-import { glassColors } from "../../pages/app/themes/dhis2.theme";
 import { useGlassModule } from "../../hooks/useGlassModule";
 import { useBooleanState } from "../../hooks/useBooleanState";
+import { QuestionnaireActions } from "./QuestionnaireActions";
 
 export interface QuestionnarieFormProps {
     id: Id;
     orgUnitId: Id;
     year: number;
-    onBackClick(): void;
     mode: "show" | "edit";
+    onBackClick(): void;
     onSave(questionnaire: QuestionnaireBase): void;
 }
 
 const QuestionnaireForm: React.FC<QuestionnarieFormProps> = props => {
     const { onBackClick, mode } = props;
-    const [questionnaire, actions, isSaving] = useQuestionnaire(props);
+    const [questionnaire, selector, actions, isSaving] = useQuestionnaire(props);
     const classes = useStyles();
-    const isCompleted = questionnaire?.isCompleted;
-    const disabled = isCompleted ? true : mode === "show";
+    const disabled = questionnaire?.isCompleted ? true : mode === "show";
 
     if (!questionnaire) return <LinearProgress />;
 
     return (
-        <Wrapper>
+        <FormWrapper>
             <PageHeader title={questionnaire.name} onBackClick={onBackClick} />
 
-            <Header>
-                {isCompleted ? (
-                    <span className="comp completed">{i18n.t("Completed")}</span>
-                ) : (
-                    <span className="comp">{i18n.t("Not completed")}</span>
-                )}
-
-                {mode === "edit" && (
-                    <div className="buttons">
-                        {isSaving && <CircularProgress size={22} />}
-
-                        {isCompleted ? (
-                            <Button onClick={() => actions.setAsCompleted(false)} variant="contained" color="secondary">
-                                {i18n.t("Set as incomplete")}
-                            </Button>
-                        ) : (
-                            <Button onClick={() => actions.setAsCompleted(true)} variant="contained" color="primary">
-                                {i18n.t("Set as completed")}
-                            </Button>
-                        )}
-                    </div>
-                )}
-
-                <div className="head">
-                    <span className="desc">{questionnaire.description}</span>
-                </div>
-            </Header>
+            <QuestionnaireActions
+                description={questionnaire.description}
+                isCompleted={questionnaire.isCompleted}
+                isSaving={isSaving}
+                mode={mode}
+                setAsCompleted={actions.setAsCompleted}
+            />
 
             {questionnaire.sections.map(section => {
                 return (
@@ -81,7 +59,7 @@ const QuestionnaireForm: React.FC<QuestionnarieFormProps> = props => {
                                 {section.questions.map(question => (
                                     <QuestionRow
                                         key={question.id}
-                                        questionnaire={questionnaire}
+                                        selector={selector}
                                         disabled={disabled}
                                         question={question}
                                         setQuestion={actions.setQuestion}
@@ -92,18 +70,18 @@ const QuestionnaireForm: React.FC<QuestionnarieFormProps> = props => {
                     </div>
                 );
             })}
-        </Wrapper>
+        </FormWrapper>
     );
 };
 
-const Wrapper = styled.div`
+const FormWrapper = styled.div`
     gap: 0px;
 `;
 
 function useQuestionnaire(options: QuestionnarieFormProps) {
     const { compositionRoot } = useAppContext();
-    const module = useGlassModule(compositionRoot);
     const snackbar = useSnackbar();
+    const module = useGlassModule(compositionRoot);
     const [isSaving, savingActions] = useBooleanState(false);
 
     const { onSave, id, orgUnitId, year } = options;
@@ -135,7 +113,7 @@ function useQuestionnaire(options: QuestionnarieFormProps) {
                     },
                     err => {
                         savingActions.disable();
-                        return snackbar.error(err);
+                        snackbar.error(err);
                     }
                 );
             },
@@ -151,7 +129,7 @@ function useQuestionnaire(options: QuestionnarieFormProps) {
 
     const actions = { setAsCompleted, setQuestion };
 
-    return [questionnaire, actions, isSaving] as const;
+    return [questionnaire, selector, actions, isSaving] as const;
 }
 
 const useStyles = makeStyles({
@@ -159,31 +137,5 @@ const useStyles = makeStyles({
     header: { fontWeight: "bold" as const },
     center: { display: "table", margin: "0 auto" },
 });
-
-const Header = styled.div`
-    .head {
-        * {
-            display: block;
-        }
-    }
-
-    .comp {
-        width: 100%;
-        text-align: right;
-        float: right;
-        text-transform: uppercase;
-        margin-bottom: 5px;
-        font-size: 12px;
-        color: ${glassColors.orange};
-        &.completed {
-            color: ${glassColors.green};
-        }
-    }
-
-    .buttons {
-        text-align: right;
-        margin-bottom: 15px;
-    }
-`;
 
 export default React.memo(QuestionnaireForm);

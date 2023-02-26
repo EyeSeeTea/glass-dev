@@ -3,13 +3,13 @@ import { makeStyles } from "@material-ui/core";
 import React from "react";
 // @ts-ignore
 import { DataTableRow, DataTableCell } from "@dhis2/ui";
-import { Questionnaire, Question, QuestionnaireSelector } from "../../../domain/entities/Questionnaire";
+import { Question, QuestionnaireSelector } from "../../../domain/entities/Questionnaire";
 import { useAppContext } from "../../contexts/app-context";
 import styled from "styled-components";
 import { QuestionWidget } from "./QuestionInput";
 
 export interface DataElementItemProps {
-    questionnaire: Questionnaire;
+    selector: QuestionnaireSelector;
     question: Question;
     disabled: boolean;
     setQuestion(newQuestion: Question): void;
@@ -38,16 +38,10 @@ const QuestionRow: React.FC<DataElementItemProps> = React.memo(props => {
 });
 
 function useSaveActions(options: DataElementItemProps) {
-    const { setQuestion } = options;
+    const { selector, setQuestion } = options;
 
     const snackbar = useSnackbar();
     const { compositionRoot } = useAppContext();
-    const { id, orgUnit, year } = options.questionnaire;
-
-    const selector = React.useMemo<QuestionnaireSelector>(
-        () => ({ id, orgUnitId: orgUnit.id, year }),
-        [id, orgUnit.id, year]
-    );
 
     const [saveState, setSaveState] = React.useState<SaveState>("original");
     const [questionToSave, setQuestionToSave] = React.useState<Question>();

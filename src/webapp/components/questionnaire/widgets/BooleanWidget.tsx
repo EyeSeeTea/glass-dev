@@ -3,6 +3,7 @@ import React from "react";
 import { Checkbox } from "@dhis2/ui";
 import { Maybe } from "../../../../types/utils";
 import { BaseWidgetProps } from "./BaseWidget";
+import i18n from "@eyeseetea/d2-ui-components/locales";
 
 export interface BooleanWidgetProps extends BaseWidgetProps<boolean> {
     value: Maybe<boolean>;
@@ -22,7 +23,14 @@ const BooleanWidget: React.FC<BooleanWidgetProps> = props => {
         [onValueChange]
     );
 
-    return <Checkbox checked={stateValue === true} disabled={props.disabled} onChange={notifyChange} />;
+    return (
+        <Checkbox
+            label={i18n.t("Yes")}
+            checked={stateValue === true}
+            disabled={props.disabled}
+            onChange={notifyChange}
+        />
+    );
 };
 
 export default React.memo(BooleanWidget);

@@ -1,5 +1,5 @@
 import { assertUnreachable, Maybe } from "../../types/utils";
-import { Id, NamedRef, Ref } from "./Base";
+import { Id, NamedRef, Ref, updateCollection } from "./Base";
 
 export interface QuestionnaireBase {
     id: Id;
@@ -75,9 +75,7 @@ export class QuestionnarieM {
             ...questionnaire,
             sections: questionnaire.sections.map(section => ({
                 ...section,
-                questions: section.questions.map(question =>
-                    question.id === questionUpdated.id ? questionUpdated : question
-                ),
+                questions: updateCollection(section.questions, questionUpdated),
             })),
         };
     }
