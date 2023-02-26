@@ -200,8 +200,8 @@ export class QuestionnaireD2Repository implements QuestionnaireRepository {
                     return {
                         ...base,
                         value: isSelected ? "true" : "",
-                        deleted: !isSelected,
                         categoryOptionCombo: option.id,
+                        ...deleted(!isSelected),
                     };
                 });
             case "boolean": {
@@ -210,7 +210,7 @@ export class QuestionnaireD2Repository implements QuestionnaireRepository {
                     {
                         ...base,
                         value: strValue,
-                        deleted: !strValue,
+                        ...deleted(!strValue),
                     },
                 ];
             }
@@ -220,7 +220,7 @@ export class QuestionnaireD2Repository implements QuestionnaireRepository {
                     {
                         ...base,
                         value: question.value ?? "",
-                        deleted: !question.value,
+                        ...deleted(!question.value),
                     },
                 ];
 
@@ -249,6 +249,10 @@ export class QuestionnaireD2Repository implements QuestionnaireRepository {
             })
         ).map(res => res.completeDataSetRegistrations || []);
     }
+}
+
+function deleted(value: boolean): { deleted: true } | {} {
+    return value ? { deleted: true } : {};
 }
 
 type D2ApiDataValue = DataValueSetsPostRequest["dataValues"][number];
