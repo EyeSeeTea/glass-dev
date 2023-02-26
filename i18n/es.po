@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: i18next-conv\n"
-"POT-Creation-Date: 2023-02-24T12:52:56.118Z\n"
+"POT-Creation-Date: 2023-02-25T21:30:51.223Z\n"
 "PO-Revision-Date: 2018-10-25T09:02:35.143Z\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -217,16 +217,16 @@ msgstr "Volver"
 msgid "Help"
 msgstr "Ayuda"
 
-msgid "Yes"
-msgstr ""
-
-msgid "No"
-msgstr ""
-
 msgid "Set as incomplete"
 msgstr ""
 
 msgid "Set as completed"
+msgstr ""
+
+msgid "Yes"
+msgstr ""
+
+msgid "No"
 msgstr ""
 
 msgid "HOME"
