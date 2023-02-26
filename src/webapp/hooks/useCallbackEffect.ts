@@ -13,12 +13,15 @@ export function useCallbackEffect<Args extends any[]>(
 ): (...args: Args) => void {
     const [args, setArgs] = React.useState<Args>();
 
-    const run = React.useCallback((...args: Args) => setArgs(args), [setArgs]);
-    const getEffectLast = useLatest(getEffect);
+    // Use a reference to effect getter function to avoid infinite loops.
+    // We wil be using the function passed when the effect begins.
+    const getEffectLastRef = useLatest(getEffect);
 
     React.useEffect(() => {
-        return args ? getEffectLast(...args) : undefined;
-    }, [args, getEffectLast]);
+        return args ? getEffectLastRef.current(...args) : undefined;
+    }, [args, getEffectLastRef]);
+
+    const run = React.useCallback((...args: Args) => setArgs(args), [setArgs]);
 
     return run;
 }
@@ -28,5 +31,6 @@ function useLatest<T>(value: T) {
     React.useEffect(() => {
         ref.current = value;
     }, [value]);
-    return ref.current;
+
+    return ref;
 }
