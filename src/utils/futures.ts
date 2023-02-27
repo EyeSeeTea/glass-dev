@@ -5,7 +5,12 @@ export function apiToFuture<Data>(res: CancelableResponse<Data>): FutureData<Dat
     return Future.fromComputation((resolve, reject) => {
         res.getData()
             .then(resolve)
-            .catch(err => reject(err ? err.message : "Unknown error"));
+            .catch(err => {
+                const innerMessage = err?.response?.data?.message;
+                const message = err ? err.message : "Unknown error";
+
+                reject(innerMessage ?? message);
+            });
         return res.cancel;
     });
 }
