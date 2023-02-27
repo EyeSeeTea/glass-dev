@@ -14,6 +14,11 @@ export class Future<E, D> {
         return new Future(instance2);
     }
 
+    mapError<E2>(mapper: (error: E) => E2): Future<E2, D> {
+        const instance2 = fluture.mapRej(mapper)(this.instance) as fluture.FutureInstance<E2, D>;
+        return new Future(instance2);
+    }
+
     bimap<E2, D2>(dataMapper: (data: D) => D2, errorMapper: (error: E) => E2): Future<E2, D2> {
         const instance2 = fluture.bimap(errorMapper)(dataMapper)(this.instance);
         return new Future(instance2);

@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2023-02-25T21:30:51.223Z\n"
-"PO-Revision-Date: 2023-02-25T21:30:51.223Z\n"
+"POT-Creation-Date: 2023-02-24T10:05:19.705Z\n"
+"PO-Revision-Date: 2023-02-24T10:05:19.705Z\n"
 
 msgid "Error saving registration status"
 msgstr ""
@@ -39,21 +39,6 @@ msgid "Enrolment status"
 msgstr ""
 
 msgid "Date of Enrolment"
-msgstr ""
-
-msgid "Family Name *"
-msgstr ""
-
-msgid "First Name *"
-msgstr ""
-
-msgid "Function *"
-msgstr ""
-
-msgid "Email Address *"
-msgstr ""
-
-msgid "Preferred Language (notifications) *"
 msgstr ""
 
 msgid "Ask for updating"
