@@ -8,6 +8,10 @@ import { UploadRis } from "./UploadRis";
 import { UploadSample } from "./UploadSample";
 import { useAppContext } from "../../contexts/app-context";
 import { GlassUploads } from "../../../domain/entities/GlassUploads";
+import { useCurrentDataSubmissionId } from "../../hooks/useCurrentDataSubmissionId";
+import { useLocation } from "react-router-dom";
+import { useCurrentModuleContext } from "../../contexts/current-module-context";
+import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context";
 
 interface UploadFilesProps {
     changeStep: (step: number) => void;
@@ -42,6 +46,7 @@ const datasetOptions = [
 
 export const UploadFiles: React.FC<UploadFilesProps> = ({ changeStep }) => {
     const { compositionRoot } = useAppContext();
+    const location = useLocation();
 
     const [batchId, setBatchId] = useState("");
     const [isValidated, setIsValidated] = useState(false);
@@ -49,14 +54,24 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({ changeStep }) => {
     const [previousUploads, setPreviousGlassUploads] = useState<GlassUploads[]>([]);
     const [previousUploadsBatchIds, setPreviousUploadsBatchIds] = useState<string[]>([]);
 
+    const {
+        currentModuleAccess: { moduleId },
+    } = useCurrentModuleContext();
+    const {
+        currentOrgUnitAccess: { orgUnitId },
+    } = useCurrentOrgUnitContext();
+
+    const queryParameters = new URLSearchParams(location.search);
+    const period = queryParameters.get("period") || (new Date().getFullYear() - 1).toString();
+    const dataSubmissionId = useCurrentDataSubmissionId(compositionRoot, moduleId, orgUnitId, parseInt(period));
+
     useEffect(() => {
         const fetchPreviousUpload = async (): Promise<GlassUploads[]> => {
-            //TODO: Hardcoded dataSubmissionsId to current data submission: replace by dynamic data submission the user is on.
-            return await compositionRoot.glassUploads.getByDataSubmission("THy2NqRXJT2").toPromise();
+            return await compositionRoot.glassUploads.getByDataSubmission(dataSubmissionId).toPromise();
         };
 
         fetchPreviousUpload().then(uploads => setPreviousGlassUploads(uploads));
-    }, [compositionRoot.glassUploads]);
+    }, [compositionRoot.glassUploads, dataSubmissionId]);
 
     useEffect(() => {
         if (batchId && isFileValid) {

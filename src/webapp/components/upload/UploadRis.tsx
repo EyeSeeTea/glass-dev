@@ -9,6 +9,11 @@ import { Dropzone, DropzoneRef } from "../dropzone/Dropzone";
 import { FileRejection } from "react-dropzone";
 import { RemoveContainer, StyledRemoveButton } from "./UploadFiles";
 import { useAppContext } from "../../contexts/app-context";
+import { useCurrentDataSubmissionId } from "../../hooks/useCurrentDataSubmissionId";
+import { useCurrentModuleContext } from "../../contexts/current-module-context";
+import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context";
+import { useLocation } from "react-router-dom";
+
 interface UploadRisProps {
     validate: (val: boolean) => void;
     batchId: string;
@@ -18,11 +23,22 @@ const RIS_FILE_TYPE = "RIS";
 
 export const UploadRis: React.FC<UploadRisProps> = ({ validate, batchId }) => {
     const { compositionRoot } = useAppContext();
+    const location = useLocation();
+    const {
+        currentModuleAccess: { moduleId },
+    } = useCurrentModuleContext();
+    const {
+        currentOrgUnitAccess: { orgUnitId },
+    } = useCurrentOrgUnitContext();
+    const queryParameters = new URLSearchParams(location.search);
+    const period = queryParameters.get("period") || (new Date().getFullYear() - 1).toString();
     const snackbar = useSnackbar();
 
     const [risFile, setRisFile] = useState<File | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const risFileUploadRef = useRef<DropzoneRef>(null);
+
+    const dataSubmissionId = useCurrentDataSubmissionId(compositionRoot, moduleId, orgUnitId, parseInt(period));
 
     const openFileUploadDialog = useCallback(async () => {
         risFileUploadRef.current?.openDialog();
@@ -58,6 +74,9 @@ export const UploadRis: React.FC<UploadRisProps> = ({ validate, batchId }) => {
                     const data = {
                         batchId,
                         fileType: RIS_FILE_TYPE,
+                        dataSubmission: dataSubmissionId,
+                        module: moduleId,
+                        period,
                     };
                     const uploadId = await compositionRoot.glassDocuments
                         .upload({ file: uploadedRisFile, data })
@@ -69,7 +88,7 @@ export const UploadRis: React.FC<UploadRisProps> = ({ validate, batchId }) => {
                 }
             }
         },
-        [batchId, compositionRoot.glassDocuments, snackbar]
+        [batchId, compositionRoot.glassDocuments, dataSubmissionId, moduleId, period, snackbar]
     );
 
     return (

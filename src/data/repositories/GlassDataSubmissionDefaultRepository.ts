@@ -37,4 +37,11 @@ export class GlassDataSubmissionsDefaultRepository implements GlassDataSubmissio
             ])
         );
     }
+
+    save(dataSubmission: GlassDataSubmission): FutureData<void> {
+        return this.dataStoreClient.listCollection(DataStoreKeys.DATA_SUBMISSIONS).flatMap(dataSubmissions => {
+            const newDataSubmissions = [...dataSubmissions, dataSubmission];
+            return this.dataStoreClient.saveObject(DataStoreKeys.DATA_SUBMISSIONS, newDataSubmissions);
+        });
+    }
 }
