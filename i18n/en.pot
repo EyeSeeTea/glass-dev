@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2023-02-24T10:05:19.705Z\n"
-"PO-Revision-Date: 2023-02-24T10:05:19.705Z\n"
+"POT-Creation-Date: 2023-02-27T10:54:38.874Z\n"
+"PO-Revision-Date: 2023-02-27T10:54:38.874Z\n"
 
 msgid "User Profile"
 msgstr ""
@@ -186,6 +186,21 @@ msgid "News from GLASS"
 msgstr ""
 
 msgid "No Open Data Submissions"
+msgstr ""
+
+msgid "Notification"
+msgstr ""
+
+msgid "Close"
+msgstr ""
+
+msgid "Participants"
+msgstr ""
+
+msgid "Me"
+msgstr ""
+
+msgid "Message from {{sender}}"
 msgstr ""
 
 msgid "Your Notifications"
