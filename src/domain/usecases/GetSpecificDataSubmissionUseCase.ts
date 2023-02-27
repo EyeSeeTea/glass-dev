@@ -18,7 +18,6 @@ export class GetSpecificDataSubmissionUseCase implements UseCase {
                 }
                 //Specific data-submission not found,
                 //Set to default status- NOT_COMPLETE, so that user can continue with upload workflow
-                //TO DO : Save new data-submission to datastore
                 else {
                     const defaultDataSubmission: GlassDataSubmission = {
                         id: generateId(),
@@ -27,7 +26,9 @@ export class GetSpecificDataSubmissionUseCase implements UseCase {
                         period: period,
                         status: "NOT_COMPLETED",
                     };
-                    return Future.success(defaultDataSubmission);
+                    return this.glassDataSubmissionRepository.save(defaultDataSubmission).flatMap(() => {
+                        return Future.success(defaultDataSubmission);
+                    });
                 }
             });
     }

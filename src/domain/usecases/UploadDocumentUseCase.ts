@@ -9,6 +9,9 @@ type UploadType = {
     data: {
         batchId: string;
         fileType: string;
+        dataSubmission: string;
+        module: string;
+        period: string;
     };
 };
 
@@ -24,15 +27,15 @@ export class UploadDocumentUseCase implements UseCase {
             const upload = {
                 id: generateUid(),
                 batchId: data.batchId,
-                dataSubmission: "THy2NqRXJT2",
+                dataSubmission: data.dataSubmission,
                 countryCode: "",
                 fileId,
                 fileName: file.name,
                 fileType: data.fileType,
                 inputLineNb: 0,
                 outputLineNb: 0,
-                module: "",
-                period: "",
+                module: data.module,
+                period: data.period,
                 specimens: [],
                 status: "UPLOADED",
                 uploadDate: new Date().toISOString(),
