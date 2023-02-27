@@ -37,7 +37,8 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({ changeStep
         <ContentWrapper>
             <p className="intro">
                 {i18n.t(
-                    "Explaining what consistency checks are: Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed doeiusmod tempor incididunt ut labore"
+                    "Explaining what consistency checks are: Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed doeiusmod tempor incididunt ut labore",
+                    { nsSeparator: false }
                 )}
             </p>
             <div className="toggles">
