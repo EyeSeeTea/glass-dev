@@ -1,6 +1,7 @@
-import { D2Api } from "@eyeseetea/d2-api/2.34";
+import { D2Api, MetadataPick } from "@eyeseetea/d2-api/2.34";
 import { FutureData } from "../../domain/entities/Future";
 import { Notification } from "../../domain/entities/Notifications";
+import { Id } from "../../domain/entities/Ref";
 import { NotificationRepository } from "../../domain/repositories/NotificationRepository";
 import { getD2APiFromInstance } from "../../utils/d2-api";
 import { apiToFuture } from "../../utils/futures";
@@ -13,17 +14,25 @@ export class NotificationDefaultRepository implements NotificationRepository {
         this.api = getD2APiFromInstance(instance);
     }
 
-    //https://metadata.eyeseetea.com/glass/api/36/messageConversations?filter=messageType:eq:PRIVATE&pageSize=10&page=1&fields=id,displayName,subject,messageType,lastSender[id,displayName],assignee[id,displayName],status,priority,lastUpdated,read,lastMessage,followUp&order=lastMessage:desc
+    get(id: Id): FutureData<Notification> {
+        return apiToFuture(
+            //TODO: Api has a bug retrieving data filtering by id (userMessages) however data is correct retrieving data by Id
+            // d2api get resource by id does not work then here I don't use type safe endpoint
+            this.api
+                .get<D2MessageConversationDetail>(`/messageConversations/${id}`, {
+                    fields: "id,lastMessage,messages[lastUpdated,sender[name],text],subject,userMessages[user[id,name,username]],user[id,name,username]",
+                })
+                .map(response => {
+                    return this.buildNotificationDetail(response.data);
+                })
+        );
+    }
 
-    get(): FutureData<Notification[]> {
+    getAll(): FutureData<Notification[]> {
         return apiToFuture(
             this.api.models.messageConversations
                 .get({
-                    fields: {
-                        id: true,
-                        subject: true,
-                        lastMessage: true,
-                    },
+                    fields: messageConversationFields,
                     page: 1,
                     pageSize: 10,
                     filter: {
@@ -32,14 +41,65 @@ export class NotificationDefaultRepository implements NotificationRepository {
                     order: "lastMessage:desc",
                 })
                 .map(response => {
-                    return response.data.objects.map(message => {
-                        return {
-                            id: message.id,
-                            date: message.lastMessage,
-                            message: message.subject,
-                        };
-                    });
+                    return response.data.objects.map(this.buildNotification);
                 })
         );
     }
+
+    private buildNotification(messageConversation: D2MessageConversation): Notification {
+        return {
+            id: messageConversation.id,
+            date: messageConversation.lastMessage,
+            subject: messageConversation.subject,
+        };
+    }
+
+    private buildNotificationDetail(messageConversation: D2MessageConversationDetail): Notification {
+        return {
+            id: messageConversation.id,
+            date: messageConversation.lastMessage,
+            subject: messageConversation.subject,
+            users: messageConversation.userMessages.map(userMesage => userMesage.user),
+            messages: messageConversation.messages.map(msg => {
+                return {
+                    text: msg.text,
+                    sender: msg.sender.name,
+                    date: msg.lastUpdated,
+                };
+            }),
+        };
+    }
 }
+
+const messageConversationFields = {
+    id: true,
+    subject: true,
+    lastMessage: true,
+} as const;
+
+type D2MessageConversation = MetadataPick<{
+    messageConversations: { fields: typeof messageConversationFields };
+}>["messageConversations"][number];
+
+type D2MessageConversationDetail = {
+    id: string;
+    subject: string;
+    lastMessage: string;
+    user: {
+        id: string;
+        name: string;
+        username: string;
+    };
+    userMessages: {
+        user: {
+            id: string;
+            name: string;
+            username: string;
+        };
+    }[];
+    messages: {
+        text: string;
+        sender: { name: string };
+        lastUpdated: string;
+    }[];
+};

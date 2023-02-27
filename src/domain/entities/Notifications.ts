@@ -1,5 +1,21 @@
+import { Id } from "./Ref";
+
 export interface Notification {
-    id: string;
+    id: Id;
     date: string;
-    message: string;
+    subject: string;
+    users?: UserNotification[];
+    messages?: MessageNotification[];
+}
+
+export interface UserNotification {
+    id: Id;
+    name: string;
+    username: string;
+}
+
+export interface MessageNotification {
+    text: string;
+    sender: string;
+    date: string;
 }
