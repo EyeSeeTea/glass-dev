@@ -41,21 +41,6 @@ msgstr ""
 msgid "Date of Enrolment"
 msgstr ""
 
-msgid "Family Name *"
-msgstr ""
-
-msgid "First Name *"
-msgstr ""
-
-msgid "Function *"
-msgstr ""
-
-msgid "Email Address *"
-msgstr ""
-
-msgid "Preferred Language (notifications) *"
-msgstr ""
-
 msgid "Ask for updating"
 msgstr ""
 
