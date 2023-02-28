@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback, useState } from "react";
 import { Grid, Typography } from "@material-ui/core";
 import styled from "styled-components";
 import { CustomCard } from "../../custom-card/CustomCard";
@@ -9,39 +9,59 @@ import { useNotifications } from "./useNotifications";
 import { useAppContext } from "../../../contexts/app-context";
 import { ContentLoader } from "../../content-loader/ContentLoader";
 import moment from "moment";
+import { NotificationDialog } from "./NotificationDialog";
 
 export const YourNotifications: React.FC = () => {
+    const [notificationToOpen, setNotificationToOpen] = useState<string | undefined>(undefined);
+
     const { compositionRoot } = useAppContext();
+
     const notifications = useNotifications(compositionRoot);
 
-    return (
-        <ContentLoader content={notifications}>
-            {notifications.kind === "loaded" && notifications.data.length ? (
-                <Grid item xs={12}>
-                    <CustomCard>
-                        <TitleContainer>
-                            <Typography variant="h5">{i18n.t("Your Notifications")}</Typography>
-                        </TitleContainer>
+    const openNotification = useCallback((id: string) => {
+        setNotificationToOpen(id);
+    }, []);
 
-                        <NotificationsList>
-                            {notifications.data.map(notification => {
-                                return (
-                                    <Item key={notification.id}>
-                                        <span className="date">{moment(notification.date).format("MM/DD/YYYY")}</span>
-                                        <p className="summary">{notification.message}</p>
-                                        <button>
-                                            <ChevronRightIcon />
-                                        </button>
-                                    </Item>
-                                );
-                            })}
-                        </NotificationsList>
-                    </CustomCard>
+    const closeNotification = useCallback(() => {
+        setNotificationToOpen(undefined);
+    }, []);
+
+    return (
+        <>
+            <ContentLoader content={notifications}>
+                <Grid item xs={12}>
+                    {notifications.kind === "loaded" && notifications.data.length ? (
+                        <CustomCard>
+                            <TitleContainer>
+                                <Typography variant="h5">{i18n.t("Your Notifications")}</Typography>
+                            </TitleContainer>
+
+                            <NotificationsList>
+                                {notifications.data.map(notification => {
+                                    return (
+                                        <Item key={notification.id} onClick={() => openNotification(notification.id)}>
+                                            <span className="date">
+                                                {moment(notification.date).format("MM/DD/YYYY")}
+                                            </span>
+                                            <p className="summary">{notification.subject}</p>
+                                            <button>
+                                                <ChevronRightIcon />
+                                            </button>
+                                        </Item>
+                                    );
+                                })}
+                            </NotificationsList>
+                        </CustomCard>
+                    ) : (
+                        <Typography>{i18n.t("No notifications")}</Typography>
+                    )}
                 </Grid>
-            ) : (
-                <StyledNoData>{i18n.t("No notifications")}</StyledNoData>
+            </ContentLoader>
+
+            {notificationToOpen && (
+                <NotificationDialog isOpen={true} onCancel={closeNotification} notificationId={notificationToOpen} />
             )}
-        </ContentLoader>
+        </>
     );
 };
 
@@ -82,8 +102,4 @@ const Item = styled.div`
             color: ${glassColors.greyBlack};
         }
     }
-`;
-
-const StyledNoData = styled(Typography)`
-    padding-left: 20px;
 `;
