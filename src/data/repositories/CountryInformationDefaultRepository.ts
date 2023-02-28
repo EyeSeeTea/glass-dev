@@ -3,7 +3,6 @@ import { Event as ProgramEvent } from "@eyeseetea/d2-api/api/events";
 import { CountryInformation } from "../../domain/entities/CountryInformation";
 import { Future, FutureData } from "../../domain/entities/Future";
 import { CountryInformationRepository } from "../../domain/repositories/CountryInformationRepository";
-import { cache } from "../../utils/cache";
 import { getD2APiFromInstance } from "../../utils/d2-api";
 import { apiToFuture } from "../../utils/futures";
 import { Instance } from "../entities/Instance";
@@ -13,6 +12,10 @@ const moduleAttribute = "Fh6atHPjdxC";
 
 export class CountryInformationDefaultRepository implements CountryInformationRepository {
     private api: D2Api;
+
+    //TODO: @cache does not work with futures
+    // I've created here an manual in memory cache to avoid many requests
+    private inmemoryCache: Record<string, unknown> = {};
 
     constructor(instance: Instance) {
         this.api = getD2APiFromInstance(instance);
@@ -78,41 +81,66 @@ export class CountryInformationDefaultRepository implements CountryInformationRe
             });
     }
 
-    @cache()
     private getOrgUnits(countryId: string): FutureData<D2OrgUnit[]> {
-        return apiToFuture(
-            this.api.get<D2OrgUnitsResponse>(`/organisationUnits/${countryId}`, {
-                fields: Object.keys(orgUnitFields).join(","),
-                includeAncestors: true,
-            })
-        ).map(response => response.organisationUnits);
+        const cacheKey = `orgUnits-${countryId}`;
+
+        return this.getFromCacheOrRemote(
+            cacheKey,
+            apiToFuture(
+                this.api.get<D2OrgUnitsResponse>(`/organisationUnits/${countryId}`, {
+                    fields: Object.keys(orgUnitFields).join(","),
+                    includeAncestors: true,
+                })
+            ).map(response => response.organisationUnits)
+        );
     }
 
-    @cache()
     private getTEI(countryId: string, module: string): FutureData<D2TEI | undefined> {
-        return apiToFuture(
-            this.api.get<D2TEIsResponse>("/trackedEntityInstances", {
-                program: ARMFocalPointProgram,
-                ou: [countryId],
-                fields: "*",
-                totalPages: true,
-                page: 1,
-                pageSize: 1,
-                filter: `${moduleAttribute}:eq:${module}`,
-                order: "created:Desc",
-            })
-        ).map(response => response.trackedEntityInstances[0]);
+        const cacheKey = `TEI-${countryId}-${module}`;
+
+        return this.getFromCacheOrRemote(
+            cacheKey,
+            apiToFuture(
+                this.api.get<D2TEIsResponse>("/trackedEntityInstances", {
+                    program: ARMFocalPointProgram,
+                    ou: [countryId],
+                    fields: "*",
+                    totalPages: true,
+                    page: 1,
+                    pageSize: 1,
+                    filter: `${moduleAttribute}:eq:${module}`,
+                    order: "created:Desc",
+                })
+            ).map(response => response.trackedEntityInstances[0])
+        );
     }
 
-    @cache()
     private getProgram(): FutureData<D2Program | undefined> {
-        return apiToFuture(
-            this.api.models.programs.get({
-                fields: programFields,
-                includeAncestors: true,
-                filter: { id: { eq: ARMFocalPointProgram } },
-            })
-        ).map(response => response.objects[0]);
+        const cacheKey = `program`;
+
+        return this.getFromCacheOrRemote(
+            cacheKey,
+            apiToFuture(
+                this.api.models.programs.get({
+                    fields: programFields,
+                    includeAncestors: true,
+                    filter: { id: { eq: ARMFocalPointProgram } },
+                })
+            ).map(response => response.objects[0])
+        );
+    }
+
+    private getFromCacheOrRemote<T>(cacheKey: string, future: FutureData<T>): FutureData<T> {
+        if (this.inmemoryCache[cacheKey]) {
+            const orgUnits = this.inmemoryCache[cacheKey] as T;
+            return Future.success(orgUnits);
+        } else {
+            return future.map(response => {
+                this.inmemoryCache[cacheKey] = response;
+
+                return response;
+            });
+        }
     }
 }
 
