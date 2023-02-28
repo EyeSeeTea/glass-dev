@@ -55,7 +55,7 @@ export function getCompositionRoot(instance: Instance) {
             getVersion: new GetInstanceVersionUseCase(instanceRepository),
         }),
         glassModules: getExecute({
-            getAll: new GetGlassModulesUseCase(glassModuleRepository),
+            getAll: new GetGlassModulesUseCase(glassModuleRepository, countryInformationRepository),
             getByName: new GetGlassModuleByNameUseCase(glassModuleRepository),
             validate: new ValidateGlassModulesUseCase(glassModuleRepository),
         }),
