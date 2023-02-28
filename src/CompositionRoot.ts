@@ -56,7 +56,7 @@ export function getCompositionRoot(instance: Instance) {
         }),
         glassModules: getExecute({
             getAll: new GetGlassModulesUseCase(glassModuleRepository, countryInformationRepository),
-            getByName: new GetGlassModuleByNameUseCase(glassModuleRepository),
+            getByName: new GetGlassModuleByNameUseCase(glassModuleRepository, countryInformationRepository),
             validate: new ValidateGlassModulesUseCase(glassModuleRepository),
         }),
         glassNews: getExecute({
