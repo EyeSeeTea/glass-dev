@@ -10,9 +10,7 @@ export function useGlassModule(compositionRoot: CompositionRoot) {
     const { currentModuleAccess } = useCurrentModuleContext();
     const moduleName = currentModuleAccess.moduleName;
 
-    const [result, setResult] = React.useState<GlassModuleState>({
-        kind: "loading",
-    });
+    const [result, setResult] = React.useState<GlassModuleState>({ kind: "loading" });
 
     React.useEffect(() => {
         if (moduleName) {

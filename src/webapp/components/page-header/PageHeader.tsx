@@ -63,5 +63,5 @@ const IconButton = styled(MUIIConButton)`
 
 const BackButton = styled(IconButton)`
     padding-top: 10px;
-    margin-bottom: 5px;
+    margin-bottom: 5x;
 `;

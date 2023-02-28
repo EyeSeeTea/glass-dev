@@ -45,6 +45,8 @@ module.exports = {
         "no-mixed-spaces-and-tabs": "off",
         "react-hooks/rules-of-hooks": "error",
         "react-hooks/exhaustive-deps": "warn",
+        "array-callback-return": "off",
+        "react/jsx-key": "warn",
     },
     plugins: ["cypress", "@typescript-eslint", "react-hooks", "unused-imports"],
     env: { "cypress/globals": true },
