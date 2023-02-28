@@ -28,7 +28,7 @@ export const SideBar: React.FC = () => {
 
     useEffect(() => {
         // Validate localstorage vs datastore
-        if (modulesResult.kind === "loaded" && modulesResult.data.length) {
+        if (modulesResult.kind === "loaded") {
             const menuData = modulesResult.data.map(module => mapModuleToMenu(module));
             if (!isLoaded || JSON.stringify(menuData) !== JSON.stringify(storedMenuData)) {
                 localStorage.setItem("glassSideBarData", JSON.stringify(menuData));
