@@ -18,45 +18,61 @@ export class CountryInformationDefaultRepository implements CountryInformationRe
     }
 
     get(countryId: string, module: string): FutureData<CountryInformation> {
-        return Future.joinObj({
-            program: this.getProgram(),
-            tei: this.getTEI(countryId, module),
-            orgUnits: this.getOrgUnits(countryId),
-        }).map(({ program, tei, orgUnits }) => {
-            const countryLevel = orgUnits.find(ou => ou.id === countryId)?.level || 0;
-            const countryName = orgUnits.find(ou => ou.id === countryId)?.shortName || "";
-            const regionName =
-                orgUnits.find(ou => ou.id !== countryId && ou.level === countryLevel - 1)?.shortName || "";
+        let countryName = "";
 
-            const enrollment = tei?.enrollments[0];
-            const events = tei?.enrollments[0]?.events || [];
-            const programstageDataElements = program?.programStages[0]?.programStageDataElements || [];
+        return this.getOrgUnits(countryId)
+            .flatMap(orgUnits => {
+                countryName = orgUnits.find(ou => ou.id === countryId)?.shortName || "";
 
-            return {
-                WHORegion: regionName,
-                country: countryName,
-                year: new Date().getFullYear(),
-                enrolmentStatus: enrollment?.status || "",
-                enrolmentDate: enrollment?.enrollmentDate || "",
-                nationalFocalPoints:
-                    events.map((event: ProgramEvent) => {
-                        return {
-                            id: event.event,
-                            values: programstageDataElements.map(programStageDataElement => {
-                                const dataValue = event.dataValues.find(
-                                    dv => dv.dataElement === programStageDataElement.dataElement.id
-                                );
+                return Future.joinObj({
+                    program: this.getProgram(),
+                    tei: this.getTEI(countryId, module),
+                    orgUnits: Future.success(orgUnits),
+                });
+            })
+            .map(({ program, tei, orgUnits }) => {
+                const country = orgUnits.find(ou => ou.id === countryId);
+                const countryLevel = country?.level || 0;
+                countryName = country?.shortName || "";
+                const regionName =
+                    orgUnits.find(ou => ou.id !== countryId && ou.level === countryLevel - 1)?.shortName || "";
 
-                                return {
-                                    id: programStageDataElement.dataElement.id,
-                                    name: programStageDataElement.dataElement.shortName,
-                                    value: dataValue?.value || "",
-                                };
-                            }),
-                        };
-                    }) || [],
-            };
-        });
+                const enrollment = tei?.enrollments[0];
+                const events = tei?.enrollments[0]?.events || [];
+                const programstageDataElements = program?.programStages[0]?.programStageDataElements || [];
+
+                return {
+                    WHORegion: regionName,
+                    country: countryName,
+                    year: new Date().getFullYear(),
+                    enrolmentStatus: enrollment?.status || "",
+                    enrolmentDate: enrollment?.enrollmentDate || "",
+                    nationalFocalPoints:
+                        events.map((event: ProgramEvent) => {
+                            return {
+                                id: event.event,
+                                values: programstageDataElements.map(programStageDataElement => {
+                                    const dataValue = event.dataValues.find(
+                                        dv => dv.dataElement === programStageDataElement.dataElement.id
+                                    );
+
+                                    return {
+                                        id: programStageDataElement.dataElement.id,
+                                        name: programStageDataElement.dataElement.shortName,
+                                        value: dataValue?.value || "",
+                                    };
+                                }),
+                            };
+                        }) || [],
+                };
+            })
+            .mapError(error => {
+                if (error.includes("Organisation unit is not part of the search scope")) {
+                    return `Organisation unit is not part of the search scope: ${countryName}`;
+                } else {
+                    return error;
+                }
+            });
     }
 
     private getOrgUnits(countryId: string): FutureData<D2OrgUnit[]> {

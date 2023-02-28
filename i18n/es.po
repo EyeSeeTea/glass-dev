@@ -8,6 +8,9 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
 
+msgid "Error saving registration status"
+msgstr ""
+
 msgid "User Profile"
 msgstr ""
 
@@ -61,13 +64,13 @@ msgstr ""
 msgid "Uploads with errors, or discarded"
 msgstr ""
 
-msgid "Questionnaire 1"
-msgstr ""
-
-msgid "Description"
+msgid "There are no questionnaries for this module"
 msgstr ""
 
 msgid "mandatory"
+msgstr ""
+
+msgid "Completed"
 msgstr ""
 
 msgid "Not completed"
@@ -77,15 +80,6 @@ msgid "View"
 msgstr ""
 
 msgid "Go"
-msgstr ""
-
-msgid "Questionnaire 2"
-msgstr ""
-
-msgid "Questionnaire 3"
-msgstr ""
-
-msgid "Completed"
 msgstr ""
 
 msgid "Overview"
@@ -223,6 +217,18 @@ msgstr "Volver"
 msgid "Help"
 msgstr "Ayuda"
 
+msgid "Set as incomplete"
+msgstr ""
+
+msgid "Set as completed"
+msgstr ""
+
+msgid "Yes"
+msgstr ""
+
+msgid "No"
+msgstr ""
+
 msgid "HOME"
 msgstr ""
 
@@ -251,6 +257,11 @@ msgid "Any other userful information here?"
 msgstr ""
 
 msgid "Info abou the previously updated quarter and the missing quarters"
+msgstr ""
+
+msgid ""
+"Explaining what consistency checks are: Lorem ipsum dolor sit amet, "
+"consectetur adipiscing elit, sed doeiusmod tempor incididunt ut labore"
 msgstr ""
 
 msgid "RIS File"
