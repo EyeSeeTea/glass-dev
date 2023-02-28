@@ -3,6 +3,7 @@ import { Event as ProgramEvent } from "@eyeseetea/d2-api/api/events";
 import { CountryInformation } from "../../domain/entities/CountryInformation";
 import { Future, FutureData } from "../../domain/entities/Future";
 import { CountryInformationRepository } from "../../domain/repositories/CountryInformationRepository";
+import { cache } from "../../utils/cache";
 import { getD2APiFromInstance } from "../../utils/d2-api";
 import { apiToFuture } from "../../utils/futures";
 import { Instance } from "../entities/Instance";
@@ -42,9 +43,11 @@ export class CountryInformationDefaultRepository implements CountryInformationRe
                 const programstageDataElements = program?.programStages[0]?.programStageDataElements || [];
 
                 return {
+                    module,
                     WHORegion: regionName,
                     country: countryName,
                     year: new Date().getFullYear(),
+                    nationalFocalPointId: enrollment?.enrollment,
                     enrolmentStatus: enrollment?.status || "",
                     enrolmentDate: enrollment?.enrollmentDate || "",
                     nationalFocalPoints:
@@ -75,6 +78,7 @@ export class CountryInformationDefaultRepository implements CountryInformationRe
             });
     }
 
+    @cache()
     private getOrgUnits(countryId: string): FutureData<D2OrgUnit[]> {
         return apiToFuture(
             this.api.get<D2OrgUnitsResponse>(`/organisationUnits/${countryId}`, {
@@ -84,6 +88,7 @@ export class CountryInformationDefaultRepository implements CountryInformationRe
         ).map(response => response.organisationUnits);
     }
 
+    @cache()
     private getTEI(countryId: string, module: string): FutureData<D2TEI | undefined> {
         return apiToFuture(
             this.api.get<D2TEIsResponse>("/trackedEntityInstances", {
@@ -99,6 +104,7 @@ export class CountryInformationDefaultRepository implements CountryInformationRe
         ).map(response => response.trackedEntityInstances[0]);
     }
 
+    @cache()
     private getProgram(): FutureData<D2Program | undefined> {
         return apiToFuture(
             this.api.models.programs.get({
