@@ -11,6 +11,7 @@ export interface GlassModule {
     id: string;
     userGroups: ModuleUserGroups;
     questionnaires: QuestionnaireConfig[];
+    countryInformationId?: Id;
 }
 
 interface QuestionnaireConfig {
