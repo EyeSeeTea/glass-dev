@@ -7,37 +7,34 @@ import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context
 import { useAppContext } from "../../contexts/app-context";
 import { ContentLoader } from "../content-loader/ContentLoader";
 import styled from "styled-components";
-import { useGlassModules } from "../../hooks/useGlassModules";
 
 export const OpenDataSubmissions: React.FC = () => {
     const { compositionRoot } = useAppContext();
-    const modules = useGlassModules(compositionRoot);
+
     const orgUnit = useCurrentOrgUnitContext();
+
     const openDataSubmissions = useOpenDataSubmissionsByOrgUnit(
         compositionRoot,
         orgUnit.currentOrgUnitAccess.orgUnitId
     );
+
     return (
         <ContentLoader content={openDataSubmissions}>
             <Grid item xs={12}>
                 <h2 className="section-title">Open Data Submissions</h2>
             </Grid>
-            <ContentLoader content={modules}>
-                {openDataSubmissions.kind === "loaded" &&
-                modules.kind === "loaded" &&
-                openDataSubmissions.data.length ? (
-                    openDataSubmissions.data.map(openDataSubmission => {
-                        const cardModule = modules.data.find(m => m.id === openDataSubmission.module);
-                        return (
-                            <Grid item xs={6} key={openDataSubmission.id}>
-                                {cardModule && <ModuleCard period={openDataSubmission.period} module={cardModule} />}
-                            </Grid>
-                        );
-                    })
-                ) : (
-                    <StyledNoData>{i18n.t("No Open Data Submissions")}</StyledNoData>
-                )}
-            </ContentLoader>
+
+            {openDataSubmissions.kind === "loaded" && openDataSubmissions.data.length ? (
+                openDataSubmissions.data.map(data => {
+                    return (
+                        <Grid item xs={6} key={data.dataSubmission.id}>
+                            {data.module && <ModuleCard period={data.dataSubmission.period} module={data.module} />}
+                        </Grid>
+                    );
+                })
+            ) : (
+                <StyledNoData>{i18n.t("No Open Data Submissions")}</StyledNoData>
+            )}
         </ContentLoader>
     );
 };
