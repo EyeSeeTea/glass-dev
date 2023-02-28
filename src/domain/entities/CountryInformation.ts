@@ -1,5 +1,4 @@
 export interface CountryInformation {
-    id: string;
     WHORegion: string;
     country: string;
     year: number;

@@ -6,9 +6,9 @@ import { CountryInformationRepository } from "../../domain/repositories/CountryI
 import { getD2APiFromInstance } from "../../utils/d2-api";
 import { apiToFuture } from "../../utils/futures";
 import { Instance } from "../entities/Instance";
-import { getTEI } from "./common/getTEI";
 
-export const ARMFocalPointProgram = "oo0bqS0AqMI";
+const ARMFocalPointProgram = "oo0bqS0AqMI";
+const moduleAttribute = "Fh6atHPjdxC";
 
 export class CountryInformationDefaultRepository implements CountryInformationRepository {
     private api: D2Api;
@@ -26,7 +26,7 @@ export class CountryInformationDefaultRepository implements CountryInformationRe
 
                 return Future.joinObj({
                     program: this.getProgram(),
-                    tei: getTEI(this.api, countryId, module),
+                    tei: this.getTEI(countryId, module),
                     orgUnits: Future.success(orgUnits),
                 });
             })
@@ -42,7 +42,6 @@ export class CountryInformationDefaultRepository implements CountryInformationRe
                 const programstageDataElements = program?.programStages[0]?.programStageDataElements || [];
 
                 return {
-                    id: enrollment?.enrollment || "",
                     WHORegion: regionName,
                     country: countryName,
                     year: new Date().getFullYear(),
@@ -85,6 +84,21 @@ export class CountryInformationDefaultRepository implements CountryInformationRe
         ).map(response => response.organisationUnits);
     }
 
+    private getTEI(countryId: string, module: string): FutureData<D2TEI | undefined> {
+        return apiToFuture(
+            this.api.get<D2TEIsResponse>("/trackedEntityInstances", {
+                program: ARMFocalPointProgram,
+                ou: [countryId],
+                fields: "*",
+                totalPages: true,
+                page: 1,
+                pageSize: 1,
+                filter: `${moduleAttribute}:eq:${module}`,
+                order: "created:Desc",
+            })
+        ).map(response => response.trackedEntityInstances[0]);
+    }
+
     private getProgram(): FutureData<D2Program | undefined> {
         return apiToFuture(
             this.api.models.programs.get({
@@ -94,6 +108,30 @@ export class CountryInformationDefaultRepository implements CountryInformationRe
             })
         ).map(response => response.objects[0]);
     }
+}
+
+export interface D2TEIsResponse {
+    trackedEntityInstances: D2TEI[];
+    pager: {
+        pageSize: number;
+        total: number;
+        page: number;
+    };
+}
+
+export interface D2TEI {
+    trackedEntityInstance: string;
+    enrollments: Enrollment[];
+}
+
+export interface Enrollment {
+    enrollment: string;
+    program: string;
+    orgUnit: string;
+    trackedEntityInstance: string;
+    enrollmentDate: string;
+    status: "ACTIVE" | "COMPLETED" | "CANCELED";
+    events: ProgramEvent[];
 }
 
 const programFields = {
