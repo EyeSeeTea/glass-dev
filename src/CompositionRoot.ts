@@ -29,6 +29,7 @@ import { ImportRISFileUseCase } from "./domain/usecases/ImportRISFileUseCase";
 import { GetOpenDataSubmissionsByOUUseCase } from "./domain/usecases/GetOpenDataSubmissionsByOUUseCase";
 import { GetNotificationsUseCase } from "./domain/usecases/GetNotificationsUseCase";
 import { NotificationDefaultRepository } from "./data/repositories/NotificationDefaultRepository";
+import { RISDataRepository } from "./data/repositories/DataRISCSVRepository";
 
 export function getCompositionRoot(instance: Instance) {
     const dataStoreClient = new DataStoreClient(instance);
@@ -38,6 +39,7 @@ export function getCompositionRoot(instance: Instance) {
     const glassDataSubmissionRepository = new GlassDataSubmissionsDefaultRepository(dataStoreClient);
     const glassUploadsRepository = new GlassUploadsDefaultRepository(dataStoreClient);
     const glassDocumentsRepository = new GlassDocumentsDefaultRepository(dataStoreClient, instance);
+    const risDataRepository = new RISDataRepository();
     const glassRisFileRepository = new GlassImportRISFileDefaultRepository(instance);
     const notificationRepository = new NotificationDefaultRepository(instance);
 
@@ -75,7 +77,7 @@ export function getCompositionRoot(instance: Instance) {
             deleteByUploadId: new DeleteDocumentInfoByUploadIdUseCase(glassDocumentsRepository, glassUploadsRepository),
         }),
         glassRisFile: getExecute({
-            importFile: new ImportRISFileUseCase(glassRisFileRepository),
+            importFile: new ImportRISFileUseCase(risDataRepository, glassRisFileRepository),
         }),
         notifications: getExecute({
             get: new GetNotificationsUseCase(notificationRepository),
