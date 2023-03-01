@@ -14,10 +14,5 @@ export interface RISData {
     UNKNOWN_NO_AST: number;
     UNKNOWN_NO_BREAKPOINTS: number;
     BATCHID: string;
+    ABCLASS: string;
 }
-
-const mapDERISCodeTod2DE = {
-    ANTIBIOTIC: "ANTIBIOTIC_DEA",
-    PATHOGEN: "AMR_AMR_DEA_PATHOGEN",
-    SPECIMEN: "AMR_AMR_DEA_SPECIMEN_TYPE_RIS",
-};
