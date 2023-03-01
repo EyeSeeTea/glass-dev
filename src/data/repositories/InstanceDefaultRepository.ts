@@ -121,7 +121,7 @@ export class InstanceDefaultRepository implements InstanceRepository {
                     if (orgUnit.level === COUNTRY_LEVEL) countryOrgUnits.push(orgUnit);
                 });
 
-                const uniqueOrgUnits = _.uniqBy(countryOrgUnits, "id");
+                const uniqueOrgUnits = _.uniqBy(countryOrgUnits, "id").sort((a, b) => a.name.localeCompare(b.name));
 
                 return this.mapUserGroupAccess(user.userGroups).map((userModulesAccess): UserAccessInfo => {
                     return {
