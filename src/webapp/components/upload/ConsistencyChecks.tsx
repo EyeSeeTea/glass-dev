@@ -61,7 +61,6 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({ changeStep
 
                 compositionRoot.glassRisFile.importFile(risFile).run(
                     datasetImportStatus => {
-                        debugger;
                         //Warning considered non-blocking
                         if (datasetImportStatus.status === "WARNING") {
                             if (datasetImportStatus.conflicts && datasetImportStatus.conflicts.length) {
@@ -106,7 +105,6 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({ changeStep
                         setIsDataSetUploading(false);
                     },
                     error => {
-                        debugger;
                         setBlockingErrors(blockingErrors => {
                             return [...blockingErrors, { error: error, count: 1 }];
                         });
