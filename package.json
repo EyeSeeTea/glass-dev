@@ -29,6 +29,7 @@
         "fluture": "14.0.0",
         "font-awesome": "4.7.0",
         "lodash": "4.17.21",
+        "lodash.product": "^18.10.0",
         "postcss-rtl": "1.7.3",
         "purify-ts": "1.2.0",
         "purify-ts-extra-codec": "0.6.0",
