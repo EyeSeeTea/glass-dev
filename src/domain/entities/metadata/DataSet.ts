@@ -5,7 +5,7 @@ export interface DataSet {
         id: string;
         name: string;
         code: string;
-        categoryCombo: string;
+        categoryCombo: { id: string };
     }[];
     categoryCombo: string;
 }
