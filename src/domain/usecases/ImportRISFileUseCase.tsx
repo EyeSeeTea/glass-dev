@@ -6,10 +6,12 @@ import { CategoryCombo } from "../entities/metadata/CategoryCombo";
 import { DataValuesSaveSummary } from "../entities/data-entry/DataValuesSaveSummary";
 import { MetadataRepository } from "../repositories/MetadataRepository";
 import { DataValuesRepository } from "../repositories/DataValuesRepository";
+import _ from "lodash";
 
 const AMR_AMR_DS_INPUT_FILES_RIS_DS_ID = "CeQPmXgrhHF";
 const AMR_PATHOGEN_ANTIBIOTIC_CC_ID = "S427AvQESbw";
 const AMR_SPECIMEN_GENDER_AGE_ORIGIN_CC_ID = "OwKsZQnHCJu";
+const defaultCategoryCombo = "bjDvmb4bfuf";
 
 export class ImportRISFileUseCase implements UseCase {
     constructor(
@@ -47,13 +49,15 @@ export class ImportRISFileUseCase implements UseCase {
                                 dataSetCategoryOptionValues
                             );
 
-                            const categoryOptionCombo = this.getCategoryOptionCombo(dataElement_CC, [
-                                risData.SPECIMEN,
-                                risData.GENDER,
-                                risData.ORIGIN,
-                                risData.AGEGROUP,
-                            ]);
-
+                            const categoryOptionCombo =
+                                dataElement.categoryCombo.id === defaultCategoryCombo
+                                    ? undefined
+                                    : this.getCategoryOptionCombo(dataElement_CC, [
+                                          risData.SPECIMEN,
+                                          risData.GENDER.replace("UNK", "UNKG"),
+                                          risData.ORIGIN.replace("UNK", "UNKO"),
+                                          risData.AGEGROUP.replace("UNK", "UNKA"),
+                                      ]);
                             const value = risData[dataElement.code as keyof RISData]?.toString() || "";
 
                             const dataValue = {
@@ -70,6 +74,9 @@ export class ImportRISFileUseCase implements UseCase {
                     })
                     .flat();
 
+                /* eslint-disable no-console */
+                console.log({ risFileDataValues: dataValues });
+
                 return this.dataValuesRepository.save(dataValues);
             });
     }
@@ -80,20 +87,33 @@ export class ImportRISFileUseCase implements UseCase {
             .flat()
             .filter(catOp => codes.includes(catOp.code));
 
-        const categoryOptionCombos = categoryOptions
-            .map(catOp =>
-                catOp.categoryOptionCombos.map(catOptCombo => ({
-                    categoryOption: catOp.code,
-                    categoryOptionCombo: catOptCombo,
-                }))
-            )
-            .flat()
-            .flat();
+        const uniqueCategoryOptions = _.unionBy(categoryOptions, catOption => catOption.code);
 
-        const categoryOptionCombosByCodes = categoryOptionCombos.filter(categoryOptioncombo =>
-            codes.includes(categoryOptioncombo.categoryOption)
-        );
+        if (uniqueCategoryOptions.length !== codes.length) {
+            /* eslint-disable no-console */
+            console.log(
+                `All codes not found as category combination in categoryCombo ${
+                    categoryCombo.name
+                }. codes: ${codes.join(",")}`
+            );
 
-        return categoryOptionCombosByCodes[0]?.categoryOptionCombo || "";
+            //console.log({ categoryCombo });
+            // debugger;
+            // throw new Error(`All codes not found as category options. codes: ${codes.join(",")}`);
+        }
+
+        //TODO: this is a code brought from old repository written by sneha, improve it without to use let
+        //The categoryOptionComboId will be common between both category options.
+
+        let commonCategoryOptionCombos = uniqueCategoryOptions[0]?.categoryOptionCombos;
+        uniqueCategoryOptions.map(co => {
+            return (commonCategoryOptionCombos = co.categoryOptionCombos.filter(co =>
+                commonCategoryOptionCombos?.some(c => c === co)
+            ));
+        });
+
+        if (commonCategoryOptionCombos?.length === 1) {
+            return commonCategoryOptionCombos[0];
+        } else return "";
     }
 }
