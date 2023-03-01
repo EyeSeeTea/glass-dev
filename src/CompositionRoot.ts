@@ -26,13 +26,23 @@ import { SetUploadBatchIdUseCase } from "./domain/usecases/SetUploadBatchIdUseCa
 import { DeleteDocumentInfoByUploadIdUseCase } from "./domain/usecases/DeleteDocumentInfoByUploadIdUseCase";
 import { ImportRISFileUseCase } from "./domain/usecases/ImportRISFileUseCase";
 import { GetOpenDataSubmissionsByOUUseCase } from "./domain/usecases/GetOpenDataSubmissionsByOUUseCase";
+import { getD2APiFromInstance } from "./utils/d2-api";
+import { QuestionnaireD2Repository } from "./data/repositories/QuestionnaireD2Repository";
+import { GetQuestionnaireUseCase } from "./domain/usecases/GetQuestionnaireUseCase";
+import { SaveQuestionnaireResponseUseCase } from "./domain/usecases/SaveQuestionUseCase";
+import { SetAsQuestionnaireCompletionUseCase } from "./domain/usecases/SetAsQuestionnaireCompletionUseCase";
+import { GetQuestionnaireListUseCase } from "./domain/usecases/GetQuestionnaireListUseCase";
 import { GetNotificationsUseCase } from "./domain/usecases/GetNotificationsUseCase";
 import { NotificationDefaultRepository } from "./data/repositories/NotificationDefaultRepository";
 import { RISDataRepository } from "./data/repositories/DataRISCSVRepository";
 import { DataValuesDefaultRepository } from "./data/repositories/DataValuesDefaultRepository";
 import { MetadataDefaultRepository } from "./data/repositories/MetadataDefaultRepository";
+import { GetCountryInformationUseCase } from "./domain/usecases/GetCountryInformationUseCase";
+import { CountryInformationDefaultRepository } from "./data/repositories/CountryInformationDefaultRepository";
+import { GetNotificationByIdUseCase } from "./domain/usecases/GetNotificationByIdUseCase";
 
 export function getCompositionRoot(instance: Instance) {
+    const api = getD2APiFromInstance(instance);
     const dataStoreClient = new DataStoreClient(instance);
     const instanceRepository = new InstanceDefaultRepository(instance, dataStoreClient);
     const glassModuleRepository = new GlassModuleDefaultRepository(dataStoreClient);
@@ -43,7 +53,9 @@ export function getCompositionRoot(instance: Instance) {
     const risDataRepository = new RISDataRepository();
     const dataValuesRepository = new DataValuesDefaultRepository(instance);
     const metadataRepository = new MetadataDefaultRepository(instance);
+    const questionnaireD2Repository = new QuestionnaireD2Repository(api);
     const notificationRepository = new NotificationDefaultRepository(instance);
+    const countryInformationRepository = new CountryInformationDefaultRepository(instance);
 
     return {
         instance: getExecute({
@@ -81,8 +93,18 @@ export function getCompositionRoot(instance: Instance) {
         glassRisFile: getExecute({
             importFile: new ImportRISFileUseCase(risDataRepository, metadataRepository, dataValuesRepository),
         }),
+        questionnaires: getExecute({
+            get: new GetQuestionnaireUseCase(questionnaireD2Repository),
+            getList: new GetQuestionnaireListUseCase(questionnaireD2Repository),
+            saveResponse: new SaveQuestionnaireResponseUseCase(questionnaireD2Repository),
+            setAsCompleted: new SetAsQuestionnaireCompletionUseCase(questionnaireD2Repository),
+        }),
         notifications: getExecute({
-            get: new GetNotificationsUseCase(notificationRepository),
+            getAll: new GetNotificationsUseCase(notificationRepository),
+            getById: new GetNotificationByIdUseCase(notificationRepository),
+        }),
+        countries: getExecute({
+            getInformation: new GetCountryInformationUseCase(countryInformationRepository),
         }),
     };
 }

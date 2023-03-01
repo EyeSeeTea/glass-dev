@@ -1,3 +1,4 @@
+import { Id } from "./Base";
 import { UserGroup } from "./User";
 
 interface ModuleUserGroups {
@@ -9,4 +10,10 @@ export interface GlassModule {
     color: string;
     id: string;
     userGroups: ModuleUserGroups;
+    questionnaires: QuestionnaireConfig[];
+}
+
+interface QuestionnaireConfig {
+    id: Id;
+    mandatory?: boolean;
 }
