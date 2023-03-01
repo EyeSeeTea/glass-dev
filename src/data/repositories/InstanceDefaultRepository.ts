@@ -1,4 +1,5 @@
 import { D2Api } from "@eyeseetea/d2-api/2.34";
+import _ from "lodash";
 import { FutureData, Future } from "../../domain/entities/Future";
 import { GlassModule } from "../../domain/entities/GlassModule";
 import { NamedRef } from "../../domain/entities/Ref";
@@ -10,6 +11,8 @@ import { apiToFuture } from "../../utils/futures";
 import { DataStoreClient } from "../data-store/DataStoreClient";
 import { DataStoreKeys } from "../data-store/DataStoreKeys";
 import { Instance } from "../entities/Instance";
+
+const COUNTRY_LEVEL = 2;
 
 export class InstanceDefaultRepository implements InstanceRepository {
     private api: D2Api;
@@ -45,7 +48,6 @@ export class InstanceDefaultRepository implements InstanceRepository {
         //TO DO: TEMP - For testing the OrgUnit Access implementation, consoling the orgUnitAccess.
         //TO DO: Remove once permission implementation done.
         console.debug("Org Unit Access Permissions : " + JSON.stringify(orgUnitsAccess));
-        console.log("orgUnitsAccess", orgUnitsAccess);
 
         return orgUnitsAccess;
     };
@@ -99,41 +101,38 @@ export class InstanceDefaultRepository implements InstanceRepository {
             })
         ).flatMap(user => {
             const { organisationUnits } = user;
-
             const countryOrgUnits: { name: string; id: string }[] = [];
-            for (const orgUnit of organisationUnits) {
-                if (orgUnit.level < 2) {
-                    apiToFuture(
-                        this.api.models.organisationUnits.get({
-                            filter: { "parent.id": { eq: orgUnit.id } },
-                            fields: {
-                                id: true,
-                                name: true,
-                            },
-                        })
-                    ).run(
-                        ({ objects }) => {
-                            objects.forEach(orgUnit => countryOrgUnits.push(orgUnit));
-                        },
-                        () => {}
-                    );
-                } else {
-                    countryOrgUnits.push({ name: orgUnit.name, id: orgUnit.id });
-                }
-            }
 
-            return this.mapUserGroupAccess(user.userGroups).map((userModulesAccess): UserAccessInfo => {
-                return {
-                    id: user.id,
-                    name: user.displayName,
-                    userGroups: user.userGroups,
-                    ...user.userCredentials,
-                    userOrgUnitsAccess: this.mapUserOrgUnitsAccess(
-                        [...new Set(countryOrgUnits)],
-                        user.dataViewOrganisationUnits
-                    ),
-                    userModulesAccess: userModulesAccess,
-                };
+            organisationUnits.forEach(orgUnit => {
+                if (orgUnit.level === COUNTRY_LEVEL) countryOrgUnits.push({ name: orgUnit.name, id: orgUnit.id });
+            });
+
+            return apiToFuture(
+                this.api.models.organisationUnits.get({
+                    filter: { "parent.id": { in: organisationUnits.map(ou => ou.id) } },
+                    fields: {
+                        id: true,
+                        name: true,
+                        level: true,
+                    },
+                })
+            ).flatMap(({ objects }) => {
+                objects.forEach(orgUnit => {
+                    if (orgUnit.level === COUNTRY_LEVEL) countryOrgUnits.push(orgUnit);
+                });
+
+                const uniqueOrgUnits = _.uniqBy(countryOrgUnits, "id");
+
+                return this.mapUserGroupAccess(user.userGroups).map((userModulesAccess): UserAccessInfo => {
+                    return {
+                        id: user.id,
+                        name: user.displayName,
+                        userGroups: user.userGroups,
+                        ...user.userCredentials,
+                        userOrgUnitsAccess: this.mapUserOrgUnitsAccess(uniqueOrgUnits, user.dataViewOrganisationUnits),
+                        userModulesAccess: userModulesAccess,
+                    };
+                });
             });
         });
     }
