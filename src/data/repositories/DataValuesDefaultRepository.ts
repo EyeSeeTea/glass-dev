@@ -15,7 +15,8 @@ export class DataValuesDefaultRepository implements DataValuesRepository {
     }
 
     save(dataValues: DataValue[]): FutureData<DataValuesSaveSummary> {
-        // return apiToFuture(this.api.dataValues.postSet({ importStrategy: "CREATE_AND_UPDATE" }, { dataValues }));
+        // We use async way because sync throw timeouts
+        //return apiToFuture(this.api.dataValues.postSet({ importStrategy: "CREATE_AND_UPDATE" }, { dataValues }));
 
         return apiToFuture(
             this.api.dataValues.postSetAsync(
