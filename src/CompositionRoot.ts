@@ -24,12 +24,13 @@ import { SetUploadStatusUseCase } from "./domain/usecases/SetUploadStatusUseCase
 import { GetGlassUploadsByDataSubmissionUseCase } from "./domain/usecases/GetGlassUploadsByDataSubmissionUseCase";
 import { SetUploadBatchIdUseCase } from "./domain/usecases/SetUploadBatchIdUseCase";
 import { DeleteDocumentInfoByUploadIdUseCase } from "./domain/usecases/DeleteDocumentInfoByUploadIdUseCase";
-import { GlassImportRISFileDefaultRepository } from "./data/repositories/GlassImportRISFileDefaultRepository";
 import { ImportRISFileUseCase } from "./domain/usecases/ImportRISFileUseCase";
 import { GetOpenDataSubmissionsByOUUseCase } from "./domain/usecases/GetOpenDataSubmissionsByOUUseCase";
 import { GetNotificationsUseCase } from "./domain/usecases/GetNotificationsUseCase";
 import { NotificationDefaultRepository } from "./data/repositories/NotificationDefaultRepository";
 import { RISDataRepository } from "./data/repositories/DataRISCSVRepository";
+import { DataValuesDefaultRepository } from "./data/repositories/DataValuesDefaultRepository";
+import { MetadataDefaultRepository } from "./data/repositories/MetadataDefaultRepository";
 
 export function getCompositionRoot(instance: Instance) {
     const dataStoreClient = new DataStoreClient(instance);
@@ -40,7 +41,8 @@ export function getCompositionRoot(instance: Instance) {
     const glassUploadsRepository = new GlassUploadsDefaultRepository(dataStoreClient);
     const glassDocumentsRepository = new GlassDocumentsDefaultRepository(dataStoreClient, instance);
     const risDataRepository = new RISDataRepository();
-    const glassRisFileRepository = new GlassImportRISFileDefaultRepository(instance);
+    const dataValuesRepository = new DataValuesDefaultRepository(instance);
+    const metadataRepository = new MetadataDefaultRepository(instance);
     const notificationRepository = new NotificationDefaultRepository(instance);
 
     return {
@@ -77,7 +79,7 @@ export function getCompositionRoot(instance: Instance) {
             deleteByUploadId: new DeleteDocumentInfoByUploadIdUseCase(glassDocumentsRepository, glassUploadsRepository),
         }),
         glassRisFile: getExecute({
-            importFile: new ImportRISFileUseCase(risDataRepository, glassRisFileRepository),
+            importFile: new ImportRISFileUseCase(risDataRepository, metadataRepository, dataValuesRepository),
         }),
         notifications: getExecute({
             get: new GetNotificationsUseCase(notificationRepository),

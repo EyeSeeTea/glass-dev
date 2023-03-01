@@ -1,88 +1,99 @@
-import { DataValueSetsPostRequest, DataValueSetsPostResponse } from "@eyeseetea/d2-api/api";
 import { UseCase } from "../../CompositionRoot";
-import { GlassImportRISFileDefaultRepository } from "../../data/repositories/GlassImportRISFileDefaultRepository";
-import { FutureData } from "../entities/Future";
+import { Future, FutureData } from "../entities/Future";
 import { RISDataRepository } from "../repositories/DataRISRepository";
-import { RISData } from "../entities/data-entry/source/RISData";
+import { RISData } from "../entities/data-entry/RISData";
+import { CategoryCombo } from "../entities/metadata/CategoryCombo";
+import { DataValuesSaveSummary } from "../entities/data-entry/DataValuesSaveSummary";
+import { MetadataRepository } from "../repositories/MetadataRepository";
+import { DataValuesRepository } from "../repositories/DataValuesRepository";
 
-const AMR_AMR_DS_INPUT_FILES_RIS_ID = "CeQPmXgrhHF";
+const AMR_AMR_DS_INPUT_FILES_RIS_DS_ID = "CeQPmXgrhHF";
+const AMR_PATHOGEN_ANTIBIOTIC_CC_ID = "S427AvQESbw";
+const AMR_SPECIMEN_GENDER_AGE_ORIGIN_CC_ID = "OwKsZQnHCJu";
 
 export class ImportRISFileUseCase implements UseCase {
     constructor(
         private risDataRepository: RISDataRepository,
-        private glassImportRISFile: GlassImportRISFileDefaultRepository
+        private metadataRepository: MetadataRepository,
+        private dataValuesRepository: DataValuesRepository
     ) {}
 
-    public async execute(inputFile: File): Promise<FutureData<DataValueSetsPostResponse>[] | undefined> {
-        const risDataItems = await this.risDataRepository.get(inputFile).toPromise();
+    public execute(inputFile: File): FutureData<DataValuesSaveSummary> {
+        return this.risDataRepository
+            .get(inputFile)
+            .flatMap(risDataItems => {
+                return Future.joinObj({
+                    risDataItems: Future.success(risDataItems),
+                    dataSet: this.metadataRepository.getDataSet(AMR_AMR_DS_INPUT_FILES_RIS_DS_ID),
+                    dataSet_CC: this.metadataRepository.getCategoryCombination(AMR_PATHOGEN_ANTIBIOTIC_CC_ID),
+                    dataElement_CC: this.metadataRepository.getCategoryCombination(
+                        AMR_SPECIMEN_GENDER_AGE_ORIGIN_CC_ID
+                    ),
+                    orgUnits: this.metadataRepository.getOrgUnitsByCode([
+                        ...new Set(risDataItems.map(item => item.COUNTRY)),
+                    ]),
+                });
+            })
+            .flatMap(({ risDataItems, dataSet, dataSet_CC, dataElement_CC, orgUnits }) => {
+                const dataValues = risDataItems
+                    .map(risData => {
+                        return dataSet.dataElements.map(dataElement => {
+                            const dataSetCategoryOptionValues = dataSet_CC.categories.map(category =>
+                                risData[category.code as keyof RISData].toString()
+                            );
 
-        const responses = risDataItems.map(async risData => {
-            const request: DataValueSetsPostRequest = {
-                dataSet: AMR_AMR_DS_INPUT_FILES_RIS_ID,
-                period: "",
-                orgUnit: "",
-                attributeOptionCombo: "",
-                dataValues: [],
-            };
-            let categoryOptionCombo: string | undefined = "";
+                            const attributeOptionCombo = this.getCategoryOptionCombo(
+                                dataSet_CC,
+                                dataSetCategoryOptionValues
+                            );
 
-            if (risData.COUNTRY) request.orgUnit = await this.glassImportRISFile.getOrgUnit(risData.COUNTRY);
-            if (risData.YEAR) request.period = risData.YEAR.toString();
+                            const categoryOptionCombo = this.getCategoryOptionCombo(dataElement_CC, [
+                                risData.SPECIMEN,
+                                risData.GENDER,
+                                risData.ORIGIN,
+                                risData.AGEGROUP,
+                            ]);
 
-            const { dataElements, attributeOptionComboList } =
-                await this.glassImportRISFile.getDataElementsAndAttributeCombo(AMR_AMR_DS_INPUT_FILES_RIS_ID);
+                            const value = risData[dataElement.code as keyof RISData]?.toString() || "";
 
-            const attributeOptionComboCodes = attributeOptionComboList.map(cc => {
-                return risData[cc as keyof RISData].toString() || "";
+                            const dataValue = {
+                                orgUnit: orgUnits.find(ou => ou.code === risData.COUNTRY)?.id || "",
+                                period: risData.YEAR.toString(),
+                                attributeOptionCombo: attributeOptionCombo,
+                                dataElement: dataElement.id,
+                                categoryOptionCombo: categoryOptionCombo,
+                                value,
+                            };
+
+                            return dataValue;
+                        });
+                    })
+                    .flat();
+
+                return this.dataValuesRepository.save(dataValues);
             });
-            request.attributeOptionCombo = await this.glassImportRISFile.getCategoryOptionCombo(
-                attributeOptionComboCodes
-            );
+    }
 
-            //TO DO : The same categoryCombo is used for each dataElement.
-            //So  making only one call to server. Should we make a call for each dataElement?
-            //Is there a better way to do this
-            if (risData.SPECIMEN && risData.GENDER && risData.ORIGIN && risData.AGEGROUP) {
-                categoryOptionCombo = await this.glassImportRISFile.getCategoryOptionCombo([
-                    risData.SPECIMEN,
-                    risData.GENDER,
-                    risData.ORIGIN,
-                    risData.AGEGROUP,
-                ]);
-            }
+    private getCategoryOptionCombo(categoryCombo: CategoryCombo, codes: string[]) {
+        const categoryOptions = categoryCombo.categories
+            .map(cat => cat.categoryOptions)
+            .flat()
+            .filter(catOp => codes.includes(catOp.code));
 
-            const dataValues = dataElements.map(de => {
-                //There is an conflict in excel. SPECIMEN, PATHOGEN and ANTIBIOTIC are both
-                //category  and data element. For now, hardcode this handling.
-                //Ideally, if both are required, either there should be 2 columns with same value and different column headers
-                //Or category  and data element should have same code.
-                let dataElementCode = de.code;
-                if (dataElementCode === "ANTIBIOTIC_DEA") {
-                    dataElementCode = "ANTIBIOTIC";
-                } else if (dataElementCode === "AMR_AMR_DEA_PATHOGEN") {
-                    dataElementCode = "PATHOGEN";
-                } else if (dataElementCode === "AMR_AMR_DEA_SPECIMEN_TYPE_RIS") {
-                    dataElementCode = "SPECIMEN";
-                }
-                const rowValue = risData[dataElementCode as keyof RISData].toString();
+        const categoryOptionCombos = categoryOptions
+            .map(catOp =>
+                catOp.categoryOptionCombos.map(catOptCombo => ({
+                    categoryOption: catOp.code,
+                    categoryOptionCombo: catOptCombo,
+                }))
+            )
+            .flat()
+            .flat();
 
-                return {
-                    dataElement: de.id,
-                    categoryOptionCombo: categoryOptionCombo,
-                    value: rowValue !== undefined ? rowValue : "",
-                };
-            });
+        const categoryOptionCombosByCodes = categoryOptionCombos.filter(categoryOptioncombo =>
+            codes.includes(categoryOptioncombo.categoryOption)
+        );
 
-            request.dataValues = dataValues;
-
-            const importResult = await this.glassImportRISFile.importRISFile(
-                { importStrategy: "CREATE_AND_UPDATE" },
-                request
-            );
-            return importResult;
-        });
-
-        const resolvedResponses = await Promise.all(responses);
-        return resolvedResponses;
+        return categoryOptionCombosByCodes[0]?.categoryOptionCombo || "";
     }
 }

@@ -1,4 +1,4 @@
-import { RISData } from "../../domain/entities/data-entry/source/RISData";
+import { RISData } from "../../domain/entities/data-entry/RISData";
 import { Future, FutureData } from "../../domain/entities/Future";
 import { Row, SpreadsheetXlsxDataSource } from "../../domain/repositories/SpreadsheetXlsxRepository";
 
@@ -24,7 +24,8 @@ export class RISDataRepository {
                         SUSCEPTIBLE: this.getNumberValue(row, "SUSCEPTIBLE"),
                         UNKNOWN_NO_AST: this.getNumberValue(row, "UNKNOWN_NO_AST"),
                         UNKNOWN_NO_BREAKPOINTS: this.getNumberValue(row, "UNKNOWN_NO_BREAKPOINTS"),
-                        BATCHID: this.getTextValue(row, "COUNTRY"),
+                        BATCHID: this.getTextValue(row, "BATCHID"),
+                        ABCLASS: this.getTextValue(row, "ABCLASS") || "ABCLASS",
                     };
                 }) || []
             );

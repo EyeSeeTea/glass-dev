@@ -8,7 +8,7 @@ import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { useAppContext } from "../../contexts/app-context";
 import { useCurrentModuleContext } from "../../contexts/current-module-context";
-import { DataValueSetsPostResponse } from "@eyeseetea/d2-api/api";
+import { DataValuesSaveSummary } from "../../../domain/entities/data-entry/DataValuesSaveSummary";
 
 interface ConsistencyChecksProps {
     changeStep: (step: number) => void;
@@ -30,7 +30,7 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({ changeStep
     const [blockingErrors, setBlockingErrors] = useState<ErrorCount[]>([]);
     const [nonBlockingErrors, setNonBlockingErrors] = useState<ErrorCount[]>([]);
 
-    const updateErrorCounts = (errors: ErrorCount[], datasetImportStatus: DataValueSetsPostResponse) => {
+    const updateErrorCounts = (errors: ErrorCount[], datasetImportStatus: DataValuesSaveSummary) => {
         const updatedNonBLockingErrors = datasetImportStatus.conflicts?.map(status => {
             const existingError = errors.filter(nbe => nbe.error === status.value);
             //Add only unique errors, so only one of each kind of error will exist in array
@@ -55,67 +55,64 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({ changeStep
         }
     };
     useEffect(() => {
-        async function uploadDatasets() {
+        function uploadDatasets() {
             if (risFile && currentModuleAccess.moduleName === "AMR") {
                 setIsDataSetUploading(true);
-                await compositionRoot.glassRisFile.importFile(risFile).then(uploadResults => {
-                    uploadResults?.forEach((result, index) => {
-                        result.run(
-                            datasetImportStatus => {
-                                //Warning considered non-blocking
-                                if (datasetImportStatus.status === "WARNING") {
-                                    if (datasetImportStatus.conflicts && datasetImportStatus.conflicts.length) {
-                                        setNonBlockingErrors(prev => {
-                                            return updateErrorCounts(prev, datasetImportStatus);
-                                        });
-                                    }
-                                }
 
-                                //Errors considered blocking
-                                else if (datasetImportStatus.status === "ERROR") {
-                                    if (datasetImportStatus.conflicts && datasetImportStatus.conflicts.length) {
-                                        setBlockingErrors(prev => {
-                                            return updateErrorCounts(prev, datasetImportStatus);
-                                        });
-                                    }
-                                }
-                                //consider any ignored imports as blocking error.
-                                if (datasetImportStatus.importCount.ignored > 0) {
-                                    setBlockingErrors(blockingErrors => {
-                                        const ignoredError = blockingErrors.filter(be => be.error === "Import Ignored");
-                                        if (ignoredError[0]) {
-                                            return [
-                                                ...blockingErrors.filter(be => be.error !== "Import Ignored"),
-                                                {
-                                                    error: ignoredError[0].error,
-                                                    count:
-                                                        ignoredError[0].count + datasetImportStatus.importCount.ignored,
-                                                },
-                                            ];
-                                        } else {
-                                            return [
-                                                ...blockingErrors,
-                                                {
-                                                    error: "Import Ignored",
-                                                    count: datasetImportStatus.importCount.ignored,
-                                                },
-                                            ];
-                                        }
-                                    });
-                                }
-                                if (index === uploadResults.length - 1) {
-                                    setIsDataSetUploading(false);
-                                }
-                            },
-                            error => {
-                                setBlockingErrors(blockingErrors => {
-                                    return [...blockingErrors, { error: error, count: 1 }];
+                compositionRoot.glassRisFile.importFile(risFile).run(
+                    datasetImportStatus => {
+                        debugger;
+                        //Warning considered non-blocking
+                        if (datasetImportStatus.status === "WARNING") {
+                            if (datasetImportStatus.conflicts && datasetImportStatus.conflicts.length) {
+                                setNonBlockingErrors(prev => {
+                                    return updateErrorCounts(prev, datasetImportStatus);
                                 });
-                                setIsDataSetUploading(false);
                             }
-                        );
-                    });
-                });
+                        }
+
+                        //Errors considered blocking
+                        else if (datasetImportStatus.status === "ERROR") {
+                            if (datasetImportStatus.conflicts && datasetImportStatus.conflicts.length) {
+                                setBlockingErrors(prev => {
+                                    return updateErrorCounts(prev, datasetImportStatus);
+                                });
+                            }
+                        }
+                        //consider any ignored imports as blocking error.
+                        if (datasetImportStatus.importCount.ignored > 0) {
+                            setBlockingErrors(blockingErrors => {
+                                const ignoredError = blockingErrors.filter(be => be.error === "Import Ignored");
+                                if (ignoredError[0]) {
+                                    return [
+                                        ...blockingErrors.filter(be => be.error !== "Import Ignored"),
+                                        {
+                                            error: ignoredError[0].error,
+                                            count: ignoredError[0].count + datasetImportStatus.importCount.ignored,
+                                        },
+                                    ];
+                                } else {
+                                    return [
+                                        ...blockingErrors,
+                                        {
+                                            error: "Import Ignored",
+                                            count: datasetImportStatus.importCount.ignored,
+                                        },
+                                    ];
+                                }
+                            });
+                        }
+
+                        setIsDataSetUploading(false);
+                    },
+                    error => {
+                        debugger;
+                        setBlockingErrors(blockingErrors => {
+                            return [...blockingErrors, { error: error, count: 1 }];
+                        });
+                        setIsDataSetUploading(false);
+                    }
+                );
             }
         }
 
