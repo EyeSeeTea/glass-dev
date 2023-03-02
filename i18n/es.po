@@ -181,6 +181,21 @@ msgstr ""
 msgid "No Open Data Submissions"
 msgstr ""
 
+msgid "Notification"
+msgstr ""
+
+msgid "Close"
+msgstr ""
+
+msgid "Participants"
+msgstr ""
+
+msgid "Me"
+msgstr ""
+
+msgid "Message from {{sender}}"
+msgstr ""
+
 msgid "Your Notifications"
 msgstr ""
 
@@ -371,6 +386,3 @@ msgstr ""
 
 msgid "Upload History"
 msgstr ""
-
-#~ msgid "Hello {{name}}"
-#~ msgstr "Hola {{name}}"
