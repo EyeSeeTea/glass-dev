@@ -1,7 +1,7 @@
 import { RISData } from "../../domain/entities/data-entry/external/RISData";
 import { Future, FutureData } from "../../domain/entities/Future";
 import { RISDataRepository } from "../../domain/repositories/data-entry/RISDataRepository";
-import { SpreadsheetXlsxDataSource } from "../../domain/repositories/SpreadsheetXlsxRepository";
+import { Row, SpreadsheetXlsxDataSource } from "../../domain/repositories/SpreadsheetXlsxRepository";
 import { getNumberValue, getTextValue } from "./utils/CSVUtils";
 
 export class RISDataCSVRepository implements RISDataRepository {
@@ -27,10 +27,16 @@ export class RISDataCSVRepository implements RISDataRepository {
                         UNKNOWN_NO_AST: getNumberValue(row, "UNKNOWN_NO_AST"),
                         UNKNOWN_NO_BREAKPOINTS: getNumberValue(row, "UNKNOWN_NO_BREAKPOINTS"),
                         BATCHID: getTextValue(row, "BATCHID"),
-                        ABCLASS: getTextValue(row, "ABCLASS") || "ABCLASS",
+                        ABCLASS: this.validateABCLASS(getTextValue(row, "ABCLASS")),
                     };
                 }) || []
             );
         });
+    }
+
+    validateABCLASS(absClass: string) {
+        //ABCLASS is not in the file for the moment, if value is empty
+        // set ABCLASS Missing
+        return absClass || "ABCLASS Missing";
     }
 }
