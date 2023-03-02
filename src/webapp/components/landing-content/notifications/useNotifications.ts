@@ -11,7 +11,7 @@ export function useNotifications(compositionRoot: CompositionRoot) {
     });
 
     React.useEffect(() => {
-        compositionRoot.notifications.get().run(
+        compositionRoot.notifications.getAll().run(
             notifications => setResult({ kind: "loaded", data: notifications }),
             error => setResult({ kind: "error", message: error })
         );
