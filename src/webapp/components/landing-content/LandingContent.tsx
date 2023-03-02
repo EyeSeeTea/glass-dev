@@ -3,7 +3,7 @@ import { Grid } from "@material-ui/core";
 import { LandingNews } from "./LandingNews";
 import styled from "styled-components";
 import { OpenDataSubmissions } from "./OpenDataSubmissions";
-import { YourNotifications } from "./YourNotifications";
+import { YourNotifications } from "./notifications/YourNotifications";
 
 export const LandingContent: React.FC = () => {
     return (
