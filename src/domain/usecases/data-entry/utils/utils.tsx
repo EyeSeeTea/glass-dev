@@ -34,11 +34,12 @@ export function getCategoryOptionComboByOptionCodes(categoryCombo: CategoryCombo
 
     if (uniqueCategoryOptions.length !== codes.length) {
         /* eslint-disable no-console */
-        console.log(
+        console.error(
             `All codes not found as category combination in categoryCombo ${categoryCombo.name}. codes: ${codes.join(
                 ","
             )}`
         );
+        return "";
     }
 
     //TODO: this is a code brought from old repository written by sneha, we need improve it without to use let
