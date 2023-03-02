@@ -5,16 +5,20 @@ export const appConfig: AppConfig = {
     },
     feedback: {
         token: ["03242fc6b0c5a48582", "2e6b8d3e8337b5a0b95fe2"],
-        createIssue: true,
+        createIssue: false,
         sendToDhis2UserGroups: ["Administrators"],
         issues: {
-            repository: "EyeSeeTea/dhis2-app-skeleton",
+            repository: "EyeSeeTea/glass-dev",
             title: "[User feedback] {title}",
             body: "## dhis2\n\nUsername: {username}\n\n{body}",
         },
         snapshots: {
             repository: "EyeSeeTeaBotTest/snapshots",
             branch: "master",
+        },
+        clickUp: {
+            title: "Bug Report",
+            listId: "134510862",
         },
         feedbackOptions: {},
     },
@@ -37,6 +41,10 @@ export interface AppConfig {
         snapshots: {
             repository: string;
             branch: string;
+        };
+        clickUp: {
+            title: string;
+            listId: string;
         };
         feedbackOptions: object;
     };
