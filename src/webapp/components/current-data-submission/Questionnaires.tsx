@@ -1,56 +1,78 @@
+import { useSnackbar } from "@eyeseetea/d2-ui-components";
 import i18n from "@eyeseetea/d2-ui-components/locales";
-import { Button } from "@material-ui/core";
+import { Button, LinearProgress } from "@material-ui/core";
 import React from "react";
+import { useLocation } from "react-router-dom";
 import styled from "styled-components";
+import { Id } from "../../../domain/entities/Base";
+import { QuestionnaireBase } from "../../../domain/entities/Questionnaire";
+import { useAppContext } from "../../contexts/app-context";
+import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context";
 import { useGlassCaptureAccess } from "../../hooks/useGlassCaptureAccess";
+import { useGlassModule } from "../../hooks/useGlassModule";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
+import QuestionnarieForm, { QuestionnarieFormProps } from "../questionnaire/QuestionnaireForm";
 
 export const Questionnaires: React.FC = () => {
     const hasCurrentUserCaptureAccess = useGlassCaptureAccess();
-    return (
-        <QuestionnairesGrid>
-            <QuestionnaireCard>
-                <div className="head">
-                    <h3>{i18n.t("Questionnaire 1")}</h3>
-                    <span className="desc">{i18n.t("Description")}</span>
-                </div>
-                <span className="mand">{i18n.t("mandatory")}</span>
-                <span className="comp">{i18n.t("Not completed")}</span>
-                <div className="buttons">
-                    <Button>{i18n.t("View")}</Button>
-                    <Button variant="contained" color="primary" disabled={!hasCurrentUserCaptureAccess}>
-                        {i18n.t("Go")}
-                    </Button>
-                </div>
-            </QuestionnaireCard>
-            <QuestionnaireCard>
-                <div className="head">
-                    <h3>{i18n.t("Questionnaire 2")}</h3>
-                    <span className="desc">{i18n.t("Description")}</span>
-                </div>
-                <span className="comp">{i18n.t("Not completed")}</span>
-                <div className="buttons">
-                    <Button>{i18n.t("View")}</Button>
-                    <Button variant="contained" color="primary" disabled={!hasCurrentUserCaptureAccess}>
-                        {i18n.t("Go")}
-                    </Button>
-                </div>
-            </QuestionnaireCard>
-            <QuestionnaireCard>
-                <div className="head">
-                    <h3>{i18n.t("Questionnaire 3")}</h3>
-                    <span className="desc">{i18n.t("Description")}</span>
-                </div>
-                <span className="comp completed">{i18n.t("Completed")}</span>
-                <div className="buttons">
-                    <Button>{i18n.t("View")}</Button>
-                    <Button variant="contained" color="primary" disabled={!hasCurrentUserCaptureAccess}>
-                        {i18n.t("Go")}
-                    </Button>
-                </div>
-            </QuestionnaireCard>
-        </QuestionnairesGrid>
-    );
+    const [questionnaires, updateQuestionnarie] = useQuestionnaires();
+    const { orgUnit, year } = useSelector();
+    const [formState, actions] = useFormState();
+
+    if (!questionnaires) {
+        return <LinearProgress />;
+    } else if (formState.mode !== "closed") {
+        return (
+            <QuestionnarieForm
+                id={formState.id}
+                orgUnitId={orgUnit.id}
+                year={year}
+                onBackClick={actions.closeQuestionnarie}
+                mode={formState.mode}
+                onSave={updateQuestionnarie}
+            />
+        );
+    } else {
+        return (
+            <QuestionnairesGrid>
+                {questionnaires.length === 0 && <h3>{i18n.t("There are no questionnaries for this module")}</h3>}
+
+                {questionnaires.map(questionnaire => (
+                    <QuestionnaireCard key={questionnaire.id}>
+                        <div className="head">
+                            <h3>{questionnaire.name}</h3>
+                            <span className="desc">{questionnaire.description}</span>
+                        </div>
+
+                        {questionnaire.isMandatory && <span className="mand">{i18n.t("mandatory")}</span>}
+
+                        {questionnaire.isCompleted ? (
+                            <span className="comp completed">{i18n.t("Completed")}</span>
+                        ) : (
+                            <span className="comp">{i18n.t("Not completed")}</span>
+                        )}
+
+                        <div className="buttons">
+                            {questionnaire.isCompleted && (
+                                <Button onClick={() => actions.goToQuestionnarie(questionnaire, { mode: "show" })}>
+                                    {i18n.t("View")}
+                                </Button>
+                            )}
+
+                            <Button
+                                variant="contained"
+                                color="primary"
+                                disabled={!hasCurrentUserCaptureAccess}
+                                onClick={() => actions.goToQuestionnarie(questionnaire, { mode: "edit" })}
+                            >
+                                {i18n.t("Go")}
+                            </Button>
+                        </div>
+                    </QuestionnaireCard>
+                ))}
+            </QuestionnairesGrid>
+        );
+    }
 };
 
 const QuestionnairesGrid = styled.div`
@@ -100,3 +122,63 @@ const QuestionnaireCard = styled.div`
         color: ${glassColors.mainPrimary};
     }
 `;
+
+// This should be probably abstracted to a common hook (with a more descriptive name)
+function useSelector() {
+    const { currentOrgUnitAccess } = useCurrentOrgUnitContext();
+    const { orgUnitId, orgUnitName } = currentOrgUnitAccess;
+    const orgUnit = React.useMemo(() => ({ id: orgUnitId, name: orgUnitName }), [orgUnitId, orgUnitName]);
+
+    const location = useLocation();
+    const queryParameters = new URLSearchParams(location.search);
+    const periodFromUrl = parseInt(queryParameters.get("period") || "");
+    const year = periodFromUrl || new Date().getFullYear() - 1;
+
+    return { orgUnit, year };
+}
+
+function useQuestionnaires() {
+    const { compositionRoot } = useAppContext();
+
+    const module = useGlassModule(compositionRoot);
+    const [questionnaires, setQuestionnaires] = React.useState<QuestionnaireBase[]>();
+    const snackbar = useSnackbar();
+    const { orgUnit, year } = useSelector();
+
+    React.useEffect(() => {
+        if (module.kind !== "loaded") return;
+
+        return compositionRoot.questionnaires
+            .getList(module.data, { orgUnitId: orgUnit.id, year: year })
+            .run(setQuestionnaires, err => snackbar.error(err));
+    }, [compositionRoot, snackbar, module, orgUnit, year]);
+
+    const updateQuestionnarie = React.useCallback<QuestionnarieFormProps["onSave"]>(updatedQuestionnaire => {
+        setQuestionnaires(prevQuestionnaries =>
+            prevQuestionnaries?.map(questionnarire =>
+                questionnarire.id === updatedQuestionnaire.id ? updatedQuestionnaire : questionnarire
+            )
+        );
+    }, []);
+
+    return [questionnaires, updateQuestionnarie] as const;
+}
+
+type QuestionnaireFormState = { mode: "closed" } | { mode: "show"; id: Id } | { mode: "edit"; id: Id };
+
+function useFormState() {
+    const [formState, setFormState] = React.useState<QuestionnaireFormState>({ mode: "closed" });
+
+    const goToQuestionnarie = React.useCallback(
+        (questionnaire: QuestionnaireBase, options: { mode: "show" | "edit" }) => {
+            setFormState({ mode: options.mode, id: questionnaire.id });
+        },
+        []
+    );
+
+    const closeQuestionnarie = React.useCallback(() => {
+        setFormState({ mode: "closed" });
+    }, []);
+
+    return [formState, { goToQuestionnarie, closeQuestionnarie }] as const;
+}

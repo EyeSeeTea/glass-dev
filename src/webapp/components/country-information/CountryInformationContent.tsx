@@ -1,9 +1,14 @@
 import i18n from "@eyeseetea/d2-ui-components/locales";
+import moment from "moment";
 import styled from "styled-components";
+import { CountryInformation } from "../../../domain/entities/CountryInformation";
 import { CustomCard } from "../custom-card/CustomCard";
 
-// TODO: refactor InfoTable content to json object format and parse rows
-export const CountryInformationContent: React.FC = () => {
+interface CountryInformationContentProps {
+    countryInformation: CountryInformation;
+}
+
+export const CountryInformationContent: React.FC<CountryInformationContentProps> = ({ countryInformation }) => {
     return (
         <ContentWrapper>
             <CustomCard title="Country Identification">
@@ -11,15 +16,15 @@ export const CountryInformationContent: React.FC = () => {
                     <tbody>
                         <tr>
                             <td>{i18n.t("WHO Region")}</td>
-                            <td>WHO African Region</td>
+                            <td>{countryInformation.WHORegion}</td>
                         </tr>
                         <tr>
                             <td>{i18n.t("Country")}</td>
-                            <td>Algeria</td>
+                            <td>{countryInformation.country}</td>
                         </tr>
                         <tr>
                             <td>{i18n.t("Year")}</td>
-                            <td>2021</td>
+                            <td>{countryInformation.year}</td>
                         </tr>
                     </tbody>
                 </InfoTable>
@@ -27,45 +32,39 @@ export const CountryInformationContent: React.FC = () => {
 
             <CustomCard title="Enrolment Information">
                 <InfoTable>
-                    <tbody>
-                        <tr>
-                            <td>{i18n.t("Enrolment status")}</td>
-                            <td>Yes</td>
-                        </tr>
-                        <tr>
-                            <td>{i18n.t("Date of Enrolment")}</td>
-                            <td>11/06/2019</td>
-                        </tr>
-                    </tbody>
+                    {countryInformation.enrolmentStatus && countryInformation.enrolmentDate && (
+                        <tbody>
+                            <tr>
+                                <td>{i18n.t("Enrolment status")}</td>
+                                <td>{countryInformation.enrolmentStatus}</td>
+                            </tr>
+                            <tr>
+                                <td>{i18n.t("Date of Enrolment")}</td>
+                                {<td>{moment(countryInformation.enrolmentDate).format("MM/DD/YYYY")}</td>}
+                            </tr>
+                        </tbody>
+                    )}
                 </InfoTable>
             </CustomCard>
 
-            <CustomCard title="National Focal Point">
-                <InfoTable>
-                    <tbody>
-                        <tr>
-                            <td>{i18n.t("Family Name *")}</td>
-                            <td>Lorem</td>
-                        </tr>
-                        <tr>
-                            <td>{i18n.t("First Name *")}</td>
-                            <td>Ipsum</td>
-                        </tr>
-                        <tr>
-                            <td>{i18n.t("Function *")}</td>
-                            <td>Dolor sit amet</td>
-                        </tr>
-                        <tr>
-                            <td>{i18n.t("Email Address *")}</td>
-                            <td>loremipsum@gmail.com</td>
-                        </tr>
-                        <tr>
-                            <td>{i18n.t("Preferred Language (notifications) *")}</td>
-                            <td>English</td>
-                        </tr>
-                    </tbody>
-                </InfoTable>
-            </CustomCard>
+            {countryInformation.nationalFocalPoints.map(nationalFocalPoint => {
+                return (
+                    <CustomCard title="National Focal Point" key={nationalFocalPoint.id}>
+                        <InfoTable>
+                            <tbody>
+                                {nationalFocalPoint.values.map(value => {
+                                    return (
+                                        <tr key={value.id}>
+                                            <td>{`${value.name} *`}</td>
+                                            <td>{value.value}</td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </InfoTable>
+                    </CustomCard>
+                );
+            })}
         </ContentWrapper>
     );
 };

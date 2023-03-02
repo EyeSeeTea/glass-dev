@@ -1,10 +1,12 @@
 import { JSXElementConstructor, ComponentProps } from "react";
 
-export type Maybe<T> = T | undefined | null;
+export type Maybe<T> = T | undefined;
 
 export type Dictionary<T> = Record<string, T>;
 
 export type PartialBy<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
+
+export type UnionFromValues<T extends ReadonlyArray<unknown>> = T[number];
 
 export type RequireAtLeastOne<T, Keys extends keyof T = keyof T> = Pick<T, Exclude<keyof T, Keys>> &
     {
@@ -63,4 +65,8 @@ export function recordOf<T>() {
     return function <Obj>(obj: { [K in keyof Obj]: T }) {
         return obj;
     };
+}
+
+export function assertUnreachable(value: never, message = `No case in exhaustive switch: ${value}`): never {
+    throw new Error(message);
 }
