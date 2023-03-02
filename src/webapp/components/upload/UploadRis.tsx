@@ -40,16 +40,19 @@ export const UploadRis: React.FC<UploadRisProps> = ({ validate, batchId }) => {
     const removeFiles = useCallback(
         (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
             event.preventDefault();
+            setIsLoading(true);
             const risUploadId = localStorage.getItem("risUploadId");
             if (risUploadId) {
                 return compositionRoot.glassDocuments.deleteByUploadId(risUploadId).run(
                     () => {
                         localStorage.removeItem("risUploadId");
                         setRisFile(null);
+                        setIsLoading(false);
                     },
                     errorMessage => {
                         snackbar.error(errorMessage);
                         setRisFile(null);
+                        setIsLoading(false);
                     }
                 );
             }

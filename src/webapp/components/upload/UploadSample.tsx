@@ -32,16 +32,19 @@ export const UploadSample: React.FC<UploadSampleProps> = ({ batchId }) => {
 
     const removeFiles = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         event.preventDefault();
+        setIsLoading(true);
         const sampleUploadId = localStorage.getItem("sampleUploadId");
         if (sampleUploadId) {
             return compositionRoot.glassDocuments.deleteByUploadId(sampleUploadId).run(
                 () => {
                     localStorage.removeItem("sampleUploadId");
                     setSampleFile(null);
+                    setIsLoading(false);
                 },
                 errorMessage => {
                     snackbar.error(errorMessage);
                     setSampleFile(null);
+                    setIsLoading(false);
                 }
             );
         }
