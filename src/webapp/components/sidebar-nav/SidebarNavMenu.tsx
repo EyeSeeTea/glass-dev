@@ -8,7 +8,7 @@ import clsx from "clsx";
 import { MenuLeaf } from "./SidebarNav";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
 import i18n from "@eyeseetea/d2-ui-components/locales";
-import { useGlassModuleContext } from "../../contexts/glass-module-context";
+import { useCurrentModuleContext } from "../../contexts/current-module-context";
 
 interface SidebarNavProps {
     className?: string;
@@ -17,10 +17,10 @@ interface SidebarNavProps {
 }
 
 const SidebarNavMenu: React.FC<SidebarNavProps> = ({ menu, className, groupName }) => {
-    const classes = useStyles(menu.level);
+    const classes = useStyles(menu?.level);
     const location = useLocation();
 
-    const { module, setModule } = useGlassModuleContext();
+    const { currentModuleAccess, changeCurrentModuleAccess } = useCurrentModuleContext();
 
     /* 
         TODO: determine through context which data submission is "current data submission" as of date and only highlight "Current data submission" if so, 
@@ -30,20 +30,26 @@ const SidebarNavMenu: React.FC<SidebarNavProps> = ({ menu, className, groupName 
         return (
             (menu.title === "Current Data Submission" &&
                 location.pathname.includes("upload/") &&
-                groupName === module) ||
-            (menuPath.includes(location.pathname) && groupName === module)
+                groupName === currentModuleAccess.moduleName) ||
+            (location.pathname !== "/" &&
+                menuPath.includes(location.pathname) &&
+                groupName === currentModuleAccess.moduleName)
         );
     };
 
+    const updateModuleContext = (module: string) => {
+        changeCurrentModuleAccess(module);
+    };
+
     return (
-        <ListItem className={clsx(classes.root, className)} disableGutters style={{ paddingLeft: menu.level * 8 }}>
+        <ListItem className={clsx(classes.root, className)} disableGutters style={{ paddingLeft: menu?.level * 8 }}>
             <Button
                 className={classes.button}
                 component={NavLink}
                 to={menu.path}
                 exact={true}
                 data-is-page-current={isCurrentPage(menu.path)}
-                onClick={() => setModule(groupName || "")}
+                onClick={() => updateModuleContext(groupName || "")}
             >
                 <div className={classes.icon}>{menu.icon}</div>
                 <Typography variant="body1" style={{ color: glassColors.greyBlack }}>

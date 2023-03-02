@@ -24,15 +24,31 @@ import { SetUploadStatusUseCase } from "./domain/usecases/SetUploadStatusUseCase
 import { GetGlassUploadsByDataSubmissionUseCase } from "./domain/usecases/GetGlassUploadsByDataSubmissionUseCase";
 import { SetUploadBatchIdUseCase } from "./domain/usecases/SetUploadBatchIdUseCase";
 import { DeleteDocumentInfoByUploadIdUseCase } from "./domain/usecases/DeleteDocumentInfoByUploadIdUseCase";
+import { GetOpenDataSubmissionsByOUUseCase } from "./domain/usecases/GetOpenDataSubmissionsByOUUseCase";
+import { getD2APiFromInstance } from "./utils/d2-api";
+import { QuestionnaireD2Repository } from "./data/repositories/QuestionnaireD2Repository";
+import { GetQuestionnaireUseCase } from "./domain/usecases/GetQuestionnaireUseCase";
+import { SaveQuestionnaireResponseUseCase } from "./domain/usecases/SaveQuestionUseCase";
+import { SetAsQuestionnaireCompletionUseCase } from "./domain/usecases/SetAsQuestionnaireCompletionUseCase";
+import { GetQuestionnaireListUseCase } from "./domain/usecases/GetQuestionnaireListUseCase";
+import { GetNotificationsUseCase } from "./domain/usecases/GetNotificationsUseCase";
+import { NotificationDefaultRepository } from "./data/repositories/NotificationDefaultRepository";
+import { GetCountryInformationUseCase } from "./domain/usecases/GetCountryInformationUseCase";
+import { CountryInformationDefaultRepository } from "./data/repositories/CountryInformationDefaultRepository";
+import { GetNotificationByIdUseCase } from "./domain/usecases/GetNotificationByIdUseCase";
 
 export function getCompositionRoot(instance: Instance) {
+    const api = getD2APiFromInstance(instance);
     const dataStoreClient = new DataStoreClient(instance);
-    const instanceRepository = new InstanceDefaultRepository(instance);
+    const instanceRepository = new InstanceDefaultRepository(instance, dataStoreClient);
     const glassModuleRepository = new GlassModuleDefaultRepository(dataStoreClient);
     const glassNewsRepository = new GlassNewsDefaultRepository(dataStoreClient);
     const glassDataSubmissionRepository = new GlassDataSubmissionsDefaultRepository(dataStoreClient);
     const glassUploadsRepository = new GlassUploadsDefaultRepository(dataStoreClient);
     const glassDocumentsRepository = new GlassDocumentsDefaultRepository(dataStoreClient, instance);
+    const questionnaireD2Repository = new QuestionnaireD2Repository(api);
+    const notificationRepository = new NotificationDefaultRepository(instance);
+    const countryInformationRepository = new CountryInformationDefaultRepository(instance);
 
     return {
         instance: getExecute({
@@ -40,8 +56,8 @@ export function getCompositionRoot(instance: Instance) {
             getVersion: new GetInstanceVersionUseCase(instanceRepository),
         }),
         glassModules: getExecute({
-            getAll: new GetGlassModulesUseCase(glassModuleRepository),
-            getByName: new GetGlassModuleByNameUseCase(glassModuleRepository),
+            getAll: new GetGlassModulesUseCase(glassModuleRepository, countryInformationRepository),
+            getByName: new GetGlassModuleByNameUseCase(glassModuleRepository, countryInformationRepository),
             validate: new ValidateGlassModulesUseCase(glassModuleRepository),
         }),
         glassNews: getExecute({
@@ -52,6 +68,7 @@ export function getCompositionRoot(instance: Instance) {
         glassDataSubmission: getExecute({
             getSpecificDataSubmission: new GetSpecificDataSubmissionUseCase(glassDataSubmissionRepository),
             getDataSubmissionsByModuleAndOU: new GetDataSubmissionsByModuleAndOUUseCase(glassDataSubmissionRepository),
+            getOpenDataSubmissionsByOU: new GetOpenDataSubmissionsByOUUseCase(glassDataSubmissionRepository),
         }),
         glassUploads: getExecute({
             getAll: new GetGlassUploadsUseCase(glassUploadsRepository),
@@ -65,6 +82,19 @@ export function getCompositionRoot(instance: Instance) {
             validate: new ValidateGlassDocumentsUseCase(glassDocumentsRepository),
             upload: new UploadDocumentUseCase(glassDocumentsRepository, glassUploadsRepository),
             deleteByUploadId: new DeleteDocumentInfoByUploadIdUseCase(glassDocumentsRepository, glassUploadsRepository),
+        }),
+        questionnaires: getExecute({
+            get: new GetQuestionnaireUseCase(questionnaireD2Repository),
+            getList: new GetQuestionnaireListUseCase(questionnaireD2Repository),
+            saveResponse: new SaveQuestionnaireResponseUseCase(questionnaireD2Repository),
+            setAsCompleted: new SetAsQuestionnaireCompletionUseCase(questionnaireD2Repository),
+        }),
+        notifications: getExecute({
+            getAll: new GetNotificationsUseCase(notificationRepository),
+            getById: new GetNotificationByIdUseCase(notificationRepository),
+        }),
+        countries: getExecute({
+            getInformation: new GetCountryInformationUseCase(countryInformationRepository),
         }),
     };
 }

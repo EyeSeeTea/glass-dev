@@ -10,26 +10,35 @@ import { NavLink } from "react-router-dom";
 import { useAppContext } from "../../contexts/app-context";
 import { useGlassModules } from "../../hooks/useGlassModules";
 import { mapModuleToMenu } from "./mapModuleToMenu";
-import { useGlassModuleContext } from "../../contexts/glass-module-context";
+import { useCurrentModuleContext } from "../../contexts/current-module-context";
 
 export const SideBar: React.FC = () => {
     const { compositionRoot } = useAppContext();
 
     const [isLoaded, setIsLoaded] = useState(false);
 
-    const storedMenuData: Menu[] | null = JSON.parse(localStorage.getItem("glassSideBarData") || "false") || null;
+    const localStoredMenu = localStorage.getItem("glassSideBarData");
+    const [storedMenuData, setstoredMenuData] = useState<Menu[] | null>(
+        localStoredMenu !== null ? JSON.parse(localStoredMenu) : null
+    );
 
     const modulesResult = useGlassModules(compositionRoot);
 
-    const { setModule } = useGlassModuleContext();
+    const { resetCurrentModuleAccess } = useCurrentModuleContext();
 
     useEffect(() => {
+        //TODO: review this: component coupled to local storage
         // Validate localstorage vs datastore
-        if (modulesResult.kind === "loaded" && modulesResult.data.length) {
-            const menuData = modulesResult.data.map(mapModuleToMenu);
+        if (modulesResult.kind === "loaded") {
+            const menuData = modulesResult.data.map(module => mapModuleToMenu(module));
             if (!isLoaded || JSON.stringify(menuData) !== JSON.stringify(storedMenuData)) {
                 localStorage.setItem("glassSideBarData", JSON.stringify(menuData));
+                setstoredMenuData(menuData);
             }
+            setIsLoaded(true);
+        } else if (modulesResult.kind === "error") {
+            localStorage.removeItem("glassSideBarData");
+            setstoredMenuData(null);
             setIsLoaded(true);
         }
     }, [storedMenuData, modulesResult, isLoaded]);
@@ -37,13 +46,19 @@ export const SideBar: React.FC = () => {
     return (
         <CustomCard minheight="630px" padding="0 0 100px 0" data-test="test2">
             <HomeButtonWrapper>
-                <Button className="home-button" component={NavLink} to="/" exact={true} onClick={() => setModule("")}>
+                <Button
+                    className="home-button"
+                    component={NavLink}
+                    to="/"
+                    exact={true}
+                    onClick={resetCurrentModuleAccess}
+                >
                     <StarGradient className="star-icon" />
                     <Box width={15} />
                     <Typography>{i18n.t("HOME")}</Typography>
                 </Button>
             </HomeButtonWrapper>
-            {!storedMenuData && <StyledCircularProgress />}
+            {!isLoaded && <StyledCircularProgress />}
             {storedMenuData && <SidebarNav menus={storedMenuData} />}
 
             <div style={{ flexGrow: 1 }} />

@@ -1,43 +1,38 @@
 import { Breadcrumbs, Button } from "@material-ui/core";
 import React from "react";
 import styled from "styled-components";
-import { MainLayout } from "../../components/main-layout/MainLayout";
 import { glassColors, palette } from "../app/themes/dhis2.theme";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import { NavLink } from "react-router-dom";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { UploadHistoryContent } from "../../components/upload-history/UploadHistoryContent";
-import { getUrlParam } from "../../utils/helpers";
+import { useCurrentModuleContext } from "../../contexts/current-module-context";
+import { ModuleLayout } from "../../components/layouts/module-layout/ModuleLayout";
 
 export const UploadHistoryPage: React.FC = React.memo(() => {
-    const moduleName = getUrlParam("module");
+    const { currentModuleAccess } = useCurrentModuleContext();
 
     const click = (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
         event.preventDefault();
     };
     return (
-        <MainLayout>
+        <ModuleLayout>
             <ContentWrapper>
                 <PreContent>
                     {/* // TODO: replace this with a global reusable StyledBreadCrumbs component */}
                     <StyledBreadCrumbs aria-label="breadcrumb" separator="">
-                        <Button
-                            component={NavLink}
-                            to={`/current-data-submission/?module=${moduleName}`}
-                            exact={true}
-                            onClick={click}
-                        >
-                            <span>{moduleName}</span>
+                        <Button component={NavLink} to={`/current-data-submission`} exact={true} onClick={click}>
+                            <span>{currentModuleAccess.moduleName}</span>
                         </Button>
                         <ChevronRightIcon />
-                        <Button component={NavLink} to={`/upload-history/?module=${moduleName}`} exact={true}>
+                        <Button component={NavLink} to={`/upload-history`} exact={true}>
                             <span>{i18n.t("Upload History")}</span>
                         </Button>
                     </StyledBreadCrumbs>
                 </PreContent>
                 <UploadHistoryContent />
             </ContentWrapper>
-        </MainLayout>
+        </ModuleLayout>
     );
 });
 
