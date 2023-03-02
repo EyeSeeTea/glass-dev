@@ -2,7 +2,6 @@
 import { Breadcrumbs, Button } from "@material-ui/core";
 import React, { useState } from "react";
 import styled from "styled-components";
-import { MainLayout } from "../../components/main-layout/MainLayout";
 import { useAppContext } from "../../contexts/app-context";
 import { glassColors, palette } from "../app/themes/dhis2.theme";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
@@ -15,6 +14,7 @@ import { ContentLoader } from "../../components/content-loader/ContentLoader";
 
 import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context";
 import { useCurrentModuleContext } from "../../contexts/current-module-context";
+import { ModuleLayout } from "../../components/layouts/module-layout/ModuleLayout";
 
 interface CurrentDataSubmissionPageContentProps {
     moduleId: string;
@@ -25,12 +25,12 @@ export const CurrentDataSubmissionPage: React.FC = React.memo(() => {
     const { currentModuleAccess } = useCurrentModuleContext();
 
     return (
-        <MainLayout>
+        <ModuleLayout>
             <CurrentDataSubmissionPageContent
                 moduleId={currentModuleAccess.moduleId}
                 moduleName={currentModuleAccess.moduleName}
             />
-        </MainLayout>
+        </ModuleLayout>
     );
 });
 

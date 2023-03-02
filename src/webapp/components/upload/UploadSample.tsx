@@ -14,6 +14,7 @@ import { useCurrentDataSubmissionId } from "../../hooks/useCurrentDataSubmission
 import { useCurrentModuleContext } from "../../contexts/current-module-context";
 import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context";
 import { useLocation } from "react-router-dom";
+import { useCallbackEffect } from "../../hooks/use-callback-effect";
 
 interface UploadSampleProps {
     batchId: string;
@@ -44,18 +45,30 @@ export const UploadSample: React.FC<UploadSampleProps> = ({ batchId }) => {
         sampleFileUploadRef.current?.openDialog();
     }, [sampleFileUploadRef]);
 
-    const removeFiles = async (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    const removeFiles = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         event.preventDefault();
+        setIsLoading(true);
         const sampleUploadId = localStorage.getItem("sampleUploadId");
         if (sampleUploadId) {
-            await compositionRoot.glassDocuments.deleteByUploadId(sampleUploadId).toPromise();
+            return compositionRoot.glassDocuments.deleteByUploadId(sampleUploadId).run(
+                () => {
+                    localStorage.removeItem("sampleUploadId");
+                    setSampleFile(null);
+                    setIsLoading(false);
+                },
+                errorMessage => {
+                    snackbar.error(errorMessage);
+                    setSampleFile(null);
+                    setIsLoading(false);
+                }
+            );
         }
-        localStorage.removeItem("sampleUploadId");
-        setSampleFile(null);
     };
 
+    const removeFilesEffect = useCallbackEffect(removeFiles);
+
     const sampleFileUpload = useCallback(
-        async (files: File[], rejections: FileRejection[]) => {
+        (files: File[], rejections: FileRejection[]) => {
             if (rejections.length > 0) {
                 snackbar.error(i18n.t("Multiple uploads not allowed, please select one file"));
             } else {
@@ -70,11 +83,16 @@ export const UploadSample: React.FC<UploadSampleProps> = ({ batchId }) => {
                         module: moduleId,
                         period,
                     };
-                    const uploadId = await compositionRoot.glassDocuments
-                        .upload({ file: uploadedSample, data })
-                        .toPromise();
-                    localStorage.setItem("sampleUploadId", uploadId);
-                    setIsLoading(false);
+                    return compositionRoot.glassDocuments.upload({ file: uploadedSample, data }).run(
+                        uploadId => {
+                            localStorage.setItem("sampleUploadId", uploadId);
+                            setIsLoading(false);
+                        },
+                        () => {
+                            snackbar.error(i18n.t("Error in file upload"));
+                            setIsLoading(false);
+                        }
+                    );
                 } else {
                     snackbar.error(i18n.t("Error in file upload"));
                 }
@@ -83,13 +101,15 @@ export const UploadSample: React.FC<UploadSampleProps> = ({ batchId }) => {
         [batchId, compositionRoot.glassDocuments, dataSubmissionId, moduleId, period, snackbar]
     );
 
+    const sampleFileUploadEffect = useCallbackEffect(sampleFileUpload);
+
     return (
         <ContentWrapper className="ris-file">
             <span className="label">
                 {i18n.t("SAMPLE File")} <small>({i18n.t("not required")})</small> <HelpIcon />
             </span>
             {/* Allow only one file upload per dataset */}
-            <Dropzone ref={sampleFileUploadRef} onDrop={sampleFileUpload} maxFiles={1}>
+            <Dropzone ref={sampleFileUploadRef} onDrop={sampleFileUploadEffect} maxFiles={1}>
                 <Button
                     variant="contained"
                     color="primary"
@@ -105,7 +125,7 @@ export const UploadSample: React.FC<UploadSampleProps> = ({ batchId }) => {
             {sampleFile && (
                 <RemoveContainer>
                     {sampleFile?.name} - {sampleFile?.type}
-                    <StyledRemoveButton onClick={removeFiles}>
+                    <StyledRemoveButton onClick={removeFilesEffect}>
                         <CloseIcon />
                     </StyledRemoveButton>
                 </RemoveContainer>

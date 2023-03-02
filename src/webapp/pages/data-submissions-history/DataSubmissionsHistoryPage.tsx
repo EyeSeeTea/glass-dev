@@ -1,7 +1,6 @@
 import { Breadcrumbs, Button } from "@material-ui/core";
 import React from "react";
 import styled from "styled-components";
-import { MainLayout } from "../../components/main-layout/MainLayout";
 import { glassColors, palette } from "../app/themes/dhis2.theme";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import { NavLink } from "react-router-dom";
@@ -9,12 +8,13 @@ import { CustomCard } from "../../components/custom-card/CustomCard";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { DataSubmissionsHistoryContent } from "../../components/data-submissions-history/DataSubmissionsHistoryContent";
 import { useCurrentModuleContext } from "../../contexts/current-module-context";
+import { ModuleLayout } from "../../components/layouts/module-layout/ModuleLayout";
 
 export const DataSubmissionsHistoryPage: React.FC = React.memo(() => {
     return (
-        <MainLayout>
+        <ModuleLayout>
             <DataSubmissionsHistoryPageContent />
-        </MainLayout>
+        </ModuleLayout>
     );
 });
 

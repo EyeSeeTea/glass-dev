@@ -7,6 +7,6 @@ export class GetNotificationsUseCase implements UseCase {
     constructor(private notificationRepository: NotificationRepository) {}
 
     public execute(): FutureData<Notification[]> {
-        return this.notificationRepository.get();
+        return this.notificationRepository.getAll();
     }
 }
