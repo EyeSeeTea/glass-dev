@@ -1,9 +1,11 @@
 export interface CountryInformation {
+    module: string;
     WHORegion: string;
     country: string;
     year: number;
     enrolmentStatus: string;
     enrolmentDate: string;
+    nationalFocalPointId?: string;
     nationalFocalPoints: NationalFocalPoint[];
 }
 

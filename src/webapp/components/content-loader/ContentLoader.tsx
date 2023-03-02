@@ -15,17 +15,21 @@ export interface ContentLoaderProps {
     content: ContentLoaderValue;
     children: ReactNode;
     showErrorAsSnackbar?: boolean;
+    onError?: () => void;
 }
 
-export const ContentLoader: React.FC<ContentLoaderProps> = props => {
-    const { content, children, showErrorAsSnackbar } = props;
+export const ContentLoader: React.FC<ContentLoaderProps> = ({ content, children, showErrorAsSnackbar, onError }) => {
     const snackbar = useSnackbar();
 
     useEffect(() => {
         if (content.kind === "error" && showErrorAsSnackbar) {
             snackbar.error(content.message);
         }
-    }, [content, snackbar, showErrorAsSnackbar]);
+
+        if (content.kind === "error" && onError) {
+            onError();
+        }
+    }, [content, snackbar, showErrorAsSnackbar, onError]);
 
     switch (content.kind) {
         case "loading":
