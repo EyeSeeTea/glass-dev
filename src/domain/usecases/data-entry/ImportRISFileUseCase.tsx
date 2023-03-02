@@ -10,6 +10,8 @@ import {
 } from "./utils/utils";
 import { RISData } from "../../entities/data-entry/external/RISData";
 import { RISDataRepository } from "../../repositories/data-entry/RISDataRepository";
+import { DataValue } from "../../entities/data-entry/DataValue";
+import i18n from "../../../locales";
 
 const AMR_AMR_DS_INPUT_FILES_RIS_DS_ID = "CeQPmXgrhHF";
 const AMR_PATHOGEN_ANTIBIOTIC_CC_ID = "S427AvQESbw";
@@ -73,9 +75,32 @@ export class ImportRISFileUseCase implements UseCase {
                     .flat();
 
                 /* eslint-disable no-console */
-                console.log({ risFileDataValues: dataValues });
 
-                return this.dataValuesRepository.save(dataValues);
+                const finalDataValues = dataValues.filter((dv: DataValue) => dv.attributeOptionCombo !== "");
+
+                console.log({ risInitialFileDataValues: dataValues });
+                console.log({ risFinalFileDataValues: finalDataValues });
+
+                return this.dataValuesRepository.save(finalDataValues).map(result => {
+                    const dataValuesRemovedByEmptyAttOpCom = {
+                        object: "",
+                        value: i18n.t(
+                            `Removed ${
+                                dataValues.length - finalDataValues.length
+                            } dataValues to import because attributeOptionCombo not found`
+                        ),
+                    };
+
+                    const removedDataValues = finalDataValues.length !== dataValues.length;
+
+                    const conflicts = removedDataValues
+                        ? [...(result.conflicts || []), dataValuesRemovedByEmptyAttOpCom]
+                        : result.conflicts;
+
+                    const status = result.status === "SUCCESS" && removedDataValues ? "WARNING" : result.status;
+
+                    return { ...result, status, conflicts };
+                });
             });
     }
 }
