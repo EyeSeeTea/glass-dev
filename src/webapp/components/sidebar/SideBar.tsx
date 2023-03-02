@@ -27,13 +27,18 @@ export const SideBar: React.FC = () => {
     const { resetCurrentModuleAccess } = useCurrentModuleContext();
 
     useEffect(() => {
+        //TODO: review this: component coupled to local storage
         // Validate localstorage vs datastore
-        if (modulesResult.kind === "loaded" && modulesResult.data.length) {
+        if (modulesResult.kind === "loaded") {
             const menuData = modulesResult.data.map(module => mapModuleToMenu(module));
             if (!isLoaded || JSON.stringify(menuData) !== JSON.stringify(storedMenuData)) {
                 localStorage.setItem("glassSideBarData", JSON.stringify(menuData));
                 setstoredMenuData(menuData);
             }
+            setIsLoaded(true);
+        } else if (modulesResult.kind === "error") {
+            localStorage.removeItem("glassSideBarData");
+            setstoredMenuData(null);
             setIsLoaded(true);
         }
     }, [storedMenuData, modulesResult, isLoaded]);
@@ -53,7 +58,7 @@ export const SideBar: React.FC = () => {
                     <Typography>{i18n.t("HOME")}</Typography>
                 </Button>
             </HomeButtonWrapper>
-            {!storedMenuData && <StyledCircularProgress />}
+            {!isLoaded && <StyledCircularProgress />}
             {storedMenuData && <SidebarNav menus={storedMenuData} />}
 
             <div style={{ flexGrow: 1 }} />
