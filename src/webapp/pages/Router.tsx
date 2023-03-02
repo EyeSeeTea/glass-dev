@@ -9,6 +9,7 @@ import { UploadHistoryPage } from "./upload-history/UploadHistoryPage";
 import { CurrentOrgUnitContextProvider } from "../context-providers/CurrentOrgUnitContextProvider";
 import { CurrentModuleContextProvider } from "../context-providers/CurrentModuleContextProvider";
 import { PrivateRoute } from "../components/private-route/PrivateRoute";
+import { QuestionnaireFormTest } from "../components/questionnaire/QuestionnaireFormTest";
 
 export const Router: React.FC = React.memo(() => {
     return (
@@ -53,6 +54,14 @@ export const Router: React.FC = React.memo(() => {
                             render={({ location }) => (
                                 <PrivateRoute pathname={location.pathname}>
                                     <CountryInformationPage />
+                                </PrivateRoute>
+                            )}
+                        />
+                        <Route
+                            path="/questionnaire"
+                            render={({ location }) => (
+                                <PrivateRoute pathname={location.pathname}>
+                                    <QuestionnaireFormTest />
                                 </PrivateRoute>
                             )}
                         />
