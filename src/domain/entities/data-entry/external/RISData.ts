@@ -1,11 +1,7 @@
-export interface RISData {
-    COUNTRY: string;
-    YEAR: number;
-    SPECIMEN: string;
+import { ExternalData } from "./ExternalData";
+
+export interface RISData extends ExternalData {
     PATHOGEN: string;
-    GENDER: string;
-    ORIGIN: string;
-    AGEGROUP: string;
     ANTIBIOTIC: string;
     RESISTANT: number;
     INTERMEDIATE: number;
@@ -13,6 +9,5 @@ export interface RISData {
     SUSCEPTIBLE: number;
     UNKNOWN_NO_AST: number;
     UNKNOWN_NO_BREAKPOINTS: number;
-    BATCHID: string;
     ABCLASS: string;
 }
