@@ -5,5 +5,4 @@ export interface ExternalData {
     GENDER: string;
     ORIGIN: string;
     AGEGROUP: string;
-    BATCHID: string;
 }

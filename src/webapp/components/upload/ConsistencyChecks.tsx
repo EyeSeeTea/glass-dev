@@ -35,7 +35,7 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({ changeStep
     const [fileType, setFileType] = useState<string>("ris");
     const [isDataSetUploading, setIsDataSetUploading] = useState<boolean>(false);
     const [risFileErrors, setRISErrors] = useState<FileErrors>({ nonBlockingErrors: [], blockingErrors: [] });
-    const [sampleFileErrors, setSampleErrors] = useState<FileErrors>({ nonBlockingErrors: [], blockingErrors: [] });
+    const [sampleFileErrors, setSampleErrors] = useState<FileErrors | undefined>(undefined);
 
     useEffect(() => {
         function uploadDatasets() {
@@ -50,6 +50,10 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({ changeStep
                         : Future.success(undefined),
                 }).run(
                     ({ risFileResult, sampleFileResult }) => {
+                        /* eslint-disable no-console */
+                        console.log({ risFileResult });
+                        console.log({ sampleFileResult });
+
                         setRISErrors(extractErrors(risFileResult));
 
                         if (sampleFileResult) {
@@ -131,7 +135,7 @@ const renderTypeContent = (type: string, risfileErrors: FileErrors, samplefileEr
                     )}
                 </>
             ) : (
-                <p>{i18n.t("Sample file uploading content/intructions here...")}</p>
+                <p>{i18n.t("No sample file uploaded")}</p>
             );
         default:
             return (
