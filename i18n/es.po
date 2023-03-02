@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: i18next-conv\n"
-"POT-Creation-Date: 2023-02-27T10:54:38.874Z\n"
+"POT-Creation-Date: 2023-02-28T11:45:09.692Z\n"
 "PO-Revision-Date: 2018-10-25T09:02:35.143Z\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -379,12 +379,6 @@ msgid "List of Data Submissions"
 msgstr ""
 
 msgid "All Data Submissions"
-msgstr ""
-
-msgid "Hello {{name}}"
-msgstr "Hola {{name}}"
-
-msgid "Detail page"
 msgstr ""
 
 msgid "2022 Data Submission"
