@@ -1,14 +1,14 @@
 import React from "react";
 import { Button, Grid } from "@material-ui/core";
 import styled from "styled-components";
-import { GlassAppBar } from "../app-bar/GlassAppBar";
-import { SideBar } from "../sidebar/SideBar";
+import { GlassAppBar } from "../../app-bar/GlassAppBar";
+import { SideBar } from "../../sidebar/SideBar";
 import ExitToAppIcon from "@material-ui/icons/ExitToApp";
 import i18n from "@eyeseetea/d2-ui-components/locales";
-import { AppFooter } from "../app-footer/AppFooter";
-import { goToDhis2Url } from "../../utils/helpers";
+import { AppFooter } from "../../app-footer/AppFooter";
+import { goToDhis2Url } from "../../../utils/helpers";
 import { useConfig } from "@dhis2/app-runtime";
-import { SideBarProvider } from "../../context-providers/SideBarProvider";
+import { SideBarProvider } from "../../../context-providers/SideBarProvider";
 
 export const MainLayout: React.FC = ({ children }) => {
     const { baseUrl } = useConfig();
