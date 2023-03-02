@@ -380,12 +380,6 @@ msgstr ""
 msgid "All Data Submissions"
 msgstr ""
 
-msgid "Hello {{name}}"
-msgstr "Hola {{name}}"
-
-msgid "Detail page"
-msgstr ""
-
 msgid "2022 Data Submission"
 msgstr ""
 

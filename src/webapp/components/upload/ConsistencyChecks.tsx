@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Button, CircularProgress } from "@material-ui/core";
 import { BlockingErrors } from "./BlockingErrors";
 import styled from "styled-components";
@@ -11,6 +11,8 @@ import { useCurrentModuleContext } from "../../contexts/current-module-context";
 import { DataValuesSaveSummary } from "../../../domain/entities/data-entry/DataValuesSaveSummary";
 import { Future } from "../../../domain/entities/Future";
 
+import { useSnackbar } from "@eyeseetea/d2-ui-components";
+import { useCallbackEffect } from "../../hooks/use-callback-effect";
 interface ConsistencyChecksProps {
     changeStep: (step: number) => void;
     risFile: File | null;
@@ -32,6 +34,7 @@ export type ErrorCount = {
 export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({ changeStep, risFile, sampleFile }) => {
     const { compositionRoot } = useAppContext();
     const { currentModuleAccess } = useCurrentModuleContext();
+    const snackbar = useSnackbar();
     const [fileType, setFileType] = useState<string>("ris");
     const [isDataSetUploading, setIsDataSetUploading] = useState<boolean>(false);
     const [risFileErrors, setRISErrors] = useState<FileErrors>({ nonBlockingErrors: [], blockingErrors: [] });
@@ -78,17 +81,34 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({ changeStep
         setFileType(fileType);
     };
 
-    const goToFinalStep = async () => {
+    const goToFinalStep = useCallback(() => {
         const risUploadId = localStorage.getItem("risUploadId");
         const sampleUploadId = localStorage.getItem("sampleUploadId");
         if (risUploadId) {
-            await compositionRoot.glassUploads.setStatus({ id: risUploadId, status: COMPLETED_STATUS }).toPromise();
+            return compositionRoot.glassUploads.setStatus({ id: risUploadId, status: COMPLETED_STATUS }).run(
+                () => {
+                    if (!sampleUploadId) {
+                        changeStep(3);
+                    }
+                },
+                errorMessage => {
+                    snackbar.error(i18n.t(errorMessage));
+                }
+            );
         }
         if (sampleUploadId) {
-            await compositionRoot.glassUploads.setStatus({ id: sampleUploadId, status: COMPLETED_STATUS }).toPromise();
+            return compositionRoot.glassUploads.setStatus({ id: sampleUploadId, status: COMPLETED_STATUS }).run(
+                () => {
+                    changeStep(3);
+                },
+                errorMessage => {
+                    snackbar.error(i18n.t(errorMessage));
+                }
+            );
         }
-        changeStep(3);
-    };
+    }, [changeStep, compositionRoot.glassUploads, snackbar]);
+
+    const goToFinalStepEffect = useCallbackEffect(goToFinalStep);
 
     if (isDataSetUploading) return <CircularProgress size={25} />;
     else
@@ -113,7 +133,7 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({ changeStep
                         variant="contained"
                         color="primary"
                         endIcon={<ChevronRightIcon />}
-                        onClick={goToFinalStep}
+                        onClick={goToFinalStepEffect}
                         disableElevation
                         disabled={risFileErrors.blockingErrors.length ? true : false}
                     >
