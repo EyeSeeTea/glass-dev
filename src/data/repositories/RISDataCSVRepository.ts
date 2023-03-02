@@ -35,6 +35,7 @@ export class RISDataCSVRepository implements RISDataRepository {
     }
 
     validateABCLASS(absClass: string) {
+        //TODO: Remove this function when ABCLASS bring value from the file
         //ABCLASS is not in the file for the moment, if value is empty
         // set ABCLASS Missing
         return absClass || "ABCLASS Missing";
