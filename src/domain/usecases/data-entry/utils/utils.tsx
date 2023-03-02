@@ -39,13 +39,10 @@ export function getCategoryOptionComboByOptionCodes(categoryCombo: CategoryCombo
                 ","
             )}`
         );
-
-        //console.log({ categoryCombo });
-        // debugger;
-        // throw new Error(`All codes not found as category options. codes: ${codes.join(",")}`);
     }
 
-    //TODO: this is a code brought from old repository written by sneha, improve it without to use let
+    //TODO: this is a code brought from old repository written by sneha, we need improve it without to use let
+
     //The categoryOptionComboId will be common between both category options.
 
     let commonCategoryOptionCombos = uniqueCategoryOptions[0]?.categoryOptionCombos;
