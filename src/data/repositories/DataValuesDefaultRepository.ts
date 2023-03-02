@@ -5,7 +5,7 @@ import { apiToFuture } from "../../utils/futures";
 import { Instance } from "../entities/Instance";
 import { DataValue } from "../../domain/entities/data-entry/DataValue";
 import { DataValuesSaveSummary } from "../../domain/entities/data-entry/DataValuesSaveSummary";
-import { DataValuesRepository } from "../../domain/repositories/DataValuesRepository";
+import { DataValuesRepository } from "../../domain/repositories/data-entry/DataValuesRepository";
 
 export class DataValuesDefaultRepository implements DataValuesRepository {
     private api: D2Api;

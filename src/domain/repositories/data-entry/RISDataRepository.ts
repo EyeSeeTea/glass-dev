@@ -1,4 +1,4 @@
-import { RISData } from "../entities/data-entry/RISData";
+import { RISData } from "../entities/data-entry/external/RISData";
 import { FutureData } from "../entities/Future";
 
 export interface RISDataRepository {
