@@ -1,6 +1,6 @@
 import { SampleData } from "../../domain/entities/data-entry/external/SampleData";
 import { Future, FutureData } from "../../domain/entities/Future";
-import { SampleDataRepository } from "../../domain/repositories/SampleDataRepository";
+import { SampleDataRepository } from "../../domain/repositories/data-entry/SampleDataRepository";
 import { SpreadsheetXlsxDataSource } from "../../domain/repositories/SpreadsheetXlsxRepository";
 import { getNumberValue, getTextValue } from "./utils/CSVUtils";
 

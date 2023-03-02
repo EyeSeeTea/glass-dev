@@ -13,6 +13,7 @@ export const UploadContent: React.FC = () => {
     const [currentStep, setCurrentStep] = useState(1);
     const [completedSteps, setCompletedSteps] = useState<number[]>([]);
     const [risFile, setRisFile] = useState<File | null>(null);
+    const [sampleFile, setSampleFile] = useState<File | null>(null);
 
     const changeStep = (step: number) => {
         setCurrentStep(step);
@@ -31,7 +32,7 @@ export const UploadContent: React.FC = () => {
                 changeStep={changeStep}
                 completedSteps={completedSteps}
             />
-            {steps.length && renderStep(currentStep, changeStep, risFile, setRisFile)}
+            {steps.length && renderStep(currentStep, changeStep, risFile, setRisFile, sampleFile, setSampleFile)}
         </ContentWrapper>
     );
 };
@@ -40,15 +41,25 @@ const renderStep = (
     step: number,
     changeStep: any,
     risFile: File | null,
-    setRisFile: React.Dispatch<React.SetStateAction<File | null>>
+    setRisFile: React.Dispatch<React.SetStateAction<File | null>>,
+    sampleFile: File | null,
+    setSampleFile: React.Dispatch<React.SetStateAction<File | null>>
 ) => {
     switch (step) {
         case 1:
-            return <UploadFiles changeStep={changeStep} risFile={risFile} setRisFile={setRisFile} />;
+            return (
+                <UploadFiles
+                    changeStep={changeStep}
+                    risFile={risFile}
+                    setRisFile={setRisFile}
+                    sampleFile={sampleFile}
+                    setSampleFile={setSampleFile}
+                />
+            );
         case 2:
             return (
                 <>
-                    <ConsistencyChecks changeStep={changeStep} risFile={risFile} />
+                    <ConsistencyChecks changeStep={changeStep} risFile={risFile} sampleFile={sampleFile} />
                     <SupportButtons changeStep={changeStep} />
                 </>
             );
