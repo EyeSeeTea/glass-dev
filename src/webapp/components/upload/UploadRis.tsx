@@ -73,8 +73,8 @@ export const UploadRis: React.FC<UploadRisProps> = ({ validate, batchId }) => {
                         fileType: RIS_FILE_TYPE,
                     };
                     return compositionRoot.glassDocuments.upload({ file: uploadedRisFile, data }).run(
-                        submissionId => {
-                            localStorage.setItem("risUploadId", submissionId);
+                        uploadId => {
+                            localStorage.setItem("risUploadId", uploadId);
                             setIsLoading(false);
                         },
                         () => {

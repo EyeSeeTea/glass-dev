@@ -13,7 +13,7 @@ interface StatusProps {
     ctas: StatusCTAs[];
 }
 
-export const CurrentStatus: React.FC<StatusProps> = ({ moduleName, title, description, statusColor, ctas }) => {
+export const CurrentStatus: React.FC<StatusProps> = ({ title, description, statusColor, ctas }) => {
     return (
         <div>
             <Box sx={{ m: 2 }} />
@@ -23,7 +23,7 @@ export const CurrentStatus: React.FC<StatusProps> = ({ moduleName, title, descri
             </div>
             <Box sx={{ m: 2 }} />
             <StyledDescription>{i18n.t(description)}</StyledDescription>
-            <CtaButtons moduleName={moduleName} ctas={ctas} />
+            <CtaButtons ctas={ctas} />
         </div>
     );
 };

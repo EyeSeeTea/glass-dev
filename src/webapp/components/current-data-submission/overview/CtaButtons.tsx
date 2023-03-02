@@ -4,13 +4,14 @@ import styled from "styled-components";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { NavLink } from "react-router-dom";
 import { StatusCTAs } from "./StatusDetails";
+import { useGlassCaptureAccess } from "../../../hooks/useGlassCaptureAccess";
 
 export interface CtaButtonsProps {
-    moduleName: string;
     ctas: StatusCTAs[];
 }
 
-export const CtaButtons: React.FC<CtaButtonsProps> = ({ moduleName, ctas }) => {
+export const CtaButtons: React.FC<CtaButtonsProps> = ({ ctas }) => {
+    const hasCurrentUserCaptureAccess = useGlassCaptureAccess();
     const getCTAButton = (cta: StatusCTAs) => {
         // TODO : Button click event handlers to be added as corresponding feature developed.
         switch (cta) {
@@ -41,8 +42,9 @@ export const CtaButtons: React.FC<CtaButtonsProps> = ({ moduleName, ctas }) => {
                         variant="contained"
                         color="primary"
                         component={NavLink}
-                        to={`/upload/?module=${moduleName}`}
+                        to={`/upload`}
                         exact={true}
+                        disabled={!hasCurrentUserCaptureAccess}
                     >
                         {i18n.t("Upload dataset")}
                     </Button>

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import AppBar from "@material-ui/core/AppBar";
 import Toolbar from "@material-ui/core/Toolbar";
 import IconButton from "@material-ui/core/IconButton";
@@ -10,6 +10,8 @@ import glassLogo from "../../assets/glass-logo.png";
 import { Box, MenuItem, Select } from "@material-ui/core";
 import styled from "styled-components";
 import i18n from "@eyeseetea/d2-ui-components/locales";
+import { useAppContext } from "../../contexts/app-context";
+import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context";
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -37,11 +39,23 @@ const useStyles = makeStyles(theme => ({
 export const GlassAppBar: React.FC = () => {
     const classes = useStyles();
 
-    const [country, setCountry] = React.useState(1);
+    const { currentUser } = useAppContext();
+    const { currentOrgUnitAccess, changeCurrentOrgUnitAccess } = useCurrentOrgUnitContext();
     const [action, setAction] = React.useState(1);
 
-    const changeCountry = (event: React.ChangeEvent<{ value: unknown }>) => {
-        setCountry(event.target.value as number);
+    const [orgUnitName, setOrgUnitName] = React.useState(currentOrgUnitAccess.orgUnitName);
+
+    useEffect(() => {
+        if (orgUnitName !== currentOrgUnitAccess.orgUnitName) {
+            //if orgUnit has been changed manually in url
+            setOrgUnitName(currentOrgUnitAccess.orgUnitName);
+        }
+    }, [orgUnitName, setOrgUnitName, currentOrgUnitAccess.orgUnitName]);
+
+    const changeOrgUnit = (e: React.ChangeEvent<{ name?: string | undefined; value: unknown }>) => {
+        if (e.target?.value) setOrgUnitName(e.target?.value as string);
+        const orgUnitId = (e.currentTarget as HTMLInputElement).getAttribute("data-key");
+        if (orgUnitId) changeCurrentOrgUnitAccess(orgUnitId);
     };
 
     const changeAction = (event: React.ChangeEvent<{ value: unknown }>) => {
@@ -66,10 +80,19 @@ export const GlassAppBar: React.FC = () => {
                         <IconButton aria-label="search" color="primary">
                             <LocationIcon />
                         </IconButton>
-                        <Select value={country} disableUnderline onChange={changeCountry}>
-                            <MenuItem value={1}>{i18n.t("Spain")}</MenuItem>
-                            <MenuItem value={2}>{i18n.t("France")}</MenuItem>
-                        </Select>
+                        {currentUser?.userOrgUnitsAccess && (
+                            <Select value={orgUnitName} disableUnderline onChange={changeOrgUnit}>
+                                {currentUser.userOrgUnitsAccess.map(orgUnit => (
+                                    <MenuItem
+                                        key={orgUnit.orgUnitId}
+                                        data-key={orgUnit.orgUnitId}
+                                        value={orgUnit.orgUnitName}
+                                    >
+                                        {i18n.t(orgUnit.orgUnitName)}
+                                    </MenuItem>
+                                ))}
+                            </Select>
+                        )}
                     </SelectContainer>
                     <SelectContainer>
                         <Select value={action} disableUnderline onChange={changeAction}>

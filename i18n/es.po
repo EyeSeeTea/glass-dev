@@ -1,17 +1,14 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: i18next-conv\n"
-"POT-Creation-Date: 2023-02-14T13:39:20.127Z\n"
+"POT-Creation-Date: 2023-02-27T10:54:38.874Z\n"
 "PO-Revision-Date: 2018-10-25T09:02:35.143Z\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
 
-msgid "Spain"
-msgstr ""
-
-msgid "France"
+msgid "Error saving registration status"
 msgstr ""
 
 msgid "User Profile"
@@ -44,21 +41,6 @@ msgstr ""
 msgid "Date of Enrolment"
 msgstr ""
 
-msgid "Family Name *"
-msgstr ""
-
-msgid "First Name *"
-msgstr ""
-
-msgid "Function *"
-msgstr ""
-
-msgid "Email Address *"
-msgstr ""
-
-msgid "Preferred Language (notifications) *"
-msgstr ""
-
 msgid "Ask for updating"
 msgstr ""
 
@@ -82,13 +64,13 @@ msgstr ""
 msgid "Uploads with errors, or discarded"
 msgstr ""
 
-msgid "Questionnaire 1"
-msgstr ""
-
-msgid "Description"
+msgid "There are no questionnaries for this module"
 msgstr ""
 
 msgid "mandatory"
+msgstr ""
+
+msgid "Completed"
 msgstr ""
 
 msgid "Not completed"
@@ -98,15 +80,6 @@ msgid "View"
 msgstr ""
 
 msgid "Go"
-msgstr ""
-
-msgid "Questionnaire 2"
-msgstr ""
-
-msgid "Questionnaire 3"
-msgstr ""
-
-msgid "Completed"
 msgstr ""
 
 msgid "Overview"
@@ -205,10 +178,28 @@ msgstr ""
 msgid "News from GLASS"
 msgstr ""
 
-msgid "No Data loaded..."
+msgid "No Open Data Submissions"
+msgstr ""
+
+msgid "Notification"
+msgstr ""
+
+msgid "Close"
+msgstr ""
+
+msgid "Participants"
+msgstr ""
+
+msgid "Me"
+msgstr ""
+
+msgid "Message from {{sender}}"
 msgstr ""
 
 msgid "Your Notifications"
+msgstr ""
+
+msgid "No notifications"
 msgstr ""
 
 msgid "Log Out"
@@ -225,6 +216,18 @@ msgstr "Volver"
 
 msgid "Help"
 msgstr "Ayuda"
+
+msgid "Set as incomplete"
+msgstr ""
+
+msgid "Set as completed"
+msgstr ""
+
+msgid "Yes"
+msgstr ""
+
+msgid "No"
+msgstr ""
 
 msgid "HOME"
 msgstr ""
@@ -254,6 +257,11 @@ msgid "Any other userful information here?"
 msgstr ""
 
 msgid "Info abou the previously updated quarter and the missing quarters"
+msgstr ""
+
+msgid ""
+"Explaining what consistency checks are: Lorem ipsum dolor sit amet, "
+"consectetur adipiscing elit, sed doeiusmod tempor incididunt ut labore"
 msgstr ""
 
 msgid "RIS File"

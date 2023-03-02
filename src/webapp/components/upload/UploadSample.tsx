@@ -63,8 +63,8 @@ export const UploadSample: React.FC<UploadSampleProps> = ({ batchId }) => {
                         fileType: SAMPLE_FILE_TYPE,
                     };
                     return compositionRoot.glassDocuments.upload({ file: uploadedSample, data }).run(
-                        submissionId => {
-                            localStorage.setItem("sampleUploadId", submissionId);
+                        uploadId => {
+                            localStorage.setItem("sampleUploadId", uploadId);
                             setIsLoading(false);
                         },
                         () => {

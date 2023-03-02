@@ -2,7 +2,7 @@ import { UseCase } from "../../CompositionRoot";
 import { Future, FutureData } from "../entities/Future";
 import { GlassUploadsRepository } from "../repositories/GlassUploadsRepository";
 
-const submission = {
+const upload = {
     id: "ACe2e4xiXG3",
     batchId: "Dataset 1",
     dataSubmission: "ACndiso120S",
@@ -26,7 +26,7 @@ export class ValidateGlassUploadsUseCase implements UseCase {
         return this.glassUploadsRepository
             .getAll()
             .flatMap(data =>
-                data.length === 0 ? this.glassUploadsRepository.save(submission) : Future.success(undefined)
+                data.length === 0 ? this.glassUploadsRepository.save(upload) : Future.success(undefined)
             );
     }
 }
