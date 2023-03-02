@@ -20,7 +20,7 @@ export class SampleDataCSVRepository implements SampleDataRepository {
                         AGEGROUP: getTextValue(row, "AGEGROUP"),
                         NUMINFECTED: getNumberValue(row, "NUMINFECTED"),
                         NUMSAMPLEDPATIENTS: getNumberValue(row, "NUMSAMPLEDPATIENTS"),
-                        BATCHID: getTextValue(row, "BATCHID"),
+                        BATCHIDS: getTextValue(row, "BATCHID"),
                     };
                 }) || []
             );

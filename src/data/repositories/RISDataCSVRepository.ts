@@ -1,7 +1,7 @@
 import { RISData } from "../../domain/entities/data-entry/external/RISData";
 import { Future, FutureData } from "../../domain/entities/Future";
 import { RISDataRepository } from "../../domain/repositories/data-entry/RISDataRepository";
-import { Row, SpreadsheetXlsxDataSource } from "../../domain/repositories/SpreadsheetXlsxRepository";
+import { SpreadsheetXlsxDataSource } from "../../domain/repositories/SpreadsheetXlsxRepository";
 import { getNumberValue, getTextValue } from "./utils/CSVUtils";
 
 export class RISDataCSVRepository implements RISDataRepository {
@@ -26,7 +26,7 @@ export class RISDataCSVRepository implements RISDataRepository {
                         SUSCEPTIBLE: getNumberValue(row, "SUSCEPTIBLE"),
                         UNKNOWN_NO_AST: getNumberValue(row, "UNKNOWN_NO_AST"),
                         UNKNOWN_NO_BREAKPOINTS: getNumberValue(row, "UNKNOWN_NO_BREAKPOINTS"),
-                        BATCHID: getTextValue(row, "BATCHID"),
+                        BATCHIDR: getTextValue(row, "BATCHID"),
                         ABCLASS: this.validateABCLASS(getTextValue(row, "ABCLASS")),
                     };
                 }) || []
