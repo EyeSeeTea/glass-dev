@@ -1,6 +1,6 @@
 import { RISData } from "../../domain/entities/data-entry/external/RISData";
 import { Future, FutureData } from "../../domain/entities/Future";
-import { RISDataRepository } from "../../domain/repositories/RISDataRepository";
+import { RISDataRepository } from "../../domain/repositories/data-entry/RISDataRepository";
 import { SpreadsheetXlsxDataSource } from "../../domain/repositories/SpreadsheetXlsxRepository";
 import { getNumberValue, getTextValue } from "./utils/CSVUtils";
 

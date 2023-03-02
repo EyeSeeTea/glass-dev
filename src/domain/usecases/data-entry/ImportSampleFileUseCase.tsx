@@ -5,7 +5,7 @@ import { MetadataRepository } from "../../repositories/MetadataRepository";
 import { DataValuesRepository } from "../../repositories/data-entry/DataValuesRepository";
 import { AMR_SPECIMEN_GENDER_AGE_ORIGIN_CC_ID, getCategoryOptionComboByDataElement } from "./utils/utils";
 import { SampleData } from "../../entities/data-entry/external/SampleData";
-import { SampleDataRepository } from "../../repositories/SampleDataRepository";
+import { SampleDataRepository } from "../../repositories/data-entry/SampleDataRepository";
 
 const AMR_AMR_DS_Input_files_Sample_DS_ID = "OcAB7oaC072";
 

@@ -9,105 +9,58 @@ import i18n from "@eyeseetea/d2-ui-components/locales";
 import { useAppContext } from "../../contexts/app-context";
 import { useCurrentModuleContext } from "../../contexts/current-module-context";
 import { DataValuesSaveSummary } from "../../../domain/entities/data-entry/DataValuesSaveSummary";
+import { Future } from "../../../domain/entities/Future";
 
 interface ConsistencyChecksProps {
     changeStep: (step: number) => void;
     risFile: File | null;
+    sampleFile?: File | null;
 }
 
 const COMPLETED_STATUS = "COMPLETED";
+
+export type FileErrors = {
+    nonBlockingErrors: ErrorCount[];
+    blockingErrors: ErrorCount[];
+};
 
 export type ErrorCount = {
     error: string;
     count: number;
 };
 
-export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({ changeStep, risFile }) => {
+export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({ changeStep, risFile, sampleFile }) => {
     const { compositionRoot } = useAppContext();
     const { currentModuleAccess } = useCurrentModuleContext();
     const [fileType, setFileType] = useState<string>("ris");
     const [isDataSetUploading, setIsDataSetUploading] = useState<boolean>(false);
-    const [blockingErrors, setBlockingErrors] = useState<ErrorCount[]>([]);
-    const [nonBlockingErrors, setNonBlockingErrors] = useState<ErrorCount[]>([]);
+    const [risFileErrors, setRISErrors] = useState<FileErrors>({ nonBlockingErrors: [], blockingErrors: [] });
+    const [sampleFileErrors, setSampleErrors] = useState<FileErrors>({ nonBlockingErrors: [], blockingErrors: [] });
 
-    const updateErrorCounts = (errors: ErrorCount[], datasetImportStatus: DataValuesSaveSummary) => {
-        const updatedNonBLockingErrors = datasetImportStatus.conflicts?.map(status => {
-            const existingError = errors.filter(nbe => nbe.error === status.value);
-            //Add only unique errors, so only one of each kind of error will exist in array
-            if (existingError[0]) {
-                return {
-                    error: existingError[0]?.error,
-                    count: existingError[0]?.count + 1,
-                };
-            } else {
-                return {
-                    error: status.value,
-                    count: 1,
-                };
-            }
-        });
-
-        if (updatedNonBLockingErrors) {
-            const uniqueErrors = errors.filter(nbe => updatedNonBLockingErrors.every(e => e.error !== nbe.error));
-            return [...uniqueErrors, ...updatedNonBLockingErrors];
-        } else {
-            return [...errors];
-        }
-    };
     useEffect(() => {
         function uploadDatasets() {
+            //TODO: It's neccessary validate ARM?
             if (risFile && currentModuleAccess.moduleName === "AMR") {
                 setIsDataSetUploading(true);
 
-                compositionRoot.glassRisFile.importFile(risFile).run(
-                    datasetImportStatus => {
-                        //Warning considered non-blocking
-                        if (datasetImportStatus.status === "WARNING") {
-                            if (datasetImportStatus.conflicts && datasetImportStatus.conflicts.length) {
-                                setNonBlockingErrors(prev => {
-                                    return updateErrorCounts(prev, datasetImportStatus);
-                                });
-                            }
-                        }
+                Future.joinObj({
+                    risFileResult: compositionRoot.dataSubmision.RISFile(risFile),
+                    sampleFileResult: sampleFile
+                        ? compositionRoot.dataSubmision.sampleFile(sampleFile)
+                        : Future.success(undefined),
+                }).run(
+                    ({ risFileResult, sampleFileResult }) => {
+                        setRISErrors(extractErrors(risFileResult));
 
-                        //Errors considered blocking
-                        else if (datasetImportStatus.status === "ERROR") {
-                            if (datasetImportStatus.conflicts && datasetImportStatus.conflicts.length) {
-                                setBlockingErrors(prev => {
-                                    return updateErrorCounts(prev, datasetImportStatus);
-                                });
-                            }
-                        }
-                        //consider any ignored imports as blocking error.
-                        if (datasetImportStatus.importCount.ignored > 0) {
-                            setBlockingErrors(blockingErrors => {
-                                const ignoredError = blockingErrors.filter(be => be.error === "Import Ignored");
-                                if (ignoredError[0]) {
-                                    return [
-                                        ...blockingErrors.filter(be => be.error !== "Import Ignored"),
-                                        {
-                                            error: ignoredError[0].error,
-                                            count: ignoredError[0].count + datasetImportStatus.importCount.ignored,
-                                        },
-                                    ];
-                                } else {
-                                    return [
-                                        ...blockingErrors,
-                                        {
-                                            error: "Import Ignored",
-                                            count: datasetImportStatus.importCount.ignored,
-                                        },
-                                    ];
-                                }
-                            });
+                        if (sampleFileResult) {
+                            setSampleErrors(extractErrors(sampleFileResult));
                         }
 
                         setIsDataSetUploading(false);
                     },
                     error => {
-                        setBlockingErrors(blockingErrors => {
-                            return [...blockingErrors, { error: error, count: 1 }];
-                        });
+                        setRISErrors({ nonBlockingErrors: [], blockingErrors: [{ error: error, count: 1 }] });
+
                         setIsDataSetUploading(false);
                     }
                 );
@@ -115,7 +68,7 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({ changeStep
         }
 
         uploadDatasets();
-    }, [compositionRoot.glassRisFile, currentModuleAccess.moduleName, risFile]);
+    }, [compositionRoot.dataSubmision, currentModuleAccess.moduleName, risFile, sampleFile]);
 
     const changeType = (fileType: string) => {
         setFileType(fileType);
@@ -150,7 +103,7 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({ changeStep
                         {i18n.t("Sample File")}
                     </Button>
                 </div>
-                {renderTypeContent(fileType, blockingErrors, nonBlockingErrors)}
+                {renderTypeContent(fileType, risFileErrors, sampleFileErrors)}
                 <div className="bottom">
                     <Button
                         variant="contained"
@@ -158,7 +111,7 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({ changeStep
                         endIcon={<ChevronRightIcon />}
                         onClick={goToFinalStep}
                         disableElevation
-                        disabled={blockingErrors.length ? true : false}
+                        disabled={risFileErrors.blockingErrors.length ? true : false}
                     >
                         {i18n.t("Continue")}
                     </Button>
@@ -167,15 +120,24 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({ changeStep
         );
 };
 
-const renderTypeContent = (type: string, blockingErrors: ErrorCount[], warningErrors: ErrorCount[]) => {
+const renderTypeContent = (type: string, risfileErrors: FileErrors, samplefileErrors?: FileErrors) => {
     switch (type) {
         case "sample":
-            return <p>{i18n.t("Sample file uploading content/intructions here...")}</p>;
+            return samplefileErrors ? (
+                <>
+                    {samplefileErrors.blockingErrors && <BlockingErrors rows={samplefileErrors.blockingErrors} />}
+                    {samplefileErrors.nonBlockingErrors && (
+                        <NonBlockingWarnings rows={samplefileErrors.nonBlockingErrors} />
+                    )}
+                </>
+            ) : (
+                <p>{i18n.t("Sample file uploading content/intructions here...")}</p>
+            );
         default:
             return (
                 <>
-                    {blockingErrors && <BlockingErrors rows={blockingErrors} />}
-                    {warningErrors && <NonBlockingWarnings rows={warningErrors} />}
+                    {risfileErrors.blockingErrors && <BlockingErrors rows={risfileErrors.blockingErrors} />}
+                    {risfileErrors.nonBlockingErrors && <NonBlockingWarnings rows={risfileErrors.nonBlockingErrors} />}
                 </>
             );
     }
@@ -207,3 +169,35 @@ const ContentWrapper = styled.div`
         }
     }
 `;
+
+const extractErrors = (datasetImportStatus: DataValuesSaveSummary): FileErrors => {
+    const nonBlockingErrors =
+        datasetImportStatus.status === "WARNING"
+            ? datasetImportStatus.conflicts?.map(status => {
+                  return {
+                      error: status.value,
+                      count: 1,
+                  };
+              }) || []
+            : [];
+
+    const blokingErrors =
+        datasetImportStatus.status === "ERROR"
+            ? datasetImportStatus.conflicts?.map(status => {
+                  return {
+                      error: status.value,
+                      count: 1,
+                  };
+              }) || []
+            : [];
+
+    const finalBlockingErrors = [
+        ...blokingErrors,
+        {
+            error: "Import Ignored",
+            count: datasetImportStatus.importCount.ignored,
+        },
+    ];
+
+    return { nonBlockingErrors, blockingErrors: finalBlockingErrors };
+};
