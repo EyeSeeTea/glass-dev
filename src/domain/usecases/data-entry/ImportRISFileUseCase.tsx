@@ -15,6 +15,7 @@ import { mapToImportSummary } from "./utils/mapDhis2Summary";
 import { ConsistencyError, ImportSummary } from "../../entities/data-entry/ImportSummary";
 import { checkSpecimenPathogen } from "./utils/checkSpecimenPathogen";
 import { GlassModuleRepository } from "../../repositories/GlassModuleRepository";
+import { checkASTResults } from "./utils/checkASTResults";
 
 const AMR_AMR_DS_INPUT_FILES_RIS_DS_ID = "CeQPmXgrhHF";
 const AMR_PATHOGEN_ANTIBIOTIC_CC_ID = "S427AvQESbw";
@@ -48,6 +49,8 @@ export class ImportRISFileUseCase implements UseCase {
                 const specimenPathogenErrors = module.consistencyChecks
                     ? checkSpecimenPathogen(risDataItems, module.consistencyChecks.specimenPathogen)
                     : [];
+
+                const astResultsErrors = checkASTResults(risDataItems);
 
                 const dataValues = risDataItems
                     .map(risData => {
@@ -93,15 +96,15 @@ export class ImportRISFileUseCase implements UseCase {
                 return this.dataValuesRepository.save(finalDataValues).map(saveSummary => {
                     const importSummary = mapToImportSummary(saveSummary);
 
-                    const summaryWithSpecimenPathogenErrors = this.includeSpecimenPathogenErrors(
-                        importSummary,
-                        specimenPathogenErrors
-                    );
+                    const summaryWithConsistencyBlokingErrors = this.includeBlokingErrors(importSummary, [
+                        ...specimenPathogenErrors,
+                        ...astResultsErrors,
+                    ]);
 
                     const finalImportSummary = this.includeDataValuesRemovedWarning(
                         dataValues,
                         finalDataValues,
-                        summaryWithSpecimenPathogenErrors
+                        summaryWithConsistencyBlokingErrors
                     );
 
                     return finalImportSummary;
@@ -109,16 +112,13 @@ export class ImportRISFileUseCase implements UseCase {
             });
     }
 
-    private includeSpecimenPathogenErrors(
-        importSummary: ImportSummary,
-        specimenPathogenErrors: ConsistencyError[]
-    ): ImportSummary {
-        const status = specimenPathogenErrors ? "ERROR" : importSummary.status;
+    private includeBlokingErrors(importSummary: ImportSummary, blokingErrors: ConsistencyError[]): ImportSummary {
+        const status = blokingErrors ? "ERROR" : importSummary.status;
 
         return {
             ...importSummary,
             status,
-            blockingErrors: [...importSummary.blockingErrors, ...specimenPathogenErrors],
+            blockingErrors: [...importSummary.blockingErrors, ...blokingErrors],
         };
     }
 
