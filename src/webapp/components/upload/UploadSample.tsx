@@ -13,16 +13,17 @@ import { useAppContext } from "../../contexts/app-context";
 import { useCallbackEffect } from "../../hooks/use-callback-effect";
 
 interface UploadSampleProps {
+    sampleFile: File | null;
+    setSampleFile: React.Dispatch<React.SetStateAction<File | null>>;
     batchId: string;
 }
 
 const SAMPLE_FILE_TYPE = "SAMPLE";
 
-export const UploadSample: React.FC<UploadSampleProps> = ({ batchId }) => {
+export const UploadSample: React.FC<UploadSampleProps> = ({ batchId, sampleFile, setSampleFile }) => {
     const { compositionRoot } = useAppContext();
     const snackbar = useSnackbar();
 
-    const [sampleFile, setSampleFile] = useState<File | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const sampleFileUploadRef = useRef<DropzoneRef>(null);
 
@@ -80,7 +81,7 @@ export const UploadSample: React.FC<UploadSampleProps> = ({ batchId }) => {
                 }
             }
         },
-        [batchId, compositionRoot.glassDocuments, snackbar]
+        [batchId, compositionRoot.glassDocuments, snackbar, setSampleFile]
     );
 
     const sampleFileUploadEffect = useCallbackEffect(sampleFileUpload);
