@@ -82,27 +82,23 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({ changeStep
     const goToFinalStep = useCallback(() => {
         const risUploadId = localStorage.getItem("risUploadId");
         const sampleUploadId = localStorage.getItem("sampleUploadId");
+
         if (risUploadId) {
-            return compositionRoot.glassUploads.setStatus({ id: risUploadId, status: COMPLETED_STATUS }).run(
-                () => {
-                    if (!sampleUploadId) {
+            return compositionRoot.glassUploads
+                .setStatus({ id: risUploadId, status: COMPLETED_STATUS })
+                .flatMap(() => {
+                    return sampleUploadId
+                        ? compositionRoot.glassUploads.setStatus({ id: sampleUploadId, status: COMPLETED_STATUS })
+                        : Future.success(undefined);
+                })
+                .run(
+                    () => {
                         changeStep(3);
+                    },
+                    errorMessage => {
+                        snackbar.error(i18n.t(errorMessage));
                     }
-                },
-                errorMessage => {
-                    snackbar.error(i18n.t(errorMessage));
-                }
-            );
-        }
-        if (sampleUploadId) {
-            return compositionRoot.glassUploads.setStatus({ id: sampleUploadId, status: COMPLETED_STATUS }).run(
-                () => {
-                    changeStep(3);
-                },
-                errorMessage => {
-                    snackbar.error(i18n.t(errorMessage));
-                }
-            );
+                );
         }
     }, [changeStep, compositionRoot.glassUploads, snackbar]);
 
