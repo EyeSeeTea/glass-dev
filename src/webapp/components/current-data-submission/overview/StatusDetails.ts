@@ -9,4 +9,5 @@ export interface StatusDetails {
     description: string;
     colour: string;
     cta: StatusCTAs[];
+    showUploadHistory: boolean;
 }
