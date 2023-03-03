@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: i18next-conv\n"
-"POT-Creation-Date: 2023-03-03T06:40:21.860Z\n"
+"POT-Creation-Date: 2023-03-03T11:05:57.853Z\n"
 "PO-Revision-Date: 2018-10-25T09:02:35.143Z\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -275,24 +275,6 @@ msgid "Non-blocking warnings"
 msgstr ""
 
 msgid "Summary"
-msgstr ""
-
-msgid "130 Subjects"
-msgstr ""
-
-msgid "First Sample"
-msgstr ""
-
-msgid "Last Sample"
-msgstr ""
-
-msgid "Filter by sample type"
-msgstr ""
-
-msgid "Compare with data from previous uploads"
-msgstr ""
-
-msgid "Charts"
 msgstr ""
 
 msgid "I need help"
