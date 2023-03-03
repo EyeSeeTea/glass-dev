@@ -11,39 +11,51 @@ import { GlassUploads } from "../../../domain/entities/GlassUploads";
 
 interface UploadFilesProps {
     changeStep: (step: number) => void;
+    risFile: File | null;
+    setRisFile: React.Dispatch<React.SetStateAction<File | null>>;
+    sampleFile: File | null;
+    setSampleFile: React.Dispatch<React.SetStateAction<File | null>>;
+    batchId: string;
+    setBatchId: React.Dispatch<React.SetStateAction<string>>;
 }
 
 const datasetOptions = [
     {
         label: "Dataset 1",
-        value: "1",
+        value: "DS1",
     },
     {
         label: "Dataset 2",
-        value: "2",
+        value: "DS2",
     },
     {
         label: "Dataset 3",
-        value: "3",
+        value: "DS3",
     },
     {
         label: "Dataset 4",
-        value: "4",
+        value: "DS4",
     },
     {
         label: "Dataset 5",
-        value: "5",
+        value: "DS5",
     },
     {
         label: "Dataset 6",
-        value: "6",
+        value: "DS6",
     },
 ];
 
-export const UploadFiles: React.FC<UploadFilesProps> = ({ changeStep }) => {
+export const UploadFiles: React.FC<UploadFilesProps> = ({
+    changeStep,
+    risFile,
+    setRisFile,
+    sampleFile,
+    setSampleFile,
+    batchId,
+    setBatchId,
+}) => {
     const { compositionRoot } = useAppContext();
-
-    const [batchId, setBatchId] = useState("");
     const [isValidated, setIsValidated] = useState(false);
     const [isFileValid, setIsFileValid] = useState(false);
     const [previousUploads, setPreviousGlassUploads] = useState<GlassUploads[]>([]);
@@ -71,7 +83,7 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({ changeStep }) => {
         setPreviousUploadsBatchIds(uniqueBatchIds);
         const firstSelectableBatchId = datasetOptions.find(({ value }) => !uniqueBatchIds.includes(value))?.value;
         setBatchId(firstSelectableBatchId || "");
-    }, [previousUploads]);
+    }, [previousUploads, setBatchId]);
 
     const changeBatchId = async (event: React.ChangeEvent<{ value: unknown }>) => {
         const batchId = event.target.value as string;
@@ -90,9 +102,9 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({ changeStep }) => {
     return (
         <ContentWrapper>
             <div className="file-fields">
-                <UploadRis validate={setIsFileValid} batchId={batchId} />
+                <UploadRis validate={setIsFileValid} batchId={batchId} risFile={risFile} setRisFile={setRisFile} />
 
-                <UploadSample batchId={batchId} />
+                <UploadSample batchId={batchId} sampleFile={sampleFile} setSampleFile={setSampleFile} />
             </div>
 
             <div className="batch-id">

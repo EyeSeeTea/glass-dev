@@ -10,11 +10,13 @@ import { useAppContext } from "../../contexts/app-context";
 import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context";
 import { useGlassCaptureAccess } from "../../hooks/useGlassCaptureAccess";
 import { useGlassModule } from "../../hooks/useGlassModule";
+import { useGlassReadAccess } from "../../hooks/useGlassReadAccess";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
 import QuestionnarieForm, { QuestionnarieFormProps } from "../questionnaire/QuestionnaireForm";
 
 export const Questionnaires: React.FC = () => {
     const hasCurrentUserCaptureAccess = useGlassCaptureAccess();
+    const hasCurrentUserViewAccess = useGlassReadAccess();
     const [questionnaires, updateQuestionnarie] = useQuestionnaires();
     const { orgUnit, year } = useSelector();
     const [formState, actions] = useFormState();
@@ -54,7 +56,10 @@ export const Questionnaires: React.FC = () => {
 
                         <div className="buttons">
                             {questionnaire.isCompleted && (
-                                <Button onClick={() => actions.goToQuestionnarie(questionnaire, { mode: "show" })}>
+                                <Button
+                                    onClick={() => actions.goToQuestionnarie(questionnaire, { mode: "show" })}
+                                    disabled={!hasCurrentUserViewAccess}
+                                >
                                     {i18n.t("View")}
                                 </Button>
                             )}

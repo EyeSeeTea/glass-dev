@@ -1,5 +1,5 @@
-import React, { useCallback, useState } from "react";
-import { Button } from "@material-ui/core";
+import React, { useCallback, useEffect, useState } from "react";
+import { Button, CircularProgress } from "@material-ui/core";
 import { BlockingErrors } from "./BlockingErrors";
 import styled from "styled-components";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
@@ -7,18 +7,91 @@ import { NonBlockingWarnings } from "./NonBlockingWarnings";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { useAppContext } from "../../contexts/app-context";
+import { useCurrentModuleContext } from "../../contexts/current-module-context";
+import { Future } from "../../../domain/entities/Future";
+
 import { useSnackbar } from "@eyeseetea/d2-ui-components";
 import { useCallbackEffect } from "../../hooks/use-callback-effect";
+import { ImportSummary } from "../../../domain/entities/data-entry/ImportSummary";
 interface ConsistencyChecksProps {
     changeStep: (step: number) => void;
+    batchId: string;
+    risFile: File | null;
+    sampleFile?: File | null;
+
+    setRISFileImportSummary: React.Dispatch<React.SetStateAction<ImportSummary | undefined>>;
+    setSampleFileImportSummary: React.Dispatch<React.SetStateAction<ImportSummary | undefined>>;
 }
 
 const COMPLETED_STATUS = "COMPLETED";
 
-export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({ changeStep }) => {
+export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
+    changeStep,
+    batchId,
+    risFile,
+    sampleFile,
+    setRISFileImportSummary,
+    setSampleFileImportSummary,
+}) => {
     const { compositionRoot } = useAppContext();
+    const { currentModuleAccess } = useCurrentModuleContext();
     const snackbar = useSnackbar();
     const [fileType, setFileType] = useState<string>("ris");
+    const [isDataSetUploading, setIsDataSetUploading] = useState<boolean>(false);
+    const [isUploadStatusChanging, setIsUploadStatusChanging] = useState<boolean>(false);
+    const [risFileErrors, setRISErrors] = useState<ImportSummary | undefined>(undefined);
+    const [sampleFileErrors, setSampleErrors] = useState<ImportSummary | undefined>(undefined);
+
+    useEffect(() => {
+        function uploadDatasets() {
+            if (risFile && currentModuleAccess.moduleName === "AMR") {
+                setIsDataSetUploading(true);
+
+                Future.joinObj({
+                    importRISFileSummary: compositionRoot.dataSubmision.RISFile(risFile, batchId),
+                    importSampleFileSummary: sampleFile
+                        ? compositionRoot.dataSubmision.sampleFile(sampleFile, batchId)
+                        : Future.success(undefined),
+                }).run(
+                    ({ importRISFileSummary, importSampleFileSummary }) => {
+                        /* eslint-disable no-console */
+                        console.log({ importRISFileSummary });
+                        console.log({ importSampleFileSummary });
+
+                        setRISErrors(importRISFileSummary);
+                        setRISFileImportSummary(importRISFileSummary);
+
+                        if (importSampleFileSummary) {
+                            setSampleErrors(importSampleFileSummary);
+                            setSampleFileImportSummary(importSampleFileSummary);
+                        }
+
+                        setIsDataSetUploading(false);
+                    },
+                    error => {
+                        setRISErrors({
+                            status: "ERROR",
+                            importCount: { ignored: 0, imported: 0, deleted: 0, updated: 0 },
+                            nonBlockingErrors: [],
+                            blockingErrors: [{ error: error, count: 1 }],
+                        });
+
+                        setIsDataSetUploading(false);
+                    }
+                );
+            }
+        }
+
+        uploadDatasets();
+    }, [
+        compositionRoot.dataSubmision,
+        currentModuleAccess.moduleName,
+        risFile,
+        sampleFile,
+        setRISFileImportSummary,
+        setSampleFileImportSummary,
+        batchId,
+    ]);
 
     const changeType = (fileType: string) => {
         setFileType(fileType);
@@ -27,74 +100,91 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({ changeStep
     const goToFinalStep = useCallback(() => {
         const risUploadId = localStorage.getItem("risUploadId");
         const sampleUploadId = localStorage.getItem("sampleUploadId");
+
         if (risUploadId) {
-            return compositionRoot.glassUploads.setStatus({ id: risUploadId, status: COMPLETED_STATUS }).run(
-                () => {
-                    if (!sampleUploadId) {
+            setIsUploadStatusChanging(true);
+            return compositionRoot.glassUploads
+                .setStatus({ id: risUploadId, status: COMPLETED_STATUS })
+                .flatMap(() => {
+                    return sampleUploadId
+                        ? compositionRoot.glassUploads.setStatus({ id: sampleUploadId, status: COMPLETED_STATUS })
+                        : Future.success(undefined);
+                })
+                .run(
+                    () => {
                         changeStep(3);
+                        setIsUploadStatusChanging(false);
+                    },
+                    errorMessage => {
+                        snackbar.error(i18n.t(errorMessage));
+                        setIsUploadStatusChanging(false);
                     }
-                },
-                errorMessage => {
-                    snackbar.error(i18n.t(errorMessage));
-                }
-            );
-        }
-        if (sampleUploadId) {
-            return compositionRoot.glassUploads.setStatus({ id: sampleUploadId, status: COMPLETED_STATUS }).run(
-                () => {
-                    changeStep(3);
-                },
-                errorMessage => {
-                    snackbar.error(i18n.t(errorMessage));
-                }
-            );
+                );
         }
     }, [changeStep, compositionRoot.glassUploads, snackbar]);
 
     const goToFinalStepEffect = useCallbackEffect(goToFinalStep);
 
-    return (
-        <ContentWrapper>
-            <p className="intro">
-                {i18n.t(
-                    "Explaining what consistency checks are: Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed doeiusmod tempor incididunt ut labore",
-                    { nsSeparator: false }
-                )}
-            </p>
-            <div className="toggles">
-                <Button onClick={() => changeType("ris")} className={fileType === "ris" ? "current" : ""}>
-                    {i18n.t("RIS File")}
-                </Button>
-                <Button onClick={() => changeType("sample")} className={fileType === "sample" ? "current" : ""}>
-                    {i18n.t("Sample File")}
-                </Button>
-            </div>
-            {renderTypeContent(fileType)}
-
-            <div className="bottom">
-                <Button
-                    variant="contained"
-                    color="primary"
-                    endIcon={<ChevronRightIcon />}
-                    onClick={goToFinalStepEffect}
-                    disableElevation
-                >
-                    {i18n.t("Continue")}
-                </Button>
-            </div>
-        </ContentWrapper>
-    );
+    if (isDataSetUploading) return <CircularProgress size={25} />;
+    else
+        return (
+            <ContentWrapper>
+                <p className="intro">
+                    {i18n.t(
+                        "Explaining what consistency checks are: Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed doeiusmod tempor incididunt ut labore"
+                    )}
+                </p>
+                <div className="toggles">
+                    <Button onClick={() => changeType("ris")} className={fileType === "ris" ? "current" : ""}>
+                        {i18n.t("RIS File")}
+                    </Button>
+                    <Button onClick={() => changeType("sample")} className={fileType === "sample" ? "current" : ""}>
+                        {i18n.t("Sample File")}
+                    </Button>
+                </div>
+                {renderTypeContent(fileType, risFileErrors, sampleFileErrors)}
+                <div className="bottom">
+                    {isUploadStatusChanging ? (
+                        <CircularProgress size={25} />
+                    ) : (
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            endIcon={<ChevronRightIcon />}
+                            onClick={goToFinalStepEffect}
+                            disableElevation
+                            disabled={risFileErrors && risFileErrors.blockingErrors.length > 0 ? true : false}
+                        >
+                            {i18n.t("Continue")}
+                        </Button>
+                    )}
+                </div>
+            </ContentWrapper>
+        );
 };
 
-const renderTypeContent = (type: string) => {
+const renderTypeContent = (type: string, risfileErrors?: ImportSummary, samplefileErrors?: ImportSummary) => {
     switch (type) {
         case "sample":
-            return <p>{i18n.t("Sample file uploading content/intructions here...")}</p>;
+            return samplefileErrors ? (
+                <>
+                    {samplefileErrors.blockingErrors && <BlockingErrors rows={samplefileErrors.blockingErrors} />}
+                    {samplefileErrors.nonBlockingErrors && (
+                        <NonBlockingWarnings rows={samplefileErrors.nonBlockingErrors} />
+                    )}
+                </>
+            ) : (
+                <p>{i18n.t("No sample file uploaded")}</p>
+            );
         default:
             return (
                 <>
-                    <BlockingErrors />
-                    <NonBlockingWarnings />
+                    {risfileErrors && risfileErrors.blockingErrors && (
+                        <BlockingErrors rows={risfileErrors.blockingErrors} />
+                    )}
+                    {risfileErrors && risfileErrors.nonBlockingErrors && (
+                        <NonBlockingWarnings rows={risfileErrors.nonBlockingErrors} />
+                    )}
                 </>
             );
     }

@@ -25,6 +25,7 @@ import { SetUploadStatusUseCase } from "./domain/usecases/SetUploadStatusUseCase
 import { GetGlassUploadsByDataSubmissionUseCase } from "./domain/usecases/GetGlassUploadsByDataSubmissionUseCase";
 import { SetUploadBatchIdUseCase } from "./domain/usecases/SetUploadBatchIdUseCase";
 import { DeleteDocumentInfoByUploadIdUseCase } from "./domain/usecases/DeleteDocumentInfoByUploadIdUseCase";
+import { ImportRISFileUseCase } from "./domain/usecases/data-entry/ImportRISFileUseCase";
 import { GetOpenDataSubmissionsByOUUseCase } from "./domain/usecases/GetOpenDataSubmissionsByOUUseCase";
 import { getD2APiFromInstance } from "./utils/d2-api";
 import { QuestionnaireD2Repository } from "./data/repositories/QuestionnaireD2Repository";
@@ -34,9 +35,14 @@ import { SetAsQuestionnaireCompletionUseCase } from "./domain/usecases/SetAsQues
 import { GetQuestionnaireListUseCase } from "./domain/usecases/GetQuestionnaireListUseCase";
 import { GetNotificationsUseCase } from "./domain/usecases/GetNotificationsUseCase";
 import { NotificationDefaultRepository } from "./data/repositories/NotificationDefaultRepository";
+import { DataValuesDefaultRepository } from "./data/repositories/DataValuesDefaultRepository";
+import { MetadataDefaultRepository } from "./data/repositories/MetadataDefaultRepository";
 import { GetCountryInformationUseCase } from "./domain/usecases/GetCountryInformationUseCase";
 import { CountryInformationDefaultRepository } from "./data/repositories/CountryInformationDefaultRepository";
 import { GetNotificationByIdUseCase } from "./domain/usecases/GetNotificationByIdUseCase";
+import { ImportSampleFileUseCase } from "./domain/usecases/data-entry/ImportSampleFileUseCase";
+import { RISDataCSVRepository } from "./data/repositories/RISDataCSVRepository";
+import { SampleDataCSVRepository } from "./data/repositories/SampleDataCSVRepository";
 
 export function getCompositionRoot(instance: Instance) {
     const api = getD2APiFromInstance(instance);
@@ -47,6 +53,10 @@ export function getCompositionRoot(instance: Instance) {
     const glassDataSubmissionRepository = new GlassDataSubmissionsDefaultRepository(dataStoreClient);
     const glassUploadsRepository = new GlassUploadsDefaultRepository(dataStoreClient);
     const glassDocumentsRepository = new GlassDocumentsDefaultRepository(dataStoreClient, instance);
+    const risDataRepository = new RISDataCSVRepository();
+    const sampleDataRepository = new SampleDataCSVRepository();
+    const dataValuesRepository = new DataValuesDefaultRepository(instance);
+    const metadataRepository = new MetadataDefaultRepository(instance);
     const questionnaireD2Repository = new QuestionnaireD2Repository(api);
     const notificationRepository = new NotificationDefaultRepository(instance);
     const countryInformationRepository = new CountryInformationDefaultRepository(instance);
@@ -84,6 +94,15 @@ export function getCompositionRoot(instance: Instance) {
             validate: new ValidateGlassDocumentsUseCase(glassDocumentsRepository),
             upload: new UploadDocumentUseCase(glassDocumentsRepository, glassUploadsRepository),
             deleteByUploadId: new DeleteDocumentInfoByUploadIdUseCase(glassDocumentsRepository, glassUploadsRepository),
+        }),
+        dataSubmision: getExecute({
+            RISFile: new ImportRISFileUseCase(
+                risDataRepository,
+                metadataRepository,
+                dataValuesRepository,
+                glassModuleRepository
+            ),
+            sampleFile: new ImportSampleFileUseCase(sampleDataRepository, metadataRepository, dataValuesRepository),
         }),
         questionnaires: getExecute({
             get: new GetQuestionnaireUseCase(questionnaireD2Repository),
