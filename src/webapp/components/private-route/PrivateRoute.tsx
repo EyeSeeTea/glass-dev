@@ -20,7 +20,7 @@ export const PrivateRoute = ({ children, pathname }: { children: JSX.Element; pa
                 snackbar.warning(i18n.t("You don't have capture access to this page"));
             }
         } else {
-            if (hasReadAccess === false) {
+            if (hasReadAccess === false && hasCaptureAccess === false) {
                 history.push("/");
                 snackbar.warning(i18n.t("You don't have read access to this page"));
             }
