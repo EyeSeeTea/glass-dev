@@ -5,13 +5,18 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2023-03-03T11:05:57.853Z\n"
-"PO-Revision-Date: 2023-03-03T11:05:57.853Z\n"
+"POT-Creation-Date: 2023-03-03T11:26:45.225Z\n"
+"PO-Revision-Date: 2023-03-03T11:26:45.225Z\n"
 
 msgid "Error saving registration status"
 msgstr ""
 
 msgid "Removed dataValues to import because attributeOptionCombo not found"
+msgstr ""
+
+msgid ""
+"The AST results provided are not valid (either they are all empty or equal "
+"to 0)"
 msgstr ""
 
 msgid "User Profile"
