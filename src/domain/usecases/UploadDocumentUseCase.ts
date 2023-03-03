@@ -12,6 +12,7 @@ type UploadType = {
         dataSubmission: string;
         module: string;
         period: string;
+        orgUnit: string;
     };
 };
 

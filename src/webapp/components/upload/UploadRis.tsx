@@ -92,6 +92,7 @@ export const UploadRis: React.FC<UploadRisProps> = ({ validate, batchId }) => {
                         dataSubmission: dataSubmissionId,
                         module: moduleId,
                         period,
+                        orgUnit: orgUnitId,
                     };
                     return compositionRoot.glassDocuments.upload({ file: uploadedRisFile, data }).run(
                         uploadId => {

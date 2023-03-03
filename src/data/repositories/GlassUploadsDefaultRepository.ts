@@ -57,4 +57,14 @@ export class GlassUploadsDefaultRepository implements GlassUploadsRepository {
             }
         });
     }
+
+    getUploadsByModuleOU(module: string, orgUnit: string): FutureData<GlassUploads[]> {
+        return this.dataStoreClient.getObjectsFilteredByProps<GlassUploads>(
+            DataStoreKeys.UPLOADS,
+            new Map<keyof GlassUploads, unknown>([
+                ["module", module],
+                ["countryCode", orgUnit],
+            ])
+        );
+    }
 }
