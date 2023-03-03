@@ -2,16 +2,12 @@ import React from "react";
 import { Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@material-ui/core";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
 import styled from "styled-components";
-import VisibilityIcon from "@material-ui/icons/Visibility";
 import i18n from "@eyeseetea/d2-ui-components/locales";
-
-function createData(name: string, count: number) {
-    return { name, count };
+import { ConsistencyError } from "../../../domain/entities/data-entry/ImportSummary";
+interface NonBlockingWarningsProps {
+    rows: ConsistencyError[];
 }
-
-const rows = [createData("AGG- BUG- DRUG combinations", 247), createData("AGG- Specimen-pathogen combinations", 124)];
-
-export const NonBlockingWarnings: React.FC = () => {
+export const NonBlockingWarnings: React.FC<NonBlockingWarningsProps> = ({ rows }) => {
     return (
         <ContentWrapper>
             <Typography variant="h3">{i18n.t("Non-blocking warnings")}</Typography>
@@ -22,19 +18,15 @@ export const NonBlockingWarnings: React.FC = () => {
                         <TableRow>
                             <TableCell>{i18n.t("Name")}</TableCell>
                             <TableCell>{i18n.t("Count")}</TableCell>
-                            <TableCell>{i18n.t("Details")}</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
                         {rows.map(row => (
-                            <TableRow key={row.name}>
+                            <TableRow key={row.error}>
                                 <TableCell align="left" className="text-gold">
-                                    {row.name}
+                                    {row.error}
                                 </TableCell>
                                 <TableCell>{row.count}</TableCell>
-                                <TableCell>
-                                    <VisibilityIcon />
-                                </TableCell>
                             </TableRow>
                         ))}
                     </TableBody>

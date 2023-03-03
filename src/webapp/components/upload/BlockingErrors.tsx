@@ -1,16 +1,13 @@
 import React from "react";
 import { Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@material-ui/core";
 import styled from "styled-components";
-import VisibilityIcon from "@material-ui/icons/Visibility";
 import i18n from "@eyeseetea/d2-ui-components/locales";
+import { ConsistencyError } from "../../../domain/entities/data-entry/ImportSummary";
 
-function createData(name: string, count: number) {
-    return { name, count };
+interface BlockingErrorsProps {
+    rows: ConsistencyError[];
 }
-
-const rows = [createData("AGG- BUG- DRUG combinations", 247), createData("AGG- Specimen-pathogen combinations", 124)];
-
-export const BlockingErrors: React.FC = () => {
+export const BlockingErrors: React.FC<BlockingErrorsProps> = ({ rows }) => {
     return (
         <ContentWrapper>
             <Typography variant="h3">{i18n.t("Blocking Errors")}</Typography>
@@ -21,19 +18,17 @@ export const BlockingErrors: React.FC = () => {
                         <TableRow>
                             <TableCell>{i18n.t("Name")}</TableCell>
                             <TableCell>{i18n.t("Count")}</TableCell>
-                            <TableCell>{i18n.t("Details")}</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {rows.map(row => (
-                            <TableRow key={row.name}>
-                                <TableCell align="left">{row.name}</TableCell>
-                                <TableCell>{row.count}</TableCell>
-                                <TableCell>
-                                    <VisibilityIcon />
-                                </TableCell>
-                            </TableRow>
-                        ))}
+                        {rows.map(row => {
+                            return (
+                                <TableRow key={row.error}>
+                                    <TableCell align="left">{row.error}</TableCell>
+                                    <TableCell>{row.count}</TableCell>
+                                </TableRow>
+                            );
+                        })}
                     </TableBody>
                 </Table>
             </TableContainer>
