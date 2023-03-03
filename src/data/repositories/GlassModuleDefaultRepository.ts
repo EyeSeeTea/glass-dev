@@ -1,3 +1,4 @@
+import { Id } from "@eyeseetea/d2-api";
 import { FutureData } from "../../domain/entities/Future";
 import { GlassModule } from "../../domain/entities/GlassModule";
 import { GlassModuleRepository } from "../../domain/repositories/GlassModuleRepository";
@@ -20,5 +21,10 @@ export class GlassModuleDefaultRepository implements GlassModuleRepository {
 
     save(modules: GlassModule[]): FutureData<void> {
         return this.dataStoreClient.saveObject(DataStoreKeys.MODULES, modules);
+    }
+
+    @cache()
+    getById(id: Id): FutureData<GlassModule> {
+        return this.dataStoreClient.getObjectCollectionByProp<GlassModule>(DataStoreKeys.MODULES, "id", id);
     }
 }

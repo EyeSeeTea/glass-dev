@@ -9,6 +9,7 @@ import { InstanceDefaultRepository } from "./data/repositories/InstanceDefaultRe
 import { GetCurrentUserUseCase } from "./domain/usecases/GetCurrentUserUseCase";
 import { GetSpecificDataSubmissionUseCase } from "./domain/usecases/GetSpecificDataSubmissionUseCase";
 import { GetGlassModuleByNameUseCase } from "./domain/usecases/GetGlassModuleByNameUseCase";
+import { GetGlassModuleByIdUseCase } from "./domain/usecases/GetGlassModuleByIdUseCase";
 import { GetGlassModulesUseCase } from "./domain/usecases/GetGlassModulesUseCase";
 import { GetGlassNewsUseCase } from "./domain/usecases/GetGlassNewsUseCase";
 import { GetGlassUploadsUseCase } from "./domain/usecases/GetGlassUploadsUseCase";
@@ -68,6 +69,7 @@ export function getCompositionRoot(instance: Instance) {
         glassModules: getExecute({
             getAll: new GetGlassModulesUseCase(glassModuleRepository, countryInformationRepository),
             getByName: new GetGlassModuleByNameUseCase(glassModuleRepository, countryInformationRepository),
+            getById: new GetGlassModuleByIdUseCase(glassModuleRepository),
             validate: new ValidateGlassModulesUseCase(glassModuleRepository),
         }),
         glassNews: getExecute({
