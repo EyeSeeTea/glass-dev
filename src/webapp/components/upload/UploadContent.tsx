@@ -13,6 +13,7 @@ import { ImportSummary } from "../../../domain/entities/data-entry/ImportSummary
 export const UploadContent: React.FC = () => {
     const [currentStep, setCurrentStep] = useState(1);
     const [completedSteps, setCompletedSteps] = useState<number[]>([]);
+    const [batchId, setBatchId] = useState<string>("");
     const [risFile, setRisFile] = useState<File | null>(null);
     const [sampleFile, setSampleFile] = useState<File | null>(null);
     const [risFileImportSummary, setRISFileImportSummary] = useState<ImportSummary | undefined>(undefined);
@@ -39,6 +40,8 @@ export const UploadContent: React.FC = () => {
                 renderStep(
                     currentStep,
                     changeStep,
+                    batchId,
+                    setBatchId,
                     risFile,
                     setRisFile,
                     sampleFile,
@@ -55,6 +58,8 @@ export const UploadContent: React.FC = () => {
 const renderStep = (
     step: number,
     changeStep: any,
+    batchId: string,
+    setBatchId: React.Dispatch<React.SetStateAction<string>>,
     risFile: File | null,
     setRisFile: React.Dispatch<React.SetStateAction<File | null>>,
     sampleFile: File | null,
@@ -69,6 +74,8 @@ const renderStep = (
             return (
                 <UploadFiles
                     changeStep={changeStep}
+                    batchId={batchId}
+                    setBatchId={setBatchId}
                     risFile={risFile}
                     setRisFile={setRisFile}
                     sampleFile={sampleFile}
@@ -80,6 +87,7 @@ const renderStep = (
                 <>
                     <ConsistencyChecks
                         changeStep={changeStep}
+                        batchId={batchId}
                         risFile={risFile}
                         sampleFile={sampleFile}
                         setRISFileImportSummary={setRISFileImportSummary}

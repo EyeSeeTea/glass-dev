@@ -10,6 +10,8 @@ import { SampleData } from "../../entities/data-entry/external/SampleData";
 import { SampleDataRepository } from "../../repositories/data-entry/SampleDataRepository";
 import { ImportSummary } from "../../entities/data-entry/ImportSummary";
 import { mapToImportSummary } from "./utils/mapDhis2Summary";
+import { checkBatchId } from "./utils/checkBatchId";
+import { includeBlokingErrors } from "./utils/includeBlockingErrors";
 
 const AMR_AMR_DS_Input_files_Sample_DS_ID = "OcAB7oaC072";
 
@@ -20,7 +22,7 @@ export class ImportSampleFileUseCase implements UseCase {
         private dataValuesRepository: DataValuesRepository
     ) {}
 
-    public execute(inputFile: File): FutureData<ImportSummary> {
+    public execute(inputFile: File, batchId: string): FutureData<ImportSummary> {
         return this.sampleDataRepository
             .get(inputFile)
             .flatMap(risDataItems => {
@@ -36,6 +38,8 @@ export class ImportSampleFileUseCase implements UseCase {
                 });
             })
             .flatMap(({ risDataItems, dataSet, dataElement_CC, orgUnits }) => {
+                const batchIdErrors = checkBatchId(risDataItems, batchId);
+
                 const dataValues = risDataItems
                     .map(risData => {
                         return dataSet.dataElements.map(dataElement => {
@@ -66,7 +70,9 @@ export class ImportSampleFileUseCase implements UseCase {
                 return this.dataValuesRepository.save(dataValues).map(saveSummary => {
                     const importSummary = mapToImportSummary(saveSummary);
 
-                    return importSummary;
+                    const summaryWithConsistencyBlokingErrors = includeBlokingErrors(importSummary, [...batchIdErrors]);
+
+                    return summaryWithConsistencyBlokingErrors;
                 });
             });
     }
