@@ -2,10 +2,10 @@ import React from "react";
 import { Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@material-ui/core";
 import styled from "styled-components";
 import i18n from "@eyeseetea/d2-ui-components/locales";
-import { ErrorCount } from "./ConsistencyChecks";
+import { ImporError } from "../../../domain/entities/data-entry/ImportSummary";
 
 interface BlockingErrorsProps {
-    rows: ErrorCount[];
+    rows: ImporError[];
 }
 export const BlockingErrors: React.FC<BlockingErrorsProps> = ({ rows }) => {
     return (

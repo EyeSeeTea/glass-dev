@@ -12,32 +12,33 @@ import { Future } from "../../../domain/entities/Future";
 
 import { useSnackbar } from "@eyeseetea/d2-ui-components";
 import { useCallbackEffect } from "../../hooks/use-callback-effect";
+import { ImportSummary } from "../../../domain/entities/data-entry/ImportSummary";
 interface ConsistencyChecksProps {
     changeStep: (step: number) => void;
     risFile: File | null;
     sampleFile?: File | null;
+
+    setRISFileImportSummary: React.Dispatch<React.SetStateAction<ImportSummary | undefined>>;
+    setSampleFileImportSummary: React.Dispatch<React.SetStateAction<ImportSummary | undefined>>;
 }
 
 const COMPLETED_STATUS = "COMPLETED";
 
-export type FileErrors = {
-    nonBlockingErrors: ErrorCount[];
-    blockingErrors: ErrorCount[];
-};
-
-export type ErrorCount = {
-    error: string;
-    count: number;
-};
-
-export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({ changeStep, risFile, sampleFile }) => {
+export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
+    changeStep,
+    risFile,
+    sampleFile,
+    setRISFileImportSummary,
+    setSampleFileImportSummary,
+}) => {
     const { compositionRoot } = useAppContext();
     const { currentModuleAccess } = useCurrentModuleContext();
     const snackbar = useSnackbar();
     const [fileType, setFileType] = useState<string>("ris");
     const [isDataSetUploading, setIsDataSetUploading] = useState<boolean>(false);
-    const [risFileErrors, setRISErrors] = useState<FileErrors>({ nonBlockingErrors: [], blockingErrors: [] });
-    const [sampleFileErrors, setSampleErrors] = useState<FileErrors | undefined>(undefined);
+    const [isUploadStatusChanging, setIsUploadStatusChanging] = useState<boolean>(false);
+    const [risFileErrors, setRISErrors] = useState<ImportSummary | undefined>(undefined);
+    const [sampleFileErrors, setSampleErrors] = useState<ImportSummary | undefined>(undefined);
 
     useEffect(() => {
         function uploadDatasets() {
@@ -56,15 +57,22 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({ changeStep
                         console.log({ importSampleFileSummary });
 
                         setRISErrors(importRISFileSummary);
+                        setRISFileImportSummary(importRISFileSummary);
 
                         if (importSampleFileSummary) {
                             setSampleErrors(importSampleFileSummary);
+                            setSampleFileImportSummary(importSampleFileSummary);
                         }
 
                         setIsDataSetUploading(false);
                     },
                     error => {
-                        setRISErrors({ nonBlockingErrors: [], blockingErrors: [{ error: error, count: 1 }] });
+                        setRISErrors({
+                            status: "ERROR",
+                            importCount: { ignored: 0, imported: 0, deleted: 0, updated: 0 },
+                            nonBlockingErrors: [],
+                            blockingErrors: [{ error: error, count: 1 }],
+                        });
 
                         setIsDataSetUploading(false);
                     }
@@ -73,7 +81,14 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({ changeStep
         }
 
         uploadDatasets();
-    }, [compositionRoot.dataSubmision, currentModuleAccess.moduleName, risFile, sampleFile]);
+    }, [
+        compositionRoot.dataSubmision,
+        currentModuleAccess.moduleName,
+        risFile,
+        sampleFile,
+        setRISFileImportSummary,
+        setSampleFileImportSummary,
+    ]);
 
     const changeType = (fileType: string) => {
         setFileType(fileType);
@@ -84,6 +99,7 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({ changeStep
         const sampleUploadId = localStorage.getItem("sampleUploadId");
 
         if (risUploadId) {
+            setIsUploadStatusChanging(true);
             return compositionRoot.glassUploads
                 .setStatus({ id: risUploadId, status: COMPLETED_STATUS })
                 .flatMap(() => {
@@ -94,9 +110,11 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({ changeStep
                 .run(
                     () => {
                         changeStep(3);
+                        setIsUploadStatusChanging(false);
                     },
                     errorMessage => {
                         snackbar.error(i18n.t(errorMessage));
+                        setIsUploadStatusChanging(false);
                     }
                 );
         }
@@ -123,22 +141,26 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({ changeStep
                 </div>
                 {renderTypeContent(fileType, risFileErrors, sampleFileErrors)}
                 <div className="bottom">
-                    <Button
-                        variant="contained"
-                        color="primary"
-                        endIcon={<ChevronRightIcon />}
-                        onClick={goToFinalStepEffect}
-                        disableElevation
-                        disabled={risFileErrors.blockingErrors.length ? true : false}
-                    >
-                        {i18n.t("Continue")}
-                    </Button>
+                    {isUploadStatusChanging ? (
+                        <CircularProgress size={25} />
+                    ) : (
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            endIcon={<ChevronRightIcon />}
+                            onClick={goToFinalStepEffect}
+                            disableElevation
+                            disabled={risFileErrors && risFileErrors.blockingErrors.length > 0 ? true : false}
+                        >
+                            {i18n.t("Continue")}
+                        </Button>
+                    )}
                 </div>
             </ContentWrapper>
         );
 };
 
-const renderTypeContent = (type: string, risfileErrors: FileErrors, samplefileErrors?: FileErrors) => {
+const renderTypeContent = (type: string, risfileErrors?: ImportSummary, samplefileErrors?: ImportSummary) => {
     switch (type) {
         case "sample":
             return samplefileErrors ? (
@@ -154,8 +176,12 @@ const renderTypeContent = (type: string, risfileErrors: FileErrors, samplefileEr
         default:
             return (
                 <>
-                    {risfileErrors.blockingErrors && <BlockingErrors rows={risfileErrors.blockingErrors} />}
-                    {risfileErrors.nonBlockingErrors && <NonBlockingWarnings rows={risfileErrors.nonBlockingErrors} />}
+                    {risfileErrors && risfileErrors.blockingErrors && (
+                        <BlockingErrors rows={risfileErrors.blockingErrors} />
+                    )}
+                    {risfileErrors && risfileErrors.nonBlockingErrors && (
+                        <NonBlockingWarnings rows={risfileErrors.nonBlockingErrors} />
+                    )}
                 </>
             );
     }

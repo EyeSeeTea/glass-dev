@@ -3,10 +3,9 @@ import { Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
 import styled from "styled-components";
 import i18n from "@eyeseetea/d2-ui-components/locales";
-import { ErrorCount } from "./ConsistencyChecks";
-
+import { ImporError } from "../../../domain/entities/data-entry/ImportSummary";
 interface NonBlockingWarningsProps {
-    rows: ErrorCount[];
+    rows: ImporError[];
 }
 export const NonBlockingWarnings: React.FC<NonBlockingWarningsProps> = ({ rows }) => {
     return (
