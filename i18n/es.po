@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: i18next-conv\n"
-"POT-Creation-Date: 2023-03-03T11:26:45.225Z\n"
+"POT-Creation-Date: 2023-03-03T17:50:05.646Z\n"
 "PO-Revision-Date: 2018-10-25T09:02:35.143Z\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -224,6 +224,12 @@ msgstr "Volver"
 
 msgid "Help"
 msgstr "Ayuda"
+
+msgid "You don't have capture access to this page"
+msgstr ""
+
+msgid "You don't have read access to this page"
+msgstr ""
 
 msgid "Set as incomplete"
 msgstr ""
