@@ -17,7 +17,7 @@ export const appConfig: AppConfig = {
             branch: "master",
         },
         clickUp: {
-            title: "Bug Report",
+            title: "[Bug Report] {title}",
             listId: "134510862",
         },
         feedbackOptions: {},
