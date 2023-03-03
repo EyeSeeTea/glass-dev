@@ -6,7 +6,8 @@ export type DataSubmissionStatusTypes =
     | "PENDING_APPROVAL"
     | "APPROVED"
     | "REJECTED"
-    | "PENDING_UPDATE_APPROVAL";
+    | "PENDING_UPDATE_APPROVAL"
+    | "UPDATE_REQUEST_ACCEPTED";
 
 export interface GlassDataSubmission {
     id: Id;
