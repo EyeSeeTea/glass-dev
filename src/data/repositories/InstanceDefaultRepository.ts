@@ -12,7 +12,7 @@ import { DataStoreClient } from "../data-store/DataStoreClient";
 import { DataStoreKeys } from "../data-store/DataStoreKeys";
 import { Instance } from "../entities/Instance";
 
-const COUNTRY_LEVEL = 2;
+const COUNTRY_LEVEL = 3;
 
 export class InstanceDefaultRepository implements InstanceRepository {
     private api: D2Api;
@@ -43,7 +43,9 @@ export class InstanceDefaultRepository implements InstanceRepository {
                 captureAccess: false, //orgUnits in dataViewOrganisationUnits dont have capture access
             }));
 
-        orgUnitsAccess = [...orgUnitsAccess, ...readOnlyAccessOrgUnits];
+        orgUnitsAccess = [...orgUnitsAccess, ...readOnlyAccessOrgUnits].sort((a, b) =>
+            a.orgUnitName.localeCompare(b.orgUnitName)
+        );
 
         //TO DO: TEMP - For testing the OrgUnit Access implementation, consoling the orgUnitAccess.
         //TO DO: Remove once permission implementation done.
@@ -96,11 +98,12 @@ export class InstanceDefaultRepository implements InstanceRepository {
                         children: true,
                         level: true,
                     },
-                    dataViewOrganisationUnits: { id: true, name: true },
+                    dataViewOrganisationUnits: { id: true, name: true, level: true },
                 },
             })
         ).flatMap(user => {
-            const { organisationUnits } = user;
+            const { organisationUnits, dataViewOrganisationUnits } = user;
+
             const countryOrgUnits: { name: string; id: string }[] = [];
 
             organisationUnits.forEach(orgUnit => {
@@ -109,7 +112,8 @@ export class InstanceDefaultRepository implements InstanceRepository {
 
             return apiToFuture(
                 this.api.models.organisationUnits.get({
-                    filter: { "parent.id": { in: organisationUnits.map(ou => ou.id) } },
+                    filter: { "parent.id": { in: organisationUnits.map(ou => ou.id) }, level: { le: "3" } },
+                    includeDescendants: true,
                     fields: {
                         id: true,
                         name: true,
@@ -121,17 +125,41 @@ export class InstanceDefaultRepository implements InstanceRepository {
                     if (orgUnit.level === COUNTRY_LEVEL) countryOrgUnits.push(orgUnit);
                 });
 
-                const uniqueOrgUnits = _.uniqBy(countryOrgUnits, "id").sort((a, b) => a.name.localeCompare(b.name));
+                const countryDataViewOrgUnits: { name: string; id: string }[] = [];
 
-                return this.mapUserGroupAccess(user.userGroups).map((userModulesAccess): UserAccessInfo => {
-                    return {
-                        id: user.id,
-                        name: user.displayName,
-                        userGroups: user.userGroups,
-                        ...user.userCredentials,
-                        userOrgUnitsAccess: this.mapUserOrgUnitsAccess(uniqueOrgUnits, user.dataViewOrganisationUnits),
-                        userModulesAccess: userModulesAccess,
-                    };
+                dataViewOrganisationUnits.forEach(orgUnit => {
+                    if (orgUnit.level === COUNTRY_LEVEL)
+                        countryDataViewOrgUnits.push({ name: orgUnit.name, id: orgUnit.id });
+                });
+
+                return apiToFuture(
+                    this.api.models.organisationUnits.get({
+                        filter: { "parent.id": { in: dataViewOrganisationUnits.map(ou => ou.id) }, level: { le: "3" } },
+                        includeDescendants: true,
+                        fields: {
+                            id: true,
+                            name: true,
+                            level: true,
+                        },
+                    })
+                ).flatMap(({ objects }) => {
+                    objects.forEach(orgUnit => {
+                        if (orgUnit.level === COUNTRY_LEVEL) countryDataViewOrgUnits.push(orgUnit);
+                    });
+
+                    const uniqueOrgUnits = _.uniqBy(countryOrgUnits, "id");
+                    const uniqueDataViewOrgUnits = _.uniqBy(countryDataViewOrgUnits, "id");
+
+                    return this.mapUserGroupAccess(user.userGroups).map((userModulesAccess): UserAccessInfo => {
+                        return {
+                            id: user.id,
+                            name: user.displayName,
+                            userGroups: user.userGroups,
+                            ...user.userCredentials,
+                            userOrgUnitsAccess: this.mapUserOrgUnitsAccess(uniqueOrgUnits, uniqueDataViewOrgUnits),
+                            userModulesAccess: userModulesAccess,
+                        };
+                    });
                 });
             });
         });
