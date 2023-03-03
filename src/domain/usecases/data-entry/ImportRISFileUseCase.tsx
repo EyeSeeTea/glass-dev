@@ -16,6 +16,7 @@ import { ConsistencyError, ImportSummary } from "../../entities/data-entry/Impor
 import { checkSpecimenPathogen } from "./utils/checkSpecimenPathogen";
 import { GlassModuleRepository } from "../../repositories/GlassModuleRepository";
 import { checkASTResults } from "./utils/checkASTResults";
+import { checkPathogenAntibiotic } from "./utils/checkPathogenAntibiotic";
 
 const AMR_AMR_DS_INPUT_FILES_RIS_DS_ID = "CeQPmXgrhHF";
 const AMR_PATHOGEN_ANTIBIOTIC_CC_ID = "S427AvQESbw";
@@ -46,6 +47,10 @@ export class ImportRISFileUseCase implements UseCase {
                 });
             })
             .flatMap(({ risDataItems, dataSet, dataSet_CC, dataElement_CC, orgUnits, module }) => {
+                const pathogenAntibioticErrors = module.consistencyChecks
+                    ? checkPathogenAntibiotic(risDataItems, module.consistencyChecks.pathogenAntibiotic)
+                    : [];
+
                 const specimenPathogenErrors = module.consistencyChecks
                     ? checkSpecimenPathogen(risDataItems, module.consistencyChecks.specimenPathogen)
                     : [];
@@ -97,6 +102,7 @@ export class ImportRISFileUseCase implements UseCase {
                     const importSummary = mapToImportSummary(saveSummary);
 
                     const summaryWithConsistencyBlokingErrors = this.includeBlokingErrors(importSummary, [
+                        ...pathogenAntibioticErrors,
                         ...specimenPathogenErrors,
                         ...astResultsErrors,
                     ]);

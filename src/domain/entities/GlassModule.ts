@@ -13,6 +13,7 @@ export interface GlassModule {
     questionnaires: QuestionnaireConfig[];
     consistencyChecks?: {
         specimenPathogen: Record<string, string[]>;
+        pathogenAntibiotic: Record<string, string[]>;
     };
 }
 
