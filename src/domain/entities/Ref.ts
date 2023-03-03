@@ -7,6 +7,11 @@ export interface Ref {
 export interface NamedRef extends Ref {
     name: string;
 }
+
+export interface CodedRef extends Ref {
+    code: string;
+}
+
 const abc = "abcdefghijklmnopqrstuvwxyz";
 const letters = abc.concat(abc.toUpperCase());
 
