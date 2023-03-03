@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2023-03-03T11:05:57.853Z\n"
-"PO-Revision-Date: 2023-03-03T11:05:57.853Z\n"
+"POT-Creation-Date: 2023-03-03T17:50:05.646Z\n"
+"PO-Revision-Date: 2023-03-03T17:50:05.646Z\n"
 
 msgid "Error saving registration status"
 msgstr ""
@@ -219,6 +219,12 @@ msgid "Back"
 msgstr ""
 
 msgid "Help"
+msgstr ""
+
+msgid "You don't have capture access to this page"
+msgstr ""
+
+msgid "You don't have read access to this page"
 msgstr ""
 
 msgid "Set as incomplete"
