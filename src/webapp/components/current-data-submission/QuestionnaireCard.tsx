@@ -17,7 +17,7 @@ export interface QuetionnaireCardProps {
     className?: string;
 }
 
-export const QuetionnaireCard: React.FC<QuetionnaireCardProps> = ({ items, className }) => {
+export const QuetionnaireCard: React.FC<QuetionnaireCardProps> = ({ className }) => {
     return (
         <ContentWrapper className={className}>
             <CustomCard />

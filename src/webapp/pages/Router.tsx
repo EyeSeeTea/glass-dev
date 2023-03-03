@@ -8,6 +8,7 @@ import { LandingPage } from "./landing/LandingPage";
 import { UploadHistoryPage } from "./upload-history/UploadHistoryPage";
 import { CurrentOrgUnitContextProvider } from "../context-providers/CurrentOrgUnitContextProvider";
 import { CurrentModuleContextProvider } from "../context-providers/CurrentModuleContextProvider";
+import { QuestionnaireFormTest } from "../components/questionnaire/QuestionnaireFormTest";
 
 export const Router: React.FC = React.memo(() => {
     return (
@@ -20,6 +21,7 @@ export const Router: React.FC = React.memo(() => {
                         <Route path="/upload/" render={() => <UploadPage />} />
                         <Route path="/upload-history" render={() => <UploadHistoryPage />} />
                         <Route path="/country-information" render={() => <CountryInformationPage />} />
+                        <Route path="/questionnaire" render={() => <QuestionnaireFormTest />} />
                         <Route render={() => <LandingPage />} />
                     </Switch>
                 </CurrentModuleContextProvider>

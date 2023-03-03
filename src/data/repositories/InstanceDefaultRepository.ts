@@ -49,8 +49,7 @@ export class InstanceDefaultRepository implements InstanceRepository {
 
         //TO DO: TEMP - For testing the OrgUnit Access implementation, consoling the orgUnitAccess.
         //TO DO: Remove once permission implementation done.
-        console.debug("Org Unit Access Permissions : " + JSON.stringify(orgUnitsAccess));
-
+        // console.debug("Org Unit Access Permissions : " + JSON.stringify(orgUnitsAccess));
         return orgUnitsAccess;
     };
 
@@ -75,7 +74,7 @@ export class InstanceDefaultRepository implements InstanceRepository {
             });
             //TO DO: TEMP - For testing the Module Access implementation, consoling the moduleAccess.
             //TO DO: Remove once permission implementation done.
-            console.debug("Module Access Permissions : " + JSON.stringify(moduleAccess));
+            //console.debug("Module Access Permissions : " + JSON.stringify(moduleAccess));
             return Future.success(moduleAccess);
         });
     };
