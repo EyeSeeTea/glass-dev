@@ -17,6 +17,7 @@ import { checkSpecimenPathogen } from "./utils/checkSpecimenPathogen";
 import { GlassModuleRepository } from "../../repositories/GlassModuleRepository";
 import { checkASTResults } from "./utils/checkASTResults";
 import { checkPathogenAntibiotic } from "./utils/checkPathogenAntibiotic";
+import { checkBatchId } from "./utils/checkBatchId";
 
 const AMR_AMR_DS_INPUT_FILES_RIS_DS_ID = "CeQPmXgrhHF";
 const AMR_PATHOGEN_ANTIBIOTIC_CC_ID = "S427AvQESbw";
@@ -29,7 +30,7 @@ export class ImportRISFileUseCase implements UseCase {
         private moduleRepository: GlassModuleRepository
     ) {}
 
-    public execute(inputFile: File): FutureData<ImportSummary> {
+    public execute(inputFile: File, batchId: string): FutureData<ImportSummary> {
         return this.risDataRepository
             .get(inputFile)
             .flatMap(risDataItems => {
@@ -56,6 +57,8 @@ export class ImportRISFileUseCase implements UseCase {
                     : [];
 
                 const astResultsErrors = checkASTResults(risDataItems);
+
+                const batchIdErrors = checkBatchId(risDataItems, batchId);
 
                 const dataValues = risDataItems
                     .map(risData => {
@@ -105,6 +108,7 @@ export class ImportRISFileUseCase implements UseCase {
                         ...pathogenAntibioticErrors,
                         ...specimenPathogenErrors,
                         ...astResultsErrors,
+                        ...batchIdErrors,
                     ]);
 
                     const finalImportSummary = this.includeDataValuesRemovedWarning(

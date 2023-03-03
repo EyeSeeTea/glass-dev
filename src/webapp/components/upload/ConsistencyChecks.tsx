@@ -15,6 +15,7 @@ import { useCallbackEffect } from "../../hooks/use-callback-effect";
 import { ImportSummary } from "../../../domain/entities/data-entry/ImportSummary";
 interface ConsistencyChecksProps {
     changeStep: (step: number) => void;
+    batchId: string;
     risFile: File | null;
     sampleFile?: File | null;
 
@@ -26,6 +27,7 @@ const COMPLETED_STATUS = "COMPLETED";
 
 export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
     changeStep,
+    batchId,
     risFile,
     sampleFile,
     setRISFileImportSummary,
@@ -46,9 +48,9 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
                 setIsDataSetUploading(true);
 
                 Future.joinObj({
-                    importRISFileSummary: compositionRoot.dataSubmision.RISFile(risFile),
+                    importRISFileSummary: compositionRoot.dataSubmision.RISFile(risFile, batchId),
                     importSampleFileSummary: sampleFile
-                        ? compositionRoot.dataSubmision.sampleFile(sampleFile)
+                        ? compositionRoot.dataSubmision.sampleFile(sampleFile, batchId)
                         : Future.success(undefined),
                 }).run(
                     ({ importRISFileSummary, importSampleFileSummary }) => {
@@ -88,6 +90,7 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
         sampleFile,
         setRISFileImportSummary,
         setSampleFileImportSummary,
+        batchId,
     ]);
 
     const changeType = (fileType: string) => {
