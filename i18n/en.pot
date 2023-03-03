@@ -5,10 +5,13 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2023-02-28T11:45:09.692Z\n"
-"PO-Revision-Date: 2023-02-28T11:45:09.692Z\n"
+"POT-Creation-Date: 2023-03-03T17:50:05.646Z\n"
+"PO-Revision-Date: 2023-03-03T17:50:05.646Z\n"
 
 msgid "Error saving registration status"
+msgstr ""
+
+msgid "Removed dataValues to import because attributeOptionCombo not found"
 msgstr ""
 
 msgid "User Profile"
@@ -218,6 +221,12 @@ msgstr ""
 msgid "Help"
 msgstr ""
 
+msgid "You don't have capture access to this page"
+msgstr ""
+
+msgid "You don't have read access to this page"
+msgstr ""
+
 msgid "Set as incomplete"
 msgstr ""
 
@@ -242,9 +251,6 @@ msgstr ""
 msgid "Count"
 msgstr ""
 
-msgid "Details"
-msgstr ""
-
 msgid "Back to Module"
 msgstr ""
 
@@ -260,11 +266,6 @@ msgstr ""
 msgid "Info abou the previously updated quarter and the missing quarters"
 msgstr ""
 
-msgid ""
-"Explaining what consistency checks are: Lorem ipsum dolor sit amet, "
-"consectetur adipiscing elit, sed doeiusmod tempor incididunt ut labore"
-msgstr ""
-
 msgid "RIS File"
 msgstr ""
 
@@ -274,31 +275,13 @@ msgstr ""
 msgid "Continue"
 msgstr ""
 
-msgid "Sample file uploading content/intructions here..."
+msgid "No sample file uploaded"
 msgstr ""
 
 msgid "Non-blocking warnings"
 msgstr ""
 
 msgid "Summary"
-msgstr ""
-
-msgid "130 Subjects"
-msgstr ""
-
-msgid "First Sample"
-msgstr ""
-
-msgid "Last Sample"
-msgstr ""
-
-msgid "Filter by sample type"
-msgstr ""
-
-msgid "Compare with data from previous uploads"
-msgstr ""
-
-msgid "Charts"
 msgstr ""
 
 msgid "I need help"
