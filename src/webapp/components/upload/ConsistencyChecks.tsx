@@ -8,7 +8,6 @@ import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { useAppContext } from "../../contexts/app-context";
 import { useCurrentModuleContext } from "../../contexts/current-module-context";
-import { DataValuesSaveSummary } from "../../../domain/entities/data-entry/DataValuesSaveSummary";
 import { Future } from "../../../domain/entities/Future";
 
 import { useSnackbar } from "@eyeseetea/d2-ui-components";
@@ -46,20 +45,20 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({ changeStep
                 setIsDataSetUploading(true);
 
                 Future.joinObj({
-                    risFileResult: compositionRoot.dataSubmision.RISFile(risFile),
-                    sampleFileResult: sampleFile
+                    importRISFileSummary: compositionRoot.dataSubmision.RISFile(risFile),
+                    importSampleFileSummary: sampleFile
                         ? compositionRoot.dataSubmision.sampleFile(sampleFile)
                         : Future.success(undefined),
                 }).run(
-                    ({ risFileResult, sampleFileResult }) => {
+                    ({ importRISFileSummary, importSampleFileSummary }) => {
                         /* eslint-disable no-console */
-                        console.log({ risFileResult });
-                        console.log({ sampleFileResult });
+                        console.log({ importRISFileSummary });
+                        console.log({ importSampleFileSummary });
 
-                        setRISErrors(extractErrors(risFileResult));
+                        setRISErrors(importRISFileSummary);
 
-                        if (sampleFileResult) {
-                            setSampleErrors(extractErrors(sampleFileResult));
+                        if (importSampleFileSummary) {
+                            setSampleErrors(importSampleFileSummary);
                         }
 
                         setIsDataSetUploading(false);
@@ -192,37 +191,3 @@ const ContentWrapper = styled.div`
         }
     }
 `;
-
-const extractErrors = (datasetImportStatus: DataValuesSaveSummary): FileErrors => {
-    const nonBlockingErrors =
-        datasetImportStatus.status === "WARNING"
-            ? datasetImportStatus.conflicts?.map(status => {
-                  return {
-                      error: status.value,
-                      count: 1,
-                  };
-              }) || []
-            : [];
-
-    const blokingErrors =
-        datasetImportStatus.status === "ERROR"
-            ? datasetImportStatus.conflicts?.map(status => {
-                  return {
-                      error: status.value,
-                      count: 1,
-                  };
-              }) || []
-            : [];
-
-    const finalBlockingErrors = _.compact([
-        ...blokingErrors,
-        datasetImportStatus.importCount.ignored > 0
-            ? {
-                  error: "Import Ignored",
-                  count: datasetImportStatus.importCount.ignored,
-              }
-            : undefined,
-    ]);
-
-    return { nonBlockingErrors, blockingErrors: finalBlockingErrors };
-};
