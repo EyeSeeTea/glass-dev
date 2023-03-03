@@ -28,7 +28,7 @@ export function getCategoryOptionComboByOptionCodes(categoryCombo: CategoryCombo
     const categoryOptions = categoryCombo.categories
         .map(cat => cat.categoryOptions)
         .flat()
-        .filter(catOp => codes.includes(catOp.code));
+        .filter(catOp => codes.includes(catOp.code.trim()));
 
     const uniqueCategoryOptions = _.unionBy(categoryOptions, catOption => catOption.code);
 
