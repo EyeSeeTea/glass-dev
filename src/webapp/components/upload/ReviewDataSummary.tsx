@@ -1,40 +1,26 @@
-import React, { useEffect, useState } from "react";
-import { Button, Checkbox, FormControlLabel } from "@material-ui/core";
+import React, { useState } from "react";
+import { Button } from "@material-ui/core";
 import styled from "styled-components";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
-import sampleCharts from "../../assets/sample-charts.png";
 import i18n from "@eyeseetea/d2-ui-components/locales";
+import { ImportSummary } from "../../../domain/entities/data-entry/ImportSummary";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 
 interface ReviewDataSummaryProps {
     changeStep: (step: number) => void;
+    risFileImportSummary?: ImportSummary;
+    sampleFileImportSummary?: ImportSummary;
 }
 
-export const ReviewDataSummary: React.FC<ReviewDataSummaryProps> = ({ changeStep }) => {
+export const ReviewDataSummary: React.FC<ReviewDataSummaryProps> = ({
+    changeStep,
+    risFileImportSummary,
+    sampleFileImportSummary,
+}) => {
     const [fileType, setFileType] = useState<string>("ris");
-    const [isValidated, setIsValidated] = useState(false);
-
-    const [state, setState] = React.useState({
-        checkedA: false,
-        checkedB: false,
-        checkedC: false,
-        checkedD: false,
-    });
-
-    useEffect(() => {
-        if (state.checkedA || state.checkedB || state.checkedC || state.checkedD) {
-            setIsValidated(true);
-        } else {
-            setIsValidated(false);
-        }
-    }, [state]);
 
     const changeType = (fileType: string) => {
         setFileType(fileType);
-    };
-
-    const check = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setState({ ...state, [event.target.name]: event.target.checked });
     };
 
     return (
@@ -51,54 +37,38 @@ export const ReviewDataSummary: React.FC<ReviewDataSummaryProps> = ({ changeStep
                 <h3>{i18n.t("Summary")}</h3>
                 <SectionCard className="wrong">
                     <ul>
-                        <li>{i18n.t("130 Subjects")}</li>
                         <li>
-                            <b>{i18n.t("First Sample")}</b> 1-20-2020
+                            <b>{i18n.t("imported: ")}</b>{" "}
+                            {fileType === "ris"
+                                ? risFileImportSummary?.importCount.imported
+                                : sampleFileImportSummary?.importCount.imported}
                         </li>
                         <li>
-                            <b>{i18n.t("Last Sample")}</b> 1-20-2020
+                            <b>{i18n.t("updated: ")}</b>{" "}
+                            {fileType === "ris"
+                                ? risFileImportSummary?.importCount.updated
+                                : sampleFileImportSummary?.importCount.updated}
+                        </li>
+                        <li>
+                            <b>{i18n.t("deleted: ")}</b>{" "}
+                            {fileType === "ris"
+                                ? risFileImportSummary?.importCount.deleted
+                                : sampleFileImportSummary?.importCount.deleted}
+                            {}
+                        </li>
+                        <li>
+                            <b>{i18n.t("ignored: ")}</b>{" "}
+                            {fileType === "ris"
+                                ? risFileImportSummary?.importCount.ignored
+                                : sampleFileImportSummary?.importCount.ignored}
                         </li>
                     </ul>
-                </SectionCard>
-            </Section>
-            <Section className="filter">
-                <h3>{i18n.t("Filter by sample type")}</h3>
-                <SectionCard className="wrong">
-                    <FormControlLabel
-                        control={<Checkbox checked={state.checkedA} onChange={check} name="checkedA" color="primary" />}
-                        label="Blood"
-                    />
-                    <FormControlLabel
-                        control={<Checkbox checked={state.checkedB} onChange={check} name="checkedB" color="primary" />}
-                        label="Genital"
-                    />
-                </SectionCard>
-            </Section>
-            <Section className="compare">
-                <h3>{i18n.t("Compare with data from previous uploads")}</h3>
-                <SectionCard className="wrong">
-                    <FormControlLabel
-                        control={<Checkbox checked={state.checkedC} onChange={check} name="checkedC" color="primary" />}
-                        label="2020"
-                    />
-                    <FormControlLabel
-                        control={<Checkbox checked={state.checkedD} onChange={check} name="checkedD" color="primary" />}
-                        label="2021"
-                    />
-                </SectionCard>
-            </Section>
-            <Section className="charts">
-                <h3>{i18n.t("Charts")}</h3>
-                <SectionCard className="wrong">
-                    <img src={sampleCharts} alt="Sample Charts" />
-                    {/* <h3>All required charts to load here...</h3> */}
                 </SectionCard>
             </Section>
             <div className="bottom">
                 <Button
                     variant="contained"
-                    color={isValidated ? "primary" : "default"}
-                    disabled={isValidated ? false : true}
+                    color={"primary"}
                     endIcon={<ChevronRightIcon />}
                     onClick={() => changeStep(4)}
                     disableElevation

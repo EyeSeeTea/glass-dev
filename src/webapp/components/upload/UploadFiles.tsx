@@ -15,6 +15,10 @@ import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context
 
 interface UploadFilesProps {
     changeStep: (step: number) => void;
+    risFile: File | null;
+    setRisFile: React.Dispatch<React.SetStateAction<File | null>>;
+    sampleFile: File | null;
+    setSampleFile: React.Dispatch<React.SetStateAction<File | null>>;
 }
 
 const datasetOptions = [
@@ -44,7 +48,13 @@ const datasetOptions = [
     },
 ];
 
-export const UploadFiles: React.FC<UploadFilesProps> = ({ changeStep }) => {
+export const UploadFiles: React.FC<UploadFilesProps> = ({
+    changeStep,
+    risFile,
+    setRisFile,
+    sampleFile,
+    setSampleFile,
+}) => {
     const { compositionRoot } = useAppContext();
     const location = useLocation();
 
@@ -105,9 +115,9 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({ changeStep }) => {
     return (
         <ContentWrapper>
             <div className="file-fields">
-                <UploadRis validate={setIsFileValid} batchId={batchId} />
+                <UploadRis validate={setIsFileValid} batchId={batchId} risFile={risFile} setRisFile={setRisFile} />
 
-                <UploadSample batchId={batchId} />
+                <UploadSample batchId={batchId} sampleFile={sampleFile} setSampleFile={setSampleFile} />
             </div>
 
             <div className="batch-id">

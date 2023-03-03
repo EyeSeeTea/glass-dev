@@ -15,13 +15,15 @@ import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context
 import { useLocation } from "react-router-dom";
 import { useCallbackEffect } from "../../hooks/use-callback-effect";
 interface UploadRisProps {
+    risFile: File | null;
+    setRisFile: React.Dispatch<React.SetStateAction<File | null>>;
     validate: (val: boolean) => void;
     batchId: string;
 }
 
 const RIS_FILE_TYPE = "RIS";
 
-export const UploadRis: React.FC<UploadRisProps> = ({ validate, batchId }) => {
+export const UploadRis: React.FC<UploadRisProps> = ({ risFile, setRisFile, validate, batchId }) => {
     const { compositionRoot } = useAppContext();
     const location = useLocation();
     const {
@@ -34,7 +36,6 @@ export const UploadRis: React.FC<UploadRisProps> = ({ validate, batchId }) => {
     const period = queryParameters.get("period") || (new Date().getFullYear() - 1).toString();
     const snackbar = useSnackbar();
 
-    const [risFile, setRisFile] = useState<File | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const risFileUploadRef = useRef<DropzoneRef>(null);
 
@@ -72,7 +73,7 @@ export const UploadRis: React.FC<UploadRisProps> = ({ validate, batchId }) => {
                 );
             }
         },
-        [compositionRoot.glassDocuments, snackbar]
+        [compositionRoot.glassDocuments, snackbar, setRisFile]
     );
 
     const removeFilesEffect = useCallbackEffect(removeFiles);
@@ -107,7 +108,7 @@ export const UploadRis: React.FC<UploadRisProps> = ({ validate, batchId }) => {
                 }
             }
         },
-        [batchId, compositionRoot.glassDocuments, dataSubmissionId, moduleId, period, snackbar]
+        [batchId, compositionRoot.glassDocuments, dataSubmissionId, moduleId, orgUnitId, period, setRisFile, snackbar]
     );
 
     const risFileUploadEffect = useCallbackEffect(risFileUpload);
