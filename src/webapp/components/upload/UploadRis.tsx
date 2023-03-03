@@ -9,6 +9,7 @@ import { Dropzone, DropzoneRef } from "../dropzone/Dropzone";
 import { FileRejection } from "react-dropzone";
 import { RemoveContainer, StyledRemoveButton } from "./UploadFiles";
 import { useAppContext } from "../../contexts/app-context";
+import { useCallbackEffect } from "../../hooks/use-callback-effect";
 interface UploadRisProps {
     validate: (val: boolean) => void;
     batchId: string;
@@ -36,18 +37,33 @@ export const UploadRis: React.FC<UploadRisProps> = ({ validate, batchId }) => {
         }
     }, [risFile, validate]);
 
-    const removeFiles = async (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-        event.preventDefault();
-        const risUploadId = localStorage.getItem("risUploadId");
-        if (risUploadId) {
-            await compositionRoot.glassDocuments.deleteByUploadId(risUploadId).toPromise();
-        }
-        localStorage.removeItem("risUploadId");
-        setRisFile(null);
-    };
+    const removeFiles = useCallback(
+        (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+            event.preventDefault();
+            setIsLoading(true);
+            const risUploadId = localStorage.getItem("risUploadId");
+            if (risUploadId) {
+                return compositionRoot.glassDocuments.deleteByUploadId(risUploadId).run(
+                    () => {
+                        localStorage.removeItem("risUploadId");
+                        setRisFile(null);
+                        setIsLoading(false);
+                    },
+                    errorMessage => {
+                        snackbar.error(errorMessage);
+                        setRisFile(null);
+                        setIsLoading(false);
+                    }
+                );
+            }
+        },
+        [compositionRoot.glassDocuments, snackbar]
+    );
+
+    const removeFilesEffect = useCallbackEffect(removeFiles);
 
     const risFileUpload = useCallback(
-        async (files: File[], rejections: FileRejection[]) => {
+        (files: File[], rejections: FileRejection[]) => {
             if (rejections.length > 0) {
                 snackbar.error(i18n.t("Multiple uploads not allowed, please select one file"));
             } else {
@@ -59,24 +75,29 @@ export const UploadRis: React.FC<UploadRisProps> = ({ validate, batchId }) => {
                         batchId,
                         fileType: RIS_FILE_TYPE,
                     };
-                    const uploadId = await compositionRoot.glassDocuments
-                        .upload({ file: uploadedRisFile, data })
-                        .toPromise();
-                    localStorage.setItem("risUploadId", uploadId);
-                    setIsLoading(false);
-                } else {
-                    snackbar.error(i18n.t("Error in file upload"));
+                    return compositionRoot.glassDocuments.upload({ file: uploadedRisFile, data }).run(
+                        uploadId => {
+                            localStorage.setItem("risUploadId", uploadId);
+                            setIsLoading(false);
+                        },
+                        () => {
+                            snackbar.error(i18n.t("Error in file upload"));
+                            setIsLoading(false);
+                        }
+                    );
                 }
             }
         },
         [batchId, compositionRoot.glassDocuments, snackbar]
     );
 
+    const risFileUploadEffect = useCallbackEffect(risFileUpload);
+
     return (
         <ContentWrapper className="ris-file">
             <span className="label">{i18n.t("Choose RIS File")}</span>
             {/* Allow only one file upload per dataset */}
-            <Dropzone ref={risFileUploadRef} onDrop={risFileUpload} maxFiles={1}>
+            <Dropzone ref={risFileUploadRef} onDrop={risFileUploadEffect} maxFiles={1}>
                 <Button
                     variant="contained"
                     color="primary"
@@ -92,7 +113,7 @@ export const UploadRis: React.FC<UploadRisProps> = ({ validate, batchId }) => {
             {risFile && (
                 <RemoveContainer>
                     {risFile?.name} - {risFile?.type}
-                    <StyledRemoveButton onClick={removeFiles}>
+                    <StyledRemoveButton onClick={removeFilesEffect}>
                         <CloseIcon />
                     </StyledRemoveButton>
                 </RemoveContainer>

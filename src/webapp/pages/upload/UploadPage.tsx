@@ -2,7 +2,7 @@ import { Breadcrumbs, Button } from "@material-ui/core";
 import React from "react";
 import styled from "styled-components";
 import { UploadContent } from "../../components/upload/UploadContent";
-import { MainLayout } from "../../components/main-layout/MainLayout";
+import { MainLayout } from "../../components/layouts/main-layout/MainLayout";
 import { glassColors, palette } from "../app/themes/dhis2.theme";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import { NavLink } from "react-router-dom";
