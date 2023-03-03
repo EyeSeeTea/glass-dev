@@ -42,7 +42,6 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({ changeStep
 
     useEffect(() => {
         function uploadDatasets() {
-            //TODO: It's neccessary validate ARM?
             if (risFile && currentModuleAccess.moduleName === "AMR") {
                 setIsDataSetUploading(true);
 
@@ -215,13 +214,15 @@ const extractErrors = (datasetImportStatus: DataValuesSaveSummary): FileErrors =
               }) || []
             : [];
 
-    const finalBlockingErrors = [
+    const finalBlockingErrors = _.compact([
         ...blokingErrors,
-        {
-            error: "Import Ignored",
-            count: datasetImportStatus.importCount.ignored,
-        },
-    ];
+        datasetImportStatus.importCount.ignored > 0
+            ? {
+                  error: "Import Ignored",
+                  count: datasetImportStatus.importCount.ignored,
+              }
+            : undefined,
+    ]);
 
     return { nonBlockingErrors, blockingErrors: finalBlockingErrors };
 };
