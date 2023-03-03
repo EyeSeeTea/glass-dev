@@ -8,10 +8,15 @@ import { glassColors, palette } from "../../pages/app/themes/dhis2.theme";
 import { UploadFiles } from "./UploadFiles";
 import { ReviewDataSummary } from "./ReviewDataSummary";
 import { Completed } from "./Completed";
+import { ImportSummary } from "../../../domain/entities/data-entry/ImportSummary";
 
 export const UploadContent: React.FC = () => {
     const [currentStep, setCurrentStep] = useState(1);
     const [completedSteps, setCompletedSteps] = useState<number[]>([]);
+    const [risFile, setRisFile] = useState<File | null>(null);
+    const [sampleFile, setSampleFile] = useState<File | null>(null);
+    const [risFileImportSummary, setRISFileImportSummary] = useState<ImportSummary | undefined>(undefined);
+    const [sampleFileImportSummary, setSampleImportSummary] = useState<ImportSummary | undefined>(undefined);
 
     const changeStep = (step: number) => {
         setCurrentStep(step);
@@ -30,24 +35,67 @@ export const UploadContent: React.FC = () => {
                 changeStep={changeStep}
                 completedSteps={completedSteps}
             />
-            {steps.length && renderStep(currentStep, changeStep)}
+            {steps.length &&
+                renderStep(
+                    currentStep,
+                    changeStep,
+                    risFile,
+                    setRisFile,
+                    sampleFile,
+                    setSampleFile,
+                    risFileImportSummary,
+                    sampleFileImportSummary,
+                    setRISFileImportSummary,
+                    setSampleImportSummary
+                )}
         </ContentWrapper>
     );
 };
 
-const renderStep = (step: number, changeStep: any) => {
+const renderStep = (
+    step: number,
+    changeStep: any,
+    risFile: File | null,
+    setRisFile: React.Dispatch<React.SetStateAction<File | null>>,
+    sampleFile: File | null,
+    setSampleFile: React.Dispatch<React.SetStateAction<File | null>>,
+    risFileImportSummary: ImportSummary | undefined,
+    sampleFileImportSummary: ImportSummary | undefined,
+    setRISFileImportSummary: React.Dispatch<React.SetStateAction<ImportSummary | undefined>>,
+    setSampleFileImportSummary: React.Dispatch<React.SetStateAction<ImportSummary | undefined>>
+) => {
     switch (step) {
         case 1:
-            return <UploadFiles changeStep={changeStep} />;
+            return (
+                <UploadFiles
+                    changeStep={changeStep}
+                    risFile={risFile}
+                    setRisFile={setRisFile}
+                    sampleFile={sampleFile}
+                    setSampleFile={setSampleFile}
+                />
+            );
         case 2:
             return (
                 <>
-                    <ConsistencyChecks changeStep={changeStep} />
+                    <ConsistencyChecks
+                        changeStep={changeStep}
+                        risFile={risFile}
+                        sampleFile={sampleFile}
+                        setRISFileImportSummary={setRISFileImportSummary}
+                        setSampleFileImportSummary={setSampleFileImportSummary}
+                    />
                     <SupportButtons changeStep={changeStep} />
                 </>
             );
         case 3:
-            return <ReviewDataSummary changeStep={changeStep} />;
+            return (
+                <ReviewDataSummary
+                    changeStep={changeStep}
+                    risFileImportSummary={risFileImportSummary}
+                    sampleFileImportSummary={sampleFileImportSummary}
+                />
+            );
         case 4:
             return <Completed />;
         default:

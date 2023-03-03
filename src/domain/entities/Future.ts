@@ -56,6 +56,13 @@ export class Future<E, D> {
         return new Future(fluture.Future((reject, resolve) => computation(resolve, reject)));
     }
 
+    static fromPromise<Data>(promise: Promise<Data>): FutureData<Data> {
+        return Future.fromComputation((resolve, reject) => {
+            promise.then(resolve).catch(err => reject(err ? err.message : "Unknown error"));
+            return () => {};
+        });
+    }
+
     static fromPurifyEither<E, D>(input: Either<E, D>): Future<E, D> {
         return new Future(
             fluture.Future((reject, resolve) => {
