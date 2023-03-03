@@ -12,7 +12,9 @@ import { RISDataRepository } from "../../repositories/data-entry/RISDataReposito
 import { DataValue } from "../../entities/data-entry/DataValue";
 import i18n from "../../../locales";
 import { mapToImportSummary } from "./utils/mapDhis2Summary";
-import { ImportSummary } from "../../entities/data-entry/ImportSummary";
+import { ConsistencyError, ImportSummary } from "../../entities/data-entry/ImportSummary";
+import { checkSpecimenPathogen } from "./utils/checkSpecimenPathogen";
+import { GlassModuleRepository } from "../../repositories/GlassModuleRepository";
 
 const AMR_AMR_DS_INPUT_FILES_RIS_DS_ID = "CeQPmXgrhHF";
 const AMR_PATHOGEN_ANTIBIOTIC_CC_ID = "S427AvQESbw";
@@ -21,7 +23,8 @@ export class ImportRISFileUseCase implements UseCase {
     constructor(
         private risDataRepository: RISDataRepository,
         private metadataRepository: MetadataRepository,
-        private dataValuesRepository: DataValuesRepository
+        private dataValuesRepository: DataValuesRepository,
+        private moduleRepository: GlassModuleRepository
     ) {}
 
     public execute(inputFile: File): FutureData<ImportSummary> {
@@ -38,9 +41,14 @@ export class ImportRISFileUseCase implements UseCase {
                     orgUnits: this.metadataRepository.getOrgUnitsByCode([
                         ...new Set(risDataItems.map(item => item.COUNTRY)),
                     ]),
+                    module: this.moduleRepository.getByName("AMR"),
                 });
             })
-            .flatMap(({ risDataItems, dataSet, dataSet_CC, dataElement_CC, orgUnits }) => {
+            .flatMap(({ risDataItems, dataSet, dataSet_CC, dataElement_CC, orgUnits, module }) => {
+                const specimenPathogenErrors = module.consistencyChecks
+                    ? checkSpecimenPathogen(risDataItems, module.consistencyChecks.specimenPathogen)
+                    : [];
+
                 const dataValues = risDataItems
                     .map(risData => {
                         return dataSet.dataElements.map(dataElement => {
@@ -85,16 +93,40 @@ export class ImportRISFileUseCase implements UseCase {
                 return this.dataValuesRepository.save(finalDataValues).map(saveSummary => {
                     const importSummary = mapToImportSummary(saveSummary);
 
-                    return this.includeDataValuesRemovedWarning(dataValues, finalDataValues, importSummary);
+                    const summaryWithSpecimenPathogenErrors = this.includeSpecimenPathogenErrors(
+                        importSummary,
+                        specimenPathogenErrors
+                    );
+
+                    const finalImportSummary = this.includeDataValuesRemovedWarning(
+                        dataValues,
+                        finalDataValues,
+                        summaryWithSpecimenPathogenErrors
+                    );
+
+                    return finalImportSummary;
                 });
             });
+    }
+
+    private includeSpecimenPathogenErrors(
+        importSummary: ImportSummary,
+        specimenPathogenErrors: ConsistencyError[]
+    ): ImportSummary {
+        const status = specimenPathogenErrors ? "ERROR" : importSummary.status;
+
+        return {
+            ...importSummary,
+            status,
+            blockingErrors: [...importSummary.blockingErrors, ...specimenPathogenErrors],
+        };
     }
 
     private includeDataValuesRemovedWarning(
         dataValues: DataValue[],
         finalDataValues: DataValue[],
         importSummary: ImportSummary
-    ) {
+    ): ImportSummary {
         const removedDataValues = dataValues.length - finalDataValues.length;
 
         const nonBlockingErrors =

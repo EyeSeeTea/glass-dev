@@ -11,6 +11,9 @@ export interface GlassModule {
     id: string;
     userGroups: ModuleUserGroups;
     questionnaires: QuestionnaireConfig[];
+    consistencyChecks?: {
+        specimenPathogen: Record<string, string[]>;
+    };
 }
 
 interface QuestionnaireConfig {

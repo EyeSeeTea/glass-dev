@@ -14,6 +14,18 @@ const glassModules: GlassModule[] = [
             captureAccess: [],
         },
         questionnaires: [],
+        consistencyChecks: {
+            specimenPathogen: {
+                BLOOD: ["ACISPP", "ESCCOL", "KLEPNE", "PSEAER", "STAAUR", "STRPNE", "SALSPP", "SALTYP", "SALPAR"],
+                CSF: ["STRPNE", "NEIGON", "HAEINF"],
+                URINE: ["ESCCOL", "KLEPNE"],
+                STOOL: ["SALSPP", "SHISPP"],
+                LOWRESP: ["STRPNE", "HAEINF", "STAAUR", "ACISPP", "ESCCOL", "KLEPNE", "PSEAER"],
+                UROGENITAL: ["NEIGON"],
+                ANORECTAL: ["NEIGON"],
+                PHARYNGEAL: ["NEIGON"],
+            },
+        },
     },
     {
         id: "BVnik5xiXGJ",
