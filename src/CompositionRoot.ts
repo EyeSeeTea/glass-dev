@@ -94,7 +94,12 @@ export function getCompositionRoot(instance: Instance) {
             deleteByUploadId: new DeleteDocumentInfoByUploadIdUseCase(glassDocumentsRepository, glassUploadsRepository),
         }),
         dataSubmision: getExecute({
-            RISFile: new ImportRISFileUseCase(risDataRepository, metadataRepository, dataValuesRepository),
+            RISFile: new ImportRISFileUseCase(
+                risDataRepository,
+                metadataRepository,
+                dataValuesRepository,
+                glassModuleRepository
+            ),
             sampleFile: new ImportSampleFileUseCase(sampleDataRepository, metadataRepository, dataValuesRepository),
         }),
         questionnaires: getExecute({
