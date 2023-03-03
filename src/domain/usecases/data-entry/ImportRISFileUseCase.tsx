@@ -1,17 +1,18 @@
 import { UseCase } from "../../../CompositionRoot";
 import { Future, FutureData } from "../../entities/Future";
-import { DataValuesSaveSummary } from "../../entities/data-entry/DataValuesSaveSummary";
 import { MetadataRepository } from "../../repositories/MetadataRepository";
 import { DataValuesRepository } from "../../repositories/data-entry/DataValuesRepository";
 import {
     AMR_SPECIMEN_GENDER_AGE_ORIGIN_CC_ID,
     getCategoryOptionComboByDataElement,
     getCategoryOptionComboByOptionCodes,
-} from "./utils/utils";
+} from "./utils/getCategoryOptionCombo";
 import { RISData } from "../../entities/data-entry/external/RISData";
 import { RISDataRepository } from "../../repositories/data-entry/RISDataRepository";
 import { DataValue } from "../../entities/data-entry/DataValue";
 import i18n from "../../../locales";
+import { mapToImportSummary } from "./utils/mapDhis2Summary";
+import { ImportSummary } from "../../entities/data-entry/ImportSummary";
 
 const AMR_AMR_DS_INPUT_FILES_RIS_DS_ID = "CeQPmXgrhHF";
 const AMR_PATHOGEN_ANTIBIOTIC_CC_ID = "S427AvQESbw";
@@ -23,7 +24,7 @@ export class ImportRISFileUseCase implements UseCase {
         private dataValuesRepository: DataValuesRepository
     ) {}
 
-    public execute(inputFile: File): FutureData<DataValuesSaveSummary> {
+    public execute(inputFile: File): FutureData<ImportSummary> {
         return this.risDataRepository
             .get(inputFile)
             .flatMap(risDataItems => {
@@ -81,26 +82,34 @@ export class ImportRISFileUseCase implements UseCase {
                 console.log({ risInitialFileDataValues: dataValues });
                 console.log({ risFinalFileDataValues: finalDataValues });
 
-                return this.dataValuesRepository.save(finalDataValues).map(result => {
-                    const dataValuesRemovedByEmptyAttOpCom = {
-                        object: "",
-                        value: i18n.t(
-                            `Removed ${
-                                dataValues.length - finalDataValues.length
-                            } dataValues to import because attributeOptionCombo not found`
-                        ),
-                    };
+                return this.dataValuesRepository.save(finalDataValues).map(saveSummary => {
+                    const importSummary = mapToImportSummary(saveSummary);
 
-                    const removedDataValues = finalDataValues.length !== dataValues.length;
-
-                    const conflicts = removedDataValues
-                        ? [...(result.conflicts || []), dataValuesRemovedByEmptyAttOpCom]
-                        : result.conflicts;
-
-                    const status = result.status === "SUCCESS" && removedDataValues ? "WARNING" : result.status;
-
-                    return { ...result, status, conflicts };
+                    return this.includeDataValuesRemovedWarning(dataValues, finalDataValues, importSummary);
                 });
             });
+    }
+
+    private includeDataValuesRemovedWarning(
+        dataValues: DataValue[],
+        finalDataValues: DataValue[],
+        importSummary: ImportSummary
+    ) {
+        const removedDataValues = dataValues.length - finalDataValues.length;
+
+        const nonBlockingErrors =
+            removedDataValues > 0
+                ? [
+                      ...importSummary.nonBlockingErrors,
+                      {
+                          count: dataValues.length - finalDataValues.length,
+                          error: i18n.t(`Removed dataValues to import because attributeOptionCombo not found`),
+                      },
+                  ]
+                : importSummary.nonBlockingErrors;
+
+        const status = importSummary.status === "SUCCESS" && removedDataValues ? "WARNING" : importSummary.status;
+
+        return { ...importSummary, status, nonBlockingErrors };
     }
 }

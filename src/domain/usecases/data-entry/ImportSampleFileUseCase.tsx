@@ -1,11 +1,15 @@
 import { UseCase } from "../../../CompositionRoot";
 import { Future, FutureData } from "../../entities/Future";
-import { DataValuesSaveSummary } from "../../entities/data-entry/DataValuesSaveSummary";
 import { MetadataRepository } from "../../repositories/MetadataRepository";
 import { DataValuesRepository } from "../../repositories/data-entry/DataValuesRepository";
-import { AMR_SPECIMEN_GENDER_AGE_ORIGIN_CC_ID, getCategoryOptionComboByDataElement } from "./utils/utils";
+import {
+    AMR_SPECIMEN_GENDER_AGE_ORIGIN_CC_ID,
+    getCategoryOptionComboByDataElement,
+} from "./utils/getCategoryOptionCombo";
 import { SampleData } from "../../entities/data-entry/external/SampleData";
 import { SampleDataRepository } from "../../repositories/data-entry/SampleDataRepository";
+import { ImportSummary } from "../../entities/data-entry/ImportSummary";
+import { mapToImportSummary } from "./utils/mapDhis2Summary";
 
 const AMR_AMR_DS_Input_files_Sample_DS_ID = "OcAB7oaC072";
 
@@ -16,7 +20,7 @@ export class ImportSampleFileUseCase implements UseCase {
         private dataValuesRepository: DataValuesRepository
     ) {}
 
-    public execute(inputFile: File): FutureData<DataValuesSaveSummary> {
+    public execute(inputFile: File): FutureData<ImportSummary> {
         return this.sampleDataRepository
             .get(inputFile)
             .flatMap(risDataItems => {
@@ -59,7 +63,11 @@ export class ImportSampleFileUseCase implements UseCase {
                 /* eslint-disable no-console */
                 console.log({ sampleFileDataValues: dataValues });
 
-                return this.dataValuesRepository.save(dataValues);
+                return this.dataValuesRepository.save(dataValues).map(saveSummary => {
+                    const importSummary = mapToImportSummary(saveSummary);
+
+                    return importSummary;
+                });
             });
     }
 }
