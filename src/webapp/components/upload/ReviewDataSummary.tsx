@@ -1,10 +1,14 @@
-import React, { useState } from "react";
-import { Button } from "@material-ui/core";
+import React, { useCallback, useState } from "react";
+import { Button, CircularProgress } from "@material-ui/core";
 import styled from "styled-components";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { ImportSummary } from "../../../domain/entities/data-entry/ImportSummary";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
+import { useCallbackEffect } from "../../hooks/use-callback-effect";
+import { useSnackbar } from "@eyeseetea/d2-ui-components";
+import { useAppContext } from "../../contexts/app-context";
+import { Future } from "../../../domain/entities/Future";
 
 interface ReviewDataSummaryProps {
     changeStep: (step: number) => void;
@@ -12,16 +16,72 @@ interface ReviewDataSummaryProps {
     sampleFileImportSummary?: ImportSummary;
 }
 
+const COMPLETED_STATUS = "COMPLETED";
+
 export const ReviewDataSummary: React.FC<ReviewDataSummaryProps> = ({
     changeStep,
     risFileImportSummary,
     sampleFileImportSummary,
 }) => {
+    const { compositionRoot } = useAppContext();
+    const snackbar = useSnackbar();
+
     const [fileType, setFileType] = useState<string>("ris");
+    const [isLoading, setIsLoading] = useState<boolean>(false);
 
     const changeType = (fileType: string) => {
         setFileType(fileType);
     };
+
+    const goToFinalStep = useCallback(() => {
+        const risUploadId = localStorage.getItem("risUploadId");
+        const sampleUploadId = localStorage.getItem("sampleUploadId");
+        setIsLoading(true);
+        if (risUploadId) {
+            return compositionRoot.glassUploads
+                .setStatus({ id: risUploadId, status: COMPLETED_STATUS })
+                .flatMap(() => {
+                    return risUploadId
+                        ? compositionRoot.glassUploads.setStatus({ id: risUploadId, status: COMPLETED_STATUS })
+                        : Future.success(undefined);
+                })
+                .run(
+                    () => {
+                        if (!sampleUploadId) {
+                            changeStep(4);
+                            setIsLoading(false);
+                        } else {
+                            return compositionRoot.glassUploads
+                                .setStatus({ id: sampleUploadId, status: COMPLETED_STATUS })
+                                .flatMap(() => {
+                                    return sampleUploadId
+                                        ? compositionRoot.glassUploads.setStatus({
+                                              id: sampleUploadId,
+                                              status: COMPLETED_STATUS,
+                                          })
+                                        : Future.success(undefined);
+                                })
+                                .run(
+                                    () => {
+                                        changeStep(4);
+                                        setIsLoading(false);
+                                    },
+                                    errorMessage => {
+                                        snackbar.error(i18n.t(errorMessage));
+                                        setIsLoading(false);
+                                    }
+                                );
+                        }
+                    },
+                    errorMessage => {
+                        snackbar.error(i18n.t(errorMessage));
+                        setIsLoading(false);
+                    }
+                );
+        }
+    }, [changeStep, compositionRoot.glassUploads, snackbar]);
+
+    const goToFinalStepEffect = useCallbackEffect(goToFinalStep);
 
     return (
         <ContentWrapper>
@@ -66,15 +126,19 @@ export const ReviewDataSummary: React.FC<ReviewDataSummaryProps> = ({
                 </SectionCard>
             </Section>
             <div className="bottom">
-                <Button
-                    variant="contained"
-                    color={"primary"}
-                    endIcon={<ChevronRightIcon />}
-                    onClick={() => changeStep(4)}
-                    disableElevation
-                >
-                    {i18n.t("Continue")}
-                </Button>
+                {isLoading ? (
+                    <CircularProgress size={25} />
+                ) : (
+                    <Button
+                        variant="contained"
+                        color={"primary"}
+                        endIcon={<ChevronRightIcon />}
+                        onClick={goToFinalStepEffect}
+                        disableElevation
+                    >
+                        {i18n.t("Continue")}
+                    </Button>
+                )}
             </div>
         </ContentWrapper>
     );
