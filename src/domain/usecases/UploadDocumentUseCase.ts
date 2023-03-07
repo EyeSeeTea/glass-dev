@@ -40,6 +40,7 @@ export class UploadDocumentUseCase implements UseCase {
                 specimens: [],
                 status: "UPLOADED",
                 uploadDate: new Date().toISOString(),
+                orgUnit: data.orgUnit,
             };
             return this.glassUploadsRepository.save(upload).flatMap(() => Future.success(upload.id));
         });
