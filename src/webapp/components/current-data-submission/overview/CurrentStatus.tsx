@@ -49,7 +49,7 @@ export const CurrentStatus: React.FC<StatusProps> = ({ title, description, statu
                 () => {}
             );
         }
-    }, []);
+    });
 
     return (
         <div>
@@ -75,11 +75,15 @@ export const CurrentStatus: React.FC<StatusProps> = ({ title, description, statu
                             <TableCell>{`No`}</TableCell>
                             <TableCell>{`0 uploaded`}</TableCell>
                         </TableRow>
-                        <TableRow>
-                            <TableCell>{`${questionnaires?.length} Questionnaires`}</TableCell>
-                            <TableCell>{`${questionnaires?.[0]?.isMandatory ? "Yes" : "No"}`}</TableCell>
-                            <TableCell>{`${questionnaires?.filter(el => el.isCompleted).length} completed`}</TableCell>
-                        </TableRow>
+                        {questionnaires && questionnaires[0] && (
+                            <TableRow>
+                                <TableCell>{`${questionnaires.length} Questionnaires`}</TableCell>
+                                <TableCell>{`${questionnaires[0].isMandatory ? "Yes" : "No"}`}</TableCell>
+                                <TableCell>{`${
+                                    questionnaires.filter(el => el.isCompleted).length
+                                } completed`}</TableCell>
+                            </TableRow>
+                        )}
                     </Table>
                 </TableContainer>
             )}
