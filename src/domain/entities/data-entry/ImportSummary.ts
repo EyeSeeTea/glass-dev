@@ -6,11 +6,11 @@ export type ImportSummary = {
         ignored: number;
         deleted: number;
     };
-    nonBlockingErrors: ImporError[];
-    blockingErrors: ImporError[];
+    nonBlockingErrors: ConsistencyError[];
+    blockingErrors: ConsistencyError[];
 };
 
-export type ImporError = {
+export type ConsistencyError = {
     error: string;
     count: number;
 };

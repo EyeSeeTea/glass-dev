@@ -5,13 +5,18 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2023-03-03T17:50:05.646Z\n"
-"PO-Revision-Date: 2023-03-03T17:50:05.646Z\n"
+"POT-Creation-Date: 2023-03-06T16:34:23.938Z\n"
+"PO-Revision-Date: 2023-03-06T16:34:23.938Z\n"
 
 msgid "Error saving registration status"
 msgstr ""
 
 msgid "Removed dataValues to import because attributeOptionCombo not found"
+msgstr ""
+
+msgid ""
+"The AST results provided are not valid (either they are all empty or equal "
+"to 0)"
 msgstr ""
 
 msgid "User Profile"
@@ -168,6 +173,15 @@ msgid "Upload dataset"
 msgstr ""
 
 msgid "Current Status"
+msgstr ""
+
+msgid "Content"
+msgstr ""
+
+msgid "Mandatory"
+msgstr ""
+
+msgid "State"
 msgstr ""
 
 msgid "Data Submission status has errors..."
