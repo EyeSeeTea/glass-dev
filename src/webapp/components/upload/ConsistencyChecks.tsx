@@ -13,6 +13,7 @@ import { Future } from "../../../domain/entities/Future";
 import { useSnackbar } from "@eyeseetea/d2-ui-components";
 import { useCallbackEffect } from "../../hooks/use-callback-effect";
 import { ImportSummary } from "../../../domain/entities/data-entry/ImportSummary";
+import { useLocation } from "react-router-dom";
 interface ConsistencyChecksProps {
     changeStep: (step: number) => void;
     batchId: string;
@@ -41,6 +42,10 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
     const [isUploadStatusChanging, setIsUploadStatusChanging] = useState<boolean>(false);
     const [risFileErrors, setRISErrors] = useState<ImportSummary | undefined>(undefined);
     const [sampleFileErrors, setSampleErrors] = useState<ImportSummary | undefined>(undefined);
+    const location = useLocation();
+    const queryParameters = new URLSearchParams(location.search);
+    const periodFromUrl = parseInt(queryParameters.get("period") || "");
+    const year = periodFromUrl || new Date().getFullYear() - 1;
 
     useEffect(() => {
         function uploadDatasets() {
@@ -48,9 +53,9 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
                 setIsDataSetUploading(true);
 
                 Future.joinObj({
-                    importRISFileSummary: compositionRoot.dataSubmision.RISFile(risFile, batchId),
+                    importRISFileSummary: compositionRoot.dataSubmision.RISFile(risFile, batchId, year),
                     importSampleFileSummary: sampleFile
-                        ? compositionRoot.dataSubmision.sampleFile(sampleFile, batchId)
+                        ? compositionRoot.dataSubmision.sampleFile(sampleFile, batchId, year)
                         : Future.success(undefined),
                 }).run(
                     ({ importRISFileSummary, importSampleFileSummary }) => {
@@ -91,6 +96,7 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
         setRISFileImportSummary,
         setSampleFileImportSummary,
         batchId,
+        year,
     ]);
 
     const changeType = (fileType: string) => {
