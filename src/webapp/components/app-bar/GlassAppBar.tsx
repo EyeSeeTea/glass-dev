@@ -76,7 +76,7 @@ export const GlassAppBar: React.FC = () => {
                         <img src={whoLogo} width={150} alt="WHO logo" />;
                     </LogoContainer>
                     <Box className={classes.title} />
-                    <SelectContainer>
+                    <CountryDropdownSelect>
                         <IconButton aria-label="search" color="primary">
                             <LocationIcon />
                         </IconButton>
@@ -93,7 +93,7 @@ export const GlassAppBar: React.FC = () => {
                                 ))}
                             </Select>
                         )}
-                    </SelectContainer>
+                    </CountryDropdownSelect>
                     <SelectContainer>
                         <Select value={action} disableUnderline onChange={changeAction}>
                             <MenuItem value={1}>{i18n.t("User Profile")}</MenuItem>
@@ -108,6 +108,11 @@ export const GlassAppBar: React.FC = () => {
 
 const SelectContainer = styled.div`
     margin: 16px 16px;
+`;
+
+const CountryDropdownSelect = styled.div`
+    margin: 16px 16px;
+    min-width: 190px;
 `;
 
 const LogoContainer = styled.div`
