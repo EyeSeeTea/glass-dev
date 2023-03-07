@@ -3,9 +3,9 @@ import { RISData } from "../../../entities/data-entry/external/RISData";
 import { SampleData } from "../../../entities/data-entry/external/SampleData";
 import { ConsistencyError } from "../../../entities/data-entry/ImportSummary";
 
-export function checkYear(risData: (RISData | SampleData)[], year: number): ConsistencyError[] {
+export function checkYear(fileData: (RISData | SampleData)[], year: number): ConsistencyError[] {
     const errors = _(
-        risData
+        fileData
             .filter(item => {
                 return item.YEAR !== year;
             })

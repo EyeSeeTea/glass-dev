@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2023-03-06T17:32:03.335Z\n"
-"PO-Revision-Date: 2023-03-06T17:32:03.336Z\n"
+"POT-Creation-Date: 2023-03-07T13:44:59.955Z\n"
+"PO-Revision-Date: 2023-03-07T13:44:59.955Z\n"
 
 msgid "Error saving registration status"
 msgstr ""
@@ -73,33 +73,6 @@ msgstr ""
 msgid "Uploads with errors, or discarded"
 msgstr ""
 
-msgid "Display full status history >"
-msgstr ""
-
-msgid "Go to questionnaires"
-msgstr ""
-
-msgid "Send to WHO for revision"
-msgstr ""
-
-msgid "Upload dataset"
-msgstr ""
-
-msgid "Current Status"
-msgstr ""
-
-msgid "Content"
-msgstr ""
-
-msgid "Mandatory"
-msgstr ""
-
-msgid "State"
-msgstr ""
-
-msgid "Data Submission status has errors..."
-msgstr ""
-
 msgid "There are no questionnaries for this module"
 msgstr ""
 
@@ -118,24 +91,6 @@ msgstr ""
 msgid "Go"
 msgstr ""
 
-msgid "Uploaded"
-msgstr ""
-
-msgid "Period"
-msgstr ""
-
-msgid "Records"
-msgstr ""
-
-msgid "Type"
-msgstr ""
-
-msgid "Batch ID"
-msgstr ""
-
-msgid "Status"
-msgstr ""
-
 msgid "Overview"
 msgstr ""
 
@@ -152,6 +107,24 @@ msgid "Advanced"
 msgstr ""
 
 msgid "No Data uploaded..."
+msgstr ""
+
+msgid "Uploaded"
+msgstr ""
+
+msgid "Period"
+msgstr ""
+
+msgid "Records"
+msgstr ""
+
+msgid "Type"
+msgstr ""
+
+msgid "Batch ID"
+msgstr ""
+
+msgid "Status"
 msgstr ""
 
 msgid "Validation Alpha"
@@ -187,6 +160,33 @@ msgstr ""
 msgid "09 - 12 - 2021 VALIDATION CORRECT"
 msgstr ""
 
+msgid "Display full status history >"
+msgstr ""
+
+msgid "Go to questionnaires"
+msgstr ""
+
+msgid "Send to WHO for revision"
+msgstr ""
+
+msgid "Upload dataset"
+msgstr ""
+
+msgid "Current Status"
+msgstr ""
+
+msgid "Content"
+msgstr ""
+
+msgid "Mandatory"
+msgstr ""
+
+msgid "State"
+msgstr ""
+
+msgid "Data Submission status has errors..."
+msgstr ""
+
 msgid " "
 msgstr ""
 
@@ -194,6 +194,9 @@ msgid "status"
 msgstr ""
 
 msgid "News from GLASS"
+msgstr ""
+
+msgid "No Open Data Submissions"
 msgstr ""
 
 msgid "Notification"
@@ -215,9 +218,6 @@ msgid "Your Notifications"
 msgstr ""
 
 msgid "No notifications"
-msgstr ""
-
-msgid "No Open Data Submissions"
 msgstr ""
 
 msgid "Log Out"
