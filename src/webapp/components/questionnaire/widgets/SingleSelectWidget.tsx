@@ -42,7 +42,7 @@ const SingleSelectWidget: React.FC<SingleSelectWidgetProps> = props => {
                 />
             ))}
 
-            <Button small onClick={() => notifyChange(undefined)} tabIndex="-1">
+            <Button small onClick={() => notifyChange(undefined)} tabIndex="-1" disabled={props.disabled}>
                 ✕
             </Button>
         </div>
