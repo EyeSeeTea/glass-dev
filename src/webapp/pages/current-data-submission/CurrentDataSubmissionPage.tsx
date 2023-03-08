@@ -45,7 +45,7 @@ export const CurrentDataSubmissionPageContent: React.FC<CurrentDataSubmissionPag
         const { compositionRoot } = useAppContext();
         const { currentOrgUnitAccess } = useCurrentOrgUnitContext();
 
-        const [refetchStatus, setRefetchStatus] = useState<DataSubmissionStatusTypes>("COMPLETE");
+        const [refetchStatus, setRefetchStatus] = useState<DataSubmissionStatusTypes>("NOT_COMPLETED");
         const currentDataSubmissionStatus = useStatusDataSubmission(
             compositionRoot,
             moduleId,

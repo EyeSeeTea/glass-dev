@@ -100,7 +100,7 @@ export class QuestionnaireD2Repository implements QuestionnaireRepository {
 
     setCompletion(selector: QuestionnaireSelector, value: boolean): FutureData<void> {
         return apiToFuture(
-            this.api.post<{ status: "OK" | "WARNING" | "ERROR" }>(
+            this.api.post<{ status: "OK" | "SUCCESS" | "WARNING" | "ERROR" }>(
                 "/completeDataSetRegistrations",
                 {},
                 {
@@ -115,7 +115,9 @@ export class QuestionnaireD2Repository implements QuestionnaireRepository {
                 }
             )
         ).flatMap(res =>
-            res.status === "OK" ? Future.success(undefined) : Future.error(i18n.t("Error saving registration status"))
+            res.status === "OK" || res.status === "SUCCESS"
+                ? Future.success(undefined)
+                : Future.error(i18n.t("Error saving registration status"))
         );
     }
 
@@ -228,9 +230,10 @@ export class QuestionnaireD2Repository implements QuestionnaireRepository {
     }
 
     private postDataValues(d2DataValues: D2DataValue[]): FutureData<void> {
-        return apiToFuture(this.api.dataValues.postSet({}, { dataValues: d2DataValues })).flatMap(res =>
-            res.status === "SUCCESS" ? Future.success(undefined) : Future.error(res.status)
-        );
+        return apiToFuture(this.api.dataValues.postSet({}, { dataValues: d2DataValues })).flatMap(res => {
+            const status = res.status as string;
+            return status === "OK" || status === "SUCCESS" ? Future.success(undefined) : Future.error(res.status);
+        });
     }
 
     private getDataSetsInfo(
