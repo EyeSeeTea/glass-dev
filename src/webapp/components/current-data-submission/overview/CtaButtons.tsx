@@ -113,8 +113,12 @@ export const CtaButtons: React.FC<CtaButtonsProps> = ({ ctas, setRefetchStatus }
             >
                 <DialogContent>
                     <Typography>
-                        Please review that the submission package contains all the datasets that you want to include.
-                        After you submit this package, you won’t be able to edit it anymore wihout WHO permissions
+                        {i18n.t(
+                            "Please review that the submission package contains all the datasets that you want to include."
+                        )}
+                        {i18n.t(
+                            "After you submit this package, you wont be able to edit it anymore wihout WHO permissions"
+                        )}
                     </Typography>
                 </DialogContent>
                 <DialogActions>{isLoading && <CircularProgress size={25} />}</DialogActions>
