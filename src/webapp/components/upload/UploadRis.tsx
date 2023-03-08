@@ -9,6 +9,10 @@ import { Dropzone, DropzoneRef } from "../dropzone/Dropzone";
 import { FileRejection } from "react-dropzone";
 import { RemoveContainer, StyledRemoveButton } from "./UploadFiles";
 import { useAppContext } from "../../contexts/app-context";
+import { useCurrentDataSubmissionId } from "../../hooks/useCurrentDataSubmissionId";
+import { useCurrentModuleContext } from "../../contexts/current-module-context";
+import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context";
+import { useLocation } from "react-router-dom";
 import { useCallbackEffect } from "../../hooks/use-callback-effect";
 interface UploadRisProps {
     risFile: File | null;
@@ -21,10 +25,21 @@ const RIS_FILE_TYPE = "RIS";
 
 export const UploadRis: React.FC<UploadRisProps> = ({ risFile, setRisFile, validate, batchId }) => {
     const { compositionRoot } = useAppContext();
+    const location = useLocation();
+    const {
+        currentModuleAccess: { moduleId },
+    } = useCurrentModuleContext();
+    const {
+        currentOrgUnitAccess: { orgUnitId },
+    } = useCurrentOrgUnitContext();
+    const queryParameters = new URLSearchParams(location.search);
+    const period = queryParameters.get("period") || (new Date().getFullYear() - 1).toString();
     const snackbar = useSnackbar();
 
     const [isLoading, setIsLoading] = useState(false);
     const risFileUploadRef = useRef<DropzoneRef>(null);
+
+    const dataSubmissionId = useCurrentDataSubmissionId(compositionRoot, moduleId, orgUnitId, parseInt(period));
 
     const openFileUploadDialog = useCallback(async () => {
         risFileUploadRef.current?.openDialog();
@@ -75,6 +90,10 @@ export const UploadRis: React.FC<UploadRisProps> = ({ risFile, setRisFile, valid
                     const data = {
                         batchId,
                         fileType: RIS_FILE_TYPE,
+                        dataSubmission: dataSubmissionId,
+                        module: moduleId,
+                        period,
+                        orgUnit: orgUnitId,
                     };
                     return compositionRoot.glassDocuments.upload({ file: uploadedRisFile, data }).run(
                         uploadId => {
@@ -89,7 +108,7 @@ export const UploadRis: React.FC<UploadRisProps> = ({ risFile, setRisFile, valid
                 }
             }
         },
-        [batchId, compositionRoot.glassDocuments, snackbar, setRisFile]
+        [batchId, compositionRoot.glassDocuments, dataSubmissionId, moduleId, orgUnitId, period, setRisFile, snackbar]
     );
 
     const risFileUploadEffect = useCallbackEffect(risFileUpload);
