@@ -57,7 +57,13 @@ const renderTypeContent = (
     switch (step) {
         case 0:
             // TODO: set module name inside page root content to avoid prop drilling
-            return <Overview moduleName={moduleName} currentDataSubmissionStatus={currentDataSubmissionStatus} />;
+            return (
+                <Overview
+                    moduleName={moduleName}
+                    currentDataSubmissionStatus={currentDataSubmissionStatus}
+                    setRefetchStatus={setRefetchStatus}
+                />
+            );
         case 1:
             return <ListOfDatasets />;
         case 2:

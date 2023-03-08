@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { Box, Paper, Table, TableCell, TableContainer, TableHead, TableRow } from "@material-ui/core";
 import styled from "styled-components";
 import i18n from "@eyeseetea/d2-ui-components/locales";
@@ -9,6 +9,7 @@ import { useCurrentModuleContext } from "../../../contexts/current-module-contex
 import { useCurrentOrgUnitContext } from "../../../contexts/current-orgUnit-context";
 import { useLocation } from "react-router-dom";
 import { QuestionnaireBase } from "../../../../domain/entities/Questionnaire";
+import { DataSubmissionStatusTypes } from "../../../../domain/entities/GlassDataSubmission";
 
 interface StatusProps {
     moduleName: string;
@@ -17,9 +18,17 @@ interface StatusProps {
     statusColor: string;
     ctas: StatusCTAs[];
     showUploadHistory: boolean;
+    setRefetchStatus: Dispatch<SetStateAction<DataSubmissionStatusTypes>>;
 }
 
-export const CurrentStatus: React.FC<StatusProps> = ({ title, description, statusColor, ctas, showUploadHistory }) => {
+export const CurrentStatus: React.FC<StatusProps> = ({
+    title,
+    description,
+    statusColor,
+    ctas,
+    showUploadHistory,
+    setRefetchStatus,
+}) => {
     const { compositionRoot } = useAppContext();
     const location = useLocation();
     const {
@@ -87,7 +96,7 @@ export const CurrentStatus: React.FC<StatusProps> = ({ title, description, statu
                     </Table>
                 </TableContainer>
             )}
-            <CtaButtons ctas={ctas} />
+            <CtaButtons ctas={ctas} setRefetchStatus={setRefetchStatus} />
         </div>
     );
 };
