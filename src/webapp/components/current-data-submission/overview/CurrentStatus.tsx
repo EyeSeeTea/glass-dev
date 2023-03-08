@@ -1,5 +1,5 @@
 import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
-import { Box, Paper, Table, TableCell, TableContainer, TableHead, TableRow } from "@material-ui/core";
+import { Box, CircularProgress, Paper, Table, TableCell, TableContainer, TableHead, TableRow } from "@material-ui/core";
 import styled from "styled-components";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { CtaButtons } from "./CtaButtons";
@@ -18,7 +18,7 @@ interface StatusProps {
     statusColor: string;
     ctas: StatusCTAs[];
     showUploadHistory: boolean;
-    setRefetchStatus: Dispatch<SetStateAction<DataSubmissionStatusTypes>>;
+    setRefetchStatus: Dispatch<SetStateAction<DataSubmissionStatusTypes | undefined>>;
 }
 
 export const CurrentStatus: React.FC<StatusProps> = ({
@@ -84,13 +84,21 @@ export const CurrentStatus: React.FC<StatusProps> = ({
                             <TableCell>{`No`}</TableCell>
                             <TableCell>{`0 uploaded`}</TableCell>
                         </TableRow>
-                        {questionnaires && questionnaires[0] && (
+                        {questionnaires ? (
                             <TableRow>
                                 <TableCell>{`${questionnaires.length} Questionnaires`}</TableCell>
-                                <TableCell>{`${questionnaires[0].isMandatory ? "Yes" : "No"}`}</TableCell>
+                                <TableCell>{`${questionnaires[0]?.isMandatory ? "Yes" : "No"}`}</TableCell>
                                 <TableCell>{`${
                                     questionnaires.filter(el => el.isCompleted).length
                                 } completed`}</TableCell>
+                            </TableRow>
+                        ) : (
+                            <TableRow>
+                                <TableCell />
+                                <TableCell>
+                                    <CircularProgress size={25} />
+                                </TableCell>
+                                <TableCell />
                             </TableRow>
                         )}
                     </Table>

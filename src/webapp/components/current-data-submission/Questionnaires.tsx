@@ -18,7 +18,7 @@ import { useCurrentModuleContext } from "../../contexts/current-module-context";
 import { DataSubmissionStatusTypes } from "../../../domain/entities/GlassDataSubmission";
 
 interface QuestionnairesProps {
-    setRefetchStatus: Dispatch<SetStateAction<DataSubmissionStatusTypes>>;
+    setRefetchStatus: Dispatch<SetStateAction<DataSubmissionStatusTypes | undefined>>;
 }
 export const Questionnaires: React.FC<QuestionnairesProps> = ({ setRefetchStatus }) => {
     const { compositionRoot } = useAppContext();

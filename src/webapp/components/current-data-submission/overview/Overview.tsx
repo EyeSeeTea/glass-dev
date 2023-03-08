@@ -10,7 +10,7 @@ import { DataSubmissionStatusTypes } from "../../../../domain/entities/GlassData
 interface OverviewProps {
     moduleName: string;
     currentDataSubmissionStatus: StatusDetails;
-    setRefetchStatus: Dispatch<SetStateAction<DataSubmissionStatusTypes>>;
+    setRefetchStatus: Dispatch<SetStateAction<DataSubmissionStatusTypes | undefined>>;
 }
 
 export const Overview: React.FC<OverviewProps> = ({ moduleName, currentDataSubmissionStatus, setRefetchStatus }) => {

@@ -14,7 +14,7 @@ import { DataSubmissionStatusTypes } from "../../../../domain/entities/GlassData
 
 export interface CtaButtonsProps {
     ctas: StatusCTAs[];
-    setRefetchStatus: Dispatch<SetStateAction<DataSubmissionStatusTypes>>;
+    setRefetchStatus: Dispatch<SetStateAction<DataSubmissionStatusTypes | undefined>>;
 }
 
 export const CtaButtons: React.FC<CtaButtonsProps> = ({ ctas, setRefetchStatus }) => {
