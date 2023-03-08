@@ -14,7 +14,7 @@ import { DataSubmissionStatusTypes } from "../../../domain/entities/GlassDataSub
 interface UploadStepsProps {
     moduleName: string;
     currentDataSubmissionStatus: StatusDetails;
-    setRefetchStatus: Dispatch<SetStateAction<DataSubmissionStatusTypes>>;
+    setRefetchStatus: Dispatch<SetStateAction<DataSubmissionStatusTypes | undefined>>;
 }
 
 export const UploadSteps: React.FC<UploadStepsProps> = ({
@@ -52,7 +52,7 @@ const renderTypeContent = (
     step: number,
     moduleName: string,
     currentDataSubmissionStatus: StatusDetails,
-    setRefetchStatus: Dispatch<SetStateAction<DataSubmissionStatusTypes>>
+    setRefetchStatus: Dispatch<SetStateAction<DataSubmissionStatusTypes | undefined>>
 ) => {
     switch (step) {
         case 0:
