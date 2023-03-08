@@ -100,7 +100,7 @@ export class QuestionnaireD2Repository implements QuestionnaireRepository {
 
     setCompletion(selector: QuestionnaireSelector, value: boolean): FutureData<void> {
         return apiToFuture(
-            this.api.post<{ status: "SUCCESS" | "WARNING" | "ERROR" }>(
+            this.api.post<{ status: "OK" | "WARNING" | "ERROR" }>(
                 "/completeDataSetRegistrations",
                 {},
                 {
@@ -115,9 +115,7 @@ export class QuestionnaireD2Repository implements QuestionnaireRepository {
                 }
             )
         ).flatMap(res =>
-            res.status === "SUCCESS"
-                ? Future.success(undefined)
-                : Future.error(i18n.t("Error saving registration status"))
+            res.status === "OK" ? Future.success(undefined) : Future.error(i18n.t("Error saving registration status"))
         );
     }
 

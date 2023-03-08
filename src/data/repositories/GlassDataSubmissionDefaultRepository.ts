@@ -1,5 +1,5 @@
-import { FutureData } from "../../domain/entities/Future";
-import { GlassDataSubmission } from "../../domain/entities/GlassDataSubmission";
+import { Future, FutureData } from "../../domain/entities/Future";
+import { DataSubmissionStatusTypes, GlassDataSubmission } from "../../domain/entities/GlassDataSubmission";
 import { GlassDataSubmissionsRepository } from "../../domain/repositories/GlassDataSubmissionRepository";
 import { DataStoreClient } from "../data-store/DataStoreClient";
 import { DataStoreKeys } from "../data-store/DataStoreKeys";
@@ -43,5 +43,19 @@ export class GlassDataSubmissionsDefaultRepository implements GlassDataSubmissio
             const newDataSubmissions = [...dataSubmissions, dataSubmission];
             return this.dataStoreClient.saveObject(DataStoreKeys.DATA_SUBMISSIONS, newDataSubmissions);
         });
+    }
+
+    setStatus(id: string, status: DataSubmissionStatusTypes): FutureData<void> {
+        return this.dataStoreClient
+            .listCollection<GlassDataSubmission>(DataStoreKeys.DATA_SUBMISSIONS)
+            .flatMap(dataSubmissions => {
+                const dataSubmission = dataSubmissions?.find(ds => ds.id === id);
+                if (dataSubmission) {
+                    dataSubmission.status = status;
+                    return this.dataStoreClient.saveObject(DataStoreKeys.DATA_SUBMISSIONS, dataSubmissions);
+                } else {
+                    return Future.error("Data Submission does not exist");
+                }
+            });
     }
 }
