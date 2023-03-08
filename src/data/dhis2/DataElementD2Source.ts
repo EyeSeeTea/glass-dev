@@ -33,9 +33,9 @@ export class DataElementD2Source {
             const categoryComboById = _.keyBy(categoryCombos, getId);
             const categoryComboMapping = _(dataForm.dataSetElements)
                 .map(dse => {
-                    const customCategoryCombo = categoryComboById[dse.categoryCombo?.id];
-                    return customCategoryCombo
-                        ? ([dse.dataElement.id, customCategoryCombo] as [Id, D2CategoryCombo])
+                    const customCategoryComboId = dse.categoryCombo?.id;
+                    return customCategoryComboId
+                        ? ([dse.dataElement.id, customCategoryComboId] as [Id, typeof customCategoryComboId])
                         : undefined;
                 })
                 .compact()
@@ -45,9 +45,14 @@ export class DataElementD2Source {
             return _(dataForm.sections)
                 .flatMap(section => section.dataElements)
                 .map(d2DataElement => {
-                    const customCategoryCombo = categoryComboMapping[d2DataElement.id];
-                    const dataElementCategoryCombo = categoryComboById[d2DataElement.categoryCombo.id];
-                    const categoryCombo = customCategoryCombo || dataElementCategoryCombo;
+                    const customCategoryComboId = categoryComboMapping[d2DataElement.id];
+                    const categoryComboId = customCategoryComboId || d2DataElement.categoryCombo.id;
+                    const categoryCombo = categoryComboById[categoryComboId];
+
+                    if (!categoryCombo)
+                        console.warn(
+                            `Category combo ${categoryComboId} not accessible (data element ${d2DataElement.id})`
+                        );
                     return categoryCombo ? getDataElement(d2DataElement, categoryCombo) : undefined;
                 })
                 .compact()
