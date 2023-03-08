@@ -17,6 +17,7 @@ const upload = {
     specimens: [],
     status: "UPLOADED",
     uploadDate: new Date().toISOString(),
+    orgUnit: "ACe2e4xiXG2",
 };
 
 export class ValidateGlassUploadsUseCase implements UseCase {
