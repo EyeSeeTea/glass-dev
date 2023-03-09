@@ -15,9 +15,10 @@ import { DataSubmissionStatusTypes } from "../../../../domain/entities/GlassData
 export interface CtaButtonsProps {
     ctas: StatusCTAs[];
     setRefetchStatus: Dispatch<SetStateAction<DataSubmissionStatusTypes | undefined>>;
+    setCurrentStep: React.Dispatch<React.SetStateAction<number>>;
 }
 
-export const CtaButtons: React.FC<CtaButtonsProps> = ({ ctas, setRefetchStatus }) => {
+export const CtaButtons: React.FC<CtaButtonsProps> = ({ ctas, setRefetchStatus, setCurrentStep }) => {
     const { compositionRoot } = useAppContext();
     const hasCurrentUserCaptureAccess = useGlassCaptureAccess();
     const [open, setOpen] = React.useState(false);
@@ -59,7 +60,7 @@ export const CtaButtons: React.FC<CtaButtonsProps> = ({ ctas, setRefetchStatus }
         );
     };
 
-    const getCTAButton = (cta: StatusCTAs) => {
+    const getCTAButton = (cta: StatusCTAs, setCurrentStep: React.Dispatch<React.SetStateAction<number>>) => {
         // TODO : Button click event handlers to be added as corresponding feature developed.
         switch (cta) {
             case "Display full status history":
@@ -72,7 +73,7 @@ export const CtaButtons: React.FC<CtaButtonsProps> = ({ ctas, setRefetchStatus }
                 );
             case "Go to questionnaire":
                 return (
-                    <Button variant="contained" color="primary" key={1}>
+                    <Button variant="contained" color="primary" key={1} onClick={() => setCurrentStep(2)}>
                         {i18n.t("Go to questionnaires")}
                     </Button>
                 );
@@ -94,6 +95,18 @@ export const CtaButtons: React.FC<CtaButtonsProps> = ({ ctas, setRefetchStatus }
                         disabled={!hasCurrentUserCaptureAccess}
                     >
                         {i18n.t("Upload dataset")}
+                    </Button>
+                );
+            case "Upload/Delete datasets >":
+                return (
+                    <Button
+                        key={4}
+                        variant="contained"
+                        color="primary"
+                        onClick={() => setCurrentStep(1)}
+                        disabled={!hasCurrentUserCaptureAccess}
+                    >
+                        {i18n.t("Upload/Delete datasets")}
                     </Button>
                 );
         }
@@ -125,7 +138,7 @@ export const CtaButtons: React.FC<CtaButtonsProps> = ({ ctas, setRefetchStatus }
             </ConfirmationDialog>
             <>
                 {ctas.map(cta => {
-                    return getCTAButton(cta);
+                    return getCTAButton(cta, setCurrentStep);
                 })}
             </>
         </ContentWrapper>
