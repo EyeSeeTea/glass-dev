@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2023-03-08T17:57:00.067Z\n"
-"PO-Revision-Date: 2023-03-08T17:57:00.067Z\n"
+"POT-Creation-Date: 2023-03-09T08:27:13.245Z\n"
+"PO-Revision-Date: 2023-03-09T08:27:13.245Z\n"
 
 msgid "Error saving registration status"
 msgstr ""
@@ -83,6 +83,9 @@ msgid "Send to WHO for revision"
 msgstr ""
 
 msgid "Upload dataset"
+msgstr ""
+
+msgid "Upload/Delete datasets"
 msgstr ""
 
 msgid "Confirm submission"
