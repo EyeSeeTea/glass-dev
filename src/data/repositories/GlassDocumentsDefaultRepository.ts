@@ -55,4 +55,8 @@ export class GlassDocumentsDefaultRepository implements GlassDocumentsRepository
             }
         });
     }
+
+    download(id: string): FutureData<Blob> {
+        return apiToFuture(this.api.files.get(id));
+    }
 }
