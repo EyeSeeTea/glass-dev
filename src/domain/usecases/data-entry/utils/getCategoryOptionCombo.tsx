@@ -25,7 +25,7 @@ export function getCategoryOptionComboByDataElement(
 
 export function getCategoryOptionComboByOptionCodes(categoryCombo: CategoryCombo, codes: string[]) {
     const categoryOptionCombo = categoryCombo.categoryOptionCombos.find(catOpComb =>
-        catOpComb.categoryOptions.every(catOp => codes.includes(catOp.code))
+        catOpComb.categoryOptions.every(catOp => codes.includes(catOp.code.trim()))
     );
 
     if (!categoryOptionCombo) {
