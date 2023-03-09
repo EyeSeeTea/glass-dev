@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2023-03-09T08:27:13.245Z\n"
-"PO-Revision-Date: 2023-03-09T08:27:13.245Z\n"
+"POT-Creation-Date: 2023-03-09T18:13:29.097Z\n"
+"PO-Revision-Date: 2023-03-09T18:13:29.097Z\n"
 
 msgid "Error saving registration status"
 msgstr ""
@@ -71,6 +71,9 @@ msgid "Correct Uploads"
 msgstr ""
 
 msgid "Uploads with errors, or discarded"
+msgstr ""
+
+msgid "Add new datasets"
 msgstr ""
 
 msgid "Display full status history >"
@@ -156,6 +159,12 @@ msgid "Batch ID"
 msgstr ""
 
 msgid "Status"
+msgstr ""
+
+msgid "Download File"
+msgstr ""
+
+msgid "Delete"
 msgstr ""
 
 msgid "Overview"

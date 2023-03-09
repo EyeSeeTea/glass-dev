@@ -28,6 +28,8 @@ export const UploadsTable: React.FC<UploadsTableProps> = ({ title, items, classN
                             <TableCell>{i18n.t("Type")}</TableCell>
                             <TableCell>{i18n.t("Batch ID")}</TableCell>
                             <TableCell>{i18n.t("Status")}</TableCell>
+                            <TableCell>{i18n.t("Download File")}</TableCell>
+                            <TableCell>{i18n.t("Delete")}</TableCell>
                         </TableRow>
                     </TableHead>
 
