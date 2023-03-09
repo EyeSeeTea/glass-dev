@@ -11,9 +11,15 @@ interface OverviewProps {
     moduleName: string;
     currentDataSubmissionStatus: StatusDetails;
     setRefetchStatus: Dispatch<SetStateAction<DataSubmissionStatusTypes | undefined>>;
+    setCurrentStep: React.Dispatch<React.SetStateAction<number>>;
 }
 
-export const Overview: React.FC<OverviewProps> = ({ moduleName, currentDataSubmissionStatus, setRefetchStatus }) => {
+export const Overview: React.FC<OverviewProps> = ({
+    moduleName,
+    currentDataSubmissionStatus,
+    setRefetchStatus,
+    setCurrentStep,
+}) => {
     return (
         <LinedBox>
             {currentDataSubmissionStatus ? (
@@ -25,6 +31,7 @@ export const Overview: React.FC<OverviewProps> = ({ moduleName, currentDataSubmi
                     ctas={currentDataSubmissionStatus.cta}
                     showUploadHistory={currentDataSubmissionStatus.showUploadHistory}
                     setRefetchStatus={setRefetchStatus}
+                    setCurrentStep={setCurrentStep}
                 />
             ) : (
                 <Typography variant="h6">{i18n.t("Data Submission status has errors...")}</Typography>
