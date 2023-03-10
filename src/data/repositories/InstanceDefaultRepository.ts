@@ -1,4 +1,5 @@
 import { D2Api } from "@eyeseetea/d2-api/2.34";
+import _ from "lodash";
 import { FutureData, Future } from "../../domain/entities/Future";
 import { GlassModule } from "../../domain/entities/GlassModule";
 import { NamedRef } from "../../domain/entities/Ref";
@@ -10,6 +11,12 @@ import { apiToFuture } from "../../utils/futures";
 import { DataStoreClient } from "../data-store/DataStoreClient";
 import { DataStoreKeys } from "../data-store/DataStoreKeys";
 import { Instance } from "../entities/Instance";
+
+type GeneralInfoType = {
+    countryLevel: number;
+    enrolmentProgram: string;
+    regionLevel: number;
+};
 
 export class InstanceDefaultRepository implements InstanceRepository {
     private api: D2Api;
@@ -40,7 +47,9 @@ export class InstanceDefaultRepository implements InstanceRepository {
                 captureAccess: false, //orgUnits in dataViewOrganisationUnits dont have capture access
             }));
 
-        orgUnitsAccess = [...orgUnitsAccess, ...readOnlyAccessOrgUnits];
+        orgUnitsAccess = [...orgUnitsAccess, ...readOnlyAccessOrgUnits].sort((a, b) =>
+            a.orgUnitName.localeCompare(b.orgUnitName)
+        );
 
         //TO DO: TEMP - For testing the OrgUnit Access implementation, consoling the orgUnitAccess.
         //TO DO: Remove once permission implementation done.
@@ -89,23 +98,48 @@ export class InstanceDefaultRepository implements InstanceRepository {
                     organisationUnits: {
                         id: true,
                         name: true,
+                        children: true,
+                        level: true,
                     },
-                    dataViewOrganisationUnits: { id: true, name: true },
+                    dataViewOrganisationUnits: { id: true, name: true, level: true },
                 },
             })
         ).flatMap(user => {
-            return this.mapUserGroupAccess(user.userGroups).map((userModulesAccess): UserAccessInfo => {
-                return {
-                    id: user.id,
-                    name: user.displayName,
-                    userGroups: user.userGroups,
-                    ...user.userCredentials,
-                    userOrgUnitsAccess: this.mapUserOrgUnitsAccess(
-                        user.organisationUnits,
-                        user.dataViewOrganisationUnits
-                    ),
-                    userModulesAccess: userModulesAccess,
-                };
+            const { organisationUnits, dataViewOrganisationUnits } = user;
+
+            const countryOrgUnits: { name: string; id: string }[] = [];
+
+            return this.dataStoreClient.getObject(DataStoreKeys.GENERAL).flatMap(generalInfo => {
+                const countryLevel = (generalInfo as GeneralInfoType).countryLevel;
+
+                organisationUnits.forEach(orgUnit => {
+                    if (orgUnit.level === countryLevel) {
+                        countryOrgUnits.push({ name: orgUnit.name, id: orgUnit.id });
+                    }
+                });
+
+                return this.getAllCountryOrgUnits(organisationUnits, countryLevel).flatMap(childrenOrgUnits => {
+                    return this.getAllCountryOrgUnits(dataViewOrganisationUnits, countryLevel).flatMap(
+                        childrenDataViewOrgUnits => {
+                            const uniqueOrgUnits = _.uniqBy([...countryOrgUnits, ...childrenOrgUnits], "id");
+                            const uniqueDataViewOrgUnits = _.uniqBy(childrenDataViewOrgUnits, "id");
+
+                            return this.mapUserGroupAccess(user.userGroups).map((userModulesAccess): UserAccessInfo => {
+                                return {
+                                    id: user.id,
+                                    name: user.displayName,
+                                    userGroups: user.userGroups,
+                                    ...user.userCredentials,
+                                    userOrgUnitsAccess: this.mapUserOrgUnitsAccess(
+                                        uniqueOrgUnits,
+                                        uniqueDataViewOrgUnits
+                                    ),
+                                    userModulesAccess: userModulesAccess,
+                                };
+                            });
+                        }
+                    );
+                });
             });
         });
     }
@@ -113,5 +147,51 @@ export class InstanceDefaultRepository implements InstanceRepository {
     @cache()
     public getInstanceVersion(): FutureData<string> {
         return apiToFuture(this.api.system.info).map(({ version }) => version);
+    }
+
+    public getAllCountryOrgUnits(
+        orgUnits: { name: string; id: string }[],
+        countryLevel: number
+    ): FutureData<{ name: string; id: string }[]> {
+        const result: { name: string; id: string }[] = [];
+
+        const recursiveGetOrgUnits = (
+            orgUnits: { name: string; id: string }[],
+            countryLevel: number
+        ): FutureData<{ name: string; id: string }[]> => {
+            const childrenOrgUnits = apiToFuture(
+                this.api.models.organisationUnits.get({
+                    filter: {
+                        "parent.id": { in: orgUnits.map(ou => ou.id) },
+                        level: { le: countryLevel.toString() },
+                    },
+                    fields: {
+                        id: true,
+                        name: true,
+                        level: true,
+                    },
+                })
+            ).map(res => res.objects);
+
+            return childrenOrgUnits.flatMap(childrenOrgUnits => {
+                if (childrenOrgUnits[0] && childrenOrgUnits[0]?.level < countryLevel) {
+                    return this.getAllCountryOrgUnits(
+                        childrenOrgUnits.map(el => {
+                            return { name: el.name, id: el.id };
+                        }),
+                        countryLevel
+                    );
+                } else {
+                    childrenOrgUnits.forEach(el => {
+                        result.push({ name: el.name, id: el.id });
+                    });
+                    return Future.success(result);
+                }
+            });
+        };
+
+        return recursiveGetOrgUnits(orgUnits, countryLevel).flatMap(orgUnits => {
+            return Future.success(orgUnits);
+        });
     }
 }
