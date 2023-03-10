@@ -15,7 +15,7 @@ export function checkPathogenAntibiotic(
             })
             .map(errorItem => {
                 return i18n.t(
-                    `The pathogen and antibiotic combination you have provided is not allowed. Specimen ${errorItem.PATHOGEN} antibiotic ${errorItem.ANTIBIOTIC}`
+                    `The pathogen and antibiotic combination you have provided is not allowed. Pathogen ${errorItem.PATHOGEN} antibiotic ${errorItem.ANTIBIOTIC}`
                 );
             })
     )
