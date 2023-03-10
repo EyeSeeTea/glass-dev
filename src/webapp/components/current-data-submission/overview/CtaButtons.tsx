@@ -102,6 +102,13 @@ export const CtaButtons: React.FC<CtaButtonsProps> = ({ ctas, position, setRefet
                         {i18n.t("Upload/Delete datasets")}
                     </Button>
                 );
+
+            case "Send submission":
+                return (
+                    <Button variant="contained" color="primary" key={2} onClick={showConfirmationDialog}>
+                        {i18n.t("Send submission")}
+                    </Button>
+                );
             default:
                 return (
                     <Button
