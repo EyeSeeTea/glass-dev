@@ -24,16 +24,21 @@ function getNonUploadedItems(upload: GlassUploadsState) {
 export const ListOfDatasets: React.FC = () => {
     const { compositionRoot } = useAppContext();
 
-    const uploads = useGlassUploads(compositionRoot);
+    const { uploads, refreshUploads } = useGlassUploads(compositionRoot);
 
     return (
         <ContentLoader content={uploads}>
             <ContentWrapper>
-                <UploadsTable title={i18n.t("Correct Uploads")} items={getUploadedItems(uploads)} />
+                <UploadsTable
+                    title={i18n.t("Correct Uploads")}
+                    items={getUploadedItems(uploads)}
+                    refreshUploads={refreshUploads}
+                />
                 <UploadsTable
                     title={i18n.t("Uploads with errors, or discarded")}
                     items={getNonUploadedItems(uploads)}
                     className="error-group"
+                    refreshUploads={refreshUploads}
                 />
                 <div>
                     <Button variant="contained" color="primary" component={NavLink} to={`/upload`} exact={true}>

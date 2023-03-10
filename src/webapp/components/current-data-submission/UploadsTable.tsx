@@ -10,10 +10,11 @@ export interface UploadsTableProps {
     title: string;
     items?: UploadsDataItem[];
     className?: string;
+    refreshUploads: React.Dispatch<React.SetStateAction<{}>>;
 }
 
 // TODO: replace Table with MUI Datagrid
-export const UploadsTable: React.FC<UploadsTableProps> = ({ title, items, className }) => {
+export const UploadsTable: React.FC<UploadsTableProps> = ({ title, items, className, refreshUploads }) => {
     return (
         <ContentWrapper className={className}>
             <Typography variant="h3">{i18n.t(title)}</Typography>
@@ -33,7 +34,7 @@ export const UploadsTable: React.FC<UploadsTableProps> = ({ title, items, classN
                         </TableRow>
                     </TableHead>
 
-                    <UploadsTableBody rows={items} />
+                    <UploadsTableBody rows={items} refreshUploads={refreshUploads} />
                 </Table>
             </TableContainer>
         </ContentWrapper>
