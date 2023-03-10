@@ -44,6 +44,7 @@ import { GetNotificationByIdUseCase } from "./domain/usecases/GetNotificationByI
 import { ImportSampleFileUseCase } from "./domain/usecases/data-entry/ImportSampleFileUseCase";
 import { RISDataCSVRepository } from "./data/repositories/RISDataCSVRepository";
 import { SampleDataCSVRepository } from "./data/repositories/SampleDataCSVRepository";
+import { SetDataSubmissionStatusUseCase } from "./domain/usecases/SetDataSubmissionStatusUseCase";
 
 export function getCompositionRoot(instance: Instance) {
     const api = getD2APiFromInstance(instance);
@@ -82,6 +83,7 @@ export function getCompositionRoot(instance: Instance) {
             getSpecificDataSubmission: new GetSpecificDataSubmissionUseCase(glassDataSubmissionRepository),
             getDataSubmissionsByModuleAndOU: new GetDataSubmissionsByModuleAndOUUseCase(glassDataSubmissionRepository),
             getOpenDataSubmissionsByOU: new GetOpenDataSubmissionsByOUUseCase(glassDataSubmissionRepository),
+            setStatus: new SetDataSubmissionStatusUseCase(glassDataSubmissionRepository),
         }),
         glassUploads: getExecute({
             getAll: new GetGlassUploadsUseCase(glassUploadsRepository),

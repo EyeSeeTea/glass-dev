@@ -15,6 +15,7 @@ import { ContentLoader } from "../../components/content-loader/ContentLoader";
 import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context";
 import { useCurrentModuleContext } from "../../contexts/current-module-context";
 import { ModuleLayout } from "../../components/layouts/module-layout/ModuleLayout";
+import { DataSubmissionStatusTypes } from "../../../domain/entities/GlassDataSubmission";
 
 interface CurrentDataSubmissionPageContentProps {
     moduleId: string;
@@ -44,11 +45,13 @@ export const CurrentDataSubmissionPageContent: React.FC<CurrentDataSubmissionPag
         const { compositionRoot } = useAppContext();
         const { currentOrgUnitAccess } = useCurrentOrgUnitContext();
 
+        const [refetchStatus, setRefetchStatus] = useState<DataSubmissionStatusTypes>("NOT_COMPLETED");
         const currentDataSubmissionStatus = useStatusDataSubmission(
             compositionRoot,
             moduleId,
             currentOrgUnitAccess.orgUnitId,
-            period
+            period,
+            refetchStatus
         );
 
         const click = (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
@@ -85,6 +88,7 @@ export const CurrentDataSubmissionPageContent: React.FC<CurrentDataSubmissionPag
                                 <CurrentDataSubmissionContent
                                     moduleName={moduleName}
                                     currentDataSubmissionStatus={currentDataSubmissionStatus.data}
+                                    setRefetchStatus={setRefetchStatus}
                                 />
                             </CustomCard>
                         </>
