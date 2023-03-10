@@ -22,7 +22,7 @@ export const statusMap = new Map<DataSubmissionStatusTypes, StatusDetails>([
             description:
                 "ACTION REQUIRED. Datasets are already uploaded with all test passed. You must approve the upload for WHO revision to continue the process.",
             colour: glassColors.accentPrimary,
-            cta: ["Send to WHO for revision"],
+            cta: ["Upload/Delete datasets >", "Send to WHO for revision"],
             showUploadHistory: true,
         },
     ],

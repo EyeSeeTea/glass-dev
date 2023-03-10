@@ -43,7 +43,7 @@ export const UploadSteps: React.FC<UploadStepsProps> = ({
                     {i18n.t("Advanced")}
                 </Button>
             </div>
-            {renderTypeContent(currentStep, moduleName, currentDataSubmissionStatus, setRefetchStatus)}
+            {renderTypeContent(currentStep, moduleName, currentDataSubmissionStatus, setRefetchStatus, setCurrentStep)}
         </ContentWrapper>
     );
 };
@@ -52,7 +52,8 @@ const renderTypeContent = (
     step: number,
     moduleName: string,
     currentDataSubmissionStatus: StatusDetails,
-    setRefetchStatus: Dispatch<SetStateAction<DataSubmissionStatusTypes | undefined>>
+    setRefetchStatus: Dispatch<SetStateAction<DataSubmissionStatusTypes | undefined>>,
+    setCurrentStep: React.Dispatch<React.SetStateAction<number>>
 ) => {
     switch (step) {
         case 0:
@@ -62,6 +63,7 @@ const renderTypeContent = (
                     moduleName={moduleName}
                     currentDataSubmissionStatus={currentDataSubmissionStatus}
                     setRefetchStatus={setRefetchStatus}
+                    setCurrentStep={setCurrentStep}
                 />
             );
         case 1:

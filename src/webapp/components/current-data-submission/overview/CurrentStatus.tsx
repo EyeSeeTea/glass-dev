@@ -19,6 +19,7 @@ interface StatusProps {
     ctas: StatusCTAs[];
     showUploadHistory: boolean;
     setRefetchStatus: Dispatch<SetStateAction<DataSubmissionStatusTypes | undefined>>;
+    setCurrentStep: React.Dispatch<React.SetStateAction<number>>;
 }
 
 export const CurrentStatus: React.FC<StatusProps> = ({
@@ -28,6 +29,7 @@ export const CurrentStatus: React.FC<StatusProps> = ({
     ctas,
     showUploadHistory,
     setRefetchStatus,
+    setCurrentStep,
 }) => {
     const { compositionRoot } = useAppContext();
     const location = useLocation();
@@ -104,7 +106,7 @@ export const CurrentStatus: React.FC<StatusProps> = ({
                     </Table>
                 </TableContainer>
             )}
-            <CtaButtons ctas={ctas} setRefetchStatus={setRefetchStatus} />
+            <CtaButtons ctas={ctas} setRefetchStatus={setRefetchStatus} setCurrentStep={setCurrentStep} />
         </div>
     );
 };
