@@ -4,4 +4,5 @@ export const DataStoreKeys = {
     DATA_SUBMISSIONS: "data-submissions",
     UPLOADS: "uploads",
     DOCUMENTS: "documents",
+    GENERAL: "general",
 };
