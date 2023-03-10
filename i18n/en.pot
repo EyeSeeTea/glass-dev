@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2023-03-09T18:13:29.097Z\n"
-"PO-Revision-Date: 2023-03-09T18:13:29.097Z\n"
+"POT-Creation-Date: 2023-03-10T16:56:35.885Z\n"
+"PO-Revision-Date: 2023-03-10T16:56:35.885Z\n"
 
 msgid "Error saving registration status"
 msgstr ""
@@ -76,55 +76,6 @@ msgstr ""
 msgid "Add new datasets"
 msgstr ""
 
-msgid "Display full status history >"
-msgstr ""
-
-msgid "Go to questionnaires"
-msgstr ""
-
-msgid "Send to WHO for revision"
-msgstr ""
-
-msgid "Upload dataset"
-msgstr ""
-
-msgid "Upload/Delete datasets"
-msgstr ""
-
-msgid "Confirm submission"
-msgstr ""
-
-msgid "Ok"
-msgstr ""
-
-msgid "Cancel"
-msgstr ""
-
-msgid ""
-"Please review that the submission package contains all the datasets that "
-"you want to include."
-msgstr ""
-
-msgid ""
-"After you submit this package, you wont be able to edit it anymore wihout "
-"WHO permissions"
-msgstr ""
-
-msgid "Current Status"
-msgstr ""
-
-msgid "Content"
-msgstr ""
-
-msgid "Mandatory"
-msgstr ""
-
-msgid "State"
-msgstr ""
-
-msgid "Data Submission status has errors..."
-msgstr ""
-
 msgid "There are no questionnaries for this module"
 msgstr ""
 
@@ -141,6 +92,24 @@ msgid "View"
 msgstr ""
 
 msgid "Go"
+msgstr ""
+
+msgid "Overview"
+msgstr ""
+
+msgid "List of Datasets"
+msgstr ""
+
+msgid "Questionnaires"
+msgstr ""
+
+msgid "Validation"
+msgstr ""
+
+msgid "Advanced"
+msgstr ""
+
+msgid "No Data uploaded..."
 msgstr ""
 
 msgid "Uploaded"
@@ -165,24 +134,6 @@ msgid "Download File"
 msgstr ""
 
 msgid "Delete"
-msgstr ""
-
-msgid "Overview"
-msgstr ""
-
-msgid "List of Datasets"
-msgstr ""
-
-msgid "Questionnaires"
-msgstr ""
-
-msgid "Validation"
-msgstr ""
-
-msgid "Advanced"
-msgstr ""
-
-msgid "No Data uploaded..."
 msgstr ""
 
 msgid "Validation Alpha"
@@ -218,6 +169,55 @@ msgstr ""
 msgid "09 - 12 - 2021 VALIDATION CORRECT"
 msgstr ""
 
+msgid "Go to questionnaires"
+msgstr ""
+
+msgid "Upload dataset"
+msgstr ""
+
+msgid "Upload/Delete datasets"
+msgstr ""
+
+msgid "Confirm submission"
+msgstr ""
+
+msgid "Ok"
+msgstr ""
+
+msgid "Cancel"
+msgstr ""
+
+msgid ""
+"Please review that the submission package contains all the datasets that "
+"you want to include."
+msgstr ""
+
+msgid ""
+"After you submit this package, you wont be able to edit it anymore wihout "
+"WHO permissions"
+msgstr ""
+
+msgid "Error fetching questionnaires."
+msgstr ""
+
+msgid "Error fetching uploads."
+msgstr ""
+
+msgid "Current Status"
+msgstr ""
+
+msgid "Content"
+msgstr ""
+
+msgid "Mandatory"
+msgstr ""
+
+msgid "State"
+msgstr ""
+
+msgid "Data Submission status has errors..."
+msgstr ""
+
 msgid " "
 msgstr ""
 
@@ -225,6 +225,9 @@ msgid "status"
 msgstr ""
 
 msgid "News from GLASS"
+msgstr ""
+
+msgid "No Open Data Submissions"
 msgstr ""
 
 msgid "Notification"
@@ -246,9 +249,6 @@ msgid "Your Notifications"
 msgstr ""
 
 msgid "No notifications"
-msgstr ""
-
-msgid "No Open Data Submissions"
 msgstr ""
 
 msgid "Log Out"
