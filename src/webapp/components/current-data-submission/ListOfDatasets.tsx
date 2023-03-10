@@ -6,33 +6,51 @@ import { GlassUploadsState, useGlassUploads } from "../../hooks/useGlassUploads"
 import { ContentLoader } from "../content-loader/ContentLoader";
 import { UploadsDataItem } from "../../entities/uploads";
 import i18n from "@eyeseetea/d2-ui-components/locales";
+import { Button } from "@material-ui/core";
+import { NavLink } from "react-router-dom";
 
 function getUploadedItems(upload: GlassUploadsState) {
     if (upload.kind === "loaded") {
-        return upload.data.filter((row: UploadsDataItem) => row.status.toLowerCase() === "uploaded");
+        return upload.data.filter(
+            (row: UploadsDataItem) =>
+                row.status.toLowerCase() === "uploaded" || row.status.toLowerCase() === "completed"
+        );
     }
 }
 
 function getNonUploadedItems(upload: GlassUploadsState) {
     if (upload.kind === "loaded") {
-        return upload.data.filter((row: UploadsDataItem) => row.status.toLowerCase() !== "uploaded");
+        return upload.data.filter(
+            (row: UploadsDataItem) =>
+                row.status.toLowerCase() !== "uploaded" && row.status.toLowerCase() !== "completed"
+        );
     }
 }
 
 export const ListOfDatasets: React.FC = () => {
     const { compositionRoot } = useAppContext();
 
-    const uploads = useGlassUploads(compositionRoot);
+    const { uploads, refreshUploads } = useGlassUploads(compositionRoot);
 
     return (
         <ContentLoader content={uploads}>
             <ContentWrapper>
-                <UploadsTable title={i18n.t("Correct Uploads")} items={getUploadedItems(uploads)} />
+                <UploadsTable
+                    title={i18n.t("Correct Uploads")}
+                    items={getUploadedItems(uploads)}
+                    refreshUploads={refreshUploads}
+                />
                 <UploadsTable
                     title={i18n.t("Uploads with errors, or discarded")}
                     items={getNonUploadedItems(uploads)}
                     className="error-group"
+                    refreshUploads={refreshUploads}
                 />
+                <div>
+                    <Button variant="contained" color="primary" component={NavLink} to={`/upload`} exact={true}>
+                        {i18n.t("Add new datasets")}
+                    </Button>
+                </div>
             </ContentWrapper>
         </ContentLoader>
     );

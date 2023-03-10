@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { Dispatch, SetStateAction, useState } from "react";
 import { Button } from "@material-ui/core";
 import styled from "styled-components";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
@@ -9,13 +9,19 @@ import { Validations } from "./Validations";
 import { Overview } from "./overview/Overview";
 import { StatusDetails } from "./overview/StatusDetails";
 import i18n from "@eyeseetea/d2-ui-components/locales";
+import { DataSubmissionStatusTypes } from "../../../domain/entities/GlassDataSubmission";
 
 interface UploadStepsProps {
     moduleName: string;
     currentDataSubmissionStatus: StatusDetails;
+    setRefetchStatus: Dispatch<SetStateAction<DataSubmissionStatusTypes | undefined>>;
 }
 
-export const UploadSteps: React.FC<UploadStepsProps> = ({ moduleName, currentDataSubmissionStatus }) => {
+export const UploadSteps: React.FC<UploadStepsProps> = ({
+    moduleName,
+    currentDataSubmissionStatus,
+    setRefetchStatus,
+}) => {
     const [currentStep, setCurrentStep] = useState<number>(0);
 
     return (
@@ -37,20 +43,33 @@ export const UploadSteps: React.FC<UploadStepsProps> = ({ moduleName, currentDat
                     {i18n.t("Advanced")}
                 </Button>
             </div>
-            {renderTypeContent(currentStep, moduleName, currentDataSubmissionStatus)}
+            {renderTypeContent(currentStep, moduleName, currentDataSubmissionStatus, setRefetchStatus, setCurrentStep)}
         </ContentWrapper>
     );
 };
 
-const renderTypeContent = (step: number, moduleName: string, currentDataSubmissionStatus: StatusDetails) => {
+const renderTypeContent = (
+    step: number,
+    moduleName: string,
+    currentDataSubmissionStatus: StatusDetails,
+    setRefetchStatus: Dispatch<SetStateAction<DataSubmissionStatusTypes | undefined>>,
+    setCurrentStep: React.Dispatch<React.SetStateAction<number>>
+) => {
     switch (step) {
         case 0:
             // TODO: set module name inside page root content to avoid prop drilling
-            return <Overview moduleName={moduleName} currentDataSubmissionStatus={currentDataSubmissionStatus} />;
+            return (
+                <Overview
+                    moduleName={moduleName}
+                    currentDataSubmissionStatus={currentDataSubmissionStatus}
+                    setRefetchStatus={setRefetchStatus}
+                    setCurrentStep={setCurrentStep}
+                />
+            );
         case 1:
             return <ListOfDatasets />;
         case 2:
-            return <Questionnaires />;
+            return <Questionnaires setRefetchStatus={setRefetchStatus} />;
         case 3:
             return <Validations />;
         case 4:

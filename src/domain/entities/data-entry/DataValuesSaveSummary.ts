@@ -1,6 +1,6 @@
 import { Id } from "../Ref";
 
-declare type ImportStrategy =
+export type ImportStrategy =
     | "CREATE"
     | "UPDATE"
     | "CREATE_AND_UPDATE"

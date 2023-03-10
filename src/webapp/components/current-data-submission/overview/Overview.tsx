@@ -1,17 +1,25 @@
-import React from "react";
+import React, { Dispatch, SetStateAction } from "react";
 import styled from "styled-components";
 import { glassColors } from "../../../pages/app/themes/dhis2.theme";
 import { CurrentStatus } from "./CurrentStatus";
 import { StatusDetails } from "./StatusDetails";
 import { Typography } from "@material-ui/core";
 import i18n from "@eyeseetea/d2-ui-components/locales";
+import { DataSubmissionStatusTypes } from "../../../../domain/entities/GlassDataSubmission";
 
 interface OverviewProps {
     moduleName: string;
     currentDataSubmissionStatus: StatusDetails;
+    setRefetchStatus: Dispatch<SetStateAction<DataSubmissionStatusTypes | undefined>>;
+    setCurrentStep: React.Dispatch<React.SetStateAction<number>>;
 }
 
-export const Overview: React.FC<OverviewProps> = ({ moduleName, currentDataSubmissionStatus }) => {
+export const Overview: React.FC<OverviewProps> = ({
+    moduleName,
+    currentDataSubmissionStatus,
+    setRefetchStatus,
+    setCurrentStep,
+}) => {
     return (
         <LinedBox>
             {currentDataSubmissionStatus ? (
@@ -24,6 +32,8 @@ export const Overview: React.FC<OverviewProps> = ({ moduleName, currentDataSubmi
                     rightCTAs={currentDataSubmissionStatus.rightCTAs}
                     showUploadHistory={currentDataSubmissionStatus.showUploadHistory}
                     isActionRequired={currentDataSubmissionStatus.isActionRequired}
+                    setRefetchStatus={setRefetchStatus}
+                    setCurrentStep={setCurrentStep}
                 />
             ) : (
                 <Typography variant="h6">{i18n.t("Data Submission status has errors...")}</Typography>

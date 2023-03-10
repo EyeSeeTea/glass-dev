@@ -53,9 +53,14 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
                 setIsDataSetUploading(true);
 
                 Future.joinObj({
-                    importRISFileSummary: compositionRoot.dataSubmision.RISFile(risFile, batchId, year),
+                    importRISFileSummary: compositionRoot.dataSubmision.RISFile(
+                        risFile,
+                        batchId,
+                        year,
+                        "CREATE_AND_UPDATE"
+                    ),
                     importSampleFileSummary: sampleFile
-                        ? compositionRoot.dataSubmision.sampleFile(sampleFile, batchId, year)
+                        ? compositionRoot.dataSubmision.sampleFile(sampleFile, batchId, year, "CREATE_AND_UPDATE")
                         : Future.success(undefined),
                 }).run(
                     ({ importRISFileSummary, importSampleFileSummary }) => {
