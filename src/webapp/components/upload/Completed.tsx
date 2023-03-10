@@ -10,7 +10,7 @@ export const Completed: React.FC = () => {
     useEffect(() => {
         localStorage.removeItem("risUploadId");
         localStorage.removeItem("sampleUploadId");
-    });
+    }, []);
 
     return (
         <ContentWrapper>

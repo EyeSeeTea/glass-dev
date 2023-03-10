@@ -79,6 +79,11 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
     const dataSubmissionId = useCurrentDataSubmissionId(compositionRoot, moduleId, orgUnitId, parseInt(period));
 
     useEffect(() => {
+        localStorage.removeItem("risUploadId");
+        localStorage.removeItem("sampleUploadId");
+    }, []);
+
+    useEffect(() => {
         const fetchPreviousUpload = async (): Promise<GlassUploads[]> => {
             return await compositionRoot.glassUploads.getByDataSubmission(dataSubmissionId).toPromise();
         };
