@@ -1,5 +1,4 @@
 import { CategoryCombo } from "../../../entities/metadata/CategoryCombo";
-import _ from "lodash";
 import { ExternalData } from "../../../entities/data-entry/external/ExternalData";
 import { DataElement } from "../../../entities/metadata/DataSet";
 
@@ -25,35 +24,18 @@ export function getCategoryOptionComboByDataElement(
 }
 
 export function getCategoryOptionComboByOptionCodes(categoryCombo: CategoryCombo, codes: string[]) {
-    const categoryOptions = categoryCombo.categories
-        .map(cat => cat.categoryOptions)
-        .flat()
-        .filter(catOp => codes.includes(catOp.code.trim()));
+    const categoryOptionCombo = categoryCombo.categoryOptionCombos.find(
+        catOpComb =>
+            catOpComb.categoryOptions.filter(catOp => codes.includes(catOp.code.trim())).length === codes.length
+    );
 
-    const uniqueCategoryOptions = _.unionBy(categoryOptions, catOption => catOption.code);
-
-    if (uniqueCategoryOptions.length !== codes.length) {
+    if (!categoryOptionCombo) {
         /* eslint-disable no-console */
         console.error(
-            `All codes not found as category combination in categoryCombo ${categoryCombo.name}. codes: ${codes.join(
-                ","
-            )}`
+            `categoryOptionCombos not found in categoryCombo ${categoryCombo.name} for codes: ${codes.join(",")}`
         );
         return "";
     }
 
-    //TODO: this is a code brought from old repository written by sneha, we need improve it without to use let
-
-    //The categoryOptionComboId will be common between both category options.
-
-    let commonCategoryOptionCombos = uniqueCategoryOptions[0]?.categoryOptionCombos;
-    uniqueCategoryOptions.map(co => {
-        return (commonCategoryOptionCombos = co.categoryOptionCombos.filter(co =>
-            commonCategoryOptionCombos?.some(c => c === co)
-        ));
-    });
-
-    if (commonCategoryOptionCombos?.length === 1) {
-        return commonCategoryOptionCombos[0];
-    } else return "";
+    return categoryOptionCombo.id;
 }
