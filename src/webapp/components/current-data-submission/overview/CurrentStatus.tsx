@@ -138,10 +138,15 @@ export const CurrentStatus: React.FC<StatusProps> = ({
             )}
             <Box display={"flex"} justifyContent="space-between" mt="20px">
                 <Box>
-                    <CtaButtons ctas={leftCTAs}  setRefetchStatus={setRefetchStatus} setCurrentStep={setCurrentStep} />
+                    <CtaButtons ctas={leftCTAs} setRefetchStatus={setRefetchStatus} setCurrentStep={setCurrentStep} />
                 </Box>
                 <Box>
-                    <CtaButtons ctas={rightCTAs} position="right" setRefetchStatus={setRefetchStatus} setCurrentStep={setCurrentStep} />
+                    <CtaButtons
+                        ctas={rightCTAs}
+                        position="right"
+                        setRefetchStatus={setRefetchStatus}
+                        setCurrentStep={setCurrentStep}
+                    />
                 </Box>
             </Box>
         </div>
