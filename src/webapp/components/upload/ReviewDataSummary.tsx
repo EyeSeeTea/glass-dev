@@ -8,7 +8,6 @@ import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import { useCallbackEffect } from "../../hooks/use-callback-effect";
 import { useSnackbar } from "@eyeseetea/d2-ui-components";
 import { useAppContext } from "../../contexts/app-context";
-import { Future } from "../../../domain/entities/Future";
 
 interface ReviewDataSummaryProps {
     changeStep: (step: number) => void;
@@ -38,46 +37,31 @@ export const ReviewDataSummary: React.FC<ReviewDataSummaryProps> = ({
         const sampleUploadId = localStorage.getItem("sampleUploadId");
         setIsLoading(true);
         if (risUploadId) {
-            return compositionRoot.glassUploads
-                .setStatus({ id: risUploadId, status: COMPLETED_STATUS })
-                .flatMap(() => {
-                    return risUploadId
-                        ? compositionRoot.glassUploads.setStatus({ id: risUploadId, status: COMPLETED_STATUS })
-                        : Future.success(undefined);
-                })
-                .run(
-                    () => {
-                        if (!sampleUploadId) {
-                            changeStep(4);
-                            setIsLoading(false);
-                        } else {
-                            return compositionRoot.glassUploads
-                                .setStatus({ id: sampleUploadId, status: COMPLETED_STATUS })
-                                .flatMap(() => {
-                                    return sampleUploadId
-                                        ? compositionRoot.glassUploads.setStatus({
-                                              id: sampleUploadId,
-                                              status: COMPLETED_STATUS,
-                                          })
-                                        : Future.success(undefined);
-                                })
-                                .run(
-                                    () => {
-                                        changeStep(4);
-                                        setIsLoading(false);
-                                    },
-                                    errorMessage => {
-                                        snackbar.error(i18n.t(errorMessage));
-                                        setIsLoading(false);
-                                    }
-                                );
-                        }
-                    },
-                    errorMessage => {
-                        snackbar.error(i18n.t(errorMessage));
+            return compositionRoot.glassUploads.setStatus({ id: risUploadId, status: COMPLETED_STATUS }).run(
+                () => {
+                    if (!sampleUploadId) {
+                        changeStep(4);
                         setIsLoading(false);
+                    } else {
+                        return compositionRoot.glassUploads
+                            .setStatus({ id: sampleUploadId, status: COMPLETED_STATUS })
+                            .run(
+                                () => {
+                                    changeStep(4);
+                                    setIsLoading(false);
+                                },
+                                errorMessage => {
+                                    snackbar.error(i18n.t(errorMessage));
+                                    setIsLoading(false);
+                                }
+                            );
                     }
-                );
+                },
+                errorMessage => {
+                    snackbar.error(i18n.t(errorMessage));
+                    setIsLoading(false);
+                }
+            );
         }
     }, [changeStep, compositionRoot.glassUploads, snackbar]);
 
