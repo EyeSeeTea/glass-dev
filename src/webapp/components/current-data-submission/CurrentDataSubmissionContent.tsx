@@ -1,20 +1,27 @@
-import React from "react";
+import React, { Dispatch, SetStateAction } from "react";
 import { UploadSteps } from "./UploadSteps";
 import styled from "styled-components";
 import { StatusDetails } from "./overview/StatusDetails";
+import { DataSubmissionStatusTypes } from "../../../domain/entities/GlassDataSubmission";
 
 interface CurrentDataSubmissionContentProps {
     moduleName: string;
     currentDataSubmissionStatus: StatusDetails;
+    setRefetchStatus: Dispatch<SetStateAction<DataSubmissionStatusTypes>>;
 }
 
 export const CurrentDataSubmissionContent: React.FC<CurrentDataSubmissionContentProps> = ({
     moduleName,
     currentDataSubmissionStatus,
+    setRefetchStatus,
 }) => {
     return (
         <ContentWrapper>
-            <UploadSteps moduleName={moduleName} currentDataSubmissionStatus={currentDataSubmissionStatus} />
+            <UploadSteps
+                moduleName={moduleName}
+                currentDataSubmissionStatus={currentDataSubmissionStatus}
+                setRefetchStatus={setRefetchStatus}
+            />
         </ContentWrapper>
     );
 };

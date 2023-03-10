@@ -10,6 +10,7 @@ export const QuestionnaireFormTest: React.FC = React.memo(() => {
             year={2022}
             onBackClick={console.debug}
             onSave={console.debug}
+            validateAndUpdateDataSubmissionStatus={console.debug}
         />
     );
 });

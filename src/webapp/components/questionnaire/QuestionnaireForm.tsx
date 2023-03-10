@@ -21,6 +21,7 @@ export interface QuestionnarieFormProps {
     mode: "show" | "edit";
     onBackClick(): void;
     onSave(questionnaire: QuestionnaireBase): void;
+    validateAndUpdateDataSubmissionStatus(complete: boolean, questionnaireId: string): void;
 }
 
 const QuestionnaireForm: React.FC<QuestionnarieFormProps> = props => {
@@ -28,6 +29,11 @@ const QuestionnaireForm: React.FC<QuestionnarieFormProps> = props => {
     const [questionnaire, selector, actions, isSaving] = useQuestionnaire(props);
     const classes = useStyles();
     const disabled = questionnaire?.isCompleted ? true : mode === "show";
+
+    const setAsCompleted = (complete: boolean) => {
+        actions.setAsCompleted(complete);
+        props.validateAndUpdateDataSubmissionStatus(complete, selector.id);
+    };
 
     if (!questionnaire) return <LinearProgress />;
 
@@ -40,7 +46,7 @@ const QuestionnaireForm: React.FC<QuestionnarieFormProps> = props => {
                 isCompleted={questionnaire.isCompleted}
                 isSaving={isSaving}
                 mode={mode}
-                setAsCompleted={actions.setAsCompleted}
+                setAsCompleted={complete => setAsCompleted(complete)}
             />
 
             {questionnaire.sections.map(section => {
