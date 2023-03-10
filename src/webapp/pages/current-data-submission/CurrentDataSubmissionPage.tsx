@@ -2,7 +2,6 @@
 import { Breadcrumbs, Button } from "@material-ui/core";
 import React, { useState } from "react";
 import styled from "styled-components";
-import { useAppContext } from "../../contexts/app-context";
 import { glassColors, palette } from "../app/themes/dhis2.theme";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import { NavLink, useLocation } from "react-router-dom";
@@ -15,6 +14,7 @@ import { ContentLoader } from "../../components/content-loader/ContentLoader";
 import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context";
 import { useCurrentModuleContext } from "../../contexts/current-module-context";
 import { ModuleLayout } from "../../components/layouts/module-layout/ModuleLayout";
+import { DataSubmissionStatusTypes } from "../../../domain/entities/GlassDataSubmission";
 
 interface CurrentDataSubmissionPageContentProps {
     moduleId: string;
@@ -41,14 +41,14 @@ export const CurrentDataSubmissionPageContent: React.FC<CurrentDataSubmissionPag
         const periodVal = queryParameters?.get("period");
         const [period, setPeriod] = useState(periodVal === null ? new Date().getFullYear() - 1 : parseInt(periodVal));
 
-        const { compositionRoot } = useAppContext();
         const { currentOrgUnitAccess } = useCurrentOrgUnitContext();
 
+        const [refetchStatus, setRefetchStatus] = useState<DataSubmissionStatusTypes>();
         const currentDataSubmissionStatus = useStatusDataSubmission(
-            compositionRoot,
             moduleId,
             currentOrgUnitAccess.orgUnitId,
-            period
+            period,
+            refetchStatus
         );
 
         const click = (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
@@ -85,6 +85,7 @@ export const CurrentDataSubmissionPageContent: React.FC<CurrentDataSubmissionPag
                                 <CurrentDataSubmissionContent
                                     moduleName={moduleName}
                                     currentDataSubmissionStatus={currentDataSubmissionStatus.data}
+                                    setRefetchStatus={setRefetchStatus}
                                 />
                             </CustomCard>
                         </>

@@ -31,7 +31,6 @@ export const QuestionnaireActions: React.FC<QuestionnaireHeaderProps> = props =>
             {mode === "edit" && (
                 <div className="buttons">
                     {isSaving && <CircularProgress size={22} />}
-
                     {isCompleted ? (
                         <Button onClick={() => setAsCompleted(false)} variant="contained" color="secondary">
                             {i18n.t("Set as incomplete")}
