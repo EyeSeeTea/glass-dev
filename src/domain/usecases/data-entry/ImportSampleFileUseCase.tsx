@@ -5,6 +5,7 @@ import { DataValuesRepository } from "../../repositories/data-entry/DataValuesRe
 import {
     AMR_SPECIMEN_GENDER_AGE_ORIGIN_CC_ID,
     getCategoryOptionComboByDataElement,
+    getCategoryOptionComboByOptionCodes,
 } from "./utils/getCategoryOptionCombo";
 import { SampleData } from "../../entities/data-entry/external/SampleData";
 import { SampleDataRepository } from "../../repositories/data-entry/SampleDataRepository";
@@ -15,6 +16,7 @@ import { includeBlokingErrors } from "./utils/includeBlockingErrors";
 import { checkYear } from "./utils/checkYear";
 
 const AMR_AMR_DS_Input_files_Sample_DS_ID = "OcAB7oaC072";
+const AMR_BATCHID_CC_ID = "rEMx3WFeLcU";
 
 export class ImportSampleFileUseCase implements UseCase {
     constructor(
@@ -30,6 +32,7 @@ export class ImportSampleFileUseCase implements UseCase {
                 return Future.joinObj({
                     risDataItems: Future.success(risDataItems),
                     dataSet: this.metadataRepository.getDataSet(AMR_AMR_DS_Input_files_Sample_DS_ID),
+                    dataSet_CC: this.metadataRepository.getCategoryCombination(AMR_BATCHID_CC_ID),
                     dataElement_CC: this.metadataRepository.getCategoryCombination(
                         AMR_SPECIMEN_GENDER_AGE_ORIGIN_CC_ID
                     ),
@@ -38,13 +41,22 @@ export class ImportSampleFileUseCase implements UseCase {
                     ]),
                 });
             })
-            .flatMap(({ risDataItems, dataSet, dataElement_CC, orgUnits }) => {
+            .flatMap(({ risDataItems, dataSet, dataSet_CC, dataElement_CC, orgUnits }) => {
                 const batchIdErrors = checkBatchId(risDataItems, batchId);
                 const yearErrors = checkYear(risDataItems, year);
 
                 const dataValues = risDataItems
                     .map(risData => {
                         return dataSet.dataElements.map(dataElement => {
+                            const dataSetCategoryOptionValues = dataSet_CC.categories.map(category =>
+                                risData[category.code as keyof SampleData].toString()
+                            );
+
+                            const attributeOptionCombo = getCategoryOptionComboByOptionCodes(
+                                dataSet_CC,
+                                dataSetCategoryOptionValues
+                            );
+
                             const categoryOptionCombo = getCategoryOptionComboByDataElement(
                                 dataElement,
                                 dataElement_CC,
@@ -55,7 +67,7 @@ export class ImportSampleFileUseCase implements UseCase {
                             const dataValue = {
                                 orgUnit: orgUnits.find(ou => ou.code === risData.COUNTRY)?.id || "",
                                 period: risData.YEAR.toString(),
-
+                                attributeOptionCombo,
                                 dataElement: dataElement.id,
                                 categoryOptionCombo: categoryOptionCombo,
                                 value,

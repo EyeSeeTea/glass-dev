@@ -8,6 +8,7 @@ export interface ExternalData {
     GENDER: string;
     ORIGIN: string;
     AGEGROUP: string;
+    BATCHIDDS: string;
 }
 
 export function isRISData(data: ExternalData): data is RISData {

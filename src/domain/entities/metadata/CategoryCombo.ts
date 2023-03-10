@@ -1,15 +1,13 @@
 export interface CategoryCombo {
     id: string;
     name: string;
-    categories: {
+    categories: { id: string; code: string }[];
+    categoryOptionCombos: {
         id: string;
         name: string;
-        code: string;
         categoryOptions: {
             id: string;
             code: string;
-            name: string;
-            categoryOptionCombos: string[];
         }[];
     }[];
 }
