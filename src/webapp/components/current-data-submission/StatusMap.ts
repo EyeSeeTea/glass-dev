@@ -11,8 +11,19 @@ export const statusMap = new Map<DataSubmissionStatusTypes, StatusDetails>([
             description:
                 "You need to complete the mandatory uploads before validating the uploads for this data submission",
             colour: glassColors.yellow,
-            cta: ["Upload dataset", "Go to questionnaire"],
+            leftCTAs: [
+                {
+                    label: "Upload dataset",
+                    url: "/upload",
+                },
+                {
+                    label: "Go to questionnaires",
+                    url: "/",
+                },
+            ],
+            rightCTAs: [],
             showUploadHistory: true,
+            isActionRequired: false,
         },
     ],
     [
@@ -20,10 +31,30 @@ export const statusMap = new Map<DataSubmissionStatusTypes, StatusDetails>([
         {
             title: "DATA TO BE APROVED BY COUNTRY",
             description:
-                "ACTION REQUIRED. Datasets are already uploaded with all test passed. You must approve the upload for WHO revision to continue the process.",
+                "Datasets are already uploaded with all test passed. You must approve the upload for WHO revision to continue the process.",
             colour: glassColors.accentPrimary,
-            cta: ["Send to WHO for revision"],
+            leftCTAs: [
+                {
+                    label: "Upload/Delete datasets",
+                    color: "default",
+                    variant: "outlined",
+                    url: "/upload-history",
+                },
+                {
+                    label: "Go to questionnaires",
+                    color: "default",
+                    variant: "outlined",
+                    url: "/",
+                },
+            ],
+            rightCTAs: [
+                {
+                    label: "Send submission",
+                    url: "/",
+                },
+            ],
             showUploadHistory: true,
+            isActionRequired: true,
         },
     ],
     [
@@ -33,8 +64,10 @@ export const statusMap = new Map<DataSubmissionStatusTypes, StatusDetails>([
             description:
                 "In this status the data is already submitted and you don’t have to take any action. WHO staff will review your data and mark it as ready to publish after the process is finished..",
             colour: glassColors.yellow,
-            cta: ["Display full status history"],
+            leftCTAs: [],
+            rightCTAs: [],
             showUploadHistory: false,
+            isActionRequired: false,
         },
     ],
     [
@@ -44,8 +77,22 @@ export const statusMap = new Map<DataSubmissionStatusTypes, StatusDetails>([
             description:
                 "In this status the data is already submitted and you don’t have to take any action. WHO staff will review your data and mark it as ready to publish after the process is finished..",
             colour: glassColors.green,
-            cta: ["Display full status history"],
+            leftCTAs: [
+                {
+                    label: "Review the submitted datasets",
+                    variant: "text",
+                    url: "/upload-history",
+                },
+            ],
+            rightCTAs: [
+                {
+                    label: "Request data update",
+                    variant: "text",
+                    url: "/",
+                },
+            ],
             showUploadHistory: false,
+            isActionRequired: false,
         },
     ],
     [
@@ -55,18 +102,40 @@ export const statusMap = new Map<DataSubmissionStatusTypes, StatusDetails>([
             description:
                 "Please review the authorisation report to find about the causes of this rejection. Please upload new files",
             colour: glassColors.red,
-            cta: ["Display full status history"],
+            leftCTAs: [
+                {
+                    label: "Read full message",
+                    color: "default",
+                    variant: "outlined",
+                    url: "/",
+                },
+                {
+                    label: "Upload dataset",
+                    url: "/upload",
+                },
+            ],
+            rightCTAs: [],
             showUploadHistory: false,
+            isActionRequired: true,
         },
     ],
     [
         "PENDING_UPDATE_APPROVAL",
         {
-            title: "WAITING for WHO TO ACCEPT THE DATA UPDATE",
-            description: "When WHO admins aprove your request you will be able to upload new data",
+            title: "WAITING for WHO TO ACCEPT THE DATA UPDATE REQUEST",
+            description:
+                "When WHO admins aprove your request you will be able to modify your upload. \n You will be notified when that happens.",
             colour: glassColors.red,
-            cta: ["Display full status history"],
+            leftCTAs: [
+                {
+                    label: "Display full status history",
+                    variant: "text",
+                    url: "/",
+                },
+            ],
+            rightCTAs: [],
             showUploadHistory: false,
+            isActionRequired: false,
         },
     ],
     [
@@ -76,8 +145,28 @@ export const statusMap = new Map<DataSubmissionStatusTypes, StatusDetails>([
             description:
                 "Your upload contains all necessary fields. You can still remove or add datasets. Please check that everything is included and once everything is fine send to WHO for revision",
             colour: glassColors.red,
-            cta: ["Display full status history"],
+            leftCTAs: [
+                {
+                    label: "Upload/Delete datasets",
+                    color: "default",
+                    variant: "outlined",
+                    url: "/upload-history",
+                },
+                {
+                    label: "Go to questionnaires",
+                    color: "default",
+                    variant: "outlined",
+                    url: "/",
+                },
+            ],
+            rightCTAs: [
+                {
+                    label: "Send submission",
+                    url: "/",
+                },
+            ],
             showUploadHistory: true,
+            isActionRequired: true,
         },
     ],
 ]);

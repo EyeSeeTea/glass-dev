@@ -20,8 +20,10 @@ export const Overview: React.FC<OverviewProps> = ({ moduleName, currentDataSubmi
                     title={currentDataSubmissionStatus.title}
                     description={currentDataSubmissionStatus.description}
                     statusColor={currentDataSubmissionStatus.colour}
-                    ctas={currentDataSubmissionStatus.cta}
+                    leftCTAs={currentDataSubmissionStatus.leftCTAs}
+                    rightCTAs={currentDataSubmissionStatus.rightCTAs}
                     showUploadHistory={currentDataSubmissionStatus.showUploadHistory}
+                    isActionRequired={currentDataSubmissionStatus.isActionRequired}
                 />
             ) : (
                 <Typography variant="h6">{i18n.t("Data Submission status has errors...")}</Typography>
