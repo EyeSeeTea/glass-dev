@@ -4,7 +4,7 @@ import { getD2APiFromInstance } from "../../utils/d2-api";
 import { apiToFuture } from "../../utils/futures";
 import { Instance } from "../entities/Instance";
 import { DataValue } from "../../domain/entities/data-entry/DataValue";
-import { DataValuesSaveSummary } from "../../domain/entities/data-entry/DataValuesSaveSummary";
+import { DataValuesSaveSummary, ImportStrategy } from "../../domain/entities/data-entry/DataValuesSaveSummary";
 import { DataValuesRepository } from "../../domain/repositories/data-entry/DataValuesRepository";
 
 export class DataValuesDefaultRepository implements DataValuesRepository {
@@ -14,14 +14,14 @@ export class DataValuesDefaultRepository implements DataValuesRepository {
         this.api = getD2APiFromInstance(instance);
     }
 
-    save(dataValues: DataValue[]): FutureData<DataValuesSaveSummary> {
+    save(dataValues: DataValue[], action: ImportStrategy): FutureData<DataValuesSaveSummary> {
         // We use async way because sync throw timeouts
         //return apiToFuture(this.api.dataValues.postSet({ importStrategy: "CREATE_AND_UPDATE" }, { dataValues }));
 
         return apiToFuture(
             this.api.dataValues.postSetAsync(
                 {
-                    importStrategy: "CREATE_AND_UPDATE",
+                    importStrategy: action,
                 },
                 { dataValues }
             )

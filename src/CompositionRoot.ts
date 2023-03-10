@@ -45,6 +45,8 @@ import { ImportSampleFileUseCase } from "./domain/usecases/data-entry/ImportSamp
 import { RISDataCSVRepository } from "./data/repositories/RISDataCSVRepository";
 import { SampleDataCSVRepository } from "./data/repositories/SampleDataCSVRepository";
 import { GetGlassUploadsByModuleOUPeriodUseCase } from "./domain/usecases/GetGlassUploadsByModuleOUPeriodUseCase";
+import { SetDataSubmissionStatusUseCase } from "./domain/usecases/SetDataSubmissionStatusUseCase";
+import { DownloadDocumentUseCase } from "./domain/usecases/DownloadDocumentUseCase";
 
 export function getCompositionRoot(instance: Instance) {
     const api = getD2APiFromInstance(instance);
@@ -83,6 +85,7 @@ export function getCompositionRoot(instance: Instance) {
             getSpecificDataSubmission: new GetSpecificDataSubmissionUseCase(glassDataSubmissionRepository),
             getDataSubmissionsByModuleAndOU: new GetDataSubmissionsByModuleAndOUUseCase(glassDataSubmissionRepository),
             getOpenDataSubmissionsByOU: new GetOpenDataSubmissionsByOUUseCase(glassDataSubmissionRepository),
+            setStatus: new SetDataSubmissionStatusUseCase(glassDataSubmissionRepository),
         }),
         glassUploads: getExecute({
             getAll: new GetGlassUploadsUseCase(glassUploadsRepository),
@@ -98,6 +101,7 @@ export function getCompositionRoot(instance: Instance) {
             validate: new ValidateGlassDocumentsUseCase(glassDocumentsRepository),
             upload: new UploadDocumentUseCase(glassDocumentsRepository, glassUploadsRepository),
             deleteByUploadId: new DeleteDocumentInfoByUploadIdUseCase(glassDocumentsRepository, glassUploadsRepository),
+            download: new DownloadDocumentUseCase(glassDocumentsRepository),
         }),
         dataSubmision: getExecute({
             RISFile: new ImportRISFileUseCase(

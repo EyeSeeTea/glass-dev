@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { Box, Paper, Table, TableCell, TableContainer, TableHead, TableRow } from "@material-ui/core";
+import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { Box, CircularProgress, Paper, Table, TableCell, TableContainer, TableHead, TableRow } from "@material-ui/core";
 import styled from "styled-components";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { CtaButtons } from "./CtaButtons";
@@ -11,6 +11,7 @@ import { useLocation } from "react-router-dom";
 import { QuestionnaireBase } from "../../../../domain/entities/Questionnaire";
 import { useSnackbar } from "@eyeseetea/d2-ui-components";
 import { Close, Check } from "@material-ui/icons";
+import { DataSubmissionStatusTypes } from "../../../../domain/entities/GlassDataSubmission";
 
 interface StatusProps {
     moduleName: string;
@@ -21,6 +22,8 @@ interface StatusProps {
     rightCTAs: CTAs[];
     showUploadHistory: boolean;
     isActionRequired: boolean;
+    setRefetchStatus: Dispatch<SetStateAction<DataSubmissionStatusTypes | undefined>>;
+    setCurrentStep: React.Dispatch<React.SetStateAction<number>>;
 }
 
 export const CurrentStatus: React.FC<StatusProps> = ({
@@ -31,6 +34,8 @@ export const CurrentStatus: React.FC<StatusProps> = ({
     rightCTAs,
     showUploadHistory,
     isActionRequired,
+    setRefetchStatus,
+    setCurrentStep,
 }) => {
     const { compositionRoot } = useAppContext();
     const location = useLocation();
@@ -136,7 +141,7 @@ export const CurrentStatus: React.FC<StatusProps> = ({
                     <CtaButtons ctas={leftCTAs} />
                 </Box>
                 <Box>
-                    <CtaButtons ctas={rightCTAs} position="right" />
+                    <CtaButtons ctas={rightCTAs} position="right" setRefetchStatus={setRefetchStatus} setCurrentStep={setCurrentStep} />
                 </Box>
             </Box>
         </div>
