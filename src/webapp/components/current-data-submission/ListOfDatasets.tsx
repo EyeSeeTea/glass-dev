@@ -11,13 +11,19 @@ import { NavLink } from "react-router-dom";
 
 function getUploadedItems(upload: GlassUploadsState) {
     if (upload.kind === "loaded") {
-        return upload.data.filter((row: UploadsDataItem) => row.status.toLowerCase() === "uploaded");
+        return upload.data.filter(
+            (row: UploadsDataItem) =>
+                row.status.toLowerCase() === "uploaded" || row.status.toLowerCase() === "completed"
+        );
     }
 }
 
 function getNonUploadedItems(upload: GlassUploadsState) {
     if (upload.kind === "loaded") {
-        return upload.data.filter((row: UploadsDataItem) => row.status.toLowerCase() !== "uploaded");
+        return upload.data.filter(
+            (row: UploadsDataItem) =>
+                row.status.toLowerCase() !== "uploaded" && row.status.toLowerCase() !== "completed"
+        );
     }
 }
 

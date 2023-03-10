@@ -34,21 +34,64 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
         );
     };
 
-    const deleteDataset = (uploadId: string, fileId: string, fileName: string) => {
+    const deleteDataset = (
+        uploadId: string,
+        fileId: string,
+        fileName: string,
+        fileType: string,
+        batchId: string,
+        period: string
+    ) => {
         //Deleting a dataset completely has the following steps:
-        //1. Delete corresponding 'upload' and 'document' from Datastore
-        //2. Delete corresponding file from DHIS
-        //3. Delete corresponsding datasetValue for each row in the file.
+        //1. Delete corresponsding datasetValue for each row in the file.
+        //2. Delete corresponding document from DHIS
+        //3. Delete corresponding 'upload' and 'document' from Datastore
         setLoading(true);
-        compositionRoot.glassDocuments.deleteByUploadId(uploadId).run(
-            _data => {
-                refreshUploads({}); //Trigger re-render of parent
-                setLoading(false);
+        compositionRoot.glassDocuments.download(fileId).run(
+            file => {
+                if (fileType === "RIS") {
+                    const risFile = new File([file], fileName);
+                    compositionRoot.dataSubmision.RISFile(risFile, batchId, parseInt(period), "DELETES").run(
+                        summary => {
+                            snackbar.info(`${summary.importCount.deleted} records deleted.`);
+                            compositionRoot.glassDocuments.deleteByUploadId(uploadId).run(
+                                _data => {
+                                    refreshUploads({}); //Trigger re-render of parent
+                                    setLoading(false);
+                                },
+                                errorMessage => {
+                                    snackbar.error(errorMessage);
+                                    setLoading(false);
+                                }
+                            );
+                        },
+                        error => {
+                            snackbar.error(error);
+                        }
+                    );
+                } else if (fileType === "SAMPLE") {
+                    const sampleFile = new File([file], fileName);
+                    compositionRoot.dataSubmision.sampleFile(sampleFile, batchId, parseInt(period), "DELETES").run(
+                        summary => {
+                            snackbar.info(`${summary.importCount.deleted} records deleted.`);
+                            compositionRoot.glassDocuments.deleteByUploadId(uploadId).run(
+                                _data => {
+                                    refreshUploads({}); //Trigger re-render of parent
+                                    setLoading(false);
+                                },
+                                errorMessage => {
+                                    snackbar.error(errorMessage);
+                                    setLoading(false);
+                                }
+                            );
+                        },
+                        error => {
+                            snackbar.error(error);
+                        }
+                    );
+                }
             },
-            errorMessage => {
-                snackbar.error(errorMessage);
-                setLoading(false);
-            }
+            () => {}
         );
     };
     return (
@@ -76,7 +119,18 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                                 </Button>
                             </TableCell>
                             <TableCell>
-                                <Button onClick={() => deleteDataset(row.id, row.fileId, row.fileName)}>
+                                <Button
+                                    onClick={() =>
+                                        deleteDataset(
+                                            row.id,
+                                            row.fileId,
+                                            row.fileName,
+                                            row.fileType,
+                                            row.batchId,
+                                            row.period
+                                        )
+                                    }
+                                >
                                     <DeleteOutline />
                                 </Button>
                             </TableCell>
