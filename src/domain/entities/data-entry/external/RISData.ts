@@ -10,5 +10,4 @@ export interface RISData extends ExternalData {
     UNKNOWN_NO_AST: number;
     UNKNOWN_NO_BREAKPOINTS: number;
     ABCLASS: string;
-    BATCHIDR: string;
 }
