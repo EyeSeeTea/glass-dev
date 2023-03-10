@@ -10,7 +10,7 @@ import { ContentLoader } from "../content-loader/ContentLoader";
 export const UploadHistoryContent: React.FC = () => {
     const location = useLocation();
     const { compositionRoot } = useAppContext();
-    const uploads = useGlassUploads(compositionRoot);
+    const { uploads } = useGlassUploads(compositionRoot);
     const params = new URLSearchParams(location.search);
 
     return (
