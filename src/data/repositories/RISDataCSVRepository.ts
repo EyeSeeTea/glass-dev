@@ -26,7 +26,7 @@ export class RISDataCSVRepository implements RISDataRepository {
                         SUSCEPTIBLE: getNumberValue(row, "SUSCEPTIBLE"),
                         UNKNOWN_NO_AST: getNumberValue(row, "UNKNOWN_NO_AST"),
                         UNKNOWN_NO_BREAKPOINTS: getNumberValue(row, "UNKNOWN_NO_BREAKPOINTS"),
-                        BATCHIDR: getTextValue(row, "BATCHID"),
+                        BATCHIDDS: getTextValue(row, "BATCHID"),
                         ABCLASS: this.validateABCLASS(getTextValue(row, "ABCLASS")),
                     };
                 }) || []

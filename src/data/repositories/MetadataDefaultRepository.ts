@@ -92,14 +92,17 @@ export class MetadataDefaultRepository implements MetadataRepository {
             categories: categoryCombo.categories.map(cat => {
                 return {
                     id: cat.id,
-                    name: cat.name,
                     code: cat.code,
-                    categoryOptions: cat.categoryOptions.map(catOp => {
+                };
+            }),
+            categoryOptionCombos: categoryCombo.categoryOptionCombos.map(catOpComb => {
+                return {
+                    id: catOpComb.id,
+                    name: catOpComb.name,
+                    categoryOptions: catOpComb.categoryOptions.map(catOp => {
                         return {
                             id: catOp.id,
                             code: catOp.code,
-                            name: catOp.name,
-                            categoryOptionCombos: catOp.categoryOptionCombos.map(catOpCombo => catOpCombo.id),
                         };
                     }),
                 };
@@ -131,11 +134,11 @@ type D2DataSet = MetadataPick<{
 const categoryComboFields = {
     id: true,
     name: true,
-    categories: {
+    categories: { id: true, code: true },
+    categoryOptionCombos: {
         id: true,
         name: true,
-        code: true,
-        categoryOptions: { id: true, code: true, name: true, categoryOptionCombos: true },
+        categoryOptions: { id: true, code: true },
     },
 } as const;
 
