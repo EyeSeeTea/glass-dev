@@ -128,7 +128,11 @@ export const CurrentStatus: React.FC<StatusProps> = ({
                                 <TableCell>
                                     <Box display={"flex"} alignItems="center">
                                         {`${questionnaires.filter(el => el.isCompleted).length} completed`}
-                                        {<Close color="error"></Close>}
+                                        {questionnaires.filter(el => el.isCompleted).length < 1 ? (
+                                            <Close color="error"></Close>
+                                        ) : (
+                                            <Check style={{ color: "green" }}></Check>
+                                        )}
                                     </Box>
                                 </TableCell>
                             </TableRow>
@@ -165,7 +169,7 @@ const StyledStatus = styled.span<{ statusColor: string }>`
     font-weight: 500;
     color: ${props => props.statusColor};
 `;
-const StyledDescription = styled.p`
+const StyledDescription = styled.span`
     margin: 0;
     line-height: 1.4;
 `;
