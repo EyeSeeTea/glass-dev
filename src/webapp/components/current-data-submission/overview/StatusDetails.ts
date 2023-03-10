@@ -1,7 +1,6 @@
 export type StatusCTAs =
     | "Upload dataset"
     | "Go to questionnaires"
-    | "Send to WHO for revision"
     | "Display full status history"
     | "Upload/Delete datasets"
     | "Send submission"
