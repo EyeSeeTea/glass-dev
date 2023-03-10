@@ -7,7 +7,7 @@ import { DataSubmissionStatusTypes } from "../../../domain/entities/GlassDataSub
 interface CurrentDataSubmissionContentProps {
     moduleName: string;
     currentDataSubmissionStatus: StatusDetails;
-    setRefetchStatus: Dispatch<SetStateAction<DataSubmissionStatusTypes>>;
+    setRefetchStatus: Dispatch<SetStateAction<DataSubmissionStatusTypes | undefined>>;
 }
 
 export const CurrentDataSubmissionContent: React.FC<CurrentDataSubmissionContentProps> = ({
