@@ -65,19 +65,26 @@ export const CtaButtons: React.FC<CtaButtonsProps> = ({ ctas, position, setRefet
         switch (cta.label) {
             case "Go to questionnaires":
                 return (
-                    <Button variant="contained" color="primary" key={1} onClick={() => setCurrentStep(2)}>
+                    <Button
+                        variant={cta.variant || "contained"}
+                        color={cta.color || "primary"}
+                        key={1}
+                        onClick={() => setCurrentStep(2)}
+                        style={{ textTransform: "none" }}
+                    >
                         {i18n.t("Go to questionnaires")}
                     </Button>
                 );
             case "Upload dataset":
                 return (
                     <Button
-                        variant="contained"
-                        color="primary"
+                        variant={cta.variant || "contained"}
+                        color={cta.color || "primary"}
                         component={NavLink}
                         to={cta.url}
                         exact={true}
                         disabled={!hasCurrentUserCaptureAccess}
+                        style={{ textTransform: "none", marginRight: "20px" }}
                     >
                         {i18n.t("Upload dataset")}
                     </Button>
@@ -86,10 +93,11 @@ export const CtaButtons: React.FC<CtaButtonsProps> = ({ ctas, position, setRefet
                 return (
                     <Button
                         key={4}
-                        variant="contained"
-                        color="primary"
+                        variant={cta.variant || "contained"}
+                        color={cta.color || "primary"}
                         onClick={() => setCurrentStep(1)}
                         disabled={!hasCurrentUserCaptureAccess}
+                        style={{ textTransform: "none", marginRight: "20px" }}
                     >
                         {i18n.t("Upload/Delete datasets")}
                     </Button>

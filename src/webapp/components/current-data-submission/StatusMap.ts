@@ -8,8 +8,7 @@ export const statusMap = new Map<DataSubmissionStatusTypes, StatusDetails>([
         "NOT_COMPLETED",
         {
             title: "NOT COMPLETED",
-            description:
-                "You need to complete the mandatory uploads before validating the uploads for this data submission",
+            description: "You need to fill at least the mandatory uploads before submitting for this data submission",
             colour: glassColors.yellow,
             leftCTAs: [
                 {
@@ -31,7 +30,7 @@ export const statusMap = new Map<DataSubmissionStatusTypes, StatusDetails>([
         {
             title: "DATA TO BE APROVED BY COUNTRY",
             description:
-                "Datasets are already uploaded with all test passed. You must approve the upload for WHO revision to continue the process.",
+                "Your submission contains all the mandatory fields. You can still add or remove datasets. Please check that everything is included and once everythiong is fine send it to WHO for revision.",
             colour: glassColors.accentPrimary,
             leftCTAs: [
                 {
@@ -62,7 +61,7 @@ export const statusMap = new Map<DataSubmissionStatusTypes, StatusDetails>([
         {
             title: "WAITING WHO APROVAL",
             description:
-                "In this status the data is already submitted and you don’t have to take any action. WHO staff will review your data and mark it as ready to publish after the process is finished..",
+                'We have received your submission. You don\'t have to take action at this point. WHO staff will review your data and mark it as "ready" or contact you in case you need to modify something.',
             colour: glassColors.yellow,
             leftCTAs: [],
             rightCTAs: [],
@@ -75,7 +74,7 @@ export const statusMap = new Map<DataSubmissionStatusTypes, StatusDetails>([
         {
             title: "APPROVED",
             description:
-                "In this status the data is already submitted and you don’t have to take any action. WHO staff will review your data and mark it as ready to publish after the process is finished..",
+                "Congratulations, your submission of data for year 2022 was accepted.\n\nPlease note that since your submission has been approved you can't modify it directly. If you want to update or add more data you need to request an update.",
             colour: glassColors.green,
             leftCTAs: [
                 {
@@ -100,7 +99,7 @@ export const statusMap = new Map<DataSubmissionStatusTypes, StatusDetails>([
         {
             title: "REJECTED BY WHO",
             description:
-                "Please review the authorisation report to find about the causes of this rejection. Please upload new files",
+                "Please review the messages and the reports to find about the causes of this rejection.\n You have to upload new datasets.",
             colour: glassColors.red,
             leftCTAs: [
                 {
@@ -109,12 +108,13 @@ export const statusMap = new Map<DataSubmissionStatusTypes, StatusDetails>([
                     variant: "outlined",
                     url: "/",
                 },
+            ],
+            rightCTAs: [
                 {
                     label: "Upload dataset",
                     url: "/upload",
                 },
             ],
-            rightCTAs: [],
             showUploadHistory: false,
             isActionRequired: true,
         },
