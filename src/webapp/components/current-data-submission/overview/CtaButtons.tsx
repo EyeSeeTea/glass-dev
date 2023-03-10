@@ -63,7 +63,7 @@ export const CtaButtons: React.FC<CtaButtonsProps> = ({ ctas, position, setRefet
     const getCTAButton = (cta: CTAs, setCurrentStep: React.Dispatch<React.SetStateAction<number>>) => {
         // TODO : Button click event handlers to be added as corresponding feature developed.
         switch (cta.label) {
-            case "Go to questionnaire":
+            case "Go to questionnaires":
                 return (
                     <Button variant="contained" color="primary" key={1} onClick={() => setCurrentStep(2)}>
                         {i18n.t("Go to questionnaires")}
@@ -82,7 +82,7 @@ export const CtaButtons: React.FC<CtaButtonsProps> = ({ ctas, position, setRefet
                         {i18n.t("Upload dataset")}
                     </Button>
                 );
-            case "Upload/Delete datasets >":
+            case "Upload/Delete datasets":
                 return (
                     <Button
                         key={4}
