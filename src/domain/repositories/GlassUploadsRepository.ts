@@ -8,4 +8,5 @@ export interface GlassUploadsRepository {
     setBatchId(id: string, batchId: string): FutureData<void>;
     delete(id: string): FutureData<string>;
     getUploadsByModuleOU(module: string, orgUnit: string): FutureData<GlassUploads[]>;
+    getUploadsByModuleOUPeriod(module: string, orgUnit: string, period: string): FutureData<GlassUploads[]>;
 }

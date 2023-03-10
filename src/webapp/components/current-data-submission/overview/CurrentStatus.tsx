@@ -3,23 +3,35 @@ import { Box, Paper, Table, TableCell, TableContainer, TableHead, TableRow } fro
 import styled from "styled-components";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { CtaButtons } from "./CtaButtons";
-import { StatusCTAs } from "./StatusDetails";
+import { CTAs } from "./StatusDetails";
 import { useAppContext } from "../../../contexts/app-context";
 import { useCurrentModuleContext } from "../../../contexts/current-module-context";
 import { useCurrentOrgUnitContext } from "../../../contexts/current-orgUnit-context";
 import { useLocation } from "react-router-dom";
 import { QuestionnaireBase } from "../../../../domain/entities/Questionnaire";
+import { useSnackbar } from "@eyeseetea/d2-ui-components";
+import { Close, Check } from "@material-ui/icons";
 
 interface StatusProps {
     moduleName: string;
     title: string;
     description: string;
     statusColor: string;
-    ctas: StatusCTAs[];
+    leftCTAs: CTAs[];
+    rightCTAs: CTAs[];
     showUploadHistory: boolean;
+    isActionRequired: boolean;
 }
 
-export const CurrentStatus: React.FC<StatusProps> = ({ title, description, statusColor, ctas, showUploadHistory }) => {
+export const CurrentStatus: React.FC<StatusProps> = ({
+    title,
+    description,
+    statusColor,
+    leftCTAs,
+    rightCTAs,
+    showUploadHistory,
+    isActionRequired,
+}) => {
     const { compositionRoot } = useAppContext();
     const location = useLocation();
     const {
@@ -28,8 +40,10 @@ export const CurrentStatus: React.FC<StatusProps> = ({ title, description, statu
     const {
         currentOrgUnitAccess: { orgUnitId },
     } = useCurrentOrgUnitContext();
+    const snackbar = useSnackbar();
 
     const [questionnaires, setQuestionnaires] = useState<QuestionnaireBase[]>();
+    const [uploadsCount, setUploadsCount] = useState<number>(0);
 
     const queryParameters = new URLSearchParams(location.search);
     const periodFromUrl = parseInt(queryParameters.get("period") || "");
@@ -46,17 +60,39 @@ export const CurrentStatus: React.FC<StatusProps> = ({ title, description, statu
                         () => {}
                     );
                 },
-                () => {}
+                () => {
+                    snackbar.error(i18n.t("Error fetching questionnaires."));
+                }
+            );
+            compositionRoot.glassUploads.getByModuleOUPeriod(moduleId, orgUnitId, year.toString()).run(
+                glassUploads => {
+                    setUploadsCount(glassUploads.length);
+                },
+                () => {
+                    snackbar.error(i18n.t("Error fetching uploads."));
+                }
             );
         }
-    });
+    }, [
+        compositionRoot.glassModules,
+        compositionRoot.glassUploads,
+        compositionRoot.questionnaires,
+        moduleId,
+        orgUnitId,
+        showUploadHistory,
+        snackbar,
+        year,
+    ]);
 
     return (
         <div>
             <Box sx={{ m: 2 }} />
             <div>
                 <StyledCurrentStatusStr>{i18n.t("Current Status")}</StyledCurrentStatusStr>
-                <StyledStatus statusColor={statusColor}>{i18n.t(title)}</StyledStatus>
+                <Box display={"flex"} justifyContent={"space-between"}>
+                    <StyledStatus statusColor={statusColor}>{i18n.t(title)}</StyledStatus>
+                    {isActionRequired && <StyledInfoText>Action required</StyledInfoText>}
+                </Box>
             </div>
             <Box sx={{ m: 2 }} />
             <StyledDescription>{i18n.t(description)}</StyledDescription>
@@ -73,21 +109,36 @@ export const CurrentStatus: React.FC<StatusProps> = ({ title, description, statu
                         <TableRow>
                             <TableCell>{`Up to 6 datasets`}</TableCell>
                             <TableCell>{`No`}</TableCell>
-                            <TableCell>{`0 uploaded`}</TableCell>
+                            <TableCell>
+                                <Box display={"flex"} alignItems="center">
+                                    {`${uploadsCount} uploaded`}
+                                    {uploadsCount > 0 && <Check style={{ color: "green" }}></Check>}
+                                </Box>
+                            </TableCell>
                         </TableRow>
                         {questionnaires && questionnaires[0] && (
                             <TableRow>
                                 <TableCell>{`${questionnaires.length} Questionnaires`}</TableCell>
                                 <TableCell>{`${questionnaires[0].isMandatory ? "Yes" : "No"}`}</TableCell>
-                                <TableCell>{`${
-                                    questionnaires.filter(el => el.isCompleted).length
-                                } completed`}</TableCell>
+                                <TableCell>
+                                    <Box display={"flex"} alignItems="center">
+                                        {`${questionnaires.filter(el => el.isCompleted).length} completed`}
+                                        {<Close color="error"></Close>}
+                                    </Box>
+                                </TableCell>
                             </TableRow>
                         )}
                     </Table>
                 </TableContainer>
             )}
-            <CtaButtons ctas={ctas} />
+            <Box display={"flex"} justifyContent="space-between" mt="20px">
+                <Box>
+                    <CtaButtons ctas={leftCTAs} />
+                </Box>
+                <Box>
+                    <CtaButtons ctas={rightCTAs} position="right" />
+                </Box>
+            </Box>
         </div>
     );
 };
@@ -107,4 +158,8 @@ const StyledStatus = styled.span<{ statusColor: string }>`
 const StyledDescription = styled.p`
     margin: 0;
     line-height: 1.4;
+`;
+
+const StyledInfoText = styled.span`
+    font-weight: bold;
 `;
