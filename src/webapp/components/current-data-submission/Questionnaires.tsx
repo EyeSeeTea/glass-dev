@@ -16,9 +16,10 @@ import QuestionnarieForm, { QuestionnarieFormProps } from "../questionnaire/Ques
 import { useCurrentDataSubmissionId } from "../../hooks/useCurrentDataSubmissionId";
 import { useCurrentModuleContext } from "../../contexts/current-module-context";
 import { DataSubmissionStatusTypes } from "../../../domain/entities/GlassDataSubmission";
+import { useStatusDataSubmission } from "../../hooks/useStatusDataSubmission";
 
 interface QuestionnairesProps {
-    setRefetchStatus: Dispatch<SetStateAction<DataSubmissionStatusTypes>>;
+    setRefetchStatus: Dispatch<SetStateAction<DataSubmissionStatusTypes | undefined>>;
 }
 export const Questionnaires: React.FC<QuestionnairesProps> = ({ setRefetchStatus }) => {
     const { compositionRoot } = useAppContext();
@@ -27,13 +28,15 @@ export const Questionnaires: React.FC<QuestionnairesProps> = ({ setRefetchStatus
     const [questionnaires, updateQuestionnarie] = useQuestionnaires();
     const { orgUnit, year } = useSelector();
     const [formState, actions] = useFormState();
-    const currentModule = useCurrentModuleContext();
+    const { currentModuleAccess } = useCurrentModuleContext();
     const dataSubmissionId = useCurrentDataSubmissionId(
         compositionRoot,
-        currentModule.currentModuleAccess.moduleId,
+        currentModuleAccess.moduleId,
         orgUnit.id,
         year
     );
+
+    const currentDataSubmissionStatus = useStatusDataSubmission(currentModuleAccess.moduleId, orgUnit.id, year);
 
     const validateAndUpdateStatus = (complete: boolean, questionnaireId: string) => {
         //If Questionnaire has been set to complete/not complete, check if data submission status needs to be updated
@@ -109,14 +112,22 @@ export const Questionnaires: React.FC<QuestionnairesProps> = ({ setRefetchStatus
                                 </Button>
                             )}
 
-                            <Button
-                                variant="contained"
-                                color="primary"
-                                disabled={!hasCurrentUserCaptureAccess}
-                                onClick={() => actions.goToQuestionnarie(questionnaire, { mode: "edit" })}
-                            >
-                                {i18n.t("Go")}
-                            </Button>
+                            {currentDataSubmissionStatus.kind === "loaded" &&
+                                (currentDataSubmissionStatus.data.title === "NOT COMPLETED" ||
+                                    currentDataSubmissionStatus.data.title === "DATA TO BE APROVED BY COUNTRY" ||
+                                    currentDataSubmissionStatus.data.title === "REJECTED BY WHO" ||
+                                    currentDataSubmissionStatus.data.title === "DATA UPDATE REQUEST ACCEPTED") && (
+                                    <>
+                                        <Button
+                                            variant="contained"
+                                            color="primary"
+                                            disabled={!hasCurrentUserCaptureAccess}
+                                            onClick={() => actions.goToQuestionnarie(questionnaire, { mode: "edit" })}
+                                        >
+                                            {i18n.t("Go")}
+                                        </Button>
+                                    </>
+                                )}
                         </div>
                     </QuestionnaireCard>
                 ))}

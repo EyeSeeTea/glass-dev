@@ -2,7 +2,6 @@
 import { Breadcrumbs, Button } from "@material-ui/core";
 import React, { useState } from "react";
 import styled from "styled-components";
-import { useAppContext } from "../../contexts/app-context";
 import { glassColors, palette } from "../app/themes/dhis2.theme";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import { NavLink, useLocation } from "react-router-dom";
@@ -42,12 +41,10 @@ export const CurrentDataSubmissionPageContent: React.FC<CurrentDataSubmissionPag
         const periodVal = queryParameters?.get("period");
         const [period, setPeriod] = useState(periodVal === null ? new Date().getFullYear() - 1 : parseInt(periodVal));
 
-        const { compositionRoot } = useAppContext();
         const { currentOrgUnitAccess } = useCurrentOrgUnitContext();
 
-        const [refetchStatus, setRefetchStatus] = useState<DataSubmissionStatusTypes>("NOT_COMPLETED");
+        const [refetchStatus, setRefetchStatus] = useState<DataSubmissionStatusTypes>();
         const currentDataSubmissionStatus = useStatusDataSubmission(
-            compositionRoot,
             moduleId,
             currentOrgUnitAccess.orgUnitId,
             period,
