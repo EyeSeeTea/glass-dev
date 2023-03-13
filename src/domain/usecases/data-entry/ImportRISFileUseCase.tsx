@@ -20,6 +20,7 @@ import { checkPathogenAntibiotic } from "./utils/checkPathogenAntibiotic";
 import { checkBatchId } from "./utils/checkBatchId";
 import { checkYear } from "./utils/checkYear";
 import { includeBlokingErrors } from "./utils/includeBlockingErrors";
+import { ImportStrategy } from "../../entities/data-entry/DataValuesSaveSummary";
 
 const AMR_AMR_DS_INPUT_FILES_RIS_DS_ID = "CeQPmXgrhHF";
 const AMR_DATA_PATHOGEN_ANTIBIOTIC_BATCHID_CC_ID = "S427AvQESbw";
@@ -32,7 +33,7 @@ export class ImportRISFileUseCase implements UseCase {
         private moduleRepository: GlassModuleRepository
     ) {}
 
-    public execute(inputFile: File, batchId: string, year: number): FutureData<ImportSummary> {
+    public execute(inputFile: File, batchId: string, year: number, action: ImportStrategy): FutureData<ImportSummary> {
         return this.risDataRepository
             .get(inputFile)
             .flatMap(risDataItems => {
@@ -106,7 +107,7 @@ export class ImportRISFileUseCase implements UseCase {
                 console.log({ risInitialFileDataValues: dataValues });
                 console.log({ risFinalFileDataValues: finalDataValues });
 
-                return this.dataValuesRepository.save(finalDataValues).map(saveSummary => {
+                return this.dataValuesRepository.save(finalDataValues, action).map(saveSummary => {
                     const importSummary = mapToImportSummary(saveSummary);
 
                     const summaryWithConsistencyBlokingErrors = includeBlokingErrors(importSummary, [
