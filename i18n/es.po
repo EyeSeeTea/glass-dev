@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: i18next-conv\n"
-"POT-Creation-Date: 2023-03-10T04:53:14.442Z\n"
+"POT-Creation-Date: 2023-03-10T17:26:14.348Z\n"
 "PO-Revision-Date: 2018-10-25T09:02:35.143Z\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -72,6 +72,9 @@ msgstr ""
 msgid "Uploads with errors, or discarded"
 msgstr ""
 
+msgid "Add new datasets"
+msgstr ""
+
 msgid "There are no questionnaries for this module"
 msgstr ""
 
@@ -126,6 +129,12 @@ msgstr ""
 msgid "Status"
 msgstr ""
 
+msgid "Download File"
+msgstr ""
+
+msgid "Delete"
+msgstr ""
+
 msgid "Validation Alpha"
 msgstr ""
 
@@ -169,6 +178,9 @@ msgid "Send to WHO for revision"
 msgstr ""
 
 msgid "Upload dataset"
+msgstr ""
+
+msgid "Upload/Delete datasets"
 msgstr ""
 
 msgid "Confirm submission"

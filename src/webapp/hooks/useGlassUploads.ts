@@ -15,16 +15,18 @@ export function useGlassUploads(compositionRoot: CompositionRoot) {
         currentOrgUnitAccess: { orgUnitId },
     } = useCurrentOrgUnitContext();
 
-    const [result, setResult] = React.useState<GlassUploadsState>({
+    const [uploads, setUploads] = React.useState<GlassUploadsState>({
         kind: "loading",
     });
 
+    const [shouldRefresh, refreshUploads] = React.useState({});
+
     React.useEffect(() => {
         compositionRoot.glassUploads.getByModuleOU(moduleId, orgUnitId).run(
-            uploads => setResult({ kind: "loaded", data: uploads }),
-            error => setResult({ kind: "error", message: error })
+            uploads => setUploads({ kind: "loaded", data: uploads }),
+            error => setUploads({ kind: "error", message: error })
         );
-    }, [compositionRoot, moduleId, orgUnitId]);
+    }, [compositionRoot, moduleId, orgUnitId, shouldRefresh]);
 
-    return result;
+    return { uploads, refreshUploads };
 }
