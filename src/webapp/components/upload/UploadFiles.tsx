@@ -66,6 +66,7 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
     const [isFileValid, setIsFileValid] = useState(false);
     const [previousUploads, setPreviousGlassUploads] = useState<GlassUploads[]>([]);
     const [previousUploadsBatchIds, setPreviousUploadsBatchIds] = useState<string[]>([]);
+    const [hasSampleFile, setHasSampleFile] = useState<boolean>(false);
 
     const {
         currentModuleAccess: { moduleId },
@@ -120,7 +121,12 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
             <div className="file-fields">
                 <UploadRis validate={setIsFileValid} batchId={batchId} risFile={risFile} setRisFile={setRisFile} />
 
-                <UploadSample batchId={batchId} sampleFile={sampleFile} setSampleFile={setSampleFile} />
+                <UploadSample
+                    batchId={batchId}
+                    sampleFile={sampleFile}
+                    setSampleFile={setSampleFile}
+                    setHasSampleFile={setHasSampleFile}
+                />
             </div>
 
             <div className="batch-id">
@@ -160,7 +166,12 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
                     disabled={isValidated ? false : true}
                     endIcon={<ChevronRightIcon />}
                     disableElevation
-                    onClick={() => changeStep(2)}
+                    onClick={() => {
+                        if (!hasSampleFile) {
+                            localStorage.removeItem("sampleUploadId");
+                        }
+                        changeStep(2);
+                    }}
                 >
                     {i18n.t("Continue")}
                 </Button>
