@@ -28,8 +28,10 @@ export const Overview: React.FC<OverviewProps> = ({
                     title={currentDataSubmissionStatus.title}
                     description={currentDataSubmissionStatus.description}
                     statusColor={currentDataSubmissionStatus.colour}
-                    ctas={currentDataSubmissionStatus.cta}
+                    leftCTAs={currentDataSubmissionStatus.leftCTAs}
+                    rightCTAs={currentDataSubmissionStatus.rightCTAs}
                     showUploadHistory={currentDataSubmissionStatus.showUploadHistory}
+                    isActionRequired={currentDataSubmissionStatus.isActionRequired}
                     setRefetchStatus={setRefetchStatus}
                     setCurrentStep={setCurrentStep}
                 />

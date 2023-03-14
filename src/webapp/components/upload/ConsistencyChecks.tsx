@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button, CircularProgress } from "@material-ui/core";
 import { BlockingErrors } from "./BlockingErrors";
 import styled from "styled-components";
@@ -9,9 +9,6 @@ import i18n from "@eyeseetea/d2-ui-components/locales";
 import { useAppContext } from "../../contexts/app-context";
 import { useCurrentModuleContext } from "../../contexts/current-module-context";
 import { Future } from "../../../domain/entities/Future";
-
-import { useSnackbar } from "@eyeseetea/d2-ui-components";
-import { useCallbackEffect } from "../../hooks/use-callback-effect";
 import { ImportSummary } from "../../../domain/entities/data-entry/ImportSummary";
 import { useLocation } from "react-router-dom";
 interface ConsistencyChecksProps {
@@ -24,8 +21,6 @@ interface ConsistencyChecksProps {
     setSampleFileImportSummary: React.Dispatch<React.SetStateAction<ImportSummary | undefined>>;
 }
 
-const COMPLETED_STATUS = "COMPLETED";
-
 export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
     changeStep,
     batchId,
@@ -36,10 +31,8 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
 }) => {
     const { compositionRoot } = useAppContext();
     const { currentModuleAccess } = useCurrentModuleContext();
-    const snackbar = useSnackbar();
     const [fileType, setFileType] = useState<string>("ris");
     const [isDataSetUploading, setIsDataSetUploading] = useState<boolean>(false);
-    const [isUploadStatusChanging, setIsUploadStatusChanging] = useState<boolean>(false);
     const [risFileErrors, setRISErrors] = useState<ImportSummary | undefined>(undefined);
     const [sampleFileErrors, setSampleErrors] = useState<ImportSummary | undefined>(undefined);
     const location = useLocation();
@@ -108,34 +101,6 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
         setFileType(fileType);
     };
 
-    const goToFinalStep = useCallback(() => {
-        const risUploadId = localStorage.getItem("risUploadId");
-        const sampleUploadId = localStorage.getItem("sampleUploadId");
-
-        if (risUploadId) {
-            setIsUploadStatusChanging(true);
-            return compositionRoot.glassUploads
-                .setStatus({ id: risUploadId, status: COMPLETED_STATUS })
-                .flatMap(() => {
-                    return sampleUploadId
-                        ? compositionRoot.glassUploads.setStatus({ id: sampleUploadId, status: COMPLETED_STATUS })
-                        : Future.success(undefined);
-                })
-                .run(
-                    () => {
-                        changeStep(3);
-                        setIsUploadStatusChanging(false);
-                    },
-                    errorMessage => {
-                        snackbar.error(i18n.t(errorMessage));
-                        setIsUploadStatusChanging(false);
-                    }
-                );
-        }
-    }, [changeStep, compositionRoot.glassUploads, snackbar]);
-
-    const goToFinalStepEffect = useCallbackEffect(goToFinalStep);
-
     if (isDataSetUploading) return <CircularProgress size={25} />;
     else
         return (
@@ -155,20 +120,16 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
                 </div>
                 {renderTypeContent(fileType, risFileErrors, sampleFileErrors)}
                 <div className="bottom">
-                    {isUploadStatusChanging ? (
-                        <CircularProgress size={25} />
-                    ) : (
-                        <Button
-                            variant="contained"
-                            color="primary"
-                            endIcon={<ChevronRightIcon />}
-                            onClick={goToFinalStepEffect}
-                            disableElevation
-                            disabled={risFileErrors && risFileErrors.blockingErrors.length > 0 ? true : false}
-                        >
-                            {i18n.t("Continue")}
-                        </Button>
-                    )}
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        endIcon={<ChevronRightIcon />}
+                        onClick={() => changeStep(3)}
+                        disableElevation
+                        disabled={risFileErrors && risFileErrors.blockingErrors.length > 0 ? true : false}
+                    >
+                        {i18n.t("Continue")}
+                    </Button>
                 </div>
             </ContentWrapper>
         );

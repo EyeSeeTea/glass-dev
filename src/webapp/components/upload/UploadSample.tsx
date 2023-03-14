@@ -19,12 +19,13 @@ import { useCallbackEffect } from "../../hooks/use-callback-effect";
 interface UploadSampleProps {
     sampleFile: File | null;
     setSampleFile: React.Dispatch<React.SetStateAction<File | null>>;
+    setHasSampleFile: React.Dispatch<React.SetStateAction<boolean>>;
     batchId: string;
 }
 
 const SAMPLE_FILE_TYPE = "SAMPLE";
 
-export const UploadSample: React.FC<UploadSampleProps> = ({ batchId, sampleFile, setSampleFile }) => {
+export const UploadSample: React.FC<UploadSampleProps> = ({ batchId, sampleFile, setSampleFile, setHasSampleFile }) => {
     const { compositionRoot } = useAppContext();
     const location = useLocation();
     const {
@@ -55,6 +56,7 @@ export const UploadSample: React.FC<UploadSampleProps> = ({ batchId, sampleFile,
                 () => {
                     localStorage.removeItem("sampleUploadId");
                     setSampleFile(null);
+                    setHasSampleFile(false);
                     setIsLoading(false);
                 },
                 errorMessage => {
@@ -89,6 +91,7 @@ export const UploadSample: React.FC<UploadSampleProps> = ({ batchId, sampleFile,
                         uploadId => {
                             localStorage.setItem("sampleUploadId", uploadId);
                             setIsLoading(false);
+                            setHasSampleFile(true);
                         },
                         () => {
                             snackbar.error(i18n.t("Error in file upload"));
@@ -107,6 +110,7 @@ export const UploadSample: React.FC<UploadSampleProps> = ({ batchId, sampleFile,
             moduleId,
             orgUnitId,
             period,
+            setHasSampleFile,
             setSampleFile,
             snackbar,
         ]

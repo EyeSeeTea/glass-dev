@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2023-03-10T17:26:14.348Z\n"
-"PO-Revision-Date: 2023-03-10T17:26:14.348Z\n"
+"POT-Creation-Date: 2023-03-13T16:25:22.650Z\n"
+"PO-Revision-Date: 2023-03-13T16:25:22.650Z\n"
 
 msgid "Error saving registration status"
 msgstr ""
@@ -169,19 +169,16 @@ msgstr ""
 msgid "09 - 12 - 2021 VALIDATION CORRECT"
 msgstr ""
 
-msgid "Display full status history >"
-msgstr ""
-
 msgid "Go to questionnaires"
-msgstr ""
-
-msgid "Send to WHO for revision"
 msgstr ""
 
 msgid "Upload dataset"
 msgstr ""
 
 msgid "Upload/Delete datasets"
+msgstr ""
+
+msgid "Send submission"
 msgstr ""
 
 msgid "Confirm submission"
@@ -201,6 +198,12 @@ msgstr ""
 msgid ""
 "After you submit this package, you wont be able to edit it anymore wihout "
 "WHO permissions"
+msgstr ""
+
+msgid "Error fetching questionnaires."
+msgstr ""
+
+msgid "Error fetching uploads."
 msgstr ""
 
 msgid "Current Status"
