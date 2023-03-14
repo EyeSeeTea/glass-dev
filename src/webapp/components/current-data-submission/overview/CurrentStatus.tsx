@@ -3,12 +3,14 @@ import { Box, CircularProgress, Paper, Table, TableCell, TableContainer, TableHe
 import styled from "styled-components";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { CtaButtons } from "./CtaButtons";
-import { StatusCTAs } from "./StatusDetails";
+import { CTAs } from "./StatusDetails";
 import { useAppContext } from "../../../contexts/app-context";
 import { useCurrentModuleContext } from "../../../contexts/current-module-context";
 import { useCurrentOrgUnitContext } from "../../../contexts/current-orgUnit-context";
 import { useLocation } from "react-router-dom";
 import { QuestionnaireBase } from "../../../../domain/entities/Questionnaire";
+import { useSnackbar } from "@eyeseetea/d2-ui-components";
+import { Close, Check } from "@material-ui/icons";
 import { DataSubmissionStatusTypes } from "../../../../domain/entities/GlassDataSubmission";
 
 interface StatusProps {
@@ -16,8 +18,10 @@ interface StatusProps {
     title: string;
     description: string;
     statusColor: string;
-    ctas: StatusCTAs[];
+    leftCTAs: CTAs[];
+    rightCTAs: CTAs[];
     showUploadHistory: boolean;
+    isActionRequired: boolean;
     setRefetchStatus: Dispatch<SetStateAction<DataSubmissionStatusTypes | undefined>>;
     setCurrentStep: React.Dispatch<React.SetStateAction<number>>;
 }
@@ -26,8 +30,10 @@ export const CurrentStatus: React.FC<StatusProps> = ({
     title,
     description,
     statusColor,
-    ctas,
+    leftCTAs,
+    rightCTAs,
     showUploadHistory,
+    isActionRequired,
     setRefetchStatus,
     setCurrentStep,
 }) => {
@@ -39,8 +45,10 @@ export const CurrentStatus: React.FC<StatusProps> = ({
     const {
         currentOrgUnitAccess: { orgUnitId },
     } = useCurrentOrgUnitContext();
+    const snackbar = useSnackbar();
 
     const [questionnaires, setQuestionnaires] = useState<QuestionnaireBase[]>();
+    const [uploadsCount, setUploadsCount] = useState<number>(0);
 
     const queryParameters = new URLSearchParams(location.search);
     const periodFromUrl = parseInt(queryParameters.get("period") || "");
@@ -57,17 +65,39 @@ export const CurrentStatus: React.FC<StatusProps> = ({
                         () => {}
                     );
                 },
-                () => {}
+                () => {
+                    snackbar.error(i18n.t("Error fetching questionnaires."));
+                }
+            );
+            compositionRoot.glassUploads.getByModuleOUPeriod(moduleId, orgUnitId, year.toString()).run(
+                glassUploads => {
+                    setUploadsCount(glassUploads.length);
+                },
+                () => {
+                    snackbar.error(i18n.t("Error fetching uploads."));
+                }
             );
         }
-    });
+    }, [
+        compositionRoot.glassModules,
+        compositionRoot.glassUploads,
+        compositionRoot.questionnaires,
+        moduleId,
+        orgUnitId,
+        showUploadHistory,
+        snackbar,
+        year,
+    ]);
 
     return (
         <div>
             <Box sx={{ m: 2 }} />
             <div>
                 <StyledCurrentStatusStr>{i18n.t("Current Status")}</StyledCurrentStatusStr>
-                <StyledStatus statusColor={statusColor}>{i18n.t(title)}</StyledStatus>
+                <Box display={"flex"} justifyContent={"space-between"}>
+                    <StyledStatus statusColor={statusColor}>{i18n.t(title)}</StyledStatus>
+                    {isActionRequired && <StyledInfoText>Action required</StyledInfoText>}
+                </Box>
             </div>
             <Box sx={{ m: 2 }} />
             <StyledDescription>{i18n.t(description)}</StyledDescription>
@@ -84,29 +114,45 @@ export const CurrentStatus: React.FC<StatusProps> = ({
                         <TableRow>
                             <TableCell>{`Up to 6 datasets`}</TableCell>
                             <TableCell>{`No`}</TableCell>
-                            <TableCell>{`0 uploaded`}</TableCell>
+                            <TableCell>
+                                <Box display={"flex"} alignItems="center">
+                                    {`${uploadsCount} uploaded`}
+                                    {uploadsCount > 0 && <Check style={{ color: "green" }}></Check>}
+                                </Box>
+                            </TableCell>
                         </TableRow>
-                        {questionnaires ? (
+                        {questionnaires && questionnaires[0] && (
                             <TableRow>
                                 <TableCell>{`${questionnaires.length} Questionnaires`}</TableCell>
-                                <TableCell>{`${questionnaires[0]?.isMandatory ? "Yes" : "No"}`}</TableCell>
-                                <TableCell>{`${
-                                    questionnaires.filter(el => el.isCompleted).length
-                                } completed`}</TableCell>
-                            </TableRow>
-                        ) : (
-                            <TableRow>
-                                <TableCell />
+                                <TableCell>{`${questionnaires[0].isMandatory ? "Yes" : "No"}`}</TableCell>
                                 <TableCell>
-                                    <CircularProgress size={25} />
+                                    <Box display={"flex"} alignItems="center">
+                                        {`${questionnaires.filter(el => el.isCompleted).length} completed`}
+                                        {questionnaires.filter(el => el.isCompleted).length < 1 ? (
+                                            <Close color="error"></Close>
+                                        ) : (
+                                            <Check style={{ color: "green" }}></Check>
+                                        )}
+                                    </Box>
                                 </TableCell>
-                                <TableCell />
                             </TableRow>
                         )}
                     </Table>
                 </TableContainer>
             )}
-            <CtaButtons ctas={ctas} setRefetchStatus={setRefetchStatus} setCurrentStep={setCurrentStep} />
+            <Box display={"flex"} justifyContent="space-between" mt="20px">
+                <Box>
+                    <CtaButtons ctas={leftCTAs} setRefetchStatus={setRefetchStatus} setCurrentStep={setCurrentStep} />
+                </Box>
+                <Box>
+                    <CtaButtons
+                        ctas={rightCTAs}
+                        position="right"
+                        setRefetchStatus={setRefetchStatus}
+                        setCurrentStep={setCurrentStep}
+                    />
+                </Box>
+            </Box>
         </div>
     );
 };
@@ -123,7 +169,11 @@ const StyledStatus = styled.span<{ statusColor: string }>`
     font-weight: 500;
     color: ${props => props.statusColor};
 `;
-const StyledDescription = styled.p`
+const StyledDescription = styled.span`
     margin: 0;
     line-height: 1.4;
+`;
+
+const StyledInfoText = styled.span`
+    font-weight: bold;
 `;

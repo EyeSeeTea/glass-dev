@@ -1,9 +1,8 @@
 import React, { Dispatch, SetStateAction } from "react";
 import { Button, CircularProgress, DialogActions, DialogContent, Typography } from "@material-ui/core";
-import styled from "styled-components";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { NavLink, useLocation } from "react-router-dom";
-import { StatusCTAs } from "./StatusDetails";
+import { CTAs } from "./StatusDetails";
 import { useGlassCaptureAccess } from "../../../hooks/useGlassCaptureAccess";
 import { ConfirmationDialog } from "@eyeseetea/d2-ui-components";
 import { useAppContext } from "../../../contexts/app-context";
@@ -13,12 +12,13 @@ import { useCurrentModuleContext } from "../../../contexts/current-module-contex
 import { DataSubmissionStatusTypes } from "../../../../domain/entities/GlassDataSubmission";
 
 export interface CtaButtonsProps {
-    ctas: StatusCTAs[];
+    ctas: CTAs[];
+    position?: "right";
     setRefetchStatus: Dispatch<SetStateAction<DataSubmissionStatusTypes | undefined>>;
     setCurrentStep: React.Dispatch<React.SetStateAction<number>>;
 }
 
-export const CtaButtons: React.FC<CtaButtonsProps> = ({ ctas, setRefetchStatus, setCurrentStep }) => {
+export const CtaButtons: React.FC<CtaButtonsProps> = ({ ctas, position, setRefetchStatus, setCurrentStep }) => {
     const { compositionRoot } = useAppContext();
     const hasCurrentUserCaptureAccess = useGlassCaptureAccess();
     const [open, setOpen] = React.useState(false);
@@ -60,60 +60,72 @@ export const CtaButtons: React.FC<CtaButtonsProps> = ({ ctas, setRefetchStatus, 
         );
     };
 
-    const getCTAButton = (cta: StatusCTAs, setCurrentStep: React.Dispatch<React.SetStateAction<number>>) => {
+    const getCTAButton = (cta: CTAs, setCurrentStep: React.Dispatch<React.SetStateAction<number>>) => {
         // TODO : Button click event handlers to be added as corresponding feature developed.
-        switch (cta) {
-            case "Display full status history":
+        switch (cta.label) {
+            case "Go to questionnaires":
                 return (
-                    <StyledDisplayHistoryContainer key={0}>
-                        <StyledDisplayHistoryButton color="primary">
-                            {i18n.t("Display full status history >")}
-                        </StyledDisplayHistoryButton>
-                    </StyledDisplayHistoryContainer>
-                );
-            case "Go to questionnaire":
-                return (
-                    <Button variant="contained" color="primary" key={1} onClick={() => setCurrentStep(2)}>
+                    <Button
+                        variant={cta.variant || "contained"}
+                        color={cta.color || "primary"}
+                        key={1}
+                        onClick={() => setCurrentStep(2)}
+                        style={{ textTransform: "none" }}
+                    >
                         {i18n.t("Go to questionnaires")}
-                    </Button>
-                );
-            case "Send to WHO for revision":
-                return (
-                    <Button variant="contained" color="primary" key={2} onClick={showConfirmationDialog}>
-                        {i18n.t("Send to WHO for revision")}
                     </Button>
                 );
             case "Upload dataset":
                 return (
                     <Button
-                        key={3}
-                        variant="contained"
-                        color="primary"
+                        variant={cta.variant || "contained"}
+                        color={cta.color || "primary"}
                         component={NavLink}
-                        to={`/upload`}
+                        to={cta.url}
                         exact={true}
                         disabled={!hasCurrentUserCaptureAccess}
+                        style={{ textTransform: "none", marginRight: "20px" }}
                     >
                         {i18n.t("Upload dataset")}
                     </Button>
                 );
-            case "Upload/Delete datasets >":
+            case "Upload/Delete datasets":
                 return (
                     <Button
                         key={4}
-                        variant="contained"
-                        color="primary"
+                        variant={cta.variant || "contained"}
+                        color={cta.color || "primary"}
                         onClick={() => setCurrentStep(1)}
                         disabled={!hasCurrentUserCaptureAccess}
+                        style={{ textTransform: "none", marginRight: "20px" }}
                     >
                         {i18n.t("Upload/Delete datasets")}
+                    </Button>
+                );
+
+            case "Send submission":
+                return (
+                    <Button variant="contained" color="primary" key={2} onClick={showConfirmationDialog}>
+                        {i18n.t("Send submission")}
+                    </Button>
+                );
+            default:
+                return (
+                    <Button
+                        variant={cta.variant || "contained"}
+                        color={cta.color || "primary"}
+                        component={NavLink}
+                        to={cta.url}
+                        style={{ textTransform: "none", marginRight: `${position ? "0" : "20px"}` }}
+                    >
+                        {i18n.t(`${cta.label} >`)}
                     </Button>
                 );
         }
     };
 
     return (
-        <ContentWrapper>
+        <>
             <ConfirmationDialog
                 isOpen={open}
                 title={i18n.t("Confirm submission")}
@@ -141,28 +153,6 @@ export const CtaButtons: React.FC<CtaButtonsProps> = ({ ctas, setRefetchStatus, 
                     return getCTAButton(cta, setCurrentStep);
                 })}
             </>
-        </ContentWrapper>
+        </>
     );
 };
-
-const ContentWrapper = styled.div`
-    display: flex;
-    margin: 40px auto 0;
-    justify-content: center;
-    gap: 10%;
-    > div {
-        display: flex;
-        flex-direction: column;
-        gap: 15px;
-    }
-`;
-
-const StyledDisplayHistoryButton = styled(Button)`
-    text-transform: none;
-    padding: 0;
-`;
-
-const StyledDisplayHistoryContainer = styled.div`
-    width: 100%;
-    align-items: baseline;
-`;

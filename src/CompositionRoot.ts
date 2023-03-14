@@ -44,6 +44,7 @@ import { GetNotificationByIdUseCase } from "./domain/usecases/GetNotificationByI
 import { ImportSampleFileUseCase } from "./domain/usecases/data-entry/ImportSampleFileUseCase";
 import { RISDataCSVRepository } from "./data/repositories/RISDataCSVRepository";
 import { SampleDataCSVRepository } from "./data/repositories/SampleDataCSVRepository";
+import { GetGlassUploadsByModuleOUPeriodUseCase } from "./domain/usecases/GetGlassUploadsByModuleOUPeriodUseCase";
 import { SetDataSubmissionStatusUseCase } from "./domain/usecases/SetDataSubmissionStatusUseCase";
 import { DownloadDocumentUseCase } from "./domain/usecases/DownloadDocumentUseCase";
 
@@ -92,6 +93,7 @@ export function getCompositionRoot(instance: Instance) {
             setStatus: new SetUploadStatusUseCase(glassUploadsRepository),
             getByDataSubmission: new GetGlassUploadsByDataSubmissionUseCase(glassUploadsRepository),
             getByModuleOU: new GetGlassUploadsByModuleOUUseCase(glassUploadsRepository),
+            getByModuleOUPeriod: new GetGlassUploadsByModuleOUPeriodUseCase(glassUploadsRepository),
             setBatchId: new SetUploadBatchIdUseCase(glassUploadsRepository),
         }),
         glassDocuments: getExecute({
