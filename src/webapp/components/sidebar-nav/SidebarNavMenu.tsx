@@ -26,10 +26,19 @@ const SidebarNavMenu: React.FC<SidebarNavProps> = ({ menu, className, groupName 
         TODO: determine through context which data submission is "current data submission" as of date and only highlight "Current data submission" if so, 
         otherwise highlight "uploads history menu"
     */
+    console.log("menu", menu);
+    console.log("location.pathname", location.pathname);
+
     const isCurrentPage = (menuPath: string) => {
         return (
             (menu.title === "Current Data Submission" &&
                 location.pathname === "/upload" &&
+                groupName === currentModuleAccess.moduleName) ||
+            (menu.title === "Data Submissions History" &&
+                location.pathname === "/current-data-submission/" &&
+                groupName === currentModuleAccess.moduleName) ||
+            (menu.title === "Upload History" &&
+                location.pathname === "/upload-history/" &&
                 groupName === currentModuleAccess.moduleName) ||
             (location.pathname !== "/" &&
                 menuPath === location.pathname &&
