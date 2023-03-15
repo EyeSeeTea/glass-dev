@@ -108,7 +108,7 @@ export const UploadRis: React.FC<UploadRisProps> = ({
                 }
             }
         },
-        [compositionRoot.glassDocuments, snackbar, setRisFile]
+        [compositionRoot.glassDocuments, snackbar, setRisFile, setRefetchPrevUploads]
     );
 
     const removeFilesEffect = useCallbackEffect(removeFiles);
