@@ -19,11 +19,20 @@ interface UploadRisProps {
     setRisFile: React.Dispatch<React.SetStateAction<File | null>>;
     validate: (val: boolean) => void;
     batchId: string;
+    dataAlreadySubmitted: boolean;
+    setRefetchPrevUploads: React.Dispatch<React.SetStateAction<{}>>;
 }
 
 const RIS_FILE_TYPE = "RIS";
 
-export const UploadRis: React.FC<UploadRisProps> = ({ risFile, setRisFile, validate, batchId }) => {
+export const UploadRis: React.FC<UploadRisProps> = ({
+    risFile,
+    setRisFile,
+    validate,
+    batchId,
+    dataAlreadySubmitted,
+    setRefetchPrevUploads,
+}) => {
     const { compositionRoot } = useAppContext();
     const location = useLocation();
     const {
@@ -59,18 +68,44 @@ export const UploadRis: React.FC<UploadRisProps> = ({ risFile, setRisFile, valid
             setIsLoading(true);
             const risUploadId = localStorage.getItem("risUploadId");
             if (risUploadId) {
-                return compositionRoot.glassDocuments.deleteByUploadId(risUploadId).run(
-                    () => {
-                        localStorage.removeItem("risUploadId");
-                        setRisFile(null);
-                        setIsLoading(false);
-                    },
-                    errorMessage => {
-                        snackbar.error(errorMessage);
-                        setRisFile(null);
-                        setIsLoading(false);
-                    }
-                );
+                //If user has come back from step 2, delete submitted dataValues also
+                if (dataAlreadySubmitted && risFile) {
+                    compositionRoot.dataSubmision.RISFile(risFile, batchId, parseInt(period), "DELETES").run(
+                        summary => {
+                            snackbar.info(`${summary.importCount.deleted} records deleted.`);
+                            return compositionRoot.glassDocuments.deleteByUploadId(risUploadId).run(
+                                () => {
+                                    localStorage.removeItem("risUploadId");
+                                    setRisFile(null);
+                                    setIsLoading(false);
+                                    setRefetchPrevUploads({});
+                                },
+                                errorMessage => {
+                                    snackbar.error(errorMessage);
+                                    setRisFile(null);
+                                    setIsLoading(false);
+                                    setRefetchPrevUploads({});
+                                }
+                            );
+                        },
+                        error => {
+                            snackbar.error(error);
+                        }
+                    );
+                } else {
+                    return compositionRoot.glassDocuments.deleteByUploadId(risUploadId).run(
+                        () => {
+                            localStorage.removeItem("risUploadId");
+                            setRisFile(null);
+                            setIsLoading(false);
+                        },
+                        errorMessage => {
+                            snackbar.error(errorMessage);
+                            setRisFile(null);
+                            setIsLoading(false);
+                        }
+                    );
+                }
             }
         },
         [compositionRoot.glassDocuments, snackbar, setRisFile]
