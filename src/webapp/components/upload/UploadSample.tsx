@@ -21,11 +21,20 @@ interface UploadSampleProps {
     setSampleFile: React.Dispatch<React.SetStateAction<File | null>>;
     setHasSampleFile: React.Dispatch<React.SetStateAction<boolean>>;
     batchId: string;
+    dataAlreadySubmitted: boolean;
+    setRefetchPrevUploads: React.Dispatch<React.SetStateAction<{}>>;
 }
 
 const SAMPLE_FILE_TYPE = "SAMPLE";
 
-export const UploadSample: React.FC<UploadSampleProps> = ({ batchId, sampleFile, setSampleFile, setHasSampleFile }) => {
+export const UploadSample: React.FC<UploadSampleProps> = ({
+    batchId,
+    sampleFile,
+    setSampleFile,
+    setHasSampleFile,
+    dataAlreadySubmitted,
+    setRefetchPrevUploads,
+}) => {
     const { compositionRoot } = useAppContext();
     const location = useLocation();
     const {
@@ -52,19 +61,45 @@ export const UploadSample: React.FC<UploadSampleProps> = ({ batchId, sampleFile,
         setIsLoading(true);
         const sampleUploadId = localStorage.getItem("sampleUploadId");
         if (sampleUploadId) {
-            return compositionRoot.glassDocuments.deleteByUploadId(sampleUploadId).run(
-                () => {
-                    localStorage.removeItem("sampleUploadId");
-                    setSampleFile(null);
-                    setHasSampleFile(false);
-                    setIsLoading(false);
-                },
-                errorMessage => {
-                    snackbar.error(errorMessage);
-                    setSampleFile(null);
-                    setIsLoading(false);
-                }
-            );
+            if (dataAlreadySubmitted && sampleFile) {
+                compositionRoot.dataSubmision.sampleFile(sampleFile, batchId, parseInt(period), "DELETES").run(
+                    summary => {
+                        snackbar.info(`${summary.importCount.deleted} records deleted.`);
+                        return compositionRoot.glassDocuments.deleteByUploadId(sampleUploadId).run(
+                            () => {
+                                localStorage.removeItem("sampleUploadId");
+                                setSampleFile(null);
+                                setHasSampleFile(false);
+                                setIsLoading(false);
+                                setRefetchPrevUploads({});
+                            },
+                            errorMessage => {
+                                snackbar.error(errorMessage);
+                                setSampleFile(null);
+                                setIsLoading(false);
+                                setRefetchPrevUploads({});
+                            }
+                        );
+                    },
+                    error => {
+                        snackbar.error(error);
+                    }
+                );
+            } else {
+                return compositionRoot.glassDocuments.deleteByUploadId(sampleUploadId).run(
+                    () => {
+                        localStorage.removeItem("sampleUploadId");
+                        setSampleFile(null);
+                        setHasSampleFile(false);
+                        setIsLoading(false);
+                    },
+                    errorMessage => {
+                        snackbar.error(errorMessage);
+                        setSampleFile(null);
+                        setIsLoading(false);
+                    }
+                );
+            }
         }
     };
 
