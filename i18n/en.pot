@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2023-03-15T17:00:48.136Z\n"
-"PO-Revision-Date: 2023-03-15T17:00:48.136Z\n"
+"POT-Creation-Date: 2023-03-16T08:01:38.364Z\n"
+"PO-Revision-Date: 2023-03-16T08:01:38.364Z\n"
 
 msgid "Error saving registration status"
 msgstr ""
@@ -168,6 +168,14 @@ msgid "Download File"
 msgstr ""
 
 msgid "Delete"
+msgstr ""
+
+msgid "Confirm Delete"
+msgstr ""
+
+msgid ""
+"Deleting this upload will delete both SAMPLE and RIS files for the given "
+"dataset. Are you sure you want to delete?"
 msgstr ""
 
 msgid "Overview"
