@@ -31,7 +31,7 @@ export const UploadSteps: React.FC<UploadStepsProps> = ({
                     {i18n.t("Overview")}
                 </Button>
                 <Button onClick={() => setCurrentStep(1)} className={currentStep === 1 ? "current" : ""}>
-                    {i18n.t("List of Datasets")}
+                    {i18n.t("Datasets")}
                 </Button>
                 <Button onClick={() => setCurrentStep(2)} className={currentStep === 2 ? "current" : ""}>
                     {i18n.t("Questionnaires")}

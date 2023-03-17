@@ -106,6 +106,9 @@ export const UploadRis: React.FC<UploadRisProps> = ({
                         }
                     );
                 }
+            } else {
+                setRisFile(null);
+                setIsLoading(false);
             }
         },
         [

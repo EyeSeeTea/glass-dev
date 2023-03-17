@@ -180,6 +180,7 @@ export class InstanceDefaultRepository implements InstanceRepository {
                         name: true,
                         level: true,
                     },
+                    paging: false,
                 })
             ).map(res => res.objects);
 
