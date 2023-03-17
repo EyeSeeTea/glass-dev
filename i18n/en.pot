@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2023-03-17T04:59:10.497Z\n"
-"PO-Revision-Date: 2023-03-17T04:59:10.497Z\n"
+"POT-Creation-Date: 2023-03-17T06:39:48.895Z\n"
+"PO-Revision-Date: 2023-03-17T06:39:48.895Z\n"
 
 msgid "Error saving registration status"
 msgstr ""
@@ -97,7 +97,9 @@ msgstr ""
 msgid "Cancel"
 msgstr ""
 
-msgid "Datasets"
+msgid ""
+"Please review that the submission package contains all the datasets that "
+"you want to include."
 msgstr ""
 
 msgid ""
@@ -171,7 +173,7 @@ msgstr ""
 msgid "Overview"
 msgstr ""
 
-msgid "List of Datasets"
+msgid "Datasets"
 msgstr ""
 
 msgid "Questionnaires"
@@ -355,6 +357,14 @@ msgid "Multiple uploads not allowed, please select one file"
 msgstr ""
 
 msgid "Error in file upload"
+msgstr ""
+
+msgid "Confirm Delete"
+msgstr ""
+
+msgid ""
+"Deleting this file will remove all associated data with it. Are you sure "
+"you want to delete?"
 msgstr ""
 
 msgid "Choose RIS File"
