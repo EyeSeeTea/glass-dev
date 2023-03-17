@@ -90,7 +90,7 @@ export const Questionnaires: React.FC<QuestionnairesProps> = ({ setRefetchStatus
                 {questionnaires.map(questionnaire => (
                     <QuestionnaireCard key={questionnaire.id}>
                         <div className="head">
-                            <h3>{questionnaire.name}</h3>
+                            <h3 style={{ wordBreak: "break-all" }}>{questionnaire.name}</h3>
                             <span className="desc">{questionnaire.description}</span>
                         </div>
 

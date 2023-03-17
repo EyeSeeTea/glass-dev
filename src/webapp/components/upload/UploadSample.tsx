@@ -100,6 +100,9 @@ export const UploadSample: React.FC<UploadSampleProps> = ({
                     }
                 );
             }
+        } else {
+            setSampleFile(null);
+            setIsLoading(false);
         }
     };
 
