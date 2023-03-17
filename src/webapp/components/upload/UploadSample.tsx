@@ -65,6 +65,9 @@ export const UploadSample: React.FC<UploadSampleProps> = ({ batchId, sampleFile,
                     setIsLoading(false);
                 }
             );
+        } else {
+            setSampleFile(null);
+            setIsLoading(false);
         }
     };
 
