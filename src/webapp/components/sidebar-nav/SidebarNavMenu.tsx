@@ -29,10 +29,16 @@ const SidebarNavMenu: React.FC<SidebarNavProps> = ({ menu, className, groupName 
     const isCurrentPage = (menuPath: string) => {
         return (
             (menu.title === "Current Data Submission" &&
-                location.pathname.includes("upload/") &&
+                location.pathname === "/upload" &&
+                groupName === currentModuleAccess.moduleName) ||
+            (menu.title === "Data Submissions History" &&
+                location.pathname === "/current-data-submission/" &&
+                groupName === currentModuleAccess.moduleName) ||
+            (menu.title === "Upload History" &&
+                location.pathname === "/upload-history/" &&
                 groupName === currentModuleAccess.moduleName) ||
             (location.pathname !== "/" &&
-                menuPath.includes(location.pathname) &&
+                menuPath === location.pathname &&
                 groupName === currentModuleAccess.moduleName)
         );
     };
