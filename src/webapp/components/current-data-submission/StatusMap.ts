@@ -80,6 +80,7 @@ export const statusMap = new Map<DataSubmissionStatusTypes, StatusDetails>([
                 {
                     label: "Review the submitted datasets",
                     variant: "text",
+                    color: "primary",
                     url: "/upload-history",
                 },
             ],
@@ -87,6 +88,7 @@ export const statusMap = new Map<DataSubmissionStatusTypes, StatusDetails>([
                 {
                     label: "Request data update",
                     variant: "text",
+                    color: "primary",
                     url: "/",
                 },
             ],
@@ -144,7 +146,7 @@ export const statusMap = new Map<DataSubmissionStatusTypes, StatusDetails>([
             title: "DATA UPDATE REQUEST ACCEPTED",
             description:
                 "Your upload contains all necessary fields. You can still remove or add datasets. Please check that everything is included and once everything is fine send to WHO for revision",
-            colour: glassColors.red,
+            colour: glassColors.accentPrimary,
             leftCTAs: [
                 {
                     label: "Upload/Delete datasets",
