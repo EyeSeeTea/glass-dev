@@ -1,10 +1,10 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { Button, CircularProgress } from "@material-ui/core";
+import { Button, CircularProgress, DialogActions, DialogContent, Typography } from "@material-ui/core";
 import styled from "styled-components";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import BackupIcon from "@material-ui/icons/Backup";
 import CloseIcon from "@material-ui/icons/Close";
-import { useSnackbar } from "@eyeseetea/d2-ui-components";
+import { ConfirmationDialog, useSnackbar } from "@eyeseetea/d2-ui-components";
 import { Dropzone, DropzoneRef } from "../dropzone/Dropzone";
 import { FileRejection } from "react-dropzone";
 import { RemoveContainer, StyledRemoveButton } from "./UploadFiles";
@@ -49,6 +49,13 @@ export const UploadRis: React.FC<UploadRisProps> = ({
     const risFileUploadRef = useRef<DropzoneRef>(null);
 
     const dataSubmissionId = useCurrentDataSubmissionId(compositionRoot, moduleId, orgUnitId, parseInt(period));
+    const [open, setOpen] = useState(false);
+    const showConfirmationDialog = () => {
+        setOpen(true);
+    };
+    const hideConfirmationDialog = () => {
+        setOpen(false);
+    };
 
     const openFileUploadDialog = useCallback(async () => {
         risFileUploadRef.current?.openDialog();
@@ -62,37 +69,48 @@ export const UploadRis: React.FC<UploadRisProps> = ({
         }
     }, [risFile, validate]);
 
+    const removeFileAndAssociatedDataValues = () => {
+        const risUploadId = localStorage.getItem("risUploadId");
+        if (risFile && risUploadId) {
+            setIsLoading(true);
+            compositionRoot.dataSubmision.RISFile(risFile, batchId, parseInt(period), "DELETES").run(
+                summary => {
+                    snackbar.info(`${summary.importCount.deleted} records deleted.`);
+                    return compositionRoot.glassDocuments.deleteByUploadId(risUploadId).run(
+                        () => {
+                            localStorage.removeItem("risUploadId");
+                            setRisFile(null);
+                            setIsLoading(false);
+                            setRefetchPrevUploads({});
+                            hideConfirmationDialog();
+                        },
+                        errorMessage => {
+                            snackbar.error(errorMessage);
+                            setRisFile(null);
+                            setIsLoading(false);
+                            setRefetchPrevUploads({});
+                            hideConfirmationDialog();
+                        }
+                    );
+                },
+                error => {
+                    snackbar.error(error);
+                }
+            );
+        }
+    };
+
     const removeFiles = useCallback(
         (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
             event.preventDefault();
-            setIsLoading(true);
+
             const risUploadId = localStorage.getItem("risUploadId");
             if (risUploadId) {
                 //If user has come back from step 2, delete submitted dataValues also
                 if (dataAlreadySubmitted && risFile) {
-                    compositionRoot.dataSubmision.RISFile(risFile, batchId, parseInt(period), "DELETES").run(
-                        summary => {
-                            snackbar.info(`${summary.importCount.deleted} records deleted.`);
-                            return compositionRoot.glassDocuments.deleteByUploadId(risUploadId).run(
-                                () => {
-                                    localStorage.removeItem("risUploadId");
-                                    setRisFile(null);
-                                    setIsLoading(false);
-                                    setRefetchPrevUploads({});
-                                },
-                                errorMessage => {
-                                    snackbar.error(errorMessage);
-                                    setRisFile(null);
-                                    setIsLoading(false);
-                                    setRefetchPrevUploads({});
-                                }
-                            );
-                        },
-                        error => {
-                            snackbar.error(error);
-                        }
-                    );
+                    showConfirmationDialog();
                 } else {
+                    setIsLoading(true);
                     return compositionRoot.glassDocuments.deleteByUploadId(risUploadId).run(
                         () => {
                             localStorage.removeItem("risUploadId");
@@ -111,17 +129,7 @@ export const UploadRis: React.FC<UploadRisProps> = ({
                 setIsLoading(false);
             }
         },
-        [
-            compositionRoot.glassDocuments,
-            snackbar,
-            risFile,
-            setRisFile,
-            setRefetchPrevUploads,
-            batchId,
-            compositionRoot.dataSubmision,
-            dataAlreadySubmitted,
-            period,
-        ]
+        [compositionRoot.glassDocuments, snackbar, risFile, setRisFile, dataAlreadySubmitted]
     );
 
     const removeFilesEffect = useCallbackEffect(removeFiles);
@@ -163,6 +171,25 @@ export const UploadRis: React.FC<UploadRisProps> = ({
 
     return (
         <ContentWrapper className="ris-file">
+            <ConfirmationDialog
+                isOpen={open}
+                title={i18n.t("Confirm Delete")}
+                onSave={removeFileAndAssociatedDataValues}
+                onCancel={hideConfirmationDialog}
+                saveText={i18n.t("Ok")}
+                cancelText={i18n.t("Cancel")}
+                fullWidth={true}
+                disableEnforceFocus
+            >
+                <DialogContent>
+                    <Typography>
+                        {i18n.t(
+                            "Deleting this file will remove all associated data with it. Are you sure you want to delete?"
+                        )}
+                    </Typography>
+                </DialogContent>
+                <DialogActions>{isLoading && <CircularProgress size={25} />}</DialogActions>
+            </ConfirmationDialog>
             <span className="label">{i18n.t("Choose RIS File")}</span>
             {/* Allow only one file upload per dataset */}
             <Dropzone ref={risFileUploadRef} onDrop={risFileUploadEffect} maxFiles={1}>

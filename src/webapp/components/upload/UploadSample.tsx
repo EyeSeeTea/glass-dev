@@ -1,5 +1,5 @@
 import React, { useCallback, useRef, useState } from "react";
-import { Button, CircularProgress } from "@material-ui/core";
+import { Button, CircularProgress, DialogActions, DialogContent, Typography } from "@material-ui/core";
 import styled from "styled-components";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import BackupIcon from "@material-ui/icons/Backup";
@@ -7,7 +7,7 @@ import HelpIcon from "@material-ui/icons/Help";
 import CloseIcon from "@material-ui/icons/Close";
 import { FileRejection } from "react-dropzone";
 import { Dropzone, DropzoneRef } from "../dropzone/Dropzone";
-import { useSnackbar } from "@eyeseetea/d2-ui-components";
+import { ConfirmationDialog, useSnackbar } from "@eyeseetea/d2-ui-components";
 import { RemoveContainer, StyledRemoveButton } from "./UploadFiles";
 import { useAppContext } from "../../contexts/app-context";
 import { useCurrentDataSubmissionId } from "../../hooks/useCurrentDataSubmissionId";
@@ -51,41 +51,58 @@ export const UploadSample: React.FC<UploadSampleProps> = ({
     const sampleFileUploadRef = useRef<DropzoneRef>(null);
 
     const dataSubmissionId = useCurrentDataSubmissionId(compositionRoot, moduleId, orgUnitId, parseInt(period));
+    const [open, setOpen] = useState(false);
+    const showConfirmationDialog = () => {
+        setOpen(true);
+    };
+    const hideConfirmationDialog = () => {
+        setOpen(false);
+    };
 
     const openFileUploadDialog = useCallback(async () => {
         sampleFileUploadRef.current?.openDialog();
     }, [sampleFileUploadRef]);
 
+    const removeFileAndAssociatedDataValues = () => {
+        const sampleUploadId = localStorage.getItem("sampleUploadId");
+        if (sampleFile && sampleUploadId) {
+            setIsLoading(true);
+            compositionRoot.dataSubmision.sampleFile(sampleFile, batchId, parseInt(period), "DELETES").run(
+                summary => {
+                    snackbar.info(`${summary.importCount.deleted} records deleted.`);
+                    return compositionRoot.glassDocuments.deleteByUploadId(sampleUploadId).run(
+                        () => {
+                            localStorage.removeItem("sampleUploadId");
+                            setSampleFile(null);
+                            setHasSampleFile(false);
+                            setIsLoading(false);
+                            setRefetchPrevUploads({});
+                            hideConfirmationDialog();
+                        },
+                        errorMessage => {
+                            snackbar.error(errorMessage);
+                            setSampleFile(null);
+                            setIsLoading(false);
+                            setRefetchPrevUploads({});
+                            hideConfirmationDialog();
+                        }
+                    );
+                },
+                error => {
+                    snackbar.error(error);
+                }
+            );
+        }
+    };
     const removeFiles = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         event.preventDefault();
-        setIsLoading(true);
+
         const sampleUploadId = localStorage.getItem("sampleUploadId");
         if (sampleUploadId) {
             if (dataAlreadySubmitted && sampleFile) {
-                compositionRoot.dataSubmision.sampleFile(sampleFile, batchId, parseInt(period), "DELETES").run(
-                    summary => {
-                        snackbar.info(`${summary.importCount.deleted} records deleted.`);
-                        return compositionRoot.glassDocuments.deleteByUploadId(sampleUploadId).run(
-                            () => {
-                                localStorage.removeItem("sampleUploadId");
-                                setSampleFile(null);
-                                setHasSampleFile(false);
-                                setIsLoading(false);
-                                setRefetchPrevUploads({});
-                            },
-                            errorMessage => {
-                                snackbar.error(errorMessage);
-                                setSampleFile(null);
-                                setIsLoading(false);
-                                setRefetchPrevUploads({});
-                            }
-                        );
-                    },
-                    error => {
-                        snackbar.error(error);
-                    }
-                );
+                showConfirmationDialog();
             } else {
+                setIsLoading(true);
                 return compositionRoot.glassDocuments.deleteByUploadId(sampleUploadId).run(
                     () => {
                         localStorage.removeItem("sampleUploadId");
@@ -158,6 +175,25 @@ export const UploadSample: React.FC<UploadSampleProps> = ({
 
     return (
         <ContentWrapper className="ris-file">
+            <ConfirmationDialog
+                isOpen={open}
+                title={i18n.t("Confirm Delete")}
+                onSave={removeFileAndAssociatedDataValues}
+                onCancel={hideConfirmationDialog}
+                saveText={i18n.t("Ok")}
+                cancelText={i18n.t("Cancel")}
+                fullWidth={true}
+                disableEnforceFocus
+            >
+                <DialogContent>
+                    <Typography>
+                        {i18n.t(
+                            "Deleting this file will remove all associated data with it. Are you sure you want to delete?"
+                        )}
+                    </Typography>
+                </DialogContent>
+                <DialogActions>{isLoading && <CircularProgress size={25} />}</DialogActions>
+            </ConfirmationDialog>
             <span className="label">
                 {i18n.t("SAMPLE File")} <small>({i18n.t("not required")})</small> <HelpIcon />
             </span>
