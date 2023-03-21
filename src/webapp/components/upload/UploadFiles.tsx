@@ -21,7 +21,6 @@ interface UploadFilesProps {
     setSampleFile: React.Dispatch<React.SetStateAction<File | null>>;
     batchId: string;
     setBatchId: React.Dispatch<React.SetStateAction<string>>;
-    dataAlreadySubmitted: boolean;
 }
 
 const datasetOptions = [
@@ -59,7 +58,6 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
     setSampleFile,
     batchId,
     setBatchId,
-    dataAlreadySubmitted,
 }) => {
     const { compositionRoot } = useAppContext();
     const location = useLocation();
@@ -69,7 +67,6 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
     const [previousUploads, setPreviousGlassUploads] = useState<GlassUploads[]>([]);
     const [previousUploadsBatchIds, setPreviousUploadsBatchIds] = useState<string[]>([]);
     const [hasSampleFile, setHasSampleFile] = useState<boolean>(false);
-    const [refetchPrevUploads, setRefetchPrevUploads] = useState({});
 
     const {
         currentModuleAccess: { moduleId },
@@ -88,7 +85,7 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
         };
 
         fetchPreviousUpload().then(uploads => setPreviousGlassUploads(uploads));
-    }, [compositionRoot.glassUploads, dataSubmissionId, refetchPrevUploads]);
+    }, [compositionRoot.glassUploads, dataSubmissionId]);
 
     useEffect(() => {
         if (batchId && isFileValid) {
@@ -122,22 +119,13 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
     return (
         <ContentWrapper>
             <div className="file-fields">
-                <UploadRis
-                    validate={setIsFileValid}
-                    batchId={batchId}
-                    risFile={risFile}
-                    setRisFile={setRisFile}
-                    dataAlreadySubmitted={dataAlreadySubmitted}
-                    setRefetchPrevUploads={setRefetchPrevUploads}
-                />
+                <UploadRis validate={setIsFileValid} batchId={batchId} risFile={risFile} setRisFile={setRisFile} />
 
                 <UploadSample
                     batchId={batchId}
                     sampleFile={sampleFile}
                     setSampleFile={setSampleFile}
                     setHasSampleFile={setHasSampleFile}
-                    dataAlreadySubmitted={dataAlreadySubmitted}
-                    setRefetchPrevUploads={setRefetchPrevUploads}
                 />
             </div>
 
