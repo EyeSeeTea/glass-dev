@@ -11,7 +11,9 @@ export class DeleteDocumentInfoByUploadIdUseCase implements UseCase {
 
     public execute(uploadId: string): FutureData<void> {
         return this.GlassUploadsRepository.delete(uploadId).flatMap(documentId => {
-            return this.glassDocumentsRepository.delete(documentId);
+            return this.glassDocumentsRepository.delete(documentId).flatMap(id => {
+                return this.glassDocumentsRepository.deleteDocumentApi(id);
+            });
         });
     }
 }
