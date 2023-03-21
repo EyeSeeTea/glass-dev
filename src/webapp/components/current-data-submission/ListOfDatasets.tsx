@@ -1,8 +1,7 @@
 import React from "react";
 import styled from "styled-components";
 import { UploadsTable } from "./UploadsTable";
-import { useAppContext } from "../../contexts/app-context";
-import { GlassUploadsState, useGlassUploads } from "../../hooks/useGlassUploads";
+import { GlassUploadsState } from "../../hooks/useGlassUploads";
 import { ContentLoader } from "../content-loader/ContentLoader";
 import { UploadsDataItem } from "../../entities/uploads";
 import i18n from "@eyeseetea/d2-ui-components/locales";
@@ -12,6 +11,7 @@ import { useStatusDataSubmission } from "../../hooks/useStatusDataSubmission";
 import { useCurrentModuleContext } from "../../contexts/current-module-context";
 import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context";
 import { isEditModeStatus } from "../../utils/editModeStatus";
+import { useGlassUploadsByModuleOUPeriod } from "../../hooks/useGlassUploadsByModuleOUPeriod";
 
 function getUploadedItems(upload: GlassUploadsState) {
     if (upload.kind === "loaded") {
@@ -32,21 +32,19 @@ function getNonUploadedItems(upload: GlassUploadsState) {
 }
 
 export const ListOfDatasets: React.FC = () => {
-    const { compositionRoot } = useAppContext();
-
-    const { uploads, refreshUploads } = useGlassUploads(compositionRoot);
-    const { currentModuleAccess } = useCurrentModuleContext();
     const location = useLocation();
     const queryParameters = new URLSearchParams(location.search);
-    const periodVal = queryParameters?.get("period");
-    const year = periodVal === null ? new Date().getFullYear() - 1 : parseInt(periodVal);
+    const periodFromUrl = parseInt(queryParameters.get("period") || "");
+    const year = periodFromUrl || new Date().getFullYear() - 1;
 
+    const { currentModuleAccess } = useCurrentModuleContext();
     const { currentOrgUnitAccess } = useCurrentOrgUnitContext();
     const currentDataSubmissionStatus = useStatusDataSubmission(
         currentModuleAccess.moduleId,
         currentOrgUnitAccess.orgUnitId,
         year
     );
+    const { uploads, refreshUploads } = useGlassUploadsByModuleOUPeriod(year.toString());
 
     return (
         <ContentLoader content={uploads}>
