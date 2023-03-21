@@ -1,5 +1,5 @@
 import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
-import { Box, CircularProgress, Paper, Table, TableCell, TableContainer, TableHead, TableRow } from "@material-ui/core";
+import { Box, Paper, Table, TableCell, TableContainer, TableHead, TableRow } from "@material-ui/core";
 import styled from "styled-components";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { CtaButtons } from "./CtaButtons";
