@@ -8,6 +8,7 @@ import { CloudDownloadOutlined, DeleteOutline } from "@material-ui/icons";
 import { useAppContext } from "../../contexts/app-context";
 import { ConfirmationDialog, useSnackbar } from "@eyeseetea/d2-ui-components";
 import { CircularProgress } from "material-ui";
+import { Future } from "../../../domain/entities/Future";
 
 export interface UploadsTableBodyProps {
     rows?: UploadsDataItem[];
@@ -44,128 +45,109 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
         );
     };
 
-    const deleteRisFile = (uploadId: string, file: Blob, fileName: string, batchId: string, period: string) => {
-        const risFile = new File([file], fileName);
-        compositionRoot.dataSubmision.RISFile(risFile, batchId, parseInt(period), "DELETES").run(
-            summary => {
-                snackbar.info(`${summary.importCount.deleted} records deleted.`);
-                compositionRoot.glassDocuments.deleteByUploadId(uploadId).run(
-                    _data => {
-                        refreshUploads({}); //Trigger re-render of parent
-                        setLoading(false);
-                        hideConfirmationDialog();
-                    },
-                    errorMessage => {
-                        snackbar.error(errorMessage);
-                        setLoading(false);
-                        hideConfirmationDialog();
-                    }
-                );
-            },
-            error => {
-                snackbar.error(error);
-            }
-        );
-    };
-
-    const deleteSampleFile = (uploadId: string, file: Blob, fileName: string, batchId: string, period: string) => {
-        const sampleFile = new File([file], fileName);
-        compositionRoot.dataSubmision.sampleFile(sampleFile, batchId, parseInt(period), "DELETES").run(
-            summary => {
-                snackbar.info(`${summary.importCount.deleted} records deleted.`);
-                compositionRoot.glassDocuments.deleteByUploadId(uploadId).run(
-                    _data => {
-                        refreshUploads({}); //Trigger re-render of parent
-                        setLoading(false);
-                        hideConfirmationDialog();
-                    },
-                    errorMessage => {
-                        snackbar.error(errorMessage);
-                        setLoading(false);
-                        hideConfirmationDialog();
-                    }
-                );
-            },
-            error => {
-                snackbar.error(error);
-            }
-        );
-    };
-
+    //Deleting a dataset completely has the following steps:
+    //1. Delete corresponsding datasetValue for each row in the file.
+    //2. Delete corresponding document from DHIS
+    //3. Delete corresponding 'upload' and 'document' from Datastore
     const deleteDataset = () => {
-        //Deleting a dataset completely has the following steps:
-        //1. Delete corresponsding datasetValue for each row in the file.
-        //2. Delete corresponding document from DHIS
-        //3. Delete corresponding 'upload' and 'document' from Datastore
         if (rowToDelete) {
-            setLoading(true);
+            //Ris file is mandatory, so there will be a ris file with given batch id.
+            const risFileToDelete = rows
+                ?.filter(
+                    ris =>
+                        ris.batchId === rowToDelete.batchId &&
+                        ris.fileType === "RIS" &&
+                        ris.period === rowToDelete.period
+                )
+                ?.at(0);
+            //Sample file is optional and could be absent
+            const sampleFileToDelete = rows
+                ?.filter(
+                    sample =>
+                        sample.batchId === rowToDelete.batchId &&
+                        sample.fileType === "SAMPLE" &&
+                        sample.period === rowToDelete.period
+                )
+                ?.at(0);
 
-            compositionRoot.glassDocuments.download(rowToDelete.fileId).run(
-                file => {
-                    if (rowToDelete.fileType === "RIS") {
-                        deleteRisFile(
-                            rowToDelete?.id,
-                            file,
-                            rowToDelete.fileName,
-                            rowToDelete.batchId,
-                            rowToDelete.period
+            if (risFileToDelete) {
+                setLoading(true);
+                Future.joinObj({
+                    risFileDownload: compositionRoot.glassDocuments.download(risFileToDelete.fileId),
+                    sampleFileDownload: sampleFileToDelete
+                        ? compositionRoot.glassDocuments.download(sampleFileToDelete.fileId)
+                        : Future.success(undefined),
+                }).run(
+                    ({ risFileDownload, sampleFileDownload }) => {
+                        const risFile = new File([risFileDownload], risFileToDelete.fileName);
+
+                        Future.joinObj({
+                            deleteRisFileSummary: compositionRoot.dataSubmision.RISFile(
+                                risFile,
+                                risFileToDelete.batchId,
+                                parseInt(risFileToDelete.period),
+                                "DELETES"
+                            ),
+                            deleteSampleFileSummary:
+                                sampleFileToDelete && sampleFileDownload
+                                    ? compositionRoot.dataSubmision.sampleFile(
+                                          new File([sampleFileDownload], sampleFileToDelete.fileName),
+                                          sampleFileToDelete.batchId,
+                                          parseInt(sampleFileToDelete.period),
+                                          "DELETES"
+                                      )
+                                    : Future.success(undefined),
+                        }).run(
+                            ({ deleteRisFileSummary, deleteSampleFileSummary }) => {
+                                let message = `${deleteRisFileSummary.importCount.deleted} records deleted for RIS file`;
+
+                                if (sampleFileToDelete && deleteSampleFileSummary) {
+                                    message =
+                                        message +
+                                        ` and ${deleteSampleFileSummary.importCount.deleted} records deleted for SAMPLE file.`;
+                                }
+
+                                snackbar.info(message);
+
+                                compositionRoot.glassDocuments.deleteByUploadId(risFileToDelete.id).run(
+                                    () => {
+                                        if (sampleFileToDelete) {
+                                            compositionRoot.glassDocuments.deleteByUploadId(sampleFileToDelete.id).run(
+                                                () => {
+                                                    refreshUploads({}); //Trigger re-render of parent
+                                                    setLoading(false);
+                                                    hideConfirmationDialog();
+                                                },
+                                                error => {
+                                                    snackbar.error(error);
+                                                }
+                                            );
+                                        } else {
+                                            refreshUploads({}); //Trigger re-render of parent
+                                            setLoading(false);
+                                            hideConfirmationDialog();
+                                        }
+                                    },
+                                    error => {
+                                        snackbar.error(error);
+                                    }
+                                );
+                            },
+                            error => {
+                                snackbar.error(error);
+                            }
                         );
-                        //check if corresponding sample file is uploaded, delete that too.
-                        const correspondingSample = rows
-                            ?.filter(
-                                upload =>
-                                    upload.batchId === rowToDelete.batchId &&
-                                    upload.fileType === "SAMPLE" &&
-                                    upload.period === rowToDelete.period
-                            )
-                            ?.at(0);
-                        if (correspondingSample)
-                            compositionRoot.glassDocuments.download(correspondingSample.fileId).run(
-                                sampleFile => {
-                                    deleteSampleFile(
-                                        correspondingSample.id,
-                                        sampleFile,
-                                        correspondingSample.fileName,
-                                        rowToDelete.batchId,
-                                        rowToDelete.period
-                                    );
-                                },
-                                () => {}
-                            );
-                    } else if (rowToDelete.fileType === "SAMPLE") {
-                        deleteSampleFile(
-                            rowToDelete.id,
-                            file,
-                            rowToDelete.fileName,
-                            rowToDelete.batchId,
-                            rowToDelete.period
+                    },
+                    error => {
+                        console.debug(
+                            `Unable to download RIS fileid : ${risFileToDelete.fileId} OR Sample fileid : ${sampleFileToDelete?.fileId}, error: ${error} `
                         );
-                        //check if corresponding RIS file is uploaded, delete that too.
-                        const correspondingRIS = rows
-                            ?.filter(
-                                upload =>
-                                    upload.batchId === rowToDelete.batchId &&
-                                    upload.fileType === "RIS" &&
-                                    upload.period === rowToDelete.period
-                            )
-                            ?.at(0);
-                        if (correspondingRIS)
-                            compositionRoot.glassDocuments.download(correspondingRIS.fileId).run(
-                                risFile => {
-                                    deleteRisFile(
-                                        correspondingRIS.id,
-                                        risFile,
-                                        correspondingRIS.fileName,
-                                        rowToDelete.batchId,
-                                        rowToDelete.period
-                                    );
-                                },
-                                () => {}
-                            );
                     }
-                },
-                () => {}
-            );
+                );
+            } else {
+                //RIS file doesnt exist, only sample file exists. This should never happen as RIS file is mandatory.
+                snackbar.error("Mandatory RIS file does not exist.");
+            }
         }
     };
     return (
