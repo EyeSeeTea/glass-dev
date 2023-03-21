@@ -18,13 +18,8 @@ export const UploadContent: React.FC = () => {
     const [sampleFile, setSampleFile] = useState<File | null>(null);
     const [risFileImportSummary, setRISFileImportSummary] = useState<ImportSummary | undefined>(undefined);
     const [sampleFileImportSummary, setSampleImportSummary] = useState<ImportSummary | undefined>(undefined);
-    const [dataAlreadySubmitted, setDataAlreadySubmitted] = useState(false);
 
     const changeStep = (step: number) => {
-        //If user goes back from step 2, set a marker for data already submitted.
-        if (currentStep === 2 && step === 1) {
-            setDataAlreadySubmitted(true);
-        }
         setCurrentStep(step);
         if (!completedSteps.includes(step - 1)) {
             setCompletedSteps([...completedSteps, step - 1]);
@@ -54,8 +49,7 @@ export const UploadContent: React.FC = () => {
                     risFileImportSummary,
                     sampleFileImportSummary,
                     setRISFileImportSummary,
-                    setSampleImportSummary,
-                    dataAlreadySubmitted
+                    setSampleImportSummary
                 )}
         </ContentWrapper>
     );
@@ -73,8 +67,7 @@ const renderStep = (
     risFileImportSummary: ImportSummary | undefined,
     sampleFileImportSummary: ImportSummary | undefined,
     setRISFileImportSummary: React.Dispatch<React.SetStateAction<ImportSummary | undefined>>,
-    setSampleFileImportSummary: React.Dispatch<React.SetStateAction<ImportSummary | undefined>>,
-    dataAlreadySubmitted: boolean
+    setSampleFileImportSummary: React.Dispatch<React.SetStateAction<ImportSummary | undefined>>
 ) => {
     switch (step) {
         case 1:
@@ -87,7 +80,6 @@ const renderStep = (
                     setRisFile={setRisFile}
                     sampleFile={sampleFile}
                     setSampleFile={setSampleFile}
-                    dataAlreadySubmitted={dataAlreadySubmitted}
                 />
             );
         case 2:
