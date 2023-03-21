@@ -1,13 +1,14 @@
 import React from "react";
-import { CompositionRoot } from "../../CompositionRoot";
 import { GlassUploads } from "../../domain/entities/GlassUploads";
+import { useAppContext } from "../contexts/app-context";
 import { useCurrentModuleContext } from "../contexts/current-module-context";
 import { useCurrentOrgUnitContext } from "../contexts/current-orgUnit-context";
 import { GlassState } from "./State";
 
 export type GlassUploadsState = GlassState<GlassUploads[]>;
 
-export function useGlassUploads(compositionRoot: CompositionRoot) {
+export function useGlassUploadsByModuleOUPeriod(period: string) {
+    const { compositionRoot } = useAppContext();
     const {
         currentModuleAccess: { moduleId },
     } = useCurrentModuleContext();
@@ -19,12 +20,14 @@ export function useGlassUploads(compositionRoot: CompositionRoot) {
         kind: "loading",
     });
 
+    const [shouldRefresh, refreshUploads] = React.useState({});
+
     React.useEffect(() => {
-        compositionRoot.glassUploads.getByModuleOU(moduleId, orgUnitId).run(
+        compositionRoot.glassUploads.getByModuleOUPeriod(moduleId, orgUnitId, period).run(
             uploads => setUploads({ kind: "loaded", data: uploads }),
             error => setUploads({ kind: "error", message: error })
         );
-    }, [compositionRoot, moduleId, orgUnitId]);
+    }, [compositionRoot, moduleId, orgUnitId, shouldRefresh, period]);
 
-    return uploads;
+    return { uploads, refreshUploads };
 }
