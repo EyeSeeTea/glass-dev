@@ -11,6 +11,9 @@ import { useLocation } from "react-router-dom";
 import { useCurrentDataSubmissionId } from "../../hooks/useCurrentDataSubmissionId";
 import { DataSubmissionStatusTypes } from "../../../domain/entities/GlassDataSubmission";
 import { CircularProgress } from "material-ui";
+import { useStatusDataSubmission } from "../../hooks/useStatusDataSubmission";
+import { isEditModeStatus } from "../../utils/editModeStatus";
+import { ContentLoader } from "../content-loader/ContentLoader";
 
 interface AdvancedButtonsProps {
     setRefetchStatus: Dispatch<SetStateAction<DataSubmissionStatusTypes | undefined>>;
@@ -35,6 +38,12 @@ export const AdvancedButtons: React.FC<AdvancedButtonsProps> = ({ setRefetchStat
     const hasCurrentUserCaptureAccess = useGlassCaptureAccess();
     const [loading, setLoading] = useState<boolean>(false);
 
+    const currentDataSubmissionStatus = useStatusDataSubmission(
+        currentModuleAccess.moduleId,
+        currentOrgUnitAccess.orgUnitId,
+        year
+    );
+
     const requestDatasetUpdate = () => {
         setLoading(true);
         compositionRoot.glassDataSubmission.setStatus(dataSubmissionId, "PENDING_UPDATE_APPROVAL").run(
@@ -50,19 +59,26 @@ export const AdvancedButtons: React.FC<AdvancedButtonsProps> = ({ setRefetchStat
     };
 
     return (
-        <ContentWrapper className="cta-buttons">
-            <div>
-                <Button
-                    variant="contained"
-                    color="primary"
-                    disabled={!hasCurrentUserCaptureAccess}
-                    onClick={requestDatasetUpdate}
-                >
-                    {i18n.t("Request Dataset update")}
-                </Button>
-            </div>
-            {loading && <CircularProgress size={25} />}
-        </ContentWrapper>
+        <ContentLoader content={currentDataSubmissionStatus}>
+            <ContentWrapper className="cta-buttons">
+                <div>
+                    {currentDataSubmissionStatus.kind === "loaded" && (
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            disabled={
+                                !hasCurrentUserCaptureAccess || isEditModeStatus(currentDataSubmissionStatus.data.title)
+                            }
+                            onClick={requestDatasetUpdate}
+                        >
+                            {i18n.t("Request Dataset update")}
+                        </Button>
+                    )}
+                </div>
+
+                {loading && <CircularProgress size={25} />}
+            </ContentWrapper>
+        </ContentLoader>
     );
 };
 

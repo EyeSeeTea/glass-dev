@@ -13,6 +13,7 @@ export const StatusCapsule: React.FC<StatusCapsuleProps> = ({ status }) => {
     switch (status) {
         case "COMPLETE":
         case "APPROVED":
+        case "UPDATE_REQUEST_ACCEPTED":
             return <Approved>{status}</Approved>;
         case "NOT_COMPLETED":
         case "PENDING_APPROVAL":
