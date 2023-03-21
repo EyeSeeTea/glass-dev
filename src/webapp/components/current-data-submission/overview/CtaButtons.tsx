@@ -80,9 +80,7 @@ export const CtaButtons: React.FC<CtaButtonsProps> = ({ ctas, position, setRefet
                     <Button
                         variant={cta.variant || "contained"}
                         color={cta.color || "primary"}
-                        component={NavLink}
-                        to={cta.url}
-                        exact={true}
+                        onClick={() => setCurrentStep(1)}
                         disabled={!hasCurrentUserCaptureAccess}
                         style={{ textTransform: "none", marginRight: "20px" }}
                     >
@@ -107,6 +105,30 @@ export const CtaButtons: React.FC<CtaButtonsProps> = ({ ctas, position, setRefet
                 return (
                     <Button variant="contained" color="primary" key={2} onClick={showConfirmationDialog}>
                         {i18n.t("Send submission")}
+                    </Button>
+                );
+            case "Review the submitted datasets":
+                return (
+                    <Button
+                        variant={cta.variant}
+                        color={cta.color}
+                        key={2}
+                        onClick={() => setCurrentStep(1)}
+                        style={{ textTransform: "none" }}
+                    >
+                        {i18n.t(`${cta.label} >`)}
+                    </Button>
+                );
+            case "Request data update":
+                return (
+                    <Button
+                        variant={cta.variant}
+                        color={cta.color}
+                        key={2}
+                        onClick={() => setCurrentStep(4)}
+                        style={{ textTransform: "none" }}
+                    >
+                        {i18n.t(`${cta.label} >`)}
                     </Button>
                 );
             default:

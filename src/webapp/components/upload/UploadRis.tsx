@@ -71,6 +71,9 @@ export const UploadRis: React.FC<UploadRisProps> = ({ risFile, setRisFile, valid
                         setIsLoading(false);
                     }
                 );
+            } else {
+                setRisFile(null);
+                setIsLoading(false);
             }
         },
         [compositionRoot.glassDocuments, snackbar, setRisFile]
