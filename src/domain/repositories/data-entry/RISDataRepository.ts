@@ -3,4 +3,5 @@ import { FutureData } from "../../entities/Future";
 
 export interface RISDataRepository {
     get(file: File): FutureData<RISData[]>;
+    validate(file: File): FutureData<boolean>;
 }
