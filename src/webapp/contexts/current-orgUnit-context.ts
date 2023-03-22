@@ -7,7 +7,7 @@ export interface CurrentOrgUnitContextState {
 }
 
 export const defaultOrgUnitContextState = {
-    currentOrgUnitAccess: { orgUnitId: "", orgUnitName: "", readAccess: false, captureAccess: false },
+    currentOrgUnitAccess: { orgUnitId: "", orgUnitName: "", orgUnitCode: "", readAccess: false, captureAccess: false },
     changeCurrentOrgUnitAccess: () => {},
 };
 
