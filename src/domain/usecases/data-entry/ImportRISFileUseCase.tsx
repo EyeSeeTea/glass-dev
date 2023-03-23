@@ -12,7 +12,7 @@ import { RISDataRepository } from "../../repositories/data-entry/RISDataReposito
 import { DataValue } from "../../entities/data-entry/DataValue";
 import i18n from "../../../locales";
 import { mapToImportSummary } from "./utils/mapDhis2Summary";
-import { ConsistencyError, ImportSummary } from "../../entities/data-entry/ImportSummary";
+import { ImportSummary } from "../../entities/data-entry/ImportSummary";
 import { checkSpecimenPathogen } from "./utils/checkSpecimenPathogen";
 import { GlassModuleRepository } from "../../repositories/GlassModuleRepository";
 import { checkASTResults } from "./utils/checkASTResults";
@@ -22,6 +22,7 @@ import { checkYear } from "./utils/checkYear";
 import { includeBlokingErrors } from "./utils/includeBlockingErrors";
 import { ImportStrategy } from "../../entities/data-entry/DataValuesSaveSummary";
 import { D2ValidationResponse } from "../../../data/repositories/MetadataDefaultRepository";
+import { checkDhis2Validations } from "./utils/checkDhis2Validations";
 
 const AMR_AMR_DS_INPUT_FILES_RIS_DS_ID = "CeQPmXgrhHF";
 const AMR_DATA_PATHOGEN_ANTIBIOTIC_BATCHID_CC_ID = "S427AvQESbw";
@@ -123,23 +124,8 @@ export class ImportRISFileUseCase implements UseCase {
                         .validateDataSet(AMR_AMR_DS_INPUT_FILES_RIS_DS_ID, year.toString(), orgUnit, uniqueAOCs)
                         .map(validationResponse => {
                             const validations = validationResponse as D2ValidationResponse[];
-                            const d2ValidationErrors: ConsistencyError[] = [];
-                            validations.forEach(({ validationRuleViolations }) => {
-                                if (validationRuleViolations.length) {
-                                    validationRuleViolations.forEach(rulesViolation => {
-                                        d2ValidationErrors.push({
-                                            error: i18n.t(
-                                                `Validation rule '${
-                                                    (rulesViolation as any).validationRule.name
-                                                }' violated. Left side value: '${
-                                                    (rulesViolation as any).leftsideValue
-                                                }', right side value: '${(rulesViolation as any).rightsideValue}'`
-                                            ),
-                                            count: 1,
-                                        });
-                                    });
-                                }
-                            });
+                            const dhis2ValidationErrors = checkDhis2Validations(validations);
+
                             const importSummary = mapToImportSummary(saveSummary);
 
                             const summaryWithConsistencyBlokingErrors = includeBlokingErrors(importSummary, [
@@ -148,7 +134,7 @@ export class ImportRISFileUseCase implements UseCase {
                                 ...astResultsErrors,
                                 ...batchIdErrors,
                                 ...yearErrors,
-                                ...d2ValidationErrors,
+                                ...dhis2ValidationErrors,
                             ]);
 
                             const finalImportSummary = this.includeDataValuesRemovedWarning(
