@@ -1,11 +1,16 @@
-import React from "react";
+import React, { Dispatch, SetStateAction } from "react";
 import { Box } from "@material-ui/core";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
 import styled from "styled-components";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { AdvancedButtons } from "./AdvancedButtons";
+import { DataSubmissionStatusTypes } from "../../../domain/entities/GlassDataSubmission";
 
-export const Advanced: React.FC = () => {
+interface AdvancedProps {
+    setRefetchStatus: Dispatch<SetStateAction<DataSubmissionStatusTypes | undefined>>;
+    setCurrentStep: React.Dispatch<React.SetStateAction<number>>;
+}
+export const Advanced: React.FC<AdvancedProps> = ({ setRefetchStatus, setCurrentStep }) => {
     return (
         <ContentWrapper>
             <LinedBox>
@@ -26,7 +31,7 @@ export const Advanced: React.FC = () => {
                         "After it the status is “WHO Aproval” or “WHO PUBLISHED” the revoking process needs to be suppervised by WHO because it can affect ongoing publications"
                     )}
                 </p>
-                <AdvancedButtons />
+                <AdvancedButtons setRefetchStatus={setRefetchStatus} setCurrentStep={setCurrentStep} />
             </LinedBox>
         </ContentWrapper>
     );
