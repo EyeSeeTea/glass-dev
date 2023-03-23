@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2023-03-23T13:35:53.740Z\n"
-"PO-Revision-Date: 2023-03-23T13:35:53.740Z\n"
+"POT-Creation-Date: 2023-03-23T21:45:33.544Z\n"
+"PO-Revision-Date: 2023-03-23T21:45:33.544Z\n"
 
 msgid "Error saving registration status"
 msgstr ""
@@ -206,6 +206,21 @@ msgstr ""
 msgid ""
 "After you submit this package, you wont be able to edit it anymore wihout "
 "WHO permissions"
+msgstr ""
+
+msgid "Full Status History"
+msgstr ""
+
+msgid "Done"
+msgstr ""
+
+msgid "From"
+msgstr ""
+
+msgid "To"
+msgstr ""
+
+msgid "Changed at"
 msgstr ""
 
 msgid "Error fetching questionnaires."
