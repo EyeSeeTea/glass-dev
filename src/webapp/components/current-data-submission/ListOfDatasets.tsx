@@ -6,12 +6,13 @@ import { ContentLoader } from "../content-loader/ContentLoader";
 import { UploadsDataItem } from "../../entities/uploads";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { Button } from "@material-ui/core";
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import { useStatusDataSubmission } from "../../hooks/useStatusDataSubmission";
 import { useCurrentModuleContext } from "../../contexts/current-module-context";
 import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context";
 import { isEditModeStatus } from "../../utils/editModeStatus";
 import { useGlassUploadsByModuleOUPeriod } from "../../hooks/useGlassUploadsByModuleOUPeriod";
+import { useCurrentPeriodContext } from "../../contexts/current-period-context";
 
 function getUploadedItems(upload: GlassUploadsState) {
     if (upload.kind === "loaded") {
@@ -32,19 +33,16 @@ function getNonUploadedItems(upload: GlassUploadsState) {
 }
 
 export const ListOfDatasets: React.FC = () => {
-    const location = useLocation();
-    const queryParameters = new URLSearchParams(location.search);
-    const periodFromUrl = parseInt(queryParameters.get("period") || "");
-    const year = periodFromUrl || new Date().getFullYear() - 1;
+    const { currentPeriod } = useCurrentPeriodContext();
 
     const { currentModuleAccess } = useCurrentModuleContext();
     const { currentOrgUnitAccess } = useCurrentOrgUnitContext();
     const currentDataSubmissionStatus = useStatusDataSubmission(
         currentModuleAccess.moduleId,
         currentOrgUnitAccess.orgUnitId,
-        year
+        currentPeriod
     );
-    const { uploads, refreshUploads } = useGlassUploadsByModuleOUPeriod(year.toString());
+    const { uploads, refreshUploads } = useGlassUploadsByModuleOUPeriod(currentPeriod.toString());
 
     return (
         <ContentLoader content={uploads}>

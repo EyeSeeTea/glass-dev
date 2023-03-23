@@ -7,11 +7,11 @@ import { CTAs } from "./StatusDetails";
 import { useAppContext } from "../../../contexts/app-context";
 import { useCurrentModuleContext } from "../../../contexts/current-module-context";
 import { useCurrentOrgUnitContext } from "../../../contexts/current-orgUnit-context";
-import { useLocation } from "react-router-dom";
 import { QuestionnaireBase } from "../../../../domain/entities/Questionnaire";
 import { useSnackbar } from "@eyeseetea/d2-ui-components";
 import { Close, Check } from "@material-ui/icons";
 import { DataSubmissionStatusTypes } from "../../../../domain/entities/GlassDataSubmission";
+import { useCurrentPeriodContext } from "../../../contexts/current-period-context";
 
 interface StatusProps {
     moduleName: string;
@@ -38,7 +38,6 @@ export const CurrentStatus: React.FC<StatusProps> = ({
     setCurrentStep,
 }) => {
     const { compositionRoot } = useAppContext();
-    const location = useLocation();
     const {
         currentModuleAccess: { moduleId },
     } = useCurrentModuleContext();
@@ -49,16 +48,13 @@ export const CurrentStatus: React.FC<StatusProps> = ({
 
     const [questionnaires, setQuestionnaires] = useState<QuestionnaireBase[]>();
     const [uploadsCount, setUploadsCount] = useState<number>(0);
-
-    const queryParameters = new URLSearchParams(location.search);
-    const periodFromUrl = parseInt(queryParameters.get("period") || "");
-    const year = periodFromUrl || new Date().getFullYear() - 1;
+    const { currentPeriod } = useCurrentPeriodContext();
 
     useEffect(() => {
         if (showUploadHistory) {
             compositionRoot.glassModules.getById(moduleId).run(
                 currentModule => {
-                    compositionRoot.questionnaires.getList(currentModule, { orgUnitId, year }).run(
+                    compositionRoot.questionnaires.getList(currentModule, { orgUnitId, year: currentPeriod }).run(
                         questionnairesData => {
                             setQuestionnaires(questionnairesData);
                         },
@@ -69,7 +65,7 @@ export const CurrentStatus: React.FC<StatusProps> = ({
                     snackbar.error(i18n.t("Error fetching questionnaires."));
                 }
             );
-            compositionRoot.glassUploads.getByModuleOUPeriod(moduleId, orgUnitId, year.toString()).run(
+            compositionRoot.glassUploads.getByModuleOUPeriod(moduleId, orgUnitId, currentPeriod.toString()).run(
                 glassUploads => {
                     setUploadsCount(glassUploads.length);
                 },
@@ -86,7 +82,7 @@ export const CurrentStatus: React.FC<StatusProps> = ({
         orgUnitId,
         showUploadHistory,
         snackbar,
-        year,
+        currentPeriod,
     ]);
 
     return (
