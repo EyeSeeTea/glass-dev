@@ -8,17 +8,15 @@ export type GlassNewsState = GlassState<GlassNews[]>;
 
 export function useGlassReadAccess() {
     const [hasReadAccess, setHasReadAccess] = React.useState<boolean>();
-    const {
-        currentModuleAccess: { readAccess: moduleReadAccess, captureAccess: moduleCaptureAccess },
-    } = useCurrentModuleContext();
-    const {
-        currentOrgUnitAccess: { readAccess: orgUnitReadAccess, captureAccess: orgUnitCaptureAccess },
-    } = useCurrentOrgUnitContext();
+    const { currentModuleAccess } = useCurrentModuleContext();
+    const { currentOrgUnitAccess } = useCurrentOrgUnitContext();
 
     useEffect(() => {
         //TO DO: add third condition for enrollment
-        setHasReadAccess(moduleReadAccess && orgUnitReadAccess);
-    }, [moduleCaptureAccess, moduleReadAccess, orgUnitCaptureAccess, orgUnitReadAccess]);
+        //Only set the read access, after the module and org unit access have been set
+        if (currentModuleAccess.moduleId !== "" && currentOrgUnitAccess.orgUnitId !== "")
+            setHasReadAccess(currentModuleAccess.readAccess && currentOrgUnitAccess.readAccess);
+    }, [currentModuleAccess, currentOrgUnitAccess]);
 
     return hasReadAccess;
 }
