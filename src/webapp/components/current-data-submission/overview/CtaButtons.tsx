@@ -58,7 +58,7 @@ export const CtaButtons: React.FC<CtaButtonsProps> = ({ ctas, position, setRefet
     useEffect(() => {
         setIsLoading(true);
         compositionRoot.glassDataSubmission
-            .getSpecificDataSubmission(currentModuleAccess.moduleId, currentOrgUnitAccess.orgUnitId, year)
+            .getSpecificDataSubmission(currentModuleAccess.moduleId, currentOrgUnitAccess.orgUnitId, currentPeriod)
             .run(
                 dataSubmission => {
                     setStatusHistory([...dataSubmission.statusHistory]);
