@@ -10,14 +10,14 @@ import { useAppContext } from "../../contexts/app-context";
 import { useCurrentModuleContext } from "../../contexts/current-module-context";
 import { Future } from "../../../domain/entities/Future";
 import { ImportSummary } from "../../../domain/entities/data-entry/ImportSummary";
-import { useLocation } from "react-router-dom";
+import { useCurrentPeriodContext } from "../../contexts/current-period-context";
 import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context";
+
 interface ConsistencyChecksProps {
     changeStep: (step: number) => void;
     batchId: string;
     risFile: File | null;
     sampleFile?: File | null;
-
     setRISFileImportSummary: React.Dispatch<React.SetStateAction<ImportSummary | undefined>>;
     setSampleFileImportSummary: React.Dispatch<React.SetStateAction<ImportSummary | undefined>>;
 }
@@ -37,10 +37,7 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
     const [isDataSetUploading, setIsDataSetUploading] = useState<boolean>(false);
     const [risFileErrors, setRISErrors] = useState<ImportSummary | undefined>(undefined);
     const [sampleFileErrors, setSampleErrors] = useState<ImportSummary | undefined>(undefined);
-    const location = useLocation();
-    const queryParameters = new URLSearchParams(location.search);
-    const periodFromUrl = parseInt(queryParameters.get("period") || "");
-    const year = periodFromUrl || new Date().getFullYear() - 1;
+    const { currentPeriod } = useCurrentPeriodContext();
 
     useEffect(() => {
         function uploadDatasets() {
@@ -51,7 +48,7 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
                     importRISFileSummary: compositionRoot.dataSubmision.RISFile(
                         risFile,
                         batchId,
-                        year,
+                        currentPeriod,
                         currentOrgUnitAccess.orgUnitCode,
                         "CREATE_AND_UPDATE"
                     ),
@@ -59,7 +56,7 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
                         ? compositionRoot.dataSubmision.sampleFile(
                               sampleFile,
                               batchId,
-                              year,
+                              currentPeriod,
                               currentOrgUnitAccess.orgUnitCode,
                               "CREATE_AND_UPDATE"
                           )
@@ -103,7 +100,7 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
         setRISFileImportSummary,
         setSampleFileImportSummary,
         batchId,
-        year,
+        currentPeriod,
         currentOrgUnitAccess.orgUnitCode,
     ]);
 
