@@ -89,21 +89,35 @@ export const UploadRis: React.FC<UploadRisProps> = ({ risFile, setRisFile, valid
                 const uploadedRisFile = files[0];
                 if (uploadedRisFile) {
                     setIsLoading(true);
-                    setRisFile(uploadedRisFile);
-                    const data = {
-                        batchId,
-                        fileType: RIS_FILE_TYPE,
-                        dataSubmission: dataSubmissionId,
-                        module: moduleId,
-                        period,
-                        orgUnit: orgUnitId,
-                    };
-                    return compositionRoot.glassDocuments.upload({ file: uploadedRisFile, data }).run(
-                        uploadId => {
-                            localStorage.setItem("risUploadId", uploadId);
-                            setIsLoading(false);
+
+                    return compositionRoot.dataSubmision.validateRISFile(uploadedRisFile).run(
+                        isValidRIS => {
+                            if (isValidRIS) {
+                                setRisFile(uploadedRisFile);
+                                const data = {
+                                    batchId,
+                                    fileType: RIS_FILE_TYPE,
+                                    dataSubmission: dataSubmissionId,
+                                    module: moduleId,
+                                    period,
+                                    orgUnit: orgUnitId,
+                                };
+                                return compositionRoot.glassDocuments.upload({ file: uploadedRisFile, data }).run(
+                                    uploadId => {
+                                        localStorage.setItem("risUploadId", uploadId);
+                                        setIsLoading(false);
+                                    },
+                                    () => {
+                                        snackbar.error(i18n.t("Error in file upload"));
+                                        setIsLoading(false);
+                                    }
+                                );
+                            } else {
+                                snackbar.error(i18n.t("Incorrect File Format. Please retry with a valid RIS file"));
+                                setIsLoading(false);
+                            }
                         },
-                        () => {
+                        _error => {
                             snackbar.error(i18n.t("Error in file upload"));
                             setIsLoading(false);
                         }
@@ -111,7 +125,17 @@ export const UploadRis: React.FC<UploadRisProps> = ({ risFile, setRisFile, valid
                 }
             }
         },
-        [batchId, compositionRoot.glassDocuments, dataSubmissionId, moduleId, orgUnitId, period, setRisFile, snackbar]
+        [
+            batchId,
+            compositionRoot.glassDocuments,
+            compositionRoot.dataSubmision,
+            dataSubmissionId,
+            moduleId,
+            orgUnitId,
+            period,
+            setRisFile,
+            snackbar,
+        ]
     );
 
     const risFileUploadEffect = useCallbackEffect(risFileUpload);

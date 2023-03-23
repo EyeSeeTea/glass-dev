@@ -2,7 +2,7 @@ import { SampleData } from "../../domain/entities/data-entry/external/SampleData
 import { Future, FutureData } from "../../domain/entities/Future";
 import { SampleDataRepository } from "../../domain/repositories/data-entry/SampleDataRepository";
 import { SpreadsheetXlsxDataSource } from "../../domain/repositories/SpreadsheetXlsxRepository";
-import { getNumberValue, getTextValue } from "./utils/CSVUtils";
+import { doesColumnExist, getNumberValue, getTextValue } from "./utils/CSVUtils";
 
 export class SampleDataCSVRepository implements SampleDataRepository {
     get(file: File): FutureData<SampleData[]> {
@@ -24,6 +24,28 @@ export class SampleDataCSVRepository implements SampleDataRepository {
                     };
                 }) || []
             );
+        });
+    }
+
+    validate(file: File): FutureData<boolean> {
+        return Future.fromPromise(new SpreadsheetXlsxDataSource().read(file)).map(spreadsheet => {
+            const sheet = spreadsheet.sheets[0]; //Only one sheet for AMR RIS
+            const firstRow = sheet?.rows[0];
+
+            if (firstRow) {
+                const allSampleColsPresent =
+                    doesColumnExist(firstRow, "COUNTRY") &&
+                    doesColumnExist(firstRow, "YEAR") &&
+                    doesColumnExist(firstRow, "SPECIMEN") &&
+                    doesColumnExist(firstRow, "GENDER") &&
+                    doesColumnExist(firstRow, "ORIGIN") &&
+                    doesColumnExist(firstRow, "AGEGROUP") &&
+                    doesColumnExist(firstRow, "NUMINFECTED") &&
+                    doesColumnExist(firstRow, "NUMSAMPLEDPATIENTS") &&
+                    doesColumnExist(firstRow, "BATCHID");
+
+                return allSampleColsPresent ? true : false;
+            } else return false;
         });
     }
 }
