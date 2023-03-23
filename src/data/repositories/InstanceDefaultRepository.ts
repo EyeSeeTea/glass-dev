@@ -109,6 +109,7 @@ export class InstanceDefaultRepository implements InstanceRepository {
             const { organisationUnits, dataViewOrganisationUnits } = user;
 
             const countryOrgUnits: { name: string; id: string; code: string }[] = [];
+            const dataViewCountryOrgUnits: { name: string; id: string; code: string }[] = [];
 
             return this.dataStoreClient.getObject(DataStoreKeys.GENERAL).flatMap(generalInfo => {
                 const countryLevel = (generalInfo as GeneralInfoType).countryLevel;
@@ -119,11 +120,24 @@ export class InstanceDefaultRepository implements InstanceRepository {
                     }
                 });
 
+                dataViewOrganisationUnits.forEach(dataViewOrgUnit => {
+                    if (dataViewOrgUnit.level === countryLevel) {
+                        dataViewCountryOrgUnits.push({
+                            name: dataViewOrgUnit.name,
+                            id: dataViewOrgUnit.id,
+                            code: dataViewOrgUnit.code,
+                        });
+                    }
+                });
+
                 return this.getAllCountryOrgUnits(organisationUnits, countryLevel).flatMap(childrenOrgUnits => {
                     return this.getAllCountryOrgUnits(dataViewOrganisationUnits, countryLevel).flatMap(
                         childrenDataViewOrgUnits => {
                             const uniqueOrgUnits = _.uniqBy([...countryOrgUnits, ...childrenOrgUnits], "id");
-                            const uniqueDataViewOrgUnits = _.uniqBy(childrenDataViewOrgUnits, "id");
+                            const uniqueDataViewOrgUnits = _.uniqBy(
+                                [...dataViewCountryOrgUnits, ...childrenDataViewOrgUnits],
+                                "id"
+                            );
 
                             return this.mapUserGroupAccess(user.userGroups).map((userModulesAccess): UserAccessInfo => {
                                 return {
