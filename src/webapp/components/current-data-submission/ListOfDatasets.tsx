@@ -7,6 +7,10 @@ import { UploadsDataItem } from "../../entities/uploads";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { Button } from "@material-ui/core";
 import { NavLink, useLocation } from "react-router-dom";
+import { useStatusDataSubmission } from "../../hooks/useStatusDataSubmission";
+import { useCurrentModuleContext } from "../../contexts/current-module-context";
+import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context";
+import { isEditModeStatus } from "../../utils/editModeStatus";
 import { useGlassUploadsByModuleOUPeriod } from "../../hooks/useGlassUploadsByModuleOUPeriod";
 
 function getUploadedItems(upload: GlassUploadsState) {
@@ -33,6 +37,13 @@ export const ListOfDatasets: React.FC = () => {
     const periodFromUrl = parseInt(queryParameters.get("period") || "");
     const year = periodFromUrl || new Date().getFullYear() - 1;
 
+    const { currentModuleAccess } = useCurrentModuleContext();
+    const { currentOrgUnitAccess } = useCurrentOrgUnitContext();
+    const currentDataSubmissionStatus = useStatusDataSubmission(
+        currentModuleAccess.moduleId,
+        currentOrgUnitAccess.orgUnitId,
+        year
+    );
     const { uploads, refreshUploads } = useGlassUploadsByModuleOUPeriod(year.toString());
 
     return (
@@ -49,11 +60,14 @@ export const ListOfDatasets: React.FC = () => {
                     className="error-group"
                     refreshUploads={refreshUploads}
                 />
-                <div>
-                    <Button variant="contained" color="primary" component={NavLink} to={`/upload`} exact={true}>
-                        {i18n.t("Add new datasets")}
-                    </Button>
-                </div>
+                {currentDataSubmissionStatus.kind === "loaded" &&
+                    isEditModeStatus(currentDataSubmissionStatus.data.title) && (
+                        <div>
+                            <Button variant="contained" color="primary" component={NavLink} to={`/upload`} exact={true}>
+                                {i18n.t("Add new datasets")}
+                            </Button>
+                        </div>
+                    )}
             </ContentWrapper>
         </ContentLoader>
     );
