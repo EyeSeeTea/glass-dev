@@ -10,10 +10,12 @@ import { CustomCard } from "../../components/custom-card/CustomCard";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context";
 import { useCurrentModuleContext } from "../../contexts/current-module-context";
+import { useCurrentPeriodContext } from "../../contexts/current-period-context";
 
 export const UploadPage: React.FC = React.memo(() => {
     const { currentOrgUnitAccess } = useCurrentOrgUnitContext();
     const { currentModuleAccess } = useCurrentModuleContext();
+    const { currentPeriod } = useCurrentPeriodContext();
 
     return (
         <MainLayout>
@@ -26,7 +28,7 @@ export const UploadPage: React.FC = React.memo(() => {
                         </Button>
                         <ChevronRightIcon />
                         <Button component={NavLink} to={`/upload`} exact={true}>
-                            <span>{i18n.t("2022 Data Submission")}</span>
+                            <span>{i18n.t(`${currentPeriod} Data Submission`)}</span>
                         </Button>
                     </StyledBreadCrumbs>
                     <div className="info">
