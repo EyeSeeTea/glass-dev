@@ -4,9 +4,11 @@ import { glassColors } from "../../pages/app/themes/dhis2.theme";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { CompleteButtons } from "./CompleteButtons";
 import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context";
+import { useCurrentPeriodContext } from "../../contexts/current-period-context";
 
 export const Completed: React.FC = () => {
     const { currentOrgUnitAccess } = useCurrentOrgUnitContext();
+    const { currentPeriod } = useCurrentPeriodContext();
     useEffect(() => {
         localStorage.removeItem("risUploadId");
         localStorage.removeItem("sampleUploadId");
@@ -16,7 +18,7 @@ export const Completed: React.FC = () => {
         <ContentWrapper>
             <p className="intro">{i18n.t("Thank! your data for now is uploaded in our system")}</p>
             <div className="ds-name">
-                <span>2020</span>
+                <span>{currentPeriod}</span>
                 <span>{i18n.t(currentOrgUnitAccess.orgUnitName)}</span>
             </div>
             <Section className="summary">
