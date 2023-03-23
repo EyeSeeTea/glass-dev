@@ -16,7 +16,7 @@ import {
     Typography,
 } from "@material-ui/core";
 import i18n from "@eyeseetea/d2-ui-components/locales";
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import { CTAs } from "./StatusDetails";
 import { useGlassCaptureAccess } from "../../../hooks/useGlassCaptureAccess";
 import { ConfirmationDialog, useSnackbar } from "@eyeseetea/d2-ui-components";
@@ -26,6 +26,7 @@ import { useCurrentOrgUnitContext } from "../../../contexts/current-orgUnit-cont
 import { useCurrentModuleContext } from "../../../contexts/current-module-context";
 import { DataSubmissionStatusTypes, StatusHistoryType } from "../../../../domain/entities/GlassDataSubmission";
 import dayjs from "dayjs";
+import { useCurrentPeriodContext } from "../../../contexts/current-period-context";
 
 export interface CtaButtonsProps {
     ctas: CTAs[];
@@ -45,16 +46,13 @@ export const CtaButtons: React.FC<CtaButtonsProps> = ({ ctas, position, setRefet
 
     const { currentOrgUnitAccess } = useCurrentOrgUnitContext();
     const { currentModuleAccess } = useCurrentModuleContext();
-    const location = useLocation();
-    const queryParameters = new URLSearchParams(location.search);
-    const periodFromUrl = parseInt(queryParameters.get("period") || "");
-    const year = periodFromUrl || new Date().getFullYear() - 1;
+    const { currentPeriod } = useCurrentPeriodContext();
 
     const dataSubmissionId = useCurrentDataSubmissionId(
         compositionRoot,
         currentModuleAccess.moduleId,
         currentOrgUnitAccess.orgUnitId,
-        year
+        currentPeriod
     );
 
     useEffect(() => {

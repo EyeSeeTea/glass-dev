@@ -9,9 +9,9 @@ import { UploadSample } from "./UploadSample";
 import { useAppContext } from "../../contexts/app-context";
 import { GlassUploads } from "../../../domain/entities/GlassUploads";
 import { useCurrentDataSubmissionId } from "../../hooks/useCurrentDataSubmissionId";
-import { useLocation } from "react-router-dom";
 import { useCurrentModuleContext } from "../../contexts/current-module-context";
 import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context";
+import { useCurrentPeriodContext } from "../../contexts/current-period-context";
 
 interface UploadFilesProps {
     changeStep: (step: number) => void;
@@ -60,7 +60,6 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
     setBatchId,
 }) => {
     const { compositionRoot } = useAppContext();
-    const location = useLocation();
 
     const [isValidated, setIsValidated] = useState(false);
     const [isFileValid, setIsFileValid] = useState(false);
@@ -75,9 +74,8 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
         currentOrgUnitAccess: { orgUnitId },
     } = useCurrentOrgUnitContext();
 
-    const queryParameters = new URLSearchParams(location.search);
-    const period = queryParameters.get("period") || (new Date().getFullYear() - 1).toString();
-    const dataSubmissionId = useCurrentDataSubmissionId(compositionRoot, moduleId, orgUnitId, parseInt(period));
+    const { currentPeriod } = useCurrentPeriodContext();
+    const dataSubmissionId = useCurrentDataSubmissionId(compositionRoot, moduleId, orgUnitId, currentPeriod);
 
     useEffect(() => {
         const fetchPreviousUpload = async (): Promise<GlassUploads[]> => {

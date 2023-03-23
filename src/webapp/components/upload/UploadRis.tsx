@@ -12,8 +12,8 @@ import { useAppContext } from "../../contexts/app-context";
 import { useCurrentDataSubmissionId } from "../../hooks/useCurrentDataSubmissionId";
 import { useCurrentModuleContext } from "../../contexts/current-module-context";
 import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context";
-import { useLocation } from "react-router-dom";
 import { useCallbackEffect } from "../../hooks/use-callback-effect";
+import { useCurrentPeriodContext } from "../../contexts/current-period-context";
 interface UploadRisProps {
     risFile: File | null;
     setRisFile: React.Dispatch<React.SetStateAction<File | null>>;
@@ -25,21 +25,21 @@ const RIS_FILE_TYPE = "RIS";
 
 export const UploadRis: React.FC<UploadRisProps> = ({ risFile, setRisFile, validate, batchId }) => {
     const { compositionRoot } = useAppContext();
-    const location = useLocation();
+
     const {
         currentModuleAccess: { moduleId },
     } = useCurrentModuleContext();
     const {
         currentOrgUnitAccess: { orgUnitId },
     } = useCurrentOrgUnitContext();
-    const queryParameters = new URLSearchParams(location.search);
-    const period = queryParameters.get("period") || (new Date().getFullYear() - 1).toString();
+
+    const { currentPeriod } = useCurrentPeriodContext();
     const snackbar = useSnackbar();
 
     const [isLoading, setIsLoading] = useState(false);
     const risFileUploadRef = useRef<DropzoneRef>(null);
 
-    const dataSubmissionId = useCurrentDataSubmissionId(compositionRoot, moduleId, orgUnitId, parseInt(period));
+    const dataSubmissionId = useCurrentDataSubmissionId(compositionRoot, moduleId, orgUnitId, currentPeriod);
 
     const openFileUploadDialog = useCallback(async () => {
         risFileUploadRef.current?.openDialog();
@@ -89,21 +89,35 @@ export const UploadRis: React.FC<UploadRisProps> = ({ risFile, setRisFile, valid
                 const uploadedRisFile = files[0];
                 if (uploadedRisFile) {
                     setIsLoading(true);
-                    setRisFile(uploadedRisFile);
-                    const data = {
-                        batchId,
-                        fileType: RIS_FILE_TYPE,
-                        dataSubmission: dataSubmissionId,
-                        module: moduleId,
-                        period,
-                        orgUnit: orgUnitId,
-                    };
-                    return compositionRoot.glassDocuments.upload({ file: uploadedRisFile, data }).run(
-                        uploadId => {
-                            localStorage.setItem("risUploadId", uploadId);
-                            setIsLoading(false);
+
+                    return compositionRoot.dataSubmision.validateRISFile(uploadedRisFile).run(
+                        isValidRIS => {
+                            if (isValidRIS) {
+                                setRisFile(uploadedRisFile);
+                                const data = {
+                                    batchId,
+                                    fileType: RIS_FILE_TYPE,
+                                    dataSubmission: dataSubmissionId,
+                                    module: moduleId,
+                                    period: currentPeriod.toString(),
+                                    orgUnit: orgUnitId,
+                                };
+                                return compositionRoot.glassDocuments.upload({ file: uploadedRisFile, data }).run(
+                                    uploadId => {
+                                        localStorage.setItem("risUploadId", uploadId);
+                                        setIsLoading(false);
+                                    },
+                                    () => {
+                                        snackbar.error(i18n.t("Error in file upload"));
+                                        setIsLoading(false);
+                                    }
+                                );
+                            } else {
+                                snackbar.error(i18n.t("Incorrect File Format. Please retry with a valid RIS file"));
+                                setIsLoading(false);
+                            }
                         },
-                        () => {
+                        _error => {
                             snackbar.error(i18n.t("Error in file upload"));
                             setIsLoading(false);
                         }
@@ -111,7 +125,17 @@ export const UploadRis: React.FC<UploadRisProps> = ({ risFile, setRisFile, valid
                 }
             }
         },
-        [batchId, compositionRoot.glassDocuments, dataSubmissionId, moduleId, orgUnitId, period, setRisFile, snackbar]
+        [
+            batchId,
+            compositionRoot.glassDocuments,
+            compositionRoot.dataSubmision,
+            dataSubmissionId,
+            moduleId,
+            orgUnitId,
+            currentPeriod,
+            setRisFile,
+            snackbar,
+        ]
     );
 
     const risFileUploadEffect = useCallbackEffect(risFileUpload);
