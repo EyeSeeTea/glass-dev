@@ -85,6 +85,18 @@ export class MetadataDefaultRepository implements MetadataRepository {
         };
     }
 
+    validateDataSet(dataset: string, period: string, orgUnit: string, AOCs: string[]): FutureData<unknown> {
+        return Future.parallel(
+            AOCs.map(aoc => {
+                return apiToFuture(
+                    this.api
+                        .get(`/validation/dataSet/${dataset}?pe=${period}&ou=${orgUnit}&aoc=${aoc}`)
+                        .map(response => response.data)
+                );
+            })
+        );
+    }
+
     private buildCategoryCombo(categoryCombo: D2CategoryCombo): CategoryCombo {
         return {
             id: categoryCombo.id,
@@ -145,3 +157,8 @@ const categoryComboFields = {
 type D2CategoryCombo = MetadataPick<{
     categoryCombos: { fields: typeof categoryComboFields };
 }>["categoryCombos"][number];
+
+export type D2ValidationResponse = {
+    commentRequiredViolations: unknown[];
+    validationRuleViolations: unknown[];
+};
