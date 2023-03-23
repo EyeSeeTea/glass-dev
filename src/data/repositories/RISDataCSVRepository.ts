@@ -2,7 +2,7 @@ import { RISData } from "../../domain/entities/data-entry/external/RISData";
 import { Future, FutureData } from "../../domain/entities/Future";
 import { RISDataRepository } from "../../domain/repositories/data-entry/RISDataRepository";
 import { SpreadsheetXlsxDataSource } from "../../domain/repositories/SpreadsheetXlsxRepository";
-import { getNumberValue, getTextValue } from "./utils/CSVUtils";
+import { doesColumnExist, getNumberValue, getTextValue } from "./utils/CSVUtils";
 
 export class RISDataCSVRepository implements RISDataRepository {
     get(file: File): FutureData<RISData[]> {
@@ -31,6 +31,34 @@ export class RISDataCSVRepository implements RISDataRepository {
                     };
                 }) || []
             );
+        });
+    }
+
+    validate(file: File): FutureData<boolean> {
+        return Future.fromPromise(new SpreadsheetXlsxDataSource().read(file)).map(spreadsheet => {
+            const sheet = spreadsheet.sheets[0]; //Only one sheet for AMR RIS
+            const firstRow = sheet?.rows[0];
+
+            if (firstRow) {
+                const allRISColsPresent =
+                    doesColumnExist(firstRow, "COUNTRY") &&
+                    doesColumnExist(firstRow, "YEAR") &&
+                    doesColumnExist(firstRow, "SPECIMEN") &&
+                    doesColumnExist(firstRow, "PATHOGEN") &&
+                    doesColumnExist(firstRow, "GENDER") &&
+                    doesColumnExist(firstRow, "ORIGIN") &&
+                    doesColumnExist(firstRow, "AGEGROUP") &&
+                    doesColumnExist(firstRow, "ANTIBIOTIC") &&
+                    doesColumnExist(firstRow, "RESISTANT") &&
+                    doesColumnExist(firstRow, "INTERMEDIATE") &&
+                    doesColumnExist(firstRow, "NONSUSCEPTIBLE") &&
+                    doesColumnExist(firstRow, "SUSCEPTIBLE") &&
+                    doesColumnExist(firstRow, "UNKNOWN_NO_AST") &&
+                    doesColumnExist(firstRow, "UNKNOWN_NO_BREAKPOINTS") &&
+                    doesColumnExist(firstRow, "BATCHID");
+
+                return allRISColsPresent ? true : false;
+            } else return false;
         });
     }
 

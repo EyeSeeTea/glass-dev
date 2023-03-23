@@ -17,6 +17,7 @@ import { useCurrentModuleContext } from "../../contexts/current-module-context";
 import { DataSubmissionStatusTypes } from "../../../domain/entities/GlassDataSubmission";
 import { useStatusDataSubmission } from "../../hooks/useStatusDataSubmission";
 import { useCurrentPeriodContext } from "../../contexts/current-period-context";
+import { isEditModeStatus } from "../../utils/editModeStatus";
 
 interface QuestionnairesProps {
     setRefetchStatus: Dispatch<SetStateAction<DataSubmissionStatusTypes | undefined>>;
@@ -113,10 +114,7 @@ export const Questionnaires: React.FC<QuestionnairesProps> = ({ setRefetchStatus
                             )}
 
                             {currentDataSubmissionStatus.kind === "loaded" &&
-                                (currentDataSubmissionStatus.data.title === "NOT COMPLETED" ||
-                                    currentDataSubmissionStatus.data.title === "DATA TO BE APROVED BY COUNTRY" ||
-                                    currentDataSubmissionStatus.data.title === "REJECTED BY WHO" ||
-                                    currentDataSubmissionStatus.data.title === "DATA UPDATE REQUEST ACCEPTED") && (
+                                isEditModeStatus(currentDataSubmissionStatus.data.title) && (
                                     <>
                                         <Button
                                             variant="contained"

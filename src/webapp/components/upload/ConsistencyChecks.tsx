@@ -11,6 +11,7 @@ import { useCurrentModuleContext } from "../../contexts/current-module-context";
 import { Future } from "../../../domain/entities/Future";
 import { ImportSummary } from "../../../domain/entities/data-entry/ImportSummary";
 import { useCurrentPeriodContext } from "../../contexts/current-period-context";
+import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context";
 
 interface ConsistencyChecksProps {
     changeStep: (step: number) => void;
@@ -31,6 +32,7 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
 }) => {
     const { compositionRoot } = useAppContext();
     const { currentModuleAccess } = useCurrentModuleContext();
+    const { currentOrgUnitAccess } = useCurrentOrgUnitContext();
     const [fileType, setFileType] = useState<string>("ris");
     const [isDataSetUploading, setIsDataSetUploading] = useState<boolean>(false);
     const [risFileErrors, setRISErrors] = useState<ImportSummary | undefined>(undefined);
@@ -47,6 +49,7 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
                         risFile,
                         batchId,
                         currentPeriod,
+                        currentOrgUnitAccess.orgUnitCode,
                         "CREATE_AND_UPDATE"
                     ),
                     importSampleFileSummary: sampleFile
@@ -54,6 +57,7 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
                               sampleFile,
                               batchId,
                               currentPeriod,
+                              currentOrgUnitAccess.orgUnitCode,
                               "CREATE_AND_UPDATE"
                           )
                         : Future.success(undefined),
@@ -97,6 +101,7 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
         setSampleFileImportSummary,
         batchId,
         currentPeriod,
+        currentOrgUnitAccess.orgUnitCode,
     ]);
 
     const changeType = (fileType: string) => {
