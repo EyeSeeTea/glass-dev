@@ -9,6 +9,7 @@ import { MenuLeaf } from "./SidebarNav";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { useCurrentModuleContext } from "../../contexts/current-module-context";
+import { useCurrentPeriodContext } from "../../contexts/current-period-context";
 
 interface SidebarNavProps {
     className?: string;
@@ -21,6 +22,7 @@ const SidebarNavMenu: React.FC<SidebarNavProps> = ({ menu, className, groupName 
     const location = useLocation();
 
     const { currentModuleAccess, changeCurrentModuleAccess } = useCurrentModuleContext();
+    const { currentPeriod, changeCurrentPeriod } = useCurrentPeriodContext();
 
     /* 
         TODO: determine through context which data submission is "current data submission" as of date and only highlight "Current data submission" if so, 
@@ -30,7 +32,8 @@ const SidebarNavMenu: React.FC<SidebarNavProps> = ({ menu, className, groupName 
         return (
             (menu.title === "Current Data Submission" &&
                 location.pathname === "/upload" &&
-                groupName === currentModuleAccess.moduleName) ||
+                groupName === currentModuleAccess.moduleName &&
+                currentPeriod === new Date().getFullYear() - 1) ||
             (menu.title === "Data Submissions History" &&
                 location.pathname === "/current-data-submission/" &&
                 groupName === currentModuleAccess.moduleName) ||
@@ -39,12 +42,14 @@ const SidebarNavMenu: React.FC<SidebarNavProps> = ({ menu, className, groupName 
                 groupName === currentModuleAccess.moduleName) ||
             (location.pathname !== "/" &&
                 menuPath === location.pathname &&
-                groupName === currentModuleAccess.moduleName)
+                groupName === currentModuleAccess.moduleName &&
+                currentPeriod === new Date().getFullYear() - 1)
         );
     };
 
-    const updateModuleContext = (module: string) => {
+    const updateModuleAndPeriodContext = (module: string) => {
         changeCurrentModuleAccess(module);
+        changeCurrentPeriod(new Date().getFullYear() - 1); //Reset to current year
     };
 
     return (
@@ -55,7 +60,7 @@ const SidebarNavMenu: React.FC<SidebarNavProps> = ({ menu, className, groupName 
                 to={menu.path}
                 exact={true}
                 data-is-page-current={isCurrentPage(menu.path)}
-                onClick={() => updateModuleContext(groupName || "")}
+                onClick={() => updateModuleAndPeriodContext(groupName || "")}
             >
                 <div className={classes.icon}>{menu.icon}</div>
                 <Typography variant="body1" style={{ color: glassColors.greyBlack }}>
