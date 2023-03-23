@@ -15,6 +15,7 @@ import { checkBatchId } from "./utils/checkBatchId";
 import { includeBlokingErrors } from "./utils/includeBlockingErrors";
 import { checkYear } from "./utils/checkYear";
 import { ImportStrategy } from "../../entities/data-entry/DataValuesSaveSummary";
+import { checkCountry } from "./utils/checkCountry";
 
 const AMR_AMR_DS_Input_files_Sample_DS_ID = "OcAB7oaC072";
 const AMR_BATCHID_CC_ID = "rEMx3WFeLcU";
@@ -26,7 +27,13 @@ export class ImportSampleFileUseCase implements UseCase {
         private dataValuesRepository: DataValuesRepository
     ) {}
 
-    public execute(inputFile: File, batchId: string, year: number, action: ImportStrategy): FutureData<ImportSummary> {
+    public execute(
+        inputFile: File,
+        batchId: string,
+        year: number,
+        countryCode: string,
+        action: ImportStrategy
+    ): FutureData<ImportSummary> {
         return this.sampleDataRepository
             .get(inputFile)
             .flatMap(risDataItems => {
@@ -45,6 +52,7 @@ export class ImportSampleFileUseCase implements UseCase {
             .flatMap(({ risDataItems, dataSet, dataSet_CC, dataElement_CC, orgUnits }) => {
                 const batchIdErrors = checkBatchId(risDataItems, batchId);
                 const yearErrors = checkYear(risDataItems, year);
+                const countryErrors = checkCountry(risDataItems, countryCode);
 
                 const dataValues = risDataItems
                     .map(risData => {
@@ -88,6 +96,7 @@ export class ImportSampleFileUseCase implements UseCase {
                     const summaryWithConsistencyBlokingErrors = includeBlokingErrors(importSummary, [
                         ...batchIdErrors,
                         ...yearErrors,
+                        ...countryErrors,
                     ]);
 
                     return summaryWithConsistencyBlokingErrors;
