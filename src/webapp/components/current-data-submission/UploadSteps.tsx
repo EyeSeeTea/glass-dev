@@ -73,7 +73,7 @@ const renderTypeContent = (
         case 3:
             return <Validations />;
         case 4:
-            return <Advanced />;
+            return <Advanced setRefetchStatus={setRefetchStatus} setCurrentStep={setCurrentStep} />;
         default:
             return <p>{i18n.t("No Data uploaded...")}</p>;
     }

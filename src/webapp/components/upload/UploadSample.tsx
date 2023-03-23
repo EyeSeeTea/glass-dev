@@ -81,20 +81,34 @@ export const UploadSample: React.FC<UploadSampleProps> = ({ batchId, sampleFile,
                 const uploadedSample = files[0];
                 if (uploadedSample) {
                     setIsLoading(true);
-                    setSampleFile(uploadedSample);
-                    const data = {
-                        batchId,
-                        fileType: SAMPLE_FILE_TYPE,
-                        dataSubmission: dataSubmissionId,
-                        module: moduleId,
-                        period,
-                        orgUnit: orgUnitId,
-                    };
-                    return compositionRoot.glassDocuments.upload({ file: uploadedSample, data }).run(
-                        uploadId => {
-                            localStorage.setItem("sampleUploadId", uploadId);
-                            setIsLoading(false);
-                            setHasSampleFile(true);
+
+                    return compositionRoot.dataSubmision.validateSampleFile(uploadedSample).run(
+                        isValidSample => {
+                            if (isValidSample) {
+                                setSampleFile(uploadedSample);
+                                const data = {
+                                    batchId,
+                                    fileType: SAMPLE_FILE_TYPE,
+                                    dataSubmission: dataSubmissionId,
+                                    module: moduleId,
+                                    period,
+                                    orgUnit: orgUnitId,
+                                };
+                                return compositionRoot.glassDocuments.upload({ file: uploadedSample, data }).run(
+                                    uploadId => {
+                                        localStorage.setItem("sampleUploadId", uploadId);
+                                        setIsLoading(false);
+                                        setHasSampleFile(true);
+                                    },
+                                    () => {
+                                        snackbar.error(i18n.t("Error in file upload"));
+                                        setIsLoading(false);
+                                    }
+                                );
+                            } else {
+                                snackbar.error(i18n.t("Incorrect File Format. Please retry with a valid Sample file"));
+                                setIsLoading(false);
+                            }
                         },
                         () => {
                             snackbar.error(i18n.t("Error in file upload"));
@@ -109,6 +123,7 @@ export const UploadSample: React.FC<UploadSampleProps> = ({ batchId, sampleFile,
         [
             batchId,
             compositionRoot.glassDocuments,
+            compositionRoot.dataSubmision,
             dataSubmissionId,
             moduleId,
             orgUnitId,
