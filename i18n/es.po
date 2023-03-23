@@ -426,8 +426,5 @@ msgstr ""
 msgid "All Data Submissions"
 msgstr ""
 
-msgid "2022 Data Submission"
-msgstr ""
-
 msgid "Upload History"
 msgstr ""
