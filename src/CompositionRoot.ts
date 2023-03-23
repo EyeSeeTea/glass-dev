@@ -47,6 +47,8 @@ import { SampleDataCSVRepository } from "./data/repositories/SampleDataCSVReposi
 import { GetGlassUploadsByModuleOUPeriodUseCase } from "./domain/usecases/GetGlassUploadsByModuleOUPeriodUseCase";
 import { SetDataSubmissionStatusUseCase } from "./domain/usecases/SetDataSubmissionStatusUseCase";
 import { DownloadDocumentUseCase } from "./domain/usecases/DownloadDocumentUseCase";
+import { ValidateRISFileUseCase } from "./domain/usecases/data-entry/ValidateRISFileUseCase";
+import { ValidateSampleFileUseCase } from "./domain/usecases/data-entry/ValidateSampleFileUseCase";
 
 export function getCompositionRoot(instance: Instance) {
     const api = getD2APiFromInstance(instance);
@@ -110,7 +112,9 @@ export function getCompositionRoot(instance: Instance) {
                 dataValuesRepository,
                 glassModuleRepository
             ),
+            validateRISFile: new ValidateRISFileUseCase(risDataRepository),
             sampleFile: new ImportSampleFileUseCase(sampleDataRepository, metadataRepository, dataValuesRepository),
+            validateSampleFile: new ValidateSampleFileUseCase(sampleDataRepository),
         }),
         questionnaires: getExecute({
             get: new GetQuestionnaireUseCase(questionnaireD2Repository),
