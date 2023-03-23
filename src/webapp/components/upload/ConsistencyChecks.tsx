@@ -11,6 +11,7 @@ import { useCurrentModuleContext } from "../../contexts/current-module-context";
 import { Future } from "../../../domain/entities/Future";
 import { ImportSummary } from "../../../domain/entities/data-entry/ImportSummary";
 import { useLocation } from "react-router-dom";
+import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context";
 interface ConsistencyChecksProps {
     changeStep: (step: number) => void;
     batchId: string;
@@ -39,6 +40,9 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
     const queryParameters = new URLSearchParams(location.search);
     const periodFromUrl = parseInt(queryParameters.get("period") || "");
     const year = periodFromUrl || new Date().getFullYear() - 1;
+    const {
+        currentOrgUnitAccess: { orgUnitId },
+    } = useCurrentOrgUnitContext();
 
     useEffect(() => {
         function uploadDatasets() {
@@ -50,7 +54,8 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
                         risFile,
                         batchId,
                         year,
-                        "CREATE_AND_UPDATE"
+                        "CREATE_AND_UPDATE",
+                        orgUnitId
                     ),
                     importSampleFileSummary: sampleFile
                         ? compositionRoot.dataSubmision.sampleFile(sampleFile, batchId, year, "CREATE_AND_UPDATE")
@@ -95,6 +100,7 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
         setSampleFileImportSummary,
         batchId,
         year,
+        orgUnitId,
     ]);
 
     const changeType = (fileType: string) => {

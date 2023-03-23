@@ -8,6 +8,7 @@ import { CloudDownloadOutlined, DeleteOutline } from "@material-ui/icons";
 import { useAppContext } from "../../contexts/app-context";
 import { useSnackbar } from "@eyeseetea/d2-ui-components";
 import { CircularProgress } from "material-ui";
+import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context";
 
 export interface UploadsTableBodyProps {
     rows?: UploadsDataItem[];
@@ -18,6 +19,9 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
     const { compositionRoot } = useAppContext();
     const snackbar = useSnackbar();
     const [loading, setLoading] = useState<boolean>(false);
+    const {
+        currentOrgUnitAccess: { orgUnitId },
+    } = useCurrentOrgUnitContext();
 
     const downloadFile = (fileId: string, fileName: string) => {
         compositionRoot.glassDocuments.download(fileId).run(
@@ -51,7 +55,7 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
             file => {
                 if (fileType === "RIS") {
                     const risFile = new File([file], fileName);
-                    compositionRoot.dataSubmision.RISFile(risFile, batchId, parseInt(period), "DELETES").run(
+                    compositionRoot.dataSubmision.RISFile(risFile, batchId, parseInt(period), "DELETES", orgUnitId).run(
                         summary => {
                             snackbar.info(`${summary.importCount.deleted} records deleted.`);
                             compositionRoot.glassDocuments.deleteByUploadId(uploadId).run(

@@ -12,7 +12,7 @@ import { RISDataRepository } from "../../repositories/data-entry/RISDataReposito
 import { DataValue } from "../../entities/data-entry/DataValue";
 import i18n from "../../../locales";
 import { mapToImportSummary } from "./utils/mapDhis2Summary";
-import { ImportSummary } from "../../entities/data-entry/ImportSummary";
+import { ConsistencyError, ImportSummary } from "../../entities/data-entry/ImportSummary";
 import { checkSpecimenPathogen } from "./utils/checkSpecimenPathogen";
 import { GlassModuleRepository } from "../../repositories/GlassModuleRepository";
 import { checkASTResults } from "./utils/checkASTResults";
@@ -21,6 +21,7 @@ import { checkBatchId } from "./utils/checkBatchId";
 import { checkYear } from "./utils/checkYear";
 import { includeBlokingErrors } from "./utils/includeBlockingErrors";
 import { ImportStrategy } from "../../entities/data-entry/DataValuesSaveSummary";
+import { D2ValidationResponse } from "../../../data/repositories/MetadataDefaultRepository";
 
 const AMR_AMR_DS_INPUT_FILES_RIS_DS_ID = "CeQPmXgrhHF";
 const AMR_DATA_PATHOGEN_ANTIBIOTIC_BATCHID_CC_ID = "S427AvQESbw";
@@ -33,7 +34,13 @@ export class ImportRISFileUseCase implements UseCase {
         private moduleRepository: GlassModuleRepository
     ) {}
 
-    public execute(inputFile: File, batchId: string, year: number, action: ImportStrategy): FutureData<ImportSummary> {
+    public execute(
+        inputFile: File,
+        batchId: string,
+        year: number,
+        action: ImportStrategy,
+        orgUnit: string
+    ): FutureData<ImportSummary> {
         return this.risDataRepository
             .get(inputFile)
             .flatMap(risDataItems => {
@@ -102,29 +109,56 @@ export class ImportRISFileUseCase implements UseCase {
 
                 /* eslint-disable no-console */
 
-                const finalDataValues = dataValues.filter((dv: DataValue) => dv.attributeOptionCombo !== "");
+                const finalDataValues: DataValue[] = dataValues.filter(
+                    (dv: DataValue) => dv.attributeOptionCombo !== ""
+                );
 
                 console.log({ risInitialFileDataValues: dataValues });
                 console.log({ risFinalFileDataValues: finalDataValues });
 
-                return this.dataValuesRepository.save(finalDataValues, action).map(saveSummary => {
-                    const importSummary = mapToImportSummary(saveSummary);
+                const uniqueAOCs = _.uniq(finalDataValues.map(el => el.attributeOptionCombo || ""));
 
-                    const summaryWithConsistencyBlokingErrors = includeBlokingErrors(importSummary, [
-                        ...pathogenAntibioticErrors,
-                        ...specimenPathogenErrors,
-                        ...astResultsErrors,
-                        ...batchIdErrors,
-                        ...yearErrors,
-                    ]);
+                return this.dataValuesRepository.save(finalDataValues, action).flatMap(saveSummary => {
+                    return this.metadataRepository
+                        .validateDataSet(AMR_AMR_DS_INPUT_FILES_RIS_DS_ID, year.toString(), orgUnit, uniqueAOCs)
+                        .map(validationResponse => {
+                            const validations = validationResponse as D2ValidationResponse[];
+                            const d2ValidationErrors: ConsistencyError[] = [];
+                            validations.forEach(({ validationRuleViolations }) => {
+                                if (validationRuleViolations.length) {
+                                    validationRuleViolations.forEach(rulesViolation => {
+                                        d2ValidationErrors.push({
+                                            error: i18n.t(
+                                                `Validation rule '${
+                                                    (rulesViolation as any).validationRule.name
+                                                }' violated. Left side value: '${
+                                                    (rulesViolation as any).leftsideValue
+                                                }', right side value: '${(rulesViolation as any).rightsideValue}'`
+                                            ),
+                                            count: 1,
+                                        });
+                                    });
+                                }
+                            });
+                            const importSummary = mapToImportSummary(saveSummary);
 
-                    const finalImportSummary = this.includeDataValuesRemovedWarning(
-                        dataValues,
-                        finalDataValues,
-                        summaryWithConsistencyBlokingErrors
-                    );
+                            const summaryWithConsistencyBlokingErrors = includeBlokingErrors(importSummary, [
+                                ...pathogenAntibioticErrors,
+                                ...specimenPathogenErrors,
+                                ...astResultsErrors,
+                                ...batchIdErrors,
+                                ...yearErrors,
+                                ...d2ValidationErrors,
+                            ]);
 
-                    return finalImportSummary;
+                            const finalImportSummary = this.includeDataValuesRemovedWarning(
+                                dataValues,
+                                finalDataValues,
+                                summaryWithConsistencyBlokingErrors
+                            );
+
+                            return finalImportSummary;
+                        });
                 });
             });
     }
