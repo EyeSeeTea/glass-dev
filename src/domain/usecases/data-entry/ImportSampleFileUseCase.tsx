@@ -32,7 +32,8 @@ export class ImportSampleFileUseCase implements UseCase {
         batchId: string,
         year: number,
         countryCode: string,
-        action: ImportStrategy
+        action: ImportStrategy,
+        dryRun: boolean
     ): FutureData<ImportSummary> {
         return this.sampleDataRepository
             .get(inputFile)
@@ -90,7 +91,7 @@ export class ImportSampleFileUseCase implements UseCase {
                 /* eslint-disable no-console */
                 console.log({ sampleFileDataValues: dataValues });
 
-                return this.dataValuesRepository.save(dataValues, action).map(saveSummary => {
+                return this.dataValuesRepository.save(dataValues, action, dryRun).map(saveSummary => {
                     const importSummary = mapToImportSummary(saveSummary);
 
                     const summaryWithConsistencyBlokingErrors = includeBlokingErrors(importSummary, [

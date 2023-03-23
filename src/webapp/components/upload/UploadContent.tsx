@@ -100,8 +100,9 @@ const renderStep = (
             return (
                 <ReviewDataSummary
                     changeStep={changeStep}
-                    risFileImportSummary={risFileImportSummary}
-                    sampleFileImportSummary={sampleFileImportSummary}
+                    risFile={risFile}
+                    batchId={batchId}
+                    sampleFile={sampleFile}
                 />
             );
         case 4:

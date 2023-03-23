@@ -14,7 +14,7 @@ export class DataValuesDefaultRepository implements DataValuesRepository {
         this.api = getD2APiFromInstance(instance);
     }
 
-    save(dataValues: DataValue[], action: ImportStrategy): FutureData<DataValuesSaveSummary> {
+    save(dataValues: DataValue[], action: ImportStrategy, dryRun: boolean): FutureData<DataValuesSaveSummary> {
         // We use async way because sync throw timeouts
         //return apiToFuture(this.api.dataValues.postSet({ importStrategy: "CREATE_AND_UPDATE" }, { dataValues }));
 
@@ -22,6 +22,7 @@ export class DataValuesDefaultRepository implements DataValuesRepository {
             this.api.dataValues.postSetAsync(
                 {
                     importStrategy: action,
+                    dryRun: dryRun,
                 },
                 { dataValues }
             )

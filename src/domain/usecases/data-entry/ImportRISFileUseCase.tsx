@@ -39,7 +39,8 @@ export class ImportRISFileUseCase implements UseCase {
         batchId: string,
         year: number,
         countryCode: string,
-        action: ImportStrategy
+        action: ImportStrategy,
+        dryRun: boolean
     ): FutureData<ImportSummary> {
         return this.risDataRepository
             .get(inputFile)
@@ -115,7 +116,7 @@ export class ImportRISFileUseCase implements UseCase {
                 console.log({ risInitialFileDataValues: dataValues });
                 console.log({ risFinalFileDataValues: finalDataValues });
 
-                return this.dataValuesRepository.save(finalDataValues, action).map(saveSummary => {
+                return this.dataValuesRepository.save(finalDataValues, action, dryRun).map(saveSummary => {
                     const importSummary = mapToImportSummary(saveSummary);
 
                     const summaryWithConsistencyBlokingErrors = includeBlokingErrors(importSummary, [

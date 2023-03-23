@@ -17,7 +17,6 @@ interface ConsistencyChecksProps {
     batchId: string;
     risFile: File | null;
     sampleFile?: File | null;
-
     setRISFileImportSummary: React.Dispatch<React.SetStateAction<ImportSummary | undefined>>;
     setSampleFileImportSummary: React.Dispatch<React.SetStateAction<ImportSummary | undefined>>;
 }
@@ -43,7 +42,7 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
     const year = periodFromUrl || new Date().getFullYear() - 1;
 
     useEffect(() => {
-        function uploadDatasets() {
+        function uploadDatasetsAsDryRun() {
             if (risFile && currentModuleAccess.moduleName === "AMR") {
                 setIsDataSetUploading(true);
 
@@ -53,7 +52,8 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
                         batchId,
                         year,
                         currentOrgUnitAccess.orgUnitCode,
-                        "CREATE_AND_UPDATE"
+                        "CREATE_AND_UPDATE",
+                        true
                     ),
                     importSampleFileSummary: sampleFile
                         ? compositionRoot.dataSubmision.sampleFile(
@@ -61,7 +61,8 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
                               batchId,
                               year,
                               currentOrgUnitAccess.orgUnitCode,
-                              "CREATE_AND_UPDATE"
+                              "CREATE_AND_UPDATE",
+                              true
                           )
                         : Future.success(undefined),
                 }).run(
@@ -94,7 +95,7 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
             }
         }
 
-        uploadDatasets();
+        uploadDatasetsAsDryRun();
     }, [
         compositionRoot.dataSubmision,
         currentModuleAccess.moduleName,
