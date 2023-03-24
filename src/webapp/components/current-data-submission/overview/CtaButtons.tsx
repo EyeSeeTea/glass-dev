@@ -5,7 +5,6 @@ import {
     CircularProgress,
     DialogActions,
     DialogContent,
-    makeStyles,
     Paper,
     Table,
     TableBody,
@@ -61,7 +60,7 @@ export const CtaButtons: React.FC<CtaButtonsProps> = ({ ctas, position, setRefet
             .getSpecificDataSubmission(currentModuleAccess.moduleId, currentOrgUnitAccess.orgUnitId, currentPeriod)
             .run(
                 dataSubmission => {
-                    setStatusHistory([...dataSubmission.statusHistory]);
+                    setStatusHistory(dataSubmission.statusHistory);
                     setIsLoading(false);
                 },
                 () => {
@@ -69,7 +68,13 @@ export const CtaButtons: React.FC<CtaButtonsProps> = ({ ctas, position, setRefet
                     setIsLoading(false);
                 }
             );
-    }, []);
+    }, [
+        compositionRoot.glassDataSubmission,
+        currentModuleAccess.moduleId,
+        currentOrgUnitAccess.orgUnitId,
+        currentPeriod,
+        snackbar,
+    ]);
 
     const showConfirmationDialog = () => {
         setOpen(true);
