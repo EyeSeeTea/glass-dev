@@ -208,6 +208,21 @@ msgid ""
 "WHO permissions"
 msgstr ""
 
+msgid "Full Status History"
+msgstr ""
+
+msgid "Done"
+msgstr ""
+
+msgid "From"
+msgstr ""
+
+msgid "To"
+msgstr ""
+
+msgid "Changed at"
+msgstr ""
+
 msgid "Error fetching questionnaires."
 msgstr ""
 
