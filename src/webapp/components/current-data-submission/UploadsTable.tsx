@@ -19,7 +19,7 @@ export const UploadsTable: React.FC<UploadsTableProps> = ({ title, items, classN
         <ContentWrapper className={className}>
             <Typography variant="h3">{i18n.t(title)}</Typography>
 
-            <TableContainer component={Paper}>
+            <TableContainer component={Paper} style={{ minWidth: "1000px" }}>
                 <Table className={"blocking-table"} aria-label="simple table">
                     <TableHead>
                         <TableRow>
