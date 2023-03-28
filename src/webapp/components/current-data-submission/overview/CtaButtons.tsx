@@ -1,15 +1,30 @@
-import React, { Dispatch, SetStateAction } from "react";
-import { Button, CircularProgress, DialogActions, DialogContent, Typography } from "@material-ui/core";
+import React, { Dispatch, SetStateAction, useEffect } from "react";
+import {
+    Button,
+    Chip,
+    CircularProgress,
+    DialogActions,
+    DialogContent,
+    Paper,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    Typography,
+} from "@material-ui/core";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { NavLink } from "react-router-dom";
 import { CTAs } from "./StatusDetails";
 import { useGlassCaptureAccess } from "../../../hooks/useGlassCaptureAccess";
-import { ConfirmationDialog } from "@eyeseetea/d2-ui-components";
+import { ConfirmationDialog, useSnackbar } from "@eyeseetea/d2-ui-components";
 import { useAppContext } from "../../../contexts/app-context";
 import { useCurrentDataSubmissionId } from "../../../hooks/useCurrentDataSubmissionId";
 import { useCurrentOrgUnitContext } from "../../../contexts/current-orgUnit-context";
 import { useCurrentModuleContext } from "../../../contexts/current-module-context";
-import { DataSubmissionStatusTypes } from "../../../../domain/entities/GlassDataSubmission";
+import { DataSubmissionStatusTypes, StatusHistoryType } from "../../../../domain/entities/GlassDataSubmission";
+import dayjs from "dayjs";
 import { useCurrentPeriodContext } from "../../../contexts/current-period-context";
 
 export interface CtaButtonsProps {
@@ -21,8 +36,11 @@ export interface CtaButtonsProps {
 
 export const CtaButtons: React.FC<CtaButtonsProps> = ({ ctas, position, setRefetchStatus, setCurrentStep }) => {
     const { compositionRoot } = useAppContext();
+    const snackbar = useSnackbar();
     const hasCurrentUserCaptureAccess = useGlassCaptureAccess();
     const [open, setOpen] = React.useState(false);
+    const [statusHistory, setStatusHistory] = React.useState<StatusHistoryType[]>([]);
+    const [isStatusHistoryDialogOpen, setIsStatusHistoryDialogOpen] = React.useState(false);
     const [isLoading, setIsLoading] = React.useState(false);
 
     const { currentOrgUnitAccess } = useCurrentOrgUnitContext();
@@ -35,6 +53,28 @@ export const CtaButtons: React.FC<CtaButtonsProps> = ({ ctas, position, setRefet
         currentOrgUnitAccess.orgUnitId,
         currentPeriod
     );
+
+    useEffect(() => {
+        setIsLoading(true);
+        compositionRoot.glassDataSubmission
+            .getSpecificDataSubmission(currentModuleAccess.moduleId, currentOrgUnitAccess.orgUnitId, currentPeriod)
+            .run(
+                dataSubmission => {
+                    setStatusHistory(dataSubmission.statusHistory);
+                    setIsLoading(false);
+                },
+                () => {
+                    snackbar.error("Error fetching full status history");
+                    setIsLoading(false);
+                }
+            );
+    }, [
+        compositionRoot.glassDataSubmission,
+        currentModuleAccess.moduleId,
+        currentOrgUnitAccess.orgUnitId,
+        currentPeriod,
+        snackbar,
+    ]);
 
     const showConfirmationDialog = () => {
         setOpen(true);
@@ -64,9 +104,9 @@ export const CtaButtons: React.FC<CtaButtonsProps> = ({ ctas, position, setRefet
             case "Go to questionnaires":
                 return (
                     <Button
+                        key={cta.label}
                         variant={cta.variant || "contained"}
                         color={cta.color || "primary"}
-                        key={1}
                         onClick={() => setCurrentStep(2)}
                         style={{ textTransform: "none" }}
                     >
@@ -76,6 +116,7 @@ export const CtaButtons: React.FC<CtaButtonsProps> = ({ ctas, position, setRefet
             case "Upload dataset":
                 return (
                     <Button
+                        key={cta.label}
                         variant={cta.variant || "contained"}
                         color={cta.color || "primary"}
                         onClick={() => setCurrentStep(1)}
@@ -88,7 +129,7 @@ export const CtaButtons: React.FC<CtaButtonsProps> = ({ ctas, position, setRefet
             case "Upload/Delete datasets":
                 return (
                     <Button
-                        key={4}
+                        key={cta.label}
                         variant={cta.variant || "contained"}
                         color={cta.color || "primary"}
                         onClick={() => setCurrentStep(1)}
@@ -101,16 +142,16 @@ export const CtaButtons: React.FC<CtaButtonsProps> = ({ ctas, position, setRefet
 
             case "Send submission":
                 return (
-                    <Button variant="contained" color="primary" key={2} onClick={showConfirmationDialog}>
+                    <Button key={cta.label} variant="contained" color="primary" onClick={showConfirmationDialog}>
                         {i18n.t("Send submission")}
                     </Button>
                 );
             case "Review the submitted datasets":
                 return (
                     <Button
+                        key={cta.label}
                         variant={cta.variant}
                         color={cta.color}
-                        key={2}
                         onClick={() => setCurrentStep(1)}
                         style={{ textTransform: "none" }}
                     >
@@ -120,10 +161,22 @@ export const CtaButtons: React.FC<CtaButtonsProps> = ({ ctas, position, setRefet
             case "Request data update":
                 return (
                     <Button
+                        key={cta.label}
                         variant={cta.variant}
                         color={cta.color}
-                        key={2}
                         onClick={() => setCurrentStep(4)}
+                        style={{ textTransform: "none" }}
+                    >
+                        {i18n.t(`${cta.label} >`)}
+                    </Button>
+                );
+            case "Display full status history":
+                return (
+                    <Button
+                        variant={cta.variant}
+                        color={cta.color}
+                        key={cta.label}
+                        onClick={() => setIsStatusHistoryDialogOpen(true)}
                         style={{ textTransform: "none" }}
                     >
                         {i18n.t(`${cta.label} >`)}
@@ -132,6 +185,7 @@ export const CtaButtons: React.FC<CtaButtonsProps> = ({ ctas, position, setRefet
             default:
                 return (
                     <Button
+                        key={cta.label}
                         variant={cta.variant || "contained"}
                         color={cta.color || "primary"}
                         component={NavLink}
@@ -165,6 +219,54 @@ export const CtaButtons: React.FC<CtaButtonsProps> = ({ ctas, position, setRefet
                             "After you submit this package, you wont be able to edit it anymore wihout WHO permissions"
                         )}
                     </Typography>
+                </DialogContent>
+                <DialogActions>{isLoading && <CircularProgress size={25} />}</DialogActions>
+            </ConfirmationDialog>
+            <ConfirmationDialog
+                isOpen={isStatusHistoryDialogOpen}
+                title={i18n.t("Full Status History")}
+                onCancel={() => setIsStatusHistoryDialogOpen(false)}
+                cancelText={i18n.t("Done")}
+                disableEnforceFocus
+                maxWidth="md"
+                fullWidth
+            >
+                <DialogContent>
+                    {statusHistory.map((status, i) => {
+                        return (
+                            <Typography key={i} display="inline">
+                                <Chip
+                                    label={status.to}
+                                    color="primary"
+                                    size="small"
+                                    variant={i === statusHistory.length - 1 ? "default" : "outlined"}
+                                />{" "}
+                                {i < statusHistory.length - 1 && " >"}{" "}
+                            </Typography>
+                        );
+                    })}
+                    <TableContainer>
+                        <Table component={Paper}>
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell>{i18n.t("From")}</TableCell>
+                                    <TableCell>{i18n.t("To")}</TableCell>
+                                    <TableCell>{i18n.t("Changed at")}</TableCell>
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {statusHistory.map(row => (
+                                    <TableRow key={row.to}>
+                                        <TableCell component="th" scope="row">
+                                            {row.from || "-"}
+                                        </TableCell>
+                                        <TableCell>{row.to}</TableCell>
+                                        <TableCell>{dayjs(row.changedAt).format("DD-MM-YYYY h:mma")}</TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
                 </DialogContent>
                 <DialogActions>{isLoading && <CircularProgress size={25} />}</DialogActions>
             </ConfirmationDialog>
