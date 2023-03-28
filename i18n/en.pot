@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2023-03-28T12:56:29.924Z\n"
-"PO-Revision-Date: 2023-03-28T12:56:29.924Z\n"
+"POT-Creation-Date: 2023-03-28T13:13:50.575Z\n"
+"PO-Revision-Date: 2023-03-28T13:13:50.575Z\n"
 
 msgid "Error saving registration status"
 msgstr ""
@@ -310,6 +310,9 @@ msgstr ""
 msgid "No"
 msgstr ""
 
+msgid "Error fetching User Modules"
+msgstr ""
+
 msgid "HOME"
 msgstr ""
 
@@ -371,6 +374,9 @@ msgid "I'll fix it later"
 msgstr ""
 
 msgid "OK"
+msgstr ""
+
+msgid "Error fetching previous uploads."
 msgstr ""
 
 msgid "Choose a Dataset"
