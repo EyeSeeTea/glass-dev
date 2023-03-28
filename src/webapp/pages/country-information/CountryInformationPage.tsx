@@ -11,7 +11,6 @@ import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context
 import { useCountryInformation } from "./useCountryInformation";
 import { useAppContext } from "../../contexts/app-context";
 import { ContentLoader } from "../../components/content-loader/ContentLoader";
-import { ModuleLayout } from "../../components/layouts/module-layout/ModuleLayout";
 
 export const CountryInformationPage: React.FC = React.memo(() => {
     const { compositionRoot } = useAppContext();
@@ -30,28 +29,26 @@ export const CountryInformationPage: React.FC = React.memo(() => {
     };
 
     return (
-        <ModuleLayout>
-            <ContentWrapper>
-                <PreContent>
-                    {/* // TODO: replace this with a global reusable StyledBreadCrumbs component */}
-                    <StyledBreadCrumbs aria-label="breadcrumb" separator="">
-                        <Button component={NavLink} to={`/current-data-submission`} exact={true} onClick={click}>
-                            <span>{currentModuleAccess.moduleName}</span>
-                        </Button>
-                        <ChevronRightIcon />
-                        <Button component={NavLink} to={`/country-information`} exact={true}>
-                            <span>{i18n.t("Country Information")}</span>
-                        </Button>
-                    </StyledBreadCrumbs>
-                </PreContent>
+        <ContentWrapper>
+            <PreContent>
+                {/* // TODO: replace this with a global reusable StyledBreadCrumbs component */}
+                <StyledBreadCrumbs aria-label="breadcrumb" separator="">
+                    <Button component={NavLink} to={`/current-data-submission`} exact={true} onClick={click}>
+                        <span>{currentModuleAccess.moduleName}</span>
+                    </Button>
+                    <ChevronRightIcon />
+                    <Button component={NavLink} to={`/country-information`} exact={true}>
+                        <span>{i18n.t("Country Information")}</span>
+                    </Button>
+                </StyledBreadCrumbs>
+            </PreContent>
 
-                <ContentLoader content={countryInformationResult} showErrorAsSnackbar={true}>
-                    {countryInformationResult.kind === "loaded" && (
-                        <CountryInformationContent countryInformation={countryInformationResult.data} />
-                    )}
-                </ContentLoader>
-            </ContentWrapper>
-        </ModuleLayout>
+            <ContentLoader content={countryInformationResult} showErrorAsSnackbar={true}>
+                {countryInformationResult.kind === "loaded" && (
+                    <CountryInformationContent countryInformation={countryInformationResult.data} />
+                )}
+            </ContentLoader>
+        </ContentWrapper>
     );
 });
 
