@@ -7,12 +7,25 @@ import { palette } from "../../pages/app/themes/dhis2.theme";
 export const AppFooter: React.FC = () => {
     return (
         <Wrapper>
-            <Typography variant="body2" gutterBottom style={{ color: palette.text.secondary }}>
-                &copy; {new Date().getFullYear()} {i18n.t("Lorem ipsum dolor sit amet, consectetur adipiscing elit.")}{" "}
+            <Typography variant="body2" gutterBottom>
+                <Link href="https://www.who.int/about/policies/privacy" target="_blank" style={{ marginRight: 20 }}>
+                    {i18n.t("WHO privacy policy")}
+                </Link>{" "}
+                <Link href="https://www.who.int/about/policies/publishing/copyright" target="_blank">
+                    {i18n.t(`©WHO ${new Date().getFullYear()}`)}
+                </Link>
             </Typography>
         </Wrapper>
     );
 };
+
+const Link = styled.a`
+    color: ${palette.text.secondary};
+    text-decoration: none;
+    &:hover {
+        color: ${palette.text.primary};
+    }
+`;
 
 const Wrapper = styled.div`
     background-color: transparent;
