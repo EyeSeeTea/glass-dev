@@ -25,6 +25,7 @@ export class GetSpecificDataSubmissionUseCase implements UseCase {
                         orgUnit: orgUnit,
                         period: period,
                         status: "NOT_COMPLETED",
+                        statusHistory: [{ to: "NOT_COMPLETED", changedAt: new Date().toISOString() }],
                     };
                     return this.glassDataSubmissionRepository.save(defaultDataSubmission).flatMap(() => {
                         return Future.success(defaultDataSubmission);

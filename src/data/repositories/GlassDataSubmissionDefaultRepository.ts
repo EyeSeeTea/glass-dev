@@ -51,6 +51,11 @@ export class GlassDataSubmissionsDefaultRepository implements GlassDataSubmissio
             .flatMap(dataSubmissions => {
                 const dataSubmission = dataSubmissions?.find(ds => ds.id === id);
                 if (dataSubmission) {
+                    dataSubmission.statusHistory.push({
+                        from: dataSubmission.status,
+                        to: status,
+                        changedAt: new Date().toISOString(),
+                    });
                     dataSubmission.status = status;
                     return this.dataStoreClient.saveObject(DataStoreKeys.DATA_SUBMISSIONS, dataSubmissions);
                 } else {
