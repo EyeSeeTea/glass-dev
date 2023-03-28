@@ -15,4 +15,11 @@ export interface GlassDataSubmission {
     orgUnit: string;
     period: number;
     status: DataSubmissionStatusTypes;
+    statusHistory: StatusHistoryType[];
 }
+
+export type StatusHistoryType = {
+    from?: DataSubmissionStatusTypes;
+    to: DataSubmissionStatusTypes;
+    changedAt: string;
+};

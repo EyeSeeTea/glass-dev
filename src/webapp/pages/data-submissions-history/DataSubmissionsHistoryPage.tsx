@@ -8,14 +8,9 @@ import { CustomCard } from "../../components/custom-card/CustomCard";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { DataSubmissionsHistoryContent } from "../../components/data-submissions-history/DataSubmissionsHistoryContent";
 import { useCurrentModuleContext } from "../../contexts/current-module-context";
-import { ModuleLayout } from "../../components/layouts/module-layout/ModuleLayout";
 
 export const DataSubmissionsHistoryPage: React.FC = React.memo(() => {
-    return (
-        <ModuleLayout>
-            <DataSubmissionsHistoryPageContent />
-        </ModuleLayout>
-    );
+    return <DataSubmissionsHistoryPageContent />;
 });
 
 export const DataSubmissionsHistoryPageContent: React.FC = React.memo(() => {

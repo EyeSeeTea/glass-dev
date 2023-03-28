@@ -10,6 +10,10 @@ import { ConfirmationDialog, useSnackbar } from "@eyeseetea/d2-ui-components";
 import { CircularProgress } from "material-ui";
 import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context";
 import { Future } from "../../../domain/entities/Future";
+import { isEditModeStatus } from "../../utils/editModeStatus";
+import { useStatusDataSubmission } from "../../hooks/useStatusDataSubmission";
+import { useCurrentModuleContext } from "../../contexts/current-module-context";
+import { useLocation } from "react-router-dom";
 
 export interface UploadsTableBodyProps {
     rows?: UploadsDataItem[];
@@ -25,6 +29,18 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
     } = useCurrentOrgUnitContext();
     const [open, setOpen] = React.useState(false);
     const [rowToDelete, setRowToDelete] = useState<UploadsDataItem>();
+    const location = useLocation();
+    const queryParameters = new URLSearchParams(location.search);
+    const periodFromUrl = parseInt(queryParameters.get("period") || "");
+    const year = periodFromUrl || new Date().getFullYear() - 1;
+
+    const { currentModuleAccess } = useCurrentModuleContext();
+    const { currentOrgUnitAccess } = useCurrentOrgUnitContext();
+    const currentDataSubmissionStatus = useStatusDataSubmission(
+        currentModuleAccess.moduleId,
+        currentOrgUnitAccess.orgUnitId,
+        year
+    );
 
     const showConfirmationDialog = (rowToDelete: UploadsDataItem) => {
         setRowToDelete(rowToDelete);
@@ -91,7 +107,8 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                                 risFileToDelete.batchId,
                                 parseInt(risFileToDelete.period),
                                 "DELETES",
-                                orgUnitId
+                                orgUnitId,
+                                risFileToDelete.countryCode
                             ),
                             deleteSampleFileSummary:
                                 sampleFileToDelete && sampleFileDownload
@@ -100,7 +117,8 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                                           sampleFileToDelete.batchId,
                                           parseInt(sampleFileToDelete.period),
                                           "DELETES",
-                                          orgUnitId
+                                          orgUnitId,
+                                          sampleFileToDelete.countryCode
                                       )
                                     : Future.success(undefined),
                         }).run(
@@ -200,9 +218,14 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                                 </Button>
                             </TableCell>
                             <TableCell>
-                                <Button onClick={() => showConfirmationDialog(row)}>
-                                    <DeleteOutline />
-                                </Button>
+                                {currentDataSubmissionStatus.kind === "loaded" && (
+                                    <Button
+                                        onClick={() => showConfirmationDialog(row)}
+                                        disabled={!isEditModeStatus(currentDataSubmissionStatus.data.title)}
+                                    >
+                                        <DeleteOutline />
+                                    </Button>
+                                )}
                             </TableCell>
                         </TableRow>
                     ))}

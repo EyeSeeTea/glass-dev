@@ -8,16 +8,14 @@ export type GlassNewsState = GlassState<GlassNews[]>;
 
 export function useGlassCaptureAccess() {
     const [hasCaptureAccess, setHasCaptureAccess] = React.useState<boolean>();
-    const {
-        currentModuleAccess: { captureAccess: moduleCaptureAccess },
-    } = useCurrentModuleContext();
-    const {
-        currentOrgUnitAccess: { captureAccess: orgUnitCaptureAccess },
-    } = useCurrentOrgUnitContext();
+    const { currentModuleAccess } = useCurrentModuleContext();
+    const { currentOrgUnitAccess } = useCurrentOrgUnitContext();
 
     useEffect(() => {
-        setHasCaptureAccess(moduleCaptureAccess && orgUnitCaptureAccess);
-    }, [moduleCaptureAccess, orgUnitCaptureAccess]);
+        //Only set the capture access, after the module and org unit access have been set
+        if (currentModuleAccess.moduleId !== "" && currentOrgUnitAccess.orgUnitId !== "")
+            setHasCaptureAccess(currentModuleAccess.captureAccess && currentOrgUnitAccess.captureAccess);
+    }, [currentModuleAccess, currentOrgUnitAccess]);
 
     return hasCaptureAccess;
 }

@@ -29,10 +29,14 @@ export class InstanceDefaultRepository implements InstanceRepository {
         return this.api.baseUrl;
     }
 
-    mapUserOrgUnitsAccess = (organisationUnits: NamedRef[], dataViewOrganisationUnits: NamedRef[]): OrgUnitAccess[] => {
+    mapUserOrgUnitsAccess = (
+        organisationUnits: { name: string; id: string; code: string }[],
+        dataViewOrganisationUnits: { name: string; id: string; code: string }[]
+    ): OrgUnitAccess[] => {
         let orgUnitsAccess = organisationUnits.map(ou => ({
             orgUnitId: ou.id,
             orgUnitName: ou.name,
+            orgUnitCode: ou.code,
             readAccess: dataViewOrganisationUnits.some(dvou => dvou.id === ou.id),
             captureAccess: true,
         }));
@@ -43,6 +47,7 @@ export class InstanceDefaultRepository implements InstanceRepository {
             .map(raou => ({
                 orgUnitId: raou.id,
                 orgUnitName: raou.name,
+                orgUnitCode: raou.code,
                 readAccess: true,
                 captureAccess: false, //orgUnits in dataViewOrganisationUnits dont have capture access
             }));
@@ -51,9 +56,6 @@ export class InstanceDefaultRepository implements InstanceRepository {
             a.orgUnitName.localeCompare(b.orgUnitName)
         );
 
-        //TO DO: TEMP - For testing the OrgUnit Access implementation, consoling the orgUnitAccess.
-        //TO DO: Remove once permission implementation done.
-        // console.debug("Org Unit Access Permissions : " + JSON.stringify(orgUnitsAccess));
         return orgUnitsAccess;
     };
 
@@ -76,9 +78,7 @@ export class InstanceDefaultRepository implements InstanceRepository {
                     usergroups: [...module.userGroups.captureAccess, ...module.userGroups.readAccess],
                 };
             });
-            //TO DO: TEMP - For testing the Module Access implementation, consoling the moduleAccess.
-            //TO DO: Remove once permission implementation done.
-            //console.debug("Module Access Permissions : " + JSON.stringify(moduleAccess));
+
             return Future.success(moduleAccess);
         });
     };
@@ -98,23 +98,35 @@ export class InstanceDefaultRepository implements InstanceRepository {
                     organisationUnits: {
                         id: true,
                         name: true,
+                        code: true,
                         children: true,
                         level: true,
                     },
-                    dataViewOrganisationUnits: { id: true, name: true, level: true },
+                    dataViewOrganisationUnits: { id: true, name: true, code: true, level: true },
                 },
             })
         ).flatMap(user => {
             const { organisationUnits, dataViewOrganisationUnits } = user;
 
-            const countryOrgUnits: { name: string; id: string }[] = [];
+            const countryOrgUnits: { name: string; id: string; code: string }[] = [];
+            const dataViewCountryOrgUnits: { name: string; id: string; code: string }[] = [];
 
             return this.dataStoreClient.getObject(DataStoreKeys.GENERAL).flatMap(generalInfo => {
                 const countryLevel = (generalInfo as GeneralInfoType).countryLevel;
 
                 organisationUnits.forEach(orgUnit => {
                     if (orgUnit.level === countryLevel) {
-                        countryOrgUnits.push({ name: orgUnit.name, id: orgUnit.id });
+                        countryOrgUnits.push({ name: orgUnit.name, id: orgUnit.id, code: orgUnit.code });
+                    }
+                });
+
+                dataViewOrganisationUnits.forEach(dataViewOrgUnit => {
+                    if (dataViewOrgUnit.level === countryLevel) {
+                        dataViewCountryOrgUnits.push({
+                            name: dataViewOrgUnit.name,
+                            id: dataViewOrgUnit.id,
+                            code: dataViewOrgUnit.code,
+                        });
                     }
                 });
 
@@ -122,7 +134,10 @@ export class InstanceDefaultRepository implements InstanceRepository {
                     return this.getAllCountryOrgUnits(dataViewOrganisationUnits, countryLevel).flatMap(
                         childrenDataViewOrgUnits => {
                             const uniqueOrgUnits = _.uniqBy([...countryOrgUnits, ...childrenOrgUnits], "id");
-                            const uniqueDataViewOrgUnits = _.uniqBy(childrenDataViewOrgUnits, "id");
+                            const uniqueDataViewOrgUnits = _.uniqBy(
+                                [...dataViewCountryOrgUnits, ...childrenDataViewOrgUnits],
+                                "id"
+                            );
 
                             return this.mapUserGroupAccess(user.userGroups).map((userModulesAccess): UserAccessInfo => {
                                 return {
@@ -150,15 +165,15 @@ export class InstanceDefaultRepository implements InstanceRepository {
     }
 
     public getAllCountryOrgUnits(
-        orgUnits: { name: string; id: string }[],
+        orgUnits: { name: string; id: string; code: string }[],
         countryLevel: number
-    ): FutureData<{ name: string; id: string }[]> {
-        const result: { name: string; id: string }[] = [];
+    ): FutureData<{ name: string; id: string; code: string }[]> {
+        const result: { name: string; id: string; code: string }[] = [];
 
         const recursiveGetOrgUnits = (
-            orgUnits: { name: string; id: string }[],
+            orgUnits: { name: string; id: string; code: string }[],
             countryLevel: number
-        ): FutureData<{ name: string; id: string }[]> => {
+        ): FutureData<{ name: string; id: string; code: string }[]> => {
             const childrenOrgUnits = apiToFuture(
                 this.api.models.organisationUnits.get({
                     filter: {
@@ -168,6 +183,7 @@ export class InstanceDefaultRepository implements InstanceRepository {
                     fields: {
                         id: true,
                         name: true,
+                        code: true,
                         level: true,
                     },
                     paging: false,
@@ -178,13 +194,13 @@ export class InstanceDefaultRepository implements InstanceRepository {
                 if (childrenOrgUnits[0] && childrenOrgUnits[0]?.level < countryLevel) {
                     return this.getAllCountryOrgUnits(
                         childrenOrgUnits.map(el => {
-                            return { name: el.name, id: el.id };
+                            return { name: el.name, id: el.id, code: el.code };
                         }),
                         countryLevel
                     );
                 } else {
                     childrenOrgUnits.forEach(el => {
-                        result.push({ name: el.name, id: el.id });
+                        result.push({ name: el.name, id: el.id, code: el.code });
                     });
                     return Future.success(result);
                 }

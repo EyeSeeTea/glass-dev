@@ -23,6 +23,7 @@ import { includeBlokingErrors } from "./utils/includeBlockingErrors";
 import { ImportStrategy } from "../../entities/data-entry/DataValuesSaveSummary";
 import { D2ValidationResponse } from "../../../data/repositories/MetadataDefaultRepository";
 import { checkDhis2Validations } from "./utils/checkDhis2Validations";
+import { checkCountry } from "./utils/checkCountry";
 
 const AMR_AMR_DS_INPUT_FILES_RIS_DS_ID = "CeQPmXgrhHF";
 const AMR_DATA_PATHOGEN_ANTIBIOTIC_BATCHID_CC_ID = "S427AvQESbw";
@@ -40,7 +41,8 @@ export class ImportRISFileUseCase implements UseCase {
         batchId: string,
         year: number,
         action: ImportStrategy,
-        orgUnit: string
+        orgUnit: string,
+        countryCode: string
     ): FutureData<ImportSummary> {
         return this.risDataRepository
             .get(inputFile)
@@ -73,6 +75,7 @@ export class ImportRISFileUseCase implements UseCase {
 
                 const batchIdErrors = checkBatchId(risDataItems, batchId);
                 const yearErrors = checkYear(risDataItems, year);
+                const countryErrors = checkCountry(risDataItems, countryCode);
 
                 const dataValues = risDataItems
                     .map(risData => {
@@ -134,6 +137,7 @@ export class ImportRISFileUseCase implements UseCase {
                                 ...astResultsErrors,
                                 ...batchIdErrors,
                                 ...yearErrors,
+                                ...countryErrors,
                                 ...dhis2ValidationErrors,
                             ]);
 
