@@ -113,7 +113,7 @@ function getOptionsCategoryCombo(categoryCombo: D2CategoryCombo) {
                 const allCategoryOptionsMatch = _(categoryOptions).differenceBy(coc.categoryOptions, getId).isEmpty();
 
                 return allCategoryOptionsMatch
-                    ? { id: coc.id, name: categoryOptions.map(co => co.displayName).join(", ") }
+                    ? { id: coc.id, name: categoryOptions.map(co => co.displayFormName || co.displayName).join(", ") }
                     : undefined;
             })
             .compact()
@@ -123,7 +123,7 @@ function getOptionsCategoryCombo(categoryCombo: D2CategoryCombo) {
 
 const categoryComboFields = {
     id: true,
-    categories: { id: true, categoryOptions: { id: true, displayName: true } },
+    categories: { id: true, categoryOptions: { id: true, displayName: true, displayFormName: true } },
     categoryOptionCombos: { id: true, categoryOptions: { id: true } },
 };
 
