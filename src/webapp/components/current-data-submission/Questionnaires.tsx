@@ -97,26 +97,24 @@ export const Questionnaires: React.FC<QuestionnairesProps> = ({ setRefetchStatus
 
                         {questionnaire.isMandatory && <span className="mand">{i18n.t("mandatory")}</span>}
                         {hasCurrentUserCaptureAccess ? (
-                            <span>
+                            <>
                                 {questionnaire.isCompleted ? (
                                     <span className="comp completed">{i18n.t("Completed")}</span>
                                 ) : (
                                     <span className="comp">{i18n.t("Not completed")}</span>
                                 )}
-                            </span>
+                            </>
                         ) : (
                             <span className="comp" />
                         )}
 
                         <div className="buttons">
-                            {questionnaire.isCompleted && (
-                                <Button
-                                    onClick={() => actions.goToQuestionnarie(questionnaire, { mode: "show" })}
-                                    disabled={!hasCurrentUserViewAccess}
-                                >
-                                    {i18n.t("View")}
-                                </Button>
-                            )}
+                            <Button
+                                onClick={() => actions.goToQuestionnarie(questionnaire, { mode: "show" })}
+                                disabled={!hasCurrentUserViewAccess}
+                            >
+                                {i18n.t("View")}
+                            </Button>
 
                             {currentDataSubmissionStatus.kind === "loaded" &&
                                 isEditModeStatus(currentDataSubmissionStatus.data.title) && (
