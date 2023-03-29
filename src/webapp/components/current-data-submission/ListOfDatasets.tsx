@@ -14,21 +14,15 @@ import { isEditModeStatus } from "../../utils/editModeStatus";
 import { useGlassUploadsByModuleOUPeriod } from "../../hooks/useGlassUploadsByModuleOUPeriod";
 import { useCurrentPeriodContext } from "../../contexts/current-period-context";
 
-function getUploadedItems(upload: GlassUploadsState) {
+function getCompletedUploads(upload: GlassUploadsState) {
     if (upload.kind === "loaded") {
-        return upload.data.filter(
-            (row: UploadsDataItem) =>
-                row.status.toLowerCase() === "uploaded" || row.status.toLowerCase() === "completed"
-        );
+        return upload.data.filter((row: UploadsDataItem) => row.status.toLowerCase() === "completed");
     }
 }
 
-function getNonUploadedItems(upload: GlassUploadsState) {
+function getNotCompletedUploads(upload: GlassUploadsState) {
     if (upload.kind === "loaded") {
-        return upload.data.filter(
-            (row: UploadsDataItem) =>
-                row.status.toLowerCase() !== "uploaded" && row.status.toLowerCase() !== "completed"
-        );
+        return upload.data.filter((row: UploadsDataItem) => row.status.toLowerCase() === "uploaded");
     }
 }
 
@@ -49,12 +43,12 @@ export const ListOfDatasets: React.FC = () => {
             <ContentWrapper>
                 <UploadsTable
                     title={i18n.t("Correct Uploads")}
-                    items={getUploadedItems(uploads)}
+                    items={getCompletedUploads(uploads)}
                     refreshUploads={refreshUploads}
                 />
                 <UploadsTable
                     title={i18n.t("Uploads with errors, or discarded")}
-                    items={getNonUploadedItems(uploads)}
+                    items={getNotCompletedUploads(uploads)}
                     className="error-group"
                     refreshUploads={refreshUploads}
                 />
