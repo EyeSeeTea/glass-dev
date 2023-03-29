@@ -7,11 +7,11 @@ import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import { UploadRis } from "./UploadRis";
 import { UploadSample } from "./UploadSample";
 import { useAppContext } from "../../contexts/app-context";
-import { GlassUploads } from "../../../domain/entities/GlassUploads";
 import { useCurrentDataSubmissionId } from "../../hooks/useCurrentDataSubmissionId";
 import { useCurrentModuleContext } from "../../contexts/current-module-context";
 import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context";
 import { useCurrentPeriodContext } from "../../contexts/current-period-context";
+import { useSnackbar } from "@eyeseetea/d2-ui-components";
 
 interface UploadFilesProps {
     changeStep: (step: number) => void;
@@ -22,6 +22,8 @@ interface UploadFilesProps {
     batchId: string;
     setBatchId: React.Dispatch<React.SetStateAction<string>>;
 }
+
+const COMPLETED_STATUS = "COMPLETED";
 
 const datasetOptions = [
     {
@@ -60,10 +62,9 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
     setBatchId,
 }) => {
     const { compositionRoot } = useAppContext();
-
+    const snackbar = useSnackbar();
     const [isValidated, setIsValidated] = useState(false);
     const [isFileValid, setIsFileValid] = useState(false);
-    const [previousUploads, setPreviousGlassUploads] = useState<GlassUploads[]>([]);
     const [previousUploadsBatchIds, setPreviousUploadsBatchIds] = useState<string[]>([]);
     const [hasSampleFile, setHasSampleFile] = useState<boolean>(false);
 
@@ -78,12 +79,24 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
     const dataSubmissionId = useCurrentDataSubmissionId(compositionRoot, moduleId, orgUnitId, currentPeriod);
 
     useEffect(() => {
-        const fetchPreviousUpload = async (): Promise<GlassUploads[]> => {
-            return await compositionRoot.glassUploads.getByDataSubmission(dataSubmissionId).toPromise();
-        };
-
-        fetchPreviousUpload().then(uploads => setPreviousGlassUploads(uploads));
-    }, [compositionRoot.glassUploads, dataSubmissionId]);
+        compositionRoot.glassUploads.getByDataSubmission(dataSubmissionId).run(
+            uploads => {
+                const uniquePreviousBatchIds = [
+                    ...new Set(
+                        uploads.filter(upload => upload.status === COMPLETED_STATUS).map(upload => upload.batchId)
+                    ),
+                ];
+                setPreviousUploadsBatchIds(uniquePreviousBatchIds);
+                const firstSelectableBatchId = datasetOptions.find(
+                    ({ value }) => !uniquePreviousBatchIds.includes(value)
+                )?.value;
+                setBatchId(firstSelectableBatchId || "");
+            },
+            () => {
+                snackbar.error(i18n.t("Error fetching previous uploads."));
+            }
+        );
+    }, [compositionRoot.glassUploads, dataSubmissionId, setBatchId, snackbar]);
 
     useEffect(() => {
         if (batchId && isFileValid) {
@@ -92,13 +105,6 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
             setIsValidated(false);
         }
     }, [batchId, isFileValid]);
-
-    useEffect(() => {
-        const uniqueBatchIds = [...new Set(previousUploads.map(uploads => uploads.batchId))];
-        setPreviousUploadsBatchIds(uniqueBatchIds);
-        const firstSelectableBatchId = datasetOptions.find(({ value }) => !uniqueBatchIds.includes(value))?.value;
-        setBatchId(firstSelectableBatchId || "");
-    }, [previousUploads, setBatchId]);
 
     const changeBatchId = async (event: React.ChangeEvent<{ value: unknown }>) => {
         const batchId = event.target.value as string;
@@ -147,7 +153,7 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
             </div>
 
             <div className="bottom">
-                {previousUploads.length !== 0 && (
+                {previousUploadsBatchIds.length !== 0 && (
                     <div className="previous-list">
                         <h4>{i18n.t("You Previously Submitted:")} </h4>
                         <ul>

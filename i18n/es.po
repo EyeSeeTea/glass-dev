@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: i18next-conv\n"
-"POT-Creation-Date: 2023-03-23T13:35:53.740Z\n"
+"POT-Creation-Date: 2023-03-28T13:13:50.575Z\n"
 "PO-Revision-Date: 2018-10-25T09:02:35.143Z\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -25,7 +25,7 @@ msgstr ""
 msgid "My Account"
 msgstr ""
 
-msgid "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
+msgid "WHO privacy policy"
 msgstr ""
 
 msgid "Add"
@@ -207,6 +207,21 @@ msgid ""
 "WHO permissions"
 msgstr ""
 
+msgid "Full Status History"
+msgstr ""
+
+msgid "Done"
+msgstr ""
+
+msgid "From"
+msgstr ""
+
+msgid "To"
+msgstr ""
+
+msgid "Changed at"
+msgstr ""
+
 msgid "Error fetching questionnaires."
 msgstr ""
 
@@ -294,6 +309,9 @@ msgstr ""
 msgid "No"
 msgstr ""
 
+msgid "Error fetching User Modules"
+msgstr ""
+
 msgid "HOME"
 msgstr ""
 
@@ -355,6 +373,9 @@ msgid "I'll fix it later"
 msgstr ""
 
 msgid "OK"
+msgstr ""
+
+msgid "Error fetching previous uploads."
 msgstr ""
 
 msgid "Choose a Dataset"
