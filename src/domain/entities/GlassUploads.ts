@@ -14,4 +14,5 @@ export interface GlassUploads {
     dataSubmission: string;
     module: string;
     orgUnit: string;
+    records: number;
 }
