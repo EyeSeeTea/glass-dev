@@ -11,7 +11,6 @@ import { useStatusDataSubmission } from "../../hooks/useStatusDataSubmission";
 import { ContentLoader } from "../../components/content-loader/ContentLoader";
 import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context";
 import { useCurrentModuleContext } from "../../contexts/current-module-context";
-import { ModuleLayout } from "../../components/layouts/module-layout/ModuleLayout";
 import { DataSubmissionStatusTypes } from "../../../domain/entities/GlassDataSubmission";
 import { useCurrentPeriodContext } from "../../contexts/current-period-context";
 
@@ -24,12 +23,10 @@ export const CurrentDataSubmissionPage: React.FC = React.memo(() => {
     const { currentModuleAccess } = useCurrentModuleContext();
 
     return (
-        <ModuleLayout>
-            <CurrentDataSubmissionPageContent
-                moduleId={currentModuleAccess.moduleId}
-                moduleName={currentModuleAccess.moduleName}
-            />
-        </ModuleLayout>
+        <CurrentDataSubmissionPageContent
+            moduleId={currentModuleAccess.moduleId}
+            moduleName={currentModuleAccess.moduleName}
+        />
     );
 });
 
