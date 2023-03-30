@@ -7,4 +7,5 @@ export interface MetadataRepository {
     getOrgUnitsByCode(orgUnitCodes: string[]): FutureData<CodedRef[]>;
     getDataSet(id: string): FutureData<DataSet>;
     getCategoryCombination(id: string): FutureData<CategoryCombo>;
+    validateDataSet(dataset: string, period: string, orgUnit: string, AOCs: string[]): FutureData<unknown>;
 }
