@@ -13,6 +13,7 @@ import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context
 import { isEditModeStatus } from "../../utils/editModeStatus";
 import { useGlassUploadsByModuleOUPeriod } from "../../hooks/useGlassUploadsByModuleOUPeriod";
 import { useCurrentPeriodContext } from "../../contexts/current-period-context";
+import { useGlassCaptureAccess } from "../../hooks/useGlassCaptureAccess";
 
 function getUploadedItems(upload: GlassUploadsState) {
     if (upload.kind === "loaded") {
@@ -43,6 +44,7 @@ export const ListOfDatasets: React.FC = () => {
         currentPeriod
     );
     const { uploads, refreshUploads } = useGlassUploadsByModuleOUPeriod(currentPeriod.toString());
+    const hasCurrentUserCaptureAccess = useGlassCaptureAccess();
 
     return (
         <ContentLoader content={uploads}>
@@ -58,7 +60,8 @@ export const ListOfDatasets: React.FC = () => {
                     className="error-group"
                     refreshUploads={refreshUploads}
                 />
-                {currentDataSubmissionStatus.kind === "loaded" &&
+                {hasCurrentUserCaptureAccess &&
+                    currentDataSubmissionStatus.kind === "loaded" &&
                     isEditModeStatus(currentDataSubmissionStatus.data.title) && (
                         <div>
                             <Button variant="contained" color="primary" component={NavLink} to={`/upload`} exact={true}>
