@@ -18,6 +18,7 @@ export const BlockingErrors: React.FC<BlockingErrorsProps> = ({ rows }) => {
                         <TableRow>
                             <TableCell>{i18n.t("Name")}</TableCell>
                             <TableCell>{i18n.t("Count")}</TableCell>
+                            <TableCell>{i18n.t("Lines")}</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
@@ -26,6 +27,7 @@ export const BlockingErrors: React.FC<BlockingErrorsProps> = ({ rows }) => {
                                 <TableRow key={row.error}>
                                     <TableCell align="left">{row.error}</TableCell>
                                     <TableCell>{row.count}</TableCell>
+                                    <TableCell>{row.lines?.join(", ") || "-"}</TableCell>
                                 </TableRow>
                             );
                         })}

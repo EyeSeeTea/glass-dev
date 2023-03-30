@@ -5,22 +5,25 @@ import { ConsistencyError } from "../../../entities/data-entry/ImportSummary";
 
 export function checkBatchId(risData: (RISData | SampleData)[], batchId: string): ConsistencyError[] {
     const errors = _(
-        risData
-            .filter(item => {
-                return item.BATCHIDDS !== batchId;
-            })
-            .map(item => {
-                return i18n.t(
-                    `Batchid is different: Selectd batchId to upload: ${batchId}, batchId in file: ${item.BATCHIDDS}`
-                );
-            })
+        risData.map((item, index) => {
+            if (item.BATCHIDDS !== batchId) {
+                return {
+                    error: i18n.t(
+                        `Batchid is different: Selectd batchId to upload: ${batchId}, batchId in file: ${item.BATCHIDDS}`
+                    ),
+                    line: index + 1,
+                };
+            }
+        })
     )
-        .groupBy(error => error)
-        .mapValues(values => values.length)
+        .omitBy(_.isNil)
+        .groupBy(error => error?.error)
+        .mapValues(value => value.map(el => el?.line || 0))
         .value();
 
     return Object.keys(errors).map(error => ({
-        error,
-        count: errors[error] || 0,
+        error: error,
+        count: errors[error]?.length || 0,
+        lines: errors[error] || [],
     }));
 }
