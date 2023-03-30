@@ -5,7 +5,7 @@ import { SampleDataRepository } from "../../repositories/data-entry/SampleDataRe
 export class ValidateSampleFileUseCase implements UseCase {
     constructor(private sampleDataRepository: SampleDataRepository) {}
 
-    public execute(inputFile: File): FutureData<boolean> {
+    public execute(inputFile: File): FutureData<{ isValid: boolean; records: number }> {
         return this.sampleDataRepository.validate(inputFile);
     }
 }

@@ -125,12 +125,12 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                                     : Future.success(undefined),
                         }).run(
                             ({ deleteRisFileSummary, deleteSampleFileSummary }) => {
-                                let message = `${deleteRisFileSummary.importCount.deleted} records deleted for RIS file`;
+                                let message = `${deleteRisFileSummary.importCount.deleted} data values deleted for RIS file`;
 
                                 if (sampleFileToDelete && deleteSampleFileSummary) {
                                     message =
                                         message +
-                                        ` and ${deleteSampleFileSummary.importCount.deleted} records deleted for SAMPLE file.`;
+                                        ` and ${deleteSampleFileSummary.importCount.deleted} data values deleted for SAMPLE file.`;
                                 }
 
                                 snackbar.info(message);
@@ -210,7 +210,7 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                         <TableRow key={row.id}>
                             <TableCell>{dayjs(row.uploadDate).format("DD-MM-YYYY")}</TableCell>
                             <TableCell>{row.period}</TableCell>
-                            <TableCell>{row.inputLineNb}</TableCell>
+                            <TableCell>{row.records}</TableCell>
                             <TableCell>{row.fileType}</TableCell>
                             <TableCell>{row.batchId}</TableCell>
                             <TableCell>{i18n.t(row.status).toUpperCase()}</TableCell>
