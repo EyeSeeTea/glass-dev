@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { UploadNav } from "./UploadNav";
 import { useUploadSteps } from "../../hooks/useUploadSteps";
 import { ConsistencyChecks } from "./ConsistencyChecks";
@@ -10,7 +10,11 @@ import { ReviewDataSummary } from "./ReviewDataSummary";
 import { Completed } from "./Completed";
 import { ImportSummary } from "../../../domain/entities/data-entry/ImportSummary";
 
-export const UploadContent: React.FC = () => {
+interface UploadContentProps {
+    resetWizard: boolean;
+    setResetWizard: React.Dispatch<React.SetStateAction<boolean>>;
+}
+export const UploadContent: React.FC<UploadContentProps> = ({ resetWizard, setResetWizard }) => {
     const [currentStep, setCurrentStep] = useState(1);
     const [completedSteps, setCompletedSteps] = useState<number[]>([]);
     const [batchId, setBatchId] = useState<string>("");
@@ -27,6 +31,19 @@ export const UploadContent: React.FC = () => {
     };
 
     const steps = useUploadSteps();
+
+    useEffect(() => {
+        if (resetWizard) {
+            setCurrentStep(1);
+            setCompletedSteps([]);
+            setBatchId("");
+            setRisFile(null);
+            setSampleFile(null);
+            setRISFileImportSummary(undefined);
+            setSampleImportSummary(undefined);
+            setResetWizard(false);
+        }
+    }, [resetWizard, setResetWizard]);
 
     return (
         <ContentWrapper>

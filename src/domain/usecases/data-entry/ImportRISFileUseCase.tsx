@@ -21,6 +21,8 @@ import { checkBatchId } from "./utils/checkBatchId";
 import { checkYear } from "./utils/checkYear";
 import { includeBlokingErrors } from "./utils/includeBlockingErrors";
 import { ImportStrategy } from "../../entities/data-entry/DataValuesSaveSummary";
+import { D2ValidationResponse } from "../../../data/repositories/MetadataDefaultRepository";
+import { checkDhis2Validations } from "./utils/checkDhis2Validations";
 import { checkCountry } from "./utils/checkCountry";
 
 const AMR_AMR_DS_INPUT_FILES_RIS_DS_ID = "CeQPmXgrhHF";
@@ -38,8 +40,9 @@ export class ImportRISFileUseCase implements UseCase {
         inputFile: File,
         batchId: string,
         year: number,
-        countryCode: string,
         action: ImportStrategy,
+        orgUnit: string,
+        countryCode: string,
         dryRun: boolean
     ): FutureData<ImportSummary> {
         return this.risDataRepository
@@ -111,30 +114,42 @@ export class ImportRISFileUseCase implements UseCase {
 
                 /* eslint-disable no-console */
 
-                const finalDataValues = dataValues.filter((dv: DataValue) => dv.attributeOptionCombo !== "");
+                const finalDataValues: DataValue[] = dataValues.filter(
+                    (dv: DataValue) => dv.attributeOptionCombo !== ""
+                );
 
                 console.log({ risInitialFileDataValues: dataValues });
                 console.log({ risFinalFileDataValues: finalDataValues });
 
-                return this.dataValuesRepository.save(finalDataValues, action, dryRun).map(saveSummary => {
-                    const importSummary = mapToImportSummary(saveSummary);
+                const uniqueAOCs = _.uniq(finalDataValues.map(el => el.attributeOptionCombo || ""));
 
-                    const summaryWithConsistencyBlokingErrors = includeBlokingErrors(importSummary, [
-                        ...pathogenAntibioticErrors,
-                        ...specimenPathogenErrors,
-                        ...astResultsErrors,
-                        ...batchIdErrors,
-                        ...yearErrors,
-                        ...countryErrors,
-                    ]);
+                return this.dataValuesRepository.save(finalDataValues, action, dryRun).flatMap(saveSummary => {
+                    return this.metadataRepository
+                        .validateDataSet(AMR_AMR_DS_INPUT_FILES_RIS_DS_ID, year.toString(), orgUnit, uniqueAOCs)
+                        .map(validationResponse => {
+                            const validations = validationResponse as D2ValidationResponse[];
+                            const dhis2ValidationErrors = checkDhis2Validations(validations);
 
-                    const finalImportSummary = this.includeDataValuesRemovedWarning(
-                        dataValues,
-                        finalDataValues,
-                        summaryWithConsistencyBlokingErrors
-                    );
+                            const importSummary = mapToImportSummary(saveSummary);
 
-                    return finalImportSummary;
+                            const summaryWithConsistencyBlokingErrors = includeBlokingErrors(importSummary, [
+                                ...pathogenAntibioticErrors,
+                                ...specimenPathogenErrors,
+                                ...astResultsErrors,
+                                ...batchIdErrors,
+                                ...yearErrors,
+                                ...countryErrors,
+                                ...dhis2ValidationErrors,
+                            ]);
+
+                            const finalImportSummary = this.includeDataValuesRemovedWarning(
+                                dataValues,
+                                finalDataValues,
+                                summaryWithConsistencyBlokingErrors
+                            );
+
+                            return finalImportSummary;
+                        });
                 });
             });
     }

@@ -1,8 +1,7 @@
 import { Breadcrumbs, Button } from "@material-ui/core";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import { UploadContent } from "../../components/upload/UploadContent";
-import { MainLayout } from "../../components/layouts/main-layout/MainLayout";
 import { glassColors, palette } from "../app/themes/dhis2.theme";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import { NavLink } from "react-router-dom";
@@ -10,35 +9,57 @@ import { CustomCard } from "../../components/custom-card/CustomCard";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context";
 import { useCurrentModuleContext } from "../../contexts/current-module-context";
+import { useCurrentPeriodContext } from "../../contexts/current-period-context";
 
 export const UploadPage: React.FC = React.memo(() => {
     const { currentOrgUnitAccess } = useCurrentOrgUnitContext();
     const { currentModuleAccess } = useCurrentModuleContext();
+    const { currentPeriod } = useCurrentPeriodContext();
+
+    const [period, setPeriod] = useState(currentPeriod);
+    const [orgUnit, setOrgUnit] = useState(currentOrgUnitAccess.orgUnitName);
+    const [module, setModule] = useState(currentModuleAccess.moduleName);
+
+    const [resetWizard, setResetWizard] = useState(false);
+
+    useEffect(() => {
+        //Whenever period, orgUnit or module changes, go back to step 1 of Upload Wizard.
+        if (period !== currentPeriod) {
+            setPeriod(currentPeriod);
+            setResetWizard(true);
+        }
+        if (orgUnit !== currentOrgUnitAccess.orgUnitName) {
+            setOrgUnit(currentOrgUnitAccess.orgUnitName);
+            setResetWizard(true);
+        }
+        if (module !== currentModuleAccess.moduleName) {
+            setModule(currentModuleAccess.moduleName);
+            setResetWizard(true);
+        }
+    }, [currentModuleAccess.moduleName, currentOrgUnitAccess.orgUnitName, currentPeriod, module, orgUnit, period]);
 
     return (
-        <MainLayout>
-            <ContentWrapper>
-                <PreContent>
-                    {/* // TODO: replace this with a global reusable StyledBreadCrumbs component */}
-                    <StyledBreadCrumbs aria-label="breadcrumb" separator="">
-                        <Button component={NavLink} to={`/current-data-submission`} exact={true} onClick={() => null}>
-                            <span>{currentModuleAccess.moduleName}</span>
-                        </Button>
-                        <ChevronRightIcon />
-                        <Button component={NavLink} to={`/upload`} exact={true}>
-                            <span>{i18n.t("2022 Data Submission")}</span>
-                        </Button>
-                    </StyledBreadCrumbs>
-                    <div className="info">
-                        <span>{i18n.t("Yearly data upload")}</span>, &nbsp;
-                        <span>{i18n.t(currentOrgUnitAccess.orgUnitName)}</span>
-                    </div>
-                </PreContent>
-                <CustomCard padding="40px 60px 50px">
-                    <UploadContent />
-                </CustomCard>
-            </ContentWrapper>
-        </MainLayout>
+        <ContentWrapper>
+            <PreContent>
+                {/* // TODO: replace this with a global reusable StyledBreadCrumbs component */}
+                <StyledBreadCrumbs aria-label="breadcrumb" separator="">
+                    <Button component={NavLink} to={`/current-data-submission`} exact={true} onClick={() => null}>
+                        <span>{module}</span>
+                    </Button>
+                    <ChevronRightIcon />
+                    <Button component={NavLink} to={`/upload`} exact={true}>
+                        <span>{i18n.t(`${period} Data Submission`)}</span>
+                    </Button>
+                </StyledBreadCrumbs>
+                <div className="info">
+                    <span>{i18n.t("Yearly data upload")}</span>, &nbsp;
+                    <span>{i18n.t(orgUnit)}</span>
+                </div>
+            </PreContent>
+            <CustomCard padding="40px 60px 50px">
+                <UploadContent resetWizard={resetWizard} setResetWizard={setResetWizard} />
+            </CustomCard>
+        </ContentWrapper>
     );
 });
 

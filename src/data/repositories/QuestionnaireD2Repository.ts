@@ -19,7 +19,11 @@ import { DataFormD2Source } from "../dhis2/DataFormD2Source";
 export class QuestionnaireD2Repository implements QuestionnaireRepository {
     constructor(private api: D2Api) {}
 
-    getList(module: GlassModule, options: { orgUnitId: Id; year: number }): FutureData<QuestionnaireBase[]> {
+    getList(
+        module: GlassModule,
+        options: { orgUnitId: Id; year: number },
+        captureAccess: boolean
+    ): FutureData<QuestionnaireBase[]> {
         const dataSetIds = module.questionnaires.map(getId);
         const configByDataSetId = _.keyBy(module.questionnaires, getId);
 
@@ -34,7 +38,7 @@ export class QuestionnaireD2Repository implements QuestionnaireRepository {
 
         const data = {
             dataSets: dataSets$,
-            dataSetsInfo: this.getDataSetsInfo(dataSetIds, options),
+            dataSetsInfo: this.getDataSetsInfo(dataSetIds, options, captureAccess),
         };
 
         return Future.joinObj(data).map(({ dataSets, dataSetsInfo }) => {
@@ -54,7 +58,7 @@ export class QuestionnaireD2Repository implements QuestionnaireRepository {
         });
     }
 
-    get(module: GlassModule, selector: QuestionnaireSelector): FutureData<Questionnaire> {
+    get(module: GlassModule, selector: QuestionnaireSelector, captureAccess: boolean): FutureData<Questionnaire> {
         const dataFormRepository = new DataFormD2Source(this.api);
         const config = module.questionnaires.find(q => q.id === selector.id);
         const dataForm$ = dataFormRepository.get({ id: selector.id });
@@ -70,7 +74,7 @@ export class QuestionnaireD2Repository implements QuestionnaireRepository {
         const data = {
             dataForm: dataForm$,
             dataValues: dataValues$,
-            dataSetInfo: this.getDataSetsInfo([selector.id], selector).map(_.first),
+            dataSetInfo: this.getDataSetsInfo([selector.id], selector, captureAccess).map(_.first),
         };
 
         return Future.joinObj(data).map(({ dataForm, dataValues, dataSetInfo }): Questionnaire => {
@@ -238,9 +242,10 @@ export class QuestionnaireD2Repository implements QuestionnaireRepository {
 
     private getDataSetsInfo(
         ids: Id[],
-        options: { orgUnitId: Id; year: number }
+        options: { orgUnitId: Id; year: number },
+        captureAccess: boolean
     ): FutureData<CompleteDataSetRegistration[]> {
-        if (_.isEmpty(ids)) return Future.success([]);
+        if (_.isEmpty(ids) || !captureAccess) return Future.success([]);
 
         return apiToFuture(
             this.api.get<CompleteDataSetRegistrationsResponse>("/completeDataSetRegistrations", {

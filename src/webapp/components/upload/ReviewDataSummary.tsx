@@ -48,8 +48,9 @@ export const ReviewDataSummary: React.FC<ReviewDataSummaryProps> = ({ changeStep
                         risFile,
                         batchId,
                         year,
-                        currentOrgUnitAccess.orgUnitCode,
                         "CREATE_AND_UPDATE",
+                        currentOrgUnitAccess.orgUnitId,
+                        currentOrgUnitAccess.orgUnitCode,
                         false
                     ),
                     importSampleFileSummary: sampleFile
@@ -57,8 +58,9 @@ export const ReviewDataSummary: React.FC<ReviewDataSummaryProps> = ({ changeStep
                               sampleFile,
                               batchId,
                               year,
-                              currentOrgUnitAccess.orgUnitCode,
                               "CREATE_AND_UPDATE",
+                              currentOrgUnitAccess.orgUnitId,
+                              currentOrgUnitAccess.orgUnitCode,
                               false
                           )
                         : Future.success(undefined),
@@ -100,6 +102,7 @@ export const ReviewDataSummary: React.FC<ReviewDataSummaryProps> = ({ changeStep
         batchId,
         year,
         currentOrgUnitAccess.orgUnitCode,
+        currentOrgUnitAccess.orgUnitId,
     ]);
 
     const changeType = (fileType: string) => {

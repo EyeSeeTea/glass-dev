@@ -27,7 +27,7 @@ export class SampleDataCSVRepository implements SampleDataRepository {
         });
     }
 
-    validate(file: File): FutureData<boolean> {
+    validate(file: File): FutureData<{ isValid: boolean; records: number }> {
         return Future.fromPromise(new SpreadsheetXlsxDataSource().read(file)).map(spreadsheet => {
             const sheet = spreadsheet.sheets[0]; //Only one sheet for AMR RIS
             const firstRow = sheet?.rows[0];
@@ -44,8 +44,12 @@ export class SampleDataCSVRepository implements SampleDataRepository {
                     doesColumnExist(firstRow, "NUMSAMPLEDPATIENTS") &&
                     doesColumnExist(firstRow, "BATCHID");
 
-                return allSampleColsPresent ? true : false;
-            } else return false;
+                return { isValid: allSampleColsPresent ? true : false, records: sheet.rows.length };
+            } else
+                return {
+                    isValid: false,
+                    records: 0,
+                };
         });
     }
 }

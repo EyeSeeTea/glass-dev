@@ -15,6 +15,8 @@ import { checkBatchId } from "./utils/checkBatchId";
 import { includeBlokingErrors } from "./utils/includeBlockingErrors";
 import { checkYear } from "./utils/checkYear";
 import { ImportStrategy } from "../../entities/data-entry/DataValuesSaveSummary";
+import { D2ValidationResponse } from "../../../data/repositories/MetadataDefaultRepository";
+import { checkDhis2Validations } from "./utils/checkDhis2Validations";
 import { checkCountry } from "./utils/checkCountry";
 
 const AMR_AMR_DS_Input_files_Sample_DS_ID = "OcAB7oaC072";
@@ -31,8 +33,9 @@ export class ImportSampleFileUseCase implements UseCase {
         inputFile: File,
         batchId: string,
         year: number,
-        countryCode: string,
         action: ImportStrategy,
+        orgUnit: string,
+        countryCode: string,
         dryRun: boolean
     ): FutureData<ImportSummary> {
         return this.sampleDataRepository
@@ -91,16 +94,26 @@ export class ImportSampleFileUseCase implements UseCase {
                 /* eslint-disable no-console */
                 console.log({ sampleFileDataValues: dataValues });
 
-                return this.dataValuesRepository.save(dataValues, action, dryRun).map(saveSummary => {
-                    const importSummary = mapToImportSummary(saveSummary);
+                const uniqueAOCs = _.uniq(dataValues.map(el => el.attributeOptionCombo || ""));
 
-                    const summaryWithConsistencyBlokingErrors = includeBlokingErrors(importSummary, [
-                        ...batchIdErrors,
-                        ...yearErrors,
-                        ...countryErrors,
-                    ]);
+                return this.dataValuesRepository.save(dataValues, action, dryRun).flatMap(saveSummary => {
+                    return this.metadataRepository
+                        .validateDataSet(AMR_AMR_DS_Input_files_Sample_DS_ID, year.toString(), orgUnit, uniqueAOCs)
+                        .map(validationResponse => {
+                            const validations = validationResponse as D2ValidationResponse[];
+                            const dhis2ValidationErrors = checkDhis2Validations(validations);
 
-                    return summaryWithConsistencyBlokingErrors;
+                            const importSummary = mapToImportSummary(saveSummary);
+
+                            const summaryWithConsistencyBlokingErrors = includeBlokingErrors(importSummary, [
+                                ...batchIdErrors,
+                                ...yearErrors,
+                                ...countryErrors,
+                                ...dhis2ValidationErrors,
+                            ]);
+
+                            return summaryWithConsistencyBlokingErrors;
+                        });
                 });
             });
     }

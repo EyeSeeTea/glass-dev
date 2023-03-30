@@ -45,12 +45,24 @@ export class GlassDataSubmissionsDefaultRepository implements GlassDataSubmissio
         });
     }
 
+    saveMultiple(dataSubmissions: GlassDataSubmission[]): FutureData<void> {
+        return this.dataStoreClient.listCollection(DataStoreKeys.DATA_SUBMISSIONS).flatMap(ds => {
+            const newDataSubmissions = [...ds, ...dataSubmissions];
+            return this.dataStoreClient.saveObject(DataStoreKeys.DATA_SUBMISSIONS, newDataSubmissions);
+        });
+    }
+
     setStatus(id: string, status: DataSubmissionStatusTypes): FutureData<void> {
         return this.dataStoreClient
             .listCollection<GlassDataSubmission>(DataStoreKeys.DATA_SUBMISSIONS)
             .flatMap(dataSubmissions => {
                 const dataSubmission = dataSubmissions?.find(ds => ds.id === id);
                 if (dataSubmission) {
+                    dataSubmission.statusHistory.push({
+                        from: dataSubmission.status,
+                        to: status,
+                        changedAt: new Date().toISOString(),
+                    });
                     dataSubmission.status = status;
                     return this.dataStoreClient.saveObject(DataStoreKeys.DATA_SUBMISSIONS, dataSubmissions);
                 } else {
