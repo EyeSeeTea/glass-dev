@@ -7,11 +7,12 @@ import { CTAs } from "./StatusDetails";
 import { useAppContext } from "../../../contexts/app-context";
 import { useCurrentModuleContext } from "../../../contexts/current-module-context";
 import { useCurrentOrgUnitContext } from "../../../contexts/current-orgUnit-context";
-import { useLocation } from "react-router-dom";
 import { QuestionnaireBase } from "../../../../domain/entities/Questionnaire";
 import { useSnackbar } from "@eyeseetea/d2-ui-components";
 import { Close, Check } from "@material-ui/icons";
 import { DataSubmissionStatusTypes } from "../../../../domain/entities/GlassDataSubmission";
+import { useCurrentPeriodContext } from "../../../contexts/current-period-context";
+import { useGlassCaptureAccess } from "../../../hooks/useGlassCaptureAccess";
 
 interface StatusProps {
     moduleName: string;
@@ -38,7 +39,6 @@ export const CurrentStatus: React.FC<StatusProps> = ({
     setCurrentStep,
 }) => {
     const { compositionRoot } = useAppContext();
-    const location = useLocation();
     const {
         currentModuleAccess: { moduleId },
     } = useCurrentModuleContext();
@@ -46,30 +46,30 @@ export const CurrentStatus: React.FC<StatusProps> = ({
         currentOrgUnitAccess: { orgUnitId },
     } = useCurrentOrgUnitContext();
     const snackbar = useSnackbar();
+    const hasCurrentUserCaptureAccess = useGlassCaptureAccess() ? true : false;
 
     const [questionnaires, setQuestionnaires] = useState<QuestionnaireBase[]>();
     const [uploadsCount, setUploadsCount] = useState<number>(0);
-
-    const queryParameters = new URLSearchParams(location.search);
-    const periodFromUrl = parseInt(queryParameters.get("period") || "");
-    const year = periodFromUrl || new Date().getFullYear() - 1;
+    const { currentPeriod } = useCurrentPeriodContext();
 
     useEffect(() => {
         if (showUploadHistory) {
             compositionRoot.glassModules.getById(moduleId).run(
                 currentModule => {
-                    compositionRoot.questionnaires.getList(currentModule, { orgUnitId, year }).run(
-                        questionnairesData => {
-                            setQuestionnaires(questionnairesData);
-                        },
-                        () => {}
-                    );
+                    compositionRoot.questionnaires
+                        .getList(currentModule, { orgUnitId, year: currentPeriod }, hasCurrentUserCaptureAccess)
+                        .run(
+                            questionnairesData => {
+                                setQuestionnaires(questionnairesData);
+                            },
+                            () => {}
+                        );
                 },
                 () => {
                     snackbar.error(i18n.t("Error fetching questionnaires."));
                 }
             );
-            compositionRoot.glassUploads.getByModuleOUPeriod(moduleId, orgUnitId, year.toString()).run(
+            compositionRoot.glassUploads.getByModuleOUPeriod(moduleId, orgUnitId, currentPeriod.toString()).run(
                 glassUploads => {
                     setUploadsCount(glassUploads.length);
                 },
@@ -86,7 +86,8 @@ export const CurrentStatus: React.FC<StatusProps> = ({
         orgUnitId,
         showUploadHistory,
         snackbar,
-        year,
+        currentPeriod,
+        hasCurrentUserCaptureAccess,
     ]);
 
     return (
@@ -126,14 +127,20 @@ export const CurrentStatus: React.FC<StatusProps> = ({
                                 <TableCell>{`${questionnaires.length} Questionnaires`}</TableCell>
                                 <TableCell>{`${questionnaires[0].isMandatory ? "Yes" : "No"}`}</TableCell>
                                 <TableCell>
-                                    <Box display={"flex"} alignItems="center">
-                                        {`${questionnaires.filter(el => el.isCompleted).length} completed`}
-                                        {questionnaires.filter(el => el.isCompleted).length < 1 ? (
-                                            <Close color="error"></Close>
-                                        ) : (
-                                            <Check style={{ color: "green" }}></Check>
-                                        )}
-                                    </Box>
+                                    {hasCurrentUserCaptureAccess ? (
+                                        <Box display={"flex"} alignItems="center">
+                                            {/* Only user with capture access, can see the Questionnaire complete status */}
+
+                                            {`${questionnaires.filter(el => el.isCompleted).length} completed`}
+                                            {questionnaires.filter(el => el.isCompleted).length < 1 ? (
+                                                <Close color="error"></Close>
+                                            ) : (
+                                                <Check style={{ color: "green" }}></Check>
+                                            )}
+                                        </Box>
+                                    ) : (
+                                        <Box>No Access</Box>
+                                    )}
                                 </TableCell>
                             </TableRow>
                         )}

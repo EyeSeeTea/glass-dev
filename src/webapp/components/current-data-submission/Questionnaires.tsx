@@ -2,7 +2,6 @@ import { useSnackbar } from "@eyeseetea/d2-ui-components";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { Button, LinearProgress } from "@material-ui/core";
 import React, { Dispatch, SetStateAction } from "react";
-import { useLocation } from "react-router-dom";
 import styled from "styled-components";
 import { Id } from "../../../domain/entities/Base";
 import { QuestionnaireBase } from "../../../domain/entities/Questionnaire";
@@ -17,6 +16,7 @@ import { useCurrentDataSubmissionId } from "../../hooks/useCurrentDataSubmission
 import { useCurrentModuleContext } from "../../contexts/current-module-context";
 import { DataSubmissionStatusTypes } from "../../../domain/entities/GlassDataSubmission";
 import { useStatusDataSubmission } from "../../hooks/useStatusDataSubmission";
+import { useCurrentPeriodContext } from "../../contexts/current-period-context";
 import { isEditModeStatus } from "../../utils/editModeStatus";
 
 interface QuestionnairesProps {
@@ -96,22 +96,25 @@ export const Questionnaires: React.FC<QuestionnairesProps> = ({ setRefetchStatus
                         </div>
 
                         {questionnaire.isMandatory && <span className="mand">{i18n.t("mandatory")}</span>}
-
-                        {questionnaire.isCompleted ? (
-                            <span className="comp completed">{i18n.t("Completed")}</span>
+                        {hasCurrentUserCaptureAccess ? (
+                            <>
+                                {questionnaire.isCompleted ? (
+                                    <span className="comp completed">{i18n.t("Completed")}</span>
+                                ) : (
+                                    <span className="comp">{i18n.t("Not completed")}</span>
+                                )}
+                            </>
                         ) : (
-                            <span className="comp">{i18n.t("Not completed")}</span>
+                            <span className="comp" />
                         )}
 
                         <div className="buttons">
-                            {questionnaire.isCompleted && (
-                                <Button
-                                    onClick={() => actions.goToQuestionnarie(questionnaire, { mode: "show" })}
-                                    disabled={!hasCurrentUserViewAccess}
-                                >
-                                    {i18n.t("View")}
-                                </Button>
-                            )}
+                            <Button
+                                onClick={() => actions.goToQuestionnarie(questionnaire, { mode: "show" })}
+                                disabled={!hasCurrentUserViewAccess}
+                            >
+                                {i18n.t("View")}
+                            </Button>
 
                             {currentDataSubmissionStatus.kind === "loaded" &&
                                 isEditModeStatus(currentDataSubmissionStatus.data.title) && (
@@ -188,12 +191,9 @@ function useSelector() {
     const { orgUnitId, orgUnitName } = currentOrgUnitAccess;
     const orgUnit = React.useMemo(() => ({ id: orgUnitId, name: orgUnitName }), [orgUnitId, orgUnitName]);
 
-    const location = useLocation();
-    const queryParameters = new URLSearchParams(location.search);
-    const periodFromUrl = parseInt(queryParameters.get("period") || "");
-    const year = periodFromUrl || new Date().getFullYear() - 1;
+    const { currentPeriod } = useCurrentPeriodContext();
 
-    return { orgUnit, year };
+    return { orgUnit, year: currentPeriod };
 }
 
 function useQuestionnaires() {
@@ -203,14 +203,15 @@ function useQuestionnaires() {
     const [questionnaires, setQuestionnaires] = React.useState<QuestionnaireBase[]>();
     const snackbar = useSnackbar();
     const { orgUnit, year } = useSelector();
+    const hasCurrentUserCaptureAccess = useGlassCaptureAccess() ? true : false;
 
     React.useEffect(() => {
         if (module.kind !== "loaded") return;
 
         return compositionRoot.questionnaires
-            .getList(module.data, { orgUnitId: orgUnit.id, year: year })
+            .getList(module.data, { orgUnitId: orgUnit.id, year: year }, hasCurrentUserCaptureAccess)
             .run(setQuestionnaires, err => snackbar.error(err));
-    }, [compositionRoot, snackbar, module, orgUnit, year]);
+    }, [compositionRoot, snackbar, module, orgUnit, year, hasCurrentUserCaptureAccess]);
 
     const updateQuestionnarie = React.useCallback<QuestionnarieFormProps["onSave"]>(updatedQuestionnaire => {
         setQuestionnaires(prevQuestionnaries =>

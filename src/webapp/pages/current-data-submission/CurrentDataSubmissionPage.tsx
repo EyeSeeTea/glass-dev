@@ -1,20 +1,18 @@
-/* eslint-disable no-console */
 import { Breadcrumbs, Button } from "@material-ui/core";
 import React, { useState } from "react";
 import styled from "styled-components";
 import { glassColors, palette } from "../app/themes/dhis2.theme";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import { CustomCard } from "../../components/custom-card/CustomCard";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { CurrentDataSubmissionContent } from "../../components/current-data-submission/CurrentDataSubmissionContent";
 import { useStatusDataSubmission } from "../../hooks/useStatusDataSubmission";
 import { ContentLoader } from "../../components/content-loader/ContentLoader";
-
 import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context";
 import { useCurrentModuleContext } from "../../contexts/current-module-context";
-import { ModuleLayout } from "../../components/layouts/module-layout/ModuleLayout";
 import { DataSubmissionStatusTypes } from "../../../domain/entities/GlassDataSubmission";
+import { useCurrentPeriodContext } from "../../contexts/current-period-context";
 
 interface CurrentDataSubmissionPageContentProps {
     moduleId: string;
@@ -25,21 +23,16 @@ export const CurrentDataSubmissionPage: React.FC = React.memo(() => {
     const { currentModuleAccess } = useCurrentModuleContext();
 
     return (
-        <ModuleLayout>
-            <CurrentDataSubmissionPageContent
-                moduleId={currentModuleAccess.moduleId}
-                moduleName={currentModuleAccess.moduleName}
-            />
-        </ModuleLayout>
+        <CurrentDataSubmissionPageContent
+            moduleId={currentModuleAccess.moduleId}
+            moduleName={currentModuleAccess.moduleName}
+        />
     );
 });
 
 export const CurrentDataSubmissionPageContent: React.FC<CurrentDataSubmissionPageContentProps> = React.memo(
     ({ moduleId, moduleName }) => {
-        const location = useLocation();
-        const queryParameters = new URLSearchParams(location.search);
-        const periodVal = queryParameters?.get("period");
-        const [period, setPeriod] = useState(periodVal === null ? new Date().getFullYear() - 1 : parseInt(periodVal));
+        const { currentPeriod } = useCurrentPeriodContext();
 
         const { currentOrgUnitAccess } = useCurrentOrgUnitContext();
 
@@ -47,14 +40,9 @@ export const CurrentDataSubmissionPageContent: React.FC<CurrentDataSubmissionPag
         const currentDataSubmissionStatus = useStatusDataSubmission(
             moduleId,
             currentOrgUnitAccess.orgUnitId,
-            period,
+            currentPeriod,
             refetchStatus
         );
-
-        const click = (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
-            event.preventDefault();
-            setPeriod(0); //new period value
-        };
 
         return (
             <ContentLoader content={currentDataSubmissionStatus}>
@@ -62,12 +50,12 @@ export const CurrentDataSubmissionPageContent: React.FC<CurrentDataSubmissionPag
                     <PreContent>
                         {/* // TODO: replace this with a global reusable StyledBreadCrumbs component */}
                         <StyledBreadCrumbs aria-label="breadcrumb" separator="">
-                            <Button component={NavLink} to={`/current-data-submission`} exact={true} onClick={click}>
+                            <Button component={NavLink} to={`/current-data-submission`} exact={true}>
                                 <span>{moduleName}</span>
                             </Button>
                             <ChevronRightIcon />
                             <Button component={NavLink} to={`/current-data-submission`} exact={true}>
-                                <span>{i18n.t(`${period} Data Submission`)}</span>
+                                <span>{i18n.t(`${currentPeriod} Data Submission`)}</span>
                             </Button>
                         </StyledBreadCrumbs>
                         <div className="info">
@@ -78,7 +66,7 @@ export const CurrentDataSubmissionPageContent: React.FC<CurrentDataSubmissionPag
                     {currentDataSubmissionStatus.kind === "loaded" && (
                         <>
                             <PageTitle statusColor={currentDataSubmissionStatus.data.colour}>
-                                <h3>{i18n.t(`${period} Data Submission`)}</h3>
+                                <h3>{i18n.t(`${currentPeriod} Data Submission`)}</h3>
                                 <div className="status">{i18n.t(currentDataSubmissionStatus.data.title)}</div>
                             </PageTitle>
                             <CustomCard padding="40px 60px 50px">

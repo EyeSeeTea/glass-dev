@@ -8,7 +8,13 @@ import { CloudDownloadOutlined, DeleteOutline } from "@material-ui/icons";
 import { useAppContext } from "../../contexts/app-context";
 import { ConfirmationDialog, useSnackbar } from "@eyeseetea/d2-ui-components";
 import { CircularProgress } from "material-ui";
+import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context";
 import { Future } from "../../../domain/entities/Future";
+import { isEditModeStatus } from "../../utils/editModeStatus";
+import { useStatusDataSubmission } from "../../hooks/useStatusDataSubmission";
+import { useCurrentModuleContext } from "../../contexts/current-module-context";
+import { useLocation } from "react-router-dom";
+import { useGlassCaptureAccess } from "../../hooks/useGlassCaptureAccess";
 
 export interface UploadsTableBodyProps {
     rows?: UploadsDataItem[];
@@ -19,8 +25,24 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
     const { compositionRoot } = useAppContext();
     const snackbar = useSnackbar();
     const [loading, setLoading] = useState<boolean>(false);
+    const {
+        currentOrgUnitAccess: { orgUnitId },
+    } = useCurrentOrgUnitContext();
     const [open, setOpen] = React.useState(false);
     const [rowToDelete, setRowToDelete] = useState<UploadsDataItem>();
+    const location = useLocation();
+    const queryParameters = new URLSearchParams(location.search);
+    const periodFromUrl = parseInt(queryParameters.get("period") || "");
+    const year = periodFromUrl || new Date().getFullYear() - 1;
+
+    const { currentModuleAccess } = useCurrentModuleContext();
+    const { currentOrgUnitAccess } = useCurrentOrgUnitContext();
+    const currentDataSubmissionStatus = useStatusDataSubmission(
+        currentModuleAccess.moduleId,
+        currentOrgUnitAccess.orgUnitId,
+        year
+    );
+    const hasCurrentUserCaptureAccess = useGlassCaptureAccess();
 
     const showConfirmationDialog = (rowToDelete: UploadsDataItem) => {
         setRowToDelete(rowToDelete);
@@ -86,8 +108,9 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                                 risFile,
                                 risFileToDelete.batchId,
                                 parseInt(risFileToDelete.period),
-                                risFileToDelete.countryCode,
                                 "DELETES",
+                                orgUnitId,
+                                risFileToDelete.countryCode,
                                 false
                             ),
                             deleteSampleFileSummary:
@@ -96,19 +119,20 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                                           new File([sampleFileDownload], sampleFileToDelete.fileName),
                                           sampleFileToDelete.batchId,
                                           parseInt(sampleFileToDelete.period),
-                                          sampleFileToDelete.countryCode,
                                           "DELETES",
+                                          orgUnitId,
+                                          sampleFileToDelete.countryCode,
                                           false
                                       )
                                     : Future.success(undefined),
                         }).run(
                             ({ deleteRisFileSummary, deleteSampleFileSummary }) => {
-                                let message = `${deleteRisFileSummary.importCount.deleted} records deleted for RIS file`;
+                                let message = `${deleteRisFileSummary.importCount.deleted} data values deleted for RIS file`;
 
                                 if (sampleFileToDelete && deleteSampleFileSummary) {
                                     message =
                                         message +
-                                        ` and ${deleteSampleFileSummary.importCount.deleted} records deleted for SAMPLE file.`;
+                                        ` and ${deleteSampleFileSummary.importCount.deleted} data values deleted for SAMPLE file.`;
                                 }
 
                                 snackbar.info(message);
@@ -188,7 +212,7 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                         <TableRow key={row.id}>
                             <TableCell>{dayjs(row.uploadDate).format("DD-MM-YYYY")}</TableCell>
                             <TableCell>{row.period}</TableCell>
-                            <TableCell>{row.inputLineNb}</TableCell>
+                            <TableCell>{row.records}</TableCell>
                             <TableCell>{row.fileType}</TableCell>
                             <TableCell>{row.batchId}</TableCell>
                             <TableCell>{i18n.t(row.status).toUpperCase()}</TableCell>
@@ -198,9 +222,17 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                                 </Button>
                             </TableCell>
                             <TableCell>
-                                <Button onClick={() => showConfirmationDialog(row)}>
-                                    <DeleteOutline />
-                                </Button>
+                                {currentDataSubmissionStatus.kind === "loaded" && (
+                                    <Button
+                                        onClick={() => showConfirmationDialog(row)}
+                                        disabled={
+                                            !hasCurrentUserCaptureAccess ||
+                                            !isEditModeStatus(currentDataSubmissionStatus.data.title)
+                                        }
+                                    >
+                                        <DeleteOutline />
+                                    </Button>
+                                )}
                             </TableCell>
                         </TableRow>
                     ))}

@@ -13,4 +13,5 @@ export interface UploadsDataItem {
     uploadDate: string;
     dataSubmission: string;
     module: string;
+    records: number;
 }
