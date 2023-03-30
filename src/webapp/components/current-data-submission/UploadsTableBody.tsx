@@ -8,11 +8,11 @@ import { CloudDownloadOutlined, DeleteOutline } from "@material-ui/icons";
 import { useAppContext } from "../../contexts/app-context";
 import { ConfirmationDialog, useSnackbar } from "@eyeseetea/d2-ui-components";
 import { CircularProgress } from "material-ui";
+import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context";
 import { Future } from "../../../domain/entities/Future";
 import { isEditModeStatus } from "../../utils/editModeStatus";
 import { useStatusDataSubmission } from "../../hooks/useStatusDataSubmission";
 import { useCurrentModuleContext } from "../../contexts/current-module-context";
-import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context";
 import { useLocation } from "react-router-dom";
 import { useGlassCaptureAccess } from "../../hooks/useGlassCaptureAccess";
 
@@ -25,6 +25,9 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
     const { compositionRoot } = useAppContext();
     const snackbar = useSnackbar();
     const [loading, setLoading] = useState<boolean>(false);
+    const {
+        currentOrgUnitAccess: { orgUnitId },
+    } = useCurrentOrgUnitContext();
     const [open, setOpen] = React.useState(false);
     const [rowToDelete, setRowToDelete] = useState<UploadsDataItem>();
     const location = useLocation();
@@ -105,8 +108,9 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                                 risFile,
                                 risFileToDelete.batchId,
                                 parseInt(risFileToDelete.period),
-                                risFileToDelete.countryCode,
-                                "DELETES"
+                                "DELETES",
+                                orgUnitId,
+                                risFileToDelete.countryCode
                             ),
                             deleteSampleFileSummary:
                                 sampleFileToDelete && sampleFileDownload
@@ -114,8 +118,9 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                                           new File([sampleFileDownload], sampleFileToDelete.fileName),
                                           sampleFileToDelete.batchId,
                                           parseInt(sampleFileToDelete.period),
-                                          sampleFileToDelete.countryCode,
-                                          "DELETES"
+                                          "DELETES",
+                                          orgUnitId,
+                                          sampleFileToDelete.countryCode
                                       )
                                     : Future.success(undefined),
                         }).run(
