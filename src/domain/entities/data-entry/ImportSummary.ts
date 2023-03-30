@@ -13,4 +13,5 @@ export type ImportSummary = {
 export type ConsistencyError = {
     error: string;
     count: number;
+    lines?: number[];
 };

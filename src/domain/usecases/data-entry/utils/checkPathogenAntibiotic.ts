@@ -7,24 +7,27 @@ export function checkPathogenAntibiotic(
     pathogenAntibioticValidations: Record<string, string[]>
 ): ConsistencyError[] {
     const errors = _(
-        risData
-            .filter(item => {
-                const allowPathogens = pathogenAntibioticValidations[item.PATHOGEN];
+        risData.map((item, index) => {
+            const allowPathogens = pathogenAntibioticValidations[item.PATHOGEN];
 
-                return !allowPathogens?.includes(item.ANTIBIOTIC);
-            })
-            .map(errorItem => {
-                return i18n.t(
-                    `The pathogen and antibiotic combination you have provided is not allowed. Pathogen ${errorItem.PATHOGEN} antibiotic ${errorItem.ANTIBIOTIC}`
-                );
-            })
+            if (!allowPathogens?.includes(item.ANTIBIOTIC)) {
+                return {
+                    error: i18n.t(
+                        `The pathogen and antibiotic combination you have provided is not allowed. Pathogen ${item.PATHOGEN} antibiotic ${item.ANTIBIOTIC}`
+                    ),
+                    line: index + 1,
+                };
+            }
+        })
     )
-        .groupBy(error => error)
-        .mapValues(values => values.length)
+        .omitBy(_.isNil)
+        .groupBy(error => error?.error)
+        .mapValues(value => value.map(el => el?.line || 0))
         .value();
 
     return Object.keys(errors).map(error => ({
-        error,
-        count: errors[error] || 0,
+        error: error,
+        count: errors[error]?.length || 0,
+        lines: errors[error] || [],
     }));
 }

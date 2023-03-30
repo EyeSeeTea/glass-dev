@@ -5,20 +5,25 @@ import { ConsistencyError } from "../../../entities/data-entry/ImportSummary";
 
 export function checkYear(fileData: (RISData | SampleData)[], year: number): ConsistencyError[] {
     const errors = _(
-        fileData
-            .filter(item => {
-                return item.YEAR !== year;
-            })
-            .map(item => {
-                return i18n.t(`Year is different: Selected Data Submission Year : ${year}, Year in file: ${item.YEAR}`);
-            })
+        fileData.map((item, index) => {
+            if (item.YEAR !== year) {
+                return {
+                    error: i18n.t(
+                        `Year is different: Selected Data Submission Year : ${year}, Year in file: ${item.YEAR}`
+                    ),
+                    line: index + 1,
+                };
+            }
+        })
     )
-        .groupBy(error => error)
-        .mapValues(values => values.length)
+        .omitBy(_.isNil)
+        .groupBy(error => error?.error)
+        .mapValues(value => value.map(el => el?.line || 0))
         .value();
 
     return Object.keys(errors).map(error => ({
-        error,
-        count: errors[error] || 0,
+        error: error,
+        count: errors[error]?.length || 0,
+        lines: errors[error] || [],
     }));
 }

@@ -7,24 +7,27 @@ export function checkSpecimenPathogen(
     specimenPathogenValidations: Record<string, string[]>
 ): ConsistencyError[] {
     const errors = _(
-        risData
-            .filter(item => {
-                const allowPathogens = specimenPathogenValidations[item.SPECIMEN];
+        risData.map((item, index) => {
+            const allowPathogens = specimenPathogenValidations[item.SPECIMEN];
 
-                return !allowPathogens?.includes(item.PATHOGEN);
-            })
-            .map(errorItem => {
-                return i18n.t(
-                    `The specimen and pathogen combination you have provided is not allowed. Specimen ${errorItem.SPECIMEN} Pathogen ${errorItem.PATHOGEN}`
-                );
-            })
+            if (!allowPathogens?.includes(item.PATHOGEN)) {
+                return {
+                    error: i18n.t(
+                        `The specimen and pathogen combination you have provided is not allowed. Specimen ${item.SPECIMEN} Pathogen ${item.PATHOGEN}`
+                    ),
+                    line: index + 1,
+                };
+            }
+        })
     )
-        .groupBy(error => error)
-        .mapValues(values => values.length)
+        .omitBy(_.isNil)
+        .groupBy(error => error?.error)
+        .mapValues(value => value.map(el => el?.line || 0))
         .value();
 
     return Object.keys(errors).map(error => ({
-        error,
-        count: errors[error] || 0,
+        error: error,
+        count: errors[error]?.length || 0,
+        lines: errors[error] || [],
     }));
 }
