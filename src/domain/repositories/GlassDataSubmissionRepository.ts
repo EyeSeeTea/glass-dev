@@ -6,5 +6,6 @@ export interface GlassDataSubmissionsRepository {
     getDataSubmissionsByModuleAndOU(module: string, orgUnit: string): FutureData<GlassDataSubmission[]>;
     getOpenDataSubmissionsByOU(orgUnit: string): FutureData<GlassDataSubmission[]>;
     save(dataSubmission: GlassDataSubmission): FutureData<void>;
+    saveMultiple(dataSubmission: GlassDataSubmission[]): FutureData<void>;
     setStatus(id: string, status: DataSubmissionStatusTypes): FutureData<void>;
 }
