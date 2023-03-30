@@ -83,8 +83,8 @@ export const UploadSample: React.FC<UploadSampleProps> = ({ batchId, sampleFile,
                     setIsLoading(true);
 
                     return compositionRoot.dataSubmision.validateSampleFile(uploadedSample).run(
-                        isValidSample => {
-                            if (isValidSample) {
+                        sampleData => {
+                            if (sampleData.isValid) {
                                 setSampleFile(uploadedSample);
                                 const data = {
                                     batchId,
@@ -93,6 +93,7 @@ export const UploadSample: React.FC<UploadSampleProps> = ({ batchId, sampleFile,
                                     module: moduleId,
                                     period: currentPeriod.toString(),
                                     orgUnit: orgUnitId,
+                                    records: sampleData.records,
                                 };
                                 return compositionRoot.glassDocuments.upload({ file: uploadedSample, data }).run(
                                     uploadId => {

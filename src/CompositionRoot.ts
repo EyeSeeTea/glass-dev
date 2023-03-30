@@ -49,6 +49,7 @@ import { SetDataSubmissionStatusUseCase } from "./domain/usecases/SetDataSubmiss
 import { DownloadDocumentUseCase } from "./domain/usecases/DownloadDocumentUseCase";
 import { ValidateRISFileUseCase } from "./domain/usecases/data-entry/ValidateRISFileUseCase";
 import { ValidateSampleFileUseCase } from "./domain/usecases/data-entry/ValidateSampleFileUseCase";
+import { SaveDataSubmissionsUseCase } from "./domain/usecases/SaveDataSubmissionsUseCase";
 
 export function getCompositionRoot(instance: Instance) {
     const api = getD2APiFromInstance(instance);
@@ -88,6 +89,7 @@ export function getCompositionRoot(instance: Instance) {
             getDataSubmissionsByModuleAndOU: new GetDataSubmissionsByModuleAndOUUseCase(glassDataSubmissionRepository),
             getOpenDataSubmissionsByOU: new GetOpenDataSubmissionsByOUUseCase(glassDataSubmissionRepository),
             setStatus: new SetDataSubmissionStatusUseCase(glassDataSubmissionRepository),
+            saveDataSubmissions: new SaveDataSubmissionsUseCase(glassDataSubmissionRepository),
         }),
         glassUploads: getExecute({
             getAll: new GetGlassUploadsUseCase(glassUploadsRepository),
