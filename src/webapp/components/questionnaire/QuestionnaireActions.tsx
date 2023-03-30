@@ -4,6 +4,7 @@ import i18n from "@eyeseetea/d2-ui-components/locales";
 import styled from "styled-components";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
 import { QuestionnarieFormProps } from "./QuestionnaireForm";
+import { useGlassCaptureAccess } from "../../hooks/useGlassCaptureAccess";
 
 interface QuestionnaireHeaderProps {
     description: string;
@@ -15,16 +16,18 @@ interface QuestionnaireHeaderProps {
 
 export const QuestionnaireActions: React.FC<QuestionnaireHeaderProps> = props => {
     const { description, isCompleted, isSaving, mode, setAsCompleted } = props;
+    const hasCurrentUserCaptureAccess = useGlassCaptureAccess();
 
     return (
         <QuestionnaireHeaderStyled>
             {mode === "show" && (
                 <>
-                    {isCompleted ? (
-                        <span className="comp completed">{i18n.t("Completed")}</span>
-                    ) : (
-                        <span className="comp">{i18n.t("Not completed")}</span>
-                    )}
+                    {hasCurrentUserCaptureAccess &&
+                        (isCompleted ? (
+                            <span className="comp completed">{i18n.t("Completed")}</span>
+                        ) : (
+                            <span className="comp">{i18n.t("Not completed")}</span>
+                        ))}
                 </>
             )}
 

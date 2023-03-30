@@ -49,16 +49,18 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
                         risFile,
                         batchId,
                         currentPeriod,
-                        currentOrgUnitAccess.orgUnitCode,
-                        "CREATE_AND_UPDATE"
+                        "CREATE_AND_UPDATE",
+                        currentOrgUnitAccess.orgUnitId,
+                        currentOrgUnitAccess.orgUnitCode
                     ),
                     importSampleFileSummary: sampleFile
                         ? compositionRoot.dataSubmision.sampleFile(
                               sampleFile,
                               batchId,
                               currentPeriod,
-                              currentOrgUnitAccess.orgUnitCode,
-                              "CREATE_AND_UPDATE"
+                              "CREATE_AND_UPDATE",
+                              currentOrgUnitAccess.orgUnitId,
+                              currentOrgUnitAccess.orgUnitCode
                           )
                         : Future.success(undefined),
                 }).run(
@@ -101,6 +103,7 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
         setSampleFileImportSummary,
         batchId,
         currentPeriod,
+        currentOrgUnitAccess.orgUnitId,
         currentOrgUnitAccess.orgUnitCode,
     ]);
 
