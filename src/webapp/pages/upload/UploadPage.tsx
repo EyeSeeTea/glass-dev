@@ -1,5 +1,5 @@
 import { Breadcrumbs, Button } from "@material-ui/core";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import { UploadContent } from "../../components/upload/UploadContent";
 import { glassColors, palette } from "../app/themes/dhis2.theme";
@@ -16,26 +16,48 @@ export const UploadPage: React.FC = React.memo(() => {
     const { currentModuleAccess } = useCurrentModuleContext();
     const { currentPeriod } = useCurrentPeriodContext();
 
+    const [period, setPeriod] = useState(currentPeriod);
+    const [orgUnit, setOrgUnit] = useState(currentOrgUnitAccess.orgUnitName);
+    const [module, setModule] = useState(currentModuleAccess.moduleName);
+
+    const [resetWizard, setResetWizard] = useState(false);
+
+    useEffect(() => {
+        //Whenever period, orgUnit or module changes, go back to step 1 of Upload Wizard.
+        if (period !== currentPeriod) {
+            setPeriod(currentPeriod);
+            setResetWizard(true);
+        }
+        if (orgUnit !== currentOrgUnitAccess.orgUnitName) {
+            setOrgUnit(currentOrgUnitAccess.orgUnitName);
+            setResetWizard(true);
+        }
+        if (module !== currentModuleAccess.moduleName) {
+            setModule(currentModuleAccess.moduleName);
+            setResetWizard(true);
+        }
+    }, [currentModuleAccess.moduleName, currentOrgUnitAccess.orgUnitName, currentPeriod, module, orgUnit, period]);
+
     return (
         <ContentWrapper>
             <PreContent>
                 {/* // TODO: replace this with a global reusable StyledBreadCrumbs component */}
                 <StyledBreadCrumbs aria-label="breadcrumb" separator="">
                     <Button component={NavLink} to={`/current-data-submission`} exact={true} onClick={() => null}>
-                        <span>{currentModuleAccess.moduleName}</span>
+                        <span>{module}</span>
                     </Button>
                     <ChevronRightIcon />
                     <Button component={NavLink} to={`/upload`} exact={true}>
-                        <span>{i18n.t(`${currentPeriod} Data Submission`)}</span>
+                        <span>{i18n.t(`${period} Data Submission`)}</span>
                     </Button>
                 </StyledBreadCrumbs>
                 <div className="info">
                     <span>{i18n.t("Yearly data upload")}</span>, &nbsp;
-                    <span>{i18n.t(currentOrgUnitAccess.orgUnitName)}</span>
+                    <span>{i18n.t(orgUnit)}</span>
                 </div>
             </PreContent>
             <CustomCard padding="40px 60px 50px">
-                <UploadContent />
+                <UploadContent resetWizard={resetWizard} setResetWizard={setResetWizard} />
             </CustomCard>
         </ContentWrapper>
     );
