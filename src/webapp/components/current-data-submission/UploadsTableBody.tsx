@@ -14,6 +14,7 @@ import { isEditModeStatus } from "../../utils/editModeStatus";
 import { useStatusDataSubmission } from "../../hooks/useStatusDataSubmission";
 import { useCurrentModuleContext } from "../../contexts/current-module-context";
 import { useLocation } from "react-router-dom";
+import { useGlassCaptureAccess } from "../../hooks/useGlassCaptureAccess";
 
 export interface UploadsTableBodyProps {
     rows?: UploadsDataItem[];
@@ -41,6 +42,7 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
         currentOrgUnitAccess.orgUnitId,
         year
     );
+    const hasCurrentUserCaptureAccess = useGlassCaptureAccess();
 
     const showConfirmationDialog = (rowToDelete: UploadsDataItem) => {
         setRowToDelete(rowToDelete);
@@ -221,7 +223,10 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                                 {currentDataSubmissionStatus.kind === "loaded" && (
                                     <Button
                                         onClick={() => showConfirmationDialog(row)}
-                                        disabled={!isEditModeStatus(currentDataSubmissionStatus.data.title)}
+                                        disabled={
+                                            !hasCurrentUserCaptureAccess ||
+                                            !isEditModeStatus(currentDataSubmissionStatus.data.title)
+                                        }
                                     >
                                         <DeleteOutline />
                                     </Button>

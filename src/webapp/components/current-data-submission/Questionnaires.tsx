@@ -96,22 +96,25 @@ export const Questionnaires: React.FC<QuestionnairesProps> = ({ setRefetchStatus
                         </div>
 
                         {questionnaire.isMandatory && <span className="mand">{i18n.t("mandatory")}</span>}
-
-                        {questionnaire.isCompleted ? (
-                            <span className="comp completed">{i18n.t("Completed")}</span>
+                        {hasCurrentUserCaptureAccess ? (
+                            <>
+                                {questionnaire.isCompleted ? (
+                                    <span className="comp completed">{i18n.t("Completed")}</span>
+                                ) : (
+                                    <span className="comp">{i18n.t("Not completed")}</span>
+                                )}
+                            </>
                         ) : (
-                            <span className="comp">{i18n.t("Not completed")}</span>
+                            <span className="comp" />
                         )}
 
                         <div className="buttons">
-                            {questionnaire.isCompleted && (
-                                <Button
-                                    onClick={() => actions.goToQuestionnarie(questionnaire, { mode: "show" })}
-                                    disabled={!hasCurrentUserViewAccess}
-                                >
-                                    {i18n.t("View")}
-                                </Button>
-                            )}
+                            <Button
+                                onClick={() => actions.goToQuestionnarie(questionnaire, { mode: "show" })}
+                                disabled={!hasCurrentUserViewAccess}
+                            >
+                                {i18n.t("View")}
+                            </Button>
 
                             {currentDataSubmissionStatus.kind === "loaded" &&
                                 isEditModeStatus(currentDataSubmissionStatus.data.title) && (
@@ -200,14 +203,15 @@ function useQuestionnaires() {
     const [questionnaires, setQuestionnaires] = React.useState<QuestionnaireBase[]>();
     const snackbar = useSnackbar();
     const { orgUnit, year } = useSelector();
+    const hasCurrentUserCaptureAccess = useGlassCaptureAccess() ? true : false;
 
     React.useEffect(() => {
         if (module.kind !== "loaded") return;
 
         return compositionRoot.questionnaires
-            .getList(module.data, { orgUnitId: orgUnit.id, year: year })
+            .getList(module.data, { orgUnitId: orgUnit.id, year: year }, hasCurrentUserCaptureAccess)
             .run(setQuestionnaires, err => snackbar.error(err));
-    }, [compositionRoot, snackbar, module, orgUnit, year]);
+    }, [compositionRoot, snackbar, module, orgUnit, year, hasCurrentUserCaptureAccess]);
 
     const updateQuestionnarie = React.useCallback<QuestionnarieFormProps["onSave"]>(updatedQuestionnaire => {
         setQuestionnaires(prevQuestionnaries =>
