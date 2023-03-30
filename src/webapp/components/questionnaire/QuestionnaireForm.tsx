@@ -13,6 +13,7 @@ import styled from "styled-components";
 import { useGlassModule } from "../../hooks/useGlassModule";
 import { useBooleanState } from "../../hooks/useBooleanState";
 import { QuestionnaireActions } from "./QuestionnaireActions";
+import { useGlassCaptureAccess } from "../../hooks/useGlassCaptureAccess";
 
 export interface QuestionnarieFormProps {
     id: Id;
@@ -93,13 +94,14 @@ function useQuestionnaire(options: QuestionnarieFormProps) {
     const { onSave, id, orgUnitId, year } = options;
     const selector = React.useMemo(() => ({ id, orgUnitId, year }), [id, orgUnitId, year]);
     const [questionnaire, setQuestionnaire] = useState<Questionnaire>();
+    const hasCurrentUserCaptureAccess = useGlassCaptureAccess() ? true : false;
 
     useEffect(() => {
         if (module.kind !== "loaded") return;
         return compositionRoot.questionnaires
-            .get(module.data, selector)
+            .get(module.data, selector, hasCurrentUserCaptureAccess)
             .run(setQuestionnaire, err => snackbar.error(err));
-    }, [compositionRoot, snackbar, selector, module]);
+    }, [compositionRoot, snackbar, selector, module, hasCurrentUserCaptureAccess]);
 
     React.useEffect(() => {
         if (questionnaire) onSave(questionnaire);

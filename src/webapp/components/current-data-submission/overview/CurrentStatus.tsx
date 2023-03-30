@@ -12,6 +12,7 @@ import { useSnackbar } from "@eyeseetea/d2-ui-components";
 import { Close, Check } from "@material-ui/icons";
 import { DataSubmissionStatusTypes } from "../../../../domain/entities/GlassDataSubmission";
 import { useCurrentPeriodContext } from "../../../contexts/current-period-context";
+import { useGlassCaptureAccess } from "../../../hooks/useGlassCaptureAccess";
 
 interface StatusProps {
     moduleName: string;
@@ -45,6 +46,7 @@ export const CurrentStatus: React.FC<StatusProps> = ({
         currentOrgUnitAccess: { orgUnitId },
     } = useCurrentOrgUnitContext();
     const snackbar = useSnackbar();
+    const hasCurrentUserCaptureAccess = useGlassCaptureAccess() ? true : false;
 
     const [questionnaires, setQuestionnaires] = useState<QuestionnaireBase[]>();
     const [uploadsCount, setUploadsCount] = useState<number>(0);
@@ -54,12 +56,14 @@ export const CurrentStatus: React.FC<StatusProps> = ({
         if (showUploadHistory) {
             compositionRoot.glassModules.getById(moduleId).run(
                 currentModule => {
-                    compositionRoot.questionnaires.getList(currentModule, { orgUnitId, year: currentPeriod }).run(
-                        questionnairesData => {
-                            setQuestionnaires(questionnairesData);
-                        },
-                        () => {}
-                    );
+                    compositionRoot.questionnaires
+                        .getList(currentModule, { orgUnitId, year: currentPeriod }, hasCurrentUserCaptureAccess)
+                        .run(
+                            questionnairesData => {
+                                setQuestionnaires(questionnairesData);
+                            },
+                            () => {}
+                        );
                 },
                 () => {
                     snackbar.error(i18n.t("Error fetching questionnaires."));
@@ -83,6 +87,7 @@ export const CurrentStatus: React.FC<StatusProps> = ({
         showUploadHistory,
         snackbar,
         currentPeriod,
+        hasCurrentUserCaptureAccess,
     ]);
 
     return (
@@ -122,14 +127,20 @@ export const CurrentStatus: React.FC<StatusProps> = ({
                                 <TableCell>{`${questionnaires.length} Questionnaires`}</TableCell>
                                 <TableCell>{`${questionnaires[0].isMandatory ? "Yes" : "No"}`}</TableCell>
                                 <TableCell>
-                                    <Box display={"flex"} alignItems="center">
-                                        {`${questionnaires.filter(el => el.isCompleted).length} completed`}
-                                        {questionnaires.filter(el => el.isCompleted).length < 1 ? (
-                                            <Close color="error"></Close>
-                                        ) : (
-                                            <Check style={{ color: "green" }}></Check>
-                                        )}
-                                    </Box>
+                                    {hasCurrentUserCaptureAccess ? (
+                                        <Box display={"flex"} alignItems="center">
+                                            {/* Only user with capture access, can see the Questionnaire complete status */}
+
+                                            {`${questionnaires.filter(el => el.isCompleted).length} completed`}
+                                            {questionnaires.filter(el => el.isCompleted).length < 1 ? (
+                                                <Close color="error"></Close>
+                                            ) : (
+                                                <Check style={{ color: "green" }}></Check>
+                                            )}
+                                        </Box>
+                                    ) : (
+                                        <Box>No Access</Box>
+                                    )}
                                 </TableCell>
                             </TableRow>
                         )}
