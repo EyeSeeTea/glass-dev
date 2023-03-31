@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Box, Button, Container, Typography } from "@material-ui/core";
 import styled from "styled-components";
 import { CustomCard } from "../custom-card/CustomCard";
@@ -9,6 +9,11 @@ import i18n from "../../../locales";
 import { NavLink } from "react-router-dom";
 import { GlassModule } from "../../../domain/entities/GlassModule";
 import { useCurrentModuleContext } from "../../contexts/current-module-context";
+import { useAppContext } from "../../contexts/app-context";
+import { QuestionnaireBase } from "../../../domain/entities/Questionnaire";
+import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context";
+import { useSnackbar } from "@eyeseetea/d2-ui-components";
+import { useGlassCaptureAccess } from "../../hooks/useGlassCaptureAccess";
 
 interface ModuleCardProps {
     period: number;
@@ -17,9 +22,53 @@ interface ModuleCardProps {
 
 export const ModuleCard: React.FC<ModuleCardProps> = ({ period, module }) => {
     const { changeCurrentModuleAccess } = useCurrentModuleContext();
+    const { compositionRoot } = useAppContext();
+
+    const {
+        currentOrgUnitAccess: { orgUnitId },
+    } = useCurrentOrgUnitContext();
+    const snackbar = useSnackbar();
+    const hasCurrentUserCaptureAccess = useGlassCaptureAccess() ? true : false;
 
     const endDays = 0; //TO DO : Calculate days left in the open period. Need confirmation on open and close days.
-    const filesUploaded = 0; //TO DO : Fetch number of files uplaoded for data submission.
+
+    const [questionnaires, setQuestionnaires] = useState<QuestionnaireBase[]>([]);
+    const [uploadsCount, setUploadsCount] = useState<number>(0);
+
+    useEffect(() => {
+        compositionRoot.glassModules.getById(module.id).run(
+            currentModule => {
+                compositionRoot.questionnaires
+                    .getList(currentModule, { orgUnitId, year: period }, hasCurrentUserCaptureAccess)
+                    .run(
+                        questionnairesData => {
+                            setQuestionnaires(questionnairesData);
+                        },
+                        () => {}
+                    );
+            },
+            () => {
+                snackbar.error(i18n.t("Error fetching questionnaires."));
+            }
+        );
+        compositionRoot.glassUploads.getByModuleOUPeriod(module.id, orgUnitId, period.toString()).run(
+            glassUploads => {
+                setUploadsCount(glassUploads.length);
+            },
+            () => {
+                snackbar.error(i18n.t("Error fetching uploads."));
+            }
+        );
+    }, [
+        compositionRoot.glassModules,
+        compositionRoot.glassUploads,
+        compositionRoot.questionnaires,
+        hasCurrentUserCaptureAccess,
+        module.id,
+        orgUnitId,
+        period,
+        snackbar,
+    ]);
 
     return (
         <CustomCard padding="0">
@@ -40,7 +89,10 @@ export const ModuleCard: React.FC<ModuleCardProps> = ({ period, module }) => {
                     ) : (
                         <Typography color="textSecondary">{i18n.t("OPEN ALL YEAR")}</Typography>
                     )}
-                    <Typography color="textSecondary">{i18n.t(`${filesUploaded} files uploaded`)}</Typography>
+                    <Typography color="textSecondary">{i18n.t(`${uploadsCount} files uploaded`)}</Typography>
+                    <Typography color="textSecondary">
+                        {i18n.t(`${questionnaires?.length} questionnaires completed`)}
+                    </Typography>
                 </Container>
 
                 <Button
