@@ -1,5 +1,5 @@
 import React, { useCallback, useState, useEffect } from "react";
-import { Button, CircularProgress } from "@material-ui/core";
+import { Backdrop, Button, CircularProgress, Typography } from "@material-ui/core";
 import styled from "styled-components";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
 import i18n from "@eyeseetea/d2-ui-components/locales";
@@ -12,6 +12,7 @@ import { useCurrentModuleContext } from "../../contexts/current-module-context";
 import { Future } from "../../../domain/entities/Future";
 import { useLocation } from "react-router-dom";
 import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context";
+import { StyledLoaderContainer } from "./ConsistencyChecks";
 
 interface ReviewDataSummaryProps {
     changeStep: (step: number) => void;
@@ -143,67 +144,75 @@ export const ReviewDataSummary: React.FC<ReviewDataSummaryProps> = ({ changeStep
     }, [changeStep, compositionRoot.glassUploads, snackbar]);
 
     const goToFinalStepEffect = useCallbackEffect(goToFinalStep);
-    if (isDataSetUploading) return <CircularProgress size={25} />;
-    else
-        return (
-            <ContentWrapper>
-                <div className="toggles">
-                    <Button onClick={() => changeType("ris")} className={fileType === "ris" ? "current" : ""}>
-                        {i18n.t("RIS File")}
+
+    return (
+        <ContentWrapper>
+            <Backdrop open={isDataSetUploading} style={{ color: "#fff", zIndex: 1 }}>
+                <StyledLoaderContainer>
+                    <CircularProgress color="inherit" size={50} />
+                    <Typography variant="h6">{i18n.t("Importing data")}</Typography>
+                    <Typography variant="h5">
+                        {i18n.t("This might take several minutes, do not refresh the page or press back.")}
+                    </Typography>
+                </StyledLoaderContainer>
+            </Backdrop>
+            <div className="toggles">
+                <Button onClick={() => changeType("ris")} className={fileType === "ris" ? "current" : ""}>
+                    {i18n.t("RIS File")}
+                </Button>
+                <Button onClick={() => changeType("sample")} className={fileType === "sample" ? "current" : ""}>
+                    {i18n.t("Sample File")}
+                </Button>
+            </div>
+            <Section className="summary">
+                <h3>{i18n.t("Summary")}</h3>
+                <SectionCard className="wrong">
+                    <ul>
+                        <li>
+                            <b>{i18n.t("imported: ")}</b>{" "}
+                            {fileType === "ris"
+                                ? risFileImportSummary?.importCount.imported
+                                : sampleFileImportSummary?.importCount.imported}
+                        </li>
+                        <li>
+                            <b>{i18n.t("updated: ")}</b>{" "}
+                            {fileType === "ris"
+                                ? risFileImportSummary?.importCount.updated
+                                : sampleFileImportSummary?.importCount.updated}
+                        </li>
+                        <li>
+                            <b>{i18n.t("deleted: ")}</b>{" "}
+                            {fileType === "ris"
+                                ? risFileImportSummary?.importCount.deleted
+                                : sampleFileImportSummary?.importCount.deleted}
+                            {}
+                        </li>
+                        <li>
+                            <b>{i18n.t("ignored: ")}</b>{" "}
+                            {fileType === "ris"
+                                ? risFileImportSummary?.importCount.ignored
+                                : sampleFileImportSummary?.importCount.ignored}
+                        </li>
+                    </ul>
+                </SectionCard>
+            </Section>
+            <div className="bottom">
+                {isLoading ? (
+                    <CircularProgress size={25} />
+                ) : (
+                    <Button
+                        variant="contained"
+                        color={"primary"}
+                        endIcon={<ChevronRightIcon />}
+                        onClick={goToFinalStepEffect}
+                        disableElevation
+                    >
+                        {i18n.t("Continue")}
                     </Button>
-                    <Button onClick={() => changeType("sample")} className={fileType === "sample" ? "current" : ""}>
-                        {i18n.t("Sample File")}
-                    </Button>
-                </div>
-                <Section className="summary">
-                    <h3>{i18n.t("Summary")}</h3>
-                    <SectionCard className="wrong">
-                        <ul>
-                            <li>
-                                <b>{i18n.t("imported: ")}</b>{" "}
-                                {fileType === "ris"
-                                    ? risFileImportSummary?.importCount.imported
-                                    : sampleFileImportSummary?.importCount.imported}
-                            </li>
-                            <li>
-                                <b>{i18n.t("updated: ")}</b>{" "}
-                                {fileType === "ris"
-                                    ? risFileImportSummary?.importCount.updated
-                                    : sampleFileImportSummary?.importCount.updated}
-                            </li>
-                            <li>
-                                <b>{i18n.t("deleted: ")}</b>{" "}
-                                {fileType === "ris"
-                                    ? risFileImportSummary?.importCount.deleted
-                                    : sampleFileImportSummary?.importCount.deleted}
-                                {}
-                            </li>
-                            <li>
-                                <b>{i18n.t("ignored: ")}</b>{" "}
-                                {fileType === "ris"
-                                    ? risFileImportSummary?.importCount.ignored
-                                    : sampleFileImportSummary?.importCount.ignored}
-                            </li>
-                        </ul>
-                    </SectionCard>
-                </Section>
-                <div className="bottom">
-                    {isLoading ? (
-                        <CircularProgress size={25} />
-                    ) : (
-                        <Button
-                            variant="contained"
-                            color={"primary"}
-                            endIcon={<ChevronRightIcon />}
-                            onClick={goToFinalStepEffect}
-                            disableElevation
-                        >
-                            {i18n.t("Continue")}
-                        </Button>
-                    )}
-                </div>
-            </ContentWrapper>
-        );
+                )}
+            </div>
+        </ContentWrapper>
+    );
 };
 
 const ContentWrapper = styled.div`
