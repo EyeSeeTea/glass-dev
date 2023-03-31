@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Button, CircularProgress } from "@material-ui/core";
+import { Backdrop, Button, CircularProgress, Typography } from "@material-ui/core";
 import { BlockingErrors } from "./BlockingErrors";
 import styled from "styled-components";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
@@ -34,7 +34,7 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
     const { currentModuleAccess } = useCurrentModuleContext();
     const { currentOrgUnitAccess } = useCurrentOrgUnitContext();
     const [fileType, setFileType] = useState<string>("ris");
-    const [isDataSetUploading, setIsDataSetUploading] = useState<boolean>(false);
+    const [dryRunImportLoading, setDryRunImportLoading] = useState<boolean>(false);
     const [risFileErrors, setRISErrors] = useState<ImportSummary | undefined>(undefined);
     const [sampleFileErrors, setSampleErrors] = useState<ImportSummary | undefined>(undefined);
     const { currentPeriod } = useCurrentPeriodContext();
@@ -42,7 +42,7 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
     useEffect(() => {
         function uploadDatasetsAsDryRun() {
             if (risFile && currentModuleAccess.moduleName === "AMR") {
-                setIsDataSetUploading(true);
+                setDryRunImportLoading(true);
 
                 Future.joinObj({
                     importRISFileSummary: compositionRoot.dataSubmision.RISFile(
@@ -79,7 +79,7 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
                             setSampleFileImportSummary(importSampleFileSummary);
                         }
 
-                        setIsDataSetUploading(false);
+                        setDryRunImportLoading(false);
                     },
                     error => {
                         setRISErrors({
@@ -89,7 +89,7 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
                             blockingErrors: [{ error: error, count: 1 }],
                         });
 
-                        setIsDataSetUploading(false);
+                        setDryRunImportLoading(false);
                     }
                 );
             }
@@ -113,38 +113,60 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
         setFileType(fileType);
     };
 
-    if (isDataSetUploading) return <CircularProgress size={25} />;
-    else
-        return (
-            <ContentWrapper>
-                <p className="intro">
+    return (
+        <ContentWrapper>
+            <Backdrop open={dryRunImportLoading} style={{ color: "#fff", zIndex: 1 }}>
+                <StyledLoaderContainer>
+                    <CircularProgress color="inherit" size={50} />
+                    <Typography variant="h6">
+                        {i18n.t("Performing a dry run of the import to ensure that there are no errors.")}
+                    </Typography>
+                    <Typography variant="h5">
+                        {i18n.t("This might take several minutes, do not refresh the page or press back.")}
+                    </Typography>
+                </StyledLoaderContainer>
+            </Backdrop>
+            <div>
+                <Typography variant="h6">
+                    {i18n.t("These Consistency Checks ensure that incorrect data is not imported.")}
+                </Typography>
+                <Typography>
+                    {i18n.t("Both Validations specified by validation rules and custom validations are complete. ")}
+                </Typography>
+                <Typography>
                     {i18n.t(
-                        "Explaining what consistency checks are: Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed doeiusmod tempor incididunt ut labore"
+                        "All Blocking errors need to be addressed. Please reupload correct data to complete the data submission"
                     )}
-                </p>
-                <div className="toggles">
-                    <Button onClick={() => changeType("ris")} className={fileType === "ris" ? "current" : ""}>
-                        {i18n.t("RIS File")}
-                    </Button>
-                    <Button onClick={() => changeType("sample")} className={fileType === "sample" ? "current" : ""}>
-                        {i18n.t("Sample File")}
-                    </Button>
-                </div>
-                {renderTypeContent(fileType, risFileErrors, sampleFileErrors)}
-                <div className="bottom">
-                    <Button
-                        variant="contained"
-                        color="primary"
-                        endIcon={<ChevronRightIcon />}
-                        onClick={() => changeStep(3)}
-                        disableElevation
-                        disabled={risFileErrors && risFileErrors.blockingErrors.length > 0 ? true : false}
-                    >
-                        {i18n.t("Continue")}
-                    </Button>
-                </div>
-            </ContentWrapper>
-        );
+                </Typography>
+                <Typography>
+                    {i18n.t(
+                        "Non-Blocking errors are warnings, it is good to address them. However, you can still proceed with the submission."
+                    )}
+                </Typography>
+            </div>
+            <div className="toggles">
+                <Button onClick={() => changeType("ris")} className={fileType === "ris" ? "current" : ""}>
+                    {i18n.t("RIS File")}
+                </Button>
+                <Button onClick={() => changeType("sample")} className={fileType === "sample" ? "current" : ""}>
+                    {i18n.t("Sample File")}
+                </Button>
+            </div>
+            {renderTypeContent(fileType, risFileErrors, sampleFileErrors)}
+            <div className="bottom">
+                <Button
+                    variant="contained"
+                    color="primary"
+                    endIcon={<ChevronRightIcon />}
+                    onClick={() => changeStep(3)}
+                    disableElevation
+                    disabled={risFileErrors && risFileErrors.blockingErrors.length > 0 ? true : false}
+                >
+                    {i18n.t("Continue")}
+                </Button>
+            </div>
+        </ContentWrapper>
+    );
 };
 
 const renderTypeContent = (type: string, risfileErrors?: ImportSummary, samplefileErrors?: ImportSummary) => {
@@ -199,4 +221,10 @@ const ContentWrapper = styled.div`
             }
         }
     }
+`;
+
+export const StyledLoaderContainer = styled.div`
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 `;
