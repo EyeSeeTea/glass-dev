@@ -110,7 +110,8 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                                 parseInt(risFileToDelete.period),
                                 "DELETES",
                                 orgUnitId,
-                                risFileToDelete.countryCode
+                                risFileToDelete.countryCode,
+                                false
                             ),
                             deleteSampleFileSummary:
                                 sampleFileToDelete && sampleFileDownload
@@ -120,7 +121,8 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                                           parseInt(sampleFileToDelete.period),
                                           "DELETES",
                                           orgUnitId,
-                                          sampleFileToDelete.countryCode
+                                          sampleFileToDelete.countryCode,
+                                          false
                                       )
                                     : Future.success(undefined),
                         }).run(
