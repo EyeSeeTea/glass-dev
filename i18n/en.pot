@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2023-03-30T12:57:56.558Z\n"
-"PO-Revision-Date: 2023-03-30T12:57:56.558Z\n"
+"POT-Creation-Date: 2023-04-02T13:22:35.764Z\n"
+"PO-Revision-Date: 2023-04-02T13:22:35.764Z\n"
 
 msgid "Error saving registration status"
 msgstr ""
@@ -325,6 +325,12 @@ msgstr ""
 msgid "Count"
 msgstr ""
 
+msgid "Lines"
+msgstr ""
+
+msgid "Blocked Lines"
+msgstr ""
+
 msgid "Back to Module"
 msgstr ""
 
@@ -340,6 +346,30 @@ msgstr ""
 msgid "Info abou the previously updated quarter and the missing quarters"
 msgstr ""
 
+msgid "Performing a dry run of the import to ensure that there are no errors."
+msgstr ""
+
+msgid "This might take several minutes, do not refresh the page or press back."
+msgstr ""
+
+msgid "These Consistency Checks ensure that incorrect data is not imported."
+msgstr ""
+
+msgid ""
+"Both Validations specified by validation rules and custom validations are "
+"complete. "
+msgstr ""
+
+msgid ""
+"All Blocking errors need to be addressed. Please reupload correct data to "
+"complete the data submission"
+msgstr ""
+
+msgid ""
+"Non-Blocking errors are warnings, it is good to address them. However, you "
+"can still proceed with the submission."
+msgstr ""
+
 msgid "RIS File"
 msgstr ""
 
@@ -353,6 +383,9 @@ msgid "No sample file uploaded"
 msgstr ""
 
 msgid "Non-blocking warnings"
+msgstr ""
+
+msgid "Importing data"
 msgstr ""
 
 msgid "Summary"
