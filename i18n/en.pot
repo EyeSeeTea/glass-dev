@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2023-04-02T13:10:07.946Z\n"
-"PO-Revision-Date: 2023-04-02T13:10:07.946Z\n"
+"POT-Creation-Date: 2023-04-02T13:22:35.764Z\n"
+"PO-Revision-Date: 2023-04-02T13:22:35.764Z\n"
 
 msgid "Error saving registration status"
 msgstr ""
@@ -323,6 +323,12 @@ msgid "Name"
 msgstr ""
 
 msgid "Count"
+msgstr ""
+
+msgid "Lines"
+msgstr ""
+
+msgid "Blocked Lines"
 msgstr ""
 
 msgid "Back to Module"
