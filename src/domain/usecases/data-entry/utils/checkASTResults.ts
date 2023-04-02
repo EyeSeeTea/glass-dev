@@ -4,27 +4,30 @@ import { ConsistencyError } from "../../../entities/data-entry/ImportSummary";
 
 export function checkASTResults(risData: RISData[]): ConsistencyError[] {
     const errors = _(
-        risData
-            .filter(item => {
-                return (
-                    (item.RESISTANT === 0 || !item.RESISTANT) &&
-                    (item.INTERMEDIATE === 0 || !item.INTERMEDIATE) &&
-                    (item.SUSCEPTIBLE === 0 || !item.SUSCEPTIBLE) &&
-                    (item.NONSUSCEPTIBLE === 0 || !item.NONSUSCEPTIBLE) &&
-                    (item.UNKNOWN_NO_AST === 0 || !item.UNKNOWN_NO_AST) &&
-                    (item.UNKNOWN_NO_BREAKPOINTS === 0 || !item.UNKNOWN_NO_BREAKPOINTS)
-                );
-            })
-            .map(() => {
-                return i18n.t(`The AST results provided are not valid (either they are all empty or equal to 0)`);
-            })
+        risData.map((item, index) => {
+            if (
+                (item.RESISTANT === 0 || !item.RESISTANT) &&
+                (item.INTERMEDIATE === 0 || !item.INTERMEDIATE) &&
+                (item.SUSCEPTIBLE === 0 || !item.SUSCEPTIBLE) &&
+                (item.NONSUSCEPTIBLE === 0 || !item.NONSUSCEPTIBLE) &&
+                (item.UNKNOWN_NO_AST === 0 || !item.UNKNOWN_NO_AST) &&
+                (item.UNKNOWN_NO_BREAKPOINTS === 0 || !item.UNKNOWN_NO_BREAKPOINTS)
+            ) {
+                return {
+                    error: i18n.t(`The AST results provided are not valid (either they are all empty or equal to 0)`),
+                    line: index + 1,
+                };
+            }
+        })
     )
-        .groupBy(error => error)
-        .mapValues(values => values.length)
+        .omitBy(_.isNil)
+        .groupBy(error => error?.error)
+        .mapValues(value => value.map(el => el?.line || 0))
         .value();
 
     return Object.keys(errors).map(error => ({
-        error,
-        count: errors[error] || 0,
+        error: error,
+        count: errors[error]?.length || 0,
+        lines: errors[error] || [],
     }));
 }
