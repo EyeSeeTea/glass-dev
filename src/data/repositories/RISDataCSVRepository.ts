@@ -34,7 +34,7 @@ export class RISDataCSVRepository implements RISDataRepository {
         });
     }
 
-    validate(file: File): FutureData<boolean> {
+    validate(file: File): FutureData<{ isValid: boolean; records: number }> {
         return Future.fromPromise(new SpreadsheetXlsxDataSource().read(file)).map(spreadsheet => {
             const sheet = spreadsheet.sheets[0]; //Only one sheet for AMR RIS
             const firstRow = sheet?.rows[0];
@@ -57,8 +57,12 @@ export class RISDataCSVRepository implements RISDataRepository {
                     doesColumnExist(firstRow, "UNKNOWN_NO_BREAKPOINTS") &&
                     doesColumnExist(firstRow, "BATCHID");
 
-                return allRISColsPresent ? true : false;
-            } else return false;
+                return { isValid: allRISColsPresent ? true : false, records: sheet.rows.length };
+            } else
+                return {
+                    isValid: false,
+                    records: 0,
+                };
         });
     }
 

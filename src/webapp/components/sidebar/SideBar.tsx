@@ -91,7 +91,7 @@ const StarGradient = styled.div`
     background: ${glassColors.accentPrimary};
 `;
 
-const StyledCircularProgress = styled(CircularProgress)`
+export const StyledCircularProgress = styled(CircularProgress)`
     margin: 30px auto;
     size: 20;
 `;

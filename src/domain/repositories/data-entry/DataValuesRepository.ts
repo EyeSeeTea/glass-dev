@@ -3,5 +3,5 @@ import { DataValuesSaveSummary, ImportStrategy } from "../../entities/data-entry
 import { FutureData } from "../../entities/Future";
 
 export interface DataValuesRepository {
-    save(dataValues: DataValue[], action: ImportStrategy): FutureData<DataValuesSaveSummary>;
+    save(dataValues: DataValue[], action: ImportStrategy, dryRun: boolean): FutureData<DataValuesSaveSummary>;
 }

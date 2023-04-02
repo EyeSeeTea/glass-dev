@@ -1,5 +1,5 @@
-import React, { useCallback, useState } from "react";
-import { Button, CircularProgress } from "@material-ui/core";
+import React, { useCallback, useState, useEffect } from "react";
+import { Backdrop, Button, CircularProgress, Typography } from "@material-ui/core";
 import styled from "styled-components";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
 import i18n from "@eyeseetea/d2-ui-components/locales";
@@ -8,25 +8,103 @@ import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import { useCallbackEffect } from "../../hooks/use-callback-effect";
 import { useSnackbar } from "@eyeseetea/d2-ui-components";
 import { useAppContext } from "../../contexts/app-context";
+import { useCurrentModuleContext } from "../../contexts/current-module-context";
+import { Future } from "../../../domain/entities/Future";
+import { useLocation } from "react-router-dom";
+import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context";
+import { StyledLoaderContainer } from "./ConsistencyChecks";
 
 interface ReviewDataSummaryProps {
     changeStep: (step: number) => void;
-    risFileImportSummary?: ImportSummary;
-    sampleFileImportSummary?: ImportSummary;
+    risFile: File | null;
+    sampleFile?: File | null;
+    batchId: string;
 }
 
 const COMPLETED_STATUS = "COMPLETED";
 
-export const ReviewDataSummary: React.FC<ReviewDataSummaryProps> = ({
-    changeStep,
-    risFileImportSummary,
-    sampleFileImportSummary,
-}) => {
+export const ReviewDataSummary: React.FC<ReviewDataSummaryProps> = ({ changeStep, risFile, sampleFile, batchId }) => {
     const { compositionRoot } = useAppContext();
     const snackbar = useSnackbar();
-
+    const { currentModuleAccess } = useCurrentModuleContext();
+    const { currentOrgUnitAccess } = useCurrentOrgUnitContext();
     const [fileType, setFileType] = useState<string>("ris");
+    const [risFileImportSummary, setRisFileImportSummary] = useState<ImportSummary>();
+    const [sampleFileImportSummary, setSampleFileImportSummary] = useState<ImportSummary>();
+
     const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [isDataSetUploading, setIsDataSetUploading] = useState<boolean>(false);
+    const location = useLocation();
+    const queryParameters = new URLSearchParams(location.search);
+    const periodFromUrl = parseInt(queryParameters.get("period") || "");
+    const year = periodFromUrl || new Date().getFullYear() - 1;
+
+    useEffect(() => {
+        function uploadDatasets() {
+            if (risFile && currentModuleAccess.moduleName === "AMR") {
+                setIsDataSetUploading(true);
+
+                Future.joinObj({
+                    importRISFileSummary: compositionRoot.dataSubmision.RISFile(
+                        risFile,
+                        batchId,
+                        year,
+                        "CREATE_AND_UPDATE",
+                        currentOrgUnitAccess.orgUnitId,
+                        currentOrgUnitAccess.orgUnitCode,
+                        false
+                    ),
+                    importSampleFileSummary: sampleFile
+                        ? compositionRoot.dataSubmision.sampleFile(
+                              sampleFile,
+                              batchId,
+                              year,
+                              "CREATE_AND_UPDATE",
+                              currentOrgUnitAccess.orgUnitId,
+                              currentOrgUnitAccess.orgUnitCode,
+                              false
+                          )
+                        : Future.success(undefined),
+                }).run(
+                    ({ importRISFileSummary, importSampleFileSummary }) => {
+                        setRisFileImportSummary(importRISFileSummary);
+                        if (importSampleFileSummary) {
+                            setSampleFileImportSummary(importSampleFileSummary);
+                        }
+                        setIsDataSetUploading(false);
+                    },
+                    error => {
+                        setRisFileImportSummary({
+                            status: "ERROR",
+                            importCount: {
+                                imported: 0,
+                                updated: 0,
+                                ignored: 0,
+                                deleted: 0,
+                            },
+                            nonBlockingErrors: [error],
+                            blockingErrors: [],
+                        });
+
+                        setIsDataSetUploading(false);
+                    }
+                );
+            }
+        }
+
+        uploadDatasets();
+    }, [
+        compositionRoot.dataSubmision,
+        currentModuleAccess.moduleName,
+        risFile,
+        sampleFile,
+        setRisFileImportSummary,
+        setSampleFileImportSummary,
+        batchId,
+        year,
+        currentOrgUnitAccess.orgUnitCode,
+        currentOrgUnitAccess.orgUnitId,
+    ]);
 
     const changeType = (fileType: string) => {
         setFileType(fileType);
@@ -69,6 +147,15 @@ export const ReviewDataSummary: React.FC<ReviewDataSummaryProps> = ({
 
     return (
         <ContentWrapper>
+            <Backdrop open={isDataSetUploading} style={{ color: "#fff", zIndex: 1 }}>
+                <StyledLoaderContainer>
+                    <CircularProgress color="inherit" size={50} />
+                    <Typography variant="h6">{i18n.t("Importing data")}</Typography>
+                    <Typography variant="h5">
+                        {i18n.t("This might take several minutes, do not refresh the page or press back.")}
+                    </Typography>
+                </StyledLoaderContainer>
+            </Backdrop>
             <div className="toggles">
                 <Button onClick={() => changeType("ris")} className={fileType === "ris" ? "current" : ""}>
                     {i18n.t("RIS File")}
