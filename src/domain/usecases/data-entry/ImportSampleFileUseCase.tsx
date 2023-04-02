@@ -35,7 +35,8 @@ export class ImportSampleFileUseCase implements UseCase {
         year: number,
         action: ImportStrategy,
         orgUnit: string,
-        countryCode: string
+        countryCode: string,
+        dryRun: boolean
     ): FutureData<ImportSummary> {
         return this.sampleDataRepository
             .get(inputFile)
@@ -95,7 +96,7 @@ export class ImportSampleFileUseCase implements UseCase {
 
                 const uniqueAOCs = _.uniq(dataValues.map(el => el.attributeOptionCombo || ""));
 
-                return this.dataValuesRepository.save(dataValues, action).flatMap(saveSummary => {
+                return this.dataValuesRepository.save(dataValues, action, dryRun).flatMap(saveSummary => {
                     return this.metadataRepository
                         .validateDataSet(AMR_AMR_DS_Input_files_Sample_DS_ID, year.toString(), orgUnit, uniqueAOCs)
                         .map(validationResponse => {
