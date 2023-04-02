@@ -91,8 +91,8 @@ export const UploadRis: React.FC<UploadRisProps> = ({ risFile, setRisFile, valid
                     setIsLoading(true);
 
                     return compositionRoot.dataSubmision.validateRISFile(uploadedRisFile).run(
-                        isValidRIS => {
-                            if (isValidRIS) {
+                        risData => {
+                            if (risData.isValid) {
                                 setRisFile(uploadedRisFile);
                                 const data = {
                                     batchId,
@@ -101,6 +101,7 @@ export const UploadRis: React.FC<UploadRisProps> = ({ risFile, setRisFile, valid
                                     module: moduleId,
                                     period: currentPeriod.toString(),
                                     orgUnit: orgUnitId,
+                                    records: risData.records,
                                 };
                                 return compositionRoot.glassDocuments.upload({ file: uploadedRisFile, data }).run(
                                     uploadId => {

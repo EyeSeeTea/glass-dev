@@ -42,7 +42,8 @@ export class ImportRISFileUseCase implements UseCase {
         year: number,
         action: ImportStrategy,
         orgUnit: string,
-        countryCode: string
+        countryCode: string,
+        dryRun: boolean
     ): FutureData<ImportSummary> {
         return this.risDataRepository
             .get(inputFile)
@@ -122,7 +123,7 @@ export class ImportRISFileUseCase implements UseCase {
 
                 const uniqueAOCs = _.uniq(finalDataValues.map(el => el.attributeOptionCombo || ""));
 
-                return this.dataValuesRepository.save(finalDataValues, action).flatMap(saveSummary => {
+                return this.dataValuesRepository.save(finalDataValues, action, dryRun).flatMap(saveSummary => {
                     return this.metadataRepository
                         .validateDataSet(AMR_AMR_DS_INPUT_FILES_RIS_DS_ID, year.toString(), orgUnit, uniqueAOCs)
                         .map(validationResponse => {
