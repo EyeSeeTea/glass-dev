@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { TableBody, TableCell, TableRow, Button, DialogContent, Typography, DialogActions } from "@material-ui/core";
+import { Backdrop, TableBody, TableCell, TableRow, Button, DialogContent, Typography } from "@material-ui/core";
 import styled from "styled-components";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import dayjs from "dayjs";
@@ -15,6 +15,7 @@ import { useStatusDataSubmission } from "../../hooks/useStatusDataSubmission";
 import { useCurrentModuleContext } from "../../contexts/current-module-context";
 import { useLocation } from "react-router-dom";
 import { useGlassCaptureAccess } from "../../hooks/useGlassCaptureAccess";
+import { StyledLoaderContainer } from "../upload/ConsistencyChecks";
 
 export interface UploadsTableBodyProps {
     rows?: UploadsDataItem[];
@@ -72,6 +73,7 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
     //2. Delete corresponding document from DHIS
     //3. Delete corresponding 'upload' and 'document' from Datastore
     const deleteDataset = () => {
+        hideConfirmationDialog();
         if (rowToDelete) {
             //Ris file is mandatory, so there will be a ris file with given batch id.
             const risFileToDelete = rows
@@ -180,13 +182,16 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
     };
     return (
         <>
-            {loading && (
-                <TableRow>
-                    <TableCell>
-                        <CircularProgress size={25} />
-                    </TableCell>
-                </TableRow>
-            )}
+            <Backdrop open={loading} style={{ color: "#fff", zIndex: 1 }}>
+                <StyledLoaderContainer>
+                    <CircularProgress color="#fff" size={50} />
+                    <Typography variant="h6">{i18n.t("Deleting Files")}</Typography>
+                    <Typography variant="h5">
+                        {i18n.t("This might take several minutes, do not refresh the page or press back.")}
+                    </Typography>
+                </StyledLoaderContainer>
+            </Backdrop>
+
             <ConfirmationDialog
                 isOpen={open}
                 title={i18n.t("Confirm Delete")}
@@ -204,7 +209,6 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                         )}
                     </Typography>
                 </DialogContent>
-                <DialogActions>{loading && <CircularProgress size={25} />}</DialogActions>
             </ConfirmationDialog>
             {rows && rows.length ? (
                 <StyledTableBody>
@@ -222,7 +226,7 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                                 </Button>
                             </TableCell>
                             <TableCell>
-                                {currentDataSubmissionStatus.kind === "loaded" && (
+                                {currentDataSubmissionStatus.kind === "loaded" ? (
                                     <Button
                                         onClick={() => showConfirmationDialog(row)}
                                         disabled={
@@ -232,6 +236,8 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                                     >
                                         <DeleteOutline />
                                     </Button>
+                                ) : (
+                                    <CircularProgress size={20} />
                                 )}
                             </TableCell>
                         </TableRow>
