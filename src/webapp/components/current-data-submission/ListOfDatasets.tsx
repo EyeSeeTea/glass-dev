@@ -51,7 +51,6 @@ export const ListOfDatasets: React.FC = () => {
                 <UploadsTable
                     title={i18n.t("Uploads with errors, or discarded")}
                     items={getNotCompletedUploads(uploads)}
-                    className="error-group"
                     refreshUploads={refreshUploads}
                 />
                 {hasCurrentUserCaptureAccess &&
