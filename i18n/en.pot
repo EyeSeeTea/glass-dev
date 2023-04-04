@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2023-04-04T08:23:59.170Z\n"
-"PO-Revision-Date: 2023-04-04T08:23:59.170Z\n"
+"POT-Creation-Date: 2023-04-04T08:26:47.903Z\n"
+"PO-Revision-Date: 2023-04-04T08:26:47.903Z\n"
 
 msgid "Error saving registration status"
 msgstr ""
@@ -464,12 +464,6 @@ msgid "Date"
 msgstr ""
 
 msgid "Filename"
-msgstr ""
-
-msgid "Input Line Nb"
-msgstr ""
-
-msgid "Output Line Nb"
 msgstr ""
 
 msgid "Country Information"
