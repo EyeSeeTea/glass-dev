@@ -39,9 +39,10 @@ export const UploadSteps: React.FC<UploadStepsProps> = ({
                 <Button onClick={() => setCurrentStep(2)} className={currentStep === 2 ? "current" : ""}>
                     {i18n.t("Questionnaires")}
                 </Button>
-                <Button onClick={() => setCurrentStep(3)} className={currentStep === 3 ? "current" : ""}>
+                {/* TO DO : Hide Validations Tab until implementation is completed. */}
+                {/* <Button onClick={() => setCurrentStep(3)} className={currentStep === 3 ? "current" : ""}>
                     {i18n.t("Validation")}
-                </Button>
+                </Button> */}
                 {/* Do not show Advanced tab, if the user does not have capture access or if the current status is not in edit mode */}
                 {hasCurrentUserCaptureAccess && !isEditModeStatus(currentDataSubmissionStatus.title) && (
                     <Button onClick={() => setCurrentStep(4)} className={currentStep === 4 ? "current" : ""}>
