@@ -18,12 +18,13 @@ export function mapModuleToMenu(module: GlassModule): Menu {
                 title: "Current Data Submission",
                 path: `/current-data-submission`,
             },
-            {
-                kind: "MenuLeaf",
-                level: 0,
-                title: "Reports",
-                path: `/reports`,
-            },
+            // TO DO : Hide Reports Menu until implementation is completed.
+            // {
+            //     kind: "MenuLeaf",
+            //     level: 0,
+            //     title: "Reports",
+            //     path: `/reports`,
+            // },
             {
                 kind: "MenuLeaf",
                 level: 0,
