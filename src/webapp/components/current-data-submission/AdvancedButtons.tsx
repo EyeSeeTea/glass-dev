@@ -3,7 +3,6 @@ import { Button } from "@material-ui/core";
 import styled from "styled-components";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
-import { useGlassCaptureAccess } from "../../hooks/useGlassCaptureAccess";
 import { useAppContext } from "../../contexts/app-context";
 import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context";
 import { useCurrentModuleContext } from "../../contexts/current-module-context";
@@ -11,9 +10,6 @@ import { useLocation } from "react-router-dom";
 import { useCurrentDataSubmissionId } from "../../hooks/useCurrentDataSubmissionId";
 import { DataSubmissionStatusTypes } from "../../../domain/entities/GlassDataSubmission";
 import { CircularProgress } from "material-ui";
-import { useStatusDataSubmission } from "../../hooks/useStatusDataSubmission";
-import { isEditModeStatus } from "../../utils/editModeStatus";
-import { ContentLoader } from "../content-loader/ContentLoader";
 
 interface AdvancedButtonsProps {
     setRefetchStatus: Dispatch<SetStateAction<DataSubmissionStatusTypes | undefined>>;
@@ -34,15 +30,7 @@ export const AdvancedButtons: React.FC<AdvancedButtonsProps> = ({ setRefetchStat
         currentOrgUnitAccess.orgUnitId,
         year
     );
-
-    const hasCurrentUserCaptureAccess = useGlassCaptureAccess();
     const [loading, setLoading] = useState<boolean>(false);
-
-    const currentDataSubmissionStatus = useStatusDataSubmission(
-        currentModuleAccess.moduleId,
-        currentOrgUnitAccess.orgUnitId,
-        year
-    );
 
     const requestDatasetUpdate = () => {
         setLoading(true);
@@ -59,26 +47,15 @@ export const AdvancedButtons: React.FC<AdvancedButtonsProps> = ({ setRefetchStat
     };
 
     return (
-        <ContentLoader content={currentDataSubmissionStatus}>
-            <ContentWrapper className="cta-buttons">
-                <div>
-                    {currentDataSubmissionStatus.kind === "loaded" && (
-                        <Button
-                            variant="contained"
-                            color="primary"
-                            disabled={
-                                !hasCurrentUserCaptureAccess || isEditModeStatus(currentDataSubmissionStatus.data.title)
-                            }
-                            onClick={requestDatasetUpdate}
-                        >
-                            {i18n.t("Request Dataset update")}
-                        </Button>
-                    )}
-                </div>
+        <ContentWrapper className="cta-buttons">
+            <div>
+                <Button variant="contained" color="primary" onClick={requestDatasetUpdate}>
+                    {i18n.t("Request Dataset update")}
+                </Button>
+            </div>
 
-                {loading && <CircularProgress size={25} />}
-            </ContentWrapper>
-        </ContentLoader>
+            {loading && <CircularProgress size={25} />}
+        </ContentWrapper>
     );
 };
 
