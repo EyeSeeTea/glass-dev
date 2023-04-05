@@ -65,7 +65,7 @@ export class ImportSampleFileUseCase implements UseCase {
                                 risData[category.code as keyof SampleData].toString()
                             );
 
-                            const attributeOptionCombo = getCategoryOptionComboByOptionCodes(
+                            const { categoryOptionComboId: attributeOptionCombo } = getCategoryOptionComboByOptionCodes(
                                 dataSet_CC,
                                 dataSetCategoryOptionValues
                             );
