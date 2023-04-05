@@ -20,7 +20,7 @@ export function getCategoryOptionComboByDataElement(
               externalData.GENDER.replace("UNK", "UNKG"),
               externalData.ORIGIN.replace("UNK", "UNKO"),
               externalData.AGEGROUP.replace("UNK", "UNKA"),
-          ]);
+          ]).categoryOptionComboId;
 }
 
 export function getCategoryOptionComboByOptionCodes(categoryCombo: CategoryCombo, codes: string[]) {
@@ -30,12 +30,11 @@ export function getCategoryOptionComboByOptionCodes(categoryCombo: CategoryCombo
     );
 
     if (!categoryOptionCombo) {
-        /* eslint-disable no-console */
-        console.error(
-            `categoryOptionCombos not found in categoryCombo ${categoryCombo.name} for codes: ${codes.join(",")}`
-        );
-        return "";
+        const errorMessage = `categoryOptionCombos not found in categoryCombo ${
+            categoryCombo.name
+        } for codes: ${codes.join(",")}`;
+        return { categoryOptionComboId: "", error: errorMessage };
     }
 
-    return categoryOptionCombo.id;
+    return { categoryOptionComboId: categoryOptionCombo.id, error: "" };
 }
