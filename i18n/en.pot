@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2023-04-05T12:24:35.029Z\n"
-"PO-Revision-Date: 2023-04-05T12:24:35.030Z\n"
+"POT-Creation-Date: 2023-04-05T13:13:51.384Z\n"
+"PO-Revision-Date: 2023-04-05T13:13:51.384Z\n"
 
 msgid "Error saving registration status"
 msgstr ""
@@ -67,10 +67,13 @@ msgstr ""
 msgid "Correct Uploads"
 msgstr ""
 
-msgid "Uploads with errors, or discarded"
+msgid "Upload Dataset"
 msgstr ""
 
-msgid "Add new datasets"
+msgid "You can add up to 6 datasets to this submission with different BATCH IDS."
+msgstr ""
+
+msgid "Uploads with errors, or discarded"
 msgstr ""
 
 msgid "There are no questionnaries for this module"
