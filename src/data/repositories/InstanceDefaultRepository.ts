@@ -101,12 +101,30 @@ export class InstanceDefaultRepository implements InstanceRepository {
                         code: true,
                         children: true,
                         level: true,
+                        parent: {
+                            id: true,
+                            code: true,
+                        },
                     },
-                    dataViewOrganisationUnits: { id: true, name: true, code: true, level: true },
+                    dataViewOrganisationUnits: {
+                        id: true,
+                        name: true,
+                        code: true,
+                        level: true,
+                        parent: {
+                            id: true,
+                            code: true,
+                        },
+                    },
                 },
             })
         ).flatMap(user => {
             const { organisationUnits, dataViewOrganisationUnits } = user;
+
+            const filteredOrgUnits = organisationUnits.filter(ou => ou.code !== "NA" && ou.parent?.code !== "NA");
+            const filteredDataViewOrgUnits = dataViewOrganisationUnits.filter(
+                ou => ou.code !== "NA" && ou.parent?.code !== "NA"
+            );
 
             const countryOrgUnits: { name: string; id: string; code: string }[] = [];
             const dataViewCountryOrgUnits: { name: string; id: string; code: string }[] = [];
@@ -114,14 +132,14 @@ export class InstanceDefaultRepository implements InstanceRepository {
             return this.dataStoreClient.getObject(DataStoreKeys.GENERAL).flatMap(generalInfo => {
                 const countryLevel = (generalInfo as GeneralInfoType).countryLevel;
 
-                organisationUnits.forEach(orgUnit => {
-                    if (orgUnit.level === countryLevel) {
+                filteredOrgUnits.forEach(orgUnit => {
+                    if (orgUnit.level === countryLevel && orgUnit.parent.code !== "NA") {
                         countryOrgUnits.push({ name: orgUnit.name, id: orgUnit.id, code: orgUnit.code });
                     }
                 });
 
-                dataViewOrganisationUnits.forEach(dataViewOrgUnit => {
-                    if (dataViewOrgUnit.level === countryLevel) {
+                filteredDataViewOrgUnits.forEach(dataViewOrgUnit => {
+                    if (dataViewOrgUnit.level === countryLevel && dataViewOrgUnit.parent.code !== "NA") {
                         dataViewCountryOrgUnits.push({
                             name: dataViewOrgUnit.name,
                             id: dataViewOrgUnit.id,
@@ -130,8 +148,8 @@ export class InstanceDefaultRepository implements InstanceRepository {
                     }
                 });
 
-                return this.getAllCountryOrgUnits(organisationUnits, countryLevel).flatMap(childrenOrgUnits => {
-                    return this.getAllCountryOrgUnits(dataViewOrganisationUnits, countryLevel).flatMap(
+                return this.getAllCountryOrgUnits(filteredOrgUnits, countryLevel).flatMap(childrenOrgUnits => {
+                    return this.getAllCountryOrgUnits(filteredDataViewOrgUnits, countryLevel).flatMap(
                         childrenDataViewOrgUnits => {
                             const uniqueOrgUnits = _.uniqBy([...countryOrgUnits, ...childrenOrgUnits], "id");
                             const uniqueDataViewOrgUnits = _.uniqBy(
@@ -170,14 +188,16 @@ export class InstanceDefaultRepository implements InstanceRepository {
     ): FutureData<{ name: string; id: string; code: string }[]> {
         const result: { name: string; id: string; code: string }[] = [];
 
+        const filteredOrgUnits = orgUnits.filter(ou => ou.code !== "NA");
+
         const recursiveGetOrgUnits = (
-            orgUnits: { name: string; id: string; code: string }[],
+            filteredOrgUnits: { name: string; id: string; code: string }[],
             countryLevel: number
         ): FutureData<{ name: string; id: string; code: string }[]> => {
             const childrenOrgUnits = apiToFuture(
                 this.api.models.organisationUnits.get({
                     filter: {
-                        "parent.id": { in: orgUnits.map(ou => ou.id) },
+                        "parent.id": { in: filteredOrgUnits.map(ou => ou.id) },
                         level: { le: countryLevel.toString() },
                     },
                     fields: {
@@ -207,7 +227,7 @@ export class InstanceDefaultRepository implements InstanceRepository {
             });
         };
 
-        return recursiveGetOrgUnits(orgUnits, countryLevel).flatMap(orgUnits => {
+        return recursiveGetOrgUnits(filteredOrgUnits, countryLevel).flatMap(orgUnits => {
             return Future.success(orgUnits);
         });
     }
