@@ -44,11 +44,13 @@ export const UploadSteps: React.FC<UploadStepsProps> = ({
                     {i18n.t("Validation")}
                 </Button> */}
                 {/* Do not show Advanced tab, if the user does not have capture access or if the current status is not in edit mode */}
-                {hasCurrentUserCaptureAccess && !isEditModeStatus(currentDataSubmissionStatus.title) && (
-                    <Button onClick={() => setCurrentStep(4)} className={currentStep === 4 ? "current" : ""}>
-                        {i18n.t("Advanced")}
-                    </Button>
-                )}
+                {hasCurrentUserCaptureAccess &&
+                    !isEditModeStatus(currentDataSubmissionStatus.title) &&
+                    currentDataSubmissionStatus.title !== "WAITING for WHO TO ACCEPT THE DATA UPDATE REQUEST" && (
+                        <Button onClick={() => setCurrentStep(4)} className={currentStep === 4 ? "current" : ""}>
+                            {i18n.t("Advanced")}
+                        </Button>
+                    )}
             </div>
             {renderTypeContent(currentStep, moduleName, currentDataSubmissionStatus, setRefetchStatus, setCurrentStep)}
         </ContentWrapper>
