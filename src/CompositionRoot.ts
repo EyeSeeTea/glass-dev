@@ -16,7 +16,6 @@ import { GetGlassUploadsUseCase } from "./domain/usecases/GetGlassUploadsUseCase
 import { GetInstanceVersionUseCase } from "./domain/usecases/GetInstanceVersionUseCase";
 import { ValidateGlassModulesUseCase } from "./domain/usecases/ValidateGlassModulesUseCase";
 import { ValidateGlassNewsUseCase } from "./domain/usecases/ValidateGlassNewsUseCase";
-import { ValidateGlassUploadsUseCase } from "./domain/usecases/ValidateGlassUploadsUseCase";
 import { GetDataSubmissionsByModuleAndOUUseCase } from "./domain/usecases/GetDataSubmissionsByModuleAndOUUseCase";
 import { GetGlassDocumentsUseCase } from "./domain/usecases/GetGlassDocumentsUseCase";
 import { ValidateGlassDocumentsUseCase } from "./domain/usecases/ValidateGlassDocumentsUseCase";
@@ -93,7 +92,6 @@ export function getCompositionRoot(instance: Instance) {
         }),
         glassUploads: getExecute({
             getAll: new GetGlassUploadsUseCase(glassUploadsRepository),
-            validate: new ValidateGlassUploadsUseCase(glassUploadsRepository),
             setStatus: new SetUploadStatusUseCase(glassUploadsRepository),
             getByDataSubmission: new GetGlassUploadsByDataSubmissionUseCase(glassUploadsRepository),
             getByModuleOU: new GetGlassUploadsByModuleOUUseCase(glassUploadsRepository),
