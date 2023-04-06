@@ -5,15 +5,13 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2023-04-05T13:13:51.384Z\n"
-"PO-Revision-Date: 2023-04-05T13:13:51.384Z\n"
+"POT-Creation-Date: 2023-04-06T09:18:42.510Z\n"
+"PO-Revision-Date: 2023-04-06T09:18:42.510Z\n"
 
 msgid "Error saving registration status"
 msgstr ""
 
-msgid ""
-"The AST results provided are not valid (either they are all empty or equal "
-"to 0)"
+msgid "The AST results provided are not valid (they are all empty)"
 msgstr ""
 
 msgid "User Profile"
