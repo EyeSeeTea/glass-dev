@@ -49,6 +49,7 @@ import { DownloadDocumentUseCase } from "./domain/usecases/DownloadDocumentUseCa
 import { ValidateRISFileUseCase } from "./domain/usecases/data-entry/ValidateRISFileUseCase";
 import { ValidateSampleFileUseCase } from "./domain/usecases/data-entry/ValidateSampleFileUseCase";
 import { SaveDataSubmissionsUseCase } from "./domain/usecases/SaveDataSubmissionsUseCase";
+import { UpdateSampleUploadWithRisIdUseCase } from "./domain/usecases/UpdateSampleUploadWithRisIdUseCase";
 
 export function getCompositionRoot(instance: Instance) {
     const api = getD2APiFromInstance(instance);
@@ -104,6 +105,7 @@ export function getCompositionRoot(instance: Instance) {
             upload: new UploadDocumentUseCase(glassDocumentsRepository, glassUploadsRepository),
             deleteByUploadId: new DeleteDocumentInfoByUploadIdUseCase(glassDocumentsRepository, glassUploadsRepository),
             download: new DownloadDocumentUseCase(glassDocumentsRepository),
+            updateSampleFileWithRisId: new UpdateSampleUploadWithRisIdUseCase(glassUploadsRepository),
         }),
         dataSubmision: getExecute({
             RISFile: new ImportRISFileUseCase(
