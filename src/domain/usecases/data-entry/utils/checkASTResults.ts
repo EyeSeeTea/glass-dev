@@ -6,15 +6,15 @@ export function checkASTResults(risData: RISData[]): ConsistencyError[] {
     const errors = _(
         risData.map((item, index) => {
             if (
-                (item.RESISTANT === 0 || !item.RESISTANT) &&
-                (item.INTERMEDIATE === 0 || !item.INTERMEDIATE) &&
-                (item.SUSCEPTIBLE === 0 || !item.SUSCEPTIBLE) &&
-                (item.NONSUSCEPTIBLE === 0 || !item.NONSUSCEPTIBLE) &&
-                (item.UNKNOWN_NO_AST === 0 || !item.UNKNOWN_NO_AST) &&
-                (item.UNKNOWN_NO_BREAKPOINTS === 0 || !item.UNKNOWN_NO_BREAKPOINTS)
+                item.RESISTANT === null &&
+                item.INTERMEDIATE === null &&
+                item.SUSCEPTIBLE === null &&
+                item.NONSUSCEPTIBLE === null &&
+                item.UNKNOWN_NO_AST === null &&
+                item.UNKNOWN_NO_BREAKPOINTS === null
             ) {
                 return {
-                    error: i18n.t(`The AST results provided are not valid (either they are all empty or equal to 0)`),
+                    error: i18n.t(`The AST results provided are not valid (they are all empty)`),
                     line: index + 1,
                 };
             }
