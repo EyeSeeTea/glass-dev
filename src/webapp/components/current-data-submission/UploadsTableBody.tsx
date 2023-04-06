@@ -104,19 +104,26 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                 }).run(
                     ({ risFileDownload, sampleFileDownload }) => {
                         const risFile = new File([risFileDownload], risFileToDelete.fileName);
+                        //If the file is in uploaded status then, data vales have not been imported.
+                        //No need for deletion
 
                         Future.joinObj({
-                            deleteRisFileSummary: compositionRoot.dataSubmision.RISFile(
-                                risFile,
-                                risFileToDelete.batchId,
-                                parseInt(risFileToDelete.period),
-                                "DELETES",
-                                orgUnitId,
-                                risFileToDelete.countryCode,
-                                false
-                            ),
+                            deleteRisFileSummary:
+                                risFileToDelete.status.toLowerCase() !== "uploaded"
+                                    ? compositionRoot.dataSubmision.RISFile(
+                                          risFile,
+                                          risFileToDelete.batchId,
+                                          parseInt(risFileToDelete.period),
+                                          "DELETES",
+                                          orgUnitId,
+                                          risFileToDelete.countryCode,
+                                          false
+                                      )
+                                    : Future.success(undefined),
                             deleteSampleFileSummary:
-                                sampleFileToDelete && sampleFileDownload
+                                sampleFileToDelete &&
+                                sampleFileToDelete.status.toLowerCase() !== "uploaded" &&
+                                sampleFileDownload
                                     ? compositionRoot.dataSubmision.sampleFile(
                                           new File([sampleFileDownload], sampleFileToDelete.fileName),
                                           sampleFileToDelete.batchId,
@@ -129,15 +136,17 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                                     : Future.success(undefined),
                         }).run(
                             ({ deleteRisFileSummary, deleteSampleFileSummary }) => {
-                                let message = `${deleteRisFileSummary.importCount.deleted} data values deleted for RIS file`;
+                                if (deleteRisFileSummary) {
+                                    let message = `${deleteRisFileSummary.importCount.deleted} data values deleted for RIS file`;
 
-                                if (sampleFileToDelete && deleteSampleFileSummary) {
-                                    message =
-                                        message +
-                                        ` and ${deleteSampleFileSummary.importCount.deleted} data values deleted for SAMPLE file.`;
+                                    if (sampleFileToDelete && deleteSampleFileSummary) {
+                                        message =
+                                            message +
+                                            ` and ${deleteSampleFileSummary.importCount.deleted} data values deleted for SAMPLE file.`;
+                                    }
+
+                                    snackbar.info(message);
                                 }
-
-                                snackbar.info(message);
 
                                 compositionRoot.glassDocuments.deleteByUploadId(risFileToDelete.id).run(
                                     () => {
