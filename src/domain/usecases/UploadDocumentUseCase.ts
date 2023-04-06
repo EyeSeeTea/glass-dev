@@ -25,7 +25,6 @@ export class UploadDocumentUseCase implements UseCase {
 
     public execute({ file, data }: UploadType): FutureData<string> {
         return this.glassDocumentsRepository.save(file).flatMap(fileId => {
-            //TODO: Hardcoded values to be replaced when we have the full scope of dynamic values
             const upload = {
                 id: generateUid(),
                 batchId: data.batchId,
@@ -43,6 +42,7 @@ export class UploadDocumentUseCase implements UseCase {
                 uploadDate: new Date().toISOString(),
                 orgUnit: data.orgUnit,
                 records: data.records,
+                correspondingRisUploadId: "",
             };
             return this.glassUploadsRepository.save(upload).flatMap(() => Future.success(upload.id));
         });

@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: i18next-conv\n"
-"POT-Creation-Date: 2023-04-06T09:18:42.510Z\n"
+"POT-Creation-Date: 2023-04-06T19:12:15.810Z\n"
 "PO-Revision-Date: 2018-10-25T09:02:35.143Z\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -350,15 +350,15 @@ msgstr ""
 msgid "Info abou the previously updated quarter and the missing quarters"
 msgstr ""
 
-msgid "Performing a dry run of the import to ensure that there are no errors."
+msgid "Importing data and applying validation rules"
 msgstr ""
 
 msgid "These Consistency Checks ensure that incorrect data is not imported."
 msgstr ""
 
 msgid ""
-"Both Validations specified by validation rules and custom validations are "
-"complete. "
+"Custom validations are complete, validation rules will be run after the "
+"actual import is completed. "
 msgstr ""
 
 msgid ""
@@ -386,9 +386,6 @@ msgstr ""
 msgid "Non-blocking warnings"
 msgstr ""
 
-msgid "Importing data"
-msgstr ""
-
 msgid "Summary"
 msgstr ""
 
@@ -411,6 +408,9 @@ msgid "OK"
 msgstr ""
 
 msgid "Error fetching previous uploads."
+msgstr ""
+
+msgid "Performing a dry run of the import to ensure that there are no errors."
 msgstr ""
 
 msgid "Choose a Dataset"
