@@ -14,4 +14,5 @@ export interface UploadsDataItem {
     dataSubmission: string;
     module: string;
     records: number;
+    correspondingRisFileUploadId: string;
 }

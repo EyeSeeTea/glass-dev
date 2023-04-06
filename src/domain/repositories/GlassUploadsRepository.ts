@@ -9,4 +9,5 @@ export interface GlassUploadsRepository {
     delete(id: string): FutureData<string>;
     getUploadsByModuleOU(module: string, orgUnit: string): FutureData<GlassUploads[]>;
     getUploadsByModuleOUPeriod(module: string, orgUnit: string, period: string): FutureData<GlassUploads[]>;
+    updateSampleUploadWithRisIdUseCase(sampleUploadId: string, risUploadId: string): FutureData<void>;
 }

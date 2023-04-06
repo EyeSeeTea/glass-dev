@@ -37,7 +37,7 @@ interface UploadFilesProps {
     setSampleFileImportSummary: React.Dispatch<React.SetStateAction<ImportSummary | undefined>>;
 }
 
-const COMPLETED_STATUS = "COMPLETED";
+const UPLOADED_STATUS = "uploaded";
 
 const datasetOptions = [
     {
@@ -84,6 +84,7 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
     const [previousUploadsBatchIds, setPreviousUploadsBatchIds] = useState<string[]>([]);
     const [hasSampleFile, setHasSampleFile] = useState<boolean>(false);
     const [importLoading, setImportLoading] = useState<boolean>(false);
+    const [previousBatchIdsLoading, setPreviousBatchIdsLoading] = useState<boolean>(true);
 
     const {
         currentModuleAccess: { moduleId, moduleName },
@@ -96,23 +97,30 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
     const dataSubmissionId = useCurrentDataSubmissionId(compositionRoot, moduleId, orgUnitId, currentPeriod);
 
     useEffect(() => {
-        compositionRoot.glassUploads.getByDataSubmission(dataSubmissionId).run(
-            uploads => {
-                const uniquePreviousBatchIds = [
-                    ...new Set(
-                        uploads.filter(upload => upload.status === COMPLETED_STATUS).map(upload => upload.batchId)
-                    ),
-                ];
-                setPreviousUploadsBatchIds(uniquePreviousBatchIds);
-                const firstSelectableBatchId = datasetOptions.find(
-                    ({ value }) => !uniquePreviousBatchIds.includes(value)
-                )?.value;
-                setBatchId(firstSelectableBatchId || "");
-            },
-            () => {
-                snackbar.error(i18n.t("Error fetching previous uploads."));
-            }
-        );
+        setPreviousBatchIdsLoading(true);
+        if (dataSubmissionId !== "") {
+            compositionRoot.glassUploads.getByDataSubmission(dataSubmissionId).run(
+                uploads => {
+                    const uniquePreviousBatchIds = [
+                        ...new Set(
+                            uploads
+                                .filter(upload => upload.status.toLowerCase() !== UPLOADED_STATUS)
+                                .map(upload => upload.batchId)
+                        ),
+                    ];
+                    setPreviousUploadsBatchIds(uniquePreviousBatchIds);
+                    const firstSelectableBatchId = datasetOptions.find(
+                        ({ value }) => !uniquePreviousBatchIds.includes(value)
+                    )?.value;
+                    setBatchId(firstSelectableBatchId || "");
+                    setPreviousBatchIdsLoading(false);
+                },
+                () => {
+                    snackbar.error(i18n.t("Error fetching previous uploads."));
+                    setPreviousBatchIdsLoading(false);
+                }
+            );
+        }
     }, [compositionRoot.glassUploads, dataSubmissionId, setBatchId, snackbar]);
 
     useEffect(() => {
@@ -139,7 +147,6 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
     const uploadDatasetsAsDryRun = useCallback(() => {
         if (risFile && moduleName === "AMR") {
             setImportLoading(true);
-
             Future.joinObj({
                 importRISFileSummary: compositionRoot.dataSubmision.RISFile(
                     risFile,
@@ -200,9 +207,23 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
     const continueClick = () => {
         if (!hasSampleFile) {
             localStorage.removeItem("sampleUploadId");
+            uploadDatasetsAsDryRun();
         }
-
-        uploadDatasetsAsDryRun();
+        //update the sample file with ris file upload id.
+        else {
+            setImportLoading(true);
+            const risUploadId = localStorage.getItem("risUploadId");
+            const sampleUploadId = localStorage.getItem("sampleUploadId");
+            if (sampleUploadId && risUploadId)
+                compositionRoot.glassDocuments.updateSampleFileWithRisId(sampleUploadId, risUploadId).run(
+                    () => {
+                        uploadDatasetsAsDryRun();
+                    },
+                    () => {
+                        console.debug("Error updating datastore");
+                    }
+                );
+        }
     };
 
     return (
@@ -218,59 +239,74 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
                     </Typography>
                 </StyledLoaderContainer>
             </Backdrop>
-            <div className="file-fields">
-                <UploadRis validate={setIsFileValid} batchId={batchId} risFile={risFile} setRisFile={setRisFile} />
+            {previousBatchIdsLoading ? (
+                <CircularProgress size={25} />
+            ) : (
+                <>
+                    <div className="file-fields">
+                        <UploadRis
+                            validate={setIsFileValid}
+                            batchId={batchId}
+                            risFile={risFile}
+                            setRisFile={setRisFile}
+                        />
 
-                <UploadSample
-                    batchId={batchId}
-                    sampleFile={sampleFile}
-                    setSampleFile={setSampleFile}
-                    setHasSampleFile={setHasSampleFile}
-                />
-            </div>
-
-            <div className="batch-id">
-                <h3>{i18n.t("Batch ID")}</h3>
-                <FormControl variant="outlined" style={{ minWidth: 180 }}>
-                    <InputLabel id="dataset-label">{i18n.t("Choose a Dataset")}</InputLabel>
-                    <Select
-                        value={batchId}
-                        onChange={changeBatchId}
-                        label={i18n.t("Choose a Dataset")}
-                        labelId="dataset-label"
-                    >
-                        {datasetOptions.map(({ label, value }) => (
-                            <MenuItem key={value} value={value} disabled={previousUploadsBatchIds.includes(value)}>
-                                {i18n.t(label)}
-                            </MenuItem>
-                        ))}
-                    </Select>
-                </FormControl>
-            </div>
-
-            <div className="bottom">
-                {previousUploadsBatchIds.length !== 0 && (
-                    <div className="previous-list">
-                        <h4>{i18n.t("You Previously Submitted:")} </h4>
-                        <ul>
-                            {previousUploadsBatchIds.map(batchId => (
-                                <li key={batchId}>{`Batch Id ${batchId}`}</li>
-                            ))}
-                        </ul>
+                        <UploadSample
+                            batchId={batchId}
+                            sampleFile={sampleFile}
+                            setSampleFile={setSampleFile}
+                            setHasSampleFile={setHasSampleFile}
+                        />
                     </div>
-                )}
 
-                <Button
-                    variant="contained"
-                    color={isValidated ? "primary" : "default"}
-                    disabled={isValidated ? false : true}
-                    endIcon={<ChevronRightIcon />}
-                    disableElevation
-                    onClick={continueClick}
-                >
-                    {i18n.t("Continue")}
-                </Button>
-            </div>
+                    <div className="batch-id">
+                        <h3>{i18n.t("Batch ID")}</h3>
+                        <FormControl variant="outlined" style={{ minWidth: 180 }}>
+                            <InputLabel id="dataset-label">{i18n.t("Choose a Dataset")}</InputLabel>
+                            <Select
+                                value={batchId}
+                                onChange={changeBatchId}
+                                label={i18n.t("Choose a Dataset")}
+                                labelId="dataset-label"
+                            >
+                                {datasetOptions.map(({ label, value }) => (
+                                    <MenuItem
+                                        key={value}
+                                        value={value}
+                                        disabled={previousUploadsBatchIds.includes(value)}
+                                    >
+                                        {i18n.t(label)}
+                                    </MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
+                    </div>
+
+                    <div className="bottom">
+                        {previousUploadsBatchIds.length > 0 && (
+                            <div className="previous-list">
+                                <h4>{i18n.t("You Previously Submitted:")} </h4>
+                                <ul>
+                                    {previousUploadsBatchIds.map(batchId => (
+                                        <li key={batchId}>{`Batch Id ${batchId}`}</li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
+
+                        <Button
+                            variant="contained"
+                            color={isValidated ? "primary" : "default"}
+                            disabled={isValidated ? false : true}
+                            endIcon={<ChevronRightIcon />}
+                            disableElevation
+                            onClick={continueClick}
+                        >
+                            {i18n.t("Continue")}
+                        </Button>
+                    </div>
+                </>
+            )}
         </ContentWrapper>
     );
 };

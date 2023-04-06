@@ -15,4 +15,5 @@ export interface GlassUploads {
     module: string;
     orgUnit: string;
     records: number;
+    correspondingRisFileUploadId: string;
 }
