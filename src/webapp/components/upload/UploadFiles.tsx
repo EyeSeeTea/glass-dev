@@ -1,5 +1,14 @@
-import React, { useEffect, useState } from "react";
-import { Button, FormControl, InputLabel, MenuItem, Select } from "@material-ui/core";
+import React, { useCallback, useEffect, useState } from "react";
+import {
+    Backdrop,
+    Button,
+    CircularProgress,
+    FormControl,
+    InputLabel,
+    MenuItem,
+    Select,
+    Typography,
+} from "@material-ui/core";
 import styled from "styled-components";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
@@ -12,6 +21,9 @@ import { useCurrentModuleContext } from "../../contexts/current-module-context";
 import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context";
 import { useCurrentPeriodContext } from "../../contexts/current-period-context";
 import { useSnackbar } from "@eyeseetea/d2-ui-components";
+import { Future } from "../../../domain/entities/Future";
+import { ImportSummary } from "../../../domain/entities/data-entry/ImportSummary";
+import { StyledLoaderContainer } from "./ConsistencyChecks";
 
 interface UploadFilesProps {
     changeStep: (step: number) => void;
@@ -21,6 +33,8 @@ interface UploadFilesProps {
     setSampleFile: React.Dispatch<React.SetStateAction<File | null>>;
     batchId: string;
     setBatchId: React.Dispatch<React.SetStateAction<string>>;
+    setRISFileImportSummary: React.Dispatch<React.SetStateAction<ImportSummary | undefined>>;
+    setSampleFileImportSummary: React.Dispatch<React.SetStateAction<ImportSummary | undefined>>;
 }
 
 const COMPLETED_STATUS = "COMPLETED";
@@ -60,6 +74,8 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
     setSampleFile,
     batchId,
     setBatchId,
+    setRISFileImportSummary,
+    setSampleFileImportSummary,
 }) => {
     const { compositionRoot } = useAppContext();
     const snackbar = useSnackbar();
@@ -67,12 +83,13 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
     const [isFileValid, setIsFileValid] = useState(false);
     const [previousUploadsBatchIds, setPreviousUploadsBatchIds] = useState<string[]>([]);
     const [hasSampleFile, setHasSampleFile] = useState<boolean>(false);
+    const [importLoading, setImportLoading] = useState<boolean>(false);
 
     const {
-        currentModuleAccess: { moduleId },
+        currentModuleAccess: { moduleId, moduleName },
     } = useCurrentModuleContext();
     const {
-        currentOrgUnitAccess: { orgUnitId },
+        currentOrgUnitAccess: { orgUnitId, orgUnitCode },
     } = useCurrentOrgUnitContext();
 
     const { currentPeriod } = useCurrentPeriodContext();
@@ -119,9 +136,88 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
             await compositionRoot.glassUploads.setBatchId({ id: sampleUploadId, batchId }).toPromise();
         }
     };
+    const uploadDatasetsAsDryRun = useCallback(() => {
+        if (risFile && moduleName === "AMR") {
+            setImportLoading(true);
+
+            Future.joinObj({
+                importRISFileSummary: compositionRoot.dataSubmision.RISFile(
+                    risFile,
+                    batchId,
+                    currentPeriod,
+                    "CREATE_AND_UPDATE",
+                    orgUnitId,
+                    orgUnitCode,
+                    true
+                ),
+                importSampleFileSummary: sampleFile
+                    ? compositionRoot.dataSubmision.sampleFile(
+                          sampleFile,
+                          batchId,
+                          currentPeriod,
+                          "CREATE_AND_UPDATE",
+                          orgUnitId,
+                          orgUnitCode,
+                          true
+                      )
+                    : Future.success(undefined),
+            }).run(
+                ({ importRISFileSummary, importSampleFileSummary }) => {
+                    setRISFileImportSummary(importRISFileSummary);
+
+                    if (importSampleFileSummary) {
+                        setSampleFileImportSummary(importSampleFileSummary);
+                    }
+                    setImportLoading(false);
+                    changeStep(2);
+                },
+                error => {
+                    setRISFileImportSummary({
+                        status: "ERROR",
+                        importCount: { ignored: 0, imported: 0, deleted: 0, updated: 0 },
+                        nonBlockingErrors: [],
+                        blockingErrors: [{ error: error, count: 1 }],
+                    });
+                    setImportLoading(false);
+                    changeStep(2);
+                }
+            );
+        }
+    }, [
+        batchId,
+        compositionRoot.dataSubmision,
+        moduleName,
+        orgUnitCode,
+        orgUnitId,
+        currentPeriod,
+        risFile,
+        sampleFile,
+        setRISFileImportSummary,
+        setSampleFileImportSummary,
+        changeStep,
+    ]);
+
+    const continueClick = () => {
+        if (!hasSampleFile) {
+            localStorage.removeItem("sampleUploadId");
+        }
+
+        uploadDatasetsAsDryRun();
+    };
 
     return (
         <ContentWrapper>
+            <Backdrop open={importLoading} style={{ color: "#fff", zIndex: 1 }}>
+                <StyledLoaderContainer>
+                    <CircularProgress color="inherit" size={50} />
+                    <Typography variant="h6">
+                        {i18n.t("Performing a dry run of the import to ensure that there are no errors.")}
+                    </Typography>
+                    <Typography variant="h5">
+                        {i18n.t("This might take several minutes, do not refresh the page or press back.")}
+                    </Typography>
+                </StyledLoaderContainer>
+            </Backdrop>
             <div className="file-fields">
                 <UploadRis validate={setIsFileValid} batchId={batchId} risFile={risFile} setRisFile={setRisFile} />
 
@@ -170,12 +266,7 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
                     disabled={isValidated ? false : true}
                     endIcon={<ChevronRightIcon />}
                     disableElevation
-                    onClick={() => {
-                        if (!hasSampleFile) {
-                            localStorage.removeItem("sampleUploadId");
-                        }
-                        changeStep(2);
-                    }}
+                    onClick={continueClick}
                 >
                     {i18n.t("Continue")}
                 </Button>
