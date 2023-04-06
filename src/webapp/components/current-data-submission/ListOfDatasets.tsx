@@ -23,7 +23,7 @@ function getCompletedUploads(upload: GlassUploadsState) {
 
 function getNotCompletedUploads(upload: GlassUploadsState) {
     if (upload.kind === "loaded") {
-        return upload.data.filter((row: UploadsDataItem) => row.status.toLowerCase() === "uploaded");
+        return upload.data.filter((row: UploadsDataItem) => row.status.toLowerCase() !== "completed");
     }
 }
 

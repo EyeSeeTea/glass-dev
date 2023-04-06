@@ -81,10 +81,32 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
                     if (importSampleFileSummary) {
                         setSampleFileImportSummary(importSampleFileSummary);
                     }
-                    setImportLoading(false);
 
                     if (importRISFileSummary.blockingErrors.length === 0) {
-                        changeStep(3);
+                        const risUploadId = localStorage.getItem("risUploadId");
+                        if (risUploadId) {
+                            compositionRoot.glassUploads.setStatus({ id: risUploadId, status: "VALIDATED" }).run(
+                                () => {
+                                    changeStep(3);
+                                    setImportLoading(false);
+                                },
+                                () => {
+                                    setImportLoading(false);
+                                }
+                            );
+                        }
+                    } else {
+                        const risUploadId = localStorage.getItem("risUploadId");
+                        if (risUploadId) {
+                            compositionRoot.glassUploads.setStatus({ id: risUploadId, status: "IMPORTED" }).run(
+                                () => {
+                                    setImportLoading(false);
+                                },
+                                () => {
+                                    setImportLoading(false);
+                                }
+                            );
+                        }
                     }
                 },
                 error => {
