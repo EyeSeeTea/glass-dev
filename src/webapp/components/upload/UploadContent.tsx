@@ -97,6 +97,8 @@ const renderStep = (
                     setRisFile={setRisFile}
                     sampleFile={sampleFile}
                     setSampleFile={setSampleFile}
+                    setRISFileImportSummary={setRISFileImportSummary}
+                    setSampleFileImportSummary={setSampleFileImportSummary}
                 />
             );
         case 2:
@@ -107,6 +109,8 @@ const renderStep = (
                         batchId={batchId}
                         risFile={risFile}
                         sampleFile={sampleFile}
+                        risFileImportSummary={risFileImportSummary}
+                        sampleFileImportSummary={sampleFileImportSummary}
                         setRISFileImportSummary={setRISFileImportSummary}
                         setSampleFileImportSummary={setSampleFileImportSummary}
                     />
@@ -117,9 +121,8 @@ const renderStep = (
             return (
                 <ReviewDataSummary
                     changeStep={changeStep}
-                    risFile={risFile}
-                    batchId={batchId}
-                    sampleFile={sampleFile}
+                    risFileImportSummary={risFileImportSummary}
+                    sampleFileImportSummary={sampleFileImportSummary}
                 />
             );
         case 4:

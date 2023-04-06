@@ -2,9 +2,9 @@ import { UseCase } from "../../CompositionRoot";
 import { FutureData } from "../entities/Future";
 import { GlassUploadsRepository } from "../repositories/GlassUploadsRepository";
 
-type SetUploadStatusType = {
+export type SetUploadStatusType = {
     id: string;
-    status: "UPLOADED" | "COMPLETED" | "ERROR UPLOADING";
+    status: "UPLOADED" | "IMPORTED" | "VALIDATED" | "COMPLETED" | "ERROR UPLOADING";
 };
 
 export class SetUploadStatusUseCase implements UseCase {
