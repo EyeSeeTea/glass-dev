@@ -80,12 +80,10 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
             //Sample file is optional and could be absent
             if (rowToDelete.fileType === "RIS") {
                 risFileToDelete = rowToDelete;
-                sampleFileToDelete = rows
-                    ?.filter(sample => sample.correspondingRisFileUploadId === rowToDelete.id)
-                    ?.at(0);
+                sampleFileToDelete = rows?.filter(sample => sample.correspondingRisUploadId === rowToDelete.id)?.at(0);
             } else {
                 sampleFileToDelete = rowToDelete;
-                risFileToDelete = rows?.filter(ris => ris.id === rowToDelete.correspondingRisFileUploadId)?.at(0);
+                risFileToDelete = rows?.filter(ris => ris.id === rowToDelete.correspondingRisUploadId)?.at(0);
             }
 
             if (risFileToDelete) {

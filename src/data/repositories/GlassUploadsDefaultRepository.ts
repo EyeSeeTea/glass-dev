@@ -32,11 +32,11 @@ export class GlassUploadsDefaultRepository implements GlassUploadsRepository {
         });
     }
 
-    updateSampleUploadWithRisIdUseCase(sampleUploadId: string, risUploadId: string): FutureData<void> {
+    updateSampleUploadWithRisId(sampleUploadId: string, risUploadId: string): FutureData<void> {
         return this.dataStoreClient.listCollection<GlassUploads>(DataStoreKeys.UPLOADS).flatMap(uploads => {
             const upload = uploads?.find(upload => upload.id === sampleUploadId);
             if (upload) {
-                upload.correspondingRisFileUploadId = risUploadId;
+                upload.correspondingRisUploadId = risUploadId;
                 return this.dataStoreClient.saveObject(DataStoreKeys.UPLOADS, uploads);
             } else {
                 return Future.error("Upload does not exist");

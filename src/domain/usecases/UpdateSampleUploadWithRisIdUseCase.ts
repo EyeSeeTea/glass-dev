@@ -6,6 +6,6 @@ export class UpdateSampleUploadWithRisIdUseCase implements UseCase {
     constructor(private glassUploadsRepository: GlassUploadsRepository) {}
 
     public execute(sampleUploadId: string, risUploadId: string): FutureData<void> {
-        return this.glassUploadsRepository.updateSampleUploadWithRisIdUseCase(sampleUploadId, risUploadId);
+        return this.glassUploadsRepository.updateSampleUploadWithRisId(sampleUploadId, risUploadId);
     }
 }
