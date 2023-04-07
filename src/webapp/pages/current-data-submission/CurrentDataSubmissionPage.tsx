@@ -61,6 +61,7 @@ export const CurrentDataSubmissionPageContent: React.FC<CurrentDataSubmissionPag
                             </StyledBreadCrumbs>
 
                             <div className="info">
+                                <span>{i18n.t("Yearly data upload")}</span>
                                 <PageTitle statusColor={currentDataSubmissionStatus.data.colour}>
                                     <div className="status">{i18n.t(currentDataSubmissionStatus.data.title)}</div>
                                 </PageTitle>
@@ -94,13 +95,12 @@ const PreContent = styled.div`
     justify-content: space-between;
     align-items: center;
     .info {
+        display: flex;
         font-size: 14px;
         span {
             opacity: 0.5;
-        }
-        span:nth-child(1) {
-            color: ${glassColors.green};
-            opacity: 1;
+            color: #666;
+            padding: 5px;
         }
     }
 `;
