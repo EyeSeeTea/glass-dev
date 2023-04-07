@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { TableBody, TableCell, TableRow, Button, DialogContent, Typography, DialogActions } from "@material-ui/core";
+import { Backdrop, TableBody, TableCell, TableRow, Button, DialogContent, Typography } from "@material-ui/core";
 import styled from "styled-components";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import dayjs from "dayjs";
@@ -15,6 +15,7 @@ import { useStatusDataSubmission } from "../../hooks/useStatusDataSubmission";
 import { useCurrentModuleContext } from "../../contexts/current-module-context";
 import { useLocation } from "react-router-dom";
 import { useGlassCaptureAccess } from "../../hooks/useGlassCaptureAccess";
+import { StyledLoaderContainer } from "../upload/ConsistencyChecks";
 
 export interface UploadsTableBodyProps {
     rows?: UploadsDataItem[];
@@ -72,25 +73,18 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
     //2. Delete corresponding document from DHIS
     //3. Delete corresponding 'upload' and 'document' from Datastore
     const deleteDataset = () => {
+        hideConfirmationDialog();
         if (rowToDelete) {
+            let risFileToDelete: UploadsDataItem | undefined, sampleFileToDelete: UploadsDataItem | undefined;
             //Ris file is mandatory, so there will be a ris file with given batch id.
-            const risFileToDelete = rows
-                ?.filter(
-                    ris =>
-                        ris.batchId === rowToDelete.batchId &&
-                        ris.fileType === "RIS" &&
-                        ris.period === rowToDelete.period
-                )
-                ?.at(0);
             //Sample file is optional and could be absent
-            const sampleFileToDelete = rows
-                ?.filter(
-                    sample =>
-                        sample.batchId === rowToDelete.batchId &&
-                        sample.fileType === "SAMPLE" &&
-                        sample.period === rowToDelete.period
-                )
-                ?.at(0);
+            if (rowToDelete.fileType === "RIS") {
+                risFileToDelete = rowToDelete;
+                sampleFileToDelete = rows?.filter(sample => sample.correspondingRisUploadId === rowToDelete.id)?.at(0);
+            } else {
+                sampleFileToDelete = rowToDelete;
+                risFileToDelete = rows?.filter(ris => ris.id === rowToDelete.correspondingRisUploadId)?.at(0);
+            }
 
             if (risFileToDelete) {
                 setLoading(true);
@@ -101,74 +95,88 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                         : Future.success(undefined),
                 }).run(
                     ({ risFileDownload, sampleFileDownload }) => {
-                        const risFile = new File([risFileDownload], risFileToDelete.fileName);
+                        if (risFileToDelete) {
+                            const risFile = new File([risFileDownload], risFileToDelete.fileName);
+                            //If the file is in uploaded status then, data vales have not been imported.
+                            //No need for deletion
 
-                        Future.joinObj({
-                            deleteRisFileSummary: compositionRoot.dataSubmision.RISFile(
-                                risFile,
-                                risFileToDelete.batchId,
-                                parseInt(risFileToDelete.period),
-                                "DELETES",
-                                orgUnitId,
-                                risFileToDelete.countryCode,
-                                false
-                            ),
-                            deleteSampleFileSummary:
-                                sampleFileToDelete && sampleFileDownload
-                                    ? compositionRoot.dataSubmision.sampleFile(
-                                          new File([sampleFileDownload], sampleFileToDelete.fileName),
-                                          sampleFileToDelete.batchId,
-                                          parseInt(sampleFileToDelete.period),
-                                          "DELETES",
-                                          orgUnitId,
-                                          sampleFileToDelete.countryCode,
-                                          false
-                                      )
-                                    : Future.success(undefined),
-                        }).run(
-                            ({ deleteRisFileSummary, deleteSampleFileSummary }) => {
-                                let message = `${deleteRisFileSummary.importCount.deleted} data values deleted for RIS file`;
+                            Future.joinObj({
+                                deleteRisFileSummary:
+                                    risFileToDelete.status.toLowerCase() !== "uploaded"
+                                        ? compositionRoot.dataSubmision.RISFile(
+                                              risFile,
+                                              risFileToDelete.batchId,
+                                              parseInt(risFileToDelete.period),
+                                              "DELETES",
+                                              orgUnitId,
+                                              risFileToDelete.countryCode,
+                                              false
+                                          )
+                                        : Future.success(undefined),
+                                deleteSampleFileSummary:
+                                    sampleFileToDelete &&
+                                    sampleFileToDelete.status.toLowerCase() !== "uploaded" &&
+                                    sampleFileDownload
+                                        ? compositionRoot.dataSubmision.sampleFile(
+                                              new File([sampleFileDownload], sampleFileToDelete.fileName),
+                                              sampleFileToDelete.batchId,
+                                              parseInt(sampleFileToDelete.period),
+                                              "DELETES",
+                                              orgUnitId,
+                                              sampleFileToDelete.countryCode,
+                                              false
+                                          )
+                                        : Future.success(undefined),
+                            }).run(
+                                ({ deleteRisFileSummary, deleteSampleFileSummary }) => {
+                                    if (deleteRisFileSummary) {
+                                        let message = `${deleteRisFileSummary.importCount.deleted} data values deleted for RIS file`;
 
-                                if (sampleFileToDelete && deleteSampleFileSummary) {
-                                    message =
-                                        message +
-                                        ` and ${deleteSampleFileSummary.importCount.deleted} data values deleted for SAMPLE file.`;
-                                }
+                                        if (sampleFileToDelete && deleteSampleFileSummary) {
+                                            message =
+                                                message +
+                                                ` and ${deleteSampleFileSummary.importCount.deleted} data values deleted for SAMPLE file.`;
+                                        }
 
-                                snackbar.info(message);
-
-                                compositionRoot.glassDocuments.deleteByUploadId(risFileToDelete.id).run(
-                                    () => {
-                                        if (sampleFileToDelete) {
-                                            compositionRoot.glassDocuments.deleteByUploadId(sampleFileToDelete.id).run(
-                                                () => {
+                                        snackbar.info(message);
+                                    }
+                                    if (risFileToDelete) {
+                                        compositionRoot.glassDocuments.deleteByUploadId(risFileToDelete.id).run(
+                                            () => {
+                                                if (sampleFileToDelete) {
+                                                    compositionRoot.glassDocuments
+                                                        .deleteByUploadId(sampleFileToDelete.id)
+                                                        .run(
+                                                            () => {
+                                                                refreshUploads({}); //Trigger re-render of parent
+                                                                setLoading(false);
+                                                                hideConfirmationDialog();
+                                                            },
+                                                            error => {
+                                                                snackbar.error(error);
+                                                            }
+                                                        );
+                                                } else {
                                                     refreshUploads({}); //Trigger re-render of parent
                                                     setLoading(false);
                                                     hideConfirmationDialog();
-                                                },
-                                                error => {
-                                                    snackbar.error(error);
                                                 }
-                                            );
-                                        } else {
-                                            refreshUploads({}); //Trigger re-render of parent
-                                            setLoading(false);
-                                            hideConfirmationDialog();
-                                        }
-                                    },
-                                    error => {
-                                        snackbar.error(error);
+                                            },
+                                            error => {
+                                                snackbar.error(error);
+                                            }
+                                        );
                                     }
-                                );
-                            },
-                            error => {
-                                snackbar.error(error);
-                            }
-                        );
+                                },
+                                error => {
+                                    snackbar.error(error);
+                                }
+                            );
+                        }
                     },
                     error => {
                         console.debug(
-                            `Unable to download RIS fileid : ${risFileToDelete.fileId} OR Sample fileid : ${sampleFileToDelete?.fileId}, error: ${error} `
+                            `Unable to download RIS fileid : ${risFileToDelete?.fileId} OR Sample fileid : ${sampleFileToDelete?.fileId}, error: ${error} `
                         );
                     }
                 );
@@ -180,13 +188,16 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
     };
     return (
         <>
-            {loading && (
-                <TableRow>
-                    <TableCell>
-                        <CircularProgress size={25} />
-                    </TableCell>
-                </TableRow>
-            )}
+            <Backdrop open={loading} style={{ color: "#fff", zIndex: 1 }}>
+                <StyledLoaderContainer>
+                    <CircularProgress color="#fff" size={50} />
+                    <Typography variant="h6">{i18n.t("Deleting Files")}</Typography>
+                    <Typography variant="h5">
+                        {i18n.t("This might take several minutes, do not refresh the page or press back.")}
+                    </Typography>
+                </StyledLoaderContainer>
+            </Backdrop>
+
             <ConfirmationDialog
                 isOpen={open}
                 title={i18n.t("Confirm Delete")}
@@ -204,7 +215,6 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                         )}
                     </Typography>
                 </DialogContent>
-                <DialogActions>{loading && <CircularProgress size={25} />}</DialogActions>
             </ConfirmationDialog>
             {rows && rows.length ? (
                 <StyledTableBody>
@@ -222,7 +232,7 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                                 </Button>
                             </TableCell>
                             <TableCell>
-                                {currentDataSubmissionStatus.kind === "loaded" && (
+                                {currentDataSubmissionStatus.kind === "loaded" ? (
                                     <Button
                                         onClick={() => showConfirmationDialog(row)}
                                         disabled={
@@ -232,6 +242,8 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                                     >
                                         <DeleteOutline />
                                     </Button>
+                                ) : (
+                                    <CircularProgress size={20} />
                                 )}
                             </TableCell>
                         </TableRow>
