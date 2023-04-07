@@ -77,6 +77,7 @@ export class ImportRISFileUseCase implements UseCase {
                 const batchIdErrors = checkBatchId(risDataItems, batchId);
                 const yearErrors = checkYear(risDataItems, year);
                 const countryErrors = checkCountry(risDataItems, countryCode);
+                const nonBlockingCategoryOptionErrors: string[] = [];
 
                 const dataValues = risDataItems
                     .map(risData => {
@@ -85,10 +86,10 @@ export class ImportRISFileUseCase implements UseCase {
                                 risData[category.code as keyof RISData].toString()
                             );
 
-                            const attributeOptionCombo = getCategoryOptionComboByOptionCodes(
-                                dataSet_CC,
-                                dataSetCategoryOptionValues
-                            );
+                            const { categoryOptionComboId: attributeOptionCombo, error: nonBlockingError } =
+                                getCategoryOptionComboByOptionCodes(dataSet_CC, dataSetCategoryOptionValues);
+
+                            if (nonBlockingError !== "") nonBlockingCategoryOptionErrors.push(nonBlockingError);
 
                             const categoryOptionCombo = getCategoryOptionComboByDataElement(
                                 dataElement,
@@ -124,32 +125,58 @@ export class ImportRISFileUseCase implements UseCase {
                 const uniqueAOCs = _.uniq(finalDataValues.map(el => el.attributeOptionCombo || ""));
 
                 return this.dataValuesRepository.save(finalDataValues, action, dryRun).flatMap(saveSummary => {
-                    return this.metadataRepository
-                        .validateDataSet(AMR_AMR_DS_INPUT_FILES_RIS_DS_ID, year.toString(), orgUnit, uniqueAOCs)
-                        .map(validationResponse => {
-                            const validations = validationResponse as D2ValidationResponse[];
-                            const dhis2ValidationErrors = checkDhis2Validations(validations);
+                    //Run validations only on actual import
+                    if (!dryRun) {
+                        return this.metadataRepository
+                            .validateDataSet(AMR_AMR_DS_INPUT_FILES_RIS_DS_ID, year.toString(), orgUnit, uniqueAOCs)
+                            .map(validationResponse => {
+                                const validations = validationResponse as D2ValidationResponse[];
+                                const dhis2ValidationErrors = checkDhis2Validations(validations);
 
-                            const importSummary = mapToImportSummary(saveSummary);
+                                const importSummary = mapToImportSummary(saveSummary);
 
-                            const summaryWithConsistencyBlokingErrors = includeBlokingErrors(importSummary, [
-                                ...pathogenAntibioticErrors,
-                                ...specimenPathogenErrors,
-                                ...astResultsErrors,
-                                ...batchIdErrors,
-                                ...yearErrors,
-                                ...countryErrors,
-                                ...dhis2ValidationErrors,
-                            ]);
+                                const summaryWithConsistencyBlokingErrors = includeBlokingErrors(importSummary, [
+                                    ...pathogenAntibioticErrors,
+                                    ...specimenPathogenErrors,
+                                    ...astResultsErrors,
+                                    ...batchIdErrors,
+                                    ...yearErrors,
+                                    ...countryErrors,
+                                    ...dhis2ValidationErrors,
+                                ]);
 
-                            const finalImportSummary = this.includeDataValuesRemovedWarning(
-                                dataValues,
-                                finalDataValues,
-                                summaryWithConsistencyBlokingErrors
-                            );
+                                const finalImportSummary = this.includeDataValuesRemovedWarning(
+                                    dataValues,
+                                    finalDataValues,
+                                    summaryWithConsistencyBlokingErrors,
+                                    nonBlockingCategoryOptionErrors
+                                );
 
-                            return finalImportSummary;
-                        });
+                                return finalImportSummary;
+                            });
+                    }
+                    //If dry-run, do not run validations
+                    else {
+                        const importSummary = mapToImportSummary(saveSummary);
+
+                        const summaryWithConsistencyBlokingErrors = includeBlokingErrors(importSummary, [
+                            ...pathogenAntibioticErrors,
+                            ...specimenPathogenErrors,
+                            ...astResultsErrors,
+                            ...batchIdErrors,
+                            ...yearErrors,
+                            ...countryErrors,
+                        ]);
+
+                        const finalImportSummary = this.includeDataValuesRemovedWarning(
+                            dataValues,
+                            finalDataValues,
+                            summaryWithConsistencyBlokingErrors,
+                            nonBlockingCategoryOptionErrors
+                        );
+
+                        return Future.success(finalImportSummary);
+                    }
                 });
             });
     }
@@ -157,7 +184,8 @@ export class ImportRISFileUseCase implements UseCase {
     private includeDataValuesRemovedWarning(
         dataValues: DataValue[],
         finalDataValues: DataValue[],
-        importSummary: ImportSummary
+        importSummary: ImportSummary,
+        nonBlockingCategoryOptionErrors: string[]
     ): ImportSummary {
         const removedDataValues = dataValues.length - finalDataValues.length;
 
@@ -165,10 +193,9 @@ export class ImportRISFileUseCase implements UseCase {
             removedDataValues > 0
                 ? [
                       ...importSummary.nonBlockingErrors,
-                      {
-                          count: dataValues.length - finalDataValues.length,
-                          error: i18n.t(`Removed dataValues to import because attributeOptionCombo not found`),
-                      },
+                      ...Object.entries(_.countBy(nonBlockingCategoryOptionErrors)).map(error => {
+                          return { error: i18n.t(`Removed Data Values : ${error[0]}`), count: error[1] };
+                      }),
                   ]
                 : importSummary.nonBlockingErrors;
 

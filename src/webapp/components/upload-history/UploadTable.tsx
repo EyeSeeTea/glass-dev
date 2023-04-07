@@ -20,6 +20,7 @@ export interface UploadHistoryItemProps {
     uploadDate: string;
     dataSubmission: string;
     module: string;
+    records: number;
 }
 
 export interface UploadTableProps {
@@ -37,7 +38,6 @@ export const UploadTable: React.FC<UploadTableProps> = ({ title, items, classNam
                 <Table className={"blocking-table"} aria-label="simple table">
                     <TableHead>
                         <TableRow>
-                            <TableCell>{i18n.t("")}</TableCell>
                             <TableCell>
                                 <StyledBox>
                                     <Typography variant="caption">{i18n.t("File Type")}</Typography>
@@ -113,16 +113,7 @@ export const UploadTable: React.FC<UploadTableProps> = ({ title, items, classNam
                             <TableCell>{i18n.t("")}</TableCell>
                             <TableCell>
                                 <StyledBox>
-                                    <Typography variant="caption">{i18n.t("Input Line Nb")}</Typography>
-                                    <ColStatus>
-                                        <ArrowUpwardIcon />
-                                        <sup>1</sup>
-                                    </ColStatus>
-                                </StyledBox>
-                            </TableCell>
-                            <TableCell>
-                                <StyledBox>
-                                    <Typography variant="caption">{i18n.t("Output Line Nb")}</Typography>
+                                    <Typography variant="caption">{i18n.t("Records")}</Typography>
                                     <ColStatus>
                                         <ArrowUpwardIcon />
                                         <sup>1</sup>
@@ -173,7 +164,6 @@ const ContentWrapper = styled.div`
             border: none;
             &:hover {
                 background-color: ${glassColors.greyLight};
-                cursor: pointer;
             }
             td {
                 border-bottom: 1px solid ${glassColors.greyLight};
