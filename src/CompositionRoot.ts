@@ -16,7 +16,6 @@ import { GetGlassUploadsUseCase } from "./domain/usecases/GetGlassUploadsUseCase
 import { GetInstanceVersionUseCase } from "./domain/usecases/GetInstanceVersionUseCase";
 import { ValidateGlassModulesUseCase } from "./domain/usecases/ValidateGlassModulesUseCase";
 import { ValidateGlassNewsUseCase } from "./domain/usecases/ValidateGlassNewsUseCase";
-import { ValidateGlassUploadsUseCase } from "./domain/usecases/ValidateGlassUploadsUseCase";
 import { GetDataSubmissionsByModuleAndOUUseCase } from "./domain/usecases/GetDataSubmissionsByModuleAndOUUseCase";
 import { GetGlassDocumentsUseCase } from "./domain/usecases/GetGlassDocumentsUseCase";
 import { ValidateGlassDocumentsUseCase } from "./domain/usecases/ValidateGlassDocumentsUseCase";
@@ -50,6 +49,7 @@ import { DownloadDocumentUseCase } from "./domain/usecases/DownloadDocumentUseCa
 import { ValidateRISFileUseCase } from "./domain/usecases/data-entry/ValidateRISFileUseCase";
 import { ValidateSampleFileUseCase } from "./domain/usecases/data-entry/ValidateSampleFileUseCase";
 import { SaveDataSubmissionsUseCase } from "./domain/usecases/SaveDataSubmissionsUseCase";
+import { UpdateSampleUploadWithRisIdUseCase } from "./domain/usecases/UpdateSampleUploadWithRisIdUseCase";
 
 export function getCompositionRoot(instance: Instance) {
     const api = getD2APiFromInstance(instance);
@@ -93,7 +93,6 @@ export function getCompositionRoot(instance: Instance) {
         }),
         glassUploads: getExecute({
             getAll: new GetGlassUploadsUseCase(glassUploadsRepository),
-            validate: new ValidateGlassUploadsUseCase(glassUploadsRepository),
             setStatus: new SetUploadStatusUseCase(glassUploadsRepository),
             getByDataSubmission: new GetGlassUploadsByDataSubmissionUseCase(glassUploadsRepository),
             getByModuleOU: new GetGlassUploadsByModuleOUUseCase(glassUploadsRepository),
@@ -106,6 +105,7 @@ export function getCompositionRoot(instance: Instance) {
             upload: new UploadDocumentUseCase(glassDocumentsRepository, glassUploadsRepository),
             deleteByUploadId: new DeleteDocumentInfoByUploadIdUseCase(glassDocumentsRepository, glassUploadsRepository),
             download: new DownloadDocumentUseCase(glassDocumentsRepository),
+            updateSampleFileWithRisId: new UpdateSampleUploadWithRisIdUseCase(glassUploadsRepository),
         }),
         dataSubmision: getExecute({
             RISFile: new ImportRISFileUseCase(

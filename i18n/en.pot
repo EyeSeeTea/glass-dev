@@ -5,15 +5,13 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2023-04-05T13:04:15.258Z\n"
-"PO-Revision-Date: 2023-04-05T13:04:15.258Z\n"
+"POT-Creation-Date: 2023-04-06T19:12:15.810Z\n"
+"PO-Revision-Date: 2023-04-06T19:12:15.810Z\n"
 
 msgid "Error saving registration status"
 msgstr ""
 
-msgid ""
-"The AST results provided are not valid (either they are all empty or equal "
-"to 0)"
+msgid "The AST results provided are not valid (they are all empty)"
 msgstr ""
 
 msgid "User Profile"
@@ -67,10 +65,13 @@ msgstr ""
 msgid "Correct Uploads"
 msgstr ""
 
-msgid "Uploads with errors, or discarded"
+msgid "Upload Dataset"
 msgstr ""
 
-msgid "Add new datasets"
+msgid "You can add up to 6 datasets to this submission with different BATCH IDS."
+msgstr ""
+
+msgid "Uploads with errors, or discarded"
 msgstr ""
 
 msgid "There are no questionnaries for this module"
@@ -349,15 +350,15 @@ msgstr ""
 msgid "Info abou the previously updated quarter and the missing quarters"
 msgstr ""
 
-msgid "Performing a dry run of the import to ensure that there are no errors."
+msgid "Importing data and applying validation rules"
 msgstr ""
 
 msgid "These Consistency Checks ensure that incorrect data is not imported."
 msgstr ""
 
 msgid ""
-"Both Validations specified by validation rules and custom validations are "
-"complete. "
+"Custom validations are complete, validation rules will be run after the "
+"actual import is completed. "
 msgstr ""
 
 msgid ""
@@ -385,9 +386,6 @@ msgstr ""
 msgid "Non-blocking warnings"
 msgstr ""
 
-msgid "Importing data"
-msgstr ""
-
 msgid "Summary"
 msgstr ""
 
@@ -410,6 +408,9 @@ msgid "OK"
 msgstr ""
 
 msgid "Error fetching previous uploads."
+msgstr ""
+
+msgid "Performing a dry run of the import to ensure that there are no errors."
 msgstr ""
 
 msgid "Choose a Dataset"
