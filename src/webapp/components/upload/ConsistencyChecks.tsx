@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Backdrop, Button, CircularProgress, Typography } from "@material-ui/core";
 import { BlockingErrors } from "./BlockingErrors";
 import styled from "styled-components";
@@ -18,6 +18,8 @@ interface ConsistencyChecksProps {
     batchId: string;
     risFile: File | null;
     sampleFile?: File | null;
+    risFileImportSummary: ImportSummary | undefined;
+    sampleFileImportSummary: ImportSummary | undefined;
     setRISFileImportSummary: React.Dispatch<React.SetStateAction<ImportSummary | undefined>>;
     setSampleFileImportSummary: React.Dispatch<React.SetStateAction<ImportSummary | undefined>>;
 }
@@ -27,6 +29,8 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
     batchId,
     risFile,
     sampleFile,
+    risFileImportSummary,
+    sampleFileImportSummary,
     setRISFileImportSummary,
     setSampleFileImportSummary,
 }) => {
@@ -34,93 +38,97 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
     const { currentModuleAccess } = useCurrentModuleContext();
     const { currentOrgUnitAccess } = useCurrentOrgUnitContext();
     const [fileType, setFileType] = useState<string>("ris");
-    const [dryRunImportLoading, setDryRunImportLoading] = useState<boolean>(false);
-    const [risFileErrors, setRISErrors] = useState<ImportSummary | undefined>(undefined);
-    const [sampleFileErrors, setSampleErrors] = useState<ImportSummary | undefined>(undefined);
+    const [importLoading, setImportLoading] = useState<boolean>(false);
     const { currentPeriod } = useCurrentPeriodContext();
-
-    useEffect(() => {
-        function uploadDatasetsAsDryRun() {
-            if (risFile && currentModuleAccess.moduleName === "AMR") {
-                setDryRunImportLoading(true);
-
-                Future.joinObj({
-                    importRISFileSummary: compositionRoot.dataSubmision.RISFile(
-                        risFile,
-                        batchId,
-                        currentPeriod,
-                        "CREATE_AND_UPDATE",
-                        currentOrgUnitAccess.orgUnitId,
-                        currentOrgUnitAccess.orgUnitCode,
-                        true
-                    ),
-                    importSampleFileSummary: sampleFile
-                        ? compositionRoot.dataSubmision.sampleFile(
-                              sampleFile,
-                              batchId,
-                              currentPeriod,
-                              "CREATE_AND_UPDATE",
-                              currentOrgUnitAccess.orgUnitId,
-                              currentOrgUnitAccess.orgUnitCode,
-                              true
-                          )
-                        : Future.success(undefined),
-                }).run(
-                    ({ importRISFileSummary, importSampleFileSummary }) => {
-                        /* eslint-disable no-console */
-                        console.log({ importRISFileSummary });
-                        console.log({ importSampleFileSummary });
-
-                        setRISErrors(importRISFileSummary);
-                        setRISFileImportSummary(importRISFileSummary);
-
-                        if (importSampleFileSummary) {
-                            setSampleErrors(importSampleFileSummary);
-                            setSampleFileImportSummary(importSampleFileSummary);
-                        }
-
-                        setDryRunImportLoading(false);
-                    },
-                    error => {
-                        setRISErrors({
-                            status: "ERROR",
-                            importCount: { ignored: 0, imported: 0, deleted: 0, updated: 0 },
-                            nonBlockingErrors: [],
-                            blockingErrors: [{ error: error, count: 1 }],
-                        });
-
-                        setDryRunImportLoading(false);
-                    }
-                );
-            }
-        }
-
-        uploadDatasetsAsDryRun();
-    }, [
-        compositionRoot.dataSubmision,
-        currentModuleAccess.moduleName,
-        risFile,
-        sampleFile,
-        setRISFileImportSummary,
-        setSampleFileImportSummary,
-        batchId,
-        currentPeriod,
-        currentOrgUnitAccess.orgUnitId,
-        currentOrgUnitAccess.orgUnitCode,
-    ]);
 
     const changeType = (fileType: string) => {
         setFileType(fileType);
     };
 
+    const continueClick = () => {
+        if (risFile && currentModuleAccess.moduleName === "AMR") {
+            setImportLoading(true);
+
+            Future.joinObj({
+                importRISFileSummary: compositionRoot.dataSubmision.RISFile(
+                    risFile,
+                    batchId,
+                    currentPeriod,
+                    "CREATE_AND_UPDATE",
+                    currentOrgUnitAccess.orgUnitId,
+                    currentOrgUnitAccess.orgUnitCode,
+                    false
+                ),
+                importSampleFileSummary: sampleFile
+                    ? compositionRoot.dataSubmision.sampleFile(
+                          sampleFile,
+                          batchId,
+                          currentPeriod,
+                          "CREATE_AND_UPDATE",
+                          currentOrgUnitAccess.orgUnitId,
+                          currentOrgUnitAccess.orgUnitCode,
+                          false
+                      )
+                    : Future.success(undefined),
+            }).run(
+                ({ importRISFileSummary, importSampleFileSummary }) => {
+                    /* eslint-disable no-console */
+                    console.log({ importRISFileSummary });
+                    console.log({ importSampleFileSummary });
+
+                    setRISFileImportSummary(importRISFileSummary);
+
+                    if (importSampleFileSummary) {
+                        setSampleFileImportSummary(importSampleFileSummary);
+                    }
+
+                    if (importRISFileSummary.blockingErrors.length === 0) {
+                        const risUploadId = localStorage.getItem("risUploadId");
+                        if (risUploadId) {
+                            compositionRoot.glassUploads.setStatus({ id: risUploadId, status: "VALIDATED" }).run(
+                                () => {
+                                    changeStep(3);
+                                    setImportLoading(false);
+                                },
+                                () => {
+                                    setImportLoading(false);
+                                }
+                            );
+                        }
+                    } else {
+                        const risUploadId = localStorage.getItem("risUploadId");
+                        if (risUploadId) {
+                            compositionRoot.glassUploads.setStatus({ id: risUploadId, status: "IMPORTED" }).run(
+                                () => {
+                                    setImportLoading(false);
+                                },
+                                () => {
+                                    setImportLoading(false);
+                                }
+                            );
+                        }
+                    }
+                },
+                error => {
+                    setRISFileImportSummary({
+                        status: "ERROR",
+                        importCount: { ignored: 0, imported: 0, deleted: 0, updated: 0 },
+                        nonBlockingErrors: [],
+                        blockingErrors: [{ error: error, count: 1 }],
+                    });
+
+                    setImportLoading(false);
+                }
+            );
+        }
+    };
+
     return (
         <ContentWrapper>
-            <Backdrop open={dryRunImportLoading} style={{ color: "#fff", zIndex: 1 }}>
+            <Backdrop open={importLoading} style={{ color: "#fff", zIndex: 1 }}>
                 <StyledLoaderContainer>
                     <CircularProgress color="inherit" size={50} />
-                    <Typography variant="h6">
-                        {i18n.t("Performing a dry run of the import to ensure that there are no errors.")}
-                    </Typography>
+                    <Typography variant="h6">{i18n.t("Importing data and applying validation rules")}</Typography>
                     <Typography variant="h5">
                         {i18n.t("This might take several minutes, do not refresh the page or press back.")}
                     </Typography>
@@ -131,7 +139,9 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
                     {i18n.t("These Consistency Checks ensure that incorrect data is not imported.")}
                 </Typography>
                 <Typography>
-                    {i18n.t("Both Validations specified by validation rules and custom validations are complete. ")}
+                    {i18n.t(
+                        "Custom validations are complete, validation rules will be run after the actual import is completed. "
+                    )}
                 </Typography>
                 <Typography>
                     {i18n.t(
@@ -152,15 +162,15 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
                     {i18n.t("Sample File")}
                 </Button>
             </div>
-            {renderTypeContent(fileType, risFileErrors, sampleFileErrors)}
+            {renderTypeContent(fileType, risFileImportSummary, sampleFileImportSummary)}
             <div className="bottom">
                 <Button
                     variant="contained"
                     color="primary"
                     endIcon={<ChevronRightIcon />}
-                    onClick={() => changeStep(3)}
+                    onClick={continueClick}
                     disableElevation
-                    disabled={risFileErrors && risFileErrors.blockingErrors.length > 0 ? true : false}
+                    disabled={risFileImportSummary && risFileImportSummary.blockingErrors.length > 0 ? true : false}
                 >
                     {i18n.t("Continue")}
                 </Button>

@@ -125,33 +125,58 @@ export class ImportRISFileUseCase implements UseCase {
                 const uniqueAOCs = _.uniq(finalDataValues.map(el => el.attributeOptionCombo || ""));
 
                 return this.dataValuesRepository.save(finalDataValues, action, dryRun).flatMap(saveSummary => {
-                    return this.metadataRepository
-                        .validateDataSet(AMR_AMR_DS_INPUT_FILES_RIS_DS_ID, year.toString(), orgUnit, uniqueAOCs)
-                        .map(validationResponse => {
-                            const validations = validationResponse as D2ValidationResponse[];
-                            const dhis2ValidationErrors = checkDhis2Validations(validations);
+                    //Run validations only on actual import
+                    if (!dryRun) {
+                        return this.metadataRepository
+                            .validateDataSet(AMR_AMR_DS_INPUT_FILES_RIS_DS_ID, year.toString(), orgUnit, uniqueAOCs)
+                            .map(validationResponse => {
+                                const validations = validationResponse as D2ValidationResponse[];
+                                const dhis2ValidationErrors = checkDhis2Validations(validations);
 
-                            const importSummary = mapToImportSummary(saveSummary);
+                                const importSummary = mapToImportSummary(saveSummary);
 
-                            const summaryWithConsistencyBlokingErrors = includeBlokingErrors(importSummary, [
-                                ...pathogenAntibioticErrors,
-                                ...specimenPathogenErrors,
-                                ...astResultsErrors,
-                                ...batchIdErrors,
-                                ...yearErrors,
-                                ...countryErrors,
-                                ...dhis2ValidationErrors,
-                            ]);
+                                const summaryWithConsistencyBlokingErrors = includeBlokingErrors(importSummary, [
+                                    ...pathogenAntibioticErrors,
+                                    ...specimenPathogenErrors,
+                                    ...astResultsErrors,
+                                    ...batchIdErrors,
+                                    ...yearErrors,
+                                    ...countryErrors,
+                                    ...dhis2ValidationErrors,
+                                ]);
 
-                            const finalImportSummary = this.includeDataValuesRemovedWarning(
-                                dataValues,
-                                finalDataValues,
-                                summaryWithConsistencyBlokingErrors,
-                                nonBlockingCategoryOptionErrors
-                            );
+                                const finalImportSummary = this.includeDataValuesRemovedWarning(
+                                    dataValues,
+                                    finalDataValues,
+                                    summaryWithConsistencyBlokingErrors,
+                                    nonBlockingCategoryOptionErrors
+                                );
 
-                            return finalImportSummary;
-                        });
+                                return finalImportSummary;
+                            });
+                    }
+                    //If dry-run, do not run validations
+                    else {
+                        const importSummary = mapToImportSummary(saveSummary);
+
+                        const summaryWithConsistencyBlokingErrors = includeBlokingErrors(importSummary, [
+                            ...pathogenAntibioticErrors,
+                            ...specimenPathogenErrors,
+                            ...astResultsErrors,
+                            ...batchIdErrors,
+                            ...yearErrors,
+                            ...countryErrors,
+                        ]);
+
+                        const finalImportSummary = this.includeDataValuesRemovedWarning(
+                            dataValues,
+                            finalDataValues,
+                            summaryWithConsistencyBlokingErrors,
+                            nonBlockingCategoryOptionErrors
+                        );
+
+                        return Future.success(finalImportSummary);
+                    }
                 });
             });
     }
