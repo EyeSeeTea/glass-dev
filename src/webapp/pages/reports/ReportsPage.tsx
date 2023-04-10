@@ -4,13 +4,11 @@ import styled from "styled-components";
 import { glassColors, palette } from "../app/themes/dhis2.theme";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import { NavLink } from "react-router-dom";
-
 import i18n from "@eyeseetea/d2-ui-components/locales";
-
 import { useCurrentModuleContext } from "../../contexts/current-module-context";
+import { EmbeddedReport } from "../../components/reports/EmbeddedReport";
 
-import { ReportContent } from "../../components/reports/ReportContent";
-
+export const GLASS_DASHBOARD_ID = "w7Kub3oACD9";
 export const ReportsPage: React.FC = React.memo(() => {
     return <ReportPageContent />;
 });
@@ -31,7 +29,7 @@ export const ReportPageContent: React.FC = React.memo(() => {
                     </Button>
                 </StyledBreadCrumbs>
             </PreContent>
-            <ReportContent />
+            <EmbeddedReport dashboardId={GLASS_DASHBOARD_ID} />
         </ContentWrapper>
     );
 });

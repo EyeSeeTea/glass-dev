@@ -1,14 +1,22 @@
-import { LinearProgress } from "@material-ui/core";
 import React from "react";
 import { useAppContext } from "../../contexts/app-context";
+import { CircularProgress } from "material-ui";
 
-export const ReportContent: React.FC = () => {
+export interface EmbeddedReportProps {
+    dashboardId: string;
+}
+
+interface State {
+    type: "loading" | "loaded";
+    height: number;
+}
+export const EmbeddedReport: React.FC<EmbeddedReportProps> = ({ dashboardId }) => {
     const { api } = useAppContext();
     const baseUrl = api.baseUrl;
     const [state, setState] = React.useState<State>({ type: "loading", height: 10000 });
     const iframeRef: React.RefObject<HTMLIFrameElement> = React.createRef();
     const dashboardUrlBase = `${baseUrl}/dhis-web-dashboard`;
-    const dashboardUrl = dashboardUrlBase + `/#/sLldHZZgnFx`;
+    const dashboardUrl = dashboardUrlBase + `/#/${dashboardId}`;
 
     React.useEffect(() => {
         const iframe = iframeRef.current;
@@ -28,21 +36,16 @@ export const ReportContent: React.FC = () => {
     }, [iframeRef]);
 
     const isLoading = state.type === "loading";
-    const title = "TITLE";
 
     return (
         <React.Fragment>
-            {isLoading && (
-                <div style={styles.progress}>
-                    <LinearProgress />
-                </div>
-            )}
+            {isLoading && <CircularProgress />}
 
             <div style={isLoading ? styles.wrapperHidden : styles.wrapperVisible}>
                 <iframe
+                    title={dashboardId}
                     ref={iframeRef}
                     id="iframe"
-                    title={title}
                     src={dashboardUrl}
                     height={state.height}
                     style={styles.iframe}
@@ -51,24 +54,11 @@ export const ReportContent: React.FC = () => {
         </React.Fragment>
     );
 };
-interface State {
-    type: "loading" | "loaded";
-    height: number;
-}
 
 const styles = {
     iframe: { width: "100%", border: 0, overflow: "hidden" },
     wrapperVisible: {},
     wrapperHidden: { visibility: "hidden" },
-    subtitle: { marginBottom: 10, marginLeft: 15 },
-    progress: { marginTop: 20 },
-    warning: {
-        color: "#555",
-        fontStyle: "italic",
-        fontSize: "0.85em",
-        display: "block",
-        padding: "0px 15px",
-    },
 };
 
 type IntervalId = number;
@@ -127,16 +117,7 @@ async function setDashboardStyling(iframe: HTMLIFrameElement) {
     // 2.36
     iframeDocument.querySelectorAll("header").forEach(el => el.remove());
     iframeDocument.querySelectorAll("[data-test='dashboards-bar']").forEach(el => el.remove());
-
-    // Hide top bar actions
-    /*
-    iframeDocument
-        .querySelectorAll<HTMLElement>(".dashboard-scroll-container > div > div[class*='ViewTitleBar_container']")
-        .forEach(el => (el.style.display = "none"));
-    */
-
-    const title = iframeDocument.querySelector<HTMLElement>("[data-test='view-dashboard-title']");
-    title?.remove();
+    // iframeDocument.querySelectorAll("[data-test='title-bar']").forEach(el => el.remove());
 
     if (pageContainer) pageContainer.style.marginTop = "0px";
     if (iFrameRoot) iFrameRoot.style.marginTop = "0px";
