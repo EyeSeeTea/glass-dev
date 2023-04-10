@@ -46,29 +46,29 @@ export const CurrentDataSubmissionPageContent: React.FC<CurrentDataSubmissionPag
 
         return (
             <ContentLoader content={currentDataSubmissionStatus}>
-                <ContentWrapper>
-                    <PreContent>
-                        {/* // TODO: replace this with a global reusable StyledBreadCrumbs component */}
-                        <StyledBreadCrumbs aria-label="breadcrumb" separator="">
-                            <Button component={NavLink} to={`/current-data-submission`} exact={true}>
-                                <span>{moduleName}</span>
-                            </Button>
-                            <ChevronRightIcon />
-                            <Button component={NavLink} to={`/current-data-submission`} exact={true}>
-                                <span>{i18n.t(`${currentPeriod} Data Submission`)}</span>
-                            </Button>
-                        </StyledBreadCrumbs>
-                        <div className="info">
-                            <span>{i18n.t("Yearly data upload")}</span>, &nbsp;
-                            <span>{i18n.t(currentOrgUnitAccess.orgUnitName)}</span>
-                        </div>
-                    </PreContent>
-                    {currentDataSubmissionStatus.kind === "loaded" && (
+                {currentDataSubmissionStatus.kind === "loaded" && (
+                    <ContentWrapper>
+                        <PreContent>
+                            {/* // TODO: replace this with a global reusable StyledBreadCrumbs component */}
+                            <StyledBreadCrumbs aria-label="breadcrumb" separator="">
+                                <Button component={NavLink} to={`/current-data-submission`} exact={true}>
+                                    <span>{moduleName}</span>
+                                </Button>
+                                <ChevronRightIcon />
+                                <Button component={NavLink} to={`/current-data-submission`} exact={true}>
+                                    <span>{i18n.t(`${currentPeriod} Data Submission`)}</span>
+                                </Button>
+                            </StyledBreadCrumbs>
+
+                            <div className="info">
+                                <span>{i18n.t("Yearly data upload")}</span>
+                                <PageTitle statusColor={currentDataSubmissionStatus.data.colour}>
+                                    <div className="status">{i18n.t(currentDataSubmissionStatus.data.title)}</div>
+                                </PageTitle>
+                            </div>
+                        </PreContent>
+
                         <>
-                            <PageTitle statusColor={currentDataSubmissionStatus.data.colour}>
-                                <h3>{i18n.t(`${currentPeriod} Data Submission`)}</h3>
-                                <div className="status">{i18n.t(currentDataSubmissionStatus.data.title)}</div>
-                            </PageTitle>
                             <CustomCard padding="40px 60px 50px">
                                 <CurrentDataSubmissionContent
                                     moduleName={moduleName}
@@ -77,8 +77,8 @@ export const CurrentDataSubmissionPageContent: React.FC<CurrentDataSubmissionPag
                                 />
                             </CustomCard>
                         </>
-                    )}
-                </ContentWrapper>
+                    </ContentWrapper>
+                )}
             </ContentLoader>
         );
     }
@@ -95,13 +95,12 @@ const PreContent = styled.div`
     justify-content: space-between;
     align-items: center;
     .info {
+        display: flex;
         font-size: 14px;
         span {
             opacity: 0.5;
-        }
-        span:nth-child(1) {
-            color: ${glassColors.green};
-            opacity: 1;
+            color: #666;
+            padding: 5px;
         }
     }
 `;
@@ -110,6 +109,7 @@ const PageTitle = styled.div<{ statusColor: string }>`
     display: flex;
     flex-direction: row;
     gap: 20px;
+    padding-right: 5px;
     align-items: center;
     h3 {
         margin: 0;
