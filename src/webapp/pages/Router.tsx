@@ -12,6 +12,7 @@ import { PrivateRoute } from "../components/private-route/PrivateRoute";
 import { QuestionnaireFormTest } from "../components/questionnaire/QuestionnaireFormTest";
 import { CurrentPeriodContextProvider } from "../context-providers/CurrentPeriodContextProvider";
 import { MainLayout } from "../components/layouts/main-layout/MainLayout";
+import { ReportsPage } from "./reports/ReportsPage";
 
 export const Router: React.FC = React.memo(() => {
     return (
@@ -34,6 +35,14 @@ export const Router: React.FC = React.memo(() => {
                                     render={({ location }) => (
                                         <PrivateRoute pathname={location.pathname}>
                                             <CurrentDataSubmissionPage />
+                                        </PrivateRoute>
+                                    )}
+                                />
+                                <Route
+                                    path="/reports/"
+                                    render={({ location }) => (
+                                        <PrivateRoute pathname={location.pathname}>
+                                            <ReportsPage />
                                         </PrivateRoute>
                                     )}
                                 />
