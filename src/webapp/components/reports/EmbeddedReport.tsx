@@ -117,7 +117,7 @@ async function setDashboardStyling(iframe: HTMLIFrameElement) {
     // 2.36
     iframeDocument.querySelectorAll("header").forEach(el => el.remove());
     iframeDocument.querySelectorAll("[data-test='dashboards-bar']").forEach(el => el.remove());
-    // iframeDocument.querySelectorAll("[data-test='title-bar']").forEach(el => el.remove());
+    iframeDocument.querySelectorAll("[data-test='title-bar']").forEach(el => el.remove());
 
     if (pageContainer) pageContainer.style.marginTop = "0px";
     if (iFrameRoot) iFrameRoot.style.marginTop = "0px";
