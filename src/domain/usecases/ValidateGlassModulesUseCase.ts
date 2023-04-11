@@ -158,6 +158,10 @@ const glassModules: GlassModule[] = [
                 NEIGON: ["J01DD", "J01FA", "J01MA", "CRO", "AZM", "SPT", "CIP", "CFM"],
             },
         },
+        dashboards: {
+            reportsMenu: "",
+            reviewSummary: "",
+        },
     },
     {
         id: "BVnik5xiXGJ",
@@ -168,6 +172,10 @@ const glassModules: GlassModule[] = [
             captureAccess: [],
         },
         questionnaires: [],
+        dashboards: {
+            reportsMenu: "",
+            reviewSummary: "",
+        },
     },
     {
         id: "CVVp44xiXGJ",
@@ -178,5 +186,9 @@ const glassModules: GlassModule[] = [
             captureAccess: [],
         },
         questionnaires: [],
+        dashboards: {
+            reportsMenu: "",
+            reviewSummary: "",
+        },
     },
 ];
