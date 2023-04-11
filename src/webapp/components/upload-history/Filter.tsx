@@ -26,33 +26,18 @@ const StyledInputLabel = styled(InputLabel)`
     color: ${glassColors.black};
 `;
 
-const yearOptions = [
-    {
-        label: "2022",
-        value: 2022,
-    },
-    {
-        label: "2021",
-        value: 2021,
-    },
-    {
-        label: "2020",
-        value: 2020,
-    },
-    {
-        label: "2019",
-        value: 2019,
-    },
-    {
-        label: "2018",
-        value: 2018,
-    },
-];
-
 const statusOptions = [
     {
         label: "Uploaded",
         value: "Uploaded",
+    },
+    {
+        label: "Imported",
+        value: "Imported",
+    },
+    {
+        label: "Validated",
+        value: "Validated",
     },
     {
         label: "Completed",
@@ -66,8 +51,19 @@ interface FilterProps {
     status: string;
     setStatus: Dispatch<SetStateAction<string>>;
 }
+
+const START_YEAR = 2018;
 export const Filter: React.FC<FilterProps> = ({ year, setYear, status, setStatus }) => {
     const classes = useStyles();
+    const currentYear = new Date().getFullYear();
+    const yearOptions: { label: string; value: number }[] = [];
+    let startYear = START_YEAR;
+
+    while (startYear < currentYear) {
+        yearOptions.push({ label: startYear.toString(), value: startYear });
+        startYear++;
+    }
+
     return (
         <Box mb={5}>
             <BlackTypography variant="h5">{i18n.t("Filters")}</BlackTypography>
