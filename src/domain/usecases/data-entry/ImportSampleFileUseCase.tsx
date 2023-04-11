@@ -99,20 +99,31 @@ export class ImportSampleFileUseCase implements UseCase {
                 return this.dataValuesRepository.save(dataValues, action, dryRun).flatMap(saveSummary => {
                     return this.metadataRepository
                         .validateDataSet(AMR_AMR_DS_Input_files_Sample_DS_ID, year.toString(), orgUnit, uniqueAOCs)
-                        .map(validationResponse => {
+                        .flatMap(validationResponse => {
                             const validations = validationResponse as D2ValidationResponse[];
-                            const dhis2ValidationErrors = checkDhis2Validations(validations);
 
-                            const importSummary = mapToImportSummary(saveSummary);
+                            const validationRulesIds: string[] = validations.flatMap(({ validationRuleViolations }) =>
+                                validationRuleViolations.map(
+                                    ruleViolation => (ruleViolation as any)?.validationRule?.id
+                                )
+                            );
 
-                            const summaryWithConsistencyBlokingErrors = includeBlokingErrors(importSummary, [
-                                ...batchIdErrors,
-                                ...yearErrors,
-                                ...countryErrors,
-                                ...dhis2ValidationErrors,
-                            ]);
+                            return this.metadataRepository
+                                .getValidationRuleInstructions(validationRulesIds)
+                                .map(rulesInstructions => {
+                                    const dhis2ValidationErrors = checkDhis2Validations(validations, rulesInstructions);
 
-                            return summaryWithConsistencyBlokingErrors;
+                                    const importSummary = mapToImportSummary(saveSummary);
+
+                                    const summaryWithConsistencyBlokingErrors = includeBlokingErrors(importSummary, [
+                                        ...batchIdErrors,
+                                        ...yearErrors,
+                                        ...countryErrors,
+                                        ...dhis2ValidationErrors,
+                                    ]);
+
+                                    return summaryWithConsistencyBlokingErrors;
+                                });
                         });
                 });
             });
