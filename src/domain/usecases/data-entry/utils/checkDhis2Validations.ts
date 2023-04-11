@@ -2,7 +2,10 @@ import { D2ValidationResponse } from "../../../../data/repositories/MetadataDefa
 import i18n from "../../../../locales";
 import { ConsistencyError } from "../../../entities/data-entry/ImportSummary";
 
-export function checkDhis2Validations(validations: D2ValidationResponse[]): ConsistencyError[] {
+export function checkDhis2Validations(
+    validations: D2ValidationResponse[],
+    rulesInstructions: { id: string; instruction: string }[]
+): ConsistencyError[] {
     const errors = _(
         validations.map(({ validationRuleViolations }) => {
             if (validationRuleViolations.length) {
@@ -10,7 +13,11 @@ export function checkDhis2Validations(validations: D2ValidationResponse[]): Cons
                     return i18n.t(
                         `Validation rule '${(rulesViolation as any).validationRule.name}' violated. Left side value: '${
                             (rulesViolation as any).leftsideValue
-                        }', right side value: '${(rulesViolation as any).rightsideValue}'`
+                        }', right side value: '${(rulesViolation as any).rightsideValue}'. Instructions: ${
+                            rulesInstructions.find(
+                                instruction => instruction.id === (rulesViolation as any).validationRule.id
+                            )?.instruction || "-"
+                        }`
                     );
                 });
             }
