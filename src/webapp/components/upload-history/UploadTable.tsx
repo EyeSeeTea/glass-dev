@@ -32,7 +32,6 @@ export interface UploadTableProps {
 
 export const UploadTable: React.FC<UploadTableProps> = ({ title, items, className, sortByColumn }) => {
     const [fileTypeSortDirection, setFileTypeSortDirection] = useState<SortDirection>("asc");
-    const [countrySortDirection, setCountrySortDirection] = useState<SortDirection>("asc");
     const [batchIdSortDirection, setBatchIdSortDirection] = useState<SortDirection>("asc");
     const [dateSortDirection, setDateSortDirection] = useState<SortDirection>("asc");
     const [fileNameSortDirection, setFileNameSortDirection] = useState<SortDirection>("asc");
@@ -63,22 +62,8 @@ export const UploadTable: React.FC<UploadTableProps> = ({ title, items, classNam
                                     )}
                                 </span>
                             </TableCell>
-                            <TableCell
-                                onClick={() => {
-                                    countrySortDirection === "asc"
-                                        ? setCountrySortDirection("desc")
-                                        : setCountrySortDirection("asc");
-                                    sortByColumn("countryCode", countrySortDirection);
-                                }}
-                            >
-                                <span>
-                                    <Typography variant="caption">{i18n.t("Country")}</Typography>
-                                    {countrySortDirection === "asc" ? (
-                                        <ArrowUpward fontSize="small" />
-                                    ) : (
-                                        <ArrowDownward fontSize="small" />
-                                    )}
-                                </span>
+                            <TableCell>
+                                <Typography variant="caption">{i18n.t("Country")}</Typography>
                             </TableCell>
                             <TableCell
                                 onClick={() => {
