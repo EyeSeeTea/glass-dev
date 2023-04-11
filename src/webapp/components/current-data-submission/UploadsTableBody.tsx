@@ -178,6 +178,7 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                         console.debug(
                             `Unable to download RIS fileid : ${risFileToDelete?.fileId} OR Sample fileid : ${sampleFileToDelete?.fileId}, error: ${error} `
                         );
+                        setLoading(false);
                     }
                 );
             } else {

@@ -103,6 +103,7 @@ export const UploadRis: React.FC<UploadRisProps> = ({ risFile, setRisFile, valid
                                     orgUnitId: orgUnitId,
                                     orgUnitCode: orgUnitCode,
                                     records: risData.records,
+                                    specimens: risData.specimens,
                                 };
                                 return compositionRoot.glassDocuments.upload({ file: uploadedRisFile, data }).run(
                                     uploadId => {

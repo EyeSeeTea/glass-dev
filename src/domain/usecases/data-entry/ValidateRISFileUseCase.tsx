@@ -5,7 +5,7 @@ import { RISDataRepository } from "../../repositories/data-entry/RISDataReposito
 export class ValidateRISFileUseCase implements UseCase {
     constructor(private risDataRepository: RISDataRepository) {}
 
-    public execute(inputFile: File): FutureData<{ isValid: boolean; records: number }> {
+    public execute(inputFile: File): FutureData<{ isValid: boolean; records: number; specimens: string[] }> {
         return this.risDataRepository.validate(inputFile);
     }
 }
