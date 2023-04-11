@@ -50,6 +50,7 @@ import { ValidateRISFileUseCase } from "./domain/usecases/data-entry/ValidateRIS
 import { ValidateSampleFileUseCase } from "./domain/usecases/data-entry/ValidateSampleFileUseCase";
 import { SaveDataSubmissionsUseCase } from "./domain/usecases/SaveDataSubmissionsUseCase";
 import { UpdateSampleUploadWithRisIdUseCase } from "./domain/usecases/UpdateSampleUploadWithRisIdUseCase";
+import { GetReportDashboardUseCase } from "./domain/usecases/GetReportDashboardUseCase";
 
 export function getCompositionRoot(instance: Instance) {
     const api = getD2APiFromInstance(instance);
@@ -130,6 +131,9 @@ export function getCompositionRoot(instance: Instance) {
         }),
         countries: getExecute({
             getInformation: new GetCountryInformationUseCase(countryInformationRepository),
+        }),
+        glassDashboard: getExecute({
+            getReportDashboard: new GetReportDashboardUseCase(glassModuleRepository),
         }),
     };
 }

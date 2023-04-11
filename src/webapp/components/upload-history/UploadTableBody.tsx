@@ -39,7 +39,9 @@ export const UploadTableBody: React.FC<UploadTableBodyProps> = ({ rows }) => {
                             <TableCell>{row.countryCode.toUpperCase()}</TableCell>
                             <TableCell>{row.batchId}</TableCell>
                             <TableCell>{row.period}</TableCell>
-                            <TableCell>{row.specimens.join(", ")}</TableCell>
+                            <TableCell style={{ maxWidth: "150px", wordWrap: "break-word" }}>
+                                {row.specimens.join(", ")}
+                            </TableCell>
                             <TableCell>{row.status}</TableCell>
                             <TableCell>{dayjs(row.uploadDate).format("YYYY-MM-DD HH:mm:ss")}</TableCell>
                             <TableCell>{row.fileName}</TableCell>
@@ -53,7 +55,11 @@ export const UploadTableBody: React.FC<UploadTableBodyProps> = ({ rows }) => {
                     ))}
                 </StyledTableBody>
             ) : (
-                <p>No data found...</p>
+                <StyledTableBody>
+                    <TableRow>
+                        <TableCell>No data found...</TableCell>
+                    </TableRow>
+                </StyledTableBody>
             )}
         </>
     );
