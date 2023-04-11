@@ -15,6 +15,10 @@ export interface GlassModule {
         specimenPathogen: Record<string, string[]>;
         pathogenAntibiotic: Record<string, string[]>;
     };
+    dashboards: {
+        reportsMenu: string;
+        reviewSummary: string;
+    };
 }
 
 interface QuestionnaireConfig {
