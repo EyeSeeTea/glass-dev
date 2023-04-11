@@ -97,6 +97,20 @@ export class MetadataDefaultRepository implements MetadataRepository {
         );
     }
 
+    getValidationRuleInstructions(ids: string[]): FutureData<{ id: string; instruction: string }[]> {
+        return apiToFuture(
+            this.api.models.validationRules.get({
+                fields: {
+                    id: true,
+                    instruction: true,
+                },
+                filter: {
+                    id: { in: ids },
+                },
+            })
+        ).map(res => res.objects);
+    }
+
     private buildCategoryCombo(categoryCombo: D2CategoryCombo): CategoryCombo {
         return {
             id: categoryCombo.id,

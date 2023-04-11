@@ -8,4 +8,5 @@ export interface MetadataRepository {
     getDataSet(id: string): FutureData<DataSet>;
     getCategoryCombination(id: string): FutureData<CategoryCombo>;
     validateDataSet(dataset: string, period: string, orgUnit: string, AOCs: string[]): FutureData<unknown>;
+    getValidationRuleInstructions(ids: string[]): FutureData<{ id: string; instruction: string }[]>;
 }

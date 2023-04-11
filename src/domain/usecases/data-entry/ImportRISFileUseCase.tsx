@@ -129,30 +129,48 @@ export class ImportRISFileUseCase implements UseCase {
                     if (!dryRun) {
                         return this.metadataRepository
                             .validateDataSet(AMR_AMR_DS_INPUT_FILES_RIS_DS_ID, year.toString(), orgUnit, uniqueAOCs)
-                            .map(validationResponse => {
+                            .flatMap(validationResponse => {
                                 const validations = validationResponse as D2ValidationResponse[];
-                                const dhis2ValidationErrors = checkDhis2Validations(validations);
 
-                                const importSummary = mapToImportSummary(saveSummary);
-
-                                const summaryWithConsistencyBlokingErrors = includeBlokingErrors(importSummary, [
-                                    ...pathogenAntibioticErrors,
-                                    ...specimenPathogenErrors,
-                                    ...astResultsErrors,
-                                    ...batchIdErrors,
-                                    ...yearErrors,
-                                    ...countryErrors,
-                                    ...dhis2ValidationErrors,
-                                ]);
-
-                                const finalImportSummary = this.includeDataValuesRemovedWarning(
-                                    dataValues,
-                                    finalDataValues,
-                                    summaryWithConsistencyBlokingErrors,
-                                    nonBlockingCategoryOptionErrors
+                                const validationRulesIds: string[] = validations.flatMap(
+                                    ({ validationRuleViolations }) =>
+                                        validationRuleViolations.map(
+                                            ruleViolation => (ruleViolation as any)?.validationRule?.id
+                                        )
                                 );
 
-                                return finalImportSummary;
+                                return this.metadataRepository
+                                    .getValidationRuleInstructions(validationRulesIds)
+                                    .map(rulesInstructions => {
+                                        const dhis2ValidationErrors = checkDhis2Validations(
+                                            validations,
+                                            rulesInstructions
+                                        );
+
+                                        const importSummary = mapToImportSummary(saveSummary);
+
+                                        const summaryWithConsistencyBlokingErrors = includeBlokingErrors(
+                                            importSummary,
+                                            [
+                                                ...pathogenAntibioticErrors,
+                                                ...specimenPathogenErrors,
+                                                ...astResultsErrors,
+                                                ...batchIdErrors,
+                                                ...yearErrors,
+                                                ...countryErrors,
+                                                ...dhis2ValidationErrors,
+                                            ]
+                                        );
+
+                                        const finalImportSummary = this.includeDataValuesRemovedWarning(
+                                            dataValues,
+                                            finalDataValues,
+                                            summaryWithConsistencyBlokingErrors,
+                                            nonBlockingCategoryOptionErrors
+                                        );
+
+                                        return finalImportSummary;
+                                    });
                             });
                     }
                     //If dry-run, do not run validations
