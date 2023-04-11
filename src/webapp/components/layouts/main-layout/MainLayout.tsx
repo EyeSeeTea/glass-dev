@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Button, Grid } from "@material-ui/core";
 import styled from "styled-components";
 import { GlassAppBar } from "../../app-bar/GlassAppBar";
@@ -12,17 +12,24 @@ import { SideBarProvider } from "../../../context-providers/SideBarProvider";
 
 export const MainLayout: React.FC = ({ children }) => {
     const { baseUrl } = useConfig();
+    const [showMenu, setShowMenu] = useState(true);
 
     const logout = () => {
         goToDhis2Url(baseUrl, "/dhis-web-commons-security/logout.action");
     };
 
+    const toggleShowMenu = () => {
+        setShowMenu(prevShowMenu => {
+            return !prevShowMenu;
+        });
+    };
+
     return (
         <SideBarProvider>
-            <GlassAppBar />
+            <GlassAppBar toggleShowMenu={toggleShowMenu} />
             <LandingContainer>
                 <RootGrid container spacing={6}>
-                    <Grid item xs={12} sm={2}>
+                    <Grid item xs={12} sm={2} style={{ display: showMenu ? "block" : "none" }}>
                         <SideBar />
                         <ButtonContainer>
                             <div>
@@ -48,24 +55,7 @@ export const MainLayout: React.FC = ({ children }) => {
     );
 };
 
-const RootGrid = styled(Grid)`
-    @media (max-width: 1024px) {
-        flex-direction: column;
-        margin: 0;
-        padding: 0;
-        gap: 0;
-        width: 100%;
-        > div {
-            max-width: none;
-            width: 100%;
-            margin: 0;
-            &:first-child > div {
-                min-height: 0;
-                padding: 0 0 60px 0;
-            }
-        }
-    }
-`;
+const RootGrid = styled(Grid)``;
 
 const LandingContainer = styled.div`
     padding: 30px;

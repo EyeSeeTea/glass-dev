@@ -36,7 +36,10 @@ const useStyles = makeStyles(theme => ({
     },
 }));
 
-export const GlassAppBar: React.FC = () => {
+interface GlassAppBarProps {
+    toggleShowMenu: () => void;
+}
+export const GlassAppBar: React.FC<GlassAppBarProps> = ({ toggleShowMenu }) => {
     const classes = useStyles();
 
     const { currentUser } = useAppContext();
@@ -66,7 +69,13 @@ export const GlassAppBar: React.FC = () => {
         <div className={classes.root}>
             <AppBar position="static">
                 <Toolbar className={`${classes.toolbar}`}>
-                    <IconButton edge="start" className={classes.menuButton} color="primary" aria-label="open drawer">
+                    <IconButton
+                        edge="start"
+                        className={classes.menuButton}
+                        color="primary"
+                        aria-label="open drawer"
+                        onClick={toggleShowMenu}
+                    >
                         <MenuIcon />
                     </IconButton>
                     <LogoContainer>
