@@ -30,7 +30,7 @@ export const UploadRis: React.FC<UploadRisProps> = ({ risFile, setRisFile, valid
         currentModuleAccess: { moduleId },
     } = useCurrentModuleContext();
     const {
-        currentOrgUnitAccess: { orgUnitId },
+        currentOrgUnitAccess: { orgUnitId, orgUnitCode },
     } = useCurrentOrgUnitContext();
 
     const { currentPeriod } = useCurrentPeriodContext();
@@ -100,7 +100,8 @@ export const UploadRis: React.FC<UploadRisProps> = ({ risFile, setRisFile, valid
                                     dataSubmission: dataSubmissionId,
                                     module: moduleId,
                                     period: currentPeriod.toString(),
-                                    orgUnit: orgUnitId,
+                                    orgUnitId: orgUnitId,
+                                    orgUnitCode: orgUnitCode,
                                     records: risData.records,
                                 };
                                 return compositionRoot.glassDocuments.upload({ file: uploadedRisFile, data }).run(
@@ -133,6 +134,7 @@ export const UploadRis: React.FC<UploadRisProps> = ({ risFile, setRisFile, valid
             dataSubmissionId,
             moduleId,
             orgUnitId,
+            orgUnitCode,
             currentPeriod,
             setRisFile,
             snackbar,

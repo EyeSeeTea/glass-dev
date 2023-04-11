@@ -141,7 +141,9 @@ export const UploadTable: React.FC<UploadTableProps> = ({ title, items, classNam
                                 </span>
                             </TableCell>
 
-                            <TableCell>{i18n.t("")}</TableCell>
+                            <TableCell>
+                                <Typography variant="caption">{i18n.t("Download")}</Typography>
+                            </TableCell>
 
                             <TableCell
                                 onClick={() => {

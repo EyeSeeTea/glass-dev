@@ -32,7 +32,7 @@ export const UploadSample: React.FC<UploadSampleProps> = ({ batchId, sampleFile,
         currentModuleAccess: { moduleId },
     } = useCurrentModuleContext();
     const {
-        currentOrgUnitAccess: { orgUnitId },
+        currentOrgUnitAccess: { orgUnitId, orgUnitCode },
     } = useCurrentOrgUnitContext();
 
     const { currentPeriod } = useCurrentPeriodContext();
@@ -92,7 +92,8 @@ export const UploadSample: React.FC<UploadSampleProps> = ({ batchId, sampleFile,
                                     dataSubmission: dataSubmissionId,
                                     module: moduleId,
                                     period: currentPeriod.toString(),
-                                    orgUnit: orgUnitId,
+                                    orgUnitId: orgUnitId,
+                                    orgUnitCode: orgUnitCode,
                                     records: sampleData.records,
                                 };
                                 return compositionRoot.glassDocuments.upload({ file: uploadedSample, data }).run(
@@ -128,6 +129,7 @@ export const UploadSample: React.FC<UploadSampleProps> = ({ batchId, sampleFile,
             dataSubmissionId,
             moduleId,
             orgUnitId,
+            orgUnitCode,
             currentPeriod,
             setHasSampleFile,
             setSampleFile,
