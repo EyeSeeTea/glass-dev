@@ -12,8 +12,10 @@ type UploadType = {
         dataSubmission: string;
         module: string;
         period: string;
-        orgUnit: string;
+        orgUnitId: string;
+        orgUnitCode: string;
         records: number;
+        specimens: string[];
     };
 };
 
@@ -29,7 +31,7 @@ export class UploadDocumentUseCase implements UseCase {
                 id: generateUid(),
                 batchId: data.batchId,
                 dataSubmission: data.dataSubmission,
-                countryCode: "",
+                countryCode: data.orgUnitCode,
                 fileId,
                 fileName: file.name,
                 fileType: data.fileType,
@@ -37,10 +39,10 @@ export class UploadDocumentUseCase implements UseCase {
                 outputLineNb: 0,
                 module: data.module,
                 period: data.period,
-                specimens: [],
+                specimens: data.specimens,
                 status: "UPLOADED",
                 uploadDate: new Date().toISOString(),
-                orgUnit: data.orgUnit,
+                orgUnit: data.orgUnitId,
                 records: data.records,
                 correspondingRisUploadId: "",
             };
