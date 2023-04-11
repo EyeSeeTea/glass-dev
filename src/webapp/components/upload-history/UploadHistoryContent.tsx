@@ -1,6 +1,6 @@
 import styled from "styled-components";
 import { useEffect, useState } from "react";
-import { UploadTable } from "./UploadTable";
+import { SortDirection, UploadTable } from "./UploadTable";
 import { useLocation } from "react-router-dom";
 import { useAppContext } from "../../contexts/app-context";
 import { useGlassUploads } from "../../hooks/useGlassUploads";
@@ -29,13 +29,23 @@ export const UploadHistoryContent: React.FC = () => {
         }
     }, [status, year, uploads]);
 
+    const sortByColumn = (columnName: string, sortDirection: SortDirection) => {
+        setFilteredUploads(prevFilteredUploads => {
+            return _.orderBy(prevFilteredUploads, columnName, sortDirection);
+        });
+    };
+
     return (
         <ContentLoader content={uploads}>
             <ContentWrapper>
                 <Filter year={year} setYear={setYear} status={status} setStatus={setStatus} />
                 <CustomCard padding="20px 30px 20px">
                     {uploads.kind === "loaded" && (
-                        <UploadTable items={filteredUploads} data-current-module={params.get("userId")} />
+                        <UploadTable
+                            items={filteredUploads}
+                            data-current-module={params.get("userId")}
+                            sortByColumn={sortByColumn}
+                        />
                     )}
                 </CustomCard>
             </ContentWrapper>

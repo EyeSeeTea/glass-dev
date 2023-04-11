@@ -1,10 +1,10 @@
-import React from "react";
-import { Box, Paper, Table, TableCell, TableContainer, TableHead, TableRow, Typography } from "@material-ui/core";
+import React, { useState } from "react";
+import { Paper, Table, TableCell, TableContainer, TableHead, TableRow, Typography } from "@material-ui/core";
 import styled from "styled-components";
 import { UploadTableBody } from "./UploadTableBody";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { glassColors, palette } from "../../pages/app/themes/dhis2.theme";
-import ArrowUpwardIcon from "@material-ui/icons/ArrowUpward";
+import { ArrowUpward, ArrowDownward } from "@material-ui/icons";
 export interface UploadHistoryItemProps {
     id: string;
     batchId: string;
@@ -22,107 +22,146 @@ export interface UploadHistoryItemProps {
     module: string;
     records: number;
 }
-
+export type SortDirection = "asc" | "desc";
 export interface UploadTableProps {
     title?: string;
     items?: UploadHistoryItemProps[];
     className?: string;
+    sortByColumn: (columnName: string, sortDirection: SortDirection) => void;
 }
 
-export const UploadTable: React.FC<UploadTableProps> = ({ title, items, className }) => {
+export const UploadTable: React.FC<UploadTableProps> = ({ title, items, className, sortByColumn }) => {
+    const [fileTypeSortDirection, setFileTypeSortDirection] = useState<SortDirection>("asc");
+    const [countrySortDirection, setCountrySortDirection] = useState<SortDirection>("asc");
+    const [batchIdSortDirection, setBatchIdSortDirection] = useState<SortDirection>("asc");
+    const [dateSortDirection, setDateSortDirection] = useState<SortDirection>("asc");
+    const [fileNameSortDirection, setFileNameSortDirection] = useState<SortDirection>("asc");
+    const [recordsSortDirection, setRecordsSortDirection] = useState<SortDirection>("asc");
+
     return (
         <ContentWrapper className={className}>
             {title && <Typography variant="h3">{title}</Typography>}
 
             <TableContainer component={Paper}>
-                <Table className={"blocking-table"} aria-label="simple table">
+                <Table>
                     <TableHead>
                         <TableRow>
-                            <TableCell>
-                                <StyledBox>
+                            <TableCell
+                                onClick={() => {
+                                    fileTypeSortDirection === "asc"
+                                        ? setFileTypeSortDirection("desc")
+                                        : setFileTypeSortDirection("asc");
+                                    sortByColumn("fileType", fileTypeSortDirection);
+                                }}
+                            >
+                                <span>
                                     <Typography variant="caption">{i18n.t("File Type")}</Typography>
-                                    <ColStatus>
-                                        <ArrowUpwardIcon />
-                                        <sup>1</sup>
-                                    </ColStatus>
-                                </StyledBox>
+                                    {fileTypeSortDirection === "asc" ? (
+                                        <ArrowUpward fontSize="small" />
+                                    ) : (
+                                        <ArrowDownward fontSize="small" />
+                                    )}
+                                </span>
                             </TableCell>
-                            <TableCell>
-                                <StyledBox>
+                            <TableCell
+                                onClick={() => {
+                                    countrySortDirection === "asc"
+                                        ? setCountrySortDirection("desc")
+                                        : setCountrySortDirection("asc");
+                                    sortByColumn("countryCode", countrySortDirection);
+                                }}
+                            >
+                                <span>
                                     <Typography variant="caption">{i18n.t("Country")}</Typography>
-                                    <ColStatus>
-                                        <ArrowUpwardIcon />
-                                        <sup>1</sup>
-                                    </ColStatus>
-                                </StyledBox>
+                                    {countrySortDirection === "asc" ? (
+                                        <ArrowUpward fontSize="small" />
+                                    ) : (
+                                        <ArrowDownward fontSize="small" />
+                                    )}
+                                </span>
                             </TableCell>
-                            <TableCell>
-                                <StyledBox>
+                            <TableCell
+                                onClick={() => {
+                                    batchIdSortDirection === "asc"
+                                        ? setBatchIdSortDirection("desc")
+                                        : setBatchIdSortDirection("asc");
+                                    sortByColumn("batchId", batchIdSortDirection);
+                                }}
+                            >
+                                <span>
                                     <Typography variant="caption">{i18n.t("Batch Id")}</Typography>
-                                    <ColStatus>
-                                        <ArrowUpwardIcon />
-                                        <sup>1</sup>
-                                    </ColStatus>
-                                </StyledBox>
+                                    {batchIdSortDirection === "asc" ? (
+                                        <ArrowUpward fontSize="small" />
+                                    ) : (
+                                        <ArrowDownward fontSize="small" />
+                                    )}
+                                </span>
                             </TableCell>
                             <TableCell>
-                                <StyledBox>
-                                    <Typography variant="caption">{i18n.t("Period")}</Typography>
-                                    <ColStatus>
-                                        <ArrowUpwardIcon />
-                                        <sup>1</sup>
-                                    </ColStatus>
-                                </StyledBox>
+                                <Typography variant="caption">{i18n.t("Period")}</Typography>
                             </TableCell>
                             <TableCell>
-                                <StyledBox>
-                                    <Typography variant="caption">{i18n.t("Specimens")}</Typography>
-                                    <ColStatus>
-                                        <ArrowUpwardIcon />
-                                        <sup>1</sup>
-                                    </ColStatus>
-                                </StyledBox>
+                                <Typography variant="caption">{i18n.t("Specimens")}</Typography>
                             </TableCell>
                             <TableCell>
-                                <StyledBox>
-                                    <Typography variant="caption">{i18n.t("Status")}</Typography>
-                                    <ColStatus>
-                                        <ArrowUpwardIcon />
-                                        <sup>1</sup>
-                                    </ColStatus>
-                                </StyledBox>
+                                <Typography variant="caption">{i18n.t("Status")}</Typography>
                             </TableCell>
-                            <TableCell>
-                                <StyledBox>
+                            <TableCell
+                                onClick={() => {
+                                    dateSortDirection === "asc"
+                                        ? setDateSortDirection("desc")
+                                        : setDateSortDirection("asc");
+                                    sortByColumn("uploadDate", dateSortDirection);
+                                }}
+                            >
+                                <span>
                                     <Typography variant="caption">{i18n.t("Date")}</Typography>
-                                    <ColStatus>
-                                        <ArrowUpwardIcon />
-                                        <sup>1</sup>
-                                    </ColStatus>
-                                </StyledBox>
+                                    {dateSortDirection === "asc" ? (
+                                        <ArrowUpward fontSize="small" />
+                                    ) : (
+                                        <ArrowDownward fontSize="small" />
+                                    )}
+                                </span>
                             </TableCell>
-                            <TableCell>
-                                <StyledBox>
+                            <TableCell
+                                onClick={() => {
+                                    fileNameSortDirection === "asc"
+                                        ? setFileNameSortDirection("desc")
+                                        : setFileNameSortDirection("asc");
+                                    sortByColumn("fileName", fileNameSortDirection);
+                                }}
+                            >
+                                <span>
                                     <Typography variant="caption">{i18n.t("Filename")}</Typography>
-                                    <ColStatus>
-                                        <ArrowUpwardIcon />
-                                        <sup>1</sup>
-                                    </ColStatus>
-                                </StyledBox>
+                                    {fileNameSortDirection === "asc" ? (
+                                        <ArrowUpward fontSize="small" />
+                                    ) : (
+                                        <ArrowDownward fontSize="small" />
+                                    )}
+                                </span>
                             </TableCell>
+
                             <TableCell>{i18n.t("")}</TableCell>
-                            <TableCell>
-                                <StyledBox>
+
+                            <TableCell
+                                onClick={() => {
+                                    recordsSortDirection === "asc"
+                                        ? setRecordsSortDirection("desc")
+                                        : setRecordsSortDirection("asc");
+                                    sortByColumn("records", recordsSortDirection);
+                                }}
+                            >
+                                <span>
                                     <Typography variant="caption">{i18n.t("Records")}</Typography>
-                                    <ColStatus>
-                                        <ArrowUpwardIcon />
-                                        <sup>1</sup>
-                                    </ColStatus>
-                                </StyledBox>
+                                    {recordsSortDirection === "asc" ? (
+                                        <ArrowUpward fontSize="small" />
+                                    ) : (
+                                        <ArrowDownward fontSize="small" />
+                                    )}
+                                </span>
                             </TableCell>
                         </TableRow>
                     </TableHead>
-
                     <UploadTableBody rows={items} />
                 </Table>
             </TableContainer>
@@ -146,7 +185,7 @@ const ContentWrapper = styled.div`
             color: ${glassColors.grey};
             font-weight: 400;
             font-size: 15px;
-            padding: 10px 15px;
+
             vertical-align: bottom;
             position: relative;
             &:after {
@@ -155,7 +194,7 @@ const ContentWrapper = styled.div`
                 border-right: 2px solid ${glassColors.greyLight};
                 position: absolute;
                 right: 0;
-                top: 50px;
+                top: 30px;
             }
         }
     }
@@ -178,23 +217,4 @@ const ContentWrapper = styled.div`
             }
         }
     }
-`;
-
-const ColStatus = styled.div`
-    display: inline-flex;
-    margin-left: 10px;
-    svg {
-        color: ${glassColors.greyBlack};
-        font-size: 18px;
-        margin-top: auto;
-    }
-    span {
-    }
-`;
-
-const StyledBox = styled(Box)`
-    display: flex;
-    flex-direction: column;
-    text-align: center;
-    align-items: center;
 `;
