@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: i18next-conv\n"
-"POT-Creation-Date: 2023-04-11T12:13:31.557Z\n"
+"POT-Creation-Date: 2023-04-12T09:33:22.056Z\n"
 "PO-Revision-Date: 2018-10-25T09:02:35.143Z\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -342,12 +342,6 @@ msgid "Go to Validation Report"
 msgstr ""
 
 msgid "Thank! your data for now is uploaded in our system"
-msgstr ""
-
-msgid "Any other userful information here?"
-msgstr ""
-
-msgid "Info abou the previously updated quarter and the missing quarters"
 msgstr ""
 
 msgid "Importing data and applying validation rules"
