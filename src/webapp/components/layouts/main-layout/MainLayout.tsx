@@ -13,6 +13,11 @@ import { SideBarProvider } from "../../../context-providers/SideBarProvider";
 export const MainLayout: React.FC = ({ children }) => {
     const { baseUrl } = useConfig();
     const [showMenu, setShowMenu] = useState(true);
+    window.matchMedia("(max-width: 1000px)").addEventListener("change", e => {
+        if (e.matches) {
+            setShowMenu(false);
+        }
+    });
 
     const logout = () => {
         goToDhis2Url(baseUrl, "/dhis-web-commons-security/logout.action");
@@ -28,7 +33,7 @@ export const MainLayout: React.FC = ({ children }) => {
         <SideBarProvider>
             <GlassAppBar toggleShowMenu={toggleShowMenu} />
             <LandingContainer>
-                <RootGrid container spacing={6}>
+                <Grid container spacing={6}>
                     <Grid item xs={12} sm={2} style={{ display: showMenu ? "block" : "none" }}>
                         <SideBar />
                         <ButtonContainer>
@@ -49,13 +54,11 @@ export const MainLayout: React.FC = ({ children }) => {
                         {children}
                         <AppFooter />
                     </Grid>
-                </RootGrid>
+                </Grid>
             </LandingContainer>
         </SideBarProvider>
     );
 };
-
-const RootGrid = styled(Grid)``;
 
 const LandingContainer = styled.div`
     padding: 30px;
