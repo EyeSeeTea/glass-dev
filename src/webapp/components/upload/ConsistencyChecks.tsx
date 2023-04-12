@@ -145,7 +145,7 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
                 </Typography>
                 <Typography>
                     {i18n.t(
-                        "All Blocking errors need to be addressed. Please reupload correct data to complete the data submission"
+                        "All blocking errors need to be addressed. If found, please re-upload correct data to complete the data submission"
                     )}
                 </Typography>
                 <Typography>
