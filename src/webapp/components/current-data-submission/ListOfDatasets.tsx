@@ -74,6 +74,7 @@ const ContentWrapper = styled.div`
     display: flex;
     flex-direction: column;
     gap: 40px;
+    overflow-x: auto;
 `;
 const StyledTypography = styled(Typography)`
     width: 217px;
