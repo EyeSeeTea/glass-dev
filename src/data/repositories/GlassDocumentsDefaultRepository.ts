@@ -34,7 +34,7 @@ export class GlassDocumentsDefaultRepository implements GlassDocumentsRepository
         ).flatMap(data => {
             return apiToFuture(
                 this.api.sharing.search({
-                    key: `AMR-${module.substring(0, module.indexOf(" "))}`,
+                    key: `AMR-${module.substring(0, module.indexOf(" ") !== -1 ? module.indexOf(" ") : module.length)}`,
                 })
             ).flatMap(({ userGroups }) => {
                 const dataVisualizerGroup = userGroups.find(group => group.name.includes("visualizer"));
