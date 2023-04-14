@@ -21,12 +21,6 @@ export const Completed: React.FC = () => {
                 <span>{currentPeriod}</span>
                 <span>{i18n.t(currentOrgUnitAccess.orgUnitName)}</span>
             </div>
-            <Section className="summary">
-                <p>{i18n.t("Any other userful information here?")}</p>
-            </Section>
-            <Section className="summary">
-                <p>{i18n.t("Info abou the previously updated quarter and the missing quarters")}</p>
-            </Section>
             <CompleteButtons />
         </ContentWrapper>
     );
