@@ -2,9 +2,13 @@ import React from "react";
 import { Button } from "@material-ui/core";
 import styled from "styled-components";
 import i18n from "@eyeseetea/d2-ui-components/locales";
-import { NavLink } from "react-router-dom";
+import { NavLink, useHistory } from "react-router-dom";
 
 export const CompleteButtons: React.FC = () => {
+    const history = useHistory();
+    const goToReports = () => {
+        history.push(`/reports/`);
+    };
     return (
         <ContentWrapper>
             <div>
@@ -19,7 +23,7 @@ export const CompleteButtons: React.FC = () => {
                 </Button>
             </div>
             <div>
-                <Button variant="contained" color="primary">
+                <Button variant="contained" color="primary" onClick={goToReports}>
                     {i18n.t("Go to Validation Report")}
                 </Button>
             </div>

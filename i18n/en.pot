@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2023-04-11T17:59:36.128Z\n"
-"PO-Revision-Date: 2023-04-11T17:59:36.128Z\n"
+"POT-Creation-Date: 2023-04-12T09:33:22.056Z\n"
+"PO-Revision-Date: 2023-04-12T09:33:22.056Z\n"
 
 msgid "Error saving registration status"
 msgstr ""
@@ -342,12 +342,6 @@ msgid "Go to Validation Report"
 msgstr ""
 
 msgid "Thank! your data for now is uploaded in our system"
-msgstr ""
-
-msgid "Any other userful information here?"
-msgstr ""
-
-msgid "Info abou the previously updated quarter and the missing quarters"
 msgstr ""
 
 msgid "Importing data and applying validation rules"
