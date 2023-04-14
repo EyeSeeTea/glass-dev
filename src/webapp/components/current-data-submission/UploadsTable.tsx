@@ -19,7 +19,7 @@ export const UploadsTable: React.FC<UploadsTableProps> = ({ title, items, classN
         <ContentWrapper className={className}>
             <Typography variant="h3">{i18n.t(title)}</Typography>
 
-            <TableContainer component={Paper} style={{ minWidth: "1000px" }}>
+            <TableContainer component={Paper} style={{ minWidth: "1000px", overflowX: "auto" }}>
                 <Table className={"blocking-table"} aria-label="simple table">
                     <TableHead>
                         <TableRow>
@@ -42,6 +42,7 @@ export const UploadsTable: React.FC<UploadsTableProps> = ({ title, items, classN
 };
 
 const ContentWrapper = styled.div`
+    overflow-x: auto;
     h3 {
         font-size: 22px;
         color: ${palette.text.primary};
@@ -50,6 +51,7 @@ const ContentWrapper = styled.div`
     .MuiTableContainer-root {
         border: none;
         box-shadow: none;
+        overflow-x: auto;
     }
     thead {
         border-bottom: 3px solid ${glassColors.greyLight};
