@@ -22,7 +22,7 @@ export class GlassDocumentsDefaultRepository implements GlassDocumentsRepository
         return this.dataStoreClient.listCollection<GlassDocuments>(DataStoreKeys.DOCUMENTS);
     }
 
-    save(file: File): FutureData<string> {
+    save(file: File, module: string): FutureData<string> {
         return Future.join2(
             apiToFuture(
                 this.api.files.upload({
@@ -32,16 +32,50 @@ export class GlassDocumentsDefaultRepository implements GlassDocumentsRepository
             ),
             this.dataStoreClient.listCollection(DataStoreKeys.DOCUMENTS)
         ).flatMap(data => {
-            const document = {
-                id: data[0].id,
-                fileResourceId: data[0].fileResourceId,
-                createdAt: new Date().toISOString(),
-            };
+            return apiToFuture(
+                this.api.sharing.search({
+                    key: `AMR-${module.substring(0, module.indexOf(" "))}`,
+                })
+            ).flatMap(({ userGroups }) => {
+                const dataVisualizerGroup = userGroups.find(group => group.name.includes("visualizer"));
+                const dataCaptureGroup = userGroups.find(group => group.name.includes("capture"));
+                if (!dataVisualizerGroup || !dataCaptureGroup) {
+                    return Future.error("Error getting data visualizer/capture groups for selected module");
+                }
+                return apiToFuture(
+                    this.api.sharing.post(
+                        {
+                            id: data[0].id,
+                            type: "document",
+                        },
+                        {
+                            externalAccess: false,
+                            publicAccess: "--------",
+                            userGroupAccesses: [
+                                {
+                                    access: "r-------",
+                                    ...dataVisualizerGroup,
+                                },
+                                {
+                                    access: "rw------",
+                                    ...dataCaptureGroup,
+                                },
+                            ],
+                        }
+                    )
+                ).flatMap(() => {
+                    const document = {
+                        id: data[0].id,
+                        fileResourceId: data[0].fileResourceId,
+                        createdAt: new Date().toISOString(),
+                    };
 
-            const newDocuments = [...data[1], document];
-            return this.dataStoreClient
-                .saveObject(DataStoreKeys.DOCUMENTS, newDocuments)
-                .flatMap(() => Future.success(document.id));
+                    const newDocuments = [...data[1], document];
+                    return this.dataStoreClient
+                        .saveObject(DataStoreKeys.DOCUMENTS, newDocuments)
+                        .flatMap(() => Future.success(document.id));
+                });
+            });
         });
     }
 
