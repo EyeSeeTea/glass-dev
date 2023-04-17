@@ -7,11 +7,15 @@ import MenuIcon from "@material-ui/icons/Menu";
 import LocationIcon from "@material-ui/icons/LocationOn";
 import whoLogo from "../../assets/who-logo-blue.png";
 import glassLogo from "../../assets/glass-logo.png";
-import { Box, MenuItem, Select } from "@material-ui/core";
+import { Badge, Box, MenuItem, Select } from "@material-ui/core";
 import styled from "styled-components";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { useAppContext } from "../../contexts/app-context";
 import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context";
+import NotificationsIcon from "@material-ui/icons/Notifications";
+import { useNotifications } from "../landing-content/notifications/useNotifications";
+import { ContentLoader } from "../content-loader/ContentLoader";
+import { useHistory } from "react-router-dom";
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -38,12 +42,15 @@ const useStyles = makeStyles(theme => ({
 
 export const GlassAppBar: React.FC = () => {
     const classes = useStyles();
+    const history = useHistory();
 
-    const { currentUser } = useAppContext();
+    const { currentUser, compositionRoot } = useAppContext();
     const { currentOrgUnitAccess, changeCurrentOrgUnitAccess } = useCurrentOrgUnitContext();
     const [action, setAction] = React.useState(1);
 
     const [orgUnitName, setOrgUnitName] = React.useState(currentOrgUnitAccess.orgUnitName);
+
+    const notifications = useNotifications(compositionRoot);
 
     useEffect(() => {
         if (orgUnitName !== currentOrgUnitAccess.orgUnitName) {
@@ -65,42 +72,56 @@ export const GlassAppBar: React.FC = () => {
     return (
         <div className={classes.root}>
             <AppBar position="static">
-                <Toolbar className={`${classes.toolbar}`}>
-                    <IconButton edge="start" className={classes.menuButton} color="primary" aria-label="open drawer">
-                        <MenuIcon />
-                    </IconButton>
-                    <LogoContainer>
-                        <img src={glassLogo} width={150} alt="Glass logo" />;
-                    </LogoContainer>
-                    <LogoContainer>
-                        <img src={whoLogo} width={150} alt="WHO logo" />;
-                    </LogoContainer>
-                    <Box className={classes.title} />
-                    <SelectContainer>
-                        <IconButton aria-label="search" color="primary">
-                            <LocationIcon />
+                <ContentLoader content={notifications}>
+                    <Toolbar className={`${classes.toolbar}`}>
+                        <IconButton
+                            edge="start"
+                            className={classes.menuButton}
+                            color="primary"
+                            aria-label="open drawer"
+                        >
+                            <MenuIcon />
                         </IconButton>
-                        {currentUser?.userOrgUnitsAccess && (
-                            <Select value={orgUnitName} disableUnderline onChange={changeOrgUnit}>
-                                {currentUser.userOrgUnitsAccess.map(orgUnit => (
-                                    <MenuItem
-                                        key={orgUnit.orgUnitId}
-                                        data-key={orgUnit.orgUnitId}
-                                        value={orgUnit.orgUnitName}
-                                    >
-                                        {i18n.t(orgUnit.orgUnitName)}
-                                    </MenuItem>
-                                ))}
-                            </Select>
+                        <LogoContainer>
+                            <img src={glassLogo} width={150} alt="Glass logo" />;
+                        </LogoContainer>
+                        <LogoContainer>
+                            <img src={whoLogo} width={150} alt="WHO logo" />;
+                        </LogoContainer>
+                        <Box className={classes.title} />
+                        {notifications.kind === "loaded" && notifications.data.length && (
+                            <IconButton aria-label="notifications" color="primary" onClick={() => history.push("/")}>
+                                <Badge badgeContent={notifications.data.length} color="primary">
+                                    <NotificationsIcon />
+                                </Badge>
+                            </IconButton>
                         )}
-                    </SelectContainer>
-                    <SelectContainer>
-                        <Select value={action} disableUnderline onChange={changeAction}>
-                            <MenuItem value={1}>{i18n.t("User Profile")}</MenuItem>
-                            <MenuItem value={2}>{i18n.t("My Account")}</MenuItem>
-                        </Select>
-                    </SelectContainer>
-                </Toolbar>
+                        <SelectContainer>
+                            <IconButton aria-label="search" color="primary">
+                                <LocationIcon />
+                            </IconButton>
+                            {currentUser?.userOrgUnitsAccess && (
+                                <Select value={orgUnitName} disableUnderline onChange={changeOrgUnit}>
+                                    {currentUser.userOrgUnitsAccess.map(orgUnit => (
+                                        <MenuItem
+                                            key={orgUnit.orgUnitId}
+                                            data-key={orgUnit.orgUnitId}
+                                            value={orgUnit.orgUnitName}
+                                        >
+                                            {i18n.t(orgUnit.orgUnitName)}
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                            )}
+                        </SelectContainer>
+                        <SelectContainer>
+                            <Select value={action} disableUnderline onChange={changeAction}>
+                                <MenuItem value={1}>{i18n.t("User Profile")}</MenuItem>
+                                <MenuItem value={2}>{i18n.t("My Account")}</MenuItem>
+                            </Select>
+                        </SelectContainer>
+                    </Toolbar>
+                </ContentLoader>
             </AppBar>
         </div>
     );

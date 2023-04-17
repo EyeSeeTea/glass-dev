@@ -1,5 +1,5 @@
 import { assertUnreachable, Maybe } from "../../types/utils";
-import { Id, NamedRef, Ref, updateCollection } from "./Base";
+import { Code, Id, NamedRef, Ref, updateCollection } from "./Base";
 
 export interface QuestionnaireBase {
     id: Id;
@@ -9,6 +9,7 @@ export interface QuestionnaireBase {
     year: number;
     isCompleted: boolean;
     isMandatory: boolean;
+    rules: QuestionnaireRule[];
 }
 
 export interface QuestionnaireSelector {
@@ -23,13 +24,16 @@ export interface Questionnaire extends QuestionnaireBase {
 
 export interface QuestionnaireSection {
     title: string;
+    code: Code;
     questions: Question[];
+    isVisible: boolean;
 }
 
 export type Question = SelectQuestion | NumberQuestion | TextQuestion | BooleanQuestion;
 
 export interface QuestionBase {
     id: Id;
+    code: Code;
     text: string;
 }
 
@@ -65,19 +69,54 @@ export interface BooleanQuestion extends QuestionBase {
 
 export type QuestionOption = NamedRef;
 
+export type QuestionnaireRule = RuleToggleSectionsVisibility;
+
+interface RuleToggleSectionsVisibility {
+    type: "setSectionsVisibility";
+    dataElementCode: Code;
+    sectionCodes: Code[];
+}
+
 export class QuestionnarieM {
     static setAsComplete(questionnarie: Questionnaire, value: boolean): Questionnaire {
         return { ...questionnarie, isCompleted: value };
     }
 
     static updateQuestion(questionnaire: Questionnaire, questionUpdated: Question): Questionnaire {
-        return {
+        return this.applyRules({
             ...questionnaire,
             sections: questionnaire.sections.map(section => ({
                 ...section,
                 questions: updateCollection(section.questions, questionUpdated),
             })),
-        };
+        });
+    }
+
+    static applyRules(questionnaire: Questionnaire) {
+        const questionsByCode = _(questionnaire.sections)
+            .flatMap(section => section.questions)
+            .keyBy(question => question.code)
+            .value();
+
+        return _(questionnaire.rules).reduce((questionnaireAcc, rule) => {
+            switch (rule.type) {
+                case "setSectionsVisibility": {
+                    const toggleQuestion = questionsByCode[rule.dataElementCode];
+                    const areRuleSectionsVisible = Boolean(toggleQuestion?.value);
+
+                    return {
+                        ...questionnaireAcc,
+                        sections: questionnaireAcc.sections.map((section): QuestionnaireSection => {
+                            return rule.sectionCodes.includes(section.code)
+                                ? { ...section, isVisible: areRuleSectionsVisible }
+                                : section;
+                        }),
+                    };
+                }
+                default:
+                    assertUnreachable(rule.type);
+            }
+        }, questionnaire);
     }
 }
 
