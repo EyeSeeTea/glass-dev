@@ -20,6 +20,8 @@ interface ModuleCardProps {
     module: GlassModule;
 }
 
+const COMPLETED_STATUS = "COMPLETED";
+
 export const ModuleCard: React.FC<ModuleCardProps> = ({ period, module }) => {
     const { changeCurrentModuleAccess } = useCurrentModuleContext();
     const { compositionRoot } = useAppContext();
@@ -53,7 +55,8 @@ export const ModuleCard: React.FC<ModuleCardProps> = ({ period, module }) => {
         );
         compositionRoot.glassUploads.getByModuleOUPeriod(module.id, orgUnitId, period.toString()).run(
             glassUploads => {
-                setUploadsCount(glassUploads.length);
+                const completedUploads = glassUploads.filter(({ status }) => status === COMPLETED_STATUS);
+                setUploadsCount(completedUploads.length);
             },
             () => {
                 snackbar.error(i18n.t("Error fetching uploads."));
