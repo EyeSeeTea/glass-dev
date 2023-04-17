@@ -6,14 +6,17 @@ import { glassColors } from "../../pages/app/themes/dhis2.theme";
 import SidebarNav, { Menu } from "../sidebar-nav/SidebarNav";
 import i18n from "../../../locales";
 import { NavLink } from "react-router-dom";
-
+import ExitToAppIcon from "@material-ui/icons/ExitToApp";
 import { useAppContext } from "../../contexts/app-context";
 import { mapModuleToMenu } from "./mapModuleToMenu";
 import { useCurrentModuleContext } from "../../contexts/current-module-context";
 import { useSnackbar } from "@eyeseetea/d2-ui-components";
 import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context";
+import { useConfig } from "@dhis2/app-runtime";
+import { goToDhis2Url } from "../../utils/helpers";
 
 export const SideBar: React.FC = () => {
+    const { baseUrl } = useConfig();
     const { compositionRoot } = useAppContext();
     const snackbar = useSnackbar();
     const [isLoading, setIsLoading] = useState(false);
@@ -21,6 +24,10 @@ export const SideBar: React.FC = () => {
     const { currentOrgUnitAccess } = useCurrentOrgUnitContext();
 
     const { resetCurrentModuleAccess } = useCurrentModuleContext();
+
+    const logout = () => {
+        goToDhis2Url(baseUrl, "/dhis-web-commons-security/logout.action");
+    };
 
     useEffect(() => {
         setIsLoading(true);
@@ -38,31 +45,48 @@ export const SideBar: React.FC = () => {
     }, [compositionRoot.glassModules, currentOrgUnitAccess.orgUnitId, snackbar]);
 
     return (
-        <CustomCard minheight="90%" padding="0 0 10px 0" maxwidth="250px">
-            <HomeButtonWrapper>
-                <Button
-                    className="home-button"
-                    component={NavLink}
-                    to="/"
-                    exact={true}
-                    onClick={resetCurrentModuleAccess}
-                >
-                    <StarGradient className="star-icon" />
-                    <Box width={15} />
-                    <Typography>{i18n.t("HOME")}</Typography>
-                </Button>
-            </HomeButtonWrapper>
-            {storedMenuData && <SidebarNav menus={storedMenuData} />}
+        <SideBarContainer>
+            <CustomCard minheight="600px" padding="0 0 80px 0" maxwidth="250px">
+                <HomeButtonWrapper>
+                    <Button
+                        className="home-button"
+                        component={NavLink}
+                        to="/"
+                        exact={true}
+                        onClick={resetCurrentModuleAccess}
+                    >
+                        <StarGradient className="star-icon" />
+                        <Box width={15} />
+                        <Typography>{i18n.t("HOME")}</Typography>
+                    </Button>
+                </HomeButtonWrapper>
+                {storedMenuData && <SidebarNav menus={storedMenuData} />}
 
-            <Backdrop open={isLoading} style={{ color: "#fff", zIndex: 1 }}>
-                <StyledCircularProgress color="inherit" size={30} />
-            </Backdrop>
+                <Backdrop open={isLoading} style={{ color: "#fff", zIndex: 1 }}>
+                    <StyledCircularProgress color="inherit" size={30} />
+                </Backdrop>
 
-            <div style={{ flexGrow: 1 }} />
-        </CustomCard>
+                <div style={{ flexGrow: 1 }} />
+            </CustomCard>
+            <ButtonContainer>
+                <div>
+                    <StyledButton
+                        onClick={logout}
+                        variant="contained"
+                        color="default"
+                        startIcon={<ExitToAppIcon />}
+                        disableElevation
+                    >
+                        {i18n.t("Log Out")}
+                    </StyledButton>
+                </div>
+            </ButtonContainer>
+        </SideBarContainer>
     );
 };
-
+const SideBarContainer = styled.div`
+    height: 100%;
+`;
 const HomeButtonWrapper = styled.div`
     margin: 25px 0 0 0;
     .home-button {
@@ -94,4 +118,24 @@ const StarGradient = styled.div`
 export const StyledCircularProgress = styled(CircularProgress)`
     margin: 30px auto;
     size: 20;
+`;
+
+const ButtonContainer = styled.div`
+    position: relative;
+    top: -70px;
+    width: 100%;
+    display: block;
+    z-index: 2;
+    text-align: center;
+    > div {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+`;
+
+const StyledButton = styled(Button)`
+    margin: 16px;
+    background: transparent;
+    text-transform: none;
 `;
