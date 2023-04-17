@@ -27,7 +27,7 @@ export const UploadRis: React.FC<UploadRisProps> = ({ risFile, setRisFile, valid
     const { compositionRoot } = useAppContext();
 
     const {
-        currentModuleAccess: { moduleId },
+        currentModuleAccess: { moduleId, moduleName },
     } = useCurrentModuleContext();
     const {
         currentOrgUnitAccess: { orgUnitId, orgUnitCode },
@@ -98,7 +98,8 @@ export const UploadRis: React.FC<UploadRisProps> = ({ risFile, setRisFile, valid
                                     batchId,
                                     fileType: RIS_FILE_TYPE,
                                     dataSubmission: dataSubmissionId,
-                                    module: moduleId,
+                                    moduleId,
+                                    moduleName,
                                     period: currentPeriod.toString(),
                                     orgUnitId: orgUnitId,
                                     orgUnitCode: orgUnitCode,
@@ -130,13 +131,14 @@ export const UploadRis: React.FC<UploadRisProps> = ({ risFile, setRisFile, valid
         },
         [
             batchId,
-            compositionRoot.glassDocuments,
             compositionRoot.dataSubmision,
+            compositionRoot.glassDocuments,
+            currentPeriod,
             dataSubmissionId,
             moduleId,
-            orgUnitId,
+            moduleName,
             orgUnitCode,
-            currentPeriod,
+            orgUnitId,
             setRisFile,
             snackbar,
         ]
