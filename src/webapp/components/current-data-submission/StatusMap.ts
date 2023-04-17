@@ -37,7 +37,7 @@ export const statusMap = new Map<DataSubmissionStatusTypes, StatusDetails>([
                     label: "Upload/Delete datasets",
                     color: "default",
                     variant: "outlined",
-                    url: "/upload-history",
+                    url: "/data-file-history",
                 },
                 {
                     label: "Go to questionnaires",
@@ -81,7 +81,7 @@ export const statusMap = new Map<DataSubmissionStatusTypes, StatusDetails>([
                     label: "Review the submitted datasets",
                     variant: "text",
                     color: "primary",
-                    url: "/upload-history",
+                    url: "/data-file-history",
                 },
             ],
             rightCTAs: [
@@ -152,7 +152,7 @@ export const statusMap = new Map<DataSubmissionStatusTypes, StatusDetails>([
                     label: "Upload/Delete datasets",
                     color: "default",
                     variant: "outlined",
-                    url: "/upload-history",
+                    url: "/data-file-history",
                 },
                 {
                     label: "Go to questionnaires",
