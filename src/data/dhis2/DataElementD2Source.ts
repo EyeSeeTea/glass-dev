@@ -64,8 +64,9 @@ function getDataElement(d2DataElement: D2DataElement, d2CategoryCombo: D2Categor
     const optionSet = getOptionSet(d2DataElement);
     const disaggregation = getOptionsCategoryCombo(d2CategoryCombo);
 
-    const base: Pick<DataElement, "id" | "name" | "options" | "disaggregation"> = {
+    const base: Pick<DataElement, "id" | "name" | "code" | "options" | "disaggregation"> = {
         id: d2DataElement.id,
+        code: d2DataElement.code,
         name: d2DataElement.formName || d2DataElement.displayName,
         options: optionSet ? { id: optionSet.id, isMultiple: false, items: optionSet.options } : undefined,
         disaggregation: disaggregation,

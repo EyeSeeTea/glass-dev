@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2023-04-17T08:41:46.092Z\n"
-"PO-Revision-Date: 2023-04-17T08:41:46.092Z\n"
+"POT-Creation-Date: 2023-04-17T15:04:29.728Z\n"
+"PO-Revision-Date: 2023-04-17T15:04:29.728Z\n"
 
 msgid "Error saving registration status"
 msgstr ""
@@ -281,9 +281,6 @@ msgstr ""
 msgid "No Open Data Submissions"
 msgstr ""
 
-msgid "Log Out"
-msgstr ""
-
 msgid "OPEN ALL YEAR"
 msgstr ""
 
@@ -318,6 +315,9 @@ msgid "Error fetching User Modules"
 msgstr ""
 
 msgid "HOME"
+msgstr ""
+
+msgid "Log Out"
 msgstr ""
 
 msgid "Blocking Errors"
