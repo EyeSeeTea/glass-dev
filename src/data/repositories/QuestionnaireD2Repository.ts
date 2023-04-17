@@ -102,8 +102,14 @@ export class QuestionnaireD2Repository implements QuestionnaireRepository {
         });
     }
 
-    setCompletion(selector: QuestionnaireSelector, value: boolean): FutureData<void> {
-        return apiToFuture(
+    setCompletion(selector: QuestionnaireSelector, toBeCompleted: boolean): FutureData<void> {
+        const validate$ = this.validateDataSet({
+            dataSetId: selector.id,
+            orgUnitId: selector.orgUnitId,
+            period: selector.year.toString(),
+        });
+
+        const setCompletion$: FutureData<void> = apiToFuture(
             this.api.post<{ status: "OK" | "SUCCESS" | "WARNING" | "ERROR" }>(
                 "/completeDataSetRegistrations",
                 {},
@@ -113,7 +119,7 @@ export class QuestionnaireD2Repository implements QuestionnaireRepository {
                             dataSet: selector.id,
                             period: selector.year.toString(),
                             organisationUnit: selector.orgUnitId,
-                            completed: value,
+                            completed: toBeCompleted,
                         },
                     ],
                 }
@@ -123,11 +129,60 @@ export class QuestionnaireD2Repository implements QuestionnaireRepository {
                 ? Future.success(undefined)
                 : Future.error(i18n.t("Error saving registration status"))
         );
+
+        if (toBeCompleted) {
+            return validate$.flatMap(() => setCompletion$);
+        } else {
+            return setCompletion$;
+        }
     }
 
     saveResponse(questionnaire: QuestionnaireSelector, question: Question): FutureData<void> {
         const dataValues = this.getDataValuesForQuestion(questionnaire, question);
         return this.postDataValues(dataValues);
+    }
+
+    private validateDataSet(options: { dataSetId: Id; period: string; orgUnitId: Id }): FutureData<void> {
+        return this.getDataSetValidation(options).flatMap(validation => {
+            const ruleIds = _(validation.validationRuleViolations)
+                .map(validation => validation.validationRule.id)
+                .uniq()
+                .value();
+
+            if (_.isEmpty(ruleIds)) {
+                return Future.success(undefined);
+            } else {
+                return this.getValidationRules(ruleIds).flatMap(rules => {
+                    const instructions = rules.map(rule => rule.instruction);
+                    return Future.error(instructions.join("\n"));
+                });
+            }
+        });
+    }
+
+    private getDataSetValidation(options: {
+        dataSetId: Id;
+        period: string;
+        orgUnitId: Id;
+    }): FutureData<DataSetValidationResponse> {
+        const { dataSetId, period, orgUnitId } = options;
+
+        return apiToFuture(
+            this.api
+                .get<DataSetValidationResponse>(`/validation/dataSet/${dataSetId}`, { pe: period, ou: orgUnitId })
+                .map(response => response.data)
+        );
+    }
+
+    private getValidationRules(ids: string[]): FutureData<ValidationRule[]> {
+        return apiToFuture(
+            this.api.metadata.get({
+                validationRules: {
+                    fields: { id: true, instruction: true },
+                    filter: { id: { in: ids } },
+                },
+            })
+        ).map(res => res.validationRules);
     }
 
     private getQuestion(dataElement: DataElement, dataValues: DataValueSetsDataValue[]): Question | null {
@@ -279,4 +334,39 @@ interface CompleteDataSetRegistration {
 
 interface CompleteDataSetRegistrationsResponse {
     completeDataSetRegistrations?: CompleteDataSetRegistration[];
+}
+
+interface ValidationRule {
+    id: Id;
+    instruction: string;
+}
+
+interface DataSetValidationResponse {
+    validationRuleViolations: Array<{
+        id: number;
+        validationRule: {
+            name: string;
+            id: Id;
+        };
+        period: {
+            code: string;
+            name: string;
+            id: string;
+        };
+        organisationUnit: {
+            code: string;
+            name: string;
+            id: Id;
+        };
+        attributeOptionCombo: {
+            code: string;
+            name: string;
+            id: Id;
+        };
+        leftsideValue: number;
+        rightsideValue: number;
+        dayInPeriod: number;
+        notificationSent: boolean;
+    }>;
+    commentRequiredViolations: unknown[];
 }
