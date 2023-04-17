@@ -1,6 +1,5 @@
 import React, { useEffect } from "react";
 import styled from "styled-components";
-import { glassColors } from "../../pages/app/themes/dhis2.theme";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { CompleteButtons } from "./CompleteButtons";
 import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context";
@@ -45,19 +44,5 @@ const ContentWrapper = styled.div`
         align-items: center;
         justify-content: center;
         font-weight: 500;
-    }
-`;
-
-const Section = styled.div`
-    display: flex;
-    width: 100%;
-    flex-direction: column;
-    gap: 10px;
-    padding: 0;
-    text-align: center;
-    margin: 0px auto;
-    border: 1px solid ${glassColors.grey};
-    p {
-        margin: 40px;
     }
 `;
