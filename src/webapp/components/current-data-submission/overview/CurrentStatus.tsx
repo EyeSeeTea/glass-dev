@@ -27,6 +27,8 @@ interface StatusProps {
     setCurrentStep: React.Dispatch<React.SetStateAction<number>>;
 }
 
+const COMPLETED_STATUS = "COMPLETED";
+
 export const CurrentStatus: React.FC<StatusProps> = ({
     title,
     description,
@@ -71,7 +73,8 @@ export const CurrentStatus: React.FC<StatusProps> = ({
             );
             compositionRoot.glassUploads.getByModuleOUPeriod(moduleId, orgUnitId, currentPeriod.toString()).run(
                 glassUploads => {
-                    setUploadsCount(glassUploads.length);
+                    const completedUploads = glassUploads.filter(({ status }) => status === COMPLETED_STATUS);
+                    setUploadsCount(completedUploads.length);
                 },
                 () => {
                     snackbar.error(i18n.t("Error fetching uploads."));
