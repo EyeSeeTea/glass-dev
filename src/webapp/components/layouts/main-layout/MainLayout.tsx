@@ -33,7 +33,7 @@ export const MainLayout: React.FC = ({ children }) => {
         <SideBarProvider>
             <GlassAppBar toggleShowMenu={toggleShowMenu} />
             <LandingContainer>
-                <Grid container spacing={6}>
+                <Grid container spacing={6} style={{ height: "100%" }}>
                     <Grid item xs={12} sm={2} style={{ display: showMenu ? "block" : "none" }}>
                         <SideBar />
                         <ButtonContainer>
@@ -61,6 +61,7 @@ export const MainLayout: React.FC = ({ children }) => {
 };
 
 const LandingContainer = styled.div`
+    height: calc(100% - 135px);
     padding: 30px;
     > .MuiGrid-container {
         .MuiGrid-item:first-child {
