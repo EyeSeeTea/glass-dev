@@ -8,6 +8,7 @@ import {
     QuestionnaireSection,
     QuestionnaireSelector,
     QuestionnaireBase,
+    QuestionnarieM,
 } from "../../domain/entities/Questionnaire";
 import { QuestionnaireRepository } from "../../domain/repositories/QuestionnaireRepository";
 import { D2Api, DataValueSetsDataValue, DataValueSetsPostRequest } from "../../types/d2-api";
@@ -44,6 +45,7 @@ export class QuestionnaireD2Repository implements QuestionnaireRepository {
         return Future.joinObj(data).map(({ dataSets, dataSetsInfo }) => {
             return dataSets.map((dataSet): QuestionnaireBase => {
                 const dataSetInfo = dataSetsInfo.find(info => info.dataSet === dataSet.id);
+                const config = configByDataSetId[dataSet.id];
 
                 return {
                     id: dataSet.id,
@@ -52,7 +54,8 @@ export class QuestionnaireD2Repository implements QuestionnaireRepository {
                     year: options.year,
                     description: dataSet.displayDescription,
                     isCompleted: dataSetInfo?.completed || false,
-                    isMandatory: configByDataSetId[dataSet.id]?.mandatory || false,
+                    isMandatory: config?.mandatory || false,
+                    rules: config?.rules || [],
                 };
             });
         });
@@ -86,10 +89,15 @@ export class QuestionnaireD2Repository implements QuestionnaireRepository {
                     return this.getQuestion(dataElement, dataValues);
                 });
 
-                return { title: section.name, questions: _.compact(questions) };
+                return {
+                    code: section.code,
+                    title: section.name,
+                    questions: _.compact(questions),
+                    isVisible: true,
+                };
             });
 
-            return {
+            const questionnaire: Questionnaire = {
                 id: selector.id,
                 name: dataForm.name,
                 description: dataForm.description,
@@ -98,7 +106,10 @@ export class QuestionnaireD2Repository implements QuestionnaireRepository {
                 sections: sections,
                 isCompleted: dataSetInfo?.completed || false,
                 isMandatory: config?.mandatory || false,
+                rules: config?.rules || [],
             };
+
+            return QuestionnarieM.applyRules(questionnaire);
         });
     }
 
@@ -146,6 +157,7 @@ export class QuestionnaireD2Repository implements QuestionnaireRepository {
 
                     return {
                         id: dataElement.id,
+                        code: dataElement.code,
                         text: dataElement.name,
                         type: "boolean",
                         value: dataValue ? stringToValue[dataValue] : undefined,
@@ -154,6 +166,7 @@ export class QuestionnaireD2Repository implements QuestionnaireRepository {
                 } else {
                     return {
                         id: dataElement.id,
+                        code: dataElement.code,
                         text: dataElement.name,
                         type: "select",
                         value: dataElement.disaggregation.find(coc =>
@@ -166,6 +179,7 @@ export class QuestionnaireD2Repository implements QuestionnaireRepository {
             case "NUMBER":
                 return {
                     id: dataElement.id,
+                    code: dataElement.code,
                     text: dataElement.name,
                     type: "number",
                     value: dataValue?.value || "",
@@ -175,6 +189,7 @@ export class QuestionnaireD2Repository implements QuestionnaireRepository {
             case "TEXT":
                 return {
                     id: dataElement.id,
+                    code: dataElement.code,
                     text: dataElement.name,
                     multiline: dataElement.multiline,
                     type: "text",
