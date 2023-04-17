@@ -51,6 +51,8 @@ const QuestionnaireForm: React.FC<QuestionnarieFormProps> = props => {
             />
 
             {questionnaire.sections.map(section => {
+                if (!section.isVisible) return null;
+
                 return (
                     <div key={section.title} className={classes.wrapper}>
                         <DataTable>

@@ -36,6 +36,7 @@ export class DataFormD2Source {
             return dataSet.sections.map((section): Section => {
                 return {
                     id: section.id,
+                    code: section.code,
                     name: section.displayName,
                     dataElements: _(section.dataElements)
                         .map(dataElementRef => dataElements[dataElementRef.id])

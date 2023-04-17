@@ -2,6 +2,8 @@ import _ from "lodash";
 
 export type Id = string;
 
+export type Code = string;
+
 export interface Ref {
     id: Id;
 }
