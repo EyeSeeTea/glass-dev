@@ -4,7 +4,7 @@ import { GlassUploadsRepository } from "../repositories/GlassUploadsRepository";
 
 export type SetUploadStatusType = {
     id: string;
-    status: "UPLOADED" | "IMPORTED" | "VALIDATED" | "COMPLETED" | "ERROR UPLOADING";
+    status: "UPLOADED" | "IMPORTED" | "VALIDATED" | "COMPLETED";
 };
 
 export class SetUploadStatusUseCase implements UseCase {
