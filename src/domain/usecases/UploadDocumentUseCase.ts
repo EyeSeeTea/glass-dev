@@ -10,7 +10,8 @@ type UploadType = {
         batchId: string;
         fileType: string;
         dataSubmission: string;
-        module: string;
+        moduleId: string;
+        moduleName: string;
         period: string;
         orgUnitId: string;
         orgUnitCode: string;
@@ -26,7 +27,7 @@ export class UploadDocumentUseCase implements UseCase {
     ) {}
 
     public execute({ file, data }: UploadType): FutureData<string> {
-        return this.glassDocumentsRepository.save(file).flatMap(fileId => {
+        return this.glassDocumentsRepository.save(file, data.moduleName).flatMap(fileId => {
             const upload = {
                 id: generateUid(),
                 batchId: data.batchId,
@@ -37,7 +38,7 @@ export class UploadDocumentUseCase implements UseCase {
                 fileType: data.fileType,
                 inputLineNb: 0,
                 outputLineNb: 0,
-                module: data.module,
+                module: data.moduleId,
                 period: data.period,
                 specimens: data.specimens,
                 status: "UPLOADED",
