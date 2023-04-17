@@ -38,7 +38,7 @@ export const SideBar: React.FC = () => {
     }, [compositionRoot.glassModules, currentOrgUnitAccess.orgUnitId, snackbar]);
 
     return (
-        <CustomCard minheight="100vh" padding="0 0 10px 0" maxwidth="250px">
+        <CustomCard minheight="90%" padding="0 0 10px 0" maxwidth="250px">
             <HomeButtonWrapper>
                 <Button
                     className="home-button"

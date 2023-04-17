@@ -3,13 +3,22 @@ html {
     font-family: Roboto, Arial, sans-serif;
     overflow-y: scroll;
     font-weight: 300;
+    height: 100%;
 }
 
 body {
     margin: 0;
     color: #666666;
+    height: 100%;
 }
 
 li {
     line-height: 1.75;
+}
+
+#root {
+    height: 100%;
+}
+#app {
+    height: 100%;
 }
