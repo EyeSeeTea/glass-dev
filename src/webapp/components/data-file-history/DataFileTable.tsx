@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import { Paper, Table, TableCell, TableContainer, TableHead, TableRow, Typography } from "@material-ui/core";
 import styled from "styled-components";
-import { UploadTableBody } from "./UploadTableBody";
+import { DataFileTableBody } from "./DataFileTableBody";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { glassColors, palette } from "../../pages/app/themes/dhis2.theme";
 import { ArrowUpward, ArrowDownward } from "@material-ui/icons";
-export interface UploadHistoryItemProps {
+export interface DataFileHistoryItemProps {
     id: string;
     batchId: string;
     countryCode: string;
@@ -23,14 +23,14 @@ export interface UploadHistoryItemProps {
     records: number;
 }
 export type SortDirection = "asc" | "desc";
-export interface UploadTableProps {
+export interface DataFileTableProps {
     title?: string;
-    items?: UploadHistoryItemProps[];
+    items?: DataFileHistoryItemProps[];
     className?: string;
     sortByColumn: (columnName: string, sortDirection: SortDirection) => void;
 }
 
-export const UploadTable: React.FC<UploadTableProps> = ({ title, items, className, sortByColumn }) => {
+export const DataFileTable: React.FC<DataFileTableProps> = ({ title, items, className, sortByColumn }) => {
     const [fileTypeSortDirection, setFileTypeSortDirection] = useState<SortDirection>("asc");
     const [batchIdSortDirection, setBatchIdSortDirection] = useState<SortDirection>("asc");
     const [dateSortDirection, setDateSortDirection] = useState<SortDirection>("asc");
@@ -149,7 +149,7 @@ export const UploadTable: React.FC<UploadTableProps> = ({ title, items, classNam
                             </TableCell>
                         </TableRow>
                     </TableHead>
-                    <UploadTableBody rows={items} />
+                    <DataFileTableBody rows={items} />
                 </Table>
             </TableContainer>
         </ContentWrapper>
