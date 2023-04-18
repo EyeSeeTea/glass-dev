@@ -82,26 +82,26 @@ export const ReviewDataSummary: React.FC<ReviewDataSummaryProps> = ({
                 <SectionCard className="wrong">
                     <ul>
                         <li>
-                            <b>{i18n.t("imported: ")}</b>{" "}
+                            <b>{i18n.t("imported: ", { nsSeparator: false })}</b>{" "}
                             {fileType === "ris"
                                 ? risFileImportSummary?.importCount.imported
                                 : sampleFileImportSummary?.importCount.imported}
                         </li>
                         <li>
-                            <b>{i18n.t("updated: ")}</b>{" "}
+                            <b>{i18n.t("updated: ", { nsSeparator: false })}</b>{" "}
                             {fileType === "ris"
                                 ? risFileImportSummary?.importCount.updated
                                 : sampleFileImportSummary?.importCount.updated}
                         </li>
                         <li>
-                            <b>{i18n.t("deleted: ")}</b>{" "}
+                            <b>{i18n.t("deleted: ", { nsSeparator: false })}</b>{" "}
                             {fileType === "ris"
                                 ? risFileImportSummary?.importCount.deleted
                                 : sampleFileImportSummary?.importCount.deleted}
                             {}
                         </li>
                         <li>
-                            <b>{i18n.t("ignored: ")}</b>{" "}
+                            <b>{i18n.t("ignored: ", { nsSeparator: false })}</b>{" "}
                             {fileType === "ris"
                                 ? risFileImportSummary?.importCount.ignored
                                 : sampleFileImportSummary?.importCount.ignored}
