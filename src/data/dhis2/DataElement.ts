@@ -1,11 +1,12 @@
 import { Maybe } from "../../types/utils";
-import { Id } from "../../domain/entities/Base";
+import { Code, Id } from "../../domain/entities/Base";
 
 export type DataElement = DataElementBoolean | DataElementNumber | DataElementText;
 
 interface DataElementBase {
     id: Id;
     name: string;
+    code: Code;
     disaggregation: CategoryOptionCombo[];
 }
 

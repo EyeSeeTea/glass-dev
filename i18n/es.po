@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: i18next-conv\n"
-"POT-Creation-Date: 2023-04-12T09:33:22.056Z\n"
+"POT-Creation-Date: 2023-04-17T15:57:59.682Z\n"
 "PO-Revision-Date: 2018-10-25T09:02:35.143Z\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -281,9 +281,6 @@ msgstr ""
 msgid "No notifications"
 msgstr ""
 
-msgid "Log Out"
-msgstr ""
-
 msgid "OPEN ALL YEAR"
 msgstr ""
 
@@ -318,6 +315,9 @@ msgid "Error fetching User Modules"
 msgstr ""
 
 msgid "HOME"
+msgstr ""
+
+msgid "Log Out"
 msgstr ""
 
 msgid "Blocking Errors"
@@ -356,8 +356,8 @@ msgid ""
 msgstr ""
 
 msgid ""
-"All Blocking errors need to be addressed. Please reupload correct data to "
-"complete the data submission"
+"All blocking errors need to be addressed. If found, please re-upload correct "
+"data to complete the data submission"
 msgstr ""
 
 msgid ""
