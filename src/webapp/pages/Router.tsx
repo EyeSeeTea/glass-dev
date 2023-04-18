@@ -5,7 +5,7 @@ import { CountryInformationPage } from "./country-information/CountryInformation
 import { CurrentDataSubmissionPage } from "./current-data-submission/CurrentDataSubmissionPage";
 import { UploadPage } from "./upload/UploadPage";
 import { LandingPage } from "./landing/LandingPage";
-import { UploadHistoryPage } from "./upload-history/UploadHistoryPage";
+import { DataFileHistoryPage } from "./data-file-history/DataFileHistoryPage";
 import { CurrentOrgUnitContextProvider } from "../context-providers/CurrentOrgUnitContextProvider";
 import { CurrentModuleContextProvider } from "../context-providers/CurrentModuleContextProvider";
 import { PrivateRoute } from "../components/private-route/PrivateRoute";
@@ -55,10 +55,10 @@ export const Router: React.FC = React.memo(() => {
                                     )}
                                 />
                                 <Route
-                                    path="/upload-history"
+                                    path="/data-file-history"
                                     render={({ location }) => (
                                         <PrivateRoute pathname={location.pathname}>
-                                            <UploadHistoryPage />
+                                            <DataFileHistoryPage />
                                         </PrivateRoute>
                                     )}
                                 />
