@@ -5,10 +5,10 @@ import { glassColors, palette } from "../app/themes/dhis2.theme";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import { NavLink } from "react-router-dom";
 import i18n from "@eyeseetea/d2-ui-components/locales";
-import { UploadHistoryContent } from "../../components/upload-history/UploadHistoryContent";
+import { DataFileHistoryContent } from "../../components/data-file-history/DataFileHistoryContent";
 import { useCurrentModuleContext } from "../../contexts/current-module-context";
 
-export const UploadHistoryPage: React.FC = React.memo(() => {
+export const DataFileHistoryPage: React.FC = React.memo(() => {
     const { currentModuleAccess } = useCurrentModuleContext();
 
     const click = (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
@@ -23,12 +23,12 @@ export const UploadHistoryPage: React.FC = React.memo(() => {
                         <span>{currentModuleAccess.moduleName}</span>
                     </Button>
                     <ChevronRightIcon />
-                    <Button component={NavLink} to={`/upload-history`} exact={true}>
-                        <span>{i18n.t("Upload History")}</span>
+                    <Button component={NavLink} to={`/data-file-history`} exact={true}>
+                        <span>{i18n.t("Data File History")}</span>
                     </Button>
                 </StyledBreadCrumbs>
             </PreContent>
-            <UploadHistoryContent />
+            <DataFileHistoryContent />
         </ContentWrapper>
     );
 });
