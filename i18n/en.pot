@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2023-04-17T15:57:59.682Z\n"
-"PO-Revision-Date: 2023-04-17T15:57:59.682Z\n"
+"POT-Creation-Date: 2023-04-18T12:38:10.490Z\n"
+"PO-Revision-Date: 2023-04-18T12:38:10.490Z\n"
 
 msgid "Error saving registration status"
 msgstr ""
@@ -381,6 +381,18 @@ msgid "Non-blocking warnings"
 msgstr ""
 
 msgid "Summary"
+msgstr ""
+
+msgid "imported: "
+msgstr ""
+
+msgid "updated: "
+msgstr ""
+
+msgid "deleted: "
+msgstr ""
+
+msgid "ignored: "
 msgstr ""
 
 msgid "I need help"
