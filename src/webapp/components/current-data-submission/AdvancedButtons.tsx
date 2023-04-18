@@ -6,10 +6,11 @@ import { glassColors } from "../../pages/app/themes/dhis2.theme";
 import { useAppContext } from "../../contexts/app-context";
 import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context";
 import { useCurrentModuleContext } from "../../contexts/current-module-context";
-import { useLocation } from "react-router-dom";
 import { useCurrentDataSubmissionId } from "../../hooks/useCurrentDataSubmissionId";
 import { DataSubmissionStatusTypes } from "../../../domain/entities/GlassDataSubmission";
 import { CircularProgress } from "material-ui";
+import { useCurrentUserGroupsAccess } from "../../hooks/useCurrentUserGroupsAccess";
+import { useCurrentPeriodContext } from "../../contexts/current-period-context";
 
 interface AdvancedButtonsProps {
     setRefetchStatus: Dispatch<SetStateAction<DataSubmissionStatusTypes | undefined>>;
@@ -19,24 +20,43 @@ export const AdvancedButtons: React.FC<AdvancedButtonsProps> = ({ setRefetchStat
     const { compositionRoot } = useAppContext();
     const { currentOrgUnitAccess } = useCurrentOrgUnitContext();
     const { currentModuleAccess } = useCurrentModuleContext();
-    const location = useLocation();
-    const queryParameters = new URLSearchParams(location.search);
-    const periodFromUrl = parseInt(queryParameters.get("period") || "");
-    const year = periodFromUrl || new Date().getFullYear() - 1;
+    const { currentPeriod } = useCurrentPeriodContext();
 
     const dataSubmissionId = useCurrentDataSubmissionId(
         compositionRoot,
         currentModuleAccess.moduleId,
         currentOrgUnitAccess.orgUnitId,
-        year
+        currentPeriod
     );
     const [loading, setLoading] = useState<boolean>(false);
+    const { approveAccessGroup, captureAccessGroup } = useCurrentUserGroupsAccess();
 
     const requestDatasetUpdate = () => {
         setLoading(true);
         compositionRoot.glassDataSubmission.setStatus(dataSubmissionId, "PENDING_UPDATE_APPROVAL").run(
             () => {
                 setRefetchStatus("PENDING_UPDATE_APPROVAL");
+                if (captureAccessGroup.kind === "loaded" && approveAccessGroup.kind === "loaded") {
+                    const approveAccessGroups = approveAccessGroup.data.map(aag => {
+                        return { id: aag.id };
+                    });
+                    const captureAccessGroups = captureAccessGroup.data.map(cag => {
+                        return { id: cag.id };
+                    });
+
+                    const userGroupsIds = [...approveAccessGroups, ...captureAccessGroups];
+                    compositionRoot.notifications
+                        .send(
+                            "Status Changed to WAITING for WHO TO ACCEPT THE DATA UPDATE REQUEST",
+                            `The data submission for ${currentModuleAccess.moduleName} module for year ${currentPeriod} has changed to WAITING for WHO TO ACCEPT THE DATA UPDATE REQUEST`,
+                            userGroupsIds,
+                            { id: currentOrgUnitAccess.orgUnitId }
+                        )
+                        .run(
+                            () => {},
+                            () => {}
+                        );
+                }
                 setCurrentStep(0);
                 setLoading(false);
             },
