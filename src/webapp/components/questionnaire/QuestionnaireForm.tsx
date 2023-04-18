@@ -32,8 +32,11 @@ const QuestionnaireForm: React.FC<QuestionnarieFormProps> = props => {
     const disabled = questionnaire?.isCompleted ? true : mode === "show";
 
     const setAsCompleted = (complete: boolean) => {
-        actions.setAsCompleted(complete);
-        props.validateAndUpdateDataSubmissionStatus(complete, selector.id);
+        actions.setAsCompleted(complete, {
+            onSuccess: () => {
+                props.validateAndUpdateDataSubmissionStatus(complete, selector.id);
+            },
+        });
     };
 
     if (!questionnaire) return <LinearProgress />;
@@ -111,12 +114,13 @@ function useQuestionnaire(options: QuestionnarieFormProps) {
 
     const setAsCompleted = useCallbackEffect(
         React.useCallback(
-            (isCompleted: boolean) => {
+            (isCompleted: boolean, options: { onSuccess: () => void }) => {
                 savingActions.enable();
 
                 return compositionRoot.questionnaires.setAsCompleted(selector, isCompleted).run(
                     () => {
                         savingActions.disable();
+                        options.onSuccess();
                         setQuestionnaire(questionnaire => {
                             return questionnaire ? QuestionnarieM.setAsComplete(questionnaire, isCompleted) : undefined;
                         });

@@ -1,6 +1,6 @@
 import styled from "styled-components";
 import { useEffect, useState } from "react";
-import { SortDirection, UploadTable } from "./UploadTable";
+import { SortDirection, DataFileTable } from "./DataFileTable";
 import { useLocation } from "react-router-dom";
 import { useAppContext } from "../../contexts/app-context";
 import { useGlassUploads } from "../../hooks/useGlassUploads";
@@ -10,7 +10,7 @@ import { ContentLoader } from "../content-loader/ContentLoader";
 import { useCurrentPeriodContext } from "../../contexts/current-period-context";
 import { GlassUploads } from "../../../domain/entities/GlassUploads";
 
-export const UploadHistoryContent: React.FC = () => {
+export const DataFileHistoryContent: React.FC = () => {
     const { currentPeriod } = useCurrentPeriodContext();
     const location = useLocation();
     const { compositionRoot } = useAppContext();
@@ -41,7 +41,7 @@ export const UploadHistoryContent: React.FC = () => {
                 <Filter year={year} setYear={setYear} status={status} setStatus={setStatus} />
                 <CustomCard padding="20px 30px 20px">
                     {uploads.kind === "loaded" && (
-                        <UploadTable
+                        <DataFileTable
                             items={filteredUploads}
                             data-current-module={params.get("userId")}
                             sortByColumn={sortByColumn}

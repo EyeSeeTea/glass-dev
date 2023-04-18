@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2023-04-18T09:30:32.090Z\n"
-"PO-Revision-Date: 2023-04-18T09:30:32.090Z\n"
+"POT-Creation-Date: 2023-04-18T12:53:14.468Z\n"
+"PO-Revision-Date: 2023-04-18T12:53:14.468Z\n"
 
 msgid "Error saving registration status"
 msgstr ""
@@ -74,6 +74,119 @@ msgstr ""
 msgid "Uploads with errors, or discarded"
 msgstr ""
 
+msgid "There are no questionnaries for this module"
+msgstr ""
+
+msgid "mandatory"
+msgstr ""
+
+msgid "Completed"
+msgstr ""
+
+msgid "Not completed"
+msgstr ""
+
+msgid "View"
+msgstr ""
+
+msgid "Go"
+msgstr ""
+
+msgid "Overview"
+msgstr ""
+
+msgid "Datasets"
+msgstr ""
+
+msgid "Questionnaires"
+msgstr ""
+
+msgid "Validation"
+msgstr ""
+
+msgid "Advanced"
+msgstr ""
+
+msgid "No Data uploaded..."
+msgstr ""
+
+msgid "Uploaded"
+msgstr ""
+
+msgid "Period"
+msgstr ""
+
+msgid "Records"
+msgstr ""
+
+msgid "Type"
+msgstr ""
+
+msgid "Batch ID"
+msgstr ""
+
+msgid "Status"
+msgstr ""
+
+msgid "Download File"
+msgstr ""
+
+msgid "Delete"
+msgstr ""
+
+msgid "Deleting Files"
+msgstr ""
+
+msgid "This might take several minutes, do not refresh the page or press back."
+msgstr ""
+
+msgid "Confirm Delete"
+msgstr ""
+
+msgid "Ok"
+msgstr ""
+
+msgid "Cancel"
+msgstr ""
+
+msgid ""
+"Deleting this upload will delete both SAMPLE and RIS files for the given "
+"dataset. Are you sure you want to delete?"
+msgstr ""
+
+msgid "Validation Alpha"
+msgstr ""
+
+msgid "no validation"
+msgstr ""
+
+msgid "Report"
+msgstr ""
+
+msgid "Run Validation"
+msgstr ""
+
+msgid "Validation Bravo"
+msgstr ""
+
+msgid "10 - 10 - 2020 VALIDATION CORRECT"
+msgstr ""
+
+msgid "Re-run Validation"
+msgstr ""
+
+msgid "Validation Charlie"
+msgstr ""
+
+msgid "10 - 10 - 2021 VALIDATION wrong"
+msgstr ""
+
+msgid "Validation Echo"
+msgstr ""
+
+msgid "09 - 12 - 2021 VALIDATION CORRECT"
+msgstr ""
+
 msgid "Go to questionnaires"
 msgstr ""
 
@@ -87,12 +200,6 @@ msgid "Send submission"
 msgstr ""
 
 msgid "Confirm submission"
-msgstr ""
-
-msgid "Ok"
-msgstr ""
-
-msgid "Cancel"
 msgstr ""
 
 msgid ""
@@ -141,111 +248,31 @@ msgstr ""
 msgid "Data Submission status has errors..."
 msgstr ""
 
-msgid "There are no questionnaries for this module"
+msgid "File Type"
 msgstr ""
 
-msgid "mandatory"
+msgid "Batch Id"
 msgstr ""
 
-msgid "Completed"
+msgid "Specimens"
 msgstr ""
 
-msgid "Not completed"
+msgid "Date"
 msgstr ""
 
-msgid "View"
+msgid "Filename"
 msgstr ""
 
-msgid "Go"
+msgid "Download"
 msgstr ""
 
-msgid "Uploaded"
+msgid "Filters"
 msgstr ""
 
-msgid "Period"
+msgid "Select Year"
 msgstr ""
 
-msgid "Records"
-msgstr ""
-
-msgid "Type"
-msgstr ""
-
-msgid "Batch ID"
-msgstr ""
-
-msgid "Status"
-msgstr ""
-
-msgid "Download File"
-msgstr ""
-
-msgid "Delete"
-msgstr ""
-
-msgid "Deleting Files"
-msgstr ""
-
-msgid "This might take several minutes, do not refresh the page or press back."
-msgstr ""
-
-msgid "Confirm Delete"
-msgstr ""
-
-msgid ""
-"Deleting this upload will delete both SAMPLE and RIS files for the given "
-"dataset. Are you sure you want to delete?"
-msgstr ""
-
-msgid "Overview"
-msgstr ""
-
-msgid "Datasets"
-msgstr ""
-
-msgid "Questionnaires"
-msgstr ""
-
-msgid "Validation"
-msgstr ""
-
-msgid "Advanced"
-msgstr ""
-
-msgid "No Data uploaded..."
-msgstr ""
-
-msgid "Validation Alpha"
-msgstr ""
-
-msgid "no validation"
-msgstr ""
-
-msgid "Report"
-msgstr ""
-
-msgid "Run Validation"
-msgstr ""
-
-msgid "Validation Bravo"
-msgstr ""
-
-msgid "10 - 10 - 2020 VALIDATION CORRECT"
-msgstr ""
-
-msgid "Re-run Validation"
-msgstr ""
-
-msgid "Validation Charlie"
-msgstr ""
-
-msgid "10 - 10 - 2021 VALIDATION wrong"
-msgstr ""
-
-msgid "Validation Echo"
-msgstr ""
-
-msgid "09 - 12 - 2021 VALIDATION CORRECT"
+msgid "Select Status"
 msgstr ""
 
 msgid " "
@@ -255,6 +282,9 @@ msgid "status"
 msgstr ""
 
 msgid "News from GLASS"
+msgstr ""
+
+msgid "No Open Data Submissions"
 msgstr ""
 
 msgid "Notification"
@@ -276,9 +306,6 @@ msgid "Your Notifications"
 msgstr ""
 
 msgid "No notifications"
-msgstr ""
-
-msgid "No Open Data Submissions"
 msgstr ""
 
 msgid "OPEN ALL YEAR"
@@ -383,6 +410,18 @@ msgstr ""
 msgid "Summary"
 msgstr ""
 
+msgid "imported: "
+msgstr ""
+
+msgid "updated: "
+msgstr ""
+
+msgid "deleted: "
+msgstr ""
+
+msgid "ignored: "
+msgstr ""
+
 msgid "I need help"
 msgstr ""
 
@@ -434,37 +473,13 @@ msgstr ""
 msgid "not required"
 msgstr ""
 
-msgid "Filters"
-msgstr ""
-
-msgid "Select Year"
-msgstr ""
-
-msgid "Select Status"
-msgstr ""
-
-msgid "File Type"
-msgstr ""
-
-msgid "Batch Id"
-msgstr ""
-
-msgid "Specimens"
-msgstr ""
-
-msgid "Date"
-msgstr ""
-
-msgid "Filename"
-msgstr ""
-
-msgid "Download"
-msgstr ""
-
 msgid "Country Information"
 msgstr ""
 
 msgid "Yearly data upload"
+msgstr ""
+
+msgid "Data File History"
 msgstr ""
 
 msgid "List of Data Submissions"
@@ -474,7 +489,4 @@ msgid "All Data Submissions"
 msgstr ""
 
 msgid "Reports"
-msgstr ""
-
-msgid "Upload History"
 msgstr ""
