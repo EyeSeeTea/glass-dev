@@ -40,7 +40,10 @@ const useStyles = makeStyles(theme => ({
     },
 }));
 
-export const GlassAppBar: React.FC = () => {
+interface GlassAppBarProps {
+    toggleShowMenu: () => void;
+}
+export const GlassAppBar: React.FC<GlassAppBarProps> = ({ toggleShowMenu }) => {
     const classes = useStyles();
     const history = useHistory();
 
@@ -79,6 +82,7 @@ export const GlassAppBar: React.FC = () => {
                             className={classes.menuButton}
                             color="primary"
                             aria-label="open drawer"
+                            onClick={toggleShowMenu}
                         >
                             <MenuIcon />
                         </IconButton>

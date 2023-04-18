@@ -7,14 +7,22 @@ import i18n from "@eyeseetea/d2-ui-components/locales";
 
 interface CustomCardProps {
     minheight?: string;
+    maxwidth?: string;
     height?: string;
     padding?: string;
     title?: string;
 }
 
-export const CustomCard: React.FC<CustomCardProps> = ({ minheight, padding, children, height = "auto", title }) => {
+export const CustomCard: React.FC<CustomCardProps> = ({
+    minheight,
+    padding,
+    children,
+    height = "auto",
+    title,
+    maxwidth,
+}) => {
     return (
-        <StyleCard minheight={minheight} padding={padding} height={height}>
+        <StyleCard minheight={minheight} padding={padding} height={height} maxwidth={maxwidth}>
             <Box display="flex" flexDirection="column" justifyContent="space-between" height={"100%"}>
                 {title && (
                     <TitleContainer>
@@ -30,6 +38,7 @@ export const CustomCard: React.FC<CustomCardProps> = ({ minheight, padding, chil
 export const StyleCard = styled(Paper)<CustomCardProps>`
     border-radius: 20px !important;
     min-height: ${props => props.minheight};
+    max-width: ${props => props.maxwidth};
     height: ${props => props.height};
     padding: ${props => props.padding};
     overflow: hidden;
