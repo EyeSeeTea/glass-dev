@@ -160,7 +160,7 @@ const glassModules: GlassModule[] = [
         },
         dashboards: {
             reportsMenu: "",
-            reviewSummary: "",
+            validationReport: "",
         },
     },
     {
@@ -174,7 +174,7 @@ const glassModules: GlassModule[] = [
         questionnaires: [],
         dashboards: {
             reportsMenu: "",
-            reviewSummary: "",
+            validationReport: "",
         },
     },
     {
@@ -188,7 +188,7 @@ const glassModules: GlassModule[] = [
         questionnaires: [],
         dashboards: {
             reportsMenu: "",
-            reviewSummary: "",
+            validationReport: "",
         },
     },
 ];

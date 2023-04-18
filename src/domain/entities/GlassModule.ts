@@ -18,7 +18,7 @@ export interface GlassModule {
     };
     dashboards: {
         reportsMenu: string;
-        reviewSummary: string;
+        validationReport: string;
     };
 }
 
