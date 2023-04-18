@@ -17,6 +17,8 @@ import { useNotifications } from "../landing-content/notifications/useNotificati
 import { ContentLoader } from "../content-loader/ContentLoader";
 import { useHistory } from "react-router-dom";
 
+const DHIS2_HOMEPAGE_URL = process.env.REACT_APP_DHIS2_BASE_URL;
+
 const useStyles = makeStyles(theme => ({
     root: {
         flexGrow: 1,
@@ -89,9 +91,12 @@ export const GlassAppBar: React.FC<GlassAppBarProps> = ({ toggleShowMenu }) => {
                         <LogoContainer>
                             <img src={glassLogo} width={150} alt="Glass logo" />;
                         </LogoContainer>
-                        <LogoContainer>
-                            <img src={whoLogo} width={150} alt="WHO logo" />;
-                        </LogoContainer>
+
+                        <a href={DHIS2_HOMEPAGE_URL}>
+                            <LogoContainer>
+                                <img src={whoLogo} width={150} alt="WHO logo" />;
+                            </LogoContainer>
+                        </a>
                         <Box className={classes.title} />
                         {notifications.kind === "loaded" && notifications.data.length && (
                             <IconButton aria-label="notifications" color="primary" onClick={() => history.push("/")}>
