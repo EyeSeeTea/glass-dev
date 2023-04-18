@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2023-04-18T12:38:10.490Z\n"
-"PO-Revision-Date: 2023-04-18T12:38:10.490Z\n"
+"POT-Creation-Date: 2023-04-18T12:46:33.525Z\n"
+"PO-Revision-Date: 2023-04-18T12:46:33.525Z\n"
 
 msgid "Error saving registration status"
 msgstr ""
@@ -248,6 +248,33 @@ msgstr ""
 msgid "Data Submission status has errors..."
 msgstr ""
 
+msgid "File Type"
+msgstr ""
+
+msgid "Batch Id"
+msgstr ""
+
+msgid "Specimens"
+msgstr ""
+
+msgid "Date"
+msgstr ""
+
+msgid "Filename"
+msgstr ""
+
+msgid "Download"
+msgstr ""
+
+msgid "Filters"
+msgstr ""
+
+msgid "Select Year"
+msgstr ""
+
+msgid "Select Status"
+msgstr ""
+
 msgid " "
 msgstr ""
 
@@ -446,37 +473,13 @@ msgstr ""
 msgid "not required"
 msgstr ""
 
-msgid "Filters"
-msgstr ""
-
-msgid "Select Year"
-msgstr ""
-
-msgid "Select Status"
-msgstr ""
-
-msgid "File Type"
-msgstr ""
-
-msgid "Batch Id"
-msgstr ""
-
-msgid "Specimens"
-msgstr ""
-
-msgid "Date"
-msgstr ""
-
-msgid "Filename"
-msgstr ""
-
-msgid "Download"
-msgstr ""
-
 msgid "Country Information"
 msgstr ""
 
 msgid "Yearly data upload"
+msgstr ""
+
+msgid "Data File History"
 msgstr ""
 
 msgid "List of Data Submissions"
@@ -486,7 +489,4 @@ msgid "All Data Submissions"
 msgstr ""
 
 msgid "Reports"
-msgstr ""
-
-msgid "Upload History"
 msgstr ""
