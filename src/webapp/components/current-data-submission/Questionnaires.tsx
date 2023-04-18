@@ -18,7 +18,7 @@ import { DataSubmissionStatusTypes } from "../../../domain/entities/GlassDataSub
 import { useStatusDataSubmission } from "../../hooks/useStatusDataSubmission";
 import { useCurrentPeriodContext } from "../../contexts/current-period-context";
 import { isEditModeStatus } from "../../utils/editModeStatus";
-import { useUserGroupsAccess } from "../../hooks/useUserGroupsAccess";
+import { useCurrentUserGroupsAccess } from "../../hooks/useCurrentUserGroupsAccess";
 
 interface QuestionnairesProps {
     setRefetchStatus: Dispatch<SetStateAction<DataSubmissionStatusTypes | undefined>>;
@@ -37,7 +37,7 @@ export const Questionnaires: React.FC<QuestionnairesProps> = ({ setRefetchStatus
         orgUnit.id,
         year
     );
-    const { captureAccessGroup } = useUserGroupsAccess();
+    const { captureAccessGroup } = useCurrentUserGroupsAccess();
 
     const currentDataSubmissionStatus = useStatusDataSubmission(currentModuleAccess.moduleId, orgUnit.id, year);
 

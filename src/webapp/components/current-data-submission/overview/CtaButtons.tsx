@@ -26,6 +26,7 @@ import { useCurrentModuleContext } from "../../../contexts/current-module-contex
 import { DataSubmissionStatusTypes, StatusHistoryType } from "../../../../domain/entities/GlassDataSubmission";
 import dayjs from "dayjs";
 import { useCurrentPeriodContext } from "../../../contexts/current-period-context";
+import { useCurrentUserGroupsAccess } from "../../../hooks/useCurrentUserGroupsAccess";
 
 export interface CtaButtonsProps {
     ctas: CTAs[];
@@ -53,6 +54,8 @@ export const CtaButtons: React.FC<CtaButtonsProps> = ({ ctas, position, setRefet
         currentOrgUnitAccess.orgUnitId,
         currentPeriod
     );
+
+    const { approveAccessGroup, captureAccessGroup } = useCurrentUserGroupsAccess();
 
     useEffect(() => {
         setIsLoading(true);
@@ -86,8 +89,30 @@ export const CtaButtons: React.FC<CtaButtonsProps> = ({ ctas, position, setRefet
         setIsLoading(true);
         compositionRoot.glassDataSubmission.setStatus(dataSubmissionId, "PENDING_APPROVAL").run(
             () => {
-                //Triggerring relaod of status in parent
+                //Triggerring reload of status in parent
                 setRefetchStatus("PENDING_APPROVAL");
+
+                if (captureAccessGroup.kind === "loaded" && approveAccessGroup.kind === "loaded") {
+                    const approveAccessGroups = approveAccessGroup.data.map(aag => {
+                        return { id: aag.id };
+                    });
+                    const captureAccessGroups = captureAccessGroup.data.map(cag => {
+                        return { id: cag.id };
+                    });
+
+                    const userGroupsIds = [...approveAccessGroups, ...captureAccessGroups];
+                    compositionRoot.notifications
+                        .send(
+                            "Status Changed to WAITING WHO APROVAL",
+                            `The data submission for ${currentModuleAccess.moduleName} module for year ${currentPeriod} has changed to WAITING WHO APROVAL`,
+                            userGroupsIds,
+                            { id: currentOrgUnitAccess.orgUnitId }
+                        )
+                        .run(
+                            () => {},
+                            () => {}
+                        );
+                }
                 setIsLoading(false);
                 setOpen(false);
             },

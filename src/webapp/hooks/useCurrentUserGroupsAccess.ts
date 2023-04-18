@@ -6,7 +6,7 @@ import { UserGroup } from "../../domain/entities/User";
 
 export type GlassModuleState = GlassState<UserGroup[]>;
 
-export function useUserGroupsAccess() {
+export function useCurrentUserGroupsAccess() {
     const { compositionRoot } = useAppContext();
     const { currentModuleAccess } = useCurrentModuleContext();
 
