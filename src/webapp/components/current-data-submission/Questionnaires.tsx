@@ -18,6 +18,7 @@ import { DataSubmissionStatusTypes } from "../../../domain/entities/GlassDataSub
 import { useStatusDataSubmission } from "../../hooks/useStatusDataSubmission";
 import { useCurrentPeriodContext } from "../../contexts/current-period-context";
 import { isEditModeStatus } from "../../utils/editModeStatus";
+import { useUserGroupsAccess } from "../../hooks/useUserGroupsAccess";
 
 interface QuestionnairesProps {
     setRefetchStatus: Dispatch<SetStateAction<DataSubmissionStatusTypes | undefined>>;
@@ -36,6 +37,7 @@ export const Questionnaires: React.FC<QuestionnairesProps> = ({ setRefetchStatus
         orgUnit.id,
         year
     );
+    const { captureAccessGroup } = useUserGroupsAccess();
 
     const currentDataSubmissionStatus = useStatusDataSubmission(currentModuleAccess.moduleId, orgUnit.id, year);
 
@@ -51,6 +53,24 @@ export const Questionnaires: React.FC<QuestionnairesProps> = ({ setRefetchStatus
                     () => {
                         //Triggerring relaod of status in parent
                         setRefetchStatus("COMPLETE");
+
+                        if (captureAccessGroup.kind === "loaded") {
+                            const userGroupsIds = captureAccessGroup.data.map(cag => {
+                                return { id: cag.id };
+                            });
+
+                            compositionRoot.notifications
+                                .send(
+                                    "Status Changed to DATA TO BE APROVED BY COUNTRY",
+                                    `The data submission for ${currentModuleAccess.moduleName} module for year ${year} has changed to DATA TO BE APROVED BY COUNTRY`,
+                                    userGroupsIds,
+                                    { id: orgUnit.id }
+                                )
+                                .run(
+                                    () => {},
+                                    () => {}
+                                );
+                        }
                     },
                     () => {}
                 );
