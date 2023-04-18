@@ -1,4 +1,4 @@
-import { Id, Ref } from "../../domain/entities/Base";
+import { Code, Id, Ref } from "../../domain/entities/Base";
 import { DataElement } from "./DataElement";
 
 export interface DataForm {
@@ -11,5 +11,6 @@ export interface DataForm {
 
 export interface Section extends Ref {
     name: string;
+    code: Code;
     dataElements: DataElement[];
 }
