@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: i18next-conv\n"
-"POT-Creation-Date: 2023-04-18T12:46:33.525Z\n"
+"POT-Creation-Date: 2023-04-19T06:48:09.208Z\n"
 "PO-Revision-Date: 2018-10-25T09:02:35.143Z\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -152,39 +152,6 @@ msgstr ""
 msgid ""
 "Deleting this upload will delete both SAMPLE and RIS files for the given "
 "dataset. Are you sure you want to delete?"
-msgstr ""
-
-msgid "Validation Alpha"
-msgstr ""
-
-msgid "no validation"
-msgstr ""
-
-msgid "Report"
-msgstr ""
-
-msgid "Run Validation"
-msgstr ""
-
-msgid "Validation Bravo"
-msgstr ""
-
-msgid "10 - 10 - 2020 VALIDATION CORRECT"
-msgstr ""
-
-msgid "Re-run Validation"
-msgstr ""
-
-msgid "Validation Charlie"
-msgstr ""
-
-msgid "10 - 10 - 2021 VALIDATION wrong"
-msgstr ""
-
-msgid "Validation Echo"
-msgstr ""
-
-msgid "09 - 12 - 2021 VALIDATION CORRECT"
 msgstr ""
 
 msgid "Go to questionnaires"

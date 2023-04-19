@@ -49,7 +49,9 @@ import { ValidateRISFileUseCase } from "./domain/usecases/data-entry/ValidateRIS
 import { ValidateSampleFileUseCase } from "./domain/usecases/data-entry/ValidateSampleFileUseCase";
 import { SaveDataSubmissionsUseCase } from "./domain/usecases/SaveDataSubmissionsUseCase";
 import { UpdateSampleUploadWithRisIdUseCase } from "./domain/usecases/UpdateSampleUploadWithRisIdUseCase";
-import { GetReportDashboardUseCase } from "./domain/usecases/GetReportDashboardUseCase";
+import { GetDashboardUseCase } from "./domain/usecases/GetDashboardUseCase";
+import { SystemSettingsDefaultRepository } from "./data/repositories/SystemSettingsDefaultRepository";
+import { GetLastAnalyticsRunTimeUseCase } from "./domain/usecases/GetLastAnalyticsRunTimeUseCase";
 import { SendNotificationsUseCase } from "./domain/usecases/SendNotificationsUseCase";
 import { UsersDefaultRepository } from "./data/repositories/UsersDefaultRepository";
 
@@ -70,6 +72,7 @@ export function getCompositionRoot(instance: Instance) {
     const notificationRepository = new NotificationDefaultRepository(instance);
     const countryInformationRepository = new CountryInformationDefaultRepository(instance);
     const usersDefaultRepository = new UsersDefaultRepository(api);
+    const systemSettingsDefaultRepository = new SystemSettingsDefaultRepository(api);
 
     return {
         instance: getExecute({
@@ -135,7 +138,10 @@ export function getCompositionRoot(instance: Instance) {
             getInformation: new GetCountryInformationUseCase(countryInformationRepository),
         }),
         glassDashboard: getExecute({
-            getReportDashboard: new GetReportDashboardUseCase(glassModuleRepository),
+            getDashboard: new GetDashboardUseCase(glassModuleRepository),
+        }),
+        systemSettings: getExecute({
+            lastAnalyticsRunTime: new GetLastAnalyticsRunTimeUseCase(systemSettingsDefaultRepository),
         }),
     };
 }
