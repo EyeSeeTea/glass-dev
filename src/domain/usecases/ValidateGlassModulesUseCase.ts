@@ -24,6 +24,7 @@ const glassModules: GlassModule[] = [
         userGroups: {
             readAccess: [],
             captureAccess: [],
+            approveAccess: [],
         },
         questionnaires: [],
         consistencyChecks: {
@@ -170,6 +171,7 @@ const glassModules: GlassModule[] = [
         userGroups: {
             readAccess: [],
             captureAccess: [],
+            approveAccess: [],
         },
         questionnaires: [],
         dashboards: {
@@ -184,6 +186,7 @@ const glassModules: GlassModule[] = [
         userGroups: {
             readAccess: [],
             captureAccess: [],
+            approveAccess: [],
         },
         questionnaires: [],
         dashboards: {

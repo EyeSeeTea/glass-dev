@@ -52,6 +52,7 @@ import { UpdateSampleUploadWithRisIdUseCase } from "./domain/usecases/UpdateSamp
 import { GetDashboardUseCase } from "./domain/usecases/GetDashboardUseCase";
 import { SystemSettingsDefaultRepository } from "./data/repositories/SystemSettingsDefaultRepository";
 import { GetLastAnalyticsRunTimeUseCase } from "./domain/usecases/GetLastAnalyticsRunTimeUseCase";
+import { SendNotificationsUseCase } from "./domain/usecases/SendNotificationsUseCase";
 
 export function getCompositionRoot(instance: Instance) {
     const api = getD2APiFromInstance(instance);
@@ -129,6 +130,7 @@ export function getCompositionRoot(instance: Instance) {
         notifications: getExecute({
             getAll: new GetNotificationsUseCase(notificationRepository),
             getById: new GetNotificationByIdUseCase(notificationRepository),
+            send: new SendNotificationsUseCase(notificationRepository),
         }),
         countries: getExecute({
             getInformation: new GetCountryInformationUseCase(countryInformationRepository),
