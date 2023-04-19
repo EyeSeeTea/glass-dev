@@ -62,7 +62,7 @@ export const Questionnaires: React.FC<QuestionnairesProps> = ({ setRefetchStatus
                             compositionRoot.notifications
                                 .send(
                                     "Status Changed to DATA TO BE APROVED BY COUNTRY",
-                                    `The data submission for ${currentModuleAccess.moduleName} module for year ${year} has changed to DATA TO BE APROVED BY COUNTRY`,
+                                    `The data submission for ${currentModuleAccess.moduleName} module for year ${year} and country ${orgUnit.name} has changed to DATA TO BE APROVED BY COUNTRY`,
                                     userGroupsIds,
                                     { id: orgUnit.id }
                                 )

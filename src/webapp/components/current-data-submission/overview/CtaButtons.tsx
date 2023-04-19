@@ -104,7 +104,7 @@ export const CtaButtons: React.FC<CtaButtonsProps> = ({ ctas, position, setRefet
                     compositionRoot.notifications
                         .send(
                             "Status Changed to WAITING WHO APROVAL",
-                            `The data submission for ${currentModuleAccess.moduleName} module for year ${currentPeriod} has changed to WAITING WHO APROVAL`,
+                            `The data submission for ${currentModuleAccess.moduleName} module for year ${currentPeriod} and country ${currentOrgUnitAccess.orgUnitName} has changed to WAITING WHO APROVAL`,
                             userGroupsIds,
                             { id: currentOrgUnitAccess.orgUnitId }
                         )
