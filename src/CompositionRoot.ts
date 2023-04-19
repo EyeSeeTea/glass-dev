@@ -50,7 +50,7 @@ import { ValidateSampleFileUseCase } from "./domain/usecases/data-entry/Validate
 import { SaveDataSubmissionsUseCase } from "./domain/usecases/SaveDataSubmissionsUseCase";
 import { UpdateSampleUploadWithRisIdUseCase } from "./domain/usecases/UpdateSampleUploadWithRisIdUseCase";
 import { GetDashboardUseCase } from "./domain/usecases/GetDashboardUseCase";
-import { SystemSettingsDefaultRepository } from "./data/repositories/SystemSettingsDefaultRepository";
+import { SystemInfoDefaultRepository } from "./data/repositories/SystemInfoDefaultRepository";
 import { GetLastAnalyticsRunTimeUseCase } from "./domain/usecases/GetLastAnalyticsRunTimeUseCase";
 import { SendNotificationsUseCase } from "./domain/usecases/SendNotificationsUseCase";
 
@@ -70,7 +70,7 @@ export function getCompositionRoot(instance: Instance) {
     const questionnaireD2Repository = new QuestionnaireD2Repository(api);
     const notificationRepository = new NotificationDefaultRepository(instance);
     const countryInformationRepository = new CountryInformationDefaultRepository(instance);
-    const systemSettingsDefaultRepository = new SystemSettingsDefaultRepository(api);
+    const systemSettingsDefaultRepository = new SystemInfoDefaultRepository(api);
 
     return {
         instance: getExecute({

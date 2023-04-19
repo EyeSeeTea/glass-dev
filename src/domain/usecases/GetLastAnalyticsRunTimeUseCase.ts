@@ -1,11 +1,11 @@
 import { UseCase } from "../../CompositionRoot";
-import { SystemSettingsDefaultRepository } from "../../data/repositories/SystemSettingsDefaultRepository";
+import { SystemInfoDefaultRepository } from "../../data/repositories/SystemInfoDefaultRepository";
 import { FutureData } from "../entities/Future";
 
 export class GetLastAnalyticsRunTimeUseCase implements UseCase {
-    constructor(private systemSettingsDefaultRepository: SystemSettingsDefaultRepository) {}
+    constructor(private systemSettingsDefaultRepository: SystemInfoDefaultRepository) {}
 
-    public execute(): FutureData<Date> {
+    public execute(): FutureData<string> {
         return this.systemSettingsDefaultRepository.getLastAnalyticsRunTime();
     }
 }
