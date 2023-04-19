@@ -11,7 +11,7 @@ export function useGetLastSuccessfulAnalyticsRunTime() {
     });
 
     React.useEffect(() => {
-        compositionRoot.systemSettings.lastAnalyticsRunTime().run(
+        compositionRoot.systemInfo.lastAnalyticsRunTime().run(
             runTime => {
                 setLastSuccessfulAnalyticsRunTime({ kind: "loaded", data: runTime });
             },

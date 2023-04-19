@@ -3,9 +3,9 @@ import { SystemInfoDefaultRepository } from "../../data/repositories/SystemInfoD
 import { FutureData } from "../entities/Future";
 
 export class GetLastAnalyticsRunTimeUseCase implements UseCase {
-    constructor(private systemSettingsDefaultRepository: SystemInfoDefaultRepository) {}
+    constructor(private systemInfoDefaultRepository: SystemInfoDefaultRepository) {}
 
     public execute(): FutureData<string> {
-        return this.systemSettingsDefaultRepository.getLastAnalyticsRunTime();
+        return this.systemInfoDefaultRepository.getLastAnalyticsRunTime();
     }
 }
