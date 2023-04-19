@@ -48,7 +48,7 @@ export const AdvancedButtons: React.FC<AdvancedButtonsProps> = ({ setRefetchStat
                     compositionRoot.notifications
                         .send(
                             "Status Changed to WAITING for WHO TO ACCEPT THE DATA UPDATE REQUEST",
-                            `The data submission for ${currentModuleAccess.moduleName} module for year ${currentPeriod} has changed to WAITING for WHO TO ACCEPT THE DATA UPDATE REQUEST`,
+                            `The data submission for ${currentModuleAccess.moduleName} module for year ${currentPeriod} and country ${currentOrgUnitAccess.orgUnitName} has changed to WAITING for WHO TO ACCEPT THE DATA UPDATE REQUEST`,
                             userGroupsIds,
                             { id: currentOrgUnitAccess.orgUnitId }
                         )
