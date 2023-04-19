@@ -70,7 +70,7 @@ export function getCompositionRoot(instance: Instance) {
     const questionnaireD2Repository = new QuestionnaireD2Repository(api);
     const notificationRepository = new NotificationDefaultRepository(instance);
     const countryInformationRepository = new CountryInformationDefaultRepository(instance);
-    const systemSettingsDefaultRepository = new SystemInfoDefaultRepository(api);
+    const systemInfoDefaultRepository = new SystemInfoDefaultRepository(api);
 
     return {
         instance: getExecute({
@@ -138,8 +138,8 @@ export function getCompositionRoot(instance: Instance) {
         glassDashboard: getExecute({
             getDashboard: new GetDashboardUseCase(glassModuleRepository),
         }),
-        systemSettings: getExecute({
-            lastAnalyticsRunTime: new GetLastAnalyticsRunTimeUseCase(systemSettingsDefaultRepository),
+        systemInfo: getExecute({
+            lastAnalyticsRunTime: new GetLastAnalyticsRunTimeUseCase(systemInfoDefaultRepository),
         }),
     };
 }
