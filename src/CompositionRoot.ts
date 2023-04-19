@@ -50,6 +50,7 @@ import { ValidateSampleFileUseCase } from "./domain/usecases/data-entry/Validate
 import { SaveDataSubmissionsUseCase } from "./domain/usecases/SaveDataSubmissionsUseCase";
 import { UpdateSampleUploadWithRisIdUseCase } from "./domain/usecases/UpdateSampleUploadWithRisIdUseCase";
 import { GetReportDashboardUseCase } from "./domain/usecases/GetReportDashboardUseCase";
+import { SendNotificationsUseCase } from "./domain/usecases/SendNotificationsUseCase";
 
 export function getCompositionRoot(instance: Instance) {
     const api = getD2APiFromInstance(instance);
@@ -126,6 +127,7 @@ export function getCompositionRoot(instance: Instance) {
         notifications: getExecute({
             getAll: new GetNotificationsUseCase(notificationRepository),
             getById: new GetNotificationByIdUseCase(notificationRepository),
+            send: new SendNotificationsUseCase(notificationRepository),
         }),
         countries: getExecute({
             getInformation: new GetCountryInformationUseCase(countryInformationRepository),
