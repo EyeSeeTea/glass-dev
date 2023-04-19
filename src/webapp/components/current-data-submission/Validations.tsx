@@ -12,8 +12,8 @@ export const Validations: React.FC = () => {
         <>
             {runTime.kind === "loaded" && (
                 <Typography>
-                    Last Successful Analytics Tables Update Time : {runTime.data}. Any data submitted after this date
-                    will not be reflected in these visualizations
+                    Last Successful Analytics Tables Update Time : {new Date(runTime.data).toUTCString()}. Any data
+                    submitted after this date will not be reflected in these visualizations
                 </Typography>
             )}
             {validationDashboardId.kind === "loading" && <CircularProgress />}
