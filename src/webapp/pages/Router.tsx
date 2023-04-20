@@ -6,6 +6,7 @@ import { CurrentDataSubmissionPage } from "./current-data-submission/CurrentData
 import { UploadPage } from "./upload/UploadPage";
 import { LandingPage } from "./landing/LandingPage";
 import { UploadHistoryPage } from "./upload-history/UploadHistoryPage";
+import { UserProfilePage } from "./user-profile/UserProfilePage";
 import { CurrentOrgUnitContextProvider } from "../context-providers/CurrentOrgUnitContextProvider";
 import { CurrentModuleContextProvider } from "../context-providers/CurrentModuleContextProvider";
 import { PrivateRoute } from "../components/private-route/PrivateRoute";
@@ -13,6 +14,7 @@ import { QuestionnaireFormTest } from "../components/questionnaire/Questionnaire
 import { CurrentPeriodContextProvider } from "../context-providers/CurrentPeriodContextProvider";
 import { MainLayout } from "../components/layouts/main-layout/MainLayout";
 import { ReportsPage } from "./reports/ReportsPage";
+import { UserSettingsPage } from "./user-profile/UserSettings";
 
 export const Router: React.FC = React.memo(() => {
     return (
@@ -75,6 +77,22 @@ export const Router: React.FC = React.memo(() => {
                                     render={({ location }) => (
                                         <PrivateRoute pathname={location.pathname}>
                                             <QuestionnaireFormTest />
+                                        </PrivateRoute>
+                                    )}
+                                />
+                                <Route
+                                    path="/user-profile"
+                                    render={({ location }) => (
+                                        <PrivateRoute pathname={location.pathname}>
+                                            <UserProfilePage />
+                                        </PrivateRoute>
+                                    )}
+                                />
+                                <Route
+                                    path="/user-settings"
+                                    render={({ location }) => (
+                                        <PrivateRoute pathname={location.pathname}>
+                                            <UserSettingsPage />
                                         </PrivateRoute>
                                     )}
                                 />

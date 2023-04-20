@@ -50,6 +50,9 @@ import { ValidateSampleFileUseCase } from "./domain/usecases/data-entry/Validate
 import { SaveDataSubmissionsUseCase } from "./domain/usecases/SaveDataSubmissionsUseCase";
 import { UpdateSampleUploadWithRisIdUseCase } from "./domain/usecases/UpdateSampleUploadWithRisIdUseCase";
 import { GetReportDashboardUseCase } from "./domain/usecases/GetReportDashboardUseCase";
+import { GetUiLocalesUseCase } from "./domain/usecases/GetUiLocalesUseCase";
+import { GetDatabaseLocalesUseCase } from "./domain/usecases/GetDatabaseLocalesUseCase";
+import { LocalesDefaultRepository } from "./data/repositories/LocalesDefaultRepository";
 
 export function getCompositionRoot(instance: Instance) {
     const api = getD2APiFromInstance(instance);
@@ -67,6 +70,7 @@ export function getCompositionRoot(instance: Instance) {
     const questionnaireD2Repository = new QuestionnaireD2Repository(api);
     const notificationRepository = new NotificationDefaultRepository(instance);
     const countryInformationRepository = new CountryInformationDefaultRepository(instance);
+    const localeRepository = new LocalesDefaultRepository(instance);
 
     return {
         instance: getExecute({
@@ -132,6 +136,10 @@ export function getCompositionRoot(instance: Instance) {
         }),
         glassDashboard: getExecute({
             getReportDashboard: new GetReportDashboardUseCase(glassModuleRepository),
+        }),
+        locales: getExecute({
+            getUiLocales: new GetUiLocalesUseCase(localeRepository),
+            getDatabaseLocales: new GetDatabaseLocalesUseCase(localeRepository),
         }),
     };
 }
