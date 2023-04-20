@@ -7,7 +7,6 @@ import { MenuItem, Select } from "@material-ui/core";
 import { useAppContext } from "../../contexts/app-context";
 import { LocalesType } from "../../../domain/usecases/GetDatabaseLocalesUseCase";
 import { useSnackbar } from "@eyeseetea/d2-ui-components";
-import { log } from "console";
 
 interface UserSettingsContentProps {
     userInformation: UserAccessInfo;
