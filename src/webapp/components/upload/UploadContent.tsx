@@ -114,7 +114,6 @@ const renderStep = (
                         setRISFileImportSummary={setRISFileImportSummary}
                         setSampleFileImportSummary={setSampleFileImportSummary}
                     />
-                    <SupportButtons changeStep={changeStep} />
                 </>
             );
         case 3:
