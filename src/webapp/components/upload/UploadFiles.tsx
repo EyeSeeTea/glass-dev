@@ -379,6 +379,7 @@ const ContentWrapper = styled.div`
     }
     .bottom {
         display: flex;
+        flex-direction: row;
         align-items: baseline;
         justify-content: space-between;
         margin: 0 auto 30px auto;

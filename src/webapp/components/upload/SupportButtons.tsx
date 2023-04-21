@@ -1,47 +1,58 @@
-import React, { useState } from "react";
-import { Button } from "@material-ui/core";
+import React from "react";
+import { Button, Typography } from "@material-ui/core";
 import styled from "styled-components";
 import i18n from "@eyeseetea/d2-ui-components/locales";
+import { ImportSummary } from "../../../domain/entities/data-entry/ImportSummary";
+import InfoIcon from "@material-ui/icons/Info";
 
 interface SupportButtonsProps {
     changeStep: (step: number) => void;
+    risFileImportSummary: ImportSummary | undefined;
 }
 
-export const SupportButtons: React.FC<SupportButtonsProps> = ({ changeStep }) => {
-    const [isHidden, setIsHidden] = useState(false);
-
+export const SupportButtons: React.FC<SupportButtonsProps> = ({ changeStep, risFileImportSummary }) => {
     const onHelpClick = (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault();
         const helpWidgetButton = document.querySelector(".feedback-btn.feedback-btn-gray") as HTMLElement | null;
         helpWidgetButton?.click();
     };
 
-    if (!isHidden) {
-        return (
-            <ContentWrapper>
-                <div>
-                    <span>{i18n.t("I need help")}</span>
-                    <Button variant="contained" color="primary" onClick={onHelpClick}>
-                        {i18n.t("Submit Help Ticket")}
-                    </Button>
-                </div>
-                <div>
-                    <span>{i18n.t("I can fix this by myself")}</span>
-                    <Button variant="contained" color="primary" onClick={() => changeStep(1)}>
-                        {i18n.t("Upload New Data Files")}
-                    </Button>
-                </div>
-                <div>
-                    <span>{i18n.t("I'll fix it later")}</span>
-                    <Button variant="contained" color="primary" onClick={() => setIsHidden(true)}>
-                        {i18n.t("OK")}
-                    </Button>
-                </div>
-            </ContentWrapper>
-        );
-    } else {
-        return <></>;
-    }
+    return (
+        <ContentWrapper>
+            <div>
+                <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={onHelpClick}
+                    disabled={risFileImportSummary && risFileImportSummary.blockingErrors.length > 0 ? false : true}
+                >
+                    {i18n.t("Submit Help Ticket")}
+                </Button>
+                <HelperWrapper>
+                    <InfoIcon fontSize={"small"} color="disabled" />
+                    <Typography color="textSecondary" variant="caption">
+                        {i18n.t("App support ticket")}
+                    </Typography>
+                </HelperWrapper>
+            </div>
+            <div>
+                <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={() => changeStep(1)}
+                    disabled={risFileImportSummary && risFileImportSummary.blockingErrors.length > 0 ? false : true}
+                >
+                    {i18n.t("Upload New Data Files")}
+                </Button>
+                <HelperWrapper>
+                    <InfoIcon fontSize={"small"} color="disabled" />
+                    <Typography color="textSecondary" variant="caption">
+                        {i18n.t("Fix upload data")}
+                    </Typography>
+                </HelperWrapper>
+            </div>
+        </ContentWrapper>
+    );
 };
 
 const ContentWrapper = styled.div`
@@ -50,9 +61,15 @@ const ContentWrapper = styled.div`
     > div {
         display: flex;
         flex-direction: column;
-        gap: 15px;
+        gap: 5px;
         button {
             font-weight: 400;
         }
     }
+`;
+
+const HelperWrapper = styled.div`
+    display: flex;
+    margin-left: 5px;
+    gap: 4px;
 `;
