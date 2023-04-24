@@ -53,6 +53,7 @@ import { GetDashboardUseCase } from "./domain/usecases/GetDashboardUseCase";
 import { SystemSettingsDefaultRepository } from "./data/repositories/SystemSettingsDefaultRepository";
 import { GetLastAnalyticsRunTimeUseCase } from "./domain/usecases/GetLastAnalyticsRunTimeUseCase";
 import { SendNotificationsUseCase } from "./domain/usecases/SendNotificationsUseCase";
+import { UsersDefaultRepository } from "./data/repositories/UsersDefaultRepository";
 
 export function getCompositionRoot(instance: Instance) {
     const api = getD2APiFromInstance(instance);
@@ -70,6 +71,7 @@ export function getCompositionRoot(instance: Instance) {
     const questionnaireD2Repository = new QuestionnaireD2Repository(api);
     const notificationRepository = new NotificationDefaultRepository(instance);
     const countryInformationRepository = new CountryInformationDefaultRepository(instance);
+    const usersDefaultRepository = new UsersDefaultRepository(api);
     const systemSettingsDefaultRepository = new SystemSettingsDefaultRepository(api);
 
     return {
@@ -130,7 +132,7 @@ export function getCompositionRoot(instance: Instance) {
         notifications: getExecute({
             getAll: new GetNotificationsUseCase(notificationRepository),
             getById: new GetNotificationByIdUseCase(notificationRepository),
-            send: new SendNotificationsUseCase(notificationRepository),
+            send: new SendNotificationsUseCase(notificationRepository, usersDefaultRepository),
         }),
         countries: getExecute({
             getInformation: new GetCountryInformationUseCase(countryInformationRepository),
