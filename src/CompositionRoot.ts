@@ -54,6 +54,9 @@ import { SystemInfoDefaultRepository } from "./data/repositories/SystemInfoDefau
 import { GetLastAnalyticsRunTimeUseCase } from "./domain/usecases/GetLastAnalyticsRunTimeUseCase";
 import { SendNotificationsUseCase } from "./domain/usecases/SendNotificationsUseCase";
 import { UsersDefaultRepository } from "./data/repositories/UsersDefaultRepository";
+import { GetUiLocalesUseCase } from "./domain/usecases/GetUiLocalesUseCase";
+import { GetDatabaseLocalesUseCase } from "./domain/usecases/GetDatabaseLocalesUseCase";
+import { LocalesDefaultRepository } from "./data/repositories/LocalesDefaultRepository";
 
 export function getCompositionRoot(instance: Instance) {
     const api = getD2APiFromInstance(instance);
@@ -73,6 +76,7 @@ export function getCompositionRoot(instance: Instance) {
     const countryInformationRepository = new CountryInformationDefaultRepository(instance);
     const systemInfoDefaultRepository = new SystemInfoDefaultRepository(api);
     const usersDefaultRepository = new UsersDefaultRepository(api);
+    const localeRepository = new LocalesDefaultRepository(instance);
 
     return {
         instance: getExecute({
@@ -142,6 +146,10 @@ export function getCompositionRoot(instance: Instance) {
         }),
         systemInfo: getExecute({
             lastAnalyticsRunTime: new GetLastAnalyticsRunTimeUseCase(systemInfoDefaultRepository),
+        }),
+        locales: getExecute({
+            getUiLocales: new GetUiLocalesUseCase(localeRepository),
+            getDatabaseLocales: new GetDatabaseLocalesUseCase(localeRepository),
         }),
     };
 }
