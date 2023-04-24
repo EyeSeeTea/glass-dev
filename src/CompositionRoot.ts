@@ -50,7 +50,7 @@ import { ValidateSampleFileUseCase } from "./domain/usecases/data-entry/Validate
 import { SaveDataSubmissionsUseCase } from "./domain/usecases/SaveDataSubmissionsUseCase";
 import { UpdateSampleUploadWithRisIdUseCase } from "./domain/usecases/UpdateSampleUploadWithRisIdUseCase";
 import { GetDashboardUseCase } from "./domain/usecases/GetDashboardUseCase";
-import { SystemSettingsDefaultRepository } from "./data/repositories/SystemSettingsDefaultRepository";
+import { SystemInfoDefaultRepository } from "./data/repositories/SystemInfoDefaultRepository";
 import { GetLastAnalyticsRunTimeUseCase } from "./domain/usecases/GetLastAnalyticsRunTimeUseCase";
 import { SendNotificationsUseCase } from "./domain/usecases/SendNotificationsUseCase";
 import { UsersDefaultRepository } from "./data/repositories/UsersDefaultRepository";
@@ -71,8 +71,8 @@ export function getCompositionRoot(instance: Instance) {
     const questionnaireD2Repository = new QuestionnaireD2Repository(api);
     const notificationRepository = new NotificationDefaultRepository(instance);
     const countryInformationRepository = new CountryInformationDefaultRepository(instance);
+    const systemInfoDefaultRepository = new SystemInfoDefaultRepository(api);
     const usersDefaultRepository = new UsersDefaultRepository(api);
-    const systemSettingsDefaultRepository = new SystemSettingsDefaultRepository(api);
 
     return {
         instance: getExecute({
@@ -140,8 +140,8 @@ export function getCompositionRoot(instance: Instance) {
         glassDashboard: getExecute({
             getDashboard: new GetDashboardUseCase(glassModuleRepository),
         }),
-        systemSettings: getExecute({
-            lastAnalyticsRunTime: new GetLastAnalyticsRunTimeUseCase(systemSettingsDefaultRepository),
+        systemInfo: getExecute({
+            lastAnalyticsRunTime: new GetLastAnalyticsRunTimeUseCase(systemInfoDefaultRepository),
         }),
     };
 }
