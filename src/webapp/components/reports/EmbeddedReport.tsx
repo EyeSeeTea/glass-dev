@@ -107,6 +107,7 @@ async function setDashboardStyling(iframe: HTMLIFrameElement) {
     const iframeDocument = iframe.contentWindow.document;
 
     await waitforElementToLoad(iframeDocument, ".app-wrapper,.dashboard-scroll-container");
+    await waitforElementToLoad(iframeDocument, "[data-test='title-bar']");
     const iFrameRoot = iframeDocument.querySelector<HTMLElement>("#root");
     const iFrameWrapper = iframeDocument.querySelector<HTMLElement>(".app-wrapper");
     const pageContainer = iframeDocument.querySelector<HTMLElement>(".page-container-top-margin");
@@ -118,6 +119,7 @@ async function setDashboardStyling(iframe: HTMLIFrameElement) {
     iframeDocument.querySelectorAll("header").forEach(el => el.remove());
     iframeDocument.querySelectorAll("[data-test='dashboards-bar']").forEach(el => el.remove());
     iframeDocument.querySelectorAll("[data-test='title-bar']").forEach(el => el.remove());
+    iframeDocument.querySelectorAll("[data-test='dashboarditem-menu-button']").forEach(el => el.remove());
 
     if (pageContainer) pageContainer.style.marginTop = "0px";
     if (iFrameRoot) iFrameRoot.style.marginTop = "0px";
