@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2023-04-24T12:52:38.725Z\n"
-"PO-Revision-Date: 2023-04-24T12:52:38.725Z\n"
+"POT-Creation-Date: 2023-04-24T14:59:32.907Z\n"
+"PO-Revision-Date: 2023-04-24T14:59:32.907Z\n"
 
 msgid "Error saving registration status"
 msgstr ""
@@ -389,22 +389,16 @@ msgstr ""
 msgid "ignored: "
 msgstr ""
 
-msgid "I need help"
-msgstr ""
-
 msgid "Submit Help Ticket"
 msgstr ""
 
-msgid "I can fix this by myself"
+msgid "App support ticket"
 msgstr ""
 
 msgid "Upload New Data Files"
 msgstr ""
 
-msgid "I'll fix it later"
-msgstr ""
-
-msgid "OK"
+msgid "Fix upload data"
 msgstr ""
 
 msgid "Error fetching previous uploads."
