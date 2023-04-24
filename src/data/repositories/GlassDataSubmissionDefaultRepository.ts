@@ -46,9 +46,24 @@ export class GlassDataSubmissionsDefaultRepository implements GlassDataSubmissio
     }
 
     saveMultiple(dataSubmissions: GlassDataSubmission[]): FutureData<void> {
-        return this.dataStoreClient.listCollection(DataStoreKeys.DATA_SUBMISSIONS).flatMap(ds => {
-            const newDataSubmissions = [...ds, ...dataSubmissions];
-            return this.dataStoreClient.saveObject(DataStoreKeys.DATA_SUBMISSIONS, newDataSubmissions);
+        return this.dataStoreClient.listCollection(DataStoreKeys.DATA_SUBMISSIONS).flatMap(existingDataSubmissions => {
+            //Adding an extra check, to ensure duplicate data submissions are never created.
+            //Every data submission should have a unique combination of module, orgUnit and period.
+            const newDataSubmissions = dataSubmissions
+                .map(ds => {
+                    const typedSubmissions = existingDataSubmissions as GlassDataSubmission[];
+                    const alreadyExists = typedSubmissions.find(
+                        d => d.module === ds.module && d.orgUnit === ds.orgUnit && d.period === ds.period
+                    );
+                    if (alreadyExists) return null;
+                    else return ds;
+                })
+                .filter(n => n);
+
+            return this.dataStoreClient.saveObject(DataStoreKeys.DATA_SUBMISSIONS, [
+                ...existingDataSubmissions,
+                ...newDataSubmissions,
+            ]);
         });
     }
 
