@@ -95,6 +95,23 @@ export class InstanceDefaultRepository implements InstanceRepository {
                         username: true,
                         userRoles: { id: true, name: true, authorities: true },
                     },
+                    gender: true,
+                    email: true,
+                    phoneNumber: true,
+                    introduction: true,
+                    birthday: true,
+                    nationality: true,
+                    employer: true,
+                    jobTitle: true,
+                    education: true,
+                    interests: true,
+                    languages: true,
+                    settings: {
+                        keyUiLocale: true,
+                        keyDbLocale: true,
+                        keyMessageEmailNotification: true,
+                        keyMessageSmsNotification: true,
+                    },
                     organisationUnits: {
                         id: true,
                         name: true,
@@ -168,6 +185,23 @@ export class InstanceDefaultRepository implements InstanceRepository {
                                         uniqueDataViewOrgUnits
                                     ),
                                     userModulesAccess: userModulesAccess,
+                                    gender: user.gender,
+                                    email: user.email,
+                                    phoneNumber: user.phoneNumber,
+                                    introduction: user.introduction,
+                                    birthday: user.birthday,
+                                    nationality: user.nationality,
+                                    employer: user.employer,
+                                    jobTitle: user.jobTitle,
+                                    education: user.education,
+                                    interests: user.interests,
+                                    languages: user.languages,
+                                    settings: {
+                                        keyUiLocale: user.settings.keyUiLocale,
+                                        keyDbLocale: user.settings.keyDbLocale,
+                                        keyMessageEmailNotification: user.settings.keyMessageEmailNotification,
+                                        keyMessageSmsNotification: user.settings.keyMessageSmsNotification,
+                                    },
                                 };
                             });
                         }
@@ -182,7 +216,7 @@ export class InstanceDefaultRepository implements InstanceRepository {
         return apiToFuture(this.api.system.info).map(({ version }) => version);
     }
 
-    public getAllCountryOrgUnits(
+    private getAllCountryOrgUnits(
         orgUnits: { name: string; id: string; code: string }[],
         countryLevel: number
     ): FutureData<{ name: string; id: string; code: string }[]> {
