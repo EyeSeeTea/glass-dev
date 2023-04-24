@@ -49,7 +49,11 @@ import { ValidateRISFileUseCase } from "./domain/usecases/data-entry/ValidateRIS
 import { ValidateSampleFileUseCase } from "./domain/usecases/data-entry/ValidateSampleFileUseCase";
 import { SaveDataSubmissionsUseCase } from "./domain/usecases/SaveDataSubmissionsUseCase";
 import { UpdateSampleUploadWithRisIdUseCase } from "./domain/usecases/UpdateSampleUploadWithRisIdUseCase";
-import { GetReportDashboardUseCase } from "./domain/usecases/GetReportDashboardUseCase";
+import { GetDashboardUseCase } from "./domain/usecases/GetDashboardUseCase";
+import { SystemInfoDefaultRepository } from "./data/repositories/SystemInfoDefaultRepository";
+import { GetLastAnalyticsRunTimeUseCase } from "./domain/usecases/GetLastAnalyticsRunTimeUseCase";
+import { SendNotificationsUseCase } from "./domain/usecases/SendNotificationsUseCase";
+import { UsersDefaultRepository } from "./data/repositories/UsersDefaultRepository";
 import { GetUiLocalesUseCase } from "./domain/usecases/GetUiLocalesUseCase";
 import { GetDatabaseLocalesUseCase } from "./domain/usecases/GetDatabaseLocalesUseCase";
 import { LocalesDefaultRepository } from "./data/repositories/LocalesDefaultRepository";
@@ -70,6 +74,8 @@ export function getCompositionRoot(instance: Instance) {
     const questionnaireD2Repository = new QuestionnaireD2Repository(api);
     const notificationRepository = new NotificationDefaultRepository(instance);
     const countryInformationRepository = new CountryInformationDefaultRepository(instance);
+    const systemInfoDefaultRepository = new SystemInfoDefaultRepository(api);
+    const usersDefaultRepository = new UsersDefaultRepository(api);
     const localeRepository = new LocalesDefaultRepository(instance);
 
     return {
@@ -130,12 +136,16 @@ export function getCompositionRoot(instance: Instance) {
         notifications: getExecute({
             getAll: new GetNotificationsUseCase(notificationRepository),
             getById: new GetNotificationByIdUseCase(notificationRepository),
+            send: new SendNotificationsUseCase(notificationRepository, usersDefaultRepository),
         }),
         countries: getExecute({
             getInformation: new GetCountryInformationUseCase(countryInformationRepository),
         }),
         glassDashboard: getExecute({
-            getReportDashboard: new GetReportDashboardUseCase(glassModuleRepository),
+            getDashboard: new GetDashboardUseCase(glassModuleRepository),
+        }),
+        systemInfo: getExecute({
+            lastAnalyticsRunTime: new GetLastAnalyticsRunTimeUseCase(systemInfoDefaultRepository),
         }),
         locales: getExecute({
             getUiLocales: new GetUiLocalesUseCase(localeRepository),

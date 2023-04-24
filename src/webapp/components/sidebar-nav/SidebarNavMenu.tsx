@@ -37,8 +37,8 @@ const SidebarNavMenu: React.FC<SidebarNavProps> = ({ menu, className, groupName 
             (menu.title === "Data Submissions History" &&
                 location.pathname === "/current-data-submission/" &&
                 groupName === currentModuleAccess.moduleName) ||
-            (menu.title === "Upload History" &&
-                location.pathname === "/upload-history/" &&
+            (menu.title === "Data File History" &&
+                location.pathname === "/data-file-history/" &&
                 groupName === currentModuleAccess.moduleName) ||
             (location.pathname !== "/" &&
                 menuPath === location.pathname &&

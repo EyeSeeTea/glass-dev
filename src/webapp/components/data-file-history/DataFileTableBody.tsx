@@ -1,17 +1,17 @@
 import React from "react";
 import { Button, TableBody, TableCell, TableRow } from "@material-ui/core";
 import styled from "styled-components";
-import { UploadHistoryItemProps } from "./UploadTable";
+import { DataFileHistoryItemProps } from "./DataFileTable";
 import CloudDownloadIcon from "@material-ui/icons/CloudDownload";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
 import dayjs from "dayjs";
 import { useAppContext } from "../../contexts/app-context";
 
-export interface UploadTableBodyProps {
-    rows?: UploadHistoryItemProps[];
+export interface DataFileTableBodyProps {
+    rows?: DataFileHistoryItemProps[];
 }
 
-export const UploadTableBody: React.FC<UploadTableBodyProps> = ({ rows }) => {
+export const DataFileTableBody: React.FC<DataFileTableBodyProps> = ({ rows }) => {
     const { compositionRoot } = useAppContext();
 
     const download = (fileId: string, fileName: string) => {
@@ -33,7 +33,7 @@ export const UploadTableBody: React.FC<UploadTableBodyProps> = ({ rows }) => {
         <>
             {rows && rows.length ? (
                 <StyledTableBody>
-                    {rows.map((row: UploadHistoryItemProps) => (
+                    {rows.map((row: DataFileHistoryItemProps) => (
                         <TableRow key={row.id}>
                             <TableCell>{row.fileType}</TableCell>
                             <TableCell>{row.countryCode.toUpperCase()}</TableCell>

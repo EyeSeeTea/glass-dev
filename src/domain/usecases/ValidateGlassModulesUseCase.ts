@@ -24,6 +24,7 @@ const glassModules: GlassModule[] = [
         userGroups: {
             readAccess: [],
             captureAccess: [],
+            approveAccess: [],
         },
         questionnaires: [],
         consistencyChecks: {
@@ -160,7 +161,7 @@ const glassModules: GlassModule[] = [
         },
         dashboards: {
             reportsMenu: "",
-            reviewSummary: "",
+            validationReport: "",
         },
     },
     {
@@ -170,11 +171,12 @@ const glassModules: GlassModule[] = [
         userGroups: {
             readAccess: [],
             captureAccess: [],
+            approveAccess: [],
         },
         questionnaires: [],
         dashboards: {
             reportsMenu: "",
-            reviewSummary: "",
+            validationReport: "",
         },
     },
     {
@@ -184,11 +186,12 @@ const glassModules: GlassModule[] = [
         userGroups: {
             readAccess: [],
             captureAccess: [],
+            approveAccess: [],
         },
         questionnaires: [],
         dashboards: {
             reportsMenu: "",
-            reviewSummary: "",
+            validationReport: "",
         },
     },
 ];
