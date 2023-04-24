@@ -17,14 +17,16 @@ interface UploadStepsProps {
     moduleName: string;
     currentDataSubmissionStatus: StatusDetails;
     setRefetchStatus: Dispatch<SetStateAction<DataSubmissionStatusTypes | undefined>>;
+    step: number;
 }
 
 export const UploadSteps: React.FC<UploadStepsProps> = ({
     moduleName,
     currentDataSubmissionStatus,
     setRefetchStatus,
+    step,
 }) => {
-    const [currentStep, setCurrentStep] = useState<number>(0);
+    const [currentStep, setCurrentStep] = useState<number>(step);
     const hasCurrentUserCaptureAccess = useGlassCaptureAccess();
 
     return (
