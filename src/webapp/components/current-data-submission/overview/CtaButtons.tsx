@@ -94,10 +94,10 @@ export const CtaButtons: React.FC<CtaButtonsProps> = ({ ctas, position, setRefet
 
                 if (captureAccessGroup.kind === "loaded" && approveAccessGroup.kind === "loaded") {
                     const approveAccessGroups = approveAccessGroup.data.map(aag => {
-                        return { id: aag.id };
+                        return aag.id;
                     });
                     const captureAccessGroups = captureAccessGroup.data.map(cag => {
-                        return { id: cag.id };
+                        return cag.id;
                     });
 
                     const userGroupsIds = [...approveAccessGroups, ...captureAccessGroups];
@@ -106,7 +106,7 @@ export const CtaButtons: React.FC<CtaButtonsProps> = ({ ctas, position, setRefet
                             "Status Changed to WAITING WHO APROVAL",
                             `The data submission for ${currentModuleAccess.moduleName} module for year ${currentPeriod} and country ${currentOrgUnitAccess.orgUnitName} has changed to WAITING WHO APROVAL`,
                             userGroupsIds,
-                            { id: currentOrgUnitAccess.orgUnitId }
+                            [currentOrgUnitAccess.orgUnitId]
                         )
                         .run(
                             () => {},

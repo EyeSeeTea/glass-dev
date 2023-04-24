@@ -56,7 +56,7 @@ export const Questionnaires: React.FC<QuestionnairesProps> = ({ setRefetchStatus
 
                         if (captureAccessGroup.kind === "loaded") {
                             const userGroupsIds = captureAccessGroup.data.map(cag => {
-                                return { id: cag.id };
+                                return cag.id;
                             });
 
                             compositionRoot.notifications
@@ -64,7 +64,7 @@ export const Questionnaires: React.FC<QuestionnairesProps> = ({ setRefetchStatus
                                     "Status Changed to DATA TO BE APROVED BY COUNTRY",
                                     `The data submission for ${currentModuleAccess.moduleName} module for year ${year} and country ${orgUnit.name} has changed to DATA TO BE APROVED BY COUNTRY`,
                                     userGroupsIds,
-                                    { id: orgUnit.id }
+                                    [orgUnit.id]
                                 )
                                 .run(
                                     () => {},
