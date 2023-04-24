@@ -8,12 +8,14 @@ interface CurrentDataSubmissionContentProps {
     moduleName: string;
     currentDataSubmissionStatus: StatusDetails;
     setRefetchStatus: Dispatch<SetStateAction<DataSubmissionStatusTypes | undefined>>;
+    step: number;
 }
 
 export const CurrentDataSubmissionContent: React.FC<CurrentDataSubmissionContentProps> = ({
     moduleName,
     currentDataSubmissionStatus,
     setRefetchStatus,
+    step,
 }) => {
     return (
         <ContentWrapper>
@@ -21,6 +23,7 @@ export const CurrentDataSubmissionContent: React.FC<CurrentDataSubmissionContent
                 moduleName={moduleName}
                 currentDataSubmissionStatus={currentDataSubmissionStatus}
                 setRefetchStatus={setRefetchStatus}
+                step={step}
             />
         </ContentWrapper>
     );
