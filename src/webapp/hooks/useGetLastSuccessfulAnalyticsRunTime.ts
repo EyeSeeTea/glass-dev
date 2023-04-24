@@ -2,7 +2,7 @@ import React from "react";
 import { GlassState } from "./State";
 import { useAppContext } from "../contexts/app-context";
 
-export type AnalyticsRunTimeState = GlassState<Date>;
+export type AnalyticsRunTimeState = GlassState<string>;
 
 export function useGetLastSuccessfulAnalyticsRunTime() {
     const { compositionRoot } = useAppContext();
@@ -11,12 +11,12 @@ export function useGetLastSuccessfulAnalyticsRunTime() {
     });
 
     React.useEffect(() => {
-        compositionRoot.systemSettings.lastAnalyticsRunTime().run(
+        compositionRoot.systemInfo.lastAnalyticsRunTime().run(
             runTime => {
                 setLastSuccessfulAnalyticsRunTime({ kind: "loaded", data: runTime });
             },
-            errMessage => {
-                setLastSuccessfulAnalyticsRunTime({ kind: "error", message: errMessage });
+            () => {
+                setLastSuccessfulAnalyticsRunTime({ kind: "error", message: "" });
             }
         );
     }, [compositionRoot]);
