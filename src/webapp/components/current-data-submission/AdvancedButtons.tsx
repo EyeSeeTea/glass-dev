@@ -38,10 +38,10 @@ export const AdvancedButtons: React.FC<AdvancedButtonsProps> = ({ setRefetchStat
                 setRefetchStatus("PENDING_UPDATE_APPROVAL");
                 if (captureAccessGroup.kind === "loaded" && approveAccessGroup.kind === "loaded") {
                     const approveAccessGroups = approveAccessGroup.data.map(aag => {
-                        return { id: aag.id };
+                        return aag.id;
                     });
                     const captureAccessGroups = captureAccessGroup.data.map(cag => {
-                        return { id: cag.id };
+                        return cag.id;
                     });
 
                     const userGroupsIds = [...approveAccessGroups, ...captureAccessGroups];
@@ -50,7 +50,7 @@ export const AdvancedButtons: React.FC<AdvancedButtonsProps> = ({ setRefetchStat
                             "Status Changed to WAITING for WHO TO ACCEPT THE DATA UPDATE REQUEST",
                             `The data submission for ${currentModuleAccess.moduleName} module for year ${currentPeriod} and country ${currentOrgUnitAccess.orgUnitName} has changed to WAITING for WHO TO ACCEPT THE DATA UPDATE REQUEST`,
                             userGroupsIds,
-                            { id: currentOrgUnitAccess.orgUnitId }
+                            [currentOrgUnitAccess.orgUnitId]
                         )
                         .run(
                             () => {},
