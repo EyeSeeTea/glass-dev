@@ -44,13 +44,12 @@ export class NotificationDefaultRepository implements NotificationRepository {
         );
     }
 
-    send(subject: string, message: string, userGroupIds: Ref[], organisationUnit: Ref): FutureData<void> {
+    send(subject: string, message: string, users: Ref[]): FutureData<void> {
         return apiToFuture(
             this.api.messageConversations.post({
                 subject: subject,
                 text: message,
-                userGroups: userGroupIds,
-                organisationUnits: [organisationUnit],
+                users: users,
             })
         ).flatMap(_res => Future.success(undefined));
     }

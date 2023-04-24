@@ -7,15 +7,20 @@ import MenuIcon from "@material-ui/icons/Menu";
 import LocationIcon from "@material-ui/icons/LocationOn";
 import whoLogo from "../../assets/who-logo-blue.png";
 import glassLogo from "../../assets/glass-logo.png";
-import { Badge, Box, MenuItem, Select } from "@material-ui/core";
+import { Avatar, Badge, Box, ListItemIcon, ListItemText, Menu, MenuItem, Select } from "@material-ui/core";
 import styled from "styled-components";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { useAppContext } from "../../contexts/app-context";
 import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context";
-import NotificationsIcon from "@material-ui/icons/Notifications";
+import MailOutlineIcon from "@material-ui/icons/MailOutline";
 import { useNotifications } from "../landing-content/notifications/useNotifications";
 import { ContentLoader } from "../content-loader/ContentLoader";
 import { useHistory } from "react-router-dom";
+import KeyboardArrowDownIcon from "@material-ui/icons/KeyboardArrowDown";
+import KeyboardArrowUpIcon from "@material-ui/icons/KeyboardArrowUp";
+import { glassColors } from "../../pages/app/themes/dhis2.theme";
+import PersonOutlineIcon from "@material-ui/icons/PersonOutline";
+import SettingsIcon from "@material-ui/icons/Settings";
 
 const DHIS2_HOMEPAGE_URL = process.env.REACT_APP_DHIS2_BASE_URL;
 
@@ -51,11 +56,19 @@ export const GlassAppBar: React.FC<GlassAppBarProps> = ({ toggleShowMenu }) => {
 
     const { currentUser, compositionRoot } = useAppContext();
     const { currentOrgUnitAccess, changeCurrentOrgUnitAccess } = useCurrentOrgUnitContext();
-    const [action, setAction] = React.useState(1);
+    const notifications = useNotifications(compositionRoot);
 
+    const [anchorEl, setAnchorEl] = React.useState(null);
     const [orgUnitName, setOrgUnitName] = React.useState(currentOrgUnitAccess.orgUnitName);
 
-    const notifications = useNotifications(compositionRoot);
+    const nameInitials = (name: string): string => {
+        const nameArray = name.split(" ");
+        if (nameArray.length > 2) {
+            return `${nameArray[0]?.charAt(0)}${nameArray[nameArray.length - 1]?.charAt(0)}`;
+        } else {
+            return nameArray.map(name => name.charAt(0)).join("");
+        }
+    };
 
     useEffect(() => {
         if (orgUnitName !== currentOrgUnitAccess.orgUnitName) {
@@ -70,8 +83,15 @@ export const GlassAppBar: React.FC<GlassAppBarProps> = ({ toggleShowMenu }) => {
         if (orgUnitId) changeCurrentOrgUnitAccess(orgUnitId);
     };
 
-    const changeAction = (event: React.ChangeEvent<{ value: unknown }>) => {
-        setAction(event.target.value as number);
+    const handleClick = (event: React.BaseSyntheticEvent) => {
+        setAnchorEl(event.currentTarget);
+    };
+
+    const handleClose = (url?: string) => {
+        setAnchorEl(null);
+        if (url) {
+            history.push(url);
+        }
     };
 
     return (
@@ -101,7 +121,7 @@ export const GlassAppBar: React.FC<GlassAppBarProps> = ({ toggleShowMenu }) => {
                         {notifications.kind === "loaded" && notifications.data.length && (
                             <IconButton aria-label="notifications" color="primary" onClick={() => history.push("/")}>
                                 <Badge badgeContent={notifications.data.length} color="primary">
-                                    <NotificationsIcon />
+                                    <MailOutlineIcon />
                                 </Badge>
                             </IconButton>
                         )}
@@ -124,10 +144,45 @@ export const GlassAppBar: React.FC<GlassAppBarProps> = ({ toggleShowMenu }) => {
                             )}
                         </SelectContainer>
                         <SelectContainer>
-                            <Select value={action} disableUnderline onChange={changeAction}>
-                                <MenuItem value={1}>{i18n.t("User Profile")}</MenuItem>
-                                <MenuItem value={2}>{i18n.t("My Account")}</MenuItem>
-                            </Select>
+                            <AvatarContainer id="demo-positioned-button" onClick={handleClick}>
+                                <Avatar style={{ backgroundColor: glassColors.accentPrimary }}>
+                                    {nameInitials(currentUser.name)}
+                                </Avatar>
+                                {anchorEl ? (
+                                    <KeyboardArrowUpIcon color="primary" />
+                                ) : (
+                                    <KeyboardArrowDownIcon color="primary" />
+                                )}
+                            </AvatarContainer>
+                            <Menu
+                                id="simple-menu"
+                                aria-labelledby="demo-positioned-button"
+                                anchorEl={anchorEl}
+                                keepMounted
+                                open={Boolean(anchorEl)}
+                                onClose={() => handleClose()}
+                                anchorOrigin={{
+                                    vertical: "bottom",
+                                    horizontal: "left",
+                                }}
+                                transformOrigin={{
+                                    vertical: "top",
+                                    horizontal: "left",
+                                }}
+                            >
+                                <MenuItem onClick={() => handleClose("/user-profile")}>
+                                    <ListItemIcon>
+                                        <PersonOutlineIcon fontSize="small" />
+                                    </ListItemIcon>
+                                    <ListItemText primary={i18n.t("Profile")} />
+                                </MenuItem>
+                                <MenuItem onClick={() => handleClose("/user-settings")}>
+                                    <ListItemIcon>
+                                        <SettingsIcon fontSize="small" />
+                                    </ListItemIcon>
+                                    <ListItemText primary={i18n.t("Settings")} />
+                                </MenuItem>
+                            </Menu>
                         </SelectContainer>
                     </Toolbar>
                 </ContentLoader>
@@ -142,4 +197,12 @@ const SelectContainer = styled.div`
 
 const LogoContainer = styled.div`
     margin: 10px 10px;
+`;
+
+const AvatarContainer = styled.div`
+    display: flex;
+    align-items: center;
+    :hover {
+        cursor: pointer;
+    }
 `;

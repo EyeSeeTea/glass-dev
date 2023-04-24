@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2023-04-19T06:48:09.208Z\n"
-"PO-Revision-Date: 2023-04-19T06:48:09.208Z\n"
+"POT-Creation-Date: 2023-04-24T12:52:38.725Z\n"
+"PO-Revision-Date: 2023-04-24T12:52:38.725Z\n"
 
 msgid "Error saving registration status"
 msgstr ""
@@ -14,10 +14,10 @@ msgstr ""
 msgid "The AST results provided are not valid (they are all empty)"
 msgstr ""
 
-msgid "User Profile"
+msgid "Profile"
 msgstr ""
 
-msgid "My Account"
+msgid "Settings"
 msgstr ""
 
 msgid "WHO privacy policy"
@@ -438,6 +438,57 @@ msgid "SAMPLE File"
 msgstr ""
 
 msgid "not required"
+msgstr ""
+
+msgid "Full name"
+msgstr ""
+
+msgid "Username"
+msgstr ""
+
+msgid "Email"
+msgstr ""
+
+msgid "Phone number"
+msgstr ""
+
+msgid "Birthday"
+msgstr ""
+
+msgid "Nationality"
+msgstr ""
+
+msgid "Job title"
+msgstr ""
+
+msgid "Employer"
+msgstr ""
+
+msgid "Education"
+msgstr ""
+
+msgid "Interests"
+msgstr ""
+
+msgid "Languages"
+msgstr ""
+
+msgid "Error fetching Database locales"
+msgstr ""
+
+msgid "Error fetching UI locales"
+msgstr ""
+
+msgid "Interface language"
+msgstr ""
+
+msgid "Database language"
+msgstr ""
+
+msgid "Enable message email notifications"
+msgstr ""
+
+msgid "Enable message SMS notifications"
 msgstr ""
 
 msgid "Country Information"

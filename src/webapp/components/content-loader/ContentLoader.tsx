@@ -1,5 +1,4 @@
 import { useSnackbar } from "@eyeseetea/d2-ui-components";
-import { Typography } from "@material-ui/core";
 import { CircularProgress } from "material-ui";
 import React, { ReactNode, useEffect } from "react";
 
@@ -38,7 +37,7 @@ export const ContentLoader: React.FC<ContentLoaderProps> = ({ content, children,
             if (showErrorAsSnackbar) {
                 return null;
             } else {
-                return <Typography variant="h6">{content.message}</Typography>;
+                return <>{children}</>;
             }
 
         case "loaded":
