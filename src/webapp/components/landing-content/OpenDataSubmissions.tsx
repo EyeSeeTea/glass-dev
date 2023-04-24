@@ -20,18 +20,19 @@ export const OpenDataSubmissions: React.FC = () => {
 
     return (
         <ContentLoader content={openDataSubmissions}>
-            <Grid item xs={12}>
-                <h2 className="section-title">Open Data Submissions</h2>
-            </Grid>
-
             {openDataSubmissions.kind === "loaded" && openDataSubmissions.data.length ? (
-                openDataSubmissions.data.map(data => {
-                    return (
-                        <Grid item xs={6} key={data.dataSubmission.id}>
-                            {data.module && <ModuleCard period={data.dataSubmission.period} module={data.module} />}
-                        </Grid>
-                    );
-                })
+                <>
+                    <Grid item xs={12}>
+                        <h2 className="section-title">Open Data Submissions</h2>
+                    </Grid>
+                    {openDataSubmissions.data.map(data => {
+                        return (
+                            <Grid item xs={6} key={data.dataSubmission.id}>
+                                {data.module && <ModuleCard period={data.dataSubmission.period} module={data.module} />}
+                            </Grid>
+                        );
+                    })}
+                </>
             ) : (
                 <StyledNoData>{i18n.t("No Open Data Submissions")}</StyledNoData>
             )}
@@ -41,4 +42,5 @@ export const OpenDataSubmissions: React.FC = () => {
 
 const StyledNoData = styled(Typography)`
     padding-left: 20px;
+    padding-top: 20px;
 `;
