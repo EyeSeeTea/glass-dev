@@ -31,7 +31,7 @@ export const DataSubmissionsHistoryContent: React.FC = () => {
                 }
             }
 
-            if (years.length) {
+            if (years.length && currentModuleAccess.moduleId !== "" && currentOrgUnitAccess.orgUnitId !== "") {
                 setLoading(true);
                 compositionRoot.glassDataSubmission
                     .saveDataSubmissions(currentModuleAccess.moduleId, currentOrgUnitAccess.orgUnitId, years)

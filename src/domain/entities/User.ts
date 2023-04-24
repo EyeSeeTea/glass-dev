@@ -29,6 +29,23 @@ export interface UserAccessInfo {
     userGroups: NamedRef[];
     userOrgUnitsAccess: OrgUnitAccess[];
     userModulesAccess: ModuleAccess[];
+    gender: string;
+    email: string;
+    phoneNumber: string;
+    introduction: string;
+    birthday: string;
+    nationality: string;
+    employer: string;
+    jobTitle: string;
+    education: string;
+    interests: string;
+    languages: string;
+    settings: {
+        keyUiLocale: string;
+        keyDbLocale: string;
+        keyMessageEmailNotification: boolean;
+        keyMessageSmsNotification: boolean;
+    };
 }
 
 export interface UserRole extends NamedRef {
