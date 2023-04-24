@@ -7,7 +7,7 @@ import { NavLink } from "react-router-dom";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { useCurrentModuleContext } from "../../contexts/current-module-context";
 import { EmbeddedReport } from "../../components/reports/EmbeddedReport";
-import { useGlassReportDashboard } from "../../hooks/useGlassReportDashboard";
+import { useGlassDashboard } from "../../hooks/useGlassDashboard";
 import { CircularProgress } from "material-ui";
 
 export const GLASS_DASHBOARD_ID = "w7Kub3oACD9";
@@ -17,7 +17,7 @@ export const ReportsPage: React.FC = React.memo(() => {
 
 export const ReportPageContent: React.FC = React.memo(() => {
     const { currentModuleAccess } = useCurrentModuleContext();
-    const dashboardData = useGlassReportDashboard();
+    const { reportDashboardId } = useGlassDashboard();
 
     return (
         <ContentWrapper>
@@ -32,8 +32,8 @@ export const ReportPageContent: React.FC = React.memo(() => {
                     </Button>
                 </StyledBreadCrumbs>
             </PreContent>
-            {dashboardData.kind === "loading" && <CircularProgress />}
-            {dashboardData.kind === "loaded" && <EmbeddedReport dashboardId={dashboardData.data} />}
+            {reportDashboardId.kind === "loading" && <CircularProgress />}
+            {reportDashboardId.kind === "loaded" && <EmbeddedReport dashboardId={reportDashboardId.data} />}
         </ContentWrapper>
     );
 });

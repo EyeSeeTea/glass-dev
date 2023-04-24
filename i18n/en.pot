@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2023-04-17T15:57:59.682Z\n"
-"PO-Revision-Date: 2023-04-17T15:57:59.682Z\n"
+"POT-Creation-Date: 2023-04-19T06:48:09.208Z\n"
+"PO-Revision-Date: 2023-04-19T06:48:09.208Z\n"
 
 msgid "Error saving registration status"
 msgstr ""
@@ -154,39 +154,6 @@ msgid ""
 "dataset. Are you sure you want to delete?"
 msgstr ""
 
-msgid "Validation Alpha"
-msgstr ""
-
-msgid "no validation"
-msgstr ""
-
-msgid "Report"
-msgstr ""
-
-msgid "Run Validation"
-msgstr ""
-
-msgid "Validation Bravo"
-msgstr ""
-
-msgid "10 - 10 - 2020 VALIDATION CORRECT"
-msgstr ""
-
-msgid "Re-run Validation"
-msgstr ""
-
-msgid "Validation Charlie"
-msgstr ""
-
-msgid "10 - 10 - 2021 VALIDATION wrong"
-msgstr ""
-
-msgid "Validation Echo"
-msgstr ""
-
-msgid "09 - 12 - 2021 VALIDATION CORRECT"
-msgstr ""
-
 msgid "Go to questionnaires"
 msgstr ""
 
@@ -246,6 +213,33 @@ msgid "State"
 msgstr ""
 
 msgid "Data Submission status has errors..."
+msgstr ""
+
+msgid "File Type"
+msgstr ""
+
+msgid "Batch Id"
+msgstr ""
+
+msgid "Specimens"
+msgstr ""
+
+msgid "Date"
+msgstr ""
+
+msgid "Filename"
+msgstr ""
+
+msgid "Download"
+msgstr ""
+
+msgid "Filters"
+msgstr ""
+
+msgid "Select Year"
+msgstr ""
+
+msgid "Select Status"
 msgstr ""
 
 msgid " "
@@ -383,6 +377,18 @@ msgstr ""
 msgid "Summary"
 msgstr ""
 
+msgid "imported: "
+msgstr ""
+
+msgid "updated: "
+msgstr ""
+
+msgid "deleted: "
+msgstr ""
+
+msgid "ignored: "
+msgstr ""
+
 msgid "I need help"
 msgstr ""
 
@@ -434,37 +440,13 @@ msgstr ""
 msgid "not required"
 msgstr ""
 
-msgid "Filters"
-msgstr ""
-
-msgid "Select Year"
-msgstr ""
-
-msgid "Select Status"
-msgstr ""
-
-msgid "File Type"
-msgstr ""
-
-msgid "Batch Id"
-msgstr ""
-
-msgid "Specimens"
-msgstr ""
-
-msgid "Date"
-msgstr ""
-
-msgid "Filename"
-msgstr ""
-
-msgid "Download"
-msgstr ""
-
 msgid "Country Information"
 msgstr ""
 
 msgid "Yearly data upload"
+msgstr ""
+
+msgid "Data File History"
 msgstr ""
 
 msgid "List of Data Submissions"
@@ -474,7 +456,4 @@ msgid "All Data Submissions"
 msgstr ""
 
 msgid "Reports"
-msgstr ""
-
-msgid "Upload History"
 msgstr ""

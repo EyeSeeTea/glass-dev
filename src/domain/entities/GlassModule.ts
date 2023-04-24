@@ -5,6 +5,7 @@ import { UserGroup } from "./User";
 interface ModuleUserGroups {
     readAccess: UserGroup[];
     captureAccess: UserGroup[];
+    approveAccess: UserGroup[];
 }
 export interface GlassModule {
     name: string;
@@ -18,7 +19,7 @@ export interface GlassModule {
     };
     dashboards: {
         reportsMenu: string;
-        reviewSummary: string;
+        validationReport: string;
     };
 }
 

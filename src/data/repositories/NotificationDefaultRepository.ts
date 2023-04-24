@@ -1,7 +1,7 @@
 import { D2Api, MetadataPick } from "@eyeseetea/d2-api/2.34";
-import { FutureData } from "../../domain/entities/Future";
+import { Future, FutureData } from "../../domain/entities/Future";
 import { Notification } from "../../domain/entities/Notifications";
-import { Id } from "../../domain/entities/Ref";
+import { Id, Ref } from "../../domain/entities/Ref";
 import { NotificationRepository } from "../../domain/repositories/NotificationRepository";
 import { getD2APiFromInstance } from "../../utils/d2-api";
 import { apiToFuture } from "../../utils/futures";
@@ -44,6 +44,16 @@ export class NotificationDefaultRepository implements NotificationRepository {
                     return response.data.objects.map(this.buildNotification);
                 })
         );
+    }
+
+    send(subject: string, message: string, users: Ref[]): FutureData<void> {
+        return apiToFuture(
+            this.api.messageConversations.post({
+                subject: subject,
+                text: message,
+                users: users,
+            })
+        ).flatMap(_res => Future.success(undefined));
     }
 
     private buildNotification(messageConversation: D2MessageConversation): Notification {
