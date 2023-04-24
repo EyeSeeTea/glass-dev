@@ -16,6 +16,23 @@ export function getTestUser(): UserAccessInfo {
         userRoles: [],
         userOrgUnitsAccess: [],
         userModulesAccess: [],
+        gender: "male",
+        email: "abc@gmail.com",
+        phoneNumber: "1234",
+        introduction: "hi",
+        birthday: "10/10/1920",
+        nationality: "south africa",
+        employer: "eyeseetea",
+        jobTitle: "developer",
+        education: "masters",
+        interests: "beach",
+        languages: "english",
+        settings: {
+            keyUiLocale: "en",
+            keyDbLocale: "en",
+            keyMessageEmailNotification: true,
+            keyMessageSmsNotification: true,
+        },
     };
 }
 
