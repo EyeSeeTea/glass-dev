@@ -6,5 +6,5 @@ import { Ref } from "../entities/Ref";
 export interface NotificationRepository {
     getAll(): FutureData<Notification[]>;
     get(id: Id): FutureData<Notification>;
-    send(subject: string, message: string, userGroupIds: Ref[], organisationUnit: Ref): FutureData<void>;
+    send(subject: string, message: string, users: Ref[]): FutureData<void>;
 }
