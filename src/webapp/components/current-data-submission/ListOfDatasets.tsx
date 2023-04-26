@@ -81,7 +81,9 @@ export const ListOfDatasets: React.FC = () => {
                         </StyledTypography>
                     </div>
                 ) : (
-                    <CircularProgress />
+                    <div>
+                        <CircularProgress size={20} />
+                    </div>
                 )}
                 {incompleteUploads && incompleteUploads.length > 0 && (
                     <UploadsTable
