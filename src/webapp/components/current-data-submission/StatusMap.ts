@@ -108,7 +108,7 @@ export const statusMap = new Map<DataSubmissionStatusTypes, StatusDetails>([
             colour: glassColors.statusNegative,
             leftCTAs: [
                 {
-                    label: "Review submitted datasets",
+                    label: "Display full status history",
                     color: "primary",
                     variant: "outlined",
                     url: "/",
