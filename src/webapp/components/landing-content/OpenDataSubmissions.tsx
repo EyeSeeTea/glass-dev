@@ -20,11 +20,8 @@ export const OpenDataSubmissions: React.FC = () => {
 
     return (
         <ContentLoader content={openDataSubmissions}>
-            {openDataSubmissions.kind === "loaded" && openDataSubmissions.data.length ? (
+            {openDataSubmissions.kind === "loaded" && openDataSubmissions.data.length > 0 && (
                 <>
-                    <Grid item xs={12}>
-                        <h2 className="section-title">Open Data Submissions</h2>
-                    </Grid>
                     {openDataSubmissions.data.map(data => {
                         return (
                             <Grid item xs={6} key={data.dataSubmission.id}>
@@ -33,8 +30,6 @@ export const OpenDataSubmissions: React.FC = () => {
                         );
                     })}
                 </>
-            ) : (
-                <StyledNoData>{i18n.t("No Open Data Submissions")}</StyledNoData>
             )}
         </ContentLoader>
     );
