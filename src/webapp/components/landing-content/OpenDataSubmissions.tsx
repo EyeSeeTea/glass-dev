@@ -1,12 +1,10 @@
 import React from "react";
-import { Grid, Typography } from "@material-ui/core";
+import { Grid } from "@material-ui/core";
 import { ModuleCard } from "../module-card/ModuleCard";
-import i18n from "@eyeseetea/d2-ui-components/locales";
 import { useOpenDataSubmissionsByOrgUnit } from "../../hooks/useOpenDataSubmissionsByOrgUnit";
 import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context";
 import { useAppContext } from "../../contexts/app-context";
 import { ContentLoader } from "../content-loader/ContentLoader";
-import styled from "styled-components";
 
 export const OpenDataSubmissions: React.FC = () => {
     const { compositionRoot } = useAppContext();
@@ -34,8 +32,3 @@ export const OpenDataSubmissions: React.FC = () => {
         </ContentLoader>
     );
 };
-
-const StyledNoData = styled(Typography)`
-    padding-left: 20px;
-    padding-top: 20px;
-`;
