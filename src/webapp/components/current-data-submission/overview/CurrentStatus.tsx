@@ -13,6 +13,7 @@ import { Close, Check } from "@material-ui/icons";
 import { DataSubmissionStatusTypes } from "../../../../domain/entities/GlassDataSubmission";
 import { useCurrentPeriodContext } from "../../../contexts/current-period-context";
 import { useGlassCaptureAccess } from "../../../hooks/useGlassCaptureAccess";
+import { palette } from "../../../pages/app/themes/dhis2.theme";
 
 interface StatusProps {
     moduleName: string;
@@ -100,7 +101,9 @@ export const CurrentStatus: React.FC<StatusProps> = ({
                 <StyledCurrentStatusStr>{i18n.t("Current Status")}</StyledCurrentStatusStr>
                 <Box display={"flex"} justifyContent={"space-between"}>
                     <StyledStatus statusColor={statusColor}>{i18n.t(title)}</StyledStatus>
-                    {isActionRequired && <StyledInfoText>Action required</StyledInfoText>}
+                    {isActionRequired && (
+                        <StyledInfoText statusColor={statusColor}>!&nbsp;&nbsp; &nbsp;Action required</StyledInfoText>
+                    )}
                 </Box>
             </div>
             <Box sx={{ m: 2 }} />
@@ -184,6 +187,22 @@ const StyledDescription = styled.span`
     line-height: 1.4;
 `;
 
-const StyledInfoText = styled.span`
-    font-weight: bold;
+const StyledInfoText = styled.span<{ statusColor: string }>`
+    text-transform: uppercase;
+    background: ${props => props.statusColor};
+    color: ${palette.common.white};
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 3px 3px;
+
+    width: 152px;
+    height: 20px;
+    border-radius: 16px;
+    font-family: "Roboto";
+    font-style: normal;
+    font-weight: 500;
+    font-size: 13px;
+    line-height: 18px;
+    letter-spacing: 0.16px;
 `;
