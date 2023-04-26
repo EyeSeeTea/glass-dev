@@ -1,11 +1,10 @@
 export type StatusCTAs =
-    | "Upload dataset"
     | "Go to questionnaires"
     | "Display full status history"
     | "Upload/Delete datasets"
     | "Send submission"
     | "Read full message"
-    | "Review the submitted datasets"
+    | "Review submitted datasets"
     | "Request data update";
 
 export type CTAs = {
