@@ -118,7 +118,11 @@ async function setDashboardStyling(iframe: HTMLIFrameElement) {
     // 2.36
     iframeDocument.querySelectorAll("header").forEach(el => el.remove());
     iframeDocument.querySelectorAll("[data-test='dashboards-bar']").forEach(el => el.remove());
-    iframeDocument.querySelectorAll("[data-test='title-bar']").forEach(el => el.remove());
+    iframeDocument.querySelectorAll("[class*=ActionsBar_moreButton]").forEach(el => el.remove());
+    iframeDocument.querySelectorAll("[class*=ActionsBar_shareButton]").forEach(el => el.remove());
+    iframeDocument.querySelectorAll("[class*=ActionsBar_editButton]").forEach(el => el.remove());
+    iframeDocument.querySelectorAll("[class*=StarDashboardButton_star]").forEach(el => el.remove());
+
     iframeDocument.querySelectorAll("[data-test='dashboarditem-menu-button']").forEach(el => el.remove());
 
     if (pageContainer) pageContainer.style.marginTop = "0px";
