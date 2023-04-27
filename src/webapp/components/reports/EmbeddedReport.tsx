@@ -26,12 +26,14 @@ export const EmbeddedReport: React.FC<EmbeddedReportProps> = ({ dashboardId }) =
                 await setDashboardStyling(iframe);
                 setState(prevState => ({ ...prevState, type: "loaded" }));
                 openExternalLinksInNewTab(iframe);
-            });
 
-            const intervalId = autoResizeIframeByContent(iframe, height =>
-                setState(prevState => ({ ...prevState, height }))
-            );
-            return () => window.clearInterval(intervalId);
+                const document = iframe?.contentWindow?.document;
+                const height = document?.querySelector(".dashboard-scroll-container > div")?.scrollHeight;
+
+                if (height && height > 0) {
+                    setState(prevState => ({ ...prevState, height }));
+                }
+            });
         }
     }, [iframeRef]);
 
@@ -61,8 +63,6 @@ const styles = {
     wrapperHidden: { visibility: "hidden" },
 };
 
-type IntervalId = number;
-
 function openExternalLinksInNewTab(iframe: HTMLIFrameElement) {
     const iwindow = iframe.contentWindow;
     if (!iwindow) return;
@@ -78,16 +78,20 @@ function openExternalLinksInNewTab(iframe: HTMLIFrameElement) {
     }, 1000);
 }
 
-function autoResizeIframeByContent(iframe: HTMLIFrameElement, setHeight: (height: number) => void): IntervalId {
-    const resize = () => {
-        // Get the first element that has the real height of the full dashboard (and not the forced large value).
-        const document = iframe?.contentWindow?.document;
-        const height = document?.querySelector(".dashboard-scroll-container > div")?.scrollHeight;
+// function autoResizeIframeByContent(iframe: HTMLIFrameElement, setHeight: (height: number) => void): IntervalId {
+//     const resize = () => {
+//         // Get the first element that has the real height of the full dashboard (and not the forced large value).
+//         const document = iframe?.contentWindow?.document;
+//         const height = document?.querySelector(".dashboard-scroll-container > div")?.scrollHeight;
 
-        if (height && height > 0) setHeight(height);
-    };
-    return window.setInterval(resize, 1000);
-}
+//         if (height && height > 0) {
+//             console.log("setHeight called");
+//             setHeight(height);
+//         }
+//     };
+//     console.log("autoResizeIframeByContent called");
+//     return window.setInterval(resize, 1000);
+// }
 
 function waitforElementToLoad(iframeDocument: HTMLDocument, selector: string) {
     return new Promise(resolve => {
