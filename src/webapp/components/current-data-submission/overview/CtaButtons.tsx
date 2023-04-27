@@ -133,24 +133,12 @@ export const CtaButtons: React.FC<CtaButtonsProps> = ({ ctas, position, setRefet
                         variant={cta.variant || "contained"}
                         color={cta.color || "primary"}
                         onClick={() => setCurrentStep(2)}
-                        style={{ textTransform: "none" }}
+                        style={{ textTransform: "uppercase" }}
                     >
                         {i18n.t("Go to questionnaires")}
                     </Button>
                 );
-            case "Upload dataset":
-                return (
-                    <Button
-                        key={cta.label}
-                        variant={cta.variant || "contained"}
-                        color={cta.color || "primary"}
-                        onClick={() => setCurrentStep(1)}
-                        disabled={!hasCurrentUserCaptureAccess}
-                        style={{ textTransform: "none", marginRight: "20px" }}
-                    >
-                        {i18n.t("Upload dataset")}
-                    </Button>
-                );
+
             case "Upload/Delete datasets":
                 return (
                     <Button
@@ -159,7 +147,7 @@ export const CtaButtons: React.FC<CtaButtonsProps> = ({ ctas, position, setRefet
                         color={cta.color || "primary"}
                         onClick={() => setCurrentStep(1)}
                         disabled={!hasCurrentUserCaptureAccess}
-                        style={{ textTransform: "none", marginRight: "20px" }}
+                        style={{ textTransform: "uppercase", marginRight: "20px" }}
                     >
                         {i18n.t("Upload/Delete datasets")}
                     </Button>
@@ -171,16 +159,16 @@ export const CtaButtons: React.FC<CtaButtonsProps> = ({ ctas, position, setRefet
                         {i18n.t("Send submission")}
                     </Button>
                 );
-            case "Review the submitted datasets":
+            case "Review submitted datasets":
                 return (
                     <Button
                         key={cta.label}
                         variant={cta.variant}
                         color={cta.color}
                         onClick={() => setCurrentStep(1)}
-                        style={{ textTransform: "none" }}
+                        style={{ textTransform: "uppercase" }}
                     >
-                        {i18n.t(`${cta.label} >`)}
+                        {i18n.t(`${cta.label}`)}
                     </Button>
                 );
             case "Request data update":
@@ -190,9 +178,9 @@ export const CtaButtons: React.FC<CtaButtonsProps> = ({ ctas, position, setRefet
                         variant={cta.variant}
                         color={cta.color}
                         onClick={() => setCurrentStep(4)}
-                        style={{ textTransform: "none" }}
+                        style={{ textTransform: "uppercase" }}
                     >
-                        {i18n.t(`${cta.label} >`)}
+                        {i18n.t(`${cta.label}`)}
                     </Button>
                 );
             case "Display full status history":
@@ -202,9 +190,9 @@ export const CtaButtons: React.FC<CtaButtonsProps> = ({ ctas, position, setRefet
                         color={cta.color}
                         key={cta.label}
                         onClick={() => setIsStatusHistoryDialogOpen(true)}
-                        style={{ textTransform: "none" }}
+                        style={{ textTransform: "uppercase" }}
                     >
-                        {i18n.t(`${cta.label} >`)}
+                        {i18n.t(`${cta.label}`)}
                     </Button>
                 );
             default:
@@ -215,9 +203,9 @@ export const CtaButtons: React.FC<CtaButtonsProps> = ({ ctas, position, setRefet
                         color={cta.color || "primary"}
                         component={NavLink}
                         to={cta.url}
-                        style={{ textTransform: "none", marginRight: `${position ? "0" : "20px"}` }}
+                        style={{ textTransform: "uppercase", marginRight: `${position ? "0" : "20px"}` }}
                     >
-                        {i18n.t(`${cta.label} >`)}
+                        {i18n.t(`${cta.label}`)}
                     </Button>
                 );
         }

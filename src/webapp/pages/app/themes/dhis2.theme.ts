@@ -44,6 +44,11 @@ export const glassColors = {
 
     gradientBg: "#9EB0E4",
     gradientLightBg: "#9EB0E4",
+
+    statusActionReq: "#ED6C02",
+    statusNeutral: "#009ADE",
+    statusPositive: "#80BC00",
+    statusNegative: "#EF3842",
 };
 
 export const palette = {
