@@ -32,7 +32,7 @@ export class ImportSampleFileUseCase implements UseCase {
     public execute(
         inputFile: File,
         batchId: string,
-        year: number,
+        year: string,
         action: ImportStrategy,
         orgUnit: string,
         countryCode: string,
