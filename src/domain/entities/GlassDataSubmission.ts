@@ -13,7 +13,7 @@ export interface GlassDataSubmission {
     id: Id;
     module: string;
     orgUnit: string;
-    period: number;
+    period: string;
     status: DataSubmissionStatusTypes;
     statusHistory: StatusHistoryType[];
 }

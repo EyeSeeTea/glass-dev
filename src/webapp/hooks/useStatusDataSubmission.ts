@@ -10,7 +10,7 @@ type GlassDataSubmissionState = GlassState<StatusDetails>;
 export function useStatusDataSubmission(
     moduleId: string,
     orgUnit: string,
-    period: number,
+    period: string,
     refetch: DataSubmissionStatusTypes | undefined = undefined
 ) {
     const { compositionRoot } = useAppContext();
