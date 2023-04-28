@@ -6,7 +6,7 @@ import { Questionnaire, Question, QuestionnaireSelector, QuestionnaireBase } fro
 export interface QuestionnaireRepository {
     getList(
         module: GlassModule,
-        options: { orgUnitId: Id; year: number },
+        options: { orgUnitId: Id; year: string },
         captureAccess: boolean
     ): FutureData<QuestionnaireBase[]>;
     get(module: GlassModule, selector: QuestionnaireSelector, captureAccess: boolean): FutureData<Questionnaire>;
