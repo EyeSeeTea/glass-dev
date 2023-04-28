@@ -5,7 +5,7 @@ export function useCurrentDataSubmissionId(
     compositionRoot: CompositionRoot,
     moduleId: string,
     orgUnit: string,
-    period: number
+    period: string
 ) {
     const [currentDataSubmissionId, setCurrentDataSubmissionId] = useState<string>("");
 

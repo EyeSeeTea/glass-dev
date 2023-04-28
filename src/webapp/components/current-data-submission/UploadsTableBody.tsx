@@ -13,9 +13,9 @@ import { Future } from "../../../domain/entities/Future";
 import { isEditModeStatus } from "../../utils/editModeStatus";
 import { useStatusDataSubmission } from "../../hooks/useStatusDataSubmission";
 import { useCurrentModuleContext } from "../../contexts/current-module-context";
-import { useLocation } from "react-router-dom";
 import { useGlassCaptureAccess } from "../../hooks/useGlassCaptureAccess";
 import { StyledLoaderContainer } from "../upload/ConsistencyChecks";
+import { useCurrentPeriodContext } from "../../contexts/current-period-context";
 
 export interface UploadsTableBodyProps {
     rows?: UploadsDataItem[];
@@ -31,17 +31,15 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
     } = useCurrentOrgUnitContext();
     const [open, setOpen] = React.useState(false);
     const [rowToDelete, setRowToDelete] = useState<UploadsDataItem>();
-    const location = useLocation();
-    const queryParameters = new URLSearchParams(location.search);
-    const periodFromUrl = parseInt(queryParameters.get("period") || "");
-    const year = periodFromUrl || new Date().getFullYear() - 1;
+
+    const { currentPeriod } = useCurrentPeriodContext();
 
     const { currentModuleAccess } = useCurrentModuleContext();
     const { currentOrgUnitAccess } = useCurrentOrgUnitContext();
     const currentDataSubmissionStatus = useStatusDataSubmission(
         currentModuleAccess.moduleId,
         currentOrgUnitAccess.orgUnitId,
-        year
+        currentPeriod
     );
     const hasCurrentUserCaptureAccess = useGlassCaptureAccess();
 
@@ -106,7 +104,7 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                                         ? compositionRoot.dataSubmision.RISFile(
                                               risFile,
                                               risFileToDelete.batchId,
-                                              parseInt(risFileToDelete.period),
+                                              risFileToDelete.period,
                                               "DELETES",
                                               orgUnitId,
                                               risFileToDelete.countryCode,
@@ -120,7 +118,7 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                                         ? compositionRoot.dataSubmision.sampleFile(
                                               new File([sampleFileDownload], sampleFileToDelete.fileName),
                                               sampleFileToDelete.batchId,
-                                              parseInt(sampleFileToDelete.period),
+                                              sampleFileToDelete.period,
                                               "DELETES",
                                               orgUnitId,
                                               sampleFileToDelete.countryCode,
