@@ -10,6 +10,10 @@ interface SupportButtonsProps {
     risFileImportSummary: ImportSummary | undefined;
 }
 
+interface ContentWrapperProps {
+    isVisible: boolean;
+}
+
 export const SupportButtons: React.FC<SupportButtonsProps> = ({ changeStep, risFileImportSummary }) => {
     const onHelpClick = (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault();
@@ -18,7 +22,7 @@ export const SupportButtons: React.FC<SupportButtonsProps> = ({ changeStep, risF
     };
 
     return (
-        <ContentWrapper>
+        <ContentWrapper isVisible={(risFileImportSummary && risFileImportSummary.blockingErrors.length > 0) || false}>
             <div>
                 <Button
                     variant="contained"
@@ -55,7 +59,7 @@ export const SupportButtons: React.FC<SupportButtonsProps> = ({ changeStep, risF
     );
 };
 
-const ContentWrapper = styled.div`
+const ContentWrapper = styled.div<ContentWrapperProps>`
     display: flex;
     gap: 20px;
     > div {
@@ -66,6 +70,10 @@ const ContentWrapper = styled.div`
             font-weight: 400;
         }
     }
+    ${props =>
+        !props.isVisible && {
+            visibility: "hidden",
+        }}
 `;
 
 const HelperWrapper = styled.div`
