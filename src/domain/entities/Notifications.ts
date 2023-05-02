@@ -16,6 +16,6 @@ export interface UserNotification {
 
 export interface MessageNotification {
     text: string;
-    sender: string;
-    date: string;
+    sender?: string;
+    date?: string;
 }
