@@ -25,9 +25,24 @@ export const DataSubmissionsHistoryContent: React.FC = () => {
             const presentYear = new Date().getFullYear();
             const years: string[] = [];
 
-            for (let yearItr = presentYear - 1; yearItr > presentYear - 6; yearItr--) {
-                if (!dataSubmissions.data.find(ds => ds.period === yearItr.toString())) {
-                    years.push(yearItr.toString());
+            if (currentModuleAccess.moduleName === "EGASP") {
+                if (!dataSubmissions.data.find(ds => ds.period === `${(presentYear - 1).toString()}Q1`)) {
+                    years.push(`${(presentYear - 1).toString()}Q1`);
+                }
+                if (!dataSubmissions.data.find(ds => ds.period === `${(presentYear - 1).toString()}Q2`)) {
+                    years.push(`${(presentYear - 1).toString()}Q2`);
+                }
+                if (!dataSubmissions.data.find(ds => ds.period === `${(presentYear - 1).toString()}Q3`)) {
+                    years.push(`${(presentYear - 1).toString()}Q3`);
+                }
+                if (!dataSubmissions.data.find(ds => ds.period === `${(presentYear - 1).toString()}Q4`)) {
+                    years.push(`${(presentYear - 1).toString()}Q4`);
+                }
+            } else {
+                for (let yearItr = presentYear - 1; yearItr > presentYear - 6; yearItr--) {
+                    if (!dataSubmissions.data.find(ds => ds.period === yearItr.toString())) {
+                        years.push(yearItr.toString());
+                    }
                 }
             }
 
@@ -49,6 +64,7 @@ export const DataSubmissionsHistoryContent: React.FC = () => {
     }, [
         compositionRoot.glassDataSubmission,
         currentModuleAccess.moduleId,
+        currentModuleAccess.moduleName,
         currentOrgUnitAccess.orgUnitId,
         dataSubmissions,
         setRefetch,

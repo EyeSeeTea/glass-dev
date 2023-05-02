@@ -33,7 +33,7 @@ const SidebarNavMenu: React.FC<SidebarNavProps> = ({ menu, className, groupName 
             (menu.title === "Current Data Submission" &&
                 location.pathname === "/upload" &&
                 groupName === currentModuleAccess.moduleName &&
-                currentPeriod === `${new Date().getFullYear() - 1}`) ||
+                currentPeriod.includes(`${new Date().getFullYear() - 1}`)) ||
             (menu.title === "Data Submissions History" &&
                 location.pathname === "/current-data-submission/" &&
                 groupName === currentModuleAccess.moduleName) ||
@@ -43,13 +43,18 @@ const SidebarNavMenu: React.FC<SidebarNavProps> = ({ menu, className, groupName 
             (location.pathname !== "/" &&
                 menuPath === location.pathname &&
                 groupName === currentModuleAccess.moduleName &&
-                currentPeriod === `${new Date().getFullYear() - 1}`)
+                currentPeriod.includes(`${new Date().getFullYear() - 1}`))
         );
     };
 
     const updateModuleAndPeriodContext = (module: string) => {
         changeCurrentModuleAccess(module);
-        changeCurrentPeriod(`${new Date().getFullYear() - 1}`); //Reset to current year
+        //Sneha Exp : Whenever module is EGASP, set quarterly period.
+        if (module === "EGASP") {
+            changeCurrentPeriod(`${new Date().getFullYear() - 1}Q1`);
+        } else {
+            changeCurrentPeriod(`${new Date().getFullYear() - 1}`); //Reset to current year
+        }
     };
 
     return (
