@@ -9,20 +9,23 @@ export const statusMap = new Map<DataSubmissionStatusTypes, StatusDetails>([
         {
             title: "NOT COMPLETED",
             description: "You need to fill at least the mandatory uploads before submitting for this data submission",
-            colour: glassColors.yellow,
+            colour: glassColors.statusActionReq,
             leftCTAs: [
                 {
-                    label: "Upload dataset",
+                    label: "Upload/Delete datasets",
                     url: "/upload",
+                    color: "primary",
+                    variant: "outlined",
                 },
+            ],
+            rightCTAs: [
                 {
                     label: "Go to questionnaires",
                     url: "/",
                 },
             ],
-            rightCTAs: [],
             showUploadHistory: true,
-            isActionRequired: false,
+            isActionRequired: true,
         },
     ],
     [
@@ -31,17 +34,17 @@ export const statusMap = new Map<DataSubmissionStatusTypes, StatusDetails>([
             title: "DATA TO BE APROVED BY COUNTRY",
             description:
                 "Your submission contains all the mandatory fields. You can still add or remove datasets. Please check that everything is included and once everythiong is fine send it to WHO for revision.",
-            colour: glassColors.accentPrimary,
+            colour: glassColors.statusActionReq,
             leftCTAs: [
                 {
                     label: "Upload/Delete datasets",
-                    color: "default",
+                    color: "primary",
                     variant: "outlined",
                     url: "/data-file-history",
                 },
                 {
                     label: "Go to questionnaires",
-                    color: "default",
+                    color: "primary",
                     variant: "outlined",
                     url: "/",
                 },
@@ -62,7 +65,7 @@ export const statusMap = new Map<DataSubmissionStatusTypes, StatusDetails>([
             title: "WAITING WHO APROVAL",
             description:
                 'We have received your submission. You don\'t have to take action at this point. WHO staff will review your data and mark it as "ready" or contact you in case you need to modify something.',
-            colour: glassColors.yellow,
+            colour: glassColors.statusNeutral,
             leftCTAs: [],
             rightCTAs: [],
             showUploadHistory: false,
@@ -75,11 +78,11 @@ export const statusMap = new Map<DataSubmissionStatusTypes, StatusDetails>([
             title: "APPROVED",
             description:
                 "Congratulations, your submission of data for year 2022 was accepted.\n\nPlease note that since your submission has been approved you can't modify it directly. If you want to update or add more data you need to request an update.",
-            colour: glassColors.green,
+            colour: glassColors.statusPositive,
             leftCTAs: [
                 {
-                    label: "Review the submitted datasets",
-                    variant: "text",
+                    label: "Review submitted datasets",
+                    variant: "outlined",
                     color: "primary",
                     url: "/data-file-history",
                 },
@@ -87,8 +90,8 @@ export const statusMap = new Map<DataSubmissionStatusTypes, StatusDetails>([
             rightCTAs: [
                 {
                     label: "Request data update",
-                    variant: "text",
                     color: "primary",
+                    variant: "contained",
                     url: "/",
                 },
             ],
@@ -102,18 +105,18 @@ export const statusMap = new Map<DataSubmissionStatusTypes, StatusDetails>([
             title: "REJECTED BY WHO",
             description:
                 "Please review the messages and the reports to find about the causes of this rejection.\n You have to upload new datasets.",
-            colour: glassColors.red,
+            colour: glassColors.statusNegative,
             leftCTAs: [
                 {
-                    label: "Read full message",
-                    color: "default",
+                    label: "Display full status history",
+                    color: "primary",
                     variant: "outlined",
                     url: "/",
                 },
             ],
             rightCTAs: [
                 {
-                    label: "Upload dataset",
+                    label: "Upload/Delete datasets",
                     url: "/upload",
                 },
             ],
@@ -127,11 +130,12 @@ export const statusMap = new Map<DataSubmissionStatusTypes, StatusDetails>([
             title: "WAITING for WHO TO ACCEPT THE DATA UPDATE REQUEST",
             description:
                 "When WHO admins aprove your request you will be able to modify your upload. \n You will be notified when that happens.",
-            colour: glassColors.red,
+            colour: glassColors.statusNeutral,
             leftCTAs: [
                 {
                     label: "Display full status history",
-                    variant: "text",
+                    variant: "contained",
+                    color: "primary",
                     url: "/",
                 },
             ],
@@ -146,17 +150,17 @@ export const statusMap = new Map<DataSubmissionStatusTypes, StatusDetails>([
             title: "DATA UPDATE REQUEST ACCEPTED",
             description:
                 "Your upload contains all necessary fields. You can still remove or add datasets. Please check that everything is included and once everything is fine send to WHO for revision",
-            colour: glassColors.accentPrimary,
+            colour: glassColors.statusActionReq,
             leftCTAs: [
                 {
                     label: "Upload/Delete datasets",
-                    color: "default",
+                    color: "primary",
                     variant: "outlined",
                     url: "/data-file-history",
                 },
                 {
                     label: "Go to questionnaires",
-                    color: "default",
+                    color: "primary",
                     variant: "outlined",
                     url: "/",
                 },

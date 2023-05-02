@@ -23,15 +23,15 @@ export const DataSubmissionsHistoryContent: React.FC = () => {
         if (dataSubmissions.kind === "loaded") {
             //Ensure that the last 5 years of data submissions are pre populated.
             const presentYear = new Date().getFullYear();
-            const years: number[] = [];
+            const years: string[] = [];
 
             for (let yearItr = presentYear - 1; yearItr > presentYear - 6; yearItr--) {
-                if (!dataSubmissions.data.find(ds => ds.period === yearItr)) {
-                    years.push(yearItr);
+                if (!dataSubmissions.data.find(ds => ds.period === yearItr.toString())) {
+                    years.push(yearItr.toString());
                 }
             }
 
-            if (years.length) {
+            if (years.length && currentModuleAccess.moduleId !== "" && currentOrgUnitAccess.orgUnitId !== "") {
                 setLoading(true);
                 compositionRoot.glassDataSubmission
                     .saveDataSubmissions(currentModuleAccess.moduleId, currentOrgUnitAccess.orgUnitId, years)

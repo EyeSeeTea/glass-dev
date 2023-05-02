@@ -7,7 +7,7 @@ import { DataStoreKeys } from "../data-store/DataStoreKeys";
 export class GlassDataSubmissionsDefaultRepository implements GlassDataSubmissionsRepository {
     constructor(private dataStoreClient: DataStoreClient) {}
 
-    getSpecificDataSubmission(module: string, orgUnit: string, period: number): FutureData<GlassDataSubmission[]> {
+    getSpecificDataSubmission(module: string, orgUnit: string, period: string): FutureData<GlassDataSubmission[]> {
         return this.dataStoreClient.getObjectsFilteredByProps<GlassDataSubmission>(
             DataStoreKeys.DATA_SUBMISSIONS,
             new Map<keyof GlassDataSubmission, unknown>([
@@ -32,7 +32,7 @@ export class GlassDataSubmissionsDefaultRepository implements GlassDataSubmissio
         return this.dataStoreClient.getObjectsFilteredByProps<GlassDataSubmission>(
             DataStoreKeys.DATA_SUBMISSIONS,
             new Map<keyof GlassDataSubmission, unknown>([
-                ["period", new Date().getFullYear() - 1], //Open Data Submissions are for the previous year
+                ["period", `${new Date().getFullYear() - 1}`], //Open Data Submissions are for the previous year
                 ["orgUnit", orgUnit],
             ])
         );
@@ -46,9 +46,24 @@ export class GlassDataSubmissionsDefaultRepository implements GlassDataSubmissio
     }
 
     saveMultiple(dataSubmissions: GlassDataSubmission[]): FutureData<void> {
-        return this.dataStoreClient.listCollection(DataStoreKeys.DATA_SUBMISSIONS).flatMap(ds => {
-            const newDataSubmissions = [...ds, ...dataSubmissions];
-            return this.dataStoreClient.saveObject(DataStoreKeys.DATA_SUBMISSIONS, newDataSubmissions);
+        return this.dataStoreClient.listCollection(DataStoreKeys.DATA_SUBMISSIONS).flatMap(existingDataSubmissions => {
+            //Adding an extra check, to ensure duplicate data submissions are never created.
+            //Every data submission should have a unique combination of module, orgUnit and period.
+            const newDataSubmissions = dataSubmissions
+                .map(ds => {
+                    const typedSubmissions = existingDataSubmissions as GlassDataSubmission[];
+                    const alreadyExists = typedSubmissions.find(
+                        d => d.module === ds.module && d.orgUnit === ds.orgUnit && d.period === ds.period
+                    );
+                    if (alreadyExists) return null;
+                    else return ds;
+                })
+                .filter(n => n);
+
+            return this.dataStoreClient.saveObject(DataStoreKeys.DATA_SUBMISSIONS, [
+                ...existingDataSubmissions,
+                ...newDataSubmissions,
+            ]);
         });
     }
 
