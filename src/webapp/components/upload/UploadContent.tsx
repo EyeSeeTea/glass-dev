@@ -3,7 +3,6 @@ import { UploadNav } from "./UploadNav";
 import { useUploadSteps } from "../../hooks/useUploadSteps";
 import { ConsistencyChecks } from "./ConsistencyChecks";
 import styled from "styled-components";
-import { SupportButtons } from "./SupportButtons";
 import { glassColors, palette } from "../../pages/app/themes/dhis2.theme";
 import { UploadFiles } from "./UploadFiles";
 import { ReviewDataSummary } from "./ReviewDataSummary";

@@ -37,6 +37,10 @@ interface UploadFilesProps {
     setSampleFileImportSummary: React.Dispatch<React.SetStateAction<ImportSummary | undefined>>;
 }
 
+interface PreviouslySubmittedContainerProps {
+    isVisible: boolean;
+}
+
 const UPLOADED_STATUS = "uploaded";
 
 const datasetOptions = [
@@ -283,16 +287,14 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
                     </div>
 
                     <div className="bottom">
-                        {previousUploadsBatchIds.length > 0 && (
-                            <div className="previous-list">
-                                <h4>{i18n.t("You Previously Submitted:")} </h4>
-                                <ul>
-                                    {previousUploadsBatchIds.map(batchId => (
-                                        <li key={batchId}>{`Batch Id ${batchId}`}</li>
-                                    ))}
-                                </ul>
-                            </div>
-                        )}
+                        <PreviouslySubmittedContainer isVisible={previousUploadsBatchIds.length > 0}>
+                            <h4>{i18n.t("You Previously Submitted:")} </h4>
+                            <ul>
+                                {previousUploadsBatchIds.map(batchId => (
+                                    <li key={batchId}>{`Batch Id ${batchId}`}</li>
+                                ))}
+                            </ul>
+                        </PreviouslySubmittedContainer>
 
                         <Button
                             variant="contained"
@@ -403,4 +405,11 @@ export const StyledRemoveButton = styled.button`
 
 export const RemoveContainer = styled.div`
     display: flex;
+`;
+
+const PreviouslySubmittedContainer = styled.div<PreviouslySubmittedContainerProps>`
+    ${props =>
+        !props.isVisible && {
+            visibility: "hidden",
+        }}
 `;
