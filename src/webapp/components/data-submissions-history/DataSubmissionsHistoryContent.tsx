@@ -7,6 +7,7 @@ import { useCurrentModuleContext } from "../../contexts/current-module-context";
 import { useAppContext } from "../../contexts/app-context";
 import { Backdrop } from "@material-ui/core";
 import { StyledCircularProgress } from "../sidebar/SideBar";
+import { getCurrentYear } from "../../../utils/currentPeriodHelper";
 
 export const DataSubmissionsHistoryContent: React.FC = () => {
     const { compositionRoot } = useAppContext();
@@ -22,7 +23,7 @@ export const DataSubmissionsHistoryContent: React.FC = () => {
     useEffect(() => {
         if (dataSubmissions.kind === "loaded") {
             //Ensure that the last 5 years of data submissions are pre populated.
-            const presentYear = new Date().getFullYear();
+            const presentYear = getCurrentYear();
             const years: string[] = [];
 
             if (currentModuleAccess.moduleName === "EGASP") {

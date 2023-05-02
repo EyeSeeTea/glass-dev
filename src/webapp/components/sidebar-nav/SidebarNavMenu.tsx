@@ -10,6 +10,7 @@ import { glassColors } from "../../pages/app/themes/dhis2.theme";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { useCurrentModuleContext } from "../../contexts/current-module-context";
 import { useCurrentPeriodContext } from "../../contexts/current-period-context";
+import { getCurrentOpenPeriod } from "../../../utils/currentPeriodHelper";
 
 interface SidebarNavProps {
     className?: string;
@@ -29,11 +30,12 @@ const SidebarNavMenu: React.FC<SidebarNavProps> = ({ menu, className, groupName 
         otherwise highlight "uploads history menu"
     */
     const isCurrentPage = (menuPath: string) => {
+        const calculatedCurrentPeriod = getCurrentOpenPeriod(currentModuleAccess.moduleName);
         return (
             (menu.title === "Current Data Submission" &&
                 location.pathname === "/upload" &&
                 groupName === currentModuleAccess.moduleName &&
-                currentPeriod.includes(`${new Date().getFullYear() - 1}`)) ||
+                currentPeriod === calculatedCurrentPeriod) ||
             (menu.title === "Data Submissions History" &&
                 location.pathname === "/current-data-submission/" &&
                 groupName === currentModuleAccess.moduleName) ||
@@ -43,18 +45,13 @@ const SidebarNavMenu: React.FC<SidebarNavProps> = ({ menu, className, groupName 
             (location.pathname !== "/" &&
                 menuPath === location.pathname &&
                 groupName === currentModuleAccess.moduleName &&
-                currentPeriod.includes(`${new Date().getFullYear() - 1}`))
+                currentPeriod === calculatedCurrentPeriod)
         );
     };
 
     const updateModuleAndPeriodContext = (module: string) => {
         changeCurrentModuleAccess(module);
-        //Sneha Exp : Whenever module is EGASP, set quarterly period.
-        if (module === "EGASP") {
-            changeCurrentPeriod(`${new Date().getFullYear() - 1}Q1`);
-        } else {
-            changeCurrentPeriod(`${new Date().getFullYear() - 1}`); //Reset to current year
-        }
+        changeCurrentPeriod(getCurrentOpenPeriod(module));
     };
 
     return (

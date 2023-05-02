@@ -3,6 +3,7 @@ import { Box, FormControl, MenuItem, Select, Typography, InputLabel, withStyles,
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { Dispatch, SetStateAction } from "react";
+import { getCurrentYear } from "../../../utils/currentPeriodHelper";
 
 const useStyles = makeStyles(theme => ({
     formControl: {
@@ -55,7 +56,7 @@ interface FilterProps {
 const START_YEAR = 2018;
 export const Filter: React.FC<FilterProps> = ({ year, setYear, status, setStatus }) => {
     const classes = useStyles();
-    const currentYear = new Date().getFullYear();
+    const currentYear = getCurrentYear();
     const yearOptions: { label: string; value: number }[] = [];
     let startYear = START_YEAR;
 
