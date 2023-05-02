@@ -10,7 +10,7 @@ import { ConfirmationDialog, useSnackbar } from "@eyeseetea/d2-ui-components";
 import { CircularProgress } from "material-ui";
 import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context";
 import { Future } from "../../../domain/entities/Future";
-import { isEditModeStatus } from "../../utils/editModeStatus";
+import { isEditModeStatus } from "../../../utils/editModeStatus";
 import { useStatusDataSubmission } from "../../hooks/useStatusDataSubmission";
 import { useCurrentModuleContext } from "../../contexts/current-module-context";
 import { useGlassCaptureAccess } from "../../hooks/useGlassCaptureAccess";

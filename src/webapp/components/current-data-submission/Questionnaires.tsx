@@ -17,7 +17,7 @@ import { useCurrentModuleContext } from "../../contexts/current-module-context";
 import { DataSubmissionStatusTypes } from "../../../domain/entities/GlassDataSubmission";
 import { useStatusDataSubmission } from "../../hooks/useStatusDataSubmission";
 import { useCurrentPeriodContext } from "../../contexts/current-period-context";
-import { isEditModeStatus } from "../../utils/editModeStatus";
+import { isEditModeStatus } from "../../../utils/editModeStatus";
 import { useCurrentUserGroupsAccess } from "../../hooks/useCurrentUserGroupsAccess";
 
 interface QuestionnairesProps {

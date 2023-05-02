@@ -11,7 +11,7 @@ import { StatusDetails } from "./overview/StatusDetails";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { DataSubmissionStatusTypes } from "../../../domain/entities/GlassDataSubmission";
 import { useGlassCaptureAccess } from "../../hooks/useGlassCaptureAccess";
-import { isEditModeStatus } from "../../utils/editModeStatus";
+import { isEditModeStatus } from "../../../utils/editModeStatus";
 
 interface UploadStepsProps {
     moduleName: string;

@@ -10,7 +10,7 @@ import { NavLink } from "react-router-dom";
 import { useStatusDataSubmission } from "../../hooks/useStatusDataSubmission";
 import { useCurrentModuleContext } from "../../contexts/current-module-context";
 import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context";
-import { isEditModeStatus } from "../../utils/editModeStatus";
+import { isEditModeStatus } from "../../../utils/editModeStatus";
 import { useGlassUploadsByModuleOUPeriod } from "../../hooks/useGlassUploadsByModuleOUPeriod";
 import { useCurrentPeriodContext } from "../../contexts/current-period-context";
 import { useGlassCaptureAccess } from "../../hooks/useGlassCaptureAccess";
