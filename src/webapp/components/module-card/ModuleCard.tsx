@@ -16,7 +16,7 @@ import { useSnackbar } from "@eyeseetea/d2-ui-components";
 import { useGlassCaptureAccess } from "../../hooks/useGlassCaptureAccess";
 
 interface ModuleCardProps {
-    period: number;
+    period: string;
     module: GlassModule;
 }
 

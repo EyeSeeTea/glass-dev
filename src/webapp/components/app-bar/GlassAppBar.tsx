@@ -22,8 +22,6 @@ import { glassColors } from "../../pages/app/themes/dhis2.theme";
 import PersonOutlineIcon from "@material-ui/icons/PersonOutline";
 import SettingsIcon from "@material-ui/icons/Settings";
 
-const DHIS2_HOMEPAGE_URL = process.env.REACT_APP_DHIS2_BASE_URL;
-
 const useStyles = makeStyles(theme => ({
     root: {
         flexGrow: 1,
@@ -60,6 +58,9 @@ export const GlassAppBar: React.FC<GlassAppBarProps> = ({ toggleShowMenu }) => {
 
     const [anchorEl, setAnchorEl] = React.useState(null);
     const [orgUnitName, setOrgUnitName] = React.useState(currentOrgUnitAccess.orgUnitName);
+
+    const { api } = useAppContext();
+    const baseUrl = api.baseUrl;
 
     const nameInitials = (name: string): string => {
         const nameArray = name.split(" ");
@@ -112,7 +113,7 @@ export const GlassAppBar: React.FC<GlassAppBarProps> = ({ toggleShowMenu }) => {
                             <img src={glassLogo} width={150} alt="Glass logo" />;
                         </LogoContainer>
 
-                        <a href={DHIS2_HOMEPAGE_URL}>
+                        <a href={`${baseUrl}/api/apps/Home-Page/index.html#/glass-hq`}>
                             <LogoContainer>
                                 <img src={whoLogo} width={150} alt="WHO logo" />;
                             </LogoContainer>

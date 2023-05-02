@@ -46,8 +46,8 @@ const statusOptions = [
 ];
 
 interface FilterProps {
-    year: number;
-    setYear: Dispatch<SetStateAction<number>>;
+    year: string;
+    setYear: Dispatch<SetStateAction<string>>;
     status: string;
     setStatus: Dispatch<SetStateAction<string>>;
 }
@@ -70,7 +70,7 @@ export const Filter: React.FC<FilterProps> = ({ year, setYear, status, setStatus
             <Box>
                 <FormControl className={classes.formControl}>
                     <StyledInputLabel id="year-label">{i18n.t("Select Year")}</StyledInputLabel>
-                    <Select labelId="year-label" value={year} onChange={e => setYear(e.target.value as number)}>
+                    <Select labelId="year-label" value={year} onChange={e => setYear(e.target.value as string)}>
                         {yearOptions.map(yearItem => (
                             <MenuItem key={yearItem.value} value={yearItem.value}>
                                 {i18n.t(yearItem.label)}

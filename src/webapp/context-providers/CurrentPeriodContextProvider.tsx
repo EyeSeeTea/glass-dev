@@ -8,12 +8,12 @@ export const CurrentPeriodContextProvider: React.FC = ({ children }) => {
     const periodQueryParam = new URLSearchParams(location.search).get("period");
 
     //The default period is always the previous calendar year.
-    const defaultPeriod: number = new Date().getFullYear() - 1;
+    const defaultPeriod = `${new Date().getFullYear() - 1}`;
 
     const [currentPeriod, setCurrentPeriod] = useState(defaultPeriod);
 
     const changeCurrentPeriod = useCallback(
-        (updatedPeriod: number) => {
+        (updatedPeriod: string) => {
             setCurrentPeriod(updatedPeriod);
             if (periodQueryParam) {
                 const queryParameters = new URLSearchParams(location.search);
@@ -32,8 +32,8 @@ export const CurrentPeriodContextProvider: React.FC = ({ children }) => {
             history.replace({ search: queryParameters.toString() });
         }
         //If user has manually changed the url, then update the period context with it.
-        else if (periodQueryParam !== null && parseInt(periodQueryParam) !== currentPeriod) {
-            changeCurrentPeriod(parseInt(periodQueryParam));
+        else if (periodQueryParam !== null && periodQueryParam !== currentPeriod) {
+            changeCurrentPeriod(periodQueryParam);
         }
     }, [changeCurrentPeriod, currentPeriod, history, location.search, periodQueryParam]);
 
