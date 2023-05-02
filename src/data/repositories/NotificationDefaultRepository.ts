@@ -1,4 +1,4 @@
-import { D2Api, Pager } from "@eyeseetea/d2-api/2.34";
+import { D2Api, MetadataPick } from "@eyeseetea/d2-api/2.34";
 import { Future, FutureData } from "../../domain/entities/Future";
 import { Notification } from "../../domain/entities/Notifications";
 import { Id, Ref } from "../../domain/entities/Ref";
@@ -30,16 +30,18 @@ export class NotificationDefaultRepository implements NotificationRepository {
 
     getAll(): FutureData<Notification[]> {
         return apiToFuture(
-            this.api
-                .get<D2MessageConversationResponse>(`/messageConversations`, {
-                    fields: "id,lastMessage,messages[text],subject",
+            this.api.models.messageConversations
+                .get({
+                    fields: messageConversationFields,
                     page: 1,
                     pageSize: 10,
-                    filter: "messageType:eq:PRIVATE",
+                    filter: {
+                        messageType: { eq: "PRIVATE" },
+                    },
                     order: "lastMessage:desc",
                 })
                 .map(response => {
-                    return response.data.messageConversations.map(this.buildNotification);
+                    return response.data.objects.map(this.buildNotification);
                 })
         );
     }
@@ -59,11 +61,6 @@ export class NotificationDefaultRepository implements NotificationRepository {
             id: messageConversation.id,
             date: messageConversation.lastMessage,
             subject: messageConversation.subject,
-            messages: messageConversation.messages.map(msg => {
-                return {
-                    text: msg.text,
-                };
-            }),
         };
     }
 
@@ -84,19 +81,15 @@ export class NotificationDefaultRepository implements NotificationRepository {
     }
 }
 
-type D2MessageConversationResponse = {
-    messageConversations: D2MessageConversation[];
-    pager: Pager;
-};
+const messageConversationFields = {
+    id: true,
+    subject: true,
+    lastMessage: true,
+} as const;
 
-type D2MessageConversation = {
-    id: string;
-    subject: string;
-    lastMessage: string;
-    messages: {
-        text: string;
-    }[];
-};
+type D2MessageConversation = MetadataPick<{
+    messageConversations: { fields: typeof messageConversationFields };
+}>["messageConversations"][number];
 
 type D2MessageConversationDetail = {
     id: string;

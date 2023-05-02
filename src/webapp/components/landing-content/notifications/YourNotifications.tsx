@@ -43,16 +43,7 @@ export const YourNotifications: React.FC = () => {
                                             <span className="date">
                                                 {moment(notification.date).format("MM/DD/YYYY")}
                                             </span>
-                                            <div style={{ display: "flex", flexDirection: "column" }}>
-                                                <p className="summary">{notification.subject}</p>
-                                                {notification.messages?.map(({ text }, i) => {
-                                                    return (
-                                                        <Typography key={i} variant="body2" color="textSecondary">
-                                                            {i18n.t(text)}
-                                                        </Typography>
-                                                    );
-                                                })}
-                                            </div>
+                                            <p className="summary">{notification.subject}</p>
                                             <button>
                                                 <ChevronRightIcon />
                                             </button>
