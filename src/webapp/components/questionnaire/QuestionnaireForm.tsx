@@ -18,7 +18,7 @@ import { useGlassCaptureAccess } from "../../hooks/useGlassCaptureAccess";
 export interface QuestionnarieFormProps {
     id: Id;
     orgUnitId: Id;
-    year: number;
+    year: string;
     mode: "show" | "edit";
     onBackClick(): void;
     onSave(questionnaire: QuestionnaireBase): void;

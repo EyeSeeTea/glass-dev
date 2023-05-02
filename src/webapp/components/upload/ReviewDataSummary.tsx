@@ -156,7 +156,7 @@ const ContentWrapper = styled.div`
     .bottom {
         display: flex;
         align-items: baseline;
-        justify-content: center;
+        justify-content: flex-end;
         margin: 0 auto 30px auto;
         align-items: flex-end;
         width: 100%;
