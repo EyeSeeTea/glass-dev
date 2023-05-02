@@ -14,6 +14,7 @@ import { QuestionnaireBase } from "../../../domain/entities/Questionnaire";
 import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context";
 import { useSnackbar } from "@eyeseetea/d2-ui-components";
 import { useGlassCaptureAccess } from "../../hooks/useGlassCaptureAccess";
+import { useCurrentPeriodContext } from "../../contexts/current-period-context";
 
 interface ModuleCardProps {
     period: string;
@@ -24,6 +25,7 @@ const COMPLETED_STATUS = "COMPLETED";
 
 export const ModuleCard: React.FC<ModuleCardProps> = ({ period, module }) => {
     const { changeCurrentModuleAccess } = useCurrentModuleContext();
+    const { changeCurrentPeriod } = useCurrentPeriodContext();
     const { compositionRoot } = useAppContext();
 
     const {
@@ -36,6 +38,11 @@ export const ModuleCard: React.FC<ModuleCardProps> = ({ period, module }) => {
 
     const [questionnaires, setQuestionnaires] = useState<QuestionnaireBase[]>([]);
     const [uploadsCount, setUploadsCount] = useState<number>(0);
+
+    const updateModuleAndPeriodContext = () => {
+        changeCurrentModuleAccess(module?.name || "");
+        changeCurrentPeriod(period);
+    };
 
     useEffect(() => {
         compositionRoot.glassModules.getById(module.id).run(
@@ -103,7 +110,7 @@ export const ModuleCard: React.FC<ModuleCardProps> = ({ period, module }) => {
                     color="primary"
                     component={NavLink}
                     to={`/current-data-submission`}
-                    onClick={() => changeCurrentModuleAccess(module?.name || "")}
+                    onClick={updateModuleAndPeriodContext}
                     exact={true}
                 >
                     <span>{i18n.t("GO")}</span>
