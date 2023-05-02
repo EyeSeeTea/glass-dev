@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import styled from "styled-components";
 import { glassColors, palette } from "../app/themes/dhis2.theme";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
-import { NavLink } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 import { CustomCard } from "../../components/custom-card/CustomCard";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { CurrentDataSubmissionContent } from "../../components/current-data-submission/CurrentDataSubmissionContent";
@@ -17,21 +17,30 @@ import { useCurrentPeriodContext } from "../../contexts/current-period-context";
 interface CurrentDataSubmissionPageContentProps {
     moduleId: string;
     moduleName: string;
+    step: number;
 }
 
 export const CurrentDataSubmissionPage: React.FC = React.memo(() => {
+    const location = useLocation<{ step: number }>();
     const { currentModuleAccess } = useCurrentModuleContext();
+    const [step, setStep] = useState<number>(0);
+    React.useEffect(() => {
+        if (location.state && location.state.step) {
+            setStep(location.state.step);
+        }
+    }, [location.state]);
 
     return (
         <CurrentDataSubmissionPageContent
             moduleId={currentModuleAccess.moduleId}
             moduleName={currentModuleAccess.moduleName}
+            step={step}
         />
     );
 });
 
 export const CurrentDataSubmissionPageContent: React.FC<CurrentDataSubmissionPageContentProps> = React.memo(
-    ({ moduleId, moduleName }) => {
+    ({ moduleId, moduleName, step }) => {
         const { currentPeriod } = useCurrentPeriodContext();
 
         const { currentOrgUnitAccess } = useCurrentOrgUnitContext();
@@ -74,6 +83,7 @@ export const CurrentDataSubmissionPageContent: React.FC<CurrentDataSubmissionPag
                                     moduleName={moduleName}
                                     currentDataSubmissionStatus={currentDataSubmissionStatus.data}
                                     setRefetchStatus={setRefetchStatus}
+                                    step={step}
                                 />
                             </CustomCard>
                         </>

@@ -13,10 +13,11 @@ export function useGlassDataSubmissionsByModuleAndOU(moduleId: string, orgUnit: 
     const [refetch, setRefetch] = useState({});
 
     useEffect(() => {
-        compositionRoot.glassDataSubmission.getDataSubmissionsByModuleAndOU(moduleId, orgUnit).run(
-            dataSubmissionsByModule => setDataSubmissions({ kind: "loaded", data: dataSubmissionsByModule }),
-            error => setDataSubmissions({ kind: "error", message: error })
-        );
+        if (moduleId !== "" && orgUnit !== "")
+            compositionRoot.glassDataSubmission.getDataSubmissionsByModuleAndOU(moduleId, orgUnit).run(
+                dataSubmissionsByModule => setDataSubmissions({ kind: "loaded", data: dataSubmissionsByModule }),
+                error => setDataSubmissions({ kind: "error", message: error })
+            );
     }, [setDataSubmissions, compositionRoot.glassDataSubmission, moduleId, orgUnit, refetch]);
 
     return { dataSubmissions, setRefetch };

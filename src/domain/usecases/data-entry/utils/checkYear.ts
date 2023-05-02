@@ -3,10 +3,10 @@ import { RISData } from "../../../entities/data-entry/external/RISData";
 import { SampleData } from "../../../entities/data-entry/external/SampleData";
 import { ConsistencyError } from "../../../entities/data-entry/ImportSummary";
 
-export function checkYear(fileData: (RISData | SampleData)[], year: number): ConsistencyError[] {
+export function checkYear(fileData: (RISData | SampleData)[], year: string): ConsistencyError[] {
     const errors = _(
         fileData.map((item, index) => {
-            if (item.YEAR !== year) {
+            if (item.YEAR.toString() !== year) {
                 return {
                     error: i18n.t(
                         `Year is different: Selected Data Submission Year : ${year}, Year in file: ${item.YEAR}`

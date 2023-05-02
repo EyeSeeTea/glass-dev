@@ -7,7 +7,7 @@ export const QuestionnaireFormTest: React.FC = React.memo(() => {
             mode="edit"
             id="OYc0CihXiSn"
             orgUnitId="PdB4jUjgRj6"
-            year={2022}
+            year={"2022"}
             onBackClick={console.debug}
             onSave={console.debug}
             validateAndUpdateDataSubmissionStatus={console.debug}

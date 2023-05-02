@@ -12,6 +12,8 @@ type GlassDataSubmissionData = {
     module?: GlassModule;
 };
 
+const openDataSubmissionStatuses = ["NOT_COMPLETED", "COMPLETE", "REJECTED", "UPDATE_REQUEST_ACCEPTED"];
+
 export function useOpenDataSubmissionsByOrgUnit(compositionRoot: CompositionRoot, orgUnit: string) {
     const modules = useGlassModules(compositionRoot);
     const [openDataSubmissions, setOpenDataSubmissions] = useState<GlassDataSubmissionsState>({
@@ -23,12 +25,12 @@ export function useOpenDataSubmissionsByOrgUnit(compositionRoot: CompositionRoot
             compositionRoot.glassDataSubmission.getOpenDataSubmissionsByOU(orgUnit).run(
                 openDataSubmissions => {
                     const submissions = openDataSubmissions
+                        .filter(data => data.module !== undefined && openDataSubmissionStatuses.includes(data.status))
                         .map(openDataSubmission => {
                             const module = modules.data.find(module => openDataSubmission.module === module.id);
 
                             return { dataSubmission: openDataSubmission, module };
-                        })
-                        .filter(data => data.module !== undefined);
+                        });
 
                     setOpenDataSubmissions({ kind: "loaded", data: submissions });
                 },
