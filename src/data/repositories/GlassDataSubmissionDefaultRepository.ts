@@ -32,7 +32,7 @@ export class GlassDataSubmissionsDefaultRepository implements GlassDataSubmissio
         return this.dataStoreClient.getObjectsFilteredByProps<GlassDataSubmission>(
             DataStoreKeys.DATA_SUBMISSIONS,
             new Map<keyof GlassDataSubmission, unknown>([
-                ["period", period], //Open Data Submissions are for the previous year
+                ["period", period],
                 ["orgUnit", orgUnit],
             ])
         );
