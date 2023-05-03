@@ -1,11 +1,9 @@
-//TO DO : get from datastore
-const QUARTERLY_MODULES = ["EGASP"];
-
-export const getCurrentOpenPeriodByModule = (module: string) => {
+export const getCurrentOpenPeriodByModule = (module: string, quarterlyModules: string[]) => {
     const today = new Date();
-    if (QUARTERLY_MODULES.find(qm => qm === module)) {
-        const lastQuarter = Math.floor((today.getMonth() + 3) / 3) - 1;
-        return `${today.getFullYear() - 1}Q${lastQuarter}`;
+    if (quarterlyModules.find(qm => qm === module)) {
+        const currentQuarter = Math.floor((today.getMonth() + 3) / 3);
+        if (currentQuarter !== 1) return `${today.getFullYear()}Q${currentQuarter - 1}`;
+        else return `${today.getFullYear() - 1}Q4`;
     } else {
         return `${today.getFullYear() - 1}`;
     }
@@ -17,8 +15,9 @@ export const getCurrentOpenYearlyPeriod = () => {
 
 export const getCurrentOpenQuarterlyPeriod = () => {
     const today = new Date();
-    const lastQuarter = Math.floor((today.getMonth() + 3) / 3) - 1;
-    return `${today.getFullYear() - 1}Q${lastQuarter}`;
+    const currentQuarter = Math.floor((today.getMonth() + 3) / 3);
+    if (currentQuarter !== 1) return `${today.getFullYear()}Q${currentQuarter - 1}`;
+    else return `${today.getFullYear() - 1}Q4`;
 };
 
 export const getCurrentYear = () => {
@@ -30,15 +29,15 @@ export const getLastNYears = (n: number) => {
     for (let yearItr = getCurrentYear() - 1; yearItr > getCurrentYear() - 1 - n; yearItr--) {
         years.push(yearItr.toString());
     }
-    console.debug(`Last N years : ${years}`);
     return years;
 };
 
 export const getLastNYearsQuarters = (n: number) => {
     const years: string[] = [];
     const openYearAndQuarter = getCurrentOpenQuarterlyPeriod().split("Q");
+
     const openQuarter = parseInt(openYearAndQuarter[1] || "0");
-    const openYear = parseInt(openYearAndQuarter[0] || (getCurrentYear() - 1).toString());
+    const openYear = parseInt(openYearAndQuarter[0] || getCurrentYear().toString());
 
     //Populate all previous quarters in the current year
     let qtrItr = openQuarter;
@@ -55,6 +54,6 @@ export const getLastNYearsQuarters = (n: number) => {
             qtrItr--;
         }
     }
-    console.debug(`Last N years : ${years}`);
+
     return years;
 };

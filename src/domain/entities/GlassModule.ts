@@ -7,6 +7,9 @@ interface ModuleUserGroups {
     captureAccess: UserGroup[];
     approveAccess: UserGroup[];
 }
+
+type DataSubmissionPeriodTypes = "YEARLY" | "QUARTERLY";
+
 export interface GlassModule {
     name: string;
     color: string;
@@ -21,6 +24,7 @@ export interface GlassModule {
         reportsMenu: string;
         validationReport: string;
     };
+    dataSubmissionPeriod: DataSubmissionPeriodTypes;
 }
 
 interface QuestionnaireConfig {

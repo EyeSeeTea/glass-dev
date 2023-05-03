@@ -2,14 +2,16 @@ import { useCallback, useEffect, useState } from "react";
 import { useHistory, useLocation } from "react-router-dom";
 import { CurrentPeriodContext } from "../contexts/current-period-context";
 import { getCurrentOpenPeriodByModule } from "../../utils/currentPeriodHelper";
+import { useAppContext } from "../contexts/app-context";
 
 export const CurrentPeriodContextProvider: React.FC = ({ children }) => {
     const history = useHistory();
     const location = useLocation();
     const periodQueryParam = new URLSearchParams(location.search).get("period");
+    const { currentUser } = useAppContext();
 
     //The default period is always the previous calendar year.
-    const defaultPeriod = getCurrentOpenPeriodByModule("");
+    const defaultPeriod = getCurrentOpenPeriodByModule("", currentUser.quarterlyPeriodModules);
 
     const [currentPeriod, setCurrentPeriod] = useState(defaultPeriod);
 

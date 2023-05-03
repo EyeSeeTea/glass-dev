@@ -163,6 +163,7 @@ const glassModules: GlassModule[] = [
             reportsMenu: "",
             validationReport: "",
         },
+        dataSubmissionPeriod: "YEARLY",
     },
     {
         id: "BVnik5xiXGJ",
@@ -178,6 +179,7 @@ const glassModules: GlassModule[] = [
             reportsMenu: "",
             validationReport: "",
         },
+        dataSubmissionPeriod: "YEARLY",
     },
     {
         id: "CVVp44xiXGJ",
@@ -193,5 +195,6 @@ const glassModules: GlassModule[] = [
             reportsMenu: "",
             validationReport: "",
         },
+        dataSubmissionPeriod: "YEARLY",
     },
 ];

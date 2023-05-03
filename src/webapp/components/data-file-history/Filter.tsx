@@ -3,7 +3,9 @@ import { Box, FormControl, MenuItem, Select, Typography, InputLabel, withStyles,
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { Dispatch, SetStateAction } from "react";
-import { getCurrentYear } from "../../../utils/currentPeriodHelper";
+import { getCurrentOpenPeriodByModule, getLastNYears, getLastNYearsQuarters } from "../../../utils/currentPeriodHelper";
+import { useCurrentModuleContext } from "../../contexts/current-module-context";
+import { useAppContext } from "../../contexts/app-context";
 
 const useStyles = makeStyles(theme => ({
     formControl: {
@@ -53,18 +55,25 @@ interface FilterProps {
     setStatus: Dispatch<SetStateAction<string>>;
 }
 
-const START_YEAR = 2018;
 export const Filter: React.FC<FilterProps> = ({ year, setYear, status, setStatus }) => {
     const classes = useStyles();
-    const currentYear = getCurrentYear();
-    const yearOptions: { label: string; value: number }[] = [];
-    let startYear = START_YEAR;
 
-    while (startYear < currentYear) {
-        yearOptions.push({ label: startYear.toString(), value: startYear });
-        startYear++;
+    const { currentUser } = useAppContext();
+    const { currentModuleAccess } = useCurrentModuleContext();
+    const currentOpenPeriod = getCurrentOpenPeriodByModule(
+        currentModuleAccess.moduleName,
+        currentUser.quarterlyPeriodModules
+    );
+    const yearOptions: { label: string; value: string }[] = [];
+    if (currentOpenPeriod.includes("Q")) {
+        getLastNYearsQuarters(2).forEach(quarter => {
+            yearOptions.push({ label: quarter, value: quarter });
+        });
+    } else {
+        getLastNYears(5).forEach(year => {
+            yearOptions.push({ label: year, value: year });
+        });
     }
-
     return (
         <Box mb={5}>
             <BlackTypography variant="h5">{i18n.t("Filters")}</BlackTypography>

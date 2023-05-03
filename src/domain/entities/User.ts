@@ -29,6 +29,7 @@ export interface UserAccessInfo {
     userGroups: NamedRef[];
     userOrgUnitsAccess: OrgUnitAccess[];
     userModulesAccess: ModuleAccess[];
+    quarterlyPeriodModules: string[];
     gender: string;
     email: string;
     phoneNumber: string;
