@@ -7,7 +7,7 @@ export interface CurrentPeriodContextState {
 }
 
 export const defaultPeriodContextState = {
-    currentPeriod: getCurrentOpenPeriodByModule(""), //The default period is always the previous calendar year.
+    currentPeriod: getCurrentOpenPeriodByModule("", []), //The default period is always the previous calendar year.
     changeCurrentPeriod: () => {},
 };
 

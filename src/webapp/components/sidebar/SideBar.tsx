@@ -19,7 +19,7 @@ import { getCurrentOpenPeriodByModule } from "../../../utils/currentPeriodHelper
 
 export const SideBar: React.FC = () => {
     const { baseUrl } = useConfig();
-    const { compositionRoot } = useAppContext();
+    const { currentUser, compositionRoot } = useAppContext();
     const snackbar = useSnackbar();
     const [isLoading, setIsLoading] = useState(false);
     const [storedMenuData, setStoredMenuData] = useState<Menu[] | null>();
@@ -33,7 +33,7 @@ export const SideBar: React.FC = () => {
 
     const updateModuleAndPeriodContext = () => {
         resetCurrentModuleAccess();
-        changeCurrentPeriod(getCurrentOpenPeriodByModule("")); //Reset to current year
+        changeCurrentPeriod(getCurrentOpenPeriodByModule("", currentUser.quarterlyPeriodModules)); //Reset to current year
     };
 
     useEffect(() => {

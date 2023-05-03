@@ -11,6 +11,7 @@ import {
 
 export function usePopulateDataSubmissionHistory() {
     const { compositionRoot } = useAppContext();
+    const { currentUser } = useAppContext();
     const { currentOrgUnitAccess } = useCurrentOrgUnitContext();
     const { currentModuleAccess } = useCurrentModuleContext();
     const { dataSubmissions, setRefetch } = useGlassDataSubmissionsByModuleAndOU(
@@ -22,7 +23,10 @@ export function usePopulateDataSubmissionHistory() {
     useEffect(() => {
         if (dataSubmissions.kind === "loaded") {
             //Ensure that the last 5 years of data submissions are pre populated.
-            const currentOpenPeriod = getCurrentOpenPeriodByModule(currentModuleAccess.moduleName);
+            const currentOpenPeriod = getCurrentOpenPeriodByModule(
+                currentModuleAccess.moduleName,
+                currentUser.quarterlyPeriodModules
+            );
             const years: string[] = [];
 
             if (currentOpenPeriod.includes("Q")) {
@@ -62,6 +66,7 @@ export function usePopulateDataSubmissionHistory() {
         currentModuleAccess.moduleId,
         currentModuleAccess.moduleName,
         currentOrgUnitAccess.orgUnitId,
+        currentUser.quarterlyPeriodModules,
         dataSubmissions,
         setRefetch,
     ]);

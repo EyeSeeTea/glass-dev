@@ -11,6 +11,7 @@ import i18n from "@eyeseetea/d2-ui-components/locales";
 import { useCurrentModuleContext } from "../../contexts/current-module-context";
 import { useCurrentPeriodContext } from "../../contexts/current-period-context";
 import { getCurrentOpenPeriodByModule } from "../../../utils/currentPeriodHelper";
+import { useAppContext } from "../../contexts/app-context";
 
 interface SidebarNavProps {
     className?: string;
@@ -21,6 +22,7 @@ interface SidebarNavProps {
 const SidebarNavMenu: React.FC<SidebarNavProps> = ({ menu, className, groupName }) => {
     const classes = useStyles(menu?.level);
     const location = useLocation();
+    const { currentUser } = useAppContext();
 
     const { currentModuleAccess, changeCurrentModuleAccess } = useCurrentModuleContext();
     const { currentPeriod, changeCurrentPeriod } = useCurrentPeriodContext();
@@ -30,7 +32,10 @@ const SidebarNavMenu: React.FC<SidebarNavProps> = ({ menu, className, groupName 
         otherwise highlight "uploads history menu"
     */
     const isCurrentPage = (menuPath: string) => {
-        const currentOpenPeriod = getCurrentOpenPeriodByModule(currentModuleAccess.moduleName);
+        const currentOpenPeriod = getCurrentOpenPeriodByModule(
+            currentModuleAccess.moduleName,
+            currentUser.quarterlyPeriodModules
+        );
         return (
             (menu.title === "Current Data Submission" &&
                 location.pathname === "/upload" &&
@@ -51,7 +56,7 @@ const SidebarNavMenu: React.FC<SidebarNavProps> = ({ menu, className, groupName 
 
     const updateModuleAndPeriodContext = (module: string) => {
         changeCurrentModuleAccess(module);
-        changeCurrentPeriod(getCurrentOpenPeriodByModule(module));
+        changeCurrentPeriod(getCurrentOpenPeriodByModule(module, currentUser.quarterlyPeriodModules));
     };
 
     return (
