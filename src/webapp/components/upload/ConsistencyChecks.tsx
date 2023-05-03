@@ -12,6 +12,7 @@ import { Future } from "../../../domain/entities/Future";
 import { ImportSummary } from "../../../domain/entities/data-entry/ImportSummary";
 import { useCurrentPeriodContext } from "../../contexts/current-period-context";
 import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context";
+import { SupportButtons } from "./SupportButtons";
 
 interface ConsistencyChecksProps {
     changeStep: (step: number) => void;
@@ -164,6 +165,7 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
             </div>
             {renderTypeContent(fileType, risFileImportSummary, sampleFileImportSummary)}
             <div className="bottom">
+                <SupportButtons changeStep={changeStep} risFileImportSummary={risFileImportSummary} />
                 <Button
                     variant="contained"
                     color="primary"
@@ -224,12 +226,17 @@ const ContentWrapper = styled.div`
             border-radius: 0;
             border: none;
             flex: 1;
-            border-bottom: 2px solid ${glassColors.greyLight};
+            border-: 2px solid ${glassColors.greyLight};
             &.current {
                 color: ${glassColors.mainPrimary};
                 border-bottom: 4px solid ${glassColors.mainPrimary};
             }
         }
+    }
+    .bottom {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
     }
 `;
 
