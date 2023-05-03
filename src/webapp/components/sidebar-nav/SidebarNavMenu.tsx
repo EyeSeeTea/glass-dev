@@ -10,7 +10,7 @@ import { glassColors } from "../../pages/app/themes/dhis2.theme";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { useCurrentModuleContext } from "../../contexts/current-module-context";
 import { useCurrentPeriodContext } from "../../contexts/current-period-context";
-import { getCurrentOpenPeriod } from "../../../utils/currentPeriodHelper";
+import { getCurrentOpenPeriodByModule } from "../../../utils/currentPeriodHelper";
 
 interface SidebarNavProps {
     className?: string;
@@ -30,12 +30,12 @@ const SidebarNavMenu: React.FC<SidebarNavProps> = ({ menu, className, groupName 
         otherwise highlight "uploads history menu"
     */
     const isCurrentPage = (menuPath: string) => {
-        const calculatedCurrentPeriod = getCurrentOpenPeriod(currentModuleAccess.moduleName);
+        const currentOpenPeriod = getCurrentOpenPeriodByModule(currentModuleAccess.moduleName);
         return (
             (menu.title === "Current Data Submission" &&
                 location.pathname === "/upload" &&
                 groupName === currentModuleAccess.moduleName &&
-                currentPeriod === calculatedCurrentPeriod) ||
+                currentPeriod === currentOpenPeriod) ||
             (menu.title === "Data Submissions History" &&
                 location.pathname === "/current-data-submission/" &&
                 groupName === currentModuleAccess.moduleName) ||
@@ -45,13 +45,13 @@ const SidebarNavMenu: React.FC<SidebarNavProps> = ({ menu, className, groupName 
             (location.pathname !== "/" &&
                 menuPath === location.pathname &&
                 groupName === currentModuleAccess.moduleName &&
-                currentPeriod === calculatedCurrentPeriod)
+                currentPeriod === currentOpenPeriod)
         );
     };
 
     const updateModuleAndPeriodContext = (module: string) => {
         changeCurrentModuleAccess(module);
-        changeCurrentPeriod(getCurrentOpenPeriod(module));
+        changeCurrentPeriod(getCurrentOpenPeriodByModule(module));
     };
 
     return (

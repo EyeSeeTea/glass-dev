@@ -1,6 +1,7 @@
+//TO DO : get from datastore
 const QUARTERLY_MODULES = ["EGASP"];
 
-export const getCurrentOpenPeriod = (module: string) => {
+export const getCurrentOpenPeriodByModule = (module: string) => {
     const today = new Date();
     if (QUARTERLY_MODULES.find(qm => qm === module)) {
         const lastQuarter = Math.floor((today.getMonth() + 3) / 3) - 1;

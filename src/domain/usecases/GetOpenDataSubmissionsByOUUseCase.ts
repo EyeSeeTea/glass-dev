@@ -8,6 +8,7 @@ export class GetOpenDataSubmissionsByOUUseCase implements UseCase {
     constructor(private glassDataSubmissionRepository: GlassDataSubmissionsRepository) {}
 
     public execute(orgUnit: string): FutureData<GlassDataSubmission[]> {
+        //Open Data Submissions are for the previous year and quarter
         return Future.joinObj({
             yearlyDataSubmissions: this.glassDataSubmissionRepository.getOpenDataSubmissionsByOU(
                 orgUnit,

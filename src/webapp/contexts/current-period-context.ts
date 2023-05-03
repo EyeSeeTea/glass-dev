@@ -1,5 +1,5 @@
 import { createContext, useContext } from "react";
-import { getCurrentOpenPeriod } from "../../utils/currentPeriodHelper";
+import { getCurrentOpenPeriodByModule } from "../../utils/currentPeriodHelper";
 
 export interface CurrentPeriodContextState {
     currentPeriod: string;
@@ -7,7 +7,7 @@ export interface CurrentPeriodContextState {
 }
 
 export const defaultPeriodContextState = {
-    currentPeriod: getCurrentOpenPeriod(""), //The default period is always the previous calendar year.
+    currentPeriod: getCurrentOpenPeriodByModule(""), //The default period is always the previous calendar year.
     changeCurrentPeriod: () => {},
 };
 

@@ -15,7 +15,7 @@ import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context
 import { useConfig } from "@dhis2/app-runtime";
 import { goToDhis2Url } from "../../utils/helpers";
 import { useCurrentPeriodContext } from "../../contexts/current-period-context";
-import { getCurrentOpenPeriod } from "../../../utils/currentPeriodHelper";
+import { getCurrentOpenPeriodByModule } from "../../../utils/currentPeriodHelper";
 
 export const SideBar: React.FC = () => {
     const { baseUrl } = useConfig();
@@ -33,7 +33,7 @@ export const SideBar: React.FC = () => {
 
     const updateModuleAndPeriodContext = () => {
         resetCurrentModuleAccess();
-        changeCurrentPeriod(getCurrentOpenPeriod("")); //Reset to current year
+        changeCurrentPeriod(getCurrentOpenPeriodByModule("")); //Reset to current year
     };
 
     useEffect(() => {
