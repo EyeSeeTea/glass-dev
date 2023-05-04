@@ -26,6 +26,7 @@ export const statusMap = new Map<DataSubmissionStatusTypes, StatusDetails>([
             ],
             showUploadHistory: true,
             isActionRequired: true,
+            actionReqText: "Please complete all mandatory questionnaires.",
         },
     ],
     [
@@ -57,6 +58,8 @@ export const statusMap = new Map<DataSubmissionStatusTypes, StatusDetails>([
             ],
             showUploadHistory: true,
             isActionRequired: true,
+            actionReqText:
+                "Please click on 'Send submission' in overview tab to submit after reviewing the data submission",
         },
     ],
     [
@@ -70,6 +73,7 @@ export const statusMap = new Map<DataSubmissionStatusTypes, StatusDetails>([
             rightCTAs: [],
             showUploadHistory: false,
             isActionRequired: false,
+            actionReqText: "",
         },
     ],
     [
@@ -97,6 +101,7 @@ export const statusMap = new Map<DataSubmissionStatusTypes, StatusDetails>([
             ],
             showUploadHistory: false,
             isActionRequired: false,
+            actionReqText: "",
         },
     ],
     [
@@ -122,6 +127,8 @@ export const statusMap = new Map<DataSubmissionStatusTypes, StatusDetails>([
             ],
             showUploadHistory: false,
             isActionRequired: true,
+            actionReqText:
+                "Please re-complete the questionnaire correctly and ensure you have uploaded correct datasets, as your previous submisison was rejected by WHO.",
         },
     ],
     [
@@ -142,6 +149,7 @@ export const statusMap = new Map<DataSubmissionStatusTypes, StatusDetails>([
             rightCTAs: [],
             showUploadHistory: false,
             isActionRequired: false,
+            actionReqText: "",
         },
     ],
     [
@@ -173,6 +181,8 @@ export const statusMap = new Map<DataSubmissionStatusTypes, StatusDetails>([
             ],
             showUploadHistory: true,
             isActionRequired: true,
+            actionReqText:
+                "Please complete the mandatory questionnaires and re-upload datasets (if any), then click on 'Send Submission' in the overview tab to submit",
         },
     ],
 ]);
