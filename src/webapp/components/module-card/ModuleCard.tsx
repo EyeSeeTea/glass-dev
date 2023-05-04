@@ -13,7 +13,6 @@ import { useAppContext } from "../../contexts/app-context";
 import { QuestionnaireBase } from "../../../domain/entities/Questionnaire";
 import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context";
 import { useSnackbar } from "@eyeseetea/d2-ui-components";
-import { useGlassCaptureAccess } from "../../hooks/useGlassCaptureAccess";
 import { StyledInfoText } from "../current-data-submission/overview/CurrentStatus";
 import { useStatusDataSubmission } from "../../hooks/useStatusDataSubmission";
 import { CircularProgress } from "material-ui";
@@ -27,13 +26,12 @@ const COMPLETED_STATUS = "COMPLETED";
 
 export const ModuleCard: React.FC<ModuleCardProps> = ({ period, module }) => {
     const { changeCurrentModuleAccess } = useCurrentModuleContext();
-    const { compositionRoot } = useAppContext();
+    const { compositionRoot, currentUser } = useAppContext();
 
     const {
         currentOrgUnitAccess: { orgUnitId },
     } = useCurrentOrgUnitContext();
     const snackbar = useSnackbar();
-    const hasCurrentUserCaptureAccess = useGlassCaptureAccess() ? true : false;
 
     const endDays = 0; //TO DO : Calculate days left in the open period. Need confirmation on open and close days.
 
@@ -42,6 +40,14 @@ export const ModuleCard: React.FC<ModuleCardProps> = ({ period, module }) => {
     const currentDataSubmissionStatus = useStatusDataSubmission(module.id, orgUnitId, period);
 
     useEffect(() => {
+        const moduleCaptureAccess = currentUser.userModulesAccess.find(m => m.moduleId === module.id)?.captureAccess;
+        const orgUnitCaptureAccess = currentUser.userOrgUnitsAccess.find(
+            ou => (ou.orgUnitId = orgUnitId)
+        )?.captureAccess;
+        const hasCurrentUserCaptureAccess =
+            (moduleCaptureAccess ? moduleCaptureAccess : false) &&
+            (orgUnitCaptureAccess ? orgUnitCaptureAccess : false);
+
         compositionRoot.glassModules.getById(module.id).run(
             currentModule => {
                 compositionRoot.questionnaires
@@ -70,7 +76,8 @@ export const ModuleCard: React.FC<ModuleCardProps> = ({ period, module }) => {
         compositionRoot.glassModules,
         compositionRoot.glassUploads,
         compositionRoot.questionnaires,
-        hasCurrentUserCaptureAccess,
+        currentUser.userModulesAccess,
+        currentUser.userOrgUnitsAccess,
         module.id,
         orgUnitId,
         period,
