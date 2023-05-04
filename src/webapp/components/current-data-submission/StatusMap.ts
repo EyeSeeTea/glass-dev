@@ -182,7 +182,7 @@ export const statusMap = new Map<DataSubmissionStatusTypes, StatusDetails>([
             showUploadHistory: true,
             isActionRequired: true,
             actionReqText:
-                "Please complete the mandatory questionnaires and re-upload datasets (if any), then click on 'Send Submission' in the overview tab to submit",
+                "Please complete all mandatory questionnaires and review datasets, then click on 'Send Submission' in the overview tab to submit",
         },
     ],
 ]);
