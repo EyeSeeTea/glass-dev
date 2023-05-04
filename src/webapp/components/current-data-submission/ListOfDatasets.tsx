@@ -46,15 +46,25 @@ export const ListOfDatasets: React.FC = () => {
     return (
         <ContentLoader content={uploads}>
             <ContentWrapper>
-                <UploadsTable
-                    title={i18n.t("Correct Uploads")}
-                    items={completeUploads}
-                    refreshUploads={refreshUploads}
-                />
+                {completeUploads && completeUploads.length > 0 && (
+                    <UploadsTable
+                        title={i18n.t("Correct Uploads")}
+                        items={completeUploads}
+                        refreshUploads={refreshUploads}
+                    />
+                )}
                 {currentDataSubmissionStatus.kind === "loaded" ? (
                     <div className={completeUploads && completeUploads.length > 0 ? "rightAligned" : "centered"}>
                         <StyledEmptyMessage
-                            style={{ display: completeUploads && completeUploads.length === 0 ? "block" : "none" }}
+                            style={{
+                                display:
+                                    completeUploads &&
+                                    completeUploads.length === 0 &&
+                                    incompleteUploads &&
+                                    incompleteUploads.length === 0
+                                        ? "block"
+                                        : "none",
+                            }}
                         >
                             {i18n.t("No datasets uploaded to this submission.")}
                         </StyledEmptyMessage>
@@ -74,9 +84,7 @@ export const ListOfDatasets: React.FC = () => {
                         >
                             {i18n.t("Add New Datasets")}
                         </Button>
-                        <StyledTypography
-                            style={{ display: completeUploads && completeUploads.length > 0 ? "block" : "none" }}
-                        >
+                        <StyledTypography>
                             {i18n.t("You can add up to 6 datasets to this submission with different BATCH IDS.")}
                         </StyledTypography>
                     </div>
