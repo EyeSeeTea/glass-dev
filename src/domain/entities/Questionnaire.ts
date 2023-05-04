@@ -6,7 +6,7 @@ export interface QuestionnaireBase {
     name: string;
     description: string;
     orgUnit: Ref;
-    year: number;
+    year: string;
     isCompleted: boolean;
     isMandatory: boolean;
     rules: QuestionnaireRule[];
@@ -15,7 +15,7 @@ export interface QuestionnaireBase {
 export interface QuestionnaireSelector {
     id: Id;
     orgUnitId: Id;
-    year: number;
+    year: string;
 }
 
 export interface Questionnaire extends QuestionnaireBase {
