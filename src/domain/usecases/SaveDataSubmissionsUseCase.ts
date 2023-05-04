@@ -7,7 +7,7 @@ import { GlassDataSubmissionsRepository } from "../repositories/GlassDataSubmiss
 export class SaveDataSubmissionsUseCase implements UseCase {
     constructor(private glassDataSubmissionRepository: GlassDataSubmissionsRepository) {}
 
-    public execute(module: string, orgUnit: string, periods: number[]): FutureData<void> {
+    public execute(module: string, orgUnit: string, periods: string[]): FutureData<void> {
         const dataSubmissions: GlassDataSubmission[] = [];
         periods.forEach(period => {
             dataSubmissions.push({

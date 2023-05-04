@@ -22,7 +22,7 @@ export class QuestionnaireD2Repository implements QuestionnaireRepository {
 
     getList(
         module: GlassModule,
-        options: { orgUnitId: Id; year: number },
+        options: { orgUnitId: Id; year: string },
         captureAccess: boolean
     ): FutureData<QuestionnaireBase[]> {
         const dataSetIds = module.questionnaires.map(getId);
@@ -312,7 +312,7 @@ export class QuestionnaireD2Repository implements QuestionnaireRepository {
 
     private getDataSetsInfo(
         ids: Id[],
-        options: { orgUnitId: Id; year: number },
+        options: { orgUnitId: Id; year: string },
         captureAccess: boolean
     ): FutureData<CompleteDataSetRegistration[]> {
         if (_.isEmpty(ids) || !captureAccess) return Future.success([]);

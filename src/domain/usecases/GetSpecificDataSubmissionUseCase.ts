@@ -7,7 +7,7 @@ import { GlassDataSubmissionsRepository } from "../repositories/GlassDataSubmiss
 export class GetSpecificDataSubmissionUseCase implements UseCase {
     constructor(private glassDataSubmissionRepository: GlassDataSubmissionsRepository) {}
 
-    public execute(module: string, orgUnit: string, period: number): FutureData<GlassDataSubmission> {
+    public execute(module: string, orgUnit: string, period: string): FutureData<GlassDataSubmission> {
         //Fix : Make sure that module, orgUnit and period are non empty before save.
         if (module !== "" && orgUnit !== "" && period) {
             return this.glassDataSubmissionRepository

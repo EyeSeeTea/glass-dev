@@ -386,22 +386,16 @@ msgstr ""
 msgid "ignored: "
 msgstr ""
 
-msgid "I need help"
-msgstr ""
-
 msgid "Submit Help Ticket"
 msgstr ""
 
-msgid "I can fix this by myself"
+msgid "App support ticket"
 msgstr ""
 
 msgid "Upload New Data Files"
 msgstr ""
 
-msgid "I'll fix it later"
-msgstr ""
-
-msgid "OK"
+msgid "Fix upload data"
 msgstr ""
 
 msgid "Error fetching previous uploads."
