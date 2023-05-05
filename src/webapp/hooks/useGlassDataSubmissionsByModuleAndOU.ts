@@ -20,5 +20,5 @@ export function useGlassDataSubmissionsByModuleAndOU(moduleId: string, orgUnit: 
             );
     }, [setDataSubmissions, compositionRoot.glassDataSubmission, moduleId, orgUnit, refetch]);
 
-    return { dataSubmissions, setRefetch };
+    return { dataSubmissions, setDataSubmissions, setRefetch };
 }
