@@ -1,14 +1,3 @@
-export const getCurrentOpenPeriodByModule = (module: string, quarterlyModules: string[]) => {
-    const today = new Date();
-    if (quarterlyModules.find(qm => qm === module)) {
-        const currentQuarter = Math.floor((today.getMonth() + 3) / 3);
-        if (currentQuarter !== 1) return `${today.getFullYear()}Q${currentQuarter - 1}`;
-        else return `${today.getFullYear() - 1}Q4`;
-    } else {
-        return `${today.getFullYear() - 1}`;
-    }
-};
-
 export const getCurrentOpenYearlyPeriod = () => {
     return `${new Date().getFullYear() - 1}`;
 };

@@ -15,16 +15,15 @@ import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context
 import { useConfig } from "@dhis2/app-runtime";
 import { goToDhis2Url } from "../../utils/helpers";
 import { useCurrentPeriodContext } from "../../contexts/current-period-context";
-import { getCurrentOpenPeriodByModule } from "../../../utils/currentPeriodHelper";
 
 export const SideBar: React.FC = () => {
     const { baseUrl } = useConfig();
-    const { currentUser, compositionRoot } = useAppContext();
+    const { compositionRoot } = useAppContext();
     const snackbar = useSnackbar();
     const [isLoading, setIsLoading] = useState(false);
     const [storedMenuData, setStoredMenuData] = useState<Menu[] | null>();
     const { currentOrgUnitAccess } = useCurrentOrgUnitContext();
-    const { changeCurrentPeriod } = useCurrentPeriodContext();
+    const { changeCurrentPeriod, getCurrentOpenPeriodByModule } = useCurrentPeriodContext();
     const { resetCurrentModuleAccess } = useCurrentModuleContext();
 
     const logout = () => {
@@ -33,7 +32,7 @@ export const SideBar: React.FC = () => {
 
     const updateModuleAndPeriodContext = () => {
         resetCurrentModuleAccess();
-        changeCurrentPeriod(getCurrentOpenPeriodByModule("", currentUser.quarterlyPeriodModules)); //Reset to current year
+        changeCurrentPeriod(getCurrentOpenPeriodByModule("")); //Reset to current year
     };
 
     useEffect(() => {
