@@ -3,11 +3,7 @@ import { useAppContext } from "../../../contexts/app-context";
 import { useCurrentOrgUnitContext } from "../../../contexts/current-orgUnit-context";
 import { useCurrentModuleContext } from "../../../contexts/current-module-context";
 import { useGlassDataSubmissionsByModuleAndOU } from "../../../hooks/useGlassDataSubmissionsByModuleAndOU";
-import {
-    getCurrentOpenPeriodByModule,
-    getLastNYears,
-    getLastNYearsQuarters,
-} from "../../../../utils/currentPeriodHelper";
+import { getLastNYears, getLastNYearsQuarters } from "../../../../utils/currentPeriodHelper";
 
 export function usePopulateDataSubmissionHistory() {
     const { compositionRoot } = useAppContext();
@@ -23,13 +19,9 @@ export function usePopulateDataSubmissionHistory() {
     useEffect(() => {
         if (dataSubmissions.kind === "loaded") {
             //Ensure that the last 5 years of data submissions are pre populated.
-            const currentOpenPeriod = getCurrentOpenPeriodByModule(
-                currentModuleAccess.moduleName,
-                currentUser.quarterlyPeriodModules
-            );
             const years: string[] = [];
 
-            if (currentOpenPeriod.includes("Q")) {
+            if (currentUser.quarterlyPeriodModules.find(qm => qm === currentModuleAccess.moduleName)) {
                 //Check if last 2 years Quarterly Data Submissions are populated
                 getLastNYearsQuarters(2).forEach(quarter => {
                     if (!dataSubmissions.data.find(ds => ds.period === quarter)) {

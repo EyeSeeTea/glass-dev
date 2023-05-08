@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useHistory, useLocation } from "react-router-dom";
 import { CurrentPeriodContext } from "../contexts/current-period-context";
-import { getCurrentOpenPeriodByModule } from "../../utils/currentPeriodHelper";
+
 import { useAppContext } from "../contexts/app-context";
 
 export const CurrentPeriodContextProvider: React.FC = ({ children }) => {
@@ -10,8 +10,19 @@ export const CurrentPeriodContextProvider: React.FC = ({ children }) => {
     const periodQueryParam = new URLSearchParams(location.search).get("period");
     const { currentUser } = useAppContext();
 
+    const getCurrentOpenPeriodByModule = (module: string) => {
+        const today = new Date();
+        if (currentUser.quarterlyPeriodModules.find(qm => qm === module)) {
+            const currentQuarter = Math.floor((today.getMonth() + 3) / 3);
+            if (currentQuarter !== 1) return `${today.getFullYear()}Q${currentQuarter - 1}`;
+            else return `${today.getFullYear() - 1}Q4`;
+        } else {
+            return `${today.getFullYear() - 1}`;
+        }
+    };
+
     //The default period is always the previous calendar year.
-    const defaultPeriod = getCurrentOpenPeriodByModule("", currentUser.quarterlyPeriodModules);
+    const defaultPeriod = getCurrentOpenPeriodByModule("");
 
     const [currentPeriod, setCurrentPeriod] = useState(defaultPeriod);
 
@@ -45,6 +56,7 @@ export const CurrentPeriodContextProvider: React.FC = ({ children }) => {
             value={{
                 currentPeriod: currentPeriod,
                 changeCurrentPeriod: changeCurrentPeriod,
+                getCurrentOpenPeriodByModule: getCurrentOpenPeriodByModule
             }}
         >
             {children}

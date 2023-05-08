@@ -3,7 +3,7 @@ import { Box, FormControl, MenuItem, Select, Typography, InputLabel, withStyles,
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { Dispatch, SetStateAction } from "react";
-import { getCurrentOpenPeriodByModule, getLastNYears, getLastNYearsQuarters } from "../../../utils/currentPeriodHelper";
+import { getLastNYears, getLastNYearsQuarters } from "../../../utils/currentPeriodHelper";
 import { useCurrentModuleContext } from "../../contexts/current-module-context";
 import { useAppContext } from "../../contexts/app-context";
 
@@ -57,15 +57,11 @@ interface FilterProps {
 
 export const Filter: React.FC<FilterProps> = ({ year, setYear, status, setStatus }) => {
     const classes = useStyles();
-
     const { currentUser } = useAppContext();
     const { currentModuleAccess } = useCurrentModuleContext();
-    const currentOpenPeriod = getCurrentOpenPeriodByModule(
-        currentModuleAccess.moduleName,
-        currentUser.quarterlyPeriodModules
-    );
+
     const yearOptions: { label: string; value: string }[] = [];
-    if (currentOpenPeriod.includes("Q")) {
+    if (currentUser.quarterlyPeriodModules.find(qm => qm === currentModuleAccess.moduleName)) {
         getLastNYearsQuarters(2).forEach(quarter => {
             yearOptions.push({ label: quarter, value: quarter });
         });

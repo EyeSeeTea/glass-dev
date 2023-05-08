@@ -10,8 +10,6 @@ import { glassColors } from "../../pages/app/themes/dhis2.theme";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { useCurrentModuleContext } from "../../contexts/current-module-context";
 import { useCurrentPeriodContext } from "../../contexts/current-period-context";
-import { getCurrentOpenPeriodByModule } from "../../../utils/currentPeriodHelper";
-import { useAppContext } from "../../contexts/app-context";
 
 interface SidebarNavProps {
     className?: string;
@@ -22,20 +20,15 @@ interface SidebarNavProps {
 const SidebarNavMenu: React.FC<SidebarNavProps> = ({ menu, className, groupName }) => {
     const classes = useStyles(menu?.level);
     const location = useLocation();
-    const { currentUser } = useAppContext();
-
     const { currentModuleAccess, changeCurrentModuleAccess } = useCurrentModuleContext();
-    const { currentPeriod, changeCurrentPeriod } = useCurrentPeriodContext();
+    const { currentPeriod, changeCurrentPeriod, getCurrentOpenPeriodByModule } = useCurrentPeriodContext();
 
     /* 
         TODO: determine through context which data submission is "current data submission" as of date and only highlight "Current data submission" if so, 
         otherwise highlight "uploads history menu"
     */
     const isCurrentPage = (menuPath: string) => {
-        const currentOpenPeriod = getCurrentOpenPeriodByModule(
-            currentModuleAccess.moduleName,
-            currentUser.quarterlyPeriodModules
-        );
+        const currentOpenPeriod = getCurrentOpenPeriodByModule(currentModuleAccess.moduleName);
         return (
             (menu.title === "Current Data Submission" &&
                 location.pathname === "/upload" &&
@@ -56,7 +49,7 @@ const SidebarNavMenu: React.FC<SidebarNavProps> = ({ menu, className, groupName 
 
     const updateModuleAndPeriodContext = (module: string) => {
         changeCurrentModuleAccess(module);
-        changeCurrentPeriod(getCurrentOpenPeriodByModule(module, currentUser.quarterlyPeriodModules));
+        changeCurrentPeriod(getCurrentOpenPeriodByModule(module));
     };
 
     return (
