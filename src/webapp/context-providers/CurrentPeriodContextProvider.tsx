@@ -3,12 +3,14 @@ import { useHistory, useLocation } from "react-router-dom";
 import { CurrentPeriodContext } from "../contexts/current-period-context";
 
 import { useAppContext } from "../contexts/app-context";
+import { useCurrentModuleContext } from "../contexts/current-module-context";
 
 export const CurrentPeriodContextProvider: React.FC = ({ children }) => {
     const history = useHistory();
     const location = useLocation();
     const periodQueryParam = new URLSearchParams(location.search).get("period");
     const { currentUser } = useAppContext();
+    const { currentModuleAccess } = useCurrentModuleContext();
 
     const getCurrentOpenPeriodByModule = (module: string) => {
         const today = new Date();
@@ -25,6 +27,35 @@ export const CurrentPeriodContextProvider: React.FC = ({ children }) => {
     const defaultPeriod = getCurrentOpenPeriodByModule("");
 
     const [currentPeriod, setCurrentPeriod] = useState(defaultPeriod);
+
+    const isValidCurrentPeriod = useCallback(
+        (updatedPeriod: string) => {
+            const currentYear = new Date().getFullYear();
+
+            //is a QUARTERLY module
+            if (
+                currentUser.quarterlyPeriodModules.find(qm => qm === currentModuleAccess.moduleName) &&
+                new RegExp(
+                    `^(${currentYear}|${currentYear.toString().slice(0, 3)}[0-${currentYear
+                        .toString()
+                        .slice(3)}])Q[1-4]$`
+                ).test(updatedPeriod)
+            ) {
+                return true;
+            } //is a YEARLY module
+            else if (
+                !currentUser.quarterlyPeriodModules.find(qm => qm === currentModuleAccess.moduleName) &&
+                new RegExp(
+                    `^(${currentYear}|${currentYear.toString().slice(0, 3)}[0-${currentYear.toString().slice(3)}])$`
+                ).test(updatedPeriod)
+            ) {
+                return true;
+            } else {
+                return false;
+            }
+        },
+        [currentModuleAccess.moduleName, currentUser.quarterlyPeriodModules]
+    );
 
     const changeCurrentPeriod = useCallback(
         (updatedPeriod: string) => {
@@ -46,17 +77,21 @@ export const CurrentPeriodContextProvider: React.FC = ({ children }) => {
             history.replace({ search: queryParameters.toString() });
         }
         //If user has manually changed the url, then update the period context with it.
-        else if (periodQueryParam !== null && periodQueryParam !== currentPeriod) {
+        else if (
+            periodQueryParam !== null &&
+            periodQueryParam !== currentPeriod &&
+            isValidCurrentPeriod(periodQueryParam)
+        ) {
             changeCurrentPeriod(periodQueryParam);
         }
-    }, [changeCurrentPeriod, currentPeriod, history, location.search, periodQueryParam]);
+    }, [changeCurrentPeriod, currentPeriod, history, location.search, periodQueryParam, isValidCurrentPeriod]);
 
     return (
         <CurrentPeriodContext.Provider
             value={{
                 currentPeriod: currentPeriod,
                 changeCurrentPeriod: changeCurrentPeriod,
-                getCurrentOpenPeriodByModule: getCurrentOpenPeriodByModule
+                getCurrentOpenPeriodByModule: getCurrentOpenPeriodByModule,
             }}
         >
             {children}
