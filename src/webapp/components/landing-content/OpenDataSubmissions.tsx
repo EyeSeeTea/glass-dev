@@ -3,20 +3,11 @@ import { Grid, Typography } from "@material-ui/core";
 import { ModuleCard } from "../module-card/ModuleCard";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { useOpenDataSubmissionsByOrgUnit } from "../../hooks/useOpenDataSubmissionsByOrgUnit";
-import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context";
-import { useAppContext } from "../../contexts/app-context";
 import { ContentLoader } from "../content-loader/ContentLoader";
 import styled from "styled-components";
 
 export const OpenDataSubmissions: React.FC = () => {
-    const { compositionRoot } = useAppContext();
-
-    const orgUnit = useCurrentOrgUnitContext();
-
-    const openDataSubmissions = useOpenDataSubmissionsByOrgUnit(
-        compositionRoot,
-        orgUnit.currentOrgUnitAccess.orgUnitId
-    );
+    const openDataSubmissions = useOpenDataSubmissionsByOrgUnit();
 
     return (
         <ContentLoader content={openDataSubmissions}>
