@@ -24,7 +24,7 @@ export const CurrentPeriodContextProvider: React.FC = ({ children }) => {
     };
 
     //The default period is always the previous calendar year.
-    const defaultPeriod = getCurrentOpenPeriodByModule("");
+    const defaultPeriod = getCurrentOpenPeriodByModule(currentModuleAccess.moduleName);
 
     const [currentPeriod, setCurrentPeriod] = useState(defaultPeriod);
 
