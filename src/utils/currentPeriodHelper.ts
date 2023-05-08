@@ -13,7 +13,7 @@ export const getCurrentYear = () => {
     return new Date().getFullYear();
 };
 
-export const getLastNYears = (n: number) => {
+export const getLastNYears = (n = 5) => {
     const years: string[] = [];
     for (let yearItr = getCurrentYear() - 1; yearItr > getCurrentYear() - 1 - n; yearItr--) {
         years.push(yearItr.toString());
@@ -21,7 +21,7 @@ export const getLastNYears = (n: number) => {
     return years;
 };
 
-export const getLastNYearsQuarters = (n: number) => {
+export const getLastNYearsQuarters = (n = 2) => {
     const years: string[] = [];
     const openYearAndQuarter = getCurrentOpenQuarterlyPeriod().split("Q");
 

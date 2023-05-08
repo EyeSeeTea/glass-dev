@@ -23,7 +23,7 @@ export function usePopulateDataSubmissionHistory() {
 
             if (currentUser.quarterlyPeriodModules.find(qm => qm === currentModuleAccess.moduleName)) {
                 //Check if last 2 years Quarterly Data Submissions are populated
-                getLastNYearsQuarters(2).forEach(quarter => {
+                getLastNYearsQuarters().forEach(quarter => {
                     if (!dataSubmissions.data.find(ds => ds.period === quarter)) {
                         years.push(quarter);
                     }
@@ -31,7 +31,7 @@ export function usePopulateDataSubmissionHistory() {
             } else {
                 //Check if last 5 Yearly Data Submissions are populated
 
-                getLastNYears(5).forEach(year => {
+                getLastNYears().forEach(year => {
                     if (!dataSubmissions.data.find(ds => ds.period === year)) {
                         years.push(year);
                     }
