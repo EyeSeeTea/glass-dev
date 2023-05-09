@@ -45,7 +45,7 @@ import { SampleDataCSVRepository } from "./data/repositories/SampleDataCSVReposi
 import { GetGlassUploadsByModuleOUPeriodUseCase } from "./domain/usecases/GetGlassUploadsByModuleOUPeriodUseCase";
 import { SetDataSubmissionStatusUseCase } from "./domain/usecases/SetDataSubmissionStatusUseCase";
 import { DownloadDocumentUseCase } from "./domain/usecases/DownloadDocumentUseCase";
-import { ValidateRISFileUseCase } from "./domain/usecases/data-entry/ValidateRISFileUseCase";
+import { ValidatePrimaryFileUseCase } from "./domain/usecases/data-entry/ValidatePrimaryFileUseCase";
 import { ValidateSampleFileUseCase } from "./domain/usecases/data-entry/ValidateSampleFileUseCase";
 import { SaveDataSubmissionsUseCase } from "./domain/usecases/SaveDataSubmissionsUseCase";
 import { UpdateSampleUploadWithRisIdUseCase } from "./domain/usecases/UpdateSampleUploadWithRisIdUseCase";
@@ -57,6 +57,7 @@ import { UsersDefaultRepository } from "./data/repositories/UsersDefaultReposito
 import { GetUiLocalesUseCase } from "./domain/usecases/GetUiLocalesUseCase";
 import { GetDatabaseLocalesUseCase } from "./domain/usecases/GetDatabaseLocalesUseCase";
 import { LocalesDefaultRepository } from "./data/repositories/LocalesDefaultRepository";
+import { EGASPDataCSVRepository } from "./data/repositories/EGASPDataCSVRepository";
 
 export function getCompositionRoot(instance: Instance) {
     const api = getD2APiFromInstance(instance);
@@ -77,6 +78,7 @@ export function getCompositionRoot(instance: Instance) {
     const systemInfoDefaultRepository = new SystemInfoDefaultRepository(api);
     const usersDefaultRepository = new UsersDefaultRepository(api);
     const localeRepository = new LocalesDefaultRepository(instance);
+    const egaspDataRepository = new EGASPDataCSVRepository();
 
     return {
         instance: getExecute({
@@ -116,14 +118,14 @@ export function getCompositionRoot(instance: Instance) {
             download: new DownloadDocumentUseCase(glassDocumentsRepository),
             updateSampleFileWithRisId: new UpdateSampleUploadWithRisIdUseCase(glassUploadsRepository),
         }),
-        dataSubmision: getExecute({
+        fileSubmission: getExecute({
             RISFile: new ImportRISFileUseCase(
                 risDataRepository,
                 metadataRepository,
                 dataValuesRepository,
                 glassModuleRepository
             ),
-            validateRISFile: new ValidateRISFileUseCase(risDataRepository),
+            validatePrimaryFile: new ValidatePrimaryFileUseCase(risDataRepository, egaspDataRepository),
             sampleFile: new ImportSampleFileUseCase(sampleDataRepository, metadataRepository, dataValuesRepository),
             validateSampleFile: new ValidateSampleFileUseCase(sampleDataRepository),
         }),

@@ -33,8 +33,8 @@ export const ReviewDataSummary: React.FC<ReviewDataSummaryProps> = ({
     };
 
     const goToFinalStep = useCallback(() => {
-        const risUploadId = localStorage.getItem("risUploadId");
-        const sampleUploadId = localStorage.getItem("sampleUploadId");
+        const risUploadId = localStorage.getItem("primaryUploadId");
+        const sampleUploadId = localStorage.getItem("secondaryUploadId");
         setIsLoading(true);
         if (risUploadId) {
             return compositionRoot.glassUploads.setStatus({ id: risUploadId, status: COMPLETED_STATUS }).run(
