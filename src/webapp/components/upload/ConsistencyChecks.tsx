@@ -51,7 +51,7 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
             setImportLoading(true);
 
             Future.joinObj({
-                importRISFileSummary: compositionRoot.dataSubmision.RISFile(
+                importRISFileSummary: compositionRoot.fileSubmission.RISFile(
                     risFile,
                     batchId,
                     currentPeriod,
@@ -61,7 +61,7 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
                     false
                 ),
                 importSampleFileSummary: sampleFile
-                    ? compositionRoot.dataSubmision.sampleFile(
+                    ? compositionRoot.fileSubmission.sampleFile(
                           sampleFile,
                           batchId,
                           currentPeriod,
@@ -84,7 +84,7 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
                     }
 
                     if (importRISFileSummary.blockingErrors.length === 0) {
-                        const risUploadId = localStorage.getItem("risUploadId");
+                        const risUploadId = localStorage.getItem("primaryUploadId");
                         if (risUploadId) {
                             compositionRoot.glassUploads.setStatus({ id: risUploadId, status: "VALIDATED" }).run(
                                 () => {
@@ -97,7 +97,7 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
                             );
                         }
                     } else {
-                        const risUploadId = localStorage.getItem("risUploadId");
+                        const risUploadId = localStorage.getItem("primaryUploadId");
                         if (risUploadId) {
                             compositionRoot.glassUploads.setStatus({ id: risUploadId, status: "IMPORTED" }).run(
                                 () => {

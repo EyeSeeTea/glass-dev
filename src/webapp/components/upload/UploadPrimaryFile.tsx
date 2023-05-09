@@ -14,21 +14,32 @@ import { useCurrentModuleContext } from "../../contexts/current-module-context";
 import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context";
 import { useCallbackEffect } from "../../hooks/use-callback-effect";
 import { useCurrentPeriodContext } from "../../contexts/current-period-context";
-interface UploadRisProps {
-    risFile: File | null;
-    setRisFile: React.Dispatch<React.SetStateAction<File | null>>;
+interface UploadPrimaryFileProps {
+    primaryFile: File | null;
+    setPrimaryFile: React.Dispatch<React.SetStateAction<File | null>>;
     validate: (val: boolean) => void;
     batchId: string;
 }
 
-const RIS_FILE_TYPE = "RIS";
+const getFileType = (module: string) => {
+    if (module === "AMR") {
+        return "RIS";
+    } else if (module === "EGASP") return "EGASP";
+    else return module;
+};
 
-export const UploadRis: React.FC<UploadRisProps> = ({ risFile, setRisFile, validate, batchId }) => {
+export const UploadPrimaryFile: React.FC<UploadPrimaryFileProps> = ({
+    primaryFile,
+    setPrimaryFile,
+    validate,
+    batchId,
+}) => {
     const { compositionRoot } = useAppContext();
 
     const {
         currentModuleAccess: { moduleId, moduleName },
     } = useCurrentModuleContext();
+
     const {
         currentOrgUnitAccess: { orgUnitId, orgUnitCode },
     } = useCurrentOrgUnitContext();
@@ -37,78 +48,78 @@ export const UploadRis: React.FC<UploadRisProps> = ({ risFile, setRisFile, valid
     const snackbar = useSnackbar();
 
     const [isLoading, setIsLoading] = useState(false);
-    const risFileUploadRef = useRef<DropzoneRef>(null);
+    const primaryFileUploadRef = useRef<DropzoneRef>(null);
 
     const dataSubmissionId = useCurrentDataSubmissionId(compositionRoot, moduleId, orgUnitId, currentPeriod);
 
     const openFileUploadDialog = useCallback(async () => {
-        risFileUploadRef.current?.openDialog();
-    }, [risFileUploadRef]);
+        primaryFileUploadRef.current?.openDialog();
+    }, [primaryFileUploadRef]);
 
     useEffect(() => {
-        if (risFile) {
+        if (primaryFile) {
             validate(true);
         } else {
             validate(false);
         }
-    }, [risFile, validate]);
+    }, [primaryFile, validate]);
 
     const removeFiles = useCallback(
         (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
             event.preventDefault();
             setIsLoading(true);
-            const risUploadId = localStorage.getItem("risUploadId");
-            if (risUploadId) {
-                return compositionRoot.glassDocuments.deleteByUploadId(risUploadId).run(
+            const primaryUploadId = localStorage.getItem("primaryUploadId");
+            if (primaryUploadId) {
+                return compositionRoot.glassDocuments.deleteByUploadId(primaryUploadId).run(
                     () => {
-                        localStorage.removeItem("risUploadId");
-                        setRisFile(null);
+                        localStorage.removeItem("primaryUploadId");
+                        setPrimaryFile(null);
                         setIsLoading(false);
                     },
                     errorMessage => {
                         snackbar.error(errorMessage);
-                        setRisFile(null);
+                        setPrimaryFile(null);
                         setIsLoading(false);
                     }
                 );
             } else {
-                setRisFile(null);
+                setPrimaryFile(null);
                 setIsLoading(false);
             }
         },
-        [compositionRoot.glassDocuments, snackbar, setRisFile]
+        [compositionRoot.glassDocuments, snackbar, setPrimaryFile]
     );
 
     const removeFilesEffect = useCallbackEffect(removeFiles);
 
-    const risFileUpload = useCallback(
+    const primaryFileUpload = useCallback(
         (files: File[], rejections: FileRejection[]) => {
             if (rejections.length > 0) {
                 snackbar.error(i18n.t("Multiple uploads not allowed, please select one file"));
             } else {
-                const uploadedRisFile = files[0];
-                if (uploadedRisFile) {
+                const uploadedPrimaryFile = files[0];
+                if (uploadedPrimaryFile) {
                     setIsLoading(true);
 
-                    return compositionRoot.dataSubmision.validateRISFile(uploadedRisFile).run(
-                        risData => {
-                            if (risData.isValid) {
-                                setRisFile(uploadedRisFile);
+                    return compositionRoot.fileSubmission.validatePrimaryFile(uploadedPrimaryFile, moduleName).run(
+                        primaryFileData => {
+                            if (primaryFileData.isValid) {
+                                setPrimaryFile(uploadedPrimaryFile);
                                 const data = {
                                     batchId,
-                                    fileType: RIS_FILE_TYPE,
+                                    fileType: getFileType(moduleName),
                                     dataSubmission: dataSubmissionId,
                                     moduleId,
                                     moduleName,
                                     period: currentPeriod.toString(),
                                     orgUnitId: orgUnitId,
                                     orgUnitCode: orgUnitCode,
-                                    records: risData.records,
-                                    specimens: risData.specimens,
+                                    records: primaryFileData.records,
+                                    specimens: primaryFileData.specimens,
                                 };
-                                return compositionRoot.glassDocuments.upload({ file: uploadedRisFile, data }).run(
+                                return compositionRoot.glassDocuments.upload({ file: uploadedPrimaryFile, data }).run(
                                     uploadId => {
-                                        localStorage.setItem("risUploadId", uploadId);
+                                        localStorage.setItem("primaryUploadId", uploadId);
                                         setIsLoading(false);
                                     },
                                     () => {
@@ -117,7 +128,7 @@ export const UploadRis: React.FC<UploadRisProps> = ({ risFile, setRisFile, valid
                                     }
                                 );
                             } else {
-                                snackbar.error(i18n.t("Incorrect File Format. Please retry with a valid RIS file"));
+                                snackbar.error(i18n.t("Incorrect File Format. Please retry with a valid file"));
                                 setIsLoading(false);
                             }
                         },
@@ -131,7 +142,7 @@ export const UploadRis: React.FC<UploadRisProps> = ({ risFile, setRisFile, valid
         },
         [
             batchId,
-            compositionRoot.dataSubmision,
+            compositionRoot.fileSubmission,
             compositionRoot.glassDocuments,
             currentPeriod,
             dataSubmissionId,
@@ -139,33 +150,33 @@ export const UploadRis: React.FC<UploadRisProps> = ({ risFile, setRisFile, valid
             moduleName,
             orgUnitCode,
             orgUnitId,
-            setRisFile,
+            setPrimaryFile,
             snackbar,
         ]
     );
 
-    const risFileUploadEffect = useCallbackEffect(risFileUpload);
+    const primaryFileUploadEffect = useCallbackEffect(primaryFileUpload);
 
     return (
         <ContentWrapper className="ris-file">
             <span className="label">{i18n.t("Choose RIS File")}</span>
             {/* Allow only one file upload per dataset */}
-            <Dropzone ref={risFileUploadRef} onDrop={risFileUploadEffect} maxFiles={1}>
+            <Dropzone ref={primaryFileUploadRef} onDrop={primaryFileUploadEffect} maxFiles={1}>
                 <Button
                     variant="contained"
                     color="primary"
                     className="choose-file-button"
                     endIcon={<BackupIcon />}
                     onClick={openFileUploadDialog}
-                    disabled={risFile === null ? false : true}
+                    disabled={primaryFile === null ? false : true}
                 >
                     {i18n.t("Select file")}
                 </Button>
                 {isLoading && <CircularProgress size={25} />}
             </Dropzone>
-            {risFile && (
+            {primaryFile && (
                 <RemoveContainer>
-                    {risFile?.name} - {risFile?.type}
+                    {primaryFile?.name} - {primaryFile?.type}
                     <StyledRemoveButton onClick={removeFilesEffect}>
                         <CloseIcon />
                     </StyledRemoveButton>

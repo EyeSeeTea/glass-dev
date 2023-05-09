@@ -101,7 +101,7 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                             Future.joinObj({
                                 deleteRisFileSummary:
                                     risFileToDelete.status.toLowerCase() !== "uploaded"
-                                        ? compositionRoot.dataSubmision.RISFile(
+                                        ? compositionRoot.fileSubmission.RISFile(
                                               risFile,
                                               risFileToDelete.batchId,
                                               risFileToDelete.period,
@@ -115,7 +115,7 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                                     sampleFileToDelete &&
                                     sampleFileToDelete.status.toLowerCase() !== "uploaded" &&
                                     sampleFileDownload
-                                        ? compositionRoot.dataSubmision.sampleFile(
+                                        ? compositionRoot.fileSubmission.sampleFile(
                                               new File([sampleFileDownload], sampleFileToDelete.fileName),
                                               sampleFileToDelete.batchId,
                                               sampleFileToDelete.period,

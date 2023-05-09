@@ -9,8 +9,8 @@ export const Completed: React.FC = () => {
     const { currentOrgUnitAccess } = useCurrentOrgUnitContext();
     const { currentPeriod } = useCurrentPeriodContext();
     useEffect(() => {
-        localStorage.removeItem("risUploadId");
-        localStorage.removeItem("sampleUploadId");
+        localStorage.removeItem("primaryUploadId");
+        localStorage.removeItem("secondaryUploadId");
     }, []);
 
     return (
