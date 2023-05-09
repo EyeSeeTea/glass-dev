@@ -82,7 +82,7 @@ export const UploadSample: React.FC<UploadSampleProps> = ({ batchId, sampleFile,
                 if (uploadedSample) {
                     setIsLoading(true);
 
-                    return compositionRoot.fileSubmission.validateSampleFile(uploadedSample).run(
+                    return compositionRoot.fileSubmission.validateSecondaryFile(uploadedSample).run(
                         sampleData => {
                             if (sampleData.isValid) {
                                 setSampleFile(uploadedSample);
