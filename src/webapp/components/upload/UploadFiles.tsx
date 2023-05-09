@@ -153,22 +153,23 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
 
     const changeBatchId = async (event: React.ChangeEvent<{ value: unknown }>) => {
         const batchId = event.target.value as string;
-        const risUploadId = localStorage.getItem("primaryUploadId");
-        const sampleUploadId = localStorage.getItem("secondaryUploadId");
+        const primaryUploadId = localStorage.getItem("primaryUploadId");
+        const secondaryUploadId = localStorage.getItem("secondaryUploadId");
         setBatchId(batchId);
 
-        if (risUploadId) {
-            await compositionRoot.glassUploads.setBatchId({ id: risUploadId, batchId }).toPromise();
+        if (primaryUploadId) {
+            await compositionRoot.glassUploads.setBatchId({ id: primaryUploadId, batchId }).toPromise();
         }
-        if (sampleUploadId) {
-            await compositionRoot.glassUploads.setBatchId({ id: sampleUploadId, batchId }).toPromise();
+        if (secondaryUploadId) {
+            await compositionRoot.glassUploads.setBatchId({ id: secondaryUploadId, batchId }).toPromise();
         }
     };
-    const uploadDatasetsAsDryRun = useCallback(() => {
-        if (primaryFile && moduleName === "AMR") {
+    const uploadFileSubmissions = useCallback(() => {
+        if (primaryFile) {
             setImportLoading(true);
             Future.joinObj({
-                importRISFileSummary: compositionRoot.fileSubmission.RISFile(
+                importPrimaryFileSummary: compositionRoot.fileSubmission.primaryFile(
+                    moduleName,
                     primaryFile,
                     batchId,
                     currentPeriod,
@@ -177,8 +178,8 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
                     orgUnitCode,
                     true
                 ),
-                importSampleFileSummary: secondaryFile
-                    ? compositionRoot.fileSubmission.sampleFile(
+                importSecondaryFileSummary: secondaryFile
+                    ? compositionRoot.fileSubmission.secondaryFile(
                           secondaryFile,
                           batchId,
                           currentPeriod,
@@ -189,11 +190,11 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
                       )
                     : Future.success(undefined),
             }).run(
-                ({ importRISFileSummary, importSampleFileSummary }) => {
-                    setPrimaryFileImportSummary(importRISFileSummary);
+                ({ importPrimaryFileSummary, importSecondaryFileSummary }) => {
+                    setPrimaryFileImportSummary(importPrimaryFileSummary);
 
-                    if (importSampleFileSummary) {
-                        setSecondaryFileImportSummary(importSampleFileSummary);
+                    if (importSecondaryFileSummary) {
+                        setSecondaryFileImportSummary(importSecondaryFileSummary);
                     }
                     setImportLoading(false);
                     changeStep(2);
@@ -227,17 +228,17 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
     const continueClick = () => {
         if (!hasSecondaryFile) {
             localStorage.removeItem("secondaryUploadId");
-            uploadDatasetsAsDryRun();
+            uploadFileSubmissions();
         }
-        //update the sample file with ris file upload id.
+        //update the secondary file with primary file upload id.
         else {
             setImportLoading(true);
-            const risUploadId = localStorage.getItem("primaryUploadId");
-            const sampleUploadId = localStorage.getItem("secondaryUploadId");
-            if (sampleUploadId && risUploadId)
-                compositionRoot.glassDocuments.updateSampleFileWithRisId(sampleUploadId, risUploadId).run(
+            const primaryUploadId = localStorage.getItem("primaryUploadId");
+            const secondaryUploadId = localStorage.getItem("secondaryUploadId");
+            if (secondaryUploadId && primaryUploadId)
+                compositionRoot.glassDocuments.updateSecondaryFileWithPrimaryId(secondaryUploadId, primaryUploadId).run(
                     () => {
-                        uploadDatasetsAsDryRun();
+                        uploadFileSubmissions();
                     },
                     () => {
                         console.debug("Error updating datastore");

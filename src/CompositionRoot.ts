@@ -24,7 +24,7 @@ import { GetGlassUploadsByDataSubmissionUseCase } from "./domain/usecases/GetGla
 import { GetGlassUploadsByModuleOUUseCase } from "./domain/usecases/GetGlassUploadsByModuleOUUseCase";
 import { SetUploadBatchIdUseCase } from "./domain/usecases/SetUploadBatchIdUseCase";
 import { DeleteDocumentInfoByUploadIdUseCase } from "./domain/usecases/DeleteDocumentInfoByUploadIdUseCase";
-import { ImportRISFileUseCase } from "./domain/usecases/data-entry/ImportRISFileUseCase";
+import { ImportPrimaryFileUseCase } from "./domain/usecases/data-entry/ImportPrimaryFileUseCase";
 import { GetOpenDataSubmissionsByOUUseCase } from "./domain/usecases/GetOpenDataSubmissionsByOUUseCase";
 import { getD2APiFromInstance } from "./utils/d2-api";
 import { QuestionnaireD2Repository } from "./data/repositories/QuestionnaireD2Repository";
@@ -116,18 +116,19 @@ export function getCompositionRoot(instance: Instance) {
             upload: new UploadDocumentUseCase(glassDocumentsRepository, glassUploadsRepository),
             deleteByUploadId: new DeleteDocumentInfoByUploadIdUseCase(glassDocumentsRepository, glassUploadsRepository),
             download: new DownloadDocumentUseCase(glassDocumentsRepository),
-            updateSampleFileWithRisId: new UpdateSampleUploadWithRisIdUseCase(glassUploadsRepository),
+            updateSecondaryFileWithPrimaryId: new UpdateSampleUploadWithRisIdUseCase(glassUploadsRepository),
         }),
         fileSubmission: getExecute({
-            RISFile: new ImportRISFileUseCase(
+            primaryFile: new ImportPrimaryFileUseCase(
                 risDataRepository,
                 metadataRepository,
                 dataValuesRepository,
-                glassModuleRepository
+                glassModuleRepository,
+                egaspDataRepository
             ),
             validatePrimaryFile: new ValidatePrimaryFileUseCase(risDataRepository, egaspDataRepository),
-            sampleFile: new ImportSampleFileUseCase(sampleDataRepository, metadataRepository, dataValuesRepository),
-            validateSampleFile: new ValidateSampleFileUseCase(sampleDataRepository),
+            secondaryFile: new ImportSampleFileUseCase(sampleDataRepository, metadataRepository, dataValuesRepository),
+            validateSecondaryFile: new ValidateSampleFileUseCase(sampleDataRepository),
         }),
         questionnaires: getExecute({
             get: new GetQuestionnaireUseCase(questionnaireD2Repository),

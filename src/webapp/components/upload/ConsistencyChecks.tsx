@@ -51,7 +51,8 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
             setImportLoading(true);
 
             Future.joinObj({
-                importRISFileSummary: compositionRoot.fileSubmission.RISFile(
+                importRISFileSummary: compositionRoot.fileSubmission.primaryFile(
+                    currentModuleAccess.moduleName,
                     risFile,
                     batchId,
                     currentPeriod,
@@ -61,7 +62,7 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
                     false
                 ),
                 importSampleFileSummary: sampleFile
-                    ? compositionRoot.fileSubmission.sampleFile(
+                    ? compositionRoot.fileSubmission.secondaryFile(
                           sampleFile,
                           batchId,
                           currentPeriod,
