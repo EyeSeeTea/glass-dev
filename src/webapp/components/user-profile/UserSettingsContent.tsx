@@ -50,7 +50,11 @@ export const UserSettingsContent: FC<UserSettingsContentProps> = ({ userInformat
                         <tr>
                             <td>{i18n.t("Interface language")}</td>
                             <td>
-                                <Select defaultValue={userInformation.settings.keyUiLocale} disabled>
+                                <Select
+                                    defaultValue={userInformation.settings.keyUiLocale}
+                                    MenuProps={{ disableScrollLock: true }}
+                                    disabled
+                                >
                                     {uiLocalesOptions.map(option => (
                                         <MenuItem key={option.locale} value={option.locale}>
                                             {option.name}
@@ -62,7 +66,11 @@ export const UserSettingsContent: FC<UserSettingsContentProps> = ({ userInformat
                         <tr>
                             <td>{i18n.t("Database language")}</td>
                             <td>
-                                <Select defaultValue={userInformation.settings.keyDbLocale} disabled>
+                                <Select
+                                    defaultValue={userInformation.settings.keyDbLocale}
+                                    MenuProps={{ disableScrollLock: true }}
+                                    disabled
+                                >
                                     {databaseLocalesOptions.map(option => (
                                         <MenuItem key={option.locale} value={option.locale}>
                                             {option.name}
@@ -74,7 +82,11 @@ export const UserSettingsContent: FC<UserSettingsContentProps> = ({ userInformat
                         <tr>
                             <td>{i18n.t("Enable message email notifications")}</td>
                             <td>
-                                <Select defaultValue={userInformation.settings.keyMessageEmailNotification} disabled>
+                                <Select
+                                    defaultValue={userInformation.settings.keyMessageEmailNotification}
+                                    MenuProps={{ disableScrollLock: true }}
+                                    disabled
+                                >
                                     {booleanOptions.map(option => (
                                         <MenuItem key={option.value} value={option.value}>
                                             {option.label}
@@ -86,7 +98,11 @@ export const UserSettingsContent: FC<UserSettingsContentProps> = ({ userInformat
                         <tr>
                             <td>{i18n.t("Enable message SMS notifications")}</td>
                             <td>
-                                <Select defaultValue={userInformation.settings.keyMessageSmsNotification} disabled>
+                                <Select
+                                    defaultValue={userInformation.settings.keyMessageSmsNotification}
+                                    MenuProps={{ disableScrollLock: true }}
+                                    disabled
+                                >
                                     {booleanOptions.map(option => (
                                         <MenuItem key={option.value} value={option.value}>
                                             {option.label}
