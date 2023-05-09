@@ -38,7 +38,7 @@ export class UsersDefaultRepository implements UsersRepository {
                 })
             )
                 .flatMap(res => {
-                    return res.status === "OK" ? Future.success(undefined) : Future.error("");
+                    return res.status === "OK" ? Future.success(undefined) : Future.error(res.status);
                 })
                 .mapError(error => {
                     return error;
