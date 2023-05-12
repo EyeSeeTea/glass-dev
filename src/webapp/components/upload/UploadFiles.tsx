@@ -24,6 +24,7 @@ import { useSnackbar } from "@eyeseetea/d2-ui-components";
 import { Future } from "../../../domain/entities/Future";
 import { ImportSummary } from "../../../domain/entities/data-entry/ImportSummary";
 import { StyledLoaderContainer } from "./ConsistencyChecks";
+import { moduleProperties } from "../../../domain/utils/ModuleProperties";
 
 interface UploadFilesProps {
     changeStep: (step: number) => void;
@@ -42,14 +43,6 @@ interface PreviouslySubmittedContainerProps {
 }
 
 const UPLOADED_STATUS = "uploaded";
-
-const isBatchAndSecondaryFileApplicable = (module: string) => {
-    if (module === "AMR") {
-        return true;
-    } else {
-        return false;
-    }
-};
 
 const datasetOptions = [
     {
@@ -109,7 +102,7 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
     const dataSubmissionId = useCurrentDataSubmissionId(compositionRoot, moduleId, orgUnitId, currentPeriod);
 
     useEffect(() => {
-        if (isBatchAndSecondaryFileApplicable(moduleName)) {
+        if (moduleProperties.get(moduleName)?.isbatchReq) {
             setPreviousBatchIdsLoading(true);
             if (dataSubmissionId !== "") {
                 compositionRoot.glassUploads.getByDataSubmission(dataSubmissionId).run(
@@ -140,7 +133,7 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
     }, [compositionRoot.glassUploads, dataSubmissionId, setBatchId, snackbar, moduleName]);
 
     useEffect(() => {
-        if (isBatchAndSecondaryFileApplicable(moduleName)) {
+        if (moduleProperties.get(moduleName)?.isbatchReq) {
             if (batchId && isFileValid) {
                 setIsValidated(true);
             } else {
@@ -252,11 +245,13 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
             <Backdrop open={importLoading} style={{ color: "#fff", zIndex: 1 }}>
                 <StyledLoaderContainer>
                     <CircularProgress color="inherit" size={50} />
+
                     <Typography variant="h6">
-                        {i18n.t("Performing a dry run of the import to ensure that there are no errors.")}
+                        {i18n.t(moduleProperties.get(moduleName)?.importLoadingMsg.line1 || "Loading")}
                     </Typography>
+
                     <Typography variant="h5">
-                        {i18n.t("This might take several minutes, do not refresh the page or press back.")}
+                        {i18n.t(moduleProperties.get(moduleName)?.importLoadingMsg.line2 || "")}
                     </Typography>
                 </StyledLoaderContainer>
             </Backdrop>
@@ -271,7 +266,7 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
                             primaryFile={primaryFile}
                             setPrimaryFile={setPrimaryFile}
                         />
-                        {isBatchAndSecondaryFileApplicable(moduleName) && (
+                        {moduleProperties.get(moduleName)?.isbatchReq && (
                             <UploadSample
                                 batchId={batchId}
                                 sampleFile={secondaryFile}
@@ -280,7 +275,7 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
                             />
                         )}
                     </div>
-                    {isBatchAndSecondaryFileApplicable(moduleName) && (
+                    {moduleProperties.get(moduleName)?.isbatchReq && (
                         <div className="batch-id">
                             <h3>{i18n.t("Batch ID")}</h3>
                             <FormControl variant="outlined" style={{ minWidth: 180 }}>
@@ -308,7 +303,8 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
                     <div className="bottom">
                         <PreviouslySubmittedContainer
                             isVisible={
-                                previousUploadsBatchIds.length > 0 && isBatchAndSecondaryFileApplicable(moduleName)
+                                previousUploadsBatchIds.length > 0 &&
+                                (moduleProperties.get(moduleName)?.isbatchReq === true ? true : false)
                             }
                         >
                             <h4>{i18n.t("You Previously Submitted:")} </h4>

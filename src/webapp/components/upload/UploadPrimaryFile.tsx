@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Button, CircularProgress } from "@material-ui/core";
-import styled from "styled-components";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import BackupIcon from "@material-ui/icons/Backup";
 import CloseIcon from "@material-ui/icons/Close";
@@ -14,19 +13,13 @@ import { useCurrentModuleContext } from "../../contexts/current-module-context";
 import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context";
 import { useCallbackEffect } from "../../hooks/use-callback-effect";
 import { useCurrentPeriodContext } from "../../contexts/current-period-context";
+import { moduleProperties } from "../../../domain/utils/ModuleProperties";
 interface UploadPrimaryFileProps {
     primaryFile: File | null;
     setPrimaryFile: React.Dispatch<React.SetStateAction<File | null>>;
     validate: (val: boolean) => void;
     batchId: string;
 }
-
-const getFileType = (module: string) => {
-    if (module === "AMR") {
-        return "RIS";
-    } else if (module === "EGASP") return "EGASP";
-    else return module;
-};
 
 export const UploadPrimaryFile: React.FC<UploadPrimaryFileProps> = ({
     primaryFile,
@@ -105,9 +98,10 @@ export const UploadPrimaryFile: React.FC<UploadPrimaryFileProps> = ({
                         primaryFileData => {
                             if (primaryFileData.isValid) {
                                 setPrimaryFile(uploadedPrimaryFile);
+                                const primaryFileType = moduleProperties.get(moduleName)?.primaryFileType;
                                 const data = {
                                     batchId,
-                                    fileType: getFileType(moduleName),
+                                    fileType: primaryFileType !== undefined ? primaryFileType : moduleName,
                                     dataSubmission: dataSubmissionId,
                                     moduleId,
                                     moduleName,
@@ -158,8 +152,10 @@ export const UploadPrimaryFile: React.FC<UploadPrimaryFileProps> = ({
     const primaryFileUploadEffect = useCallbackEffect(primaryFileUpload);
 
     return (
-        <ContentWrapper className="ris-file">
-            <span className="label">{i18n.t("Choose RIS File")}</span>
+        <div>
+            <span className="label">
+                {i18n.t(moduleProperties.get(moduleName)?.primaryUploadLabel || "Choose File")}
+            </span>
             {/* Allow only one file upload per dataset */}
             <Dropzone ref={primaryFileUploadRef} onDrop={primaryFileUploadEffect} maxFiles={1}>
                 <Button
@@ -182,8 +178,6 @@ export const UploadPrimaryFile: React.FC<UploadPrimaryFileProps> = ({
                     </StyledRemoveButton>
                 </RemoveContainer>
             )}
-        </ContentWrapper>
+        </div>
     );
 };
-
-const ContentWrapper = styled.div``;
