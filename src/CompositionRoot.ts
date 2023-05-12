@@ -58,6 +58,8 @@ import { GetUiLocalesUseCase } from "./domain/usecases/GetUiLocalesUseCase";
 import { GetDatabaseLocalesUseCase } from "./domain/usecases/GetDatabaseLocalesUseCase";
 import { LocalesDefaultRepository } from "./data/repositories/LocalesDefaultRepository";
 import { EGASPDataCSVRepository } from "./data/repositories/EGASPDataCSVRepository";
+import { Dhis2EventsDefaultRepository } from "./data/repositories/Dhis2EventsDefaultRepository";
+import { EGASPProgramDefaultRepository } from "./data/repositories/bulk-load/EGASPProgramDefaultRepository";
 
 export function getCompositionRoot(instance: Instance) {
     const api = getD2APiFromInstance(instance);
@@ -79,6 +81,8 @@ export function getCompositionRoot(instance: Instance) {
     const usersDefaultRepository = new UsersDefaultRepository(api);
     const localeRepository = new LocalesDefaultRepository(instance);
     const egaspDataRepository = new EGASPDataCSVRepository();
+    const dhis2EventsDefaultRepository = new Dhis2EventsDefaultRepository(instance);
+    const egaspProgramRepository = new EGASPProgramDefaultRepository(instance);
 
     return {
         instance: getExecute({
@@ -124,7 +128,9 @@ export function getCompositionRoot(instance: Instance) {
                 metadataRepository,
                 dataValuesRepository,
                 glassModuleRepository,
-                egaspDataRepository
+                egaspDataRepository,
+                dhis2EventsDefaultRepository,
+                egaspProgramRepository
             ),
             validatePrimaryFile: new ValidatePrimaryFileUseCase(risDataRepository, egaspDataRepository),
             secondaryFile: new ImportSampleFileUseCase(sampleDataRepository, metadataRepository, dataValuesRepository),
