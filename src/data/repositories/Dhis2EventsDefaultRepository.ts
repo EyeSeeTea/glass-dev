@@ -35,8 +35,28 @@ export class Dhis2EventsDefaultRepository {
     }
 
     import(events: EventsPostRequest) {
-        return apiToFuture(this.api.events.postAsync({}, events)).map(result => {
-            console.debug(result);
-        });
+        return (
+            apiToFuture(this.api.events.post({}, events))
+                // .flatMap(response => {
+                //     return apiToFuture(this.api.system.waitFor(response.response.jobType, response.response.id));
+                // })
+                .map(result => {
+                    if (!result) {
+                        return {
+                            status: "ERROR",
+                            description: "An unexpected error has ocurred saving data values",
+                            importCount: {
+                                imported: 0,
+                                updated: 0,
+                                ignored: 0,
+                                deleted: 0,
+                            },
+                            conficts: [],
+                        };
+                    }
+
+                    return result;
+                })
+        );
     }
 }

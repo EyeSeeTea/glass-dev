@@ -60,6 +60,7 @@ import { LocalesDefaultRepository } from "./data/repositories/LocalesDefaultRepo
 import { EGASPDataCSVRepository } from "./data/repositories/EGASPDataCSVRepository";
 import { Dhis2EventsDefaultRepository } from "./data/repositories/Dhis2EventsDefaultRepository";
 import { EGASPProgramDefaultRepository } from "./data/repositories/bulk-load/EGASPProgramDefaultRepository";
+import { ExcelPopulateRepository } from "./data/repositories/ExcelPopulateRepository";
 
 export function getCompositionRoot(instance: Instance) {
     const api = getD2APiFromInstance(instance);
@@ -83,6 +84,7 @@ export function getCompositionRoot(instance: Instance) {
     const egaspDataRepository = new EGASPDataCSVRepository();
     const dhis2EventsDefaultRepository = new Dhis2EventsDefaultRepository(instance);
     const egaspProgramRepository = new EGASPProgramDefaultRepository(instance);
+    const excelRepository = new ExcelPopulateRepository();
 
     return {
         instance: getExecute({
@@ -130,7 +132,8 @@ export function getCompositionRoot(instance: Instance) {
                 glassModuleRepository,
                 egaspDataRepository,
                 dhis2EventsDefaultRepository,
-                egaspProgramRepository
+                egaspProgramRepository,
+                excelRepository
             ),
             validatePrimaryFile: new ValidatePrimaryFileUseCase(risDataRepository, egaspDataRepository),
             secondaryFile: new ImportSampleFileUseCase(sampleDataRepository, metadataRepository, dataValuesRepository),
