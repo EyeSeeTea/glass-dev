@@ -1,8 +1,8 @@
 import _ from "lodash";
 import { Maybe } from "../../types/utils";
-import { DataPackage } from "../../domain/usecases/data-entry/ImportEGASPFile";
-import { Id } from "../../domain/entities/Ref";
-import { DataFormType } from "../repositories/bulk-load/EGASPProgramDefaultRepository";
+import { DataPackage } from "../usecases/data-entry/ImportEGASPFile";
+import { Id } from "./Ref";
+import { DataFormType } from "../../data/repositories/bulk-load/EGASPProgramDefaultRepository";
 
 export interface SheetE {
     index: number;
@@ -15,13 +15,7 @@ export type DataSourceType = "row" | "column" | "cell";
 export type RefType = "row" | "column" | "cell" | "range";
 export type SheetRef = RowRef | ColumnRef | CellRef | RangeRef;
 
-export type DataSourceValue =
-    | RowDataSource
-    | TeiRowDataSource
-    | TrackerEventRowDataSource
-    | TrackerRelationship
-    | ColumnDataSource
-    | CellDataSource;
+export type DataSourceValue = RowDataSource;
 
 // Use to reference data sources for dynamic sheets
 type DataSourceValueGetter = (sheet: string) => DataSourceValue | DataSourceValue[] | false;
@@ -34,7 +28,7 @@ export type StyleSource = {
     source: CellRef | RangeRef;
 };
 
-type Base64String = string;
+// type Base64String = string;
 
 export type Template = GeneratedTemplate;
 

@@ -5,10 +5,22 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2023-05-09T16:12:09.182Z\n"
-"PO-Revision-Date: 2023-05-09T16:12:09.182Z\n"
+"POT-Creation-Date: 2023-05-12T09:41:55.812Z\n"
+"PO-Revision-Date: 2023-05-12T09:41:55.812Z\n"
+
+msgid "Template {{id}} not loaded"
+msgstr ""
 
 msgid "Error saving registration status"
+msgstr ""
+
+msgid "Data Set"
+msgstr ""
+
+msgid "Event Program"
+msgstr ""
+
+msgid "Tracker Program"
 msgstr ""
 
 msgid "The AST results provided are not valid (they are all empty)"
@@ -401,9 +413,6 @@ msgstr ""
 msgid "Error fetching previous uploads."
 msgstr ""
 
-msgid "Performing a dry run of the import to ensure that there are no errors."
-msgstr ""
-
 msgid "Choose a Dataset"
 msgstr ""
 
@@ -414,9 +423,6 @@ msgid "Error in file upload"
 msgstr ""
 
 msgid "Incorrect File Format. Please retry with a valid file"
-msgstr ""
-
-msgid "Choose RIS File"
 msgstr ""
 
 msgid "Select file"

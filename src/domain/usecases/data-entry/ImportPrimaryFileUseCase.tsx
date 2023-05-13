@@ -11,6 +11,7 @@ import { ImportEGASPFile } from "./ImportEGASPFile";
 import { EGASPDataRepository } from "../../repositories/data-entry/EGASPDataRepository";
 import { Dhis2EventsDefaultRepository } from "../../../data/repositories/Dhis2EventsDefaultRepository";
 import { EGASPProgramDefaultRepository } from "../../../data/repositories/bulk-load/EGASPProgramDefaultRepository";
+import { ExcelRepository } from "../../repositories/ExcelRepository";
 
 export class ImportPrimaryFileUseCase implements UseCase {
     constructor(
@@ -20,7 +21,8 @@ export class ImportPrimaryFileUseCase implements UseCase {
         private moduleRepository: GlassModuleRepository,
         private egaspDataRepository: EGASPDataRepository,
         private dhis2EventsDefaultRepository: Dhis2EventsDefaultRepository,
-        private egaspProgramDefaultRepository: EGASPProgramDefaultRepository
+        private egaspProgramDefaultRepository: EGASPProgramDefaultRepository,
+        private excelRepository: ExcelRepository
     ) {}
 
     public execute(
@@ -44,7 +46,8 @@ export class ImportPrimaryFileUseCase implements UseCase {
         } else if (moduleName === "EGASP") {
             const importEGASPFile = new ImportEGASPFile(
                 this.dhis2EventsDefaultRepository,
-                this.egaspProgramDefaultRepository
+                this.egaspProgramDefaultRepository,
+                this.excelRepository
             );
             return importEGASPFile.importEGASPFile(inputFile);
         } else {
