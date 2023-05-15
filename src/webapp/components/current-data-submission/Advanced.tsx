@@ -28,7 +28,7 @@ export const Advanced: React.FC<AdvancedProps> = ({ setRefetchStatus, setCurrent
                 <Box sx={{ m: 2 }} />
                 <p>
                     {i18n.t(
-                        "After it the status is “WHO Aproval” or “WHO PUBLISHED” the revoking process needs to be suppervised by WHO because it can affect ongoing publications"
+                        "After the file has been submitted or approved by WHO the revoking process needs to be supervised by WHO because it can affect ongoing validation or publication"
                     )}
                 </p>
                 <AdvancedButtons setRefetchStatus={setRefetchStatus} setCurrentStep={setCurrentStep} />
