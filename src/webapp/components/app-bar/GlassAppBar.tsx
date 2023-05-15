@@ -133,7 +133,12 @@ export const GlassAppBar: React.FC<GlassAppBarProps> = ({ toggleShowMenu }) => {
                                 <LocationIcon />
                             </IconButton>
                             {currentUser?.userOrgUnitsAccess && (
-                                <Select value={orgUnitName} disableUnderline onChange={changeOrgUnit}>
+                                <Select
+                                    value={orgUnitName}
+                                    disableUnderline
+                                    onChange={changeOrgUnit}
+                                    MenuProps={{ disableScrollLock: true }}
+                                >
                                     {currentUser.userOrgUnitsAccess.map(orgUnit => (
                                         <MenuItem
                                             key={orgUnit.orgUnitId}
@@ -172,6 +177,7 @@ export const GlassAppBar: React.FC<GlassAppBarProps> = ({ toggleShowMenu }) => {
                                     vertical: "top",
                                     horizontal: "left",
                                 }}
+                                disableScrollLock={true}
                             >
                                 <MenuItem onClick={() => handleClose("/user-profile")}>
                                     <ListItemIcon>
