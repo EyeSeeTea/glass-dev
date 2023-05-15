@@ -5,13 +5,277 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2021-08-25T12:21:36.218Z\n"
-"PO-Revision-Date: 2021-08-25T12:21:36.218Z\n"
+"POT-Creation-Date: 2023-05-15T14:02:53.262Z\n"
+"PO-Revision-Date: 2023-05-15T14:02:53.262Z\n"
+
+msgid "Error saving registration status"
+msgstr ""
+
+msgid "The AST results provided are not valid (they are all empty)"
+msgstr ""
+
+msgid "Profile"
+msgstr ""
+
+msgid "Settings"
+msgstr ""
+
+msgid "WHO privacy policy"
+msgstr ""
 
 msgid "Add"
 msgstr ""
 
 msgid "List"
+msgstr ""
+
+msgid "WHO Region"
+msgstr ""
+
+msgid "Country"
+msgstr ""
+
+msgid "Year"
+msgstr ""
+
+msgid "Enrolment status"
+msgstr ""
+
+msgid "Date of Enrolment"
+msgstr ""
+
+msgid "Ask for updating"
+msgstr ""
+
+msgid ""
+"If for any reason you need to pull this file from the platform to upload a "
+"new version of the data you can do it automatically while it is not "
+"approved by WHO."
+msgstr ""
+
+msgid ""
+"After the file has been submitted or approved by WHO the revoking process "
+"needs to be supervised by WHO because it can affect ongoing validation or "
+"publication"
+msgstr ""
+
+msgid "Request Dataset update"
+msgstr ""
+
+msgid "Correct Uploads"
+msgstr ""
+
+msgid "Upload Dataset"
+msgstr ""
+
+msgid "You can add up to 6 datasets to this submission with different BATCH IDS."
+msgstr ""
+
+msgid "Uploads with errors, or discarded"
+msgstr ""
+
+msgid "There are no questionnaries for this module"
+msgstr ""
+
+msgid "mandatory"
+msgstr ""
+
+msgid "Completed"
+msgstr ""
+
+msgid "Not completed"
+msgstr ""
+
+msgid "View"
+msgstr ""
+
+msgid "Go"
+msgstr ""
+
+msgid "Overview"
+msgstr ""
+
+msgid "Datasets"
+msgstr ""
+
+msgid "Questionnaires"
+msgstr ""
+
+msgid "Validation Report"
+msgstr ""
+
+msgid "Advanced"
+msgstr ""
+
+msgid "No Data uploaded..."
+msgstr ""
+
+msgid "Uploaded"
+msgstr ""
+
+msgid "Period"
+msgstr ""
+
+msgid "Records"
+msgstr ""
+
+msgid "Type"
+msgstr ""
+
+msgid "Batch ID"
+msgstr ""
+
+msgid "Status"
+msgstr ""
+
+msgid "Download File"
+msgstr ""
+
+msgid "Delete"
+msgstr ""
+
+msgid "Deleting Files"
+msgstr ""
+
+msgid "This might take several minutes, do not refresh the page or press back."
+msgstr ""
+
+msgid "Confirm Delete"
+msgstr ""
+
+msgid "Ok"
+msgstr ""
+
+msgid "Cancel"
+msgstr ""
+
+msgid ""
+"Deleting this upload will delete both SAMPLE and RIS files for the given "
+"dataset. Are you sure you want to delete?"
+msgstr ""
+
+msgid "Go to questionnaires"
+msgstr ""
+
+msgid "Upload/Delete datasets"
+msgstr ""
+
+msgid "Send submission"
+msgstr ""
+
+msgid "Confirm submission"
+msgstr ""
+
+msgid ""
+"Please review that the submission package contains all the datasets that "
+"you want to include."
+msgstr ""
+
+msgid ""
+"After you submit this package, you wont be able to edit it anymore wihout "
+"WHO permissions"
+msgstr ""
+
+msgid "Full Status History"
+msgstr ""
+
+msgid "Done"
+msgstr ""
+
+msgid "From"
+msgstr ""
+
+msgid "To"
+msgstr ""
+
+msgid "Changed at"
+msgstr ""
+
+msgid "Error fetching questionnaires."
+msgstr ""
+
+msgid "Error fetching uploads."
+msgstr ""
+
+msgid "Current Status"
+msgstr ""
+
+msgid "Content"
+msgstr ""
+
+msgid "Mandatory"
+msgstr ""
+
+msgid "State"
+msgstr ""
+
+msgid "Data Submission status has errors..."
+msgstr ""
+
+msgid "File Type"
+msgstr ""
+
+msgid "Batch Id"
+msgstr ""
+
+msgid "Specimens"
+msgstr ""
+
+msgid "Date"
+msgstr ""
+
+msgid "Filename"
+msgstr ""
+
+msgid "Download"
+msgstr ""
+
+msgid "Filters"
+msgstr ""
+
+msgid "Select Year"
+msgstr ""
+
+msgid "Select Status"
+msgstr ""
+
+msgid " "
+msgstr ""
+
+msgid "status"
+msgstr ""
+
+msgid "News from GLASS"
+msgstr ""
+
+msgid "No Open Data Submissions"
+msgstr ""
+
+msgid "Notification"
+msgstr ""
+
+msgid "Close"
+msgstr ""
+
+msgid "Participants"
+msgstr ""
+
+msgid "Me"
+msgstr ""
+
+msgid "Message from {{sender}}"
+msgstr ""
+
+msgid "Your Notifications"
+msgstr ""
+
+msgid "No notifications"
+msgstr ""
+
+msgid "OPEN ALL YEAR"
+msgstr ""
+
+msgid "GO"
 msgstr ""
 
 msgid "Back"
@@ -20,8 +284,230 @@ msgstr ""
 msgid "Help"
 msgstr ""
 
-msgid "Hello {{name}}"
+msgid "You don't have capture access to this page"
 msgstr ""
 
-msgid "Detail page"
+msgid "You don't have read access to this page"
+msgstr ""
+
+msgid "Set as incomplete"
+msgstr ""
+
+msgid "Set as completed"
+msgstr ""
+
+msgid "Yes"
+msgstr ""
+
+msgid "No"
+msgstr ""
+
+msgid "Error fetching User Modules"
+msgstr ""
+
+msgid "HOME"
+msgstr ""
+
+msgid "Log Out"
+msgstr ""
+
+msgid "Blocking Errors"
+msgstr ""
+
+msgid "Name"
+msgstr ""
+
+msgid "Count"
+msgstr ""
+
+msgid "Lines"
+msgstr ""
+
+msgid "Blocked Lines"
+msgstr ""
+
+msgid "Back to Module"
+msgstr ""
+
+msgid "Go to Validation Report"
+msgstr ""
+
+msgid "Thank! your data for now is uploaded in our system"
+msgstr ""
+
+msgid "Importing data and applying validation rules"
+msgstr ""
+
+msgid "These Consistency Checks ensure that incorrect data is not imported."
+msgstr ""
+
+msgid ""
+"Custom validations are complete, validation rules will be run after the "
+"actual import is completed. "
+msgstr ""
+
+msgid ""
+"All blocking errors need to be addressed. If found, please re-upload "
+"correct data to complete the data submission"
+msgstr ""
+
+msgid ""
+"Non-Blocking errors are warnings, it is good to address them. However, you "
+"can still proceed with the submission."
+msgstr ""
+
+msgid "RIS File"
+msgstr ""
+
+msgid "Sample File"
+msgstr ""
+
+msgid "Continue"
+msgstr ""
+
+msgid "No sample file uploaded"
+msgstr ""
+
+msgid "Non-blocking warnings"
+msgstr ""
+
+msgid "Summary"
+msgstr ""
+
+msgid "imported: "
+msgstr ""
+
+msgid "updated: "
+msgstr ""
+
+msgid "deleted: "
+msgstr ""
+
+msgid "ignored: "
+msgstr ""
+
+msgid "Submit Help Ticket"
+msgstr ""
+
+msgid "App support ticket"
+msgstr ""
+
+msgid "Upload New Data Files"
+msgstr ""
+
+msgid "Fix upload data"
+msgstr ""
+
+msgid "Error fetching previous uploads."
+msgstr ""
+
+msgid "Performing a dry run of the import to ensure that there are no errors."
+msgstr ""
+
+msgid "Choose a Dataset"
+msgstr ""
+
+msgid "Multiple uploads not allowed, please select one file"
+msgstr ""
+
+msgid "Error in file upload"
+msgstr ""
+
+msgid "Incorrect File Format. Please retry with a valid RIS file"
+msgstr ""
+
+msgid "Choose RIS File"
+msgstr ""
+
+msgid "Select file"
+msgstr ""
+
+msgid "Incorrect File Format. Please retry with a valid Sample file"
+msgstr ""
+
+msgid "SAMPLE File"
+msgstr ""
+
+msgid "not required"
+msgstr ""
+
+msgid "The password and confirm password fields don't match"
+msgstr ""
+
+msgid "User password changed successfully."
+msgstr ""
+
+msgid "Full name"
+msgstr ""
+
+msgid "Username"
+msgstr ""
+
+msgid "Email"
+msgstr ""
+
+msgid "Phone number"
+msgstr ""
+
+msgid "Birthday"
+msgstr ""
+
+msgid "Nationality"
+msgstr ""
+
+msgid "Job title"
+msgstr ""
+
+msgid "Employer"
+msgstr ""
+
+msgid "Education"
+msgstr ""
+
+msgid "Interests"
+msgstr ""
+
+msgid "Languages"
+msgstr ""
+
+msgid "Change Password"
+msgstr ""
+
+msgid "Change password"
+msgstr ""
+
+msgid "Error fetching Database locales"
+msgstr ""
+
+msgid "Error fetching UI locales"
+msgstr ""
+
+msgid "Interface language"
+msgstr ""
+
+msgid "Database language"
+msgstr ""
+
+msgid "Enable message email notifications"
+msgstr ""
+
+msgid "Enable message SMS notifications"
+msgstr ""
+
+msgid "Country Information"
+msgstr ""
+
+msgid "Yearly data upload"
+msgstr ""
+
+msgid "Data File History"
+msgstr ""
+
+msgid "List of Data Submissions"
+msgstr ""
+
+msgid "All Data Submissions"
+msgstr ""
+
+msgid "Reports"
 msgstr ""

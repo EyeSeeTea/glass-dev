@@ -8,6 +8,7 @@ import styled from "styled-components";
 
 export const PageHeader: React.FC<PageHeaderProps> = React.memo(props => {
     const { variant = "h5", title, onBackClick, helpText, children } = props;
+
     return (
         <div>
             {!!onBackClick && (
@@ -22,7 +23,7 @@ export const PageHeader: React.FC<PageHeaderProps> = React.memo(props => {
             )}
 
             <Title variant={variant} gutterBottom data-test={"page-header-title"}>
-                {title}
+                {i18n.t(title)}
             </Title>
 
             {helpText && <HelpButton text={helpText} />}
@@ -62,5 +63,5 @@ const IconButton = styled(MUIIConButton)`
 
 const BackButton = styled(IconButton)`
     padding-top: 10px;
-    margin-bottom: 5px;
+    margin-bottom: 5x;
 `;
