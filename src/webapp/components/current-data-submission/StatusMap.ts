@@ -32,7 +32,7 @@ export const statusMap = new Map<DataSubmissionStatusTypes, StatusDetails>([
     [
         "COMPLETE",
         {
-            title: "DATA TO BE APROVED BY COUNTRY",
+            title: "DATA TO BE APPROVED BY COUNTRY",
             description:
                 "Your submission contains all the mandatory fields. You can still add or remove datasets. Please check that everything is included and once everythiong is fine send it to WHO for revision.",
             colour: glassColors.statusActionReq,
@@ -136,7 +136,7 @@ export const statusMap = new Map<DataSubmissionStatusTypes, StatusDetails>([
         {
             title: "WAITING for WHO TO ACCEPT THE DATA UPDATE REQUEST",
             description:
-                "When WHO admins aprove your request you will be able to modify your upload. \n You will be notified when that happens.",
+                "When WHO admins approve your request you will be able to modify your upload. \n You will be notified when that happens.",
             colour: glassColors.statusNeutral,
             leftCTAs: [
                 {
