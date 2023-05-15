@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2023-05-15T14:00:00.214Z\n"
-"PO-Revision-Date: 2023-05-15T14:00:00.214Z\n"
+"POT-Creation-Date: 2023-05-15T14:02:53.262Z\n"
+"PO-Revision-Date: 2023-05-15T14:02:53.262Z\n"
 
 msgid "Error saving registration status"
 msgstr ""
@@ -431,6 +431,12 @@ msgstr ""
 msgid "not required"
 msgstr ""
 
+msgid "The password and confirm password fields don't match"
+msgstr ""
+
+msgid "User password changed successfully."
+msgstr ""
+
 msgid "Full name"
 msgstr ""
 
@@ -462,6 +468,12 @@ msgid "Interests"
 msgstr ""
 
 msgid "Languages"
+msgstr ""
+
+msgid "Change Password"
+msgstr ""
+
+msgid "Change password"
 msgstr ""
 
 msgid "Error fetching Database locales"
