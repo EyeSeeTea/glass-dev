@@ -3,17 +3,21 @@ import { Paper, Table, TableCell, TableContainer, TableHead, TableRow, TableBody
 import styled from "styled-components";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
-import ArrowUpwardIcon from "@material-ui/icons/ArrowUpward";
 import { useHistory } from "react-router-dom";
 import { StatusCapsule } from "./StatusCapsule";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import { GlassDataSubmission } from "../../../domain/entities/GlassDataSubmission";
+import { SortDirection } from "../data-file-history/DataFileTable";
+import { ArrowDownward, ArrowUpward } from "@material-ui/icons";
 
 export interface DataSubmissionsTableProps {
     items?: GlassDataSubmission[];
+    sortByColumn: (columnName: string, sortDirection: SortDirection) => void;
 }
 
-export const DataSubmissionsTable: React.FC<DataSubmissionsTableProps> = ({ items }) => {
+export const DataSubmissionsTable: React.FC<DataSubmissionsTableProps> = ({ items, sortByColumn }) => {
+    const [yearSortDirection, setYearSortDirection] = React.useState<SortDirection>("asc");
+    const [statusSortDirection, setStatusSortDirection] = React.useState<SortDirection>("asc");
     const history = useHistory();
 
     const handleClick = (period: string) => {
@@ -25,19 +29,41 @@ export const DataSubmissionsTable: React.FC<DataSubmissionsTableProps> = ({ item
                 <Table aria-label="Data Submissions history table">
                     <StyledTableHead>
                         <TableRow>
-                            <TableCell>
-                                {i18n.t("Year")}
-                                <ColStatus>
-                                    <ArrowUpwardIcon />
-                                    <sup>1</sup>
-                                </ColStatus>
+                            <TableCell
+                                style={{ cursor: "pointer" }}
+                                onClick={() => {
+                                    yearSortDirection === "asc"
+                                        ? setYearSortDirection("desc")
+                                        : setYearSortDirection("asc");
+                                    sortByColumn("period", yearSortDirection);
+                                }}
+                            >
+                                <span>
+                                    {i18n.t("Year")}
+                                    {yearSortDirection === "asc" ? (
+                                        <ArrowUpward fontSize="small" />
+                                    ) : (
+                                        <ArrowDownward fontSize="small" />
+                                    )}
+                                </span>
                             </TableCell>
-                            <TableCell>
-                                {i18n.t("Status")}
-                                <ColStatus>
-                                    <ArrowUpwardIcon />
-                                    <sup>1</sup>
-                                </ColStatus>
+                            <TableCell
+                                style={{ cursor: "pointer" }}
+                                onClick={() => {
+                                    statusSortDirection === "asc"
+                                        ? setStatusSortDirection("desc")
+                                        : setStatusSortDirection("asc");
+                                    sortByColumn("status", statusSortDirection);
+                                }}
+                            >
+                                <span>
+                                    {i18n.t("Status")}
+                                    {statusSortDirection === "asc" ? (
+                                        <ArrowUpward fontSize="small" />
+                                    ) : (
+                                        <ArrowDownward fontSize="small" />
+                                    )}
+                                </span>
                             </TableCell>
                             <TableCell>{i18n.t(" ")}</TableCell>
                         </TableRow>
@@ -104,16 +130,6 @@ const StyledTableBody = styled(TableBody)`
         td {
             border-bottom: 1px solid ${glassColors.greyLight};
         }
-    }
-`;
-
-const ColStatus = styled.div`
-    display: inline-flex;
-    margin-left: 10px;
-    svg {
-        color: ${glassColors.greyBlack};
-        font-size: 18px;
-        margin-top: auto;
     }
 `;
 

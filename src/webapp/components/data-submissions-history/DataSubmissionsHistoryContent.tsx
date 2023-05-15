@@ -7,12 +7,13 @@ import { useCurrentModuleContext } from "../../contexts/current-module-context";
 import { useAppContext } from "../../contexts/app-context";
 import { Backdrop } from "@material-ui/core";
 import { StyledCircularProgress } from "../sidebar/SideBar";
+import { SortDirection } from "../data-file-history/DataFileTable";
 
 export const DataSubmissionsHistoryContent: React.FC = () => {
     const { compositionRoot } = useAppContext();
     const { currentOrgUnitAccess } = useCurrentOrgUnitContext();
     const { currentModuleAccess } = useCurrentModuleContext();
-    const { dataSubmissions, setRefetch } = useGlassDataSubmissionsByModuleAndOU(
+    const { dataSubmissions, setDataSubmissions, setRefetch } = useGlassDataSubmissionsByModuleAndOU(
         currentModuleAccess.moduleId,
         currentOrgUnitAccess.orgUnitId
     );
@@ -54,13 +55,22 @@ export const DataSubmissionsHistoryContent: React.FC = () => {
         setRefetch,
     ]);
 
+    const sortByColumn = (columnName: string, sortDirection: SortDirection) => {
+        setDataSubmissions(prevDataSubmissions => {
+            if (prevDataSubmissions.kind === "loaded") {
+                return { kind: "loaded", data: _.orderBy(prevDataSubmissions.data, columnName, sortDirection) };
+            } else return prevDataSubmissions;
+        });
+    };
     return (
         <ContentLoader content={dataSubmissions}>
             <Backdrop open={loading} style={{ color: "#fff", zIndex: 1 }}>
                 <StyledCircularProgress color="inherit" size={30} />
             </Backdrop>
 
-            {dataSubmissions.kind === "loaded" && <DataSubmissionsTable items={dataSubmissions.data} />}
+            {dataSubmissions.kind === "loaded" && (
+                <DataSubmissionsTable items={dataSubmissions.data} sortByColumn={sortByColumn} />
+            )}
         </ContentLoader>
     );
 };
