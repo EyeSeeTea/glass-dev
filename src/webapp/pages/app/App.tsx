@@ -1,4 +1,3 @@
-import { HeaderBar } from "@dhis2/ui";
 import { SnackbarProvider } from "@eyeseetea/d2-ui-components";
 import { MuiThemeProvider } from "@material-ui/core/styles";
 import _ from "lodash";
@@ -9,7 +8,6 @@ import { appConfig } from "../../../app-config";
 import { getCompositionRoot } from "../../../CompositionRoot";
 import { Instance } from "../../../data/entities/Instance";
 import { D2Api } from "../../../types/d2-api";
-import Share from "../../components/share/Share";
 import { AppContext, AppContextState } from "../../contexts/app-context";
 import { Router } from "../Router";
 import "./App.css";
@@ -24,7 +22,7 @@ export interface AppProps {
 }
 
 export const App: React.FC<AppProps> = React.memo(function App({ api, d2, instance }) {
-    const [showShareButton, setShowShareButton] = useState(false);
+    // const [showShareButton, setShowShareButton] = useState(false);
     const [loading, setLoading] = useState(true);
     const [appContext, setAppContext] = useState<AppContextState | null>(null);
 
@@ -32,12 +30,15 @@ export const App: React.FC<AppProps> = React.memo(function App({ api, d2, instan
         async function setup() {
             const compositionRoot = getCompositionRoot(instance);
             const { data: currentUser } = await compositionRoot.instance.getCurrentUser().runAsync();
+
             if (!currentUser) throw new Error("User not logged in");
 
-            const isShareButtonVisible = _(appConfig).get("appearance.showShareButton") || false;
+            await compositionRoot.glassModules.validate().runAsync();
+
+            // const isShareButtonVisible = _(appConfig).get("appearance.showShareButton") || false;
 
             setAppContext({ api, currentUser, compositionRoot });
-            setShowShareButton(isShareButtonVisible);
+            // setShowShareButton(isShareButtonVisible);
             initFeedbackTool(d2, appConfig);
             setLoading(false);
         }
@@ -50,7 +51,7 @@ export const App: React.FC<AppProps> = React.memo(function App({ api, d2, instan
         <MuiThemeProvider theme={muiTheme}>
             <OldMuiThemeProvider muiTheme={muiThemeLegacy}>
                 <SnackbarProvider>
-                    <HeaderBar appName="Skeleton App" />
+                    {/* <HeaderBar appName="Skeleton App" /> */}
 
                     <div id="app" className="content">
                         <AppContext.Provider value={appContext}>
@@ -58,7 +59,7 @@ export const App: React.FC<AppProps> = React.memo(function App({ api, d2, instan
                         </AppContext.Provider>
                     </div>
 
-                    <Share visible={showShareButton} />
+                    {/* <Share visible={showShareButton} /> */}
                 </SnackbarProvider>
             </OldMuiThemeProvider>
         </MuiThemeProvider>

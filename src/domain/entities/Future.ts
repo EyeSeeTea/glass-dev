@@ -14,6 +14,11 @@ export class Future<E, D> {
         return new Future(instance2);
     }
 
+    mapError<E2>(mapper: (error: E) => E2): Future<E2, D> {
+        const instance2 = fluture.mapRej(mapper)(this.instance) as fluture.FutureInstance<E2, D>;
+        return new Future(instance2);
+    }
+
     bimap<E2, D2>(dataMapper: (data: D) => D2, errorMapper: (error: E) => E2): Future<E2, D2> {
         const instance2 = fluture.bimap(errorMapper)(dataMapper)(this.instance);
         return new Future(instance2);
@@ -51,6 +56,13 @@ export class Future<E, D> {
         return new Future(fluture.Future((reject, resolve) => computation(resolve, reject)));
     }
 
+    static fromPromise<Data>(promise: Promise<Data>): FutureData<Data> {
+        return Future.fromComputation((resolve, reject) => {
+            promise.then(resolve).catch(err => reject(err ? err.message : "Unknown error"));
+            return () => {};
+        });
+    }
+
     static fromPurifyEither<E, D>(input: Either<E, D>): Future<E, D> {
         return new Future(
             fluture.Future((reject, resolve) => {
@@ -72,6 +84,10 @@ export class Future<E, D> {
     static join2<E, D1, D2>(future1: Future<E, D1>, future2: Future<E, D2>): Future<E, [D1, D2]> {
         const instance = fluture.both(future1.instance)(future2.instance);
         return new Future(instance);
+    }
+
+    static sequential<E, D>(futures: Array<Future<E, D>>): Future<E, Array<D>> {
+        return Future.parallel(futures, { maxConcurrency: 1 });
     }
 
     static parallel<E, D>(

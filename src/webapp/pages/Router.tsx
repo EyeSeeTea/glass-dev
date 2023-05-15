@@ -1,20 +1,107 @@
 import React from "react";
 import { HashRouter, Route, Switch } from "react-router-dom";
-import { ExamplePage } from "./example/ExamplePage";
+import { DataSubmissionsHistoryPage } from "./data-submissions-history/DataSubmissionsHistoryPage";
+import { CountryInformationPage } from "./country-information/CountryInformationPage";
+import { CurrentDataSubmissionPage } from "./current-data-submission/CurrentDataSubmissionPage";
+import { UploadPage } from "./upload/UploadPage";
 import { LandingPage } from "./landing/LandingPage";
+import { DataFileHistoryPage } from "./data-file-history/DataFileHistoryPage";
+import { UserProfilePage } from "./user-profile/UserProfilePage";
+import { CurrentOrgUnitContextProvider } from "../context-providers/CurrentOrgUnitContextProvider";
+import { CurrentModuleContextProvider } from "../context-providers/CurrentModuleContextProvider";
+import { PrivateRoute } from "../components/private-route/PrivateRoute";
+import { QuestionnaireFormTest } from "../components/questionnaire/QuestionnaireFormTest";
+import { CurrentPeriodContextProvider } from "../context-providers/CurrentPeriodContextProvider";
+import { MainLayout } from "../components/layouts/main-layout/MainLayout";
+import { ReportsPage } from "./reports/ReportsPage";
+import { UserSettingsPage } from "./user-profile/UserSettings";
 
 export const Router: React.FC = React.memo(() => {
     return (
         <HashRouter>
-            <Switch>
-                <Route
-                    path="/for/:name?"
-                    render={({ match }) => <ExamplePage name={match.params.name ?? "Stranger"} />}
-                />
-
-                {/* Default route */}
-                <Route render={() => <LandingPage />} />
-            </Switch>
+            <CurrentOrgUnitContextProvider>
+                <CurrentModuleContextProvider>
+                    <CurrentPeriodContextProvider>
+                        <MainLayout>
+                            <Switch>
+                                <Route
+                                    path="/data-submissions-history/"
+                                    render={({ location }) => (
+                                        <PrivateRoute pathname={location.pathname}>
+                                            <DataSubmissionsHistoryPage />
+                                        </PrivateRoute>
+                                    )}
+                                />
+                                <Route
+                                    path="/current-data-submission/"
+                                    render={({ location }) => (
+                                        <PrivateRoute pathname={location.pathname}>
+                                            <CurrentDataSubmissionPage />
+                                        </PrivateRoute>
+                                    )}
+                                />
+                                <Route
+                                    path="/reports/"
+                                    render={({ location }) => (
+                                        <PrivateRoute pathname={location.pathname}>
+                                            <ReportsPage />
+                                        </PrivateRoute>
+                                    )}
+                                />
+                                <Route
+                                    path="/upload/"
+                                    render={({ location }) => (
+                                        <PrivateRoute pathname={location.pathname}>
+                                            <UploadPage />
+                                        </PrivateRoute>
+                                    )}
+                                />
+                                <Route
+                                    path="/data-file-history"
+                                    render={({ location }) => (
+                                        <PrivateRoute pathname={location.pathname}>
+                                            <DataFileHistoryPage />
+                                        </PrivateRoute>
+                                    )}
+                                />
+                                <Route
+                                    path="/country-information"
+                                    render={({ location }) => (
+                                        <PrivateRoute pathname={location.pathname}>
+                                            <CountryInformationPage />
+                                        </PrivateRoute>
+                                    )}
+                                />
+                                <Route
+                                    path="/questionnaire"
+                                    render={({ location }) => (
+                                        <PrivateRoute pathname={location.pathname}>
+                                            <QuestionnaireFormTest />
+                                        </PrivateRoute>
+                                    )}
+                                />
+                                <Route
+                                    path="/user-profile"
+                                    render={({ location }) => (
+                                        <PrivateRoute pathname={location.pathname}>
+                                            <UserProfilePage />
+                                        </PrivateRoute>
+                                    )}
+                                />
+                                <Route
+                                    path="/user-settings"
+                                    render={({ location }) => (
+                                        <PrivateRoute pathname={location.pathname}>
+                                            <UserSettingsPage />
+                                        </PrivateRoute>
+                                    )}
+                                />
+                                <Route render={() => <LandingPage />} />
+                            </Switch>
+                        </MainLayout>
+                    </CurrentPeriodContextProvider>
+                </CurrentModuleContextProvider>
+            </CurrentOrgUnitContextProvider>
         </HashRouter>
     );
 });

@@ -5,15 +5,34 @@ import { getCompositionRoot } from "../CompositionRoot";
 import { getMockApi } from "../types/d2-api";
 import { AppContext, AppContextState } from "../webapp/contexts/app-context";
 import { Instance } from "../data/entities/Instance";
-import { User } from "../domain/entities/User";
+import { UserAccessInfo } from "../domain/entities/User";
 
-export function getTestUser(): User {
+export function getTestUser(): UserAccessInfo {
     return {
         id: "xE7jOejl9FI",
         name: "John Traore",
         username: "admin",
         userGroups: [],
         userRoles: [],
+        userOrgUnitsAccess: [],
+        userModulesAccess: [],
+        gender: "male",
+        email: "abc@gmail.com",
+        phoneNumber: "1234",
+        introduction: "hi",
+        birthday: "10/10/1920",
+        nationality: "south africa",
+        employer: "eyeseetea",
+        jobTitle: "developer",
+        education: "masters",
+        interests: "beach",
+        languages: "english",
+        settings: {
+            keyUiLocale: "en",
+            keyDbLocale: "en",
+            keyMessageEmailNotification: true,
+            keyMessageSmsNotification: true,
+        },
     };
 }
 
