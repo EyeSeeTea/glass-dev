@@ -101,13 +101,9 @@ export const CtaButtons: React.FC<CtaButtonsProps> = ({ ctas, position, setRefet
                     });
 
                     const userGroupsIds = [...approveAccessGroups, ...captureAccessGroups];
+                    const notificationText = `The data submission for ${currentModuleAccess.moduleName} module for year ${currentPeriod} and country ${currentOrgUnitAccess.orgUnitName} has changed to WAITING WHO APROVAL`;
                     compositionRoot.notifications
-                        .send(
-                            "Status Changed to WAITING WHO APROVAL",
-                            `The data submission for ${currentModuleAccess.moduleName} module for year ${currentPeriod} and country ${currentOrgUnitAccess.orgUnitName} has changed to WAITING WHO APROVAL`,
-                            userGroupsIds,
-                            [currentOrgUnitAccess.orgUnitId]
-                        )
+                        .send(notificationText, notificationText, userGroupsIds, [currentOrgUnitAccess.orgUnitId])
                         .run(
                             () => {},
                             () => {}
