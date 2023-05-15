@@ -151,7 +151,8 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                                                                 hideConfirmationDialog();
                                                             },
                                                             error => {
-                                                                snackbar.error(error);
+                                                                snackbar.error("Error deleting file");
+                                                                console.error(error);
                                                             }
                                                         );
                                                 } else {
@@ -161,13 +162,15 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                                                 }
                                             },
                                             error => {
-                                                snackbar.error(error);
+                                                snackbar.error("Error deleting file");
+                                                console.error(error);
                                             }
                                         );
                                     }
                                 },
                                 error => {
-                                    snackbar.error(error);
+                                    snackbar.error("Error deleting file");
+                                    console.error(error);
                                 }
                             );
                         }
