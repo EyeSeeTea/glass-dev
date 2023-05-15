@@ -3,7 +3,7 @@ export const isEditModeStatus = (statusTitle: string) => {
     //they allow New Dataset Uploads and Questionnaire edits.
     return (
         statusTitle === "NOT COMPLETED" ||
-        statusTitle === "DATA TO BE APROVED BY COUNTRY" ||
+        statusTitle === "DATA TO BE APPROVED BY COUNTRY" ||
         statusTitle === "REJECTED BY WHO" ||
         statusTitle === "DATA UPDATE REQUEST ACCEPTED"
     );
