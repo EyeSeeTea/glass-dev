@@ -1,8 +1,5 @@
 import _ from "lodash";
-import { Maybe } from "../../types/utils";
-import { DataPackage } from "../usecases/data-entry/ImportEGASPFile";
 import { Id } from "./Ref";
-import { DataFormType } from "../../data/repositories/bulk-load/EGASPProgramDefaultRepository";
 
 export interface SheetE {
     index: number;
@@ -27,9 +24,6 @@ export type StyleSource = {
     section: ThemeableSections | ImageSections;
     source: CellRef | RangeRef;
 };
-
-// type Base64String = string;
-
 export type Template = GeneratedTemplate;
 
 interface BaseTemplate {
@@ -39,22 +33,12 @@ interface BaseTemplate {
     dataSources?: DataSource[];
     styleSources: StyleSource[];
     dataFormId: CellRef | ValueRef;
-    dataFormType: CellRef | ValueRef<DataFormType>;
+    dataFormType: CellRef | ValueRef<"programs">;
 }
 
 export interface GeneratedTemplate extends BaseTemplate {
     type: "generated";
     rowOffset: number;
-}
-
-export interface DownloadCustomizationOptions {
-    populate: boolean;
-    dataPackage?: DataPackage;
-    orgUnits: string[];
-}
-
-export interface ImportCustomizationOptions {
-    dataPackage: DataPackage;
 }
 
 export interface GenericSheetRef {
@@ -115,29 +99,6 @@ interface BaseDataSource {
     };
 }
 
-export interface TrackerRelationship {
-    type: "rowTeiRelationship";
-    sheetsMatch: string;
-    skipPopulate?: boolean;
-    range: Range;
-    relationshipType: CellRef;
-    from: ColumnRef;
-    to: ColumnRef;
-}
-
-export interface TrackerEventRowDataSource {
-    type: "rowTrackedEvent";
-    sheetsMatch: string;
-    skipPopulate?: boolean;
-    teiId: ColumnRef;
-    eventId: ColumnRef;
-    date: ColumnRef;
-    categoryOptionCombo: ColumnRef;
-    dataValues: Range;
-    programStage: CellRef;
-    dataElements: Range;
-}
-
 export interface RowDataSource extends BaseDataSource {
     type: "row";
     range: Range;
@@ -147,18 +108,6 @@ export interface RowDataSource extends BaseDataSource {
     categoryOption?: RowRef | ValueRef;
     attribute?: ColumnRef | CellRef | ValueRef;
     eventId?: ColumnRef | CellRef | ValueRef;
-}
-
-export interface TeiRowDataSource {
-    type: "rowTei";
-    skipPopulate?: boolean;
-    teiId: ColumnRef;
-    orgUnit: ColumnRef;
-    geometry?: ColumnRef;
-    enrollmentDate: ColumnRef;
-    incidentDate: ColumnRef;
-    attributes: Range;
-    attributeId: RowRef;
 }
 
 export interface ColumnDataSource extends BaseDataSource {
@@ -181,20 +130,6 @@ export interface CellDataSource extends BaseDataSource {
     categoryOption?: CellRef | ValueRef;
     attribute?: CellRef | ValueRef;
     eventId?: CellRef | ValueRef;
-}
-
-interface DataFormRef {
-    type: Maybe<DataFormType>;
-    id: Maybe<string>;
-}
-
-export function getDataFormRef(template: BaseTemplate): DataFormRef {
-    const { dataFormType, dataFormId } = template;
-
-    return {
-        type: dataFormType.type === "value" ? dataFormType.id : undefined,
-        id: dataFormId.type === "value" ? dataFormId.id : undefined,
-    };
 }
 
 type ReferenceType = ColumnRef | CellRef | RowRef | Range | ValueRef | undefined;
@@ -264,33 +199,4 @@ export function setDataEntrySheet(dataSource: RowDataSource, sheets: SheetE[]): 
             eventId: set(dataSource.eventId),
         };
     });
-}
-
-export function setSheet<DS extends TrackerRelationship | TrackerEventRowDataSource>(
-    dataSource: DS,
-    sheetName: string
-): DS {
-    const sheet = sheetName;
-
-    switch (dataSource.type) {
-        case "rowTeiRelationship":
-            return {
-                ...dataSource,
-                range: { ...dataSource.range, sheet },
-                relationshipType: { ...dataSource.relationshipType, sheet },
-                from: { ...dataSource.from, sheet },
-                to: { ...dataSource.to, sheet },
-            };
-        case "rowTrackedEvent":
-            return {
-                ...dataSource,
-                teiId: { ...dataSource.teiId, sheet },
-                eventId: { ...dataSource.eventId, sheet },
-                date: { ...dataSource.date, sheet },
-                categoryOptionCombo: { ...dataSource.categoryOptionCombo, sheet },
-                dataValues: { ...dataSource.dataValues, sheet },
-                programStage: { ...dataSource.programStage, sheet },
-                dataElements: { ...dataSource.dataElements, sheet },
-            };
-    }
 }
