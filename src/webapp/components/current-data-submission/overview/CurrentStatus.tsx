@@ -187,14 +187,16 @@ const StyledDescription = styled.span`
     line-height: 1.4;
 `;
 
-const StyledInfoText = styled.span<{ statusColor: string }>`
+export const StyledInfoText = styled.span<{ statusColor: string }>`
     text-transform: uppercase;
     background: ${props => props.statusColor};
     color: ${palette.common.white};
     display: flex;
+    flex: none;
     flex-direction: column;
     align-items: center;
     padding: 3px 3px;
+    margin-bottom: 10px;
 
     width: 152px;
     height: 20px;

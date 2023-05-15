@@ -109,13 +109,15 @@ export const GlassAppBar: React.FC<GlassAppBarProps> = ({ toggleShowMenu }) => {
                         >
                             <MenuIcon />
                         </IconButton>
-                        <LogoContainer>
-                            <img src={glassLogo} width={150} alt="Glass logo" />;
-                        </LogoContainer>
+                        <a href={`${baseUrl}/api/apps/Home-Page/index.html#/glass-hq`}>
+                            <LogoContainer>
+                                <img src={glassLogo} width={150} alt="Glass logo" />
+                            </LogoContainer>
+                        </a>
 
                         <a href={`${baseUrl}/api/apps/Home-Page/index.html#/glass-hq`}>
                             <LogoContainer>
-                                <img src={whoLogo} width={150} alt="WHO logo" />;
+                                <img src={whoLogo} width={150} alt="WHO logo" />
                             </LogoContainer>
                         </a>
                         <Box className={classes.title} />
