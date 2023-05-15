@@ -8,24 +8,27 @@ import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import { useCallbackEffect } from "../../hooks/use-callback-effect";
 import { useSnackbar } from "@eyeseetea/d2-ui-components";
 import { useAppContext } from "../../contexts/app-context";
+import { moduleProperties } from "../../../domain/utils/ModuleProperties";
+import { useCurrentModuleContext } from "../../contexts/current-module-context";
 
 interface ReviewDataSummaryProps {
     changeStep: (step: number) => void;
-    risFileImportSummary: ImportSummary | undefined;
-    sampleFileImportSummary?: ImportSummary | undefined;
+    primaryFileImportSummary: ImportSummary | undefined;
+    secondaryFileImportSummary?: ImportSummary | undefined;
 }
 
 const COMPLETED_STATUS = "COMPLETED";
 
 export const ReviewDataSummary: React.FC<ReviewDataSummaryProps> = ({
     changeStep,
-    risFileImportSummary,
-    sampleFileImportSummary,
+    primaryFileImportSummary,
+    secondaryFileImportSummary,
 }) => {
     const { compositionRoot } = useAppContext();
     const snackbar = useSnackbar();
+    const { currentModuleAccess } = useCurrentModuleContext();
 
-    const [fileType, setFileType] = useState<string>("ris");
+    const [fileType, setFileType] = useState<string>("primary");
     const [isLoading, setIsLoading] = useState<boolean>(false);
 
     const changeType = (fileType: string) => {
@@ -33,18 +36,18 @@ export const ReviewDataSummary: React.FC<ReviewDataSummaryProps> = ({
     };
 
     const goToFinalStep = useCallback(() => {
-        const risUploadId = localStorage.getItem("primaryUploadId");
-        const sampleUploadId = localStorage.getItem("secondaryUploadId");
+        const primaryUploadId = localStorage.getItem("primaryUploadId");
+        const secondaryUploadId = localStorage.getItem("secondaryUploadId");
         setIsLoading(true);
-        if (risUploadId) {
-            return compositionRoot.glassUploads.setStatus({ id: risUploadId, status: COMPLETED_STATUS }).run(
+        if (primaryUploadId) {
+            return compositionRoot.glassUploads.setStatus({ id: primaryUploadId, status: COMPLETED_STATUS }).run(
                 () => {
-                    if (!sampleUploadId) {
+                    if (!secondaryUploadId) {
                         changeStep(4);
                         setIsLoading(false);
                     } else {
                         return compositionRoot.glassUploads
-                            .setStatus({ id: sampleUploadId, status: COMPLETED_STATUS })
+                            .setStatus({ id: secondaryUploadId, status: COMPLETED_STATUS })
                             .run(
                                 () => {
                                     changeStep(4);
@@ -69,42 +72,47 @@ export const ReviewDataSummary: React.FC<ReviewDataSummaryProps> = ({
 
     return (
         <ContentWrapper>
-            <div className="toggles">
-                <Button onClick={() => changeType("ris")} className={fileType === "ris" ? "current" : ""}>
-                    {i18n.t("RIS File")}
-                </Button>
-                <Button onClick={() => changeType("sample")} className={fileType === "sample" ? "current" : ""}>
-                    {i18n.t("Sample File")}
-                </Button>
-            </div>
+            {moduleProperties.get(currentModuleAccess.moduleName)?.isSecondaryReq && (
+                <div className="toggles">
+                    <Button onClick={() => changeType("primary")} className={fileType === "primary" ? "current" : ""}>
+                        {i18n.t(`${moduleProperties.get(currentModuleAccess.moduleName)?.primaryFileType} File`)}
+                    </Button>
+                    <Button
+                        onClick={() => changeType("secondary")}
+                        className={fileType === "secondary" ? "current" : ""}
+                    >
+                        {i18n.t(`${moduleProperties.get(currentModuleAccess.moduleName)?.secondaryFileType} File`)}
+                    </Button>
+                </div>
+            )}
             <Section className="summary">
                 <h3>{i18n.t("Summary")}</h3>
                 <SectionCard className="wrong">
                     <ul>
                         <li>
                             <b>{i18n.t("imported: ", { nsSeparator: false })}</b>{" "}
-                            {fileType === "ris"
-                                ? risFileImportSummary?.importCount.imported
-                                : sampleFileImportSummary?.importCount.imported}
+                            {fileType === "primary"
+                                ? primaryFileImportSummary?.importCount.imported
+                                : secondaryFileImportSummary?.importCount.imported}
                         </li>
                         <li>
                             <b>{i18n.t("updated: ", { nsSeparator: false })}</b>{" "}
-                            {fileType === "ris"
-                                ? risFileImportSummary?.importCount.updated
-                                : sampleFileImportSummary?.importCount.updated}
+                            {fileType === "primary"
+                                ? primaryFileImportSummary?.importCount.updated
+                                : secondaryFileImportSummary?.importCount.updated}
                         </li>
                         <li>
                             <b>{i18n.t("deleted: ", { nsSeparator: false })}</b>{" "}
-                            {fileType === "ris"
-                                ? risFileImportSummary?.importCount.deleted
-                                : sampleFileImportSummary?.importCount.deleted}
+                            {fileType === "primary"
+                                ? primaryFileImportSummary?.importCount.deleted
+                                : secondaryFileImportSummary?.importCount.deleted}
                             {}
                         </li>
                         <li>
                             <b>{i18n.t("ignored: ", { nsSeparator: false })}</b>{" "}
-                            {fileType === "ris"
-                                ? risFileImportSummary?.importCount.ignored
-                                : sampleFileImportSummary?.importCount.ignored}
+                            {fileType === "primary"
+                                ? primaryFileImportSummary?.importCount.ignored
+                                : secondaryFileImportSummary?.importCount.ignored}
                         </li>
                     </ul>
                 </SectionCard>
