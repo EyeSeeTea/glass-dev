@@ -13,7 +13,9 @@ import { useAppContext } from "../../contexts/app-context";
 import { QuestionnaireBase } from "../../../domain/entities/Questionnaire";
 import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context";
 import { useSnackbar } from "@eyeseetea/d2-ui-components";
-import { useGlassCaptureAccess } from "../../hooks/useGlassCaptureAccess";
+import { StyledInfoText } from "../current-data-submission/overview/CurrentStatus";
+import { useStatusDataSubmission } from "../../hooks/useStatusDataSubmission";
+import { CircularProgress } from "material-ui";
 
 interface ModuleCardProps {
     period: string;
@@ -24,20 +26,28 @@ const COMPLETED_STATUS = "COMPLETED";
 
 export const ModuleCard: React.FC<ModuleCardProps> = ({ period, module }) => {
     const { changeCurrentModuleAccess } = useCurrentModuleContext();
-    const { compositionRoot } = useAppContext();
+    const { compositionRoot, currentUser } = useAppContext();
 
     const {
         currentOrgUnitAccess: { orgUnitId },
     } = useCurrentOrgUnitContext();
     const snackbar = useSnackbar();
-    const hasCurrentUserCaptureAccess = useGlassCaptureAccess() ? true : false;
 
     const endDays = 0; //TO DO : Calculate days left in the open period. Need confirmation on open and close days.
 
     const [questionnaires, setQuestionnaires] = useState<QuestionnaireBase[]>([]);
     const [uploadsCount, setUploadsCount] = useState<number>(0);
+    const currentDataSubmissionStatus = useStatusDataSubmission(module.id, orgUnitId, period);
 
     useEffect(() => {
+        const moduleCaptureAccess = currentUser.userModulesAccess.find(m => m.moduleId === module.id)?.captureAccess;
+        const orgUnitCaptureAccess = currentUser.userOrgUnitsAccess.find(
+            ou => (ou.orgUnitId = orgUnitId)
+        )?.captureAccess;
+        const hasCurrentUserCaptureAccess =
+            (moduleCaptureAccess ? moduleCaptureAccess : false) &&
+            (orgUnitCaptureAccess ? orgUnitCaptureAccess : false);
+
         compositionRoot.glassModules.getById(module.id).run(
             currentModule => {
                 compositionRoot.questionnaires
@@ -66,7 +76,8 @@ export const ModuleCard: React.FC<ModuleCardProps> = ({ period, module }) => {
         compositionRoot.glassModules,
         compositionRoot.glassUploads,
         compositionRoot.questionnaires,
-        hasCurrentUserCaptureAccess,
+        currentUser.userModulesAccess,
+        currentUser.userOrgUnitsAccess,
         module.id,
         orgUnitId,
         period,
@@ -79,8 +90,27 @@ export const ModuleCard: React.FC<ModuleCardProps> = ({ period, module }) => {
                 <StarIcon />
                 <h3>{`${module?.name} ${period}`}</h3>
             </TitleContainer>
+
             <ContentContainer moduleColor={module?.color || ""}>
                 <Container style={{ padding: 0 }}>
+                    {currentDataSubmissionStatus.kind === "loaded" ? (
+                        <ActionRequiredContainer>
+                            <StyledInfoText statusColor={currentDataSubmissionStatus.data.colour}>
+                                !&nbsp;&nbsp; &nbsp;Action required
+                            </StyledInfoText>
+                            <Typography
+                                style={{
+                                    color: currentDataSubmissionStatus.data.colour,
+                                    paddingLeft: "5px",
+                                    alignSelf: "baseline",
+                                }}
+                            >
+                                {currentDataSubmissionStatus.data.actionReqText}
+                            </Typography>
+                        </ActionRequiredContainer>
+                    ) : (
+                        <CircularProgress />
+                    )}
                     {endDays ? (
                         <Box display={"flex"} flexDirection="row">
                             <WarningIcon htmlColor={glassColors.mainTertiary} />
@@ -94,7 +124,9 @@ export const ModuleCard: React.FC<ModuleCardProps> = ({ period, module }) => {
                     )}
                     <Typography color="textSecondary">{i18n.t(`${uploadsCount} files uploaded`)}</Typography>
                     <Typography color="textSecondary">
-                        {i18n.t(`${questionnaires?.length} questionnaires completed`)}
+                        {i18n.t(
+                            `${questionnaires.filter(q => q.isCompleted === true)?.length} questionnaires completed`
+                        )}
                     </Typography>
                 </Container>
 
@@ -149,4 +181,11 @@ const ContentContainer = styled.div<{ moduleColor: string }>`
             box-shadow: none;
         }
     }
+`;
+
+const ActionRequiredContainer = styled.span`
+    padding: 10px 5px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
 `;
