@@ -1,6 +1,5 @@
 import { Dhis2EventsDefaultRepository, Event } from "../../../data/repositories/Dhis2EventsDefaultRepository";
 import { Future, FutureData } from "../../entities/Future";
-import { Id } from "../../entities/Ref";
 import { ImportSummary } from "../../entities/data-entry/ImportSummary";
 import * as templates from "../../../data/templates";
 import { EGASPProgramDefaultRepository } from "../../../data/repositories/bulk-load/EGASPProgramDefaultRepository";
@@ -8,36 +7,7 @@ import { Template } from "../../entities/Template";
 import { DataForm } from "../../entities/DataForm";
 import { ExcelReader } from "../../utils/ExcelReader";
 import { ExcelRepository } from "../../repositories/ExcelRepository";
-
-const PROGRAM_ID = "SOjanrinfuG";
-export interface DataPackage {
-    type: "programs";
-    dataEntries: DataPackageData[];
-}
-
-export interface DataPackageData {
-    group?: number | string;
-    id?: Id;
-    dataForm: Id;
-    orgUnit: Id;
-    period: string;
-    attribute?: Id;
-    trackedEntityInstance?: Id;
-    programStage?: Id;
-    coordinate?: {
-        latitude: number;
-        longitude: number;
-    };
-    dataValues: DataPackageDataValue[];
-}
-export type DataPackageValue = string | number | boolean;
-export interface DataPackageDataValue {
-    dataElement: Id;
-    category?: Id;
-    value: DataPackageValue;
-    optionId?: Id;
-    comment?: string;
-}
+import { DataPackage, DataPackageDataValue } from "../../entities/data-entry/EGASPData";
 
 export class ImportEGASPFile {
     constructor(
@@ -56,17 +26,16 @@ export class ImportEGASPFile {
         };
 
         return this.excelRepository.loadTemplate(file).flatMap(templateId => {
-            console.debug(PROGRAM_ID, templateId);
+            console.debug(`Loaded template ${templateId}`);
             const egaspTemplate = _.values(templates).map(TemplateClass => new TemplateClass())[0];
-            console.debug(egaspTemplate);
+
             return this.egaspProgramDefaultRepository.getProgramEGASP().flatMap(egaspProgram => {
                 if (egaspTemplate) {
                     return this.readTemplate(egaspTemplate, egaspProgram).flatMap(dataPackage => {
-                        console.debug(dataPackage);
                         if (dataPackage) {
                             const events = this.buildEventsPayload(dataPackage);
                             return this.dhis2EventsDefaultRepository.import({ events }).flatMap(result => {
-                                console.debug("ASYNC POST EVENTS : " + result);
+                                console.debug(`import result ${result}`);
                                 return Future.success(importSummary);
                             });
                         } else {

@@ -5,9 +5,6 @@ import { getD2APiFromInstance } from "../../../utils/d2-api";
 import { Future, FutureData } from "../../../domain/entities/Future";
 import { apiToFuture } from "../../../utils/futures";
 
-export const dataFormTypes = ["dataSets", "programs", "trackerPrograms"] as const;
-export type DataFormType = typeof dataFormTypes[number];
-
 export type DataElementType =
     | "TEXT"
     | "LONG_TEXT"

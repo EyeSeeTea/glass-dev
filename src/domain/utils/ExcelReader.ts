@@ -9,9 +9,10 @@ import {
     setDataEntrySheet,
 } from "../entities/Template";
 import { ExcelRepository, ExcelValue } from "../repositories/ExcelRepository";
-import { DataPackage, DataPackageData } from "../usecases/data-entry/ImportEGASPFile";
+
 import { promiseMap } from "../../utils/promises";
 import moment from "moment";
+import { DataPackage, DataPackageData } from "../entities/data-entry/EGASPData";
 export const isDefined = <T>(item: T) => item !== undefined && item !== null;
 export function removeCharacters(value: unknown): string {
     return value === undefined ? "" : String(value).replace(/[^a-zA-Z0-9.]/g, "");

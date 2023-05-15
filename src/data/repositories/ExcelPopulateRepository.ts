@@ -15,43 +15,20 @@ import { Future, FutureData } from "../../domain/entities/Future";
 
 type RowWithCells = XLSX.Row & { _cells: XLSX.Cell[] };
 
-export const fromBase64 = async (uri: string, filename?: string, options?: { mimeType: string }): Promise<File> => {
-    const response = await fetch(uri);
-    const buffer = await response.arrayBuffer();
-    return new File([buffer], filename || "Logo", { type: options?.mimeType });
-};
-
 export class ExcelPopulateRepository extends ExcelRepository {
     private workbooks: Record<string, ExcelWorkbook> = {};
 
     public loadTemplate(file: Blob): FutureData<string> {
         return Future.fromPromise(this.parseFile(file)).map(workbook => {
-            const id = "Version: PROGRAM_GENERATED_v4";
-
-            if (!id || typeof id !== "string") throw new Error("Invalid id");
-            const cleanId = id.replace(/^.*?:/, "").trim();
-
-            this.workbooks[cleanId] = workbook;
-            return cleanId;
+            const id = "PROGRAM_GENERATED_v4";
+            this.workbooks[id] = workbook;
+            return id;
         });
     }
 
     private async parseFile(file: Blob): Promise<ExcelWorkbook> {
         return XLSX.fromDataAsync(file);
     }
-
-    // public async toBlob(id: string): Promise<Blob> {
-    //     const data = await this.toBuffer(id);
-    //     return new Blob([data], {
-    //         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    //     });
-    // }
-
-    // public async toBuffer(id: string): Promise<Buffer> {
-    //     const workbook = await this.getWorkbook(id);
-    //     return workbook.outputAsync() as unknown as Buffer;
-    // }
-
     public async findRelativeCell(id: string, location?: SheetRef, cellRef?: CellRef): Promise<CellRef | undefined> {
         const workbook = await this.getWorkbook(id);
 
@@ -68,28 +45,6 @@ export class ExcelPopulateRepository extends ExcelRepository {
         }
     }
 
-    // public async writeCell(id: string, cellRef: CellRef, value: string | number | boolean): Promise<void> {
-    //     const workbook = await this.getWorkbook(id);
-    //     const mergedCells = this.listMergedCells(workbook, cellRef.sheet);
-    //     const definedNames = await this.listDefinedNames(id);
-    //     const definedName = definedNames.find(name => removeCharacters(name) === removeCharacters(value));
-
-    //     const cell = workbook.sheet(cellRef.sheet)?.cell(cellRef.ref);
-    //     if (!cell) return;
-
-    //     const { startCell: destination = cell } = mergedCells.find(range => range.hasCell(cell)) ?? {};
-
-    //     if (!!value && !isNaN(Number(value))) {
-    //         destination.value(Number(value));
-    //     } else if (String(value).startsWith("=")) {
-    //         destination.formula(String(value));
-    //     } else if (definedName) {
-    //         destination.formula(`=${definedName}`);
-    //     } else {
-    //         destination.value(value);
-    //     }
-    // }
-
     public async readCell(
         id: string,
         cellRef?: CellRef | ValueRef,
@@ -101,22 +56,6 @@ export class ExcelPopulateRepository extends ExcelRepository {
         const workbook = await this.getWorkbook(id);
         return this.readCellValue(workbook, cellRef, options?.formula);
     }
-
-    // public async getConstants(id: string): Promise<Record<string, string>> {
-    //     const workbook = await this.getWorkbook(id);
-    //     const keys = (workbook as any).definedName() as string[];
-
-    //     return _(keys)
-    //         .map(key => {
-    //             const element = workbook.definedName(key);
-    //             if (!isCell(element)) return null;
-    //             const value = element.value();
-    //             return value ? ([key, value.toString()] as [string, string]) : null;
-    //         })
-    //         .compact()
-    //         .fromPairs()
-    //         .value();
-    // }
 
     public async getSheets(id: string): Promise<Sheet[]> {
         const workbook = await this.getWorkbook(id);
@@ -178,90 +117,6 @@ export class ExcelPopulateRepository extends ExcelRepository {
         }));
     }
 
-    // public async addPicture(id: string, location: SheetRef, file: File): Promise<void> {
-    //     const workbook = await this.getWorkbook(id);
-
-    //     const { sheet, ref } = location;
-    //     const [from, to] = location.type === "range" ? String(ref).split(":") : [ref, ref];
-
-    //     // @ts-ignore: This part is not typed (we need to create an extension)
-    //     workbook.sheet(sheet).drawings("logo", file).from(from).to(to);
-    // }
-
-    // public async styleCell(id: string, source: SheetRef, style: ThemeStyle): Promise<void> {
-    //     const workbook = await this.getWorkbook(id);
-
-    //     const { sheet } = source;
-    //     const {
-    //         text,
-    //         bold,
-    //         italic,
-    //         fontSize = 12,
-    //         fontColor,
-    //         fillColor,
-    //         wrapText,
-    //         horizontalAlignment,
-    //         verticalAlignment = "center",
-    //         border,
-    //         borderColor,
-    //         rowSize,
-    //         columnSize,
-    //         merged = false,
-    //         locked,
-    //     } = style;
-
-    //     const textStyle = _.omitBy(
-    //         {
-    //             bold,
-    //             italic,
-    //             fontSize,
-    //             fontColor: fontColor?.replace(/#/g, ""),
-    //         },
-    //         _.isUndefined
-    //     );
-
-    //     const cellStyle = _.omitBy(
-    //         {
-    //             verticalAlignment,
-    //             horizontalAlignment,
-    //             wrapText,
-    //             fill: fillColor?.replace(/#/g, ""),
-    //             border,
-    //             borderColor: borderColor?.replace(/#/g, ""),
-    //             locked,
-    //         },
-    //         _.isUndefined
-    //     );
-
-    //     const range =
-    //         source.type === "range"
-    //             ? workbook.sheet(sheet).range(String(source.ref))
-    //             : workbook.sheet(sheet).range(`${source.ref}:${source.ref}`);
-
-    //     const cells = source.type === "cell" ? [workbook.sheet(sheet).cell(source.ref)] : _.flatten(range.cells());
-
-    //     if (source.type === "range") range.merged(merged);
-
-    //     try {
-    //         for (const cell of cells) {
-    //             const value = text ?? String(getValue(cell) ?? "");
-    //             const formula = cell.formula();
-
-    //             //@ts-ignore Not properly typed
-    //             const richText = new XLSX.RichText();
-    //             richText.add(value, textStyle);
-
-    //             const destination = cell.style(cellStyle).value(richText);
-    //             if (formula) destination.formula(formula);
-
-    //             if (rowSize) cell.row().hidden(false).height(rowSize);
-    //             if (columnSize) cell.column().hidden(false).width(columnSize);
-    //         }
-    //     } catch (error) {
-    //         console.error("Could not apply style", { source, style, error });
-    //     }
-    // }
-
     @cache()
     public async getSheetRowsCount(id: string, sheetId: string | number): Promise<number | undefined> {
         const workbook = await this.getWorkbook(id);
@@ -295,19 +150,6 @@ export class ExcelPopulateRepository extends ExcelRepository {
 
         return this.buildColumnName(maxColumn ?? 0);
     }
-
-    // public async getOrCreateSheet(id: string, name: string): Promise<Sheet> {
-    //     const workbook = await this.getWorkbook(id);
-    //     const sheet = workbook.sheet(name) ?? workbook.addSheet(name);
-    //     const index = _.findIndex(workbook.sheets(), sheet => sheet.name() === name);
-
-    //     return {
-    //         index,
-    //         name: sheet.name(),
-    //         active: sheet.active(),
-    //     };
-    // }
-
     public buildColumnName(column: number | string): string {
         if (typeof column === "string") return column;
 
@@ -323,18 +165,6 @@ export class ExcelPopulateRepository extends ExcelRepository {
 
         return name;
     }
-
-    // public buildColumnNumber(column: string): number {
-    //     const letters = column.split("");
-    //     let number = 0;
-
-    //     for (let i = 0; i < letters.length; i++) {
-    //         const start = letters[i]?.charCodeAt(0) ?? 0;
-    //         number += Math.pow(26, letters.length - i - 1) * (start - "A".charCodeAt(0) + 1);
-    //     }
-
-    //     return number - 1;
-    // }
 
     public buildRowNumber(row: string): number {
         const rowNumber = row.match(/\d+/g);
@@ -368,62 +198,7 @@ export class ExcelPopulateRepository extends ExcelRepository {
             return [];
         }
     }
-
-    // public async defineName(id: string, name: string, cell: CellRef): Promise<void> {
-    //     const workbook = await this.getWorkbook(id);
-    //     const location = workbook.sheet(cell.sheet).cell(cell.ref);
-    //     workbook.definedName(name, location);
-    // }
-
-    // public async mergeCells(id: string, range: Range): Promise<void> {
-    //     const workbook = await this.getWorkbook(id);
-
-    //     const { sheet, columnStart, rowStart, columnEnd, rowEnd } = range;
-
-    //     const rangeColumnEnd = columnEnd ?? (await this.getSheetFinalColumn(id, range.sheet)) ?? "XFD";
-    //     const rangeRowEnd = rowEnd ?? (await this.getSheetRowsCount(id, range.sheet)) ?? 1048576;
-
-    //     if (rangeRowEnd >= rowStart) {
-    //         workbook.sheet(sheet).range(rowStart, columnStart, rangeRowEnd, rangeColumnEnd).merged(true);
-    //     }
-    // }
-
-    // public async hideCells(id: string, ref: ColumnRef | RowRef, hidden = true): Promise<void> {
-    //     const workbook = await this.getWorkbook(id);
-    //     const sheet = workbook.sheet(ref.sheet);
-    //     const item = ref.type === "row" ? sheet.row(ref.ref) : sheet.column(ref.ref);
-    //     item.hidden(hidden);
-    // }
-
-    // public async hideSheet(id: string, sheet: string | number, hidden = true): Promise<void> {
-    //     const workbook = await this.getWorkbook(id);
-    //     workbook.sheet(sheet).hidden(hidden);
-    // }
-
-    // public async protectSheet(id: string, sheet: string | number, password: string): Promise<void> {
-    //     const workbook = await this.getWorkbook(id);
-    //     workbook.sheet(sheet).protected(password, {
-    //         selectLockedCells: true,
-    //     });
-    // }
-
-    // public async setActiveCell(id: string, cell: CellRef): Promise<void> {
-    //     const workbook = await this.getWorkbook(id);
-    //     workbook.sheet(cell.sheet).activeCell(cell.ref);
-    // }
-
-    // public async setDataValidation(id: string, ref: CellRef | RangeRef, formula: string | null): Promise<void> {
-    //     const workbook = await this.getWorkbook(id);
-    //     const sheet = workbook.sheet(ref.sheet);
-    //     const item = ref.type === "range" ? sheet.range(ref.ref) : sheet.cell(ref.ref);
-    //     // @ts-ignore Not properly typed (https://app.clickup.com/t/e14mnv)
-    //     item.dataValidation(formula);
-    // }
 }
-
-// function isCell(element: any): element is ExcelCell {
-//     return element?.constructor?.name === "Cell";
-// }
 
 interface SheetWithValidations extends XLSX.Sheet {
     _dataValidations: Record<string, unknown>;
@@ -507,8 +282,6 @@ function getValue(cell: Cell): ExcelValue | undefined {
 
     return value;
 }
-
-// type RowWithCells = XLSX.Row & { _cells: XLSX.Cell[] };
 
 type MergedCell = {
     range: XLSX.Range;
