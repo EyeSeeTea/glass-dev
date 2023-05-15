@@ -26,12 +26,13 @@ export const statusMap = new Map<DataSubmissionStatusTypes, StatusDetails>([
             ],
             showUploadHistory: true,
             isActionRequired: true,
+            actionReqText: "Please complete all mandatory questionnaires.",
         },
     ],
     [
         "COMPLETE",
         {
-            title: "DATA TO BE APROVED BY COUNTRY",
+            title: "DATA TO BE APPROVED BY COUNTRY",
             description:
                 "Your submission contains all the mandatory fields. You can still add or remove datasets. Please check that everything is included and once everythiong is fine send it to WHO for revision.",
             colour: glassColors.statusActionReq,
@@ -57,6 +58,8 @@ export const statusMap = new Map<DataSubmissionStatusTypes, StatusDetails>([
             ],
             showUploadHistory: true,
             isActionRequired: true,
+            actionReqText:
+                "Please click on 'Send submission' in overview tab to submit after reviewing the data submission",
         },
     ],
     [
@@ -70,6 +73,7 @@ export const statusMap = new Map<DataSubmissionStatusTypes, StatusDetails>([
             rightCTAs: [],
             showUploadHistory: false,
             isActionRequired: false,
+            actionReqText: "",
         },
     ],
     [
@@ -97,6 +101,7 @@ export const statusMap = new Map<DataSubmissionStatusTypes, StatusDetails>([
             ],
             showUploadHistory: false,
             isActionRequired: false,
+            actionReqText: "",
         },
     ],
     [
@@ -122,6 +127,8 @@ export const statusMap = new Map<DataSubmissionStatusTypes, StatusDetails>([
             ],
             showUploadHistory: false,
             isActionRequired: true,
+            actionReqText:
+                "Please re-complete the questionnaire correctly and ensure you have uploaded correct datasets, as your previous submisison was rejected by WHO.",
         },
     ],
     [
@@ -129,7 +136,7 @@ export const statusMap = new Map<DataSubmissionStatusTypes, StatusDetails>([
         {
             title: "WAITING for WHO TO ACCEPT THE DATA UPDATE REQUEST",
             description:
-                "When WHO admins aprove your request you will be able to modify your upload. \n You will be notified when that happens.",
+                "When WHO admins approve your request you will be able to modify your upload. \n You will be notified when that happens.",
             colour: glassColors.statusNeutral,
             leftCTAs: [
                 {
@@ -142,6 +149,7 @@ export const statusMap = new Map<DataSubmissionStatusTypes, StatusDetails>([
             rightCTAs: [],
             showUploadHistory: false,
             isActionRequired: false,
+            actionReqText: "",
         },
     ],
     [
@@ -173,6 +181,8 @@ export const statusMap = new Map<DataSubmissionStatusTypes, StatusDetails>([
             ],
             showUploadHistory: true,
             isActionRequired: true,
+            actionReqText:
+                "Please complete all mandatory questionnaires and review datasets, then click on 'Send Submission' in the overview tab to submit",
         },
     ],
 ]);
