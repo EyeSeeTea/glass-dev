@@ -15,7 +15,7 @@ export const Completed: React.FC = () => {
 
     return (
         <ContentWrapper>
-            <p className="intro">{i18n.t("Thank! your data for now is uploaded in our system")}</p>
+            <p className="intro">{i18n.t("Thank you! your data for now is uploaded in our system")}</p>
             <div className="ds-name">
                 <span>{currentPeriod}</span>
                 <span>{i18n.t(currentOrgUnitAccess.orgUnitName)}</span>

@@ -106,12 +106,12 @@ const renderStep = (
                     <ConsistencyChecks
                         changeStep={changeStep}
                         batchId={batchId}
-                        risFile={primaryFile}
-                        sampleFile={secondaryFile}
-                        risFileImportSummary={primaryFileImportSummary}
-                        sampleFileImportSummary={secondaryFileImportSummary}
-                        setRISFileImportSummary={setPrimaryFileImportSummary}
-                        setSampleFileImportSummary={setSecondaryFileImportSummary}
+                        primaryFile={primaryFile}
+                        secondaryFile={secondaryFile}
+                        primaryFileImportSummary={primaryFileImportSummary}
+                        secondaryFileImportSummary={secondaryFileImportSummary}
+                        setPrimaryFileImportSummary={setPrimaryFileImportSummary}
+                        setSecondaryFileImportSummary={setSecondaryFileImportSummary}
                     />
                 </>
             );
@@ -119,8 +119,8 @@ const renderStep = (
             return (
                 <ReviewDataSummary
                     changeStep={changeStep}
-                    risFileImportSummary={primaryFileImportSummary}
-                    sampleFileImportSummary={secondaryFileImportSummary}
+                    primaryFileImportSummary={primaryFileImportSummary}
+                    secondaryFileImportSummary={secondaryFileImportSummary}
                 />
             );
         case 4:

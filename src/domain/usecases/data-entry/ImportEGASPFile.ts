@@ -1,6 +1,6 @@
 import { Dhis2EventsDefaultRepository, Event } from "../../../data/repositories/Dhis2EventsDefaultRepository";
 import { Future, FutureData } from "../../entities/Future";
-import { ImportSummary } from "../../entities/data-entry/ImportSummary";
+import { ImportConflictCount, ImportSummary } from "../../entities/data-entry/ImportSummary";
 import * as templates from "../../../data/templates";
 import { EGASPProgramDefaultRepository } from "../../../data/repositories/bulk-load/EGASPProgramDefaultRepository";
 import { Template } from "../../entities/Template";
@@ -8,6 +8,7 @@ import { DataForm } from "../../entities/DataForm";
 import { ExcelReader } from "../../utils/ExcelReader";
 import { ExcelRepository } from "../../repositories/ExcelRepository";
 import { DataPackage, DataPackageDataValue } from "../../entities/data-entry/EGASPData";
+import { EventsPostResponse } from "@eyeseetea/d2-api/api/events";
 
 export class ImportEGASPFile {
     constructor(
@@ -18,12 +19,6 @@ export class ImportEGASPFile {
 
     public importEGASPFile(file: File): FutureData<ImportSummary> {
         console.debug(file);
-        const importSummary: ImportSummary = {
-            status: "SUCCESS",
-            importCount: { imported: 99, updated: 99, ignored: 99, deleted: 99 },
-            nonBlockingErrors: [],
-            blockingErrors: [],
-        };
 
         return this.excelRepository.loadTemplate(file).flatMap(templateId => {
             console.debug(`Loaded template ${templateId}`);
@@ -35,8 +30,7 @@ export class ImportEGASPFile {
                         if (dataPackage) {
                             const events = this.buildEventsPayload(dataPackage);
                             return this.dhis2EventsDefaultRepository.import({ events }).flatMap(result => {
-                                console.debug(`import result ${result}`);
-                                return Future.success(importSummary);
+                                return Future.success(this.mapToImportSummary(result));
                             });
                         } else {
                             return Future.error("Unknow template");
@@ -47,6 +41,53 @@ export class ImportEGASPFile {
                 }
             });
         });
+    }
+
+    private mapToImportSummary(result: EventsPostResponse): ImportSummary {
+        if (result && result.importSummaries) {
+            const importCounts: ImportConflictCount[] = result.importSummaries.map(summary => {
+                return {
+                    importCount: {
+                        imported: summary.importCount.imported,
+                        updated: summary.importCount.updated,
+                        ignored: summary.importCount.ignored,
+                        deleted: summary.importCount.deleted,
+                    },
+                    conflicts: summary.status === "ERROR" ? summary.conflicts : [],
+                };
+            });
+
+            const add = (accumulator: ImportConflictCount, currentVal: ImportConflictCount): ImportConflictCount => {
+                return {
+                    importCount: {
+                        imported: accumulator.importCount.imported + currentVal.importCount.imported,
+                        updated: accumulator.importCount.updated + currentVal.importCount.updated,
+                        ignored: accumulator.importCount.ignored + currentVal.importCount.ignored,
+                        deleted: accumulator.importCount.deleted + currentVal.importCount.deleted,
+                    },
+                    conflicts: [...accumulator.conflicts, ...currentVal.conflicts],
+                };
+            };
+
+            const importCountSum = importCounts.reduce(add, {
+                importCount: { imported: 0, updated: 0, ignored: 0, deleted: 0 },
+                conflicts: [],
+            });
+
+            return {
+                status: result.status,
+                importCount: importCountSum.importCount,
+                blockingErrors: importCountSum.conflicts.map(conflict => ({ error: conflict.value, count: 1 })),
+                nonBlockingErrors: [],
+            };
+        } else {
+            return {
+                status: "ERROR",
+                importCount: { ignored: 0, imported: 0, deleted: 0, updated: 0 },
+                nonBlockingErrors: [],
+                blockingErrors: [{ error: "An unexpected error has ocurred saving events", count: 1 }],
+            };
+        }
     }
 
     private readTemplate(template: Template, dataForm: DataForm): FutureData<DataPackage | undefined> {
