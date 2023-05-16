@@ -49,7 +49,7 @@ export class ImportPrimaryFileUseCase implements UseCase {
                 this.egaspProgramDefaultRepository,
                 this.excelRepository
             );
-            return importEGASPFile.importEGASPFile(inputFile);
+            return importEGASPFile.importEGASPFile(inputFile, action);
         } else {
             return Future.error("Unknown module type");
         }

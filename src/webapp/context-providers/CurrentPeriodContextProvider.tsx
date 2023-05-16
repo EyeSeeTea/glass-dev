@@ -30,24 +30,16 @@ export const CurrentPeriodContextProvider: React.FC = ({ children }) => {
 
     const isValidCurrentPeriod = useCallback(
         (updatedPeriod: string) => {
-            const currentYear = new Date().getFullYear();
-
             //is a QUARTERLY module
             if (
                 currentUser.quarterlyPeriodModules.find(qm => qm === currentModuleAccess.moduleName) &&
-                new RegExp(
-                    `^(${currentYear}|${currentYear.toString().slice(0, 3)}[0-${currentYear
-                        .toString()
-                        .slice(3)}])Q[1-4]$`
-                ).test(updatedPeriod)
+                RegExp(/^\d{4}Q[1-4]$/).test(updatedPeriod)
             ) {
                 return true;
             } //is a YEARLY module
             else if (
                 !currentUser.quarterlyPeriodModules.find(qm => qm === currentModuleAccess.moduleName) &&
-                new RegExp(
-                    `^(${currentYear}|${currentYear.toString().slice(0, 3)}[0-${currentYear.toString().slice(3)}])$`
-                ).test(updatedPeriod)
+                new RegExp(/^\d{4}$/).test(updatedPeriod)
             ) {
                 return true;
             } else {

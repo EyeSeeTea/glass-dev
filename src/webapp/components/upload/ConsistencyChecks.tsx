@@ -159,7 +159,7 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
                     )}
                 </Typography>
             </div>
-            {moduleProperties.get(currentModuleAccess.moduleName)?.isSecondaryReq && (
+            {moduleProperties.get(currentModuleAccess.moduleName)?.isSecondaryFileApplicable && (
                 <div className="toggles">
                     <Button onClick={() => changeType("primary")} className={fileType === "primary" ? "current" : ""}>
                         {i18n.t(`${moduleProperties.get(currentModuleAccess.moduleName)?.primaryFileType} File`)}

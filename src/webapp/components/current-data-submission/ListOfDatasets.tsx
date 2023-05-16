@@ -14,6 +14,7 @@ import { isEditModeStatus } from "../../../utils/editModeStatus";
 import { useGlassUploadsByModuleOUPeriod } from "../../hooks/useGlassUploadsByModuleOUPeriod";
 import { useCurrentPeriodContext } from "../../contexts/current-period-context";
 import { useGlassCaptureAccess } from "../../hooks/useGlassCaptureAccess";
+import { moduleProperties } from "../../../domain/utils/ModuleProperties";
 
 function getCompletedUploads(upload: GlassUploadsState) {
     if (upload.kind === "loaded") {
@@ -55,9 +56,13 @@ export const ListOfDatasets: React.FC = () => {
                             <Button variant="contained" color="primary" component={NavLink} to={`/upload`} exact={true}>
                                 {i18n.t("Upload Dataset")}
                             </Button>
-                            <StyledTypography>
-                                {i18n.t("You can add up to 6 datasets to this submission with different BATCH IDS.")}
-                            </StyledTypography>
+                            {moduleProperties.get(currentModuleAccess.moduleName)?.isbatchReq && (
+                                <StyledTypography>
+                                    {i18n.t(
+                                        "You can add up to 6 datasets to this submission with different BATCH IDS."
+                                    )}
+                                </StyledTypography>
+                            )}
                         </div>
                     )}
                 <UploadsTable

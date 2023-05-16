@@ -2,6 +2,7 @@ import { D2Api } from "@eyeseetea/d2-api/2.34";
 import { getD2APiFromInstance } from "../../utils/d2-api";
 import { apiToFuture } from "../../utils/futures";
 import { Instance } from "../entities/Instance";
+import { ImportStrategy } from "../../domain/entities/data-entry/DataValuesSaveSummary";
 
 export declare type EventStatus = "ACTIVE" | "COMPLETED" | "VISITED" | "SCHEDULED" | "OVERDUE" | "SKIPPED";
 export interface EventsPostRequest {
@@ -34,8 +35,8 @@ export class Dhis2EventsDefaultRepository {
         this.api = getD2APiFromInstance(instance);
     }
 
-    import(events: EventsPostRequest) {
-        return apiToFuture(this.api.events.post({}, events)).map(result => {
+    import(events: EventsPostRequest, action: ImportStrategy) {
+        return apiToFuture(this.api.events.post({ strategy: action }, events)).map(result => {
             return result.response;
         });
     }
