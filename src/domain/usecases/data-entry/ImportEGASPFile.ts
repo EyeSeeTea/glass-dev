@@ -9,6 +9,7 @@ import { ExcelReader } from "../../utils/ExcelReader";
 import { ExcelRepository } from "../../repositories/ExcelRepository";
 import { DataPackage, DataPackageDataValue } from "../../entities/data-entry/EGASPData";
 import { EventsPostResponse } from "@eyeseetea/d2-api/api/events";
+import { ImportStrategy } from "../../entities/data-entry/DataValuesSaveSummary";
 
 export class ImportEGASPFile {
     constructor(
@@ -17,7 +18,7 @@ export class ImportEGASPFile {
         private excelRepository: ExcelRepository
     ) {}
 
-    public importEGASPFile(file: File): FutureData<ImportSummary> {
+    public importEGASPFile(file: File, action: ImportStrategy): FutureData<ImportSummary> {
         console.debug(file);
 
         return this.excelRepository.loadTemplate(file).flatMap(templateId => {
@@ -29,7 +30,7 @@ export class ImportEGASPFile {
                     return this.readTemplate(egaspTemplate, egaspProgram).flatMap(dataPackage => {
                         if (dataPackage) {
                             const events = this.buildEventsPayload(dataPackage);
-                            return this.dhis2EventsDefaultRepository.import({ events }).flatMap(result => {
+                            return this.dhis2EventsDefaultRepository.import({ events }, action).flatMap(result => {
                                 return Future.success(this.mapToImportSummary(result));
                             });
                         } else {

@@ -6,6 +6,8 @@ import CloudDownloadIcon from "@material-ui/icons/CloudDownload";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
 import dayjs from "dayjs";
 import { useAppContext } from "../../contexts/app-context";
+import { moduleProperties } from "../../../domain/utils/ModuleProperties";
+import { useCurrentModuleContext } from "../../contexts/current-module-context";
 
 export interface DataFileTableBodyProps {
     rows?: DataFileHistoryItemProps[];
@@ -13,6 +15,7 @@ export interface DataFileTableBodyProps {
 
 export const DataFileTableBody: React.FC<DataFileTableBodyProps> = ({ rows }) => {
     const { compositionRoot } = useAppContext();
+    const { currentModuleAccess } = useCurrentModuleContext();
 
     const download = (fileId: string, fileName: string) => {
         compositionRoot.glassDocuments.download(fileId).run(
@@ -37,11 +40,15 @@ export const DataFileTableBody: React.FC<DataFileTableBodyProps> = ({ rows }) =>
                         <TableRow key={row.id}>
                             <TableCell>{row.fileType}</TableCell>
                             <TableCell>{row.countryCode.toUpperCase()}</TableCell>
-                            <TableCell>{row.batchId}</TableCell>
+                            {moduleProperties.get(currentModuleAccess.moduleName)?.isbatchReq && (
+                                <TableCell>{row.batchId}</TableCell>
+                            )}
                             <TableCell>{row.period}</TableCell>
-                            <TableCell style={{ maxWidth: "150px", wordWrap: "break-word" }}>
-                                {row.specimens.join(", ")}
-                            </TableCell>
+                            {moduleProperties.get(currentModuleAccess.moduleName)?.isbatchReq && (
+                                <TableCell style={{ maxWidth: "150px", wordWrap: "break-word" }}>
+                                    {row.specimens.join(", ")}
+                                </TableCell>
+                            )}
                             <TableCell>{row.status}</TableCell>
                             <TableCell>{dayjs(row.uploadDate).format("YYYY-MM-DD HH:mm:ss")}</TableCell>
                             <TableCell>{row.fileName}</TableCell>
