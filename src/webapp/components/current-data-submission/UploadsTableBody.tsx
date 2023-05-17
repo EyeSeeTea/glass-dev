@@ -78,7 +78,10 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
             //For AMR, Ris file is mandatory, so there will be a ris file with given batch id.
             //Sample file is optional and could be absent
             if (moduleProperties.get(currentModuleAccess.moduleName)?.isSecondaryFileApplicable) {
-                if (rowToDelete.fileType === moduleProperties.get(currentModuleAccess.moduleName)?.primaryFileType) {
+                if (
+                    rowToDelete.fileType.toLowerCase() ===
+                    moduleProperties.get(currentModuleAccess.moduleName)?.primaryFileType.toLowerCase()
+                ) {
                     primaryFileToDelete = rowToDelete;
                     secondaryFileToDelete = rows
                         ?.filter(sample => sample.correspondingRisUploadId === rowToDelete.id)
