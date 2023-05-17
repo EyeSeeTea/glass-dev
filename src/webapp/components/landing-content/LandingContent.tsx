@@ -27,7 +27,7 @@ export const LandingContent: React.FC = () => {
     return (
         <StyledGrid container spacing={4} alignItems="flex-start">
             {showNoModuleCard && (
-                <Grid item xs={3}>
+                <Grid item xs={6}>
                     <CustomCard>
                         <TitleContainer />
                         <NotEnrolledText>
