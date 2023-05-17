@@ -272,6 +272,7 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
                                 onChange={changeBatchId}
                                 label={i18n.t("Choose a Dataset")}
                                 labelId="dataset-label"
+                                MenuProps={{ disableScrollLock: true }}
                             >
                                 {datasetOptions.map(({ label, value }) => (
                                     <MenuItem

@@ -58,7 +58,7 @@ export const Questionnaires: React.FC<QuestionnairesProps> = ({ setRefetchStatus
                             const userGroupsIds = captureAccessGroup.data.map(cag => {
                                 return cag.id;
                             });
-                            const notificationText = `The data submission for ${currentModuleAccess.moduleName} module for year ${year} and country ${orgUnit.name} has changed to DATA TO BE APROVED BY COUNTRY`;
+                            const notificationText = `The data submission for ${currentModuleAccess.moduleName} module for year ${year} and country ${orgUnit.name} has changed to DATA TO BE APPROVED BY COUNTRY`;
 
                             compositionRoot.notifications
                                 .send(notificationText, notificationText, userGroupsIds, [orgUnit.id])

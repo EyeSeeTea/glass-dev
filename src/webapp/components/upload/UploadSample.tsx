@@ -3,7 +3,6 @@ import { Button, CircularProgress } from "@material-ui/core";
 import styled from "styled-components";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import BackupIcon from "@material-ui/icons/Backup";
-import HelpIcon from "@material-ui/icons/Help";
 import CloseIcon from "@material-ui/icons/Close";
 import { FileRejection } from "react-dropzone";
 import { Dropzone, DropzoneRef } from "../dropzone/Dropzone";
@@ -145,7 +144,7 @@ export const UploadSample: React.FC<UploadSampleProps> = ({ batchId, sampleFile,
     return (
         <ContentWrapper className="ris-file">
             <span className="label">
-                {i18n.t("SAMPLE File")} <small>({i18n.t("not required")})</small> <HelpIcon />
+                {i18n.t("SAMPLE File")} <small>({i18n.t("not required")})</small>
             </span>
             {/* Allow only one file upload per dataset */}
             <Dropzone ref={sampleFileUploadRef} onDrop={sampleFileUploadEffect} maxFiles={1}>

@@ -42,7 +42,7 @@ export const UploadSteps: React.FC<UploadStepsProps> = ({
                     {i18n.t("Questionnaires")}
                 </Button>
                 <Button onClick={() => setCurrentStep(3)} className={currentStep === 3 ? "current" : ""}>
-                    {i18n.t("Validation")}
+                    {i18n.t("Validation Report")}
                 </Button>
                 {/* Do not show Advanced tab, if the user does not have capture access or if the current status is not in edit mode */}
                 {hasCurrentUserCaptureAccess &&
@@ -101,9 +101,11 @@ const ContentWrapper = styled.div`
         width: 100%;
         max-width: 800px;
         margin: 0 auto;
+        white-space: nowrap;
+        overflow-x: auto;
         button {
             color: ${glassColors.greyDisabled};
-            padding: 10px 15px;
+            padding: 10px 74px;
             border-radius: 0;
             border: none;
             flex: 1;
