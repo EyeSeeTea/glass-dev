@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2023-05-15T14:02:53.262Z\n"
-"PO-Revision-Date: 2023-05-15T14:02:53.262Z\n"
+"POT-Creation-Date: 2023-05-17T07:41:16.020Z\n"
+"PO-Revision-Date: 2023-05-17T07:41:16.020Z\n"
 
 msgid "Error saving registration status"
 msgstr ""
@@ -74,106 +74,13 @@ msgstr ""
 msgid "Uploads with errors, or discarded"
 msgstr ""
 
-msgid "There are no questionnaries for this module"
-msgstr ""
-
-msgid "mandatory"
-msgstr ""
-
-msgid "Completed"
-msgstr ""
-
-msgid "Not completed"
-msgstr ""
-
-msgid "View"
-msgstr ""
-
-msgid "Go"
-msgstr ""
-
-msgid "Overview"
-msgstr ""
-
-msgid "Datasets"
-msgstr ""
-
-msgid "Questionnaires"
-msgstr ""
-
-msgid "Validation Report"
-msgstr ""
-
-msgid "Advanced"
-msgstr ""
-
-msgid "No Data uploaded..."
-msgstr ""
-
-msgid "Uploaded"
-msgstr ""
-
-msgid "Period"
-msgstr ""
-
-msgid "Records"
-msgstr ""
-
-msgid "Type"
-msgstr ""
-
-msgid "Batch ID"
-msgstr ""
-
-msgid "Status"
-msgstr ""
-
-msgid "Download File"
-msgstr ""
-
-msgid "Delete"
-msgstr ""
-
-msgid "Deleting Files"
-msgstr ""
-
-msgid "This might take several minutes, do not refresh the page or press back."
-msgstr ""
-
-msgid "Confirm Delete"
-msgstr ""
-
-msgid "Ok"
-msgstr ""
-
-msgid "Cancel"
-msgstr ""
-
-msgid ""
-"Deleting this upload will delete both SAMPLE and RIS files for the given "
-"dataset. Are you sure you want to delete?"
-msgstr ""
-
 msgid "Go to questionnaires"
 msgstr ""
 
 msgid "Upload/Delete datasets"
 msgstr ""
 
-msgid "Send submission"
-msgstr ""
-
-msgid "Confirm submission"
-msgstr ""
-
-msgid ""
-"Please review that the submission package contains all the datasets that "
-"you want to include."
-msgstr ""
-
-msgid ""
-"After you submit this package, you wont be able to edit it anymore wihout "
-"WHO permissions"
+msgid "Go to submission"
 msgstr ""
 
 msgid "Full Status History"
@@ -212,6 +119,111 @@ msgstr ""
 msgid "Data Submission status has errors..."
 msgstr ""
 
+msgid "There are no questionnaries for this module"
+msgstr ""
+
+msgid "mandatory"
+msgstr ""
+
+msgid "Completed"
+msgstr ""
+
+msgid "Not completed"
+msgstr ""
+
+msgid "View"
+msgstr ""
+
+msgid "Go"
+msgstr ""
+
+msgid "Confirm submission"
+msgstr ""
+
+msgid "Ok"
+msgstr ""
+
+msgid "Cancel"
+msgstr ""
+
+msgid ""
+"Please review that the submission package contains all the datasets that "
+"you want to include."
+msgstr ""
+
+msgid ""
+"After you submit this package, you wont be able to edit it anymore wihout "
+"WHO permissions"
+msgstr ""
+
+msgid ""
+"Please review that the submission package contains all the datasets that "
+"you want to include. After you submit this package, you wont be able to "
+"edit it anymore wihout WHO permissions"
+msgstr ""
+
+msgid "Send Submission"
+msgstr ""
+
+msgid "Uploaded"
+msgstr ""
+
+msgid "Period"
+msgstr ""
+
+msgid "Records"
+msgstr ""
+
+msgid "Type"
+msgstr ""
+
+msgid "Batch ID"
+msgstr ""
+
+msgid "Status"
+msgstr ""
+
+msgid "Download File"
+msgstr ""
+
+msgid "Delete"
+msgstr ""
+
+msgid "Deleting Files"
+msgstr ""
+
+msgid "This might take several minutes, do not refresh the page or press back."
+msgstr ""
+
+msgid "Confirm Delete"
+msgstr ""
+
+msgid ""
+"Deleting this upload will delete both SAMPLE and RIS files for the given "
+"dataset. Are you sure you want to delete?"
+msgstr ""
+
+msgid "Overview"
+msgstr ""
+
+msgid "Questionnaires"
+msgstr ""
+
+msgid "Datasets"
+msgstr ""
+
+msgid "Validation Report"
+msgstr ""
+
+msgid "Advanced"
+msgstr ""
+
+msgid "Submission"
+msgstr ""
+
+msgid "No Data uploaded..."
+msgstr ""
+
 msgid "File Type"
 msgstr ""
 
@@ -248,9 +260,6 @@ msgstr ""
 msgid "News from GLASS"
 msgstr ""
 
-msgid "No Open Data Submissions"
-msgstr ""
-
 msgid "Notification"
 msgstr ""
 
@@ -270,6 +279,9 @@ msgid "Your Notifications"
 msgstr ""
 
 msgid "No notifications"
+msgstr ""
+
+msgid "No Open Data Submissions"
 msgstr ""
 
 msgid "OPEN ALL YEAR"
