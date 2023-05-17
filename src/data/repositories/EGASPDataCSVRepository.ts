@@ -19,7 +19,7 @@ export class EGASPDataCSVRepository implements EGASPDataRepository {
             if (firstRow) {
                 return {
                     isValid: true,
-                    records: sheet.rows.length,
+                    records: sheet.rows.length - 2, //two rows for header
                     specimens: [],
                 };
             } else
