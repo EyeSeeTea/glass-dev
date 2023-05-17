@@ -30,7 +30,7 @@ export const YourNotifications: React.FC = () => {
         <>
             <ContentLoader content={notifications}>
                 <Grid item xs={12}>
-                    {notifications.kind === "loaded" && notifications.data.length && (
+                    {notifications.kind === "loaded" && notifications.data.length > 0 && (
                         <CustomCard>
                             <TitleContainer>
                                 <Typography variant="h5">{i18n.t("Your Notifications")}</Typography>
