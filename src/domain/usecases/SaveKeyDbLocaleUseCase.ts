@@ -1,10 +1,10 @@
 import { FutureData } from "../entities/Future";
 import { UsersRepository } from "../repositories/UsersRepository";
 
-export class SaveUserUseCase {
+export class SaveKeyDbLocaleUseCase {
     constructor(private usersRepository: UsersRepository) {}
 
-    execute(password: string): FutureData<void | unknown> {
-        return this.usersRepository.save(password);
+    execute(keyDbLocale: string): FutureData<void | unknown> {
+        return this.usersRepository.saveLocale(false, keyDbLocale);
     }
 }
