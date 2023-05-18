@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2023-05-17T07:41:16.020Z\n"
-"PO-Revision-Date: 2023-05-17T07:41:16.020Z\n"
+"POT-Creation-Date: 2023-05-18T20:32:48.523Z\n"
+"PO-Revision-Date: 2023-05-18T20:32:48.523Z\n"
 
 msgid "Error saving registration status"
 msgstr ""
@@ -74,51 +74,6 @@ msgstr ""
 msgid "Uploads with errors, or discarded"
 msgstr ""
 
-msgid "Go to questionnaires"
-msgstr ""
-
-msgid "Upload/Delete datasets"
-msgstr ""
-
-msgid "Go to submission"
-msgstr ""
-
-msgid "Full Status History"
-msgstr ""
-
-msgid "Done"
-msgstr ""
-
-msgid "From"
-msgstr ""
-
-msgid "To"
-msgstr ""
-
-msgid "Changed at"
-msgstr ""
-
-msgid "Error fetching questionnaires."
-msgstr ""
-
-msgid "Error fetching uploads."
-msgstr ""
-
-msgid "Current Status"
-msgstr ""
-
-msgid "Content"
-msgstr ""
-
-msgid "Mandatory"
-msgstr ""
-
-msgid "State"
-msgstr ""
-
-msgid "Data Submission status has errors..."
-msgstr ""
-
 msgid "There are no questionnaries for this module"
 msgstr ""
 
@@ -165,6 +120,27 @@ msgstr ""
 msgid "Send Submission"
 msgstr ""
 
+msgid "Overview"
+msgstr ""
+
+msgid "Questionnaires"
+msgstr ""
+
+msgid "Datasets"
+msgstr ""
+
+msgid "Validation Report"
+msgstr ""
+
+msgid "Advanced"
+msgstr ""
+
+msgid "Submission"
+msgstr ""
+
+msgid "No Data uploaded..."
+msgstr ""
+
 msgid "Uploaded"
 msgstr ""
 
@@ -203,25 +179,49 @@ msgid ""
 "dataset. Are you sure you want to delete?"
 msgstr ""
 
-msgid "Overview"
+msgid "Go to questionnaires"
 msgstr ""
 
-msgid "Questionnaires"
+msgid "Upload/Delete datasets"
 msgstr ""
 
-msgid "Datasets"
+msgid "Go to submission"
 msgstr ""
 
-msgid "Validation Report"
+msgid "Full Status History"
 msgstr ""
 
-msgid "Advanced"
+msgid "Done"
 msgstr ""
 
-msgid "Submission"
+msgid "From"
 msgstr ""
 
-msgid "No Data uploaded..."
+msgid "To"
+msgstr ""
+
+msgid "Changed at"
+msgstr ""
+
+msgid "Error fetching questionnaires."
+msgstr ""
+
+msgid "Error fetching uploads."
+msgstr ""
+
+msgid "Current Status"
+msgstr ""
+
+msgid "Content"
+msgstr ""
+
+msgid "Mandatory"
+msgstr ""
+
+msgid "State"
+msgstr ""
+
+msgid "Data Submission status has errors..."
 msgstr ""
 
 msgid "File Type"
@@ -260,6 +260,9 @@ msgstr ""
 msgid "News from GLASS"
 msgstr ""
 
+msgid "No Open Data Submissions"
+msgstr ""
+
 msgid "Notification"
 msgstr ""
 
@@ -279,9 +282,6 @@ msgid "Your Notifications"
 msgstr ""
 
 msgid "No notifications"
-msgstr ""
-
-msgid "No Open Data Submissions"
 msgstr ""
 
 msgid "OPEN ALL YEAR"
