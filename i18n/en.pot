@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2023-05-18T20:32:48.523Z\n"
-"PO-Revision-Date: 2023-05-18T20:32:48.523Z\n"
+"POT-Creation-Date: 2023-05-18T20:49:58.503Z\n"
+"PO-Revision-Date: 2023-05-18T20:49:58.503Z\n"
 
 msgid "Error saving registration status"
 msgstr ""
@@ -492,6 +492,18 @@ msgid "Error fetching Database locales"
 msgstr ""
 
 msgid "Error fetching UI locales"
+msgstr ""
+
+msgid "Interface language updated successfully"
+msgstr ""
+
+msgid "Error updating interface language."
+msgstr ""
+
+msgid "Database language updated successfully"
+msgstr ""
+
+msgid "Error updating database language."
 msgstr ""
 
 msgid "Interface language"
