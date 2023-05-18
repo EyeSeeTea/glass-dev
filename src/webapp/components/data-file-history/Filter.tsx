@@ -52,7 +52,7 @@ interface FilterProps {
     setStatus: Dispatch<SetStateAction<string>>;
 }
 
-const START_YEAR = 2018;
+const START_YEAR = 2016;
 export const Filter: React.FC<FilterProps> = ({ year, setYear, status, setStatus }) => {
     const classes = useStyles();
     const currentYear = new Date().getFullYear();
