@@ -1,5 +1,6 @@
 type ModuleDetails = {
     isbatchReq: boolean;
+    isQuestionnaireReq: boolean;
     isSecondaryFileApplicable: boolean;
     isDryRunReq: boolean;
     importLoadingMsg: {
@@ -21,6 +22,7 @@ export const moduleProperties = new Map<string, ModuleDetails>([
         "AMR",
         {
             isbatchReq: true,
+            isQuestionnaireReq: true,
             isSecondaryFileApplicable: true,
             isDryRunReq: true,
             importLoadingMsg: {
@@ -42,6 +44,7 @@ export const moduleProperties = new Map<string, ModuleDetails>([
         "EGASP",
         {
             isbatchReq: false,
+            isQuestionnaireReq: false,
             isSecondaryFileApplicable: false,
             isDryRunReq: false,
             importLoadingMsg: {
