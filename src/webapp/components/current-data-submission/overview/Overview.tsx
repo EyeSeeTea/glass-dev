@@ -14,12 +14,7 @@ interface OverviewProps {
     setCurrentStep: React.Dispatch<React.SetStateAction<number>>;
 }
 
-export const Overview: React.FC<OverviewProps> = ({
-    moduleName,
-    currentDataSubmissionStatus,
-    setRefetchStatus,
-    setCurrentStep,
-}) => {
+export const Overview: React.FC<OverviewProps> = ({ moduleName, currentDataSubmissionStatus, setCurrentStep }) => {
     return (
         <LinedBox>
             {currentDataSubmissionStatus ? (
@@ -32,7 +27,6 @@ export const Overview: React.FC<OverviewProps> = ({
                     rightCTAs={currentDataSubmissionStatus.rightCTAs}
                     showUploadHistory={currentDataSubmissionStatus.showUploadHistory}
                     isActionRequired={currentDataSubmissionStatus.isActionRequired}
-                    setRefetchStatus={setRefetchStatus}
                     setCurrentStep={setCurrentStep}
                 />
             ) : (

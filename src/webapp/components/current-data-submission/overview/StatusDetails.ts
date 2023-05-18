@@ -5,7 +5,8 @@ export type StatusCTAs =
     | "Send submission"
     | "Read full message"
     | "Review submitted datasets"
-    | "Request data update";
+    | "Request data update"
+    | "Go to submission";
 
 export type CTAs = {
     label: StatusCTAs;
@@ -23,4 +24,5 @@ export interface StatusDetails {
     showUploadHistory: boolean;
     isActionRequired: boolean;
     actionReqText: string;
+    isSubmissionStatus: boolean;
 }

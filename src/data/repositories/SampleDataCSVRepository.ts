@@ -40,7 +40,7 @@ export class SampleDataCSVRepository implements SampleDataRepository {
                     doesColumnExist(firstRow, "GENDER") &&
                     doesColumnExist(firstRow, "ORIGIN") &&
                     doesColumnExist(firstRow, "AGEGROUP") &&
-                    doesColumnExist(firstRow, "NUMINFECTED") &&
+                    // doesColumnExist(firstRow, "NUMINFECTED") &&
                     doesColumnExist(firstRow, "NUMSAMPLEDPATIENTS") &&
                     doesColumnExist(firstRow, "BATCHID");
 
