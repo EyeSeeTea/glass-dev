@@ -26,7 +26,7 @@ export const statusMap = new Map<DataSubmissionStatusTypes, StatusDetails>([
             ],
             showUploadHistory: true,
             isActionRequired: true,
-            actionReqText: "Please complete all mandatory questionnaires.",
+            actionReqText: "Please complete dataset upload for submission",
         },
     ],
     [

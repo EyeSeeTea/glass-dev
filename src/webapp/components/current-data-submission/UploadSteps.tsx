@@ -12,6 +12,7 @@ import i18n from "@eyeseetea/d2-ui-components/locales";
 import { DataSubmissionStatusTypes } from "../../../domain/entities/GlassDataSubmission";
 import { useGlassCaptureAccess } from "../../hooks/useGlassCaptureAccess";
 import { isEditModeStatus } from "../../../utils/editModeStatus";
+import { moduleProperties } from "../../../domain/utils/ModuleProperties";
 
 interface UploadStepsProps {
     moduleName: string;
@@ -38,9 +39,11 @@ export const UploadSteps: React.FC<UploadStepsProps> = ({
                 <Button onClick={() => setCurrentStep(1)} className={currentStep === 1 ? "current" : ""}>
                     {i18n.t("Datasets")}
                 </Button>
-                <Button onClick={() => setCurrentStep(2)} className={currentStep === 2 ? "current" : ""}>
-                    {i18n.t("Questionnaires")}
-                </Button>
+                {moduleProperties.get(moduleName)?.isQuestionnaireReq && (
+                    <Button onClick={() => setCurrentStep(2)} className={currentStep === 2 ? "current" : ""}>
+                        {i18n.t("Questionnaires")}
+                    </Button>
+                )}
                 <Button onClick={() => setCurrentStep(3)} className={currentStep === 3 ? "current" : ""}>
                     {i18n.t("Validation Report")}
                 </Button>
