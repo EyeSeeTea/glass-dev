@@ -10,7 +10,7 @@ export function usePopulateDataSubmissionHistory() {
     const { currentUser } = useAppContext();
     const { currentOrgUnitAccess } = useCurrentOrgUnitContext();
     const { currentModuleAccess } = useCurrentModuleContext();
-    const { dataSubmissions, setRefetch } = useGlassDataSubmissionsByModuleAndOU(
+    const { dataSubmissions, setDataSubmissions, setRefetch } = useGlassDataSubmissionsByModuleAndOU(
         currentModuleAccess.moduleId,
         currentOrgUnitAccess.orgUnitId
     );
@@ -63,5 +63,5 @@ export function usePopulateDataSubmissionHistory() {
         setRefetch,
     ]);
 
-    return { loading, dataSubmissions };
+    return { loading, dataSubmissions, setDataSubmissions };
 }

@@ -3,12 +3,55 @@ import styled from "styled-components";
 import { CustomCard } from "../custom-card/CustomCard";
 import { UserAccessInfo } from "../../../domain/entities/User";
 import Chip from "@material-ui/core/Chip";
+import {
+    Button,
+    CircularProgress,
+    DialogContent,
+    FormControl,
+    IconButton,
+    Input,
+    InputAdornment,
+    InputLabel,
+} from "@material-ui/core";
+import { ConfirmationDialog, useSnackbar } from "@eyeseetea/d2-ui-components";
+import { useState } from "react";
+import { Visibility, VisibilityOff } from "@material-ui/icons";
+import { useAppContext } from "../../contexts/app-context";
 
 interface UserProfileContentProps {
     userInformation: UserAccessInfo;
 }
 
 export const UserProfileContent: React.FC<UserProfileContentProps> = ({ userInformation }) => {
+    const { compositionRoot } = useAppContext();
+    const snackbar = useSnackbar();
+    const [password, setPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
+    const [isChangePasswordDialogOpen, setIsChangePasswordDialogOpen] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+
+    const savePassword = () => {
+        if (password !== confirmPassword) {
+            snackbar.error(i18n.t("The password and confirm password fields don't match"));
+        } else {
+            setIsLoading(true);
+            compositionRoot.user.save(password).run(
+                () => {
+                    snackbar.success(i18n.t("User password changed successfully."));
+                    setPassword("");
+                    setConfirmPassword("");
+                    setIsLoading(false);
+                },
+                error => {
+                    snackbar.error(i18n.t(error));
+                    setIsLoading(false);
+                }
+            );
+        }
+    };
+
     return (
         <ContentWrapper>
             <CustomCard title="User Profile">
@@ -60,6 +103,9 @@ export const UserProfileContent: React.FC<UserProfileContentProps> = ({ userInfo
                         </tr>
                     </tbody>
                 </InfoTable>
+                <StyledButton onClick={() => setIsChangePasswordDialogOpen(true)} variant="contained" color="primary">
+                    {i18n.t("Change Password")}
+                </StyledButton>
             </CustomCard>
 
             <CustomCard title="User Roles">
@@ -94,6 +140,61 @@ export const UserProfileContent: React.FC<UserProfileContentProps> = ({ userInfo
                     </tbody>
                 </InfoTable>
             </CustomCard>
+
+            <ConfirmationDialog
+                isOpen={isChangePasswordDialogOpen}
+                title={i18n.t("Change password")}
+                onSave={savePassword}
+                onCancel={() => setIsChangePasswordDialogOpen(false)}
+                saveText={i18n.t("Change Password")}
+                cancelText={i18n.t("Cancel")}
+                fullWidth={true}
+                disableEnforceFocus
+            >
+                <DialogContainer>
+                    <FormControl variant="standard">
+                        <InputLabel htmlFor="password">New Password</InputLabel>
+                        <Input
+                            id="password"
+                            type={showPassword ? "text" : "password"}
+                            value={password}
+                            onChange={e => setPassword(e.target.value)}
+                            disabled={isLoading}
+                            endAdornment={
+                                <InputAdornment position="end">
+                                    <IconButton
+                                        aria-label="toggle password visibility"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                    >
+                                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                                    </IconButton>
+                                </InputAdornment>
+                            }
+                        />
+                    </FormControl>
+                    <FormControl variant="standard">
+                        <InputLabel htmlFor="confirm-password">Confirm Password</InputLabel>
+                        <Input
+                            id="confirm-password"
+                            type={showConfirmPassword ? "text" : "password"}
+                            value={confirmPassword}
+                            onChange={e => setConfirmPassword(e.target.value)}
+                            disabled={isLoading}
+                            endAdornment={
+                                <InputAdornment position="end">
+                                    <IconButton
+                                        aria-label="toggle password visibility"
+                                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                    >
+                                        {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                                    </IconButton>
+                                </InputAdornment>
+                            }
+                        />
+                    </FormControl>
+                    {isLoading && <CircularProgress />}
+                </DialogContainer>
+            </ConfirmationDialog>
         </ContentWrapper>
     );
 };
@@ -130,4 +231,17 @@ const InfoTable = styled.table`
 
 const StyledChip = styled(Chip)`
     margin: 5px 1px;
+`;
+
+const StyledButton = styled(Button)`
+    margin: 10px 20px 20px auto;
+    margin-left: auto;
+    width: fit-content;
+`;
+
+const DialogContainer = styled(DialogContent)`
+    display: flex;
+    flex-direction: column;
+    align-items: self-start;
+    gap: 10px;
 `;
