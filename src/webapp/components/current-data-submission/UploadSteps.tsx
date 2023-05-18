@@ -12,6 +12,7 @@ import i18n from "@eyeseetea/d2-ui-components/locales";
 import { DataSubmissionStatusTypes } from "../../../domain/entities/GlassDataSubmission";
 import { useGlassCaptureAccess } from "../../hooks/useGlassCaptureAccess";
 import { isEditModeStatus } from "../../utils/editModeStatus";
+import { Submission } from "./Submission";
 
 interface UploadStepsProps {
     moduleName: string;
@@ -36,10 +37,10 @@ export const UploadSteps: React.FC<UploadStepsProps> = ({
                     {i18n.t("Overview")}
                 </Button>
                 <Button onClick={() => setCurrentStep(1)} className={currentStep === 1 ? "current" : ""}>
-                    {i18n.t("Datasets")}
+                    {i18n.t("Questionnaires")}
                 </Button>
                 <Button onClick={() => setCurrentStep(2)} className={currentStep === 2 ? "current" : ""}>
-                    {i18n.t("Questionnaires")}
+                    {i18n.t("Datasets")}
                 </Button>
                 <Button onClick={() => setCurrentStep(3)} className={currentStep === 3 ? "current" : ""}>
                     {i18n.t("Validation Report")}
@@ -52,6 +53,12 @@ export const UploadSteps: React.FC<UploadStepsProps> = ({
                             {i18n.t("Advanced")}
                         </Button>
                     )}
+                {/* Do not show Submission tab, unless the current status is a submission status */}
+                {hasCurrentUserCaptureAccess && currentDataSubmissionStatus.isSubmissionStatus && (
+                    <Button onClick={() => setCurrentStep(5)} className={currentStep === 5 ? "current" : ""}>
+                        {i18n.t("Submission")}
+                    </Button>
+                )}
             </div>
             {renderTypeContent(currentStep, moduleName, currentDataSubmissionStatus, setRefetchStatus, setCurrentStep)}
         </ContentWrapper>
@@ -77,13 +84,15 @@ const renderTypeContent = (
                 />
             );
         case 1:
-            return <ListOfDatasets />;
-        case 2:
             return <Questionnaires setRefetchStatus={setRefetchStatus} />;
+        case 2:
+            return <ListOfDatasets />;
         case 3:
             return <Validations />;
         case 4:
             return <Advanced setRefetchStatus={setRefetchStatus} setCurrentStep={setCurrentStep} />;
+        case 5:
+            return <Submission setRefetchStatus={setRefetchStatus} setCurrentStep={setCurrentStep} />;
         default:
             return <p>{i18n.t("No Data uploaded...")}</p>;
     }

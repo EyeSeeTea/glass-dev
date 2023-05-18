@@ -26,7 +26,7 @@ export const DataSubmissionsHistoryContent: React.FC = () => {
             const presentYear = new Date().getFullYear();
             const years: string[] = [];
 
-            for (let yearItr = presentYear - 1; yearItr > presentYear - 6; yearItr--) {
+            for (let yearItr = presentYear - 1; yearItr > presentYear - 8; yearItr--) {
                 if (!dataSubmissions.data.find(ds => ds.period === yearItr.toString())) {
                     years.push(yearItr.toString());
                 }

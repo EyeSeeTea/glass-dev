@@ -37,7 +37,7 @@ export const UserProfileContent: React.FC<UserProfileContentProps> = ({ userInfo
             snackbar.error(i18n.t("The password and confirm password fields don't match"));
         } else {
             setIsLoading(true);
-            compositionRoot.user.save(password).run(
+            compositionRoot.user.savePassword(password).run(
                 () => {
                     snackbar.success(i18n.t("User password changed successfully."));
                     setPassword("");
