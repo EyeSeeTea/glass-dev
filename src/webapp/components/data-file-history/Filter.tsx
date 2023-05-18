@@ -76,7 +76,12 @@ export const Filter: React.FC<FilterProps> = ({ year, setYear, status, setStatus
             <Box>
                 <FormControl className={classes.formControl}>
                     <StyledInputLabel id="year-label">{i18n.t("Select Year")}</StyledInputLabel>
-                    <Select labelId="year-label" value={year} onChange={e => setYear(e.target.value as string)}>
+                    <Select
+                        labelId="year-label"
+                        value={year}
+                        onChange={e => setYear(e.target.value as string)}
+                        MenuProps={{ disableScrollLock: true }}
+                    >
                         {yearOptions.map(yearItem => (
                             <MenuItem key={yearItem.value} value={yearItem.value}>
                                 {i18n.t(yearItem.label)}
@@ -91,6 +96,7 @@ export const Filter: React.FC<FilterProps> = ({ year, setYear, status, setStatus
                         value={status}
                         label="Select Status"
                         onChange={e => setStatus(e.target.value as string)}
+                        MenuProps={{ disableScrollLock: true }}
                     >
                         {statusOptions.map(statusItem => (
                             <MenuItem key={statusItem.value} value={statusItem.value}>

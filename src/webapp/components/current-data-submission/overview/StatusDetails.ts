@@ -22,4 +22,5 @@ export interface StatusDetails {
     rightCTAs: CTAs[];
     showUploadHistory: boolean;
     isActionRequired: boolean;
+    actionReqText: string;
 }

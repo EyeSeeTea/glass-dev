@@ -61,6 +61,7 @@ import { EGASPDataCSVRepository } from "./data/repositories/EGASPDataCSVReposito
 import { Dhis2EventsDefaultRepository } from "./data/repositories/Dhis2EventsDefaultRepository";
 import { EGASPProgramDefaultRepository } from "./data/repositories/bulk-load/EGASPProgramDefaultRepository";
 import { ExcelPopulateRepository } from "./data/repositories/ExcelPopulateRepository";
+import { SaveUserUseCase } from "./domain/usecases/SaveUserUseCase";
 
 export function getCompositionRoot(instance: Instance) {
     const api = getD2APiFromInstance(instance);
@@ -78,8 +79,8 @@ export function getCompositionRoot(instance: Instance) {
     const questionnaireD2Repository = new QuestionnaireD2Repository(api);
     const notificationRepository = new NotificationDefaultRepository(instance);
     const countryInformationRepository = new CountryInformationDefaultRepository(instance);
-    const systemInfoDefaultRepository = new SystemInfoDefaultRepository(api);
-    const usersDefaultRepository = new UsersDefaultRepository(api);
+    const systemInfoRepository = new SystemInfoDefaultRepository(api);
+    const usersRepository = new UsersDefaultRepository(api);
     const localeRepository = new LocalesDefaultRepository(instance);
     const egaspDataRepository = new EGASPDataCSVRepository();
     const dhis2EventsDefaultRepository = new Dhis2EventsDefaultRepository(instance);
@@ -148,7 +149,7 @@ export function getCompositionRoot(instance: Instance) {
         notifications: getExecute({
             getAll: new GetNotificationsUseCase(notificationRepository),
             getById: new GetNotificationByIdUseCase(notificationRepository),
-            send: new SendNotificationsUseCase(notificationRepository, usersDefaultRepository),
+            send: new SendNotificationsUseCase(notificationRepository, usersRepository),
         }),
         countries: getExecute({
             getInformation: new GetCountryInformationUseCase(countryInformationRepository),
@@ -157,11 +158,14 @@ export function getCompositionRoot(instance: Instance) {
             getDashboard: new GetDashboardUseCase(glassModuleRepository),
         }),
         systemInfo: getExecute({
-            lastAnalyticsRunTime: new GetLastAnalyticsRunTimeUseCase(systemInfoDefaultRepository),
+            lastAnalyticsRunTime: new GetLastAnalyticsRunTimeUseCase(systemInfoRepository),
         }),
         locales: getExecute({
             getUiLocales: new GetUiLocalesUseCase(localeRepository),
             getDatabaseLocales: new GetDatabaseLocalesUseCase(localeRepository),
+        }),
+        user: getExecute({
+            save: new SaveUserUseCase(usersRepository),
         }),
     };
 }

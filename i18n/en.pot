@@ -57,9 +57,9 @@ msgid ""
 msgstr ""
 
 msgid ""
-"After it the status is “WHO Aproval” or “WHO PUBLISHED” the revoking "
-"process needs to be suppervised by WHO because it can affect ongoing "
-"publications"
+"After the file has been submitted or approved by WHO the revoking process "
+"needs to be supervised by WHO because it can affect ongoing validation or "
+"publication"
 msgstr ""
 
 msgid "Request Dataset update"
@@ -75,6 +75,86 @@ msgid "You can add up to 6 datasets to this submission with different BATCH IDS.
 msgstr ""
 
 msgid "Uploads with errors, or discarded"
+msgstr ""
+
+msgid "There are no questionnaries for this module"
+msgstr ""
+
+msgid "mandatory"
+msgstr ""
+
+msgid "Completed"
+msgstr ""
+
+msgid "Not completed"
+msgstr ""
+
+msgid "View"
+msgstr ""
+
+msgid "Go"
+msgstr ""
+
+msgid "Overview"
+msgstr ""
+
+msgid "Datasets"
+msgstr ""
+
+msgid "Questionnaires"
+msgstr ""
+
+msgid "Validation Report"
+msgstr ""
+
+msgid "Advanced"
+msgstr ""
+
+msgid "No Data uploaded..."
+msgstr ""
+
+msgid "Uploaded"
+msgstr ""
+
+msgid "Period"
+msgstr ""
+
+msgid "Records"
+msgstr ""
+
+msgid "Type"
+msgstr ""
+
+msgid "Batch ID"
+msgstr ""
+
+msgid "Status"
+msgstr ""
+
+msgid "Download File"
+msgstr ""
+
+msgid "Delete"
+msgstr ""
+
+msgid "Deleting Files"
+msgstr ""
+
+msgid "This might take several minutes, do not refresh the page or press back."
+msgstr ""
+
+msgid "Confirm Delete"
+msgstr ""
+
+msgid "Ok"
+msgstr ""
+
+msgid "Cancel"
+msgstr ""
+
+msgid ""
+"Deleting this upload will delete both SAMPLE and RIS files for the given "
+"dataset. Are you sure you want to delete?"
 msgstr ""
 
 msgid "Go to questionnaires"
@@ -411,6 +491,12 @@ msgstr ""
 msgid "not required"
 msgstr ""
 
+msgid "The password and confirm password fields don't match"
+msgstr ""
+
+msgid "User password changed successfully."
+msgstr ""
+
 msgid "Full name"
 msgstr ""
 
@@ -442,6 +528,12 @@ msgid "Interests"
 msgstr ""
 
 msgid "Languages"
+msgstr ""
+
+msgid "Change Password"
+msgstr ""
+
+msgid "Change password"
 msgstr ""
 
 msgid "Error fetching Database locales"
