@@ -20,7 +20,7 @@ export class UsersDefaultRepository implements UsersRepository {
         ).map(res => res.objects);
     }
 
-    save(password: string): FutureData<void | unknown> {
+    savePassword(password: string): FutureData<void | unknown> {
         return apiToFuture(
             this.api.currentUser.get({
                 fields: {
@@ -44,5 +44,21 @@ export class UsersDefaultRepository implements UsersRepository {
                     return error;
                 });
         });
+    }
+
+    saveLocale(isUiLocale: boolean, locale: string): FutureData<void | unknown> {
+        return apiToFuture(
+            this.api.post<{ status: "OK" | "SUCCESS" | "WARNING" | "ERROR" }>(
+                `/userSettings/${isUiLocale ? "keyUiLocale" : "keyDbLocale"}`,
+                { value: locale },
+                {}
+            )
+        )
+            .flatMap(res => {
+                return res.status === "OK" ? Future.success(undefined) : Future.error(res.status);
+            })
+            .mapError(error => {
+                return error;
+            });
     }
 }
