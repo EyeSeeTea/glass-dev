@@ -57,7 +57,9 @@ import { UsersDefaultRepository } from "./data/repositories/UsersDefaultReposito
 import { GetUiLocalesUseCase } from "./domain/usecases/GetUiLocalesUseCase";
 import { GetDatabaseLocalesUseCase } from "./domain/usecases/GetDatabaseLocalesUseCase";
 import { LocalesDefaultRepository } from "./data/repositories/LocalesDefaultRepository";
-import { SaveUserUseCase } from "./domain/usecases/SaveUserUseCase";
+import { SavePasswordUseCase } from "./domain/usecases/SavePasswordUseCase";
+import { SaveKeyDbLocaleUseCase } from "./domain/usecases/SaveKeyDbLocaleUseCase";
+import { SaveKeyUiLocaleUseCase } from "./domain/usecases/SaveKeyUiLocaleUseCase";
 
 export function getCompositionRoot(instance: Instance) {
     const api = getD2APiFromInstance(instance);
@@ -153,7 +155,9 @@ export function getCompositionRoot(instance: Instance) {
             getDatabaseLocales: new GetDatabaseLocalesUseCase(localeRepository),
         }),
         user: getExecute({
-            save: new SaveUserUseCase(usersRepository),
+            savePassword: new SavePasswordUseCase(usersRepository),
+            saveKeyUiLocale: new SaveKeyUiLocaleUseCase(usersRepository),
+            saveKeyDbLocale: new SaveKeyDbLocaleUseCase(usersRepository),
         }),
     };
 }

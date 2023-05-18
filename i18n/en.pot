@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2023-05-15T14:02:53.262Z\n"
-"PO-Revision-Date: 2023-05-15T14:02:53.262Z\n"
+"POT-Creation-Date: 2023-05-18T20:49:58.503Z\n"
+"PO-Revision-Date: 2023-05-18T20:49:58.503Z\n"
 
 msgid "Error saving registration status"
 msgstr ""
@@ -65,7 +65,10 @@ msgstr ""
 msgid "Correct Uploads"
 msgstr ""
 
-msgid "Upload Dataset"
+msgid "No datasets uploaded to this submission."
+msgstr ""
+
+msgid "Add New Datasets"
 msgstr ""
 
 msgid "You can add up to 6 datasets to this submission with different BATCH IDS."
@@ -92,19 +95,50 @@ msgstr ""
 msgid "Go"
 msgstr ""
 
+msgid "Confirm submission"
+msgstr ""
+
+msgid "Ok"
+msgstr ""
+
+msgid "Cancel"
+msgstr ""
+
+msgid ""
+"Please review that the submission package contains all the datasets that "
+"you want to include."
+msgstr ""
+
+msgid ""
+"After you submit this package, you wont be able to edit it anymore wihout "
+"WHO permissions"
+msgstr ""
+
+msgid ""
+"Please review that the submission package contains all the datasets that "
+"you want to include. After you submit this package, you wont be able to "
+"edit it anymore wihout WHO permissions"
+msgstr ""
+
+msgid "Send Submission"
+msgstr ""
+
 msgid "Overview"
 msgstr ""
 
-msgid "Datasets"
+msgid "Questionnaires"
 msgstr ""
 
-msgid "Questionnaires"
+msgid "Datasets"
 msgstr ""
 
 msgid "Validation Report"
 msgstr ""
 
 msgid "Advanced"
+msgstr ""
+
+msgid "Submission"
 msgstr ""
 
 msgid "No Data uploaded..."
@@ -143,12 +177,6 @@ msgstr ""
 msgid "Confirm Delete"
 msgstr ""
 
-msgid "Ok"
-msgstr ""
-
-msgid "Cancel"
-msgstr ""
-
 msgid ""
 "Deleting this upload will delete both SAMPLE and RIS files for the given "
 "dataset. Are you sure you want to delete?"
@@ -160,20 +188,7 @@ msgstr ""
 msgid "Upload/Delete datasets"
 msgstr ""
 
-msgid "Send submission"
-msgstr ""
-
-msgid "Confirm submission"
-msgstr ""
-
-msgid ""
-"Please review that the submission package contains all the datasets that "
-"you want to include."
-msgstr ""
-
-msgid ""
-"After you submit this package, you wont be able to edit it anymore wihout "
-"WHO permissions"
+msgid "Go to submission"
 msgstr ""
 
 msgid "Full Status History"
@@ -248,9 +263,6 @@ msgstr ""
 msgid "News from GLASS"
 msgstr ""
 
-msgid "No Open Data Submissions"
-msgstr ""
-
 msgid "Notification"
 msgstr ""
 
@@ -267,9 +279,6 @@ msgid "Message from {{sender}}"
 msgstr ""
 
 msgid "Your Notifications"
-msgstr ""
-
-msgid "No notifications"
 msgstr ""
 
 msgid "OPEN ALL YEAR"
@@ -480,6 +489,18 @@ msgid "Error fetching Database locales"
 msgstr ""
 
 msgid "Error fetching UI locales"
+msgstr ""
+
+msgid "Interface language updated successfully"
+msgstr ""
+
+msgid "Error updating interface language."
+msgstr ""
+
+msgid "Database language updated successfully"
+msgstr ""
+
+msgid "Error updating database language."
 msgstr ""
 
 msgid "Interface language"
