@@ -6,9 +6,9 @@ import { apiToFuture } from "../../utils/futures";
 export class SystemInfoDefaultRepository implements SystemInfoRepository {
     constructor(private api: D2Api) {}
 
-    getLastAnalyticsRunTime(): FutureData<string> {
+    getLastAnalyticsRunTime(): FutureData<Date> {
         return apiToFuture(
-            this.api.request<{ lastAnalyticsTableSuccess: string; lastAnalyticsTablePartitionSuccess: string }>({
+            this.api.request<{ lastAnalyticsTableSuccess: Date; lastAnalyticsTablePartitionSuccess: Date }>({
                 url: `/system/info?fields=lastAnalyticsTablePartitionSuccess,lastAnalyticsTableSuccess`,
                 method: "get",
             })

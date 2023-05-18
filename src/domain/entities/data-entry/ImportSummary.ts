@@ -8,6 +8,7 @@ export type ImportSummary = {
     };
     nonBlockingErrors: ConsistencyError[];
     blockingErrors: ConsistencyError[];
+    importTime?: Date;
 };
 
 export type ConsistencyError = {
