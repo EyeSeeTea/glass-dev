@@ -12,21 +12,22 @@ export const statusMap = new Map<DataSubmissionStatusTypes, StatusDetails>([
             colour: glassColors.statusActionReq,
             leftCTAs: [
                 {
+                    label: "Go to questionnaires",
+                    url: "/",
+                },
+            ],
+            rightCTAs: [
+                {
                     label: "Upload/Delete datasets",
                     url: "/upload",
                     color: "primary",
                     variant: "outlined",
                 },
             ],
-            rightCTAs: [
-                {
-                    label: "Go to questionnaires",
-                    url: "/",
-                },
-            ],
             showUploadHistory: true,
             isActionRequired: true,
             actionReqText: "Please complete all mandatory questionnaires.",
+            isSubmissionStatus: false,
         },
     ],
     [
@@ -38,28 +39,30 @@ export const statusMap = new Map<DataSubmissionStatusTypes, StatusDetails>([
             colour: glassColors.statusActionReq,
             leftCTAs: [
                 {
+                    label: "Go to questionnaires",
+                    color: "primary",
+                    variant: "outlined",
+                    url: "/",
+                },
+                {
                     label: "Upload/Delete datasets",
                     color: "primary",
                     variant: "outlined",
                     url: "/data-file-history",
                 },
                 {
-                    label: "Go to questionnaires",
+                    label: "Go to submission",
                     color: "primary",
                     variant: "outlined",
                     url: "/",
                 },
             ],
-            rightCTAs: [
-                {
-                    label: "Send submission",
-                    url: "/",
-                },
-            ],
+            rightCTAs: [],
             showUploadHistory: true,
             isActionRequired: true,
             actionReqText:
                 "Please click on 'Send submission' in overview tab to submit after reviewing the data submission",
+            isSubmissionStatus: true,
         },
     ],
     [
@@ -74,6 +77,7 @@ export const statusMap = new Map<DataSubmissionStatusTypes, StatusDetails>([
             showUploadHistory: false,
             isActionRequired: false,
             actionReqText: "",
+            isSubmissionStatus: false,
         },
     ],
     [
@@ -102,6 +106,7 @@ export const statusMap = new Map<DataSubmissionStatusTypes, StatusDetails>([
             showUploadHistory: false,
             isActionRequired: false,
             actionReqText: "",
+            isSubmissionStatus: false,
         },
     ],
     [
@@ -129,6 +134,7 @@ export const statusMap = new Map<DataSubmissionStatusTypes, StatusDetails>([
             isActionRequired: true,
             actionReqText:
                 "Please re-complete the questionnaire correctly and ensure you have uploaded correct datasets, as your previous submisison was rejected by WHO.",
+            isSubmissionStatus: false,
         },
     ],
     [
@@ -150,6 +156,7 @@ export const statusMap = new Map<DataSubmissionStatusTypes, StatusDetails>([
             showUploadHistory: false,
             isActionRequired: false,
             actionReqText: "",
+            isSubmissionStatus: false,
         },
     ],
     [
@@ -161,28 +168,30 @@ export const statusMap = new Map<DataSubmissionStatusTypes, StatusDetails>([
             colour: glassColors.statusActionReq,
             leftCTAs: [
                 {
+                    label: "Go to questionnaires",
+                    color: "primary",
+                    variant: "outlined",
+                    url: "/",
+                },
+                {
                     label: "Upload/Delete datasets",
                     color: "primary",
                     variant: "outlined",
                     url: "/data-file-history",
                 },
                 {
-                    label: "Go to questionnaires",
+                    label: "Go to submission",
                     color: "primary",
                     variant: "outlined",
                     url: "/",
                 },
             ],
-            rightCTAs: [
-                {
-                    label: "Send submission",
-                    url: "/",
-                },
-            ],
+            rightCTAs: [],
             showUploadHistory: true,
             isActionRequired: true,
             actionReqText:
                 "Please complete all mandatory questionnaires and review datasets, then click on 'Send Submission' in the overview tab to submit",
+            isSubmissionStatus: true,
         },
     ],
 ]);

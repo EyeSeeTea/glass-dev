@@ -1,4 +1,4 @@
-import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Box, Paper, Table, TableCell, TableContainer, TableHead, TableRow } from "@material-ui/core";
 import styled from "styled-components";
 import i18n from "@eyeseetea/d2-ui-components/locales";
@@ -10,7 +10,6 @@ import { useCurrentOrgUnitContext } from "../../../contexts/current-orgUnit-cont
 import { QuestionnaireBase } from "../../../../domain/entities/Questionnaire";
 import { useSnackbar } from "@eyeseetea/d2-ui-components";
 import { Close, Check } from "@material-ui/icons";
-import { DataSubmissionStatusTypes } from "../../../../domain/entities/GlassDataSubmission";
 import { useCurrentPeriodContext } from "../../../contexts/current-period-context";
 import { useGlassCaptureAccess } from "../../../hooks/useGlassCaptureAccess";
 import { palette } from "../../../pages/app/themes/dhis2.theme";
@@ -24,7 +23,6 @@ interface StatusProps {
     rightCTAs: CTAs[];
     showUploadHistory: boolean;
     isActionRequired: boolean;
-    setRefetchStatus: Dispatch<SetStateAction<DataSubmissionStatusTypes | undefined>>;
     setCurrentStep: React.Dispatch<React.SetStateAction<number>>;
 }
 
@@ -38,7 +36,6 @@ export const CurrentStatus: React.FC<StatusProps> = ({
     rightCTAs,
     showUploadHistory,
     isActionRequired,
-    setRefetchStatus,
     setCurrentStep,
 }) => {
     const { compositionRoot } = useAppContext();
@@ -155,15 +152,10 @@ export const CurrentStatus: React.FC<StatusProps> = ({
             )}
             <Box display={"flex"} justifyContent="space-between" mt="20px">
                 <Box>
-                    <CtaButtons ctas={leftCTAs} setRefetchStatus={setRefetchStatus} setCurrentStep={setCurrentStep} />
+                    <CtaButtons ctas={leftCTAs} setCurrentStep={setCurrentStep} />
                 </Box>
                 <Box>
-                    <CtaButtons
-                        ctas={rightCTAs}
-                        position="right"
-                        setRefetchStatus={setRefetchStatus}
-                        setCurrentStep={setCurrentStep}
-                    />
+                    <CtaButtons ctas={rightCTAs} position="right" setCurrentStep={setCurrentStep} />
                 </Box>
             </Box>
         </div>
