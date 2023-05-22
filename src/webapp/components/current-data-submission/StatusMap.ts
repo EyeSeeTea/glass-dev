@@ -8,12 +8,14 @@ export const statusMap = new Map<DataSubmissionStatusTypes, StatusDetails>([
         "NOT_COMPLETED",
         {
             title: "NOT COMPLETED",
-            description: "You need to fill at least the mandatory uploads before submitting for this data submission",
+            description:
+                "You need to fill at least the mandatory questionnaires and uploads before submitting for this data submission",
             colour: glassColors.statusActionReq,
             leftCTAs: [
                 {
                     label: "Go to questionnaires",
                     url: "/",
+                    variant: "outlined",
                 },
             ],
             rightCTAs: [
@@ -21,7 +23,6 @@ export const statusMap = new Map<DataSubmissionStatusTypes, StatusDetails>([
                     label: "Upload/Delete datasets",
                     url: "/upload",
                     color: "primary",
-                    variant: "outlined",
                 },
             ],
             showUploadHistory: true,
@@ -61,7 +62,7 @@ export const statusMap = new Map<DataSubmissionStatusTypes, StatusDetails>([
             showUploadHistory: true,
             isActionRequired: true,
             actionReqText:
-                "Please click on 'Send submission' in overview tab to submit after reviewing the data submission",
+                "Please click on 'Send submission' in Submission tab to submit after reviewing the data submission",
             isSubmissionStatus: true,
         },
     ],
@@ -190,7 +191,7 @@ export const statusMap = new Map<DataSubmissionStatusTypes, StatusDetails>([
             showUploadHistory: true,
             isActionRequired: true,
             actionReqText:
-                "Please complete all mandatory questionnaires and review datasets, then click on 'Send Submission' in the overview tab to submit",
+                "Please complete all mandatory questionnaires and review datasets, then click on 'Send Submission' in the Submission tab to submit",
             isSubmissionStatus: true,
         },
     ],
