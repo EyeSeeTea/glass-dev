@@ -139,7 +139,9 @@ export const ReviewDataSummary: React.FC<ReviewDataSummaryProps> = ({
                 </SectionCard>
                 <SectionCard>
                     {isReportReady === true ? (
-                        <Validations />
+                        <div style={{ display: "flex", flexDirection: "column" }}>
+                            <Validations />
+                        </div>
                     ) : (
                         <div>
                             <Typography variant="h3">

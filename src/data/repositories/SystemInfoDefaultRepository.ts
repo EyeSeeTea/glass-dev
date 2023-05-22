@@ -14,7 +14,7 @@ export class SystemInfoDefaultRepository implements SystemInfoRepository {
             })
         ).flatMap(response => {
             //If continious analytics is turned on, return it.
-            if (response.lastAnalyticsTablePartitionSuccess) {
+            if (new Date(response.lastAnalyticsTablePartitionSuccess) > new Date(response.lastAnalyticsTableSuccess)) {
                 return Future.success(response.lastAnalyticsTablePartitionSuccess);
             }
             //Else, return the lastAnalyticsTableSuccess time
