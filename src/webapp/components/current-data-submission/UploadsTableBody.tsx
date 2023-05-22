@@ -243,7 +243,7 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                     </Typography>
                 </DialogContent>
             </ConfirmationDialog>
-            {rows && rows.length ? (
+            {rows && (
                 <StyledTableBody>
                     {rows.map((row: UploadsDataItem) => (
                         <TableRow key={row.id}>
@@ -278,8 +278,6 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                         </TableRow>
                     ))}
                 </StyledTableBody>
-            ) : (
-                <p>No data found...</p>
             )}
         </>
     );
