@@ -65,7 +65,10 @@ msgstr ""
 msgid "Correct Uploads"
 msgstr ""
 
-msgid "Upload Dataset"
+msgid "No datasets uploaded to this submission."
+msgstr ""
+
+msgid "Add New Datasets"
 msgstr ""
 
 msgid "You can add up to 6 datasets to this submission with different BATCH IDS."
@@ -260,9 +263,6 @@ msgstr ""
 msgid "News from GLASS"
 msgstr ""
 
-msgid "No Open Data Submissions"
-msgstr ""
-
 msgid "Notification"
 msgstr ""
 
@@ -279,9 +279,6 @@ msgid "Message from {{sender}}"
 msgstr ""
 
 msgid "Your Notifications"
-msgstr ""
-
-msgid "No notifications"
 msgstr ""
 
 msgid "OPEN ALL YEAR"
