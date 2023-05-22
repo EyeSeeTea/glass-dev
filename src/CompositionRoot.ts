@@ -61,7 +61,9 @@ import { EGASPDataCSVRepository } from "./data/repositories/EGASPDataCSVReposito
 import { Dhis2EventsDefaultRepository } from "./data/repositories/Dhis2EventsDefaultRepository";
 import { EGASPProgramDefaultRepository } from "./data/repositories/bulk-load/EGASPProgramDefaultRepository";
 import { ExcelPopulateRepository } from "./data/repositories/ExcelPopulateRepository";
-import { SaveUserUseCase } from "./domain/usecases/SaveUserUseCase";
+import { SavePasswordUseCase } from "./domain/usecases/SavePasswordUseCase";
+import { SaveKeyDbLocaleUseCase } from "./domain/usecases/SaveKeyDbLocaleUseCase";
+import { SaveKeyUiLocaleUseCase } from "./domain/usecases/SaveKeyUiLocaleUseCase";
 
 export function getCompositionRoot(instance: Instance) {
     const api = getD2APiFromInstance(instance);
@@ -165,7 +167,9 @@ export function getCompositionRoot(instance: Instance) {
             getDatabaseLocales: new GetDatabaseLocalesUseCase(localeRepository),
         }),
         user: getExecute({
-            save: new SaveUserUseCase(usersRepository),
+            savePassword: new SavePasswordUseCase(usersRepository),
+            saveKeyUiLocale: new SaveKeyUiLocaleUseCase(usersRepository),
+            saveKeyDbLocale: new SaveKeyDbLocaleUseCase(usersRepository),
         }),
     };
 }

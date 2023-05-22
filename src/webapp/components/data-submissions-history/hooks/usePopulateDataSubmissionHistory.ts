@@ -18,7 +18,7 @@ export function usePopulateDataSubmissionHistory() {
 
     useEffect(() => {
         if (dataSubmissions.kind === "loaded") {
-            //Ensure that the last 5 years of data submissions are pre populated.
+            //Ensure that the last n years of data submissions are pre populated.
             const years: string[] = [];
 
             if (currentUser.quarterlyPeriodModules.find(qm => qm === currentModuleAccess.moduleName)) {
