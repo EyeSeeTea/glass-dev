@@ -190,34 +190,6 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
     };
     return (
         <>
-            <Backdrop open={loading} style={{ color: "#fff", zIndex: 1 }}>
-                <StyledLoaderContainer>
-                    <CircularProgress color="#fff" size={50} />
-                    <Typography variant="h6">{i18n.t("Deleting Files")}</Typography>
-                    <Typography variant="h5">
-                        {i18n.t("This might take several minutes, do not refresh the page or press back.")}
-                    </Typography>
-                </StyledLoaderContainer>
-            </Backdrop>
-
-            <ConfirmationDialog
-                isOpen={open}
-                title={i18n.t("Confirm Delete")}
-                onSave={deleteDataset}
-                onCancel={hideConfirmationDialog}
-                saveText={i18n.t("Ok")}
-                cancelText={i18n.t("Cancel")}
-                fullWidth={true}
-                disableEnforceFocus
-            >
-                <DialogContent>
-                    <Typography>
-                        {i18n.t(
-                            "Deleting this upload will delete both SAMPLE and RIS files for the given dataset. Are you sure you want to delete?"
-                        )}
-                    </Typography>
-                </DialogContent>
-            </ConfirmationDialog>
             {rows && (
                 <StyledTableBody>
                     {rows.map((row: UploadsDataItem) => (
@@ -234,6 +206,36 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                                 </Button>
                             </TableCell>
                             <TableCell>
+                                <Backdrop open={loading} style={{ color: "#fff", zIndex: 1 }}>
+                                    <StyledLoaderContainer>
+                                        <CircularProgress color="#fff" size={50} />
+                                        <Typography variant="h6">{i18n.t("Deleting Files")}</Typography>
+                                        <Typography variant="h5">
+                                            {i18n.t(
+                                                "This might take several minutes, do not refresh the page or press back."
+                                            )}
+                                        </Typography>
+                                    </StyledLoaderContainer>
+                                </Backdrop>
+
+                                <ConfirmationDialog
+                                    isOpen={open}
+                                    title={i18n.t("Confirm Delete")}
+                                    onSave={deleteDataset}
+                                    onCancel={hideConfirmationDialog}
+                                    saveText={i18n.t("Ok")}
+                                    cancelText={i18n.t("Cancel")}
+                                    fullWidth={true}
+                                    disableEnforceFocus
+                                >
+                                    <DialogContent>
+                                        <Typography>
+                                            {i18n.t(
+                                                "Deleting this upload will delete both SAMPLE and RIS files for the given dataset. Are you sure you want to delete?"
+                                            )}
+                                        </Typography>
+                                    </DialogContent>
+                                </ConfirmationDialog>
                                 {currentDataSubmissionStatus.kind === "loaded" ? (
                                     <Button
                                         onClick={() => showConfirmationDialog(row)}
