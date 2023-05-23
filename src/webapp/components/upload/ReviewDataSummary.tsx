@@ -1,5 +1,5 @@
-import React, { useCallback, useState } from "react";
-import { Button, CircularProgress } from "@material-ui/core";
+import React, { useCallback, useEffect, useState } from "react";
+import { Button, CircularProgress, Typography } from "@material-ui/core";
 import styled from "styled-components";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
 import i18n from "@eyeseetea/d2-ui-components/locales";
@@ -8,6 +8,8 @@ import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import { useCallbackEffect } from "../../hooks/use-callback-effect";
 import { useSnackbar } from "@eyeseetea/d2-ui-components";
 import { useAppContext } from "../../contexts/app-context";
+import { useGetLastSuccessfulAnalyticsRunTime } from "../../hooks/useGetLastSuccessfulAnalyticsRunTime";
+import { Validations } from "../current-data-submission/Validations";
 
 interface ReviewDataSummaryProps {
     changeStep: (step: number) => void;
@@ -27,10 +29,37 @@ export const ReviewDataSummary: React.FC<ReviewDataSummaryProps> = ({
 
     const [fileType, setFileType] = useState<string>("ris");
     const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [isReportReady, setIsReportReady] = useState<boolean>(false);
 
     const changeType = (fileType: string) => {
         setFileType(fileType);
     };
+
+    const { lastSuccessfulAnalyticsRunTime, setRefetch } = useGetLastSuccessfulAnalyticsRunTime();
+
+    useEffect(() => {
+        if (lastSuccessfulAnalyticsRunTime.kind === "loaded") {
+            const lastAnalyticsRunTime = new Date(lastSuccessfulAnalyticsRunTime.data);
+
+            console.debug(
+                `Last Analytics Run time : ${lastAnalyticsRunTime}, Import time: ${risFileImportSummary?.importTime} `
+            );
+            if (risFileImportSummary?.importTime) {
+                if (lastAnalyticsRunTime > risFileImportSummary.importTime) {
+                    setIsReportReady(true);
+                }
+            }
+        }
+    }, [setIsReportReady, lastSuccessfulAnalyticsRunTime, risFileImportSummary?.importTime]);
+
+    React.useEffect(() => {
+        const timer = setInterval(() => {
+            setRefetch({});
+        }, 3000);
+        return () => {
+            clearInterval(timer);
+        };
+    }, [setRefetch]);
 
     const goToFinalStep = useCallback(() => {
         const risUploadId = localStorage.getItem("risUploadId");
@@ -107,6 +136,27 @@ export const ReviewDataSummary: React.FC<ReviewDataSummaryProps> = ({
                                 : sampleFileImportSummary?.importCount.ignored}
                         </li>
                     </ul>
+                </SectionCard>
+                <SectionCard>
+                    {isReportReady === true ? (
+                        <div style={{ display: "flex", flexDirection: "column" }}>
+                            <Validations />
+                        </div>
+                    ) : (
+                        <div>
+                            <Typography variant="h3">
+                                We are running analytics in the background, this typically takes 5 mins.
+                            </Typography>
+                            <Typography>
+                                You can wait on this page to view report,
+                                <b> or click continue to complete the submission.</b> The report can be viewed in the
+                                Validation tab at anytime.
+                            </Typography>
+                            <StyledProgress>
+                                <CircularProgress size={75} />
+                            </StyledProgress>
+                        </div>
+                    )}
                 </SectionCard>
             </Section>
             <div className="bottom">
@@ -196,4 +246,10 @@ const SectionCard = styled.div`
             display: inline-block;
         }
     }
+`;
+
+const StyledProgress = styled.div`
+    display: flex;
+    justify-content: center;
+    padding: 10px;
 `;
