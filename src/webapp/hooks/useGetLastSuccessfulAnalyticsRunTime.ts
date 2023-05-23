@@ -2,10 +2,11 @@ import React from "react";
 import { GlassState } from "./State";
 import { useAppContext } from "../contexts/app-context";
 
-export type AnalyticsRunTimeState = GlassState<string>;
+export type AnalyticsRunTimeState = GlassState<Date>;
 
 export function useGetLastSuccessfulAnalyticsRunTime() {
     const { compositionRoot } = useAppContext();
+    const [refetch, setRefetch] = React.useState({});
     const [lastSuccessfulAnalyticsRunTime, setLastSuccessfulAnalyticsRunTime] = React.useState<AnalyticsRunTimeState>({
         kind: "loading",
     });
@@ -19,7 +20,7 @@ export function useGetLastSuccessfulAnalyticsRunTime() {
                 setLastSuccessfulAnalyticsRunTime({ kind: "error", message: "" });
             }
         );
-    }, [compositionRoot]);
+    }, [compositionRoot, refetch]);
 
-    return lastSuccessfulAnalyticsRunTime;
+    return { lastSuccessfulAnalyticsRunTime, setRefetch };
 }
