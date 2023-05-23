@@ -115,38 +115,40 @@ export const CurrentStatus: React.FC<StatusProps> = ({
                                 <TableCell>{i18n.t("State")}</TableCell>
                             </TableRow>
                         </TableHead>
-                        <TableRow>
-                            <TableCell>{`Up to 6 datasets`}</TableCell>
-                            <TableCell>{`No`}</TableCell>
-                            <TableCell>
-                                <Box display={"flex"} alignItems="center">
-                                    {`${uploadsCount} uploaded`}
-                                    {uploadsCount > 0 && <Check style={{ color: "green" }}></Check>}
-                                </Box>
-                            </TableCell>
-                        </TableRow>
-                        {questionnaires && questionnaires[0] && (
+                        <tbody>
                             <TableRow>
-                                <TableCell>{`${questionnaires.length} Questionnaires`}</TableCell>
-                                <TableCell>{`${questionnaires[0].isMandatory ? "Yes" : "No"}`}</TableCell>
+                                <TableCell>{`Up to 6 datasets`}</TableCell>
+                                <TableCell>{`No`}</TableCell>
                                 <TableCell>
-                                    {hasCurrentUserCaptureAccess ? (
-                                        <Box display={"flex"} alignItems="center">
-                                            {/* Only user with capture access, can see the Questionnaire complete status */}
-
-                                            {`${questionnaires.filter(el => el.isCompleted).length} completed`}
-                                            {questionnaires.filter(el => el.isCompleted).length < 1 ? (
-                                                <Close color="error"></Close>
-                                            ) : (
-                                                <Check style={{ color: "green" }}></Check>
-                                            )}
-                                        </Box>
-                                    ) : (
-                                        <Box>No Access</Box>
-                                    )}
+                                    <Box display={"flex"} alignItems="center">
+                                        {`${uploadsCount} uploaded`}
+                                        {uploadsCount > 0 && <Check style={{ color: "green" }}></Check>}
+                                    </Box>
                                 </TableCell>
                             </TableRow>
-                        )}
+                            {questionnaires && questionnaires[0] && (
+                                <TableRow>
+                                    <TableCell>{`${questionnaires.length} Questionnaires`}</TableCell>
+                                    <TableCell>{`${questionnaires[0].isMandatory ? "Yes" : "No"}`}</TableCell>
+                                    <TableCell>
+                                        {hasCurrentUserCaptureAccess ? (
+                                            <Box display={"flex"} alignItems="center">
+                                                {/* Only user with capture access, can see the Questionnaire complete status */}
+
+                                                {`${questionnaires.filter(el => el.isCompleted).length} completed`}
+                                                {questionnaires.filter(el => el.isCompleted).length < 1 ? (
+                                                    <Close color="error"></Close>
+                                                ) : (
+                                                    <Check style={{ color: "green" }}></Check>
+                                                )}
+                                            </Box>
+                                        ) : (
+                                            <Box>No Access</Box>
+                                        )}
+                                    </TableCell>
+                                </TableRow>
+                            )}
+                        </tbody>
                     </Table>
                 </TableContainer>
             )}
