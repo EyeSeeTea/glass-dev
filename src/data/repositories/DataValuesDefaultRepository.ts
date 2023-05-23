@@ -26,12 +26,22 @@ export class DataValuesDefaultRepository implements DataValuesRepository {
                 },
                 { dataValues }
             )
-        )
-            .flatMap(response => {
-                return apiToFuture(this.api.system.waitFor(response.response.jobType, response.response.id));
-            })
-            .map(result => {
-                if (!result) {
+        ).flatMap(response => {
+            return apiToFuture(this.api.system.waitFor(response.response.jobType, response.response.id)).map(result => {
+                if (result) {
+                    return {
+                        status: result.status,
+                        description: result.description,
+                        importCount: {
+                            imported: result.importCount.imported,
+                            updated: result.importCount.updated,
+                            ignored: result.importCount.ignored,
+                            deleted: result.importCount.deleted,
+                        },
+                        conficts: result.conflicts,
+                        importTime: new Date(response.response.created),
+                    };
+                } else {
                     return {
                         status: "ERROR",
                         description: "An unexpected error has ocurred saving data values",
@@ -42,10 +52,10 @@ export class DataValuesDefaultRepository implements DataValuesRepository {
                             deleted: 0,
                         },
                         conficts: [],
+                        importTime: new Date(response.response.created),
                     };
                 }
-
-                return result;
             });
+        });
     }
 }

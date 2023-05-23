@@ -6,15 +6,15 @@ import { apiToFuture } from "../../utils/futures";
 export class SystemInfoDefaultRepository implements SystemInfoRepository {
     constructor(private api: D2Api) {}
 
-    getLastAnalyticsRunTime(): FutureData<string> {
+    getLastAnalyticsRunTime(): FutureData<Date> {
         return apiToFuture(
-            this.api.request<{ lastAnalyticsTableSuccess: string; lastAnalyticsTablePartitionSuccess: string }>({
+            this.api.request<{ lastAnalyticsTableSuccess: Date; lastAnalyticsTablePartitionSuccess: Date }>({
                 url: `/system/info?fields=lastAnalyticsTablePartitionSuccess,lastAnalyticsTableSuccess`,
                 method: "get",
             })
         ).flatMap(response => {
             //If continious analytics is turned on, return it.
-            if (response.lastAnalyticsTablePartitionSuccess) {
+            if (new Date(response.lastAnalyticsTablePartitionSuccess) > new Date(response.lastAnalyticsTableSuccess)) {
                 return Future.success(response.lastAnalyticsTablePartitionSuccess);
             }
             //Else, return the lastAnalyticsTableSuccess time

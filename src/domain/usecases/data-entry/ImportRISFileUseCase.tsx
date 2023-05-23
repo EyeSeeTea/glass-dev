@@ -168,6 +168,7 @@ export class ImportRISFileUseCase implements UseCase {
                                             summaryWithConsistencyBlokingErrors,
                                             nonBlockingCategoryOptionErrors
                                         );
+                                        finalImportSummary.importTime = saveSummary.importTime;
 
                                         return finalImportSummary;
                                     });
@@ -192,7 +193,7 @@ export class ImportRISFileUseCase implements UseCase {
                             summaryWithConsistencyBlokingErrors,
                             nonBlockingCategoryOptionErrors
                         );
-
+                        finalImportSummary.importTime = saveSummary.importTime;
                         return Future.success(finalImportSummary);
                     }
                 });
