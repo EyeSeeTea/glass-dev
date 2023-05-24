@@ -15,13 +15,3 @@ export type ConsistencyError = {
     count: number;
     lines?: number[];
 };
-
-export type ImportConflictCount = {
-    importCount: {
-        imported: number;
-        updated: number;
-        ignored: number;
-        deleted: number;
-    };
-    conflicts: { object: string; value: string }[];
-};

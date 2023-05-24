@@ -136,7 +136,9 @@ export function getCompositionRoot(instance: Instance) {
                 egaspDataRepository,
                 dhis2EventsDefaultRepository,
                 egaspProgramRepository,
-                excelRepository
+                excelRepository,
+                glassDocumentsRepository,
+                glassUploadsRepository
             ),
             validatePrimaryFile: new ValidatePrimaryFileUseCase(risDataRepository, egaspDataRepository),
             secondaryFile: new ImportSampleFileUseCase(sampleDataRepository, metadataRepository, dataValuesRepository),
