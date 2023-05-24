@@ -1,6 +1,6 @@
 import { Dhis2EventsDefaultRepository, Event } from "../../../data/repositories/Dhis2EventsDefaultRepository";
 import { Future, FutureData } from "../../entities/Future";
-import { ImportConflictCount, ImportSummary } from "../../entities/data-entry/ImportSummary";
+import { ImportSummary } from "../../entities/data-entry/ImportSummary";
 import * as templates from "../../../data/templates";
 import { EGASPProgramDefaultRepository } from "../../../data/repositories/bulk-load/EGASPProgramDefaultRepository";
 import { Template } from "../../entities/Template";
@@ -10,19 +10,20 @@ import { ExcelRepository } from "../../repositories/ExcelRepository";
 import { DataPackage, DataPackageDataValue } from "../../entities/data-entry/EGASPData";
 import { EventsPostResponse } from "@eyeseetea/d2-api/api/events";
 import { ImportStrategy } from "../../entities/data-entry/DataValuesSaveSummary";
+import { GlassDocumentsRepository } from "../../repositories/GlassDocumentsRepository";
+import { GlassUploadsRepository } from "../../repositories/GlassUploadsRepository";
 
 export class ImportEGASPFile {
     constructor(
         private dhis2EventsDefaultRepository: Dhis2EventsDefaultRepository,
         private egaspProgramDefaultRepository: EGASPProgramDefaultRepository,
-        private excelRepository: ExcelRepository
+        private excelRepository: ExcelRepository,
+        private glassDocumentsRepository: GlassDocumentsRepository,
+        private glassUploadsRepository: GlassUploadsRepository
     ) {}
 
     public importEGASPFile(file: File, action: ImportStrategy): FutureData<ImportSummary> {
-        console.debug(file);
-
-        return this.excelRepository.loadTemplate(file).flatMap(templateId => {
-            console.debug(`Loaded template ${templateId}`);
+        return this.excelRepository.loadTemplate(file).flatMap(_templateId => {
             const egaspTemplate = _.values(templates).map(TemplateClass => new TemplateClass())[0];
 
             return this.egaspProgramDefaultRepository.getProgramEGASP().flatMap(egaspProgram => {
@@ -31,7 +32,42 @@ export class ImportEGASPFile {
                         if (dataPackage) {
                             const events = this.buildEventsPayload(dataPackage);
                             return this.dhis2EventsDefaultRepository.import({ events }, action).flatMap(result => {
-                                return Future.success(this.mapToImportSummary(result));
+                                const { importSummary, eventIdList } = this.mapToImportSummary(result);
+
+                                const primaryUploadId = localStorage.getItem("primaryUploadId");
+                                if (eventIdList.length > 0 && primaryUploadId) {
+                                    //TO DO : upload eventlistid to DHIS Document
+                                    const eventListBlob = new Blob([JSON.stringify(eventIdList)], {
+                                        type: "text/plain",
+                                    });
+
+                                    const eventIdListFile = new File(
+                                        [eventListBlob],
+                                        `${primaryUploadId}_eventIdsFile`
+                                    );
+
+                                    this.glassDocumentsRepository.save(eventIdListFile, "EGASP").run(
+                                        fileId => {
+                                            this.glassUploadsRepository.setEventListFileId(primaryUploadId, fileId).run(
+                                                () => {
+                                                    console.debug(
+                                                        `Updated upload datastore object with eventListFileId`
+                                                    );
+                                                },
+                                                err => {
+                                                    console.debug(
+                                                        `Error updating upload datastore object with eventListFileId :  ${err}`
+                                                    );
+                                                }
+                                            );
+                                        },
+                                        err => {
+                                            console.debug(`Error uploading event id list file ${err}`);
+                                        }
+                                    );
+                                }
+
+                                return Future.success(importSummary);
                             });
                         } else {
                             return Future.error("Unknow template");
@@ -44,49 +80,55 @@ export class ImportEGASPFile {
         });
     }
 
-    private mapToImportSummary(result: EventsPostResponse): ImportSummary {
+    private mapToImportSummary(result: EventsPostResponse): {
+        importSummary: ImportSummary;
+        eventIdList: string[];
+    } {
         if (result && result.importSummaries) {
-            const importCounts: ImportConflictCount[] = result.importSummaries.map(summary => {
-                return {
-                    importCount: {
-                        imported: summary.importCount.imported,
-                        updated: summary.importCount.updated,
-                        ignored: summary.importCount.ignored,
-                        deleted: summary.importCount.deleted,
-                    },
-                    conflicts: summary.status === "ERROR" ? summary.conflicts : [],
-                };
-            });
+            const blockingErrorList = _.compact(
+                result.importSummaries.map(summary => {
+                    if (summary.status === "ERROR") {
+                        if (summary.description) return summary.description;
+                        else {
+                            return summary.conflicts.map(
+                                conflict => `Object : ${conflict.object}, Value : ${conflict.value}`
+                            );
+                        }
+                    }
+                })
+            );
 
-            const add = (accumulator: ImportConflictCount, currentVal: ImportConflictCount): ImportConflictCount => {
-                return {
-                    importCount: {
-                        imported: accumulator.importCount.imported + currentVal.importCount.imported,
-                        updated: accumulator.importCount.updated + currentVal.importCount.updated,
-                        ignored: accumulator.importCount.ignored + currentVal.importCount.ignored,
-                        deleted: accumulator.importCount.deleted + currentVal.importCount.deleted,
-                    },
-                    conflicts: [...accumulator.conflicts, ...currentVal.conflicts],
-                };
-            };
-
-            const importCountSum = importCounts.reduce(add, {
-                importCount: { imported: 0, updated: 0, ignored: 0, deleted: 0 },
-                conflicts: [],
-            });
-
-            return {
+            const blockingErrorsByCount = _.countBy(blockingErrorList);
+            const importSummary = {
                 status: result.status,
-                importCount: importCountSum.importCount,
-                blockingErrors: importCountSum.conflicts.map(conflict => ({ error: conflict.value, count: 1 })),
-                nonBlockingErrors: [],
+                importCount: {
+                    imported: result.imported,
+                    updated: result.updated,
+                    ignored: result.ignored,
+                    deleted: result.deleted,
+                },
+                blockingErrors: Object.entries(blockingErrorsByCount).map(err => {
+                    return { error: err[0], count: err[1] };
+                }),
+                nonBlockingErrors: [], //Non-blocking errors set on running consistency checks
             };
+
+            const eventIdList = result.importSummaries.map(summary => {
+                if (summary.status === "SUCCESS") {
+                    return summary.reference;
+                }
+            });
+
+            return { importSummary, eventIdList: _.compact(eventIdList) };
         } else {
             return {
-                status: "ERROR",
-                importCount: { ignored: 0, imported: 0, deleted: 0, updated: 0 },
-                nonBlockingErrors: [],
-                blockingErrors: [{ error: "An unexpected error has ocurred saving events", count: 1 }],
+                importSummary: {
+                    status: "ERROR",
+                    importCount: { ignored: 0, imported: 0, deleted: 0, updated: 0 },
+                    nonBlockingErrors: [],
+                    blockingErrors: [{ error: "An unexpected error has ocurred saving events", count: 1 }],
+                },
+                eventIdList: [],
             };
         }
     }

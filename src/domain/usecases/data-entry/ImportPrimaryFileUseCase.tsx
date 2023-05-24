@@ -12,6 +12,8 @@ import { EGASPDataRepository } from "../../repositories/data-entry/EGASPDataRepo
 import { Dhis2EventsDefaultRepository } from "../../../data/repositories/Dhis2EventsDefaultRepository";
 import { EGASPProgramDefaultRepository } from "../../../data/repositories/bulk-load/EGASPProgramDefaultRepository";
 import { ExcelRepository } from "../../repositories/ExcelRepository";
+import { GlassDocumentsRepository } from "../../repositories/GlassDocumentsRepository";
+import { GlassUploadsDefaultRepository } from "../../../data/repositories/GlassUploadsDefaultRepository";
 
 export class ImportPrimaryFileUseCase implements UseCase {
     constructor(
@@ -22,7 +24,9 @@ export class ImportPrimaryFileUseCase implements UseCase {
         private egaspDataRepository: EGASPDataRepository,
         private dhis2EventsDefaultRepository: Dhis2EventsDefaultRepository,
         private egaspProgramDefaultRepository: EGASPProgramDefaultRepository,
-        private excelRepository: ExcelRepository
+        private excelRepository: ExcelRepository,
+        private glassDocumentsRepository: GlassDocumentsRepository,
+        private glassUploadsRepository: GlassUploadsDefaultRepository
     ) {}
 
     public execute(
@@ -47,8 +51,11 @@ export class ImportPrimaryFileUseCase implements UseCase {
             const importEGASPFile = new ImportEGASPFile(
                 this.dhis2EventsDefaultRepository,
                 this.egaspProgramDefaultRepository,
-                this.excelRepository
+                this.excelRepository,
+                this.glassDocumentsRepository,
+                this.glassUploadsRepository
             );
+
             return importEGASPFile.importEGASPFile(inputFile, action);
         } else {
             return Future.error("Unknown module type");
