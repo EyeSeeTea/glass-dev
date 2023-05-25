@@ -44,14 +44,14 @@ export class GlassUploadsDefaultRepository implements GlassUploadsRepository {
         });
     }
 
-    delete(id: string): FutureData<string> {
+    delete(id: string): FutureData<{ fileId: string; eventListFileId: string | undefined }> {
         return this.dataStoreClient.listCollection<GlassUploads>(DataStoreKeys.UPLOADS).flatMap(uploads => {
             const upload = uploads?.find(upload => upload.id === id);
             if (upload) {
                 uploads.splice(uploads.indexOf(upload), 1);
                 return this.dataStoreClient
                     .saveObject(DataStoreKeys.UPLOADS, uploads)
-                    .flatMap(() => Future.success(upload.fileId));
+                    .flatMap(() => Future.success({ fileId: upload.fileId, eventListFileId: upload.eventListFileId }));
             } else {
                 return Future.error("Upload does not exist");
             }

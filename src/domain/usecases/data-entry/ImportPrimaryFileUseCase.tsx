@@ -37,7 +37,8 @@ export class ImportPrimaryFileUseCase implements UseCase {
         action: ImportStrategy,
         orgUnit: string,
         countryCode: string,
-        dryRun: boolean
+        dryRun: boolean,
+        eventListId: string
     ): FutureData<ImportSummary> {
         if (moduleName === "AMR") {
             const importRISFile = new ImportRISFile(
@@ -56,7 +57,7 @@ export class ImportPrimaryFileUseCase implements UseCase {
                 this.glassUploadsRepository
             );
 
-            return importEGASPFile.importEGASPFile(inputFile, action);
+            return importEGASPFile.importEGASPFile(inputFile, action, eventListId);
         } else {
             return Future.error("Unknown module type");
         }

@@ -22,7 +22,7 @@ export class ImportEGASPFile {
         private glassUploadsRepository: GlassUploadsRepository
     ) {}
 
-    public importEGASPFile(file: File, action: ImportStrategy): FutureData<ImportSummary> {
+    public importEGASPFile(file: File, action: ImportStrategy, eventListId: string): FutureData<ImportSummary> {
         return this.excelRepository.loadTemplate(file).flatMap(_templateId => {
             const egaspTemplate = _.values(templates).map(TemplateClass => new TemplateClass())[0];
 
@@ -30,44 +30,45 @@ export class ImportEGASPFile {
                 if (egaspTemplate) {
                     return this.readTemplate(egaspTemplate, egaspProgram).flatMap(dataPackage => {
                         if (dataPackage) {
-                            const events = this.buildEventsPayload(dataPackage);
-                            return this.dhis2EventsDefaultRepository.import({ events }, action).flatMap(result => {
-                                const { importSummary, eventIdList } = this.mapToImportSummary(result);
+                            return this.buildEventsPayload(dataPackage, action, eventListId).flatMap(events => {
+                                return this.dhis2EventsDefaultRepository.import({ events }, action).flatMap(result => {
+                                    const { importSummary, eventIdList } = this.mapToImportSummary(result);
+                                    const primaryUploadId = localStorage.getItem("primaryUploadId");
+                                    if (action === "CREATE_AND_UPDATE" && eventIdList.length > 0 && primaryUploadId) {
+                                        const eventListBlob = new Blob([JSON.stringify(eventIdList)], {
+                                            type: "text/plain",
+                                        });
 
-                                const primaryUploadId = localStorage.getItem("primaryUploadId");
-                                if (eventIdList.length > 0 && primaryUploadId) {
-                                    //TO DO : upload eventlistid to DHIS Document
-                                    const eventListBlob = new Blob([JSON.stringify(eventIdList)], {
-                                        type: "text/plain",
-                                    });
+                                        const eventIdListFile = new File(
+                                            [eventListBlob],
+                                            `${primaryUploadId}_eventIdsFile`
+                                        );
 
-                                    const eventIdListFile = new File(
-                                        [eventListBlob],
-                                        `${primaryUploadId}_eventIdsFile`
-                                    );
-
-                                    this.glassDocumentsRepository.save(eventIdListFile, "EGASP").run(
-                                        fileId => {
-                                            this.glassUploadsRepository.setEventListFileId(primaryUploadId, fileId).run(
-                                                () => {
-                                                    console.debug(
-                                                        `Updated upload datastore object with eventListFileId`
+                                        this.glassDocumentsRepository.save(eventIdListFile, "EGASP").run(
+                                            fileId => {
+                                                this.glassUploadsRepository
+                                                    .setEventListFileId(primaryUploadId, fileId)
+                                                    .run(
+                                                        () => {
+                                                            console.debug(
+                                                                `Updated upload datastore object with eventListFileId`
+                                                            );
+                                                        },
+                                                        err => {
+                                                            console.debug(
+                                                                `Error updating upload datastore object with eventListFileId :  ${err}`
+                                                            );
+                                                        }
                                                     );
-                                                },
-                                                err => {
-                                                    console.debug(
-                                                        `Error updating upload datastore object with eventListFileId :  ${err}`
-                                                    );
-                                                }
-                                            );
-                                        },
-                                        err => {
-                                            console.debug(`Error uploading event id list file ${err}`);
-                                        }
-                                    );
-                                }
+                                            },
+                                            err => {
+                                                console.debug(`Error uploading event id list file ${err}`);
+                                            }
+                                        );
+                                    }
 
-                                return Future.success(importSummary);
+                                    return Future.success(importSummary);
+                                });
                             });
                         } else {
                             return Future.error("Unknow template");
@@ -150,20 +151,59 @@ export class ImportEGASPFile {
         });
     }
 
-    private buildEventsPayload(dataPackage: DataPackage): Event[] {
-        return dataPackage.dataEntries.map(({ id, orgUnit, period, attribute, dataValues, dataForm, coordinate }) => {
-            return {
-                event: id,
-                program: dataForm,
-                status: "COMPLETED",
-                orgUnit,
-                eventDate: period,
-                attributeOptionCombo: attribute,
-                dataValues: dataValues,
-                coordinate,
-            };
-        });
+    private buildEventsPayload(
+        dataPackage: DataPackage,
+        action: ImportStrategy,
+        eventListId: string
+    ): FutureData<Event[]> {
+        if (action === "CREATE_AND_UPDATE")
+            return Future.success(
+                dataPackage.dataEntries.map(({ id, orgUnit, period, attribute, dataValues, dataForm, coordinate }) => {
+                    return {
+                        event: id,
+                        program: dataForm,
+                        status: "COMPLETED",
+                        orgUnit,
+                        eventDate: period,
+                        attributeOptionCombo: attribute,
+                        dataValues: dataValues,
+                        coordinate,
+                    };
+                })
+            );
+        else {
+            return this.glassDocumentsRepository.download(eventListId).flatMap(file => {
+                console.debug(file);
+
+                return Future.fromPromise(this.getStringFromFile(file)).flatMap(_events => {
+                    console.debug(_events);
+                    const eventIdList: [] = JSON.parse(_events);
+                    const events: Event[] = eventIdList.map(eventId => {
+                        return {
+                            event: eventId,
+                            program: "",
+                            status: "COMPLETED",
+                            orgUnit: "",
+                            eventDate: "",
+                            attributeOptionCombo: "",
+                            dataValues: [],
+                        };
+                    });
+
+                    return Future.success(events);
+                });
+            });
+        }
     }
+
+    private getStringFromFile = (file: Blob): Promise<string> => {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsText(file, "utf-8");
+            reader.onload = () => resolve(String(reader.result));
+            reader.onerror = error => reject(error);
+        });
+    };
 
     private formatDhis2Value(item: DataPackageDataValue, dataForm: DataForm): DataPackageDataValue | undefined {
         const dataElement = dataForm.dataElements.find(({ id }) => item.dataElement === id);
