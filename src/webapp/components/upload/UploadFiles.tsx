@@ -169,7 +169,8 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
                     "CREATE_AND_UPDATE",
                     orgUnitId,
                     orgUnitCode,
-                    true
+                    true,
+                    ""
                 ),
                 importSecondaryFileSummary: secondaryFile
                     ? compositionRoot.fileSubmission.secondaryFile(

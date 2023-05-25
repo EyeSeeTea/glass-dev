@@ -111,7 +111,8 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
 
                             Future.joinObj({
                                 deletePrimaryFileSummary:
-                                    primaryFileToDelete.status.toLowerCase() !== "uploaded"
+                                    primaryFileToDelete.status.toLowerCase() !== "uploaded" ||
+                                    currentModuleAccess.moduleName === "EGASP"
                                         ? compositionRoot.fileSubmission.primaryFile(
                                               currentModuleAccess.moduleName,
                                               primaryFile,
@@ -120,7 +121,8 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                                               "DELETE",
                                               orgUnitId,
                                               primaryFileToDelete.countryCode,
-                                              false
+                                              false,
+                                              primaryFileToDelete.eventListFileId || ""
                                           )
                                         : Future.success(undefined),
                                 deleteSecondaryFileSummary:

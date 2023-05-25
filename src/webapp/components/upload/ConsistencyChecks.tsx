@@ -60,7 +60,8 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
                     "CREATE_AND_UPDATE",
                     currentOrgUnitAccess.orgUnitId,
                     currentOrgUnitAccess.orgUnitCode,
-                    false
+                    false,
+                    ""
                 ),
                 importSecondaryFileSummary: secondaryFile
                     ? compositionRoot.fileSubmission.secondaryFile(
