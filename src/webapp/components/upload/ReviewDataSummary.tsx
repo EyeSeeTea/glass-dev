@@ -1,5 +1,5 @@
-import React, { useCallback, useState } from "react";
-import { Button, CircularProgress } from "@material-ui/core";
+import React, { useCallback, useEffect, useState } from "react";
+import { Button, CircularProgress, Typography } from "@material-ui/core";
 import styled from "styled-components";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
 import i18n from "@eyeseetea/d2-ui-components/locales";
@@ -14,6 +14,8 @@ import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context
 import { useCurrentPeriodContext } from "../../contexts/current-period-context";
 import { useCurrentDataSubmissionId } from "../../hooks/useCurrentDataSubmissionId";
 import { useCurrentUserGroupsAccess } from "../../hooks/useCurrentUserGroupsAccess";
+import { useGetLastSuccessfulAnalyticsRunTime } from "../../hooks/useGetLastSuccessfulAnalyticsRunTime";
+import { Validations } from "../current-data-submission/Validations";
 
 interface ReviewDataSummaryProps {
     changeStep: (step: number) => void;
@@ -43,10 +45,37 @@ export const ReviewDataSummary: React.FC<ReviewDataSummaryProps> = ({
         currentPeriod
     );
     const { captureAccessGroup } = useCurrentUserGroupsAccess();
+    const [isReportReady, setIsReportReady] = useState<boolean>(false);
 
     const changeType = (fileType: string) => {
         setFileType(fileType);
     };
+
+    const { lastSuccessfulAnalyticsRunTime, setRefetch } = useGetLastSuccessfulAnalyticsRunTime();
+
+    useEffect(() => {
+        if (lastSuccessfulAnalyticsRunTime.kind === "loaded") {
+            const lastAnalyticsRunTime = new Date(lastSuccessfulAnalyticsRunTime.data);
+
+            console.debug(
+                `Last Analytics Run time : ${lastAnalyticsRunTime}, Import time: ${primaryFileImportSummary?.importTime} `
+            );
+            if (primaryFileImportSummary?.importTime) {
+                if (lastAnalyticsRunTime > primaryFileImportSummary.importTime) {
+                    setIsReportReady(true);
+                }
+            }
+        }
+    }, [setIsReportReady, lastSuccessfulAnalyticsRunTime, primaryFileImportSummary?.importTime]);
+
+    React.useEffect(() => {
+        const timer = setInterval(() => {
+            setRefetch({});
+        }, 3000);
+        return () => {
+            clearInterval(timer);
+        };
+    }, [setRefetch]);
 
     const goToFinalStep = useCallback(() => {
         const primaryUploadId = localStorage.getItem("primaryUploadId");
@@ -168,6 +197,27 @@ export const ReviewDataSummary: React.FC<ReviewDataSummaryProps> = ({
                         </li>
                     </ul>
                 </SectionCard>
+                <SectionCard>
+                    {isReportReady === true ? (
+                        <div style={{ display: "flex", flexDirection: "column" }}>
+                            <Validations />
+                        </div>
+                    ) : (
+                        <div>
+                            <Typography variant="h3">
+                                We are running analytics in the background, this typically takes 5 mins.
+                            </Typography>
+                            <Typography>
+                                You can wait on this page to view report,
+                                <b> or click continue to complete the submission.</b> The report can be viewed in the
+                                Validation tab at anytime.
+                            </Typography>
+                            <StyledProgress>
+                                <CircularProgress size={75} />
+                            </StyledProgress>
+                        </div>
+                    )}
+                </SectionCard>
             </Section>
             <div className="bottom">
                 {isLoading ? (
@@ -256,4 +306,10 @@ const SectionCard = styled.div`
             display: inline-block;
         }
     }
+`;
+
+const StyledProgress = styled.div`
+    display: flex;
+    justify-content: center;
+    padding: 10px;
 `;

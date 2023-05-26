@@ -7,13 +7,14 @@ import { useGetLastSuccessfulAnalyticsRunTime } from "../../hooks/useGetLastSucc
 
 export const Validations: React.FC = () => {
     const { validationDashboardId } = useGlassDashboard();
-    const runTime = useGetLastSuccessfulAnalyticsRunTime();
+    const { lastSuccessfulAnalyticsRunTime } = useGetLastSuccessfulAnalyticsRunTime();
     return (
         <>
-            {runTime.kind === "loaded" && (
+            {lastSuccessfulAnalyticsRunTime.kind === "loaded" && (
                 <Typography>
-                    Last Successful Analytics Tables Update Time : {new Date(runTime.data).toUTCString()}. Any data
-                    submitted after this date will not be reflected in these visualizations
+                    Last Successful Analytics Tables Update Time :
+                    {new Date(lastSuccessfulAnalyticsRunTime.data).toUTCString()}. Any data submitted after this date
+                    will not be reflected in these visualizations
                 </Typography>
             )}
             {validationDashboardId.kind === "loading" && <CircularProgress />}
