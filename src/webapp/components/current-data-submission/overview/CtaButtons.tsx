@@ -25,6 +25,7 @@ import { useCurrentModuleContext } from "../../../contexts/current-module-contex
 import { StatusHistoryType } from "../../../../domain/entities/GlassDataSubmission";
 import dayjs from "dayjs";
 import { useCurrentPeriodContext } from "../../../contexts/current-period-context";
+import { moduleProperties } from "../../../../domain/utils/ModuleProperties";
 
 export interface CtaButtonsProps {
     ctas: CTAs[];
@@ -33,7 +34,7 @@ export interface CtaButtonsProps {
 }
 
 export const CtaButtons: React.FC<CtaButtonsProps> = ({ ctas, position, setCurrentStep }) => {
-    const { compositionRoot } = useAppContext();
+    const { compositionRoot, currentUser } = useAppContext();
     const snackbar = useSnackbar();
     const hasCurrentUserCaptureAccess = useGlassCaptureAccess();
 
@@ -47,8 +48,16 @@ export const CtaButtons: React.FC<CtaButtonsProps> = ({ ctas, position, setCurre
 
     useEffect(() => {
         setIsLoading(true);
+        const isQuarterlyModule = currentUser.quarterlyPeriodModules.find(m => m.id === currentModuleAccess.moduleId)
+            ? true
+            : false;
         compositionRoot.glassDataSubmission
-            .getSpecificDataSubmission(currentModuleAccess.moduleId, currentOrgUnitAccess.orgUnitId, currentPeriod)
+            .getSpecificDataSubmission(
+                currentModuleAccess.moduleId,
+                currentOrgUnitAccess.orgUnitId,
+                currentPeriod,
+                isQuarterlyModule
+            )
             .run(
                 dataSubmission => {
                     setStatusHistory(dataSubmission.statusHistory);
@@ -65,23 +74,26 @@ export const CtaButtons: React.FC<CtaButtonsProps> = ({ ctas, position, setCurre
         currentOrgUnitAccess.orgUnitId,
         currentPeriod,
         snackbar,
+        currentUser.quarterlyPeriodModules,
     ]);
 
     const getCTAButton = (cta: CTAs, setCurrentStep: React.Dispatch<React.SetStateAction<number>>) => {
         // TODO : Button click event handlers to be added as corresponding feature developed.
         switch (cta.label) {
             case "Go to questionnaires":
-                return (
-                    <Button
-                        key={cta.label}
-                        variant={cta.variant || "contained"}
-                        color={cta.color || "primary"}
-                        onClick={() => setCurrentStep(1)}
-                        style={{ textTransform: "uppercase", marginRight: "10px" }}
-                    >
-                        {i18n.t("Go to questionnaires")}
-                    </Button>
-                );
+                if (moduleProperties.get(currentModuleAccess.moduleName)?.isQuestionnaireReq)
+                    return (
+                        <Button
+                            key={cta.label}
+                            variant={cta.variant || "contained"}
+                            color={cta.color || "primary"}
+                            onClick={() => setCurrentStep(1)}
+                            style={{ textTransform: "uppercase", marginRight: "10px" }}
+                        >
+                            {i18n.t("Go to questionnaires")}
+                        </Button>
+                    );
+                else return <></>;
 
             case "Upload/Delete datasets":
                 return (

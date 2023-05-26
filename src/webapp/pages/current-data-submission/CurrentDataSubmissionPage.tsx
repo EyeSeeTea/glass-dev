@@ -13,6 +13,7 @@ import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context
 import { useCurrentModuleContext } from "../../contexts/current-module-context";
 import { DataSubmissionStatusTypes } from "../../../domain/entities/GlassDataSubmission";
 import { useCurrentPeriodContext } from "../../contexts/current-period-context";
+import { useAppContext } from "../../contexts/app-context";
 
 interface CurrentDataSubmissionPageContentProps {
     moduleId: string;
@@ -42,6 +43,7 @@ export const CurrentDataSubmissionPage: React.FC = React.memo(() => {
 export const CurrentDataSubmissionPageContent: React.FC<CurrentDataSubmissionPageContentProps> = React.memo(
     ({ moduleId, moduleName, step }) => {
         const { currentPeriod } = useCurrentPeriodContext();
+        const { currentUser } = useAppContext();
 
         const { currentOrgUnitAccess } = useCurrentOrgUnitContext();
 
@@ -52,6 +54,10 @@ export const CurrentDataSubmissionPageContent: React.FC<CurrentDataSubmissionPag
             currentPeriod,
             refetchStatus
         );
+
+        const periodType = currentUser.quarterlyPeriodModules.find(qm => qm.name === moduleName)
+            ? "Quarterly"
+            : "Yearly";
 
         return (
             <ContentLoader content={currentDataSubmissionStatus}>
@@ -70,7 +76,7 @@ export const CurrentDataSubmissionPageContent: React.FC<CurrentDataSubmissionPag
                             </StyledBreadCrumbs>
 
                             <div className="info">
-                                <span>{i18n.t("Yearly data upload")}</span>
+                                <span>{i18n.t(`${periodType} data upload`)}</span>
                                 <PageTitle statusColor={currentDataSubmissionStatus.data.colour}>
                                     <div className="status">{i18n.t(currentDataSubmissionStatus.data.title)}</div>
                                 </PageTitle>

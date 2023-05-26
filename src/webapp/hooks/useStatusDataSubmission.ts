@@ -13,13 +13,14 @@ export function useStatusDataSubmission(
     period: string,
     refetch: DataSubmissionStatusTypes | undefined = undefined
 ) {
-    const { compositionRoot } = useAppContext();
+    const { compositionRoot, currentUser } = useAppContext();
     const [dataSubmissionStatus, setDataSubmissionStatus] = useState<GlassDataSubmissionState>({
         kind: "loading",
     });
 
     useEffect(() => {
-        compositionRoot.glassDataSubmission.getSpecificDataSubmission(moduleId, orgUnit, period).run(
+        const isQuarterlyModule = currentUser.quarterlyPeriodModules.find(m => m.id === moduleId) ? true : false;
+        compositionRoot.glassDataSubmission.getSpecificDataSubmission(moduleId, orgUnit, period, isQuarterlyModule).run(
             currentDataSubmission => {
                 const dataSubmissionStatusDetails = statusMap.get(currentDataSubmission.status);
                 if (dataSubmissionStatusDetails)
@@ -29,7 +30,15 @@ export function useStatusDataSubmission(
                 setDataSubmissionStatus({ kind: "error", message: error });
             }
         );
-    }, [setDataSubmissionStatus, compositionRoot.glassDataSubmission, moduleId, orgUnit, period, refetch]);
+    }, [
+        setDataSubmissionStatus,
+        compositionRoot.glassDataSubmission,
+        moduleId,
+        orgUnit,
+        period,
+        refetch,
+        currentUser.quarterlyPeriodModules,
+    ]);
 
     return dataSubmissionStatus;
 }

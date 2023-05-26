@@ -11,7 +11,8 @@ import { StatusDetails } from "./overview/StatusDetails";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { DataSubmissionStatusTypes } from "../../../domain/entities/GlassDataSubmission";
 import { useGlassCaptureAccess } from "../../hooks/useGlassCaptureAccess";
-import { isEditModeStatus } from "../../utils/editModeStatus";
+import { isEditModeStatus } from "../../../utils/editModeStatus";
+import { moduleProperties } from "../../../domain/utils/ModuleProperties";
 import { Submission } from "./Submission";
 
 interface UploadStepsProps {
@@ -36,9 +37,11 @@ export const UploadSteps: React.FC<UploadStepsProps> = ({
                 <Button onClick={() => setCurrentStep(0)} className={currentStep === 0 ? "current" : ""}>
                     {i18n.t("Overview")}
                 </Button>
-                <Button onClick={() => setCurrentStep(1)} className={currentStep === 1 ? "current" : ""}>
-                    {i18n.t("Questionnaires")}
-                </Button>
+                {moduleProperties.get(moduleName)?.isQuestionnaireReq && (
+                    <Button onClick={() => setCurrentStep(1)} className={currentStep === 1 ? "current" : ""}>
+                        {i18n.t("Questionnaires")}
+                    </Button>
+                )}
                 <Button onClick={() => setCurrentStep(2)} className={currentStep === 2 ? "current" : ""}>
                     {i18n.t("Datasets")}
                 </Button>
@@ -86,7 +89,7 @@ const renderTypeContent = (
         case 1:
             return <Questionnaires setRefetchStatus={setRefetchStatus} />;
         case 2:
-            return <ListOfDatasets />;
+            return <ListOfDatasets setRefetchStatus={setRefetchStatus} />;
         case 3:
             return <Validations />;
         case 4:

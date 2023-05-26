@@ -59,7 +59,9 @@ export class InstanceDefaultRepository implements InstanceRepository {
         return orgUnitsAccess;
     };
 
-    mapUserGroupAccess = (userGroups: NamedRef[]): FutureData<ModuleAccess[]> => {
+    mapUserGroupAccess = (
+        userGroups: NamedRef[]
+    ): FutureData<{ moduleAccess: ModuleAccess[]; quarterlyPeriodModules: { id: string; name: string }[] }> => {
         return this.dataStoreClient.listCollection<GlassModule>(DataStoreKeys.MODULES).flatMap(modules => {
             //Iterate through modules and populate access for each
             const moduleAccess = modules.map(module => {
@@ -78,8 +80,16 @@ export class InstanceDefaultRepository implements InstanceRepository {
                     usergroups: [...module.userGroups.captureAccess, ...module.userGroups.readAccess],
                 };
             });
+            const quarterlyPeriodModules: { id: string; name: string }[] = modules
+                .filter(module => module.dataSubmissionPeriod === "QUARTERLY")
+                .map(module => {
+                    return { id: module.id, name: module.name };
+                });
 
-            return Future.success(moduleAccess);
+            return Future.success({
+                moduleAccess,
+                quarterlyPeriodModules,
+            });
         });
     };
 
@@ -174,36 +184,39 @@ export class InstanceDefaultRepository implements InstanceRepository {
                                 "id"
                             );
 
-                            return this.mapUserGroupAccess(user.userGroups).map((userModulesAccess): UserAccessInfo => {
-                                return {
-                                    id: user.id,
-                                    name: user.displayName,
-                                    userGroups: user.userGroups,
-                                    ...user.userCredentials,
-                                    userOrgUnitsAccess: this.mapUserOrgUnitsAccess(
-                                        uniqueOrgUnits,
-                                        uniqueDataViewOrgUnits
-                                    ),
-                                    userModulesAccess: userModulesAccess,
-                                    gender: user.gender,
-                                    email: user.email,
-                                    phoneNumber: user.phoneNumber,
-                                    introduction: user.introduction,
-                                    birthday: user.birthday,
-                                    nationality: user.nationality,
-                                    employer: user.employer,
-                                    jobTitle: user.jobTitle,
-                                    education: user.education,
-                                    interests: user.interests,
-                                    languages: user.languages,
-                                    settings: {
-                                        keyUiLocale: user.settings.keyUiLocale,
-                                        keyDbLocale: user.settings.keyDbLocale,
-                                        keyMessageEmailNotification: user.settings.keyMessageEmailNotification,
-                                        keyMessageSmsNotification: user.settings.keyMessageSmsNotification,
-                                    },
-                                };
-                            });
+                            return this.mapUserGroupAccess(user.userGroups).map(
+                                ({ moduleAccess, quarterlyPeriodModules }): UserAccessInfo => {
+                                    return {
+                                        id: user.id,
+                                        name: user.displayName,
+                                        userGroups: user.userGroups,
+                                        ...user.userCredentials,
+                                        userOrgUnitsAccess: this.mapUserOrgUnitsAccess(
+                                            uniqueOrgUnits,
+                                            uniqueDataViewOrgUnits
+                                        ),
+                                        userModulesAccess: moduleAccess,
+                                        quarterlyPeriodModules: quarterlyPeriodModules,
+                                        gender: user.gender,
+                                        email: user.email,
+                                        phoneNumber: user.phoneNumber,
+                                        introduction: user.introduction,
+                                        birthday: user.birthday,
+                                        nationality: user.nationality,
+                                        employer: user.employer,
+                                        jobTitle: user.jobTitle,
+                                        education: user.education,
+                                        interests: user.interests,
+                                        languages: user.languages,
+                                        settings: {
+                                            keyUiLocale: user.settings.keyUiLocale,
+                                            keyDbLocale: user.settings.keyDbLocale,
+                                            keyMessageEmailNotification: user.settings.keyMessageEmailNotification,
+                                            keyMessageSmsNotification: user.settings.keyMessageSmsNotification,
+                                        },
+                                    };
+                                }
+                            );
                         }
                     );
                 });

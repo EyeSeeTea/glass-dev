@@ -14,6 +14,7 @@ import { useSnackbar } from "@eyeseetea/d2-ui-components";
 import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context";
 import { useConfig } from "@dhis2/app-runtime";
 import { goToDhis2Url } from "../../utils/helpers";
+import { useCurrentPeriodContext } from "../../contexts/current-period-context";
 
 export const SideBar: React.FC = () => {
     const { baseUrl } = useConfig();
@@ -22,11 +23,16 @@ export const SideBar: React.FC = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [storedMenuData, setStoredMenuData] = useState<Menu[] | null>();
     const { currentOrgUnitAccess } = useCurrentOrgUnitContext();
-
+    const { changeCurrentPeriod, getCurrentOpenPeriodByModule } = useCurrentPeriodContext();
     const { resetCurrentModuleAccess } = useCurrentModuleContext();
 
     const logout = () => {
         goToDhis2Url(baseUrl, "/dhis-web-commons-security/logout.action");
+    };
+
+    const updateModuleAndPeriodContext = () => {
+        resetCurrentModuleAccess();
+        changeCurrentPeriod(getCurrentOpenPeriodByModule("")); //Reset to current year
     };
 
     useEffect(() => {
@@ -53,7 +59,7 @@ export const SideBar: React.FC = () => {
                         component={NavLink}
                         to="/"
                         exact={true}
-                        onClick={resetCurrentModuleAccess}
+                        onClick={updateModuleAndPeriodContext}
                     >
                         <StarGradient className="star-icon" />
                         <Box width={15} />

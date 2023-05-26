@@ -5,6 +5,8 @@ import { UploadsTableBody } from "./UploadsTableBody";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { glassColors, palette } from "../../pages/app/themes/dhis2.theme";
 import { UploadsDataItem } from "../../entities/uploads";
+import { useCurrentModuleContext } from "../../contexts/current-module-context";
+import { moduleProperties } from "../../../domain/utils/ModuleProperties";
 
 export interface UploadsTableProps {
     title: string;
@@ -15,6 +17,7 @@ export interface UploadsTableProps {
 
 // TODO: replace Table with MUI Datagrid
 export const UploadsTable: React.FC<UploadsTableProps> = ({ title, items, className, refreshUploads }) => {
+    const { currentModuleAccess } = useCurrentModuleContext();
     return (
         <ContentWrapper className={className}>
             <Typography variant="h3">{i18n.t(title)}</Typography>
@@ -27,7 +30,9 @@ export const UploadsTable: React.FC<UploadsTableProps> = ({ title, items, classN
                             <TableCell>{i18n.t("Period")}</TableCell>
                             <TableCell>{i18n.t("Records")}</TableCell>
                             <TableCell>{i18n.t("Type")}</TableCell>
-                            <TableCell>{i18n.t("Batch ID")}</TableCell>
+                            {moduleProperties.get(currentModuleAccess.moduleName)?.isbatchReq && (
+                                <TableCell>{i18n.t("Batch ID")}</TableCell>
+                            )}
                             <TableCell>{i18n.t("Status")}</TableCell>
                             <TableCell>{i18n.t("Download File")}</TableCell>
                             <TableCell>{i18n.t("Delete")}</TableCell>

@@ -1,14 +1,6 @@
 import { Id } from "../Ref";
 
-export type ImportStrategy =
-    | "CREATE"
-    | "UPDATE"
-    | "CREATE_AND_UPDATE"
-    | "DELETE"
-    | "NEW_AND_UPDATES"
-    | "NEW"
-    | "UPDATES"
-    | "DELETES";
+export type ImportStrategy = "CREATE" | "UPDATE" | "CREATE_AND_UPDATE" | "DELETE";
 
 export interface DataValuesSaveSummary {
     status: "SUCCESS" | "ERROR" | "WARNING";

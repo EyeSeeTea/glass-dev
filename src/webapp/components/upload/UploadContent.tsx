@@ -17,10 +17,10 @@ export const UploadContent: React.FC<UploadContentProps> = ({ resetWizard, setRe
     const [currentStep, setCurrentStep] = useState(1);
     const [completedSteps, setCompletedSteps] = useState<number[]>([]);
     const [batchId, setBatchId] = useState<string>("");
-    const [risFile, setRisFile] = useState<File | null>(null);
-    const [sampleFile, setSampleFile] = useState<File | null>(null);
-    const [risFileImportSummary, setRISFileImportSummary] = useState<ImportSummary | undefined>(undefined);
-    const [sampleFileImportSummary, setSampleImportSummary] = useState<ImportSummary | undefined>(undefined);
+    const [primaryFile, setPrimaryFile] = useState<File | null>(null);
+    const [secondaryFile, setSecondaryFile] = useState<File | null>(null);
+    const [primaryFileImportSummary, setPrimaryFileImportSummary] = useState<ImportSummary | undefined>(undefined);
+    const [secondaryFileImportSummary, setSecondaryImportSummary] = useState<ImportSummary | undefined>(undefined);
 
     const changeStep = (step: number) => {
         setCurrentStep(step);
@@ -36,10 +36,10 @@ export const UploadContent: React.FC<UploadContentProps> = ({ resetWizard, setRe
             setCurrentStep(1);
             setCompletedSteps([]);
             setBatchId("");
-            setRisFile(null);
-            setSampleFile(null);
-            setRISFileImportSummary(undefined);
-            setSampleImportSummary(undefined);
+            setPrimaryFile(null);
+            setSecondaryFile(null);
+            setPrimaryFileImportSummary(undefined);
+            setSecondaryImportSummary(undefined);
             setResetWizard(false);
         }
     }, [resetWizard, setResetWizard]);
@@ -58,14 +58,14 @@ export const UploadContent: React.FC<UploadContentProps> = ({ resetWizard, setRe
                     changeStep,
                     batchId,
                     setBatchId,
-                    risFile,
-                    setRisFile,
-                    sampleFile,
-                    setSampleFile,
-                    risFileImportSummary,
-                    sampleFileImportSummary,
-                    setRISFileImportSummary,
-                    setSampleImportSummary
+                    primaryFile,
+                    setPrimaryFile,
+                    secondaryFile,
+                    setSecondaryFile,
+                    primaryFileImportSummary,
+                    secondaryFileImportSummary,
+                    setPrimaryFileImportSummary,
+                    setSecondaryImportSummary
                 )}
         </ContentWrapper>
     );
@@ -76,14 +76,14 @@ const renderStep = (
     changeStep: any,
     batchId: string,
     setBatchId: React.Dispatch<React.SetStateAction<string>>,
-    risFile: File | null,
-    setRisFile: React.Dispatch<React.SetStateAction<File | null>>,
-    sampleFile: File | null,
-    setSampleFile: React.Dispatch<React.SetStateAction<File | null>>,
-    risFileImportSummary: ImportSummary | undefined,
-    sampleFileImportSummary: ImportSummary | undefined,
-    setRISFileImportSummary: React.Dispatch<React.SetStateAction<ImportSummary | undefined>>,
-    setSampleFileImportSummary: React.Dispatch<React.SetStateAction<ImportSummary | undefined>>
+    primaryFile: File | null,
+    setPrimaryFile: React.Dispatch<React.SetStateAction<File | null>>,
+    secondaryFile: File | null,
+    setSecondaryFile: React.Dispatch<React.SetStateAction<File | null>>,
+    primaryFileImportSummary: ImportSummary | undefined,
+    secondaryFileImportSummary: ImportSummary | undefined,
+    setPrimaryFileImportSummary: React.Dispatch<React.SetStateAction<ImportSummary | undefined>>,
+    setSecondaryFileImportSummary: React.Dispatch<React.SetStateAction<ImportSummary | undefined>>
 ) => {
     switch (step) {
         case 1:
@@ -92,12 +92,12 @@ const renderStep = (
                     changeStep={changeStep}
                     batchId={batchId}
                     setBatchId={setBatchId}
-                    risFile={risFile}
-                    setRisFile={setRisFile}
-                    sampleFile={sampleFile}
-                    setSampleFile={setSampleFile}
-                    setRISFileImportSummary={setRISFileImportSummary}
-                    setSampleFileImportSummary={setSampleFileImportSummary}
+                    primaryFile={primaryFile}
+                    setPrimaryFile={setPrimaryFile}
+                    secondaryFile={secondaryFile}
+                    setSecondaryFile={setSecondaryFile}
+                    setPrimaryFileImportSummary={setPrimaryFileImportSummary}
+                    setSecondaryFileImportSummary={setSecondaryFileImportSummary}
                 />
             );
         case 2:
@@ -106,12 +106,12 @@ const renderStep = (
                     <ConsistencyChecks
                         changeStep={changeStep}
                         batchId={batchId}
-                        risFile={risFile}
-                        sampleFile={sampleFile}
-                        risFileImportSummary={risFileImportSummary}
-                        sampleFileImportSummary={sampleFileImportSummary}
-                        setRISFileImportSummary={setRISFileImportSummary}
-                        setSampleFileImportSummary={setSampleFileImportSummary}
+                        primaryFile={primaryFile}
+                        secondaryFile={secondaryFile}
+                        primaryFileImportSummary={primaryFileImportSummary}
+                        secondaryFileImportSummary={secondaryFileImportSummary}
+                        setPrimaryFileImportSummary={setPrimaryFileImportSummary}
+                        setSecondaryFileImportSummary={setSecondaryFileImportSummary}
                     />
                 </>
             );
@@ -119,8 +119,8 @@ const renderStep = (
             return (
                 <ReviewDataSummary
                     changeStep={changeStep}
-                    risFileImportSummary={risFileImportSummary}
-                    sampleFileImportSummary={sampleFileImportSummary}
+                    primaryFileImportSummary={primaryFileImportSummary}
+                    secondaryFileImportSummary={secondaryFileImportSummary}
                 />
             );
         case 4:
