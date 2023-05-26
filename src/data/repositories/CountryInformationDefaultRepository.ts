@@ -6,6 +6,7 @@ import { CountryInformationRepository } from "../../domain/repositories/CountryI
 import { getD2APiFromInstance } from "../../utils/d2-api";
 import { apiToFuture } from "../../utils/futures";
 import { Instance } from "../entities/Instance";
+import { getCurrentYear } from "../../utils/currentPeriodHelper";
 
 const ARMFocalPointProgram = "oo0bqS0AqMI";
 const moduleAttribute = "Fh6atHPjdxC";
@@ -49,7 +50,7 @@ export class CountryInformationDefaultRepository implements CountryInformationRe
                     module,
                     WHORegion: regionName,
                     country: countryName,
-                    year: new Date().getFullYear(),
+                    year: getCurrentYear(),
                     nationalFocalPointId: enrollment?.enrollment,
                     enrolmentStatus: enrollment?.status || "",
                     enrolmentDate: enrollment?.enrollmentDate || "",

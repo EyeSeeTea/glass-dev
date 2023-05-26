@@ -16,4 +16,5 @@ export interface GlassUploads {
     orgUnit: string;
     records: number;
     correspondingRisUploadId: string;
+    eventListFileId?: string;
 }

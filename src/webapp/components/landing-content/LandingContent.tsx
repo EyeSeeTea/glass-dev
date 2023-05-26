@@ -17,7 +17,7 @@ export const LandingContent: React.FC = () => {
     useEffect(() => {
         compositionRoot.glassModules.getAll(currentOrgUnitAccess.orgUnitId).run(
             modules => {
-                if (modules.length) setShowNoModuleCard(false);
+                if (modules.length > 0) setShowNoModuleCard(false);
                 else setShowNoModuleCard(true);
             },
             () => {}

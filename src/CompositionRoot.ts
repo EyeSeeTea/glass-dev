@@ -24,7 +24,7 @@ import { GetGlassUploadsByDataSubmissionUseCase } from "./domain/usecases/GetGla
 import { GetGlassUploadsByModuleOUUseCase } from "./domain/usecases/GetGlassUploadsByModuleOUUseCase";
 import { SetUploadBatchIdUseCase } from "./domain/usecases/SetUploadBatchIdUseCase";
 import { DeleteDocumentInfoByUploadIdUseCase } from "./domain/usecases/DeleteDocumentInfoByUploadIdUseCase";
-import { ImportRISFileUseCase } from "./domain/usecases/data-entry/ImportRISFileUseCase";
+import { ImportPrimaryFileUseCase } from "./domain/usecases/data-entry/ImportPrimaryFileUseCase";
 import { GetOpenDataSubmissionsByOUUseCase } from "./domain/usecases/GetOpenDataSubmissionsByOUUseCase";
 import { getD2APiFromInstance } from "./utils/d2-api";
 import { QuestionnaireD2Repository } from "./data/repositories/QuestionnaireD2Repository";
@@ -45,7 +45,7 @@ import { SampleDataCSVRepository } from "./data/repositories/SampleDataCSVReposi
 import { GetGlassUploadsByModuleOUPeriodUseCase } from "./domain/usecases/GetGlassUploadsByModuleOUPeriodUseCase";
 import { SetDataSubmissionStatusUseCase } from "./domain/usecases/SetDataSubmissionStatusUseCase";
 import { DownloadDocumentUseCase } from "./domain/usecases/DownloadDocumentUseCase";
-import { ValidateRISFileUseCase } from "./domain/usecases/data-entry/ValidateRISFileUseCase";
+import { ValidatePrimaryFileUseCase } from "./domain/usecases/data-entry/ValidatePrimaryFileUseCase";
 import { ValidateSampleFileUseCase } from "./domain/usecases/data-entry/ValidateSampleFileUseCase";
 import { SaveDataSubmissionsUseCase } from "./domain/usecases/SaveDataSubmissionsUseCase";
 import { UpdateSampleUploadWithRisIdUseCase } from "./domain/usecases/UpdateSampleUploadWithRisIdUseCase";
@@ -57,6 +57,10 @@ import { UsersDefaultRepository } from "./data/repositories/UsersDefaultReposito
 import { GetUiLocalesUseCase } from "./domain/usecases/GetUiLocalesUseCase";
 import { GetDatabaseLocalesUseCase } from "./domain/usecases/GetDatabaseLocalesUseCase";
 import { LocalesDefaultRepository } from "./data/repositories/LocalesDefaultRepository";
+import { EGASPDataCSVRepository } from "./data/repositories/EGASPDataCSVRepository";
+import { Dhis2EventsDefaultRepository } from "./data/repositories/Dhis2EventsDefaultRepository";
+import { EGASPProgramDefaultRepository } from "./data/repositories/bulk-load/EGASPProgramDefaultRepository";
+import { ExcelPopulateRepository } from "./data/repositories/ExcelPopulateRepository";
 import { SavePasswordUseCase } from "./domain/usecases/SavePasswordUseCase";
 import { SaveKeyDbLocaleUseCase } from "./domain/usecases/SaveKeyDbLocaleUseCase";
 import { SaveKeyUiLocaleUseCase } from "./domain/usecases/SaveKeyUiLocaleUseCase";
@@ -80,6 +84,10 @@ export function getCompositionRoot(instance: Instance) {
     const systemInfoRepository = new SystemInfoDefaultRepository(api);
     const usersRepository = new UsersDefaultRepository(api);
     const localeRepository = new LocalesDefaultRepository(instance);
+    const egaspDataRepository = new EGASPDataCSVRepository();
+    const dhis2EventsDefaultRepository = new Dhis2EventsDefaultRepository(instance);
+    const egaspProgramRepository = new EGASPProgramDefaultRepository(instance);
+    const excelRepository = new ExcelPopulateRepository();
 
     return {
         instance: getExecute({
@@ -117,18 +125,24 @@ export function getCompositionRoot(instance: Instance) {
             upload: new UploadDocumentUseCase(glassDocumentsRepository, glassUploadsRepository),
             deleteByUploadId: new DeleteDocumentInfoByUploadIdUseCase(glassDocumentsRepository, glassUploadsRepository),
             download: new DownloadDocumentUseCase(glassDocumentsRepository),
-            updateSampleFileWithRisId: new UpdateSampleUploadWithRisIdUseCase(glassUploadsRepository),
+            updateSecondaryFileWithPrimaryId: new UpdateSampleUploadWithRisIdUseCase(glassUploadsRepository),
         }),
-        dataSubmision: getExecute({
-            RISFile: new ImportRISFileUseCase(
+        fileSubmission: getExecute({
+            primaryFile: new ImportPrimaryFileUseCase(
                 risDataRepository,
                 metadataRepository,
                 dataValuesRepository,
-                glassModuleRepository
+                glassModuleRepository,
+                egaspDataRepository,
+                dhis2EventsDefaultRepository,
+                egaspProgramRepository,
+                excelRepository,
+                glassDocumentsRepository,
+                glassUploadsRepository
             ),
-            validateRISFile: new ValidateRISFileUseCase(risDataRepository),
-            sampleFile: new ImportSampleFileUseCase(sampleDataRepository, metadataRepository, dataValuesRepository),
-            validateSampleFile: new ValidateSampleFileUseCase(sampleDataRepository),
+            validatePrimaryFile: new ValidatePrimaryFileUseCase(risDataRepository, egaspDataRepository),
+            secondaryFile: new ImportSampleFileUseCase(sampleDataRepository, metadataRepository, dataValuesRepository),
+            validateSecondaryFile: new ValidateSampleFileUseCase(sampleDataRepository),
         }),
         questionnaires: getExecute({
             get: new GetQuestionnaireUseCase(questionnaireD2Repository),

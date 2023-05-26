@@ -13,32 +13,33 @@ import { ImportSummary } from "../../../domain/entities/data-entry/ImportSummary
 import { useCurrentPeriodContext } from "../../contexts/current-period-context";
 import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context";
 import { SupportButtons } from "./SupportButtons";
+import { moduleProperties } from "../../../domain/utils/ModuleProperties";
 
 interface ConsistencyChecksProps {
     changeStep: (step: number) => void;
     batchId: string;
-    risFile: File | null;
-    sampleFile?: File | null;
-    risFileImportSummary: ImportSummary | undefined;
-    sampleFileImportSummary: ImportSummary | undefined;
-    setRISFileImportSummary: React.Dispatch<React.SetStateAction<ImportSummary | undefined>>;
-    setSampleFileImportSummary: React.Dispatch<React.SetStateAction<ImportSummary | undefined>>;
+    primaryFile: File | null;
+    secondaryFile?: File | null;
+    primaryFileImportSummary: ImportSummary | undefined;
+    secondaryFileImportSummary: ImportSummary | undefined;
+    setPrimaryFileImportSummary: React.Dispatch<React.SetStateAction<ImportSummary | undefined>>;
+    setSecondaryFileImportSummary: React.Dispatch<React.SetStateAction<ImportSummary | undefined>>;
 }
 
 export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
     changeStep,
     batchId,
-    risFile,
-    sampleFile,
-    risFileImportSummary,
-    sampleFileImportSummary,
-    setRISFileImportSummary,
-    setSampleFileImportSummary,
+    primaryFile,
+    secondaryFile,
+    primaryFileImportSummary,
+    secondaryFileImportSummary,
+    setPrimaryFileImportSummary,
+    setSecondaryFileImportSummary,
 }) => {
     const { compositionRoot } = useAppContext();
     const { currentModuleAccess } = useCurrentModuleContext();
     const { currentOrgUnitAccess } = useCurrentOrgUnitContext();
-    const [fileType, setFileType] = useState<string>("ris");
+    const [fileType, setFileType] = useState<string>("primary");
     const [importLoading, setImportLoading] = useState<boolean>(false);
     const { currentPeriod } = useCurrentPeriodContext();
 
@@ -47,22 +48,24 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
     };
 
     const continueClick = () => {
-        if (risFile && currentModuleAccess.moduleName === "AMR") {
+        if (primaryFile && moduleProperties.get(currentModuleAccess.moduleName)?.isDryRunReq) {
             setImportLoading(true);
 
             Future.joinObj({
-                importRISFileSummary: compositionRoot.dataSubmision.RISFile(
-                    risFile,
+                importPrimaryFileSummary: compositionRoot.fileSubmission.primaryFile(
+                    currentModuleAccess.moduleName,
+                    primaryFile,
                     batchId,
                     currentPeriod,
                     "CREATE_AND_UPDATE",
                     currentOrgUnitAccess.orgUnitId,
                     currentOrgUnitAccess.orgUnitCode,
-                    false
+                    false,
+                    ""
                 ),
-                importSampleFileSummary: sampleFile
-                    ? compositionRoot.dataSubmision.sampleFile(
-                          sampleFile,
+                importSecondaryFileSummary: secondaryFile
+                    ? compositionRoot.fileSubmission.secondaryFile(
+                          secondaryFile,
                           batchId,
                           currentPeriod,
                           "CREATE_AND_UPDATE",
@@ -72,21 +75,21 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
                       )
                     : Future.success(undefined),
             }).run(
-                ({ importRISFileSummary, importSampleFileSummary }) => {
+                ({ importPrimaryFileSummary, importSecondaryFileSummary }) => {
                     /* eslint-disable no-console */
-                    console.log({ importRISFileSummary });
-                    console.log({ importSampleFileSummary });
+                    console.log({ importPrimaryFileSummary });
+                    console.log({ importSecondaryFileSummary });
 
-                    setRISFileImportSummary(importRISFileSummary);
+                    setPrimaryFileImportSummary(importPrimaryFileSummary);
 
-                    if (importSampleFileSummary) {
-                        setSampleFileImportSummary(importSampleFileSummary);
+                    if (importSecondaryFileSummary) {
+                        setSecondaryFileImportSummary(importSecondaryFileSummary);
                     }
 
-                    if (importRISFileSummary.blockingErrors.length === 0) {
-                        const risUploadId = localStorage.getItem("risUploadId");
-                        if (risUploadId) {
-                            compositionRoot.glassUploads.setStatus({ id: risUploadId, status: "VALIDATED" }).run(
+                    if (importPrimaryFileSummary.blockingErrors.length === 0) {
+                        const primaryUploadId = localStorage.getItem("primaryUploadId");
+                        if (primaryUploadId) {
+                            compositionRoot.glassUploads.setStatus({ id: primaryUploadId, status: "VALIDATED" }).run(
                                 () => {
                                     changeStep(3);
                                     setImportLoading(false);
@@ -97,9 +100,9 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
                             );
                         }
                     } else {
-                        const risUploadId = localStorage.getItem("risUploadId");
-                        if (risUploadId) {
-                            compositionRoot.glassUploads.setStatus({ id: risUploadId, status: "IMPORTED" }).run(
+                        const primaryUploadId = localStorage.getItem("primaryUploadId");
+                        if (primaryUploadId) {
+                            compositionRoot.glassUploads.setStatus({ id: primaryUploadId, status: "IMPORTED" }).run(
                                 () => {
                                     setImportLoading(false);
                                 },
@@ -111,7 +114,7 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
                     }
                 },
                 error => {
-                    setRISFileImportSummary({
+                    setPrimaryFileImportSummary({
                         status: "ERROR",
                         importCount: { ignored: 0, imported: 0, deleted: 0, updated: 0 },
                         nonBlockingErrors: [],
@@ -121,6 +124,8 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
                     setImportLoading(false);
                 }
             );
+        } else {
+            changeStep(3);
         }
     };
 
@@ -155,24 +160,36 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
                     )}
                 </Typography>
             </div>
-            <div className="toggles">
-                <Button onClick={() => changeType("ris")} className={fileType === "ris" ? "current" : ""}>
-                    {i18n.t("RIS File")}
-                </Button>
-                <Button onClick={() => changeType("sample")} className={fileType === "sample" ? "current" : ""}>
-                    {i18n.t("Sample File")}
-                </Button>
-            </div>
-            {renderTypeContent(fileType, risFileImportSummary, sampleFileImportSummary)}
+            {moduleProperties.get(currentModuleAccess.moduleName)?.isSecondaryFileApplicable && (
+                <div className="toggles">
+                    <Button onClick={() => changeType("primary")} className={fileType === "primary" ? "current" : ""}>
+                        {i18n.t(`${moduleProperties.get(currentModuleAccess.moduleName)?.primaryFileType} File`)}
+                    </Button>
+                    <Button
+                        onClick={() => changeType("secondary")}
+                        className={fileType === "secondary" ? "current" : ""}
+                    >
+                        {i18n.t(`${moduleProperties.get(currentModuleAccess.moduleName)?.secondaryFileType} File`)}
+                    </Button>
+                </div>
+            )}
+            {renderTypeContent(
+                fileType,
+                currentModuleAccess.moduleName,
+                primaryFileImportSummary,
+                secondaryFileImportSummary
+            )}
             <div className="bottom">
-                <SupportButtons changeStep={changeStep} risFileImportSummary={risFileImportSummary} />
+                <SupportButtons changeStep={changeStep} primaryFileImportSummary={primaryFileImportSummary} />
                 <Button
                     variant="contained"
                     color="primary"
                     endIcon={<ChevronRightIcon />}
                     onClick={continueClick}
                     disableElevation
-                    disabled={risFileImportSummary && risFileImportSummary.blockingErrors.length > 0 ? true : false}
+                    disabled={
+                        primaryFileImportSummary && primaryFileImportSummary.blockingErrors.length > 0 ? true : false
+                    }
                 >
                     {i18n.t("Continue")}
                 </Button>
@@ -181,27 +198,34 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
     );
 };
 
-const renderTypeContent = (type: string, risfileErrors?: ImportSummary, samplefileErrors?: ImportSummary) => {
+const renderTypeContent = (
+    type: string,
+    moduleName: string,
+    primaryFileImportSummary?: ImportSummary,
+    secondaryFileImportSummary?: ImportSummary
+) => {
     switch (type) {
-        case "sample":
-            return samplefileErrors ? (
+        case "secondary":
+            return secondaryFileImportSummary ? (
                 <>
-                    {samplefileErrors.blockingErrors && <BlockingErrors rows={samplefileErrors.blockingErrors} />}
-                    {samplefileErrors.nonBlockingErrors && (
-                        <NonBlockingWarnings rows={samplefileErrors.nonBlockingErrors} />
+                    {secondaryFileImportSummary.blockingErrors && (
+                        <BlockingErrors rows={secondaryFileImportSummary.blockingErrors} />
+                    )}
+                    {secondaryFileImportSummary.nonBlockingErrors && (
+                        <NonBlockingWarnings rows={secondaryFileImportSummary.nonBlockingErrors} />
                     )}
                 </>
             ) : (
-                <p>{i18n.t("No sample file uploaded")}</p>
+                <p>{i18n.t(`No ${moduleProperties.get(moduleName)?.secondaryFileType} file uploaded`)}</p>
             );
         default:
             return (
                 <>
-                    {risfileErrors && risfileErrors.blockingErrors && (
-                        <BlockingErrors rows={risfileErrors.blockingErrors} />
+                    {primaryFileImportSummary && primaryFileImportSummary.blockingErrors && (
+                        <BlockingErrors rows={primaryFileImportSummary.blockingErrors} />
                     )}
-                    {risfileErrors && risfileErrors.nonBlockingErrors && (
-                        <NonBlockingWarnings rows={risfileErrors.nonBlockingErrors} />
+                    {primaryFileImportSummary && primaryFileImportSummary.nonBlockingErrors && (
+                        <NonBlockingWarnings rows={primaryFileImportSummary.nonBlockingErrors} />
                     )}
                 </>
             );

@@ -13,7 +13,7 @@ import styled from "styled-components";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
-import { UploadRis } from "./UploadRis";
+import { UploadPrimaryFile } from "./UploadPrimaryFile";
 import { UploadSample } from "./UploadSample";
 import { useAppContext } from "../../contexts/app-context";
 import { useCurrentDataSubmissionId } from "../../hooks/useCurrentDataSubmissionId";
@@ -24,17 +24,18 @@ import { useSnackbar } from "@eyeseetea/d2-ui-components";
 import { Future } from "../../../domain/entities/Future";
 import { ImportSummary } from "../../../domain/entities/data-entry/ImportSummary";
 import { StyledLoaderContainer } from "./ConsistencyChecks";
+import { moduleProperties } from "../../../domain/utils/ModuleProperties";
 
 interface UploadFilesProps {
     changeStep: (step: number) => void;
-    risFile: File | null;
-    setRisFile: React.Dispatch<React.SetStateAction<File | null>>;
-    sampleFile: File | null;
-    setSampleFile: React.Dispatch<React.SetStateAction<File | null>>;
+    primaryFile: File | null;
+    setPrimaryFile: React.Dispatch<React.SetStateAction<File | null>>;
+    secondaryFile: File | null;
+    setSecondaryFile: React.Dispatch<React.SetStateAction<File | null>>;
     batchId: string;
     setBatchId: React.Dispatch<React.SetStateAction<string>>;
-    setRISFileImportSummary: React.Dispatch<React.SetStateAction<ImportSummary | undefined>>;
-    setSampleFileImportSummary: React.Dispatch<React.SetStateAction<ImportSummary | undefined>>;
+    setPrimaryFileImportSummary: React.Dispatch<React.SetStateAction<ImportSummary | undefined>>;
+    setSecondaryFileImportSummary: React.Dispatch<React.SetStateAction<ImportSummary | undefined>>;
 }
 
 interface PreviouslySubmittedContainerProps {
@@ -72,21 +73,21 @@ const datasetOptions = [
 
 export const UploadFiles: React.FC<UploadFilesProps> = ({
     changeStep,
-    risFile,
-    setRisFile,
-    sampleFile,
-    setSampleFile,
+    primaryFile,
+    setPrimaryFile,
+    secondaryFile,
+    setSecondaryFile,
     batchId,
     setBatchId,
-    setRISFileImportSummary,
-    setSampleFileImportSummary,
+    setPrimaryFileImportSummary,
+    setSecondaryFileImportSummary,
 }) => {
     const { compositionRoot } = useAppContext();
     const snackbar = useSnackbar();
     const [isValidated, setIsValidated] = useState(false);
     const [isFileValid, setIsFileValid] = useState(false);
     const [previousUploadsBatchIds, setPreviousUploadsBatchIds] = useState<string[]>([]);
-    const [hasSampleFile, setHasSampleFile] = useState<boolean>(false);
+    const [hasSecondaryFile, setHasSecondaryFile] = useState<boolean>(false);
     const [importLoading, setImportLoading] = useState<boolean>(false);
     const [previousBatchIdsLoading, setPreviousBatchIdsLoading] = useState<boolean>(true);
 
@@ -101,69 +102,79 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
     const dataSubmissionId = useCurrentDataSubmissionId(compositionRoot, moduleId, orgUnitId, currentPeriod);
 
     useEffect(() => {
-        setPreviousBatchIdsLoading(true);
-        if (dataSubmissionId !== "") {
-            compositionRoot.glassUploads.getByDataSubmission(dataSubmissionId).run(
-                uploads => {
-                    const uniquePreviousBatchIds = [
-                        ...new Set(
-                            uploads
-                                .filter(upload => upload.status.toLowerCase() !== UPLOADED_STATUS)
-                                .map(upload => upload.batchId)
-                        ),
-                    ];
-                    setPreviousUploadsBatchIds(uniquePreviousBatchIds);
-                    const firstSelectableBatchId = datasetOptions.find(
-                        ({ value }) => !uniquePreviousBatchIds.includes(value)
-                    )?.value;
-                    setBatchId(firstSelectableBatchId || "");
-                    setPreviousBatchIdsLoading(false);
-                },
-                () => {
-                    snackbar.error(i18n.t("Error fetching previous uploads."));
-                    setPreviousBatchIdsLoading(false);
-                }
-            );
+        if (moduleProperties.get(moduleName)?.isbatchReq) {
+            setPreviousBatchIdsLoading(true);
+            if (dataSubmissionId !== "") {
+                compositionRoot.glassUploads.getByDataSubmission(dataSubmissionId).run(
+                    uploads => {
+                        const uniquePreviousBatchIds = [
+                            ...new Set(
+                                uploads
+                                    .filter(upload => upload.status.toLowerCase() !== UPLOADED_STATUS)
+                                    .map(upload => upload.batchId)
+                            ),
+                        ];
+                        setPreviousUploadsBatchIds(uniquePreviousBatchIds);
+                        const firstSelectableBatchId = datasetOptions.find(
+                            ({ value }) => !uniquePreviousBatchIds.includes(value)
+                        )?.value;
+                        setBatchId(firstSelectableBatchId || "");
+                        setPreviousBatchIdsLoading(false);
+                    },
+                    () => {
+                        snackbar.error(i18n.t("Error fetching previous uploads."));
+                        setPreviousBatchIdsLoading(false);
+                    }
+                );
+            }
+        } else {
+            setPreviousBatchIdsLoading(false);
         }
-    }, [compositionRoot.glassUploads, dataSubmissionId, setBatchId, snackbar]);
+    }, [compositionRoot.glassUploads, dataSubmissionId, setBatchId, snackbar, moduleName]);
 
     useEffect(() => {
-        if (batchId && isFileValid) {
-            setIsValidated(true);
+        if (moduleProperties.get(moduleName)?.isbatchReq) {
+            if (batchId && isFileValid) {
+                setIsValidated(true);
+            } else {
+                setIsValidated(false);
+            }
         } else {
-            setIsValidated(false);
+            if (isFileValid) setIsValidated(true);
         }
-    }, [batchId, isFileValid]);
+    }, [batchId, isFileValid, moduleName]);
 
     const changeBatchId = async (event: React.ChangeEvent<{ value: unknown }>) => {
         const batchId = event.target.value as string;
-        const risUploadId = localStorage.getItem("risUploadId");
-        const sampleUploadId = localStorage.getItem("sampleUploadId");
+        const primaryUploadId = localStorage.getItem("primaryUploadId");
+        const secondaryUploadId = localStorage.getItem("secondaryUploadId");
         setBatchId(batchId);
 
-        if (risUploadId) {
-            await compositionRoot.glassUploads.setBatchId({ id: risUploadId, batchId }).toPromise();
+        if (primaryUploadId) {
+            await compositionRoot.glassUploads.setBatchId({ id: primaryUploadId, batchId }).toPromise();
         }
-        if (sampleUploadId) {
-            await compositionRoot.glassUploads.setBatchId({ id: sampleUploadId, batchId }).toPromise();
+        if (secondaryUploadId) {
+            await compositionRoot.glassUploads.setBatchId({ id: secondaryUploadId, batchId }).toPromise();
         }
     };
-    const uploadDatasetsAsDryRun = useCallback(() => {
-        if (risFile && moduleName === "AMR") {
+    const uploadFileSubmissions = useCallback(() => {
+        if (primaryFile) {
             setImportLoading(true);
             Future.joinObj({
-                importRISFileSummary: compositionRoot.dataSubmision.RISFile(
-                    risFile,
+                importPrimaryFileSummary: compositionRoot.fileSubmission.primaryFile(
+                    moduleName,
+                    primaryFile,
                     batchId,
                     currentPeriod,
                     "CREATE_AND_UPDATE",
                     orgUnitId,
                     orgUnitCode,
-                    true
+                    true,
+                    ""
                 ),
-                importSampleFileSummary: sampleFile
-                    ? compositionRoot.dataSubmision.sampleFile(
-                          sampleFile,
+                importSecondaryFileSummary: secondaryFile
+                    ? compositionRoot.fileSubmission.secondaryFile(
+                          secondaryFile,
                           batchId,
                           currentPeriod,
                           "CREATE_AND_UPDATE",
@@ -173,17 +184,17 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
                       )
                     : Future.success(undefined),
             }).run(
-                ({ importRISFileSummary, importSampleFileSummary }) => {
-                    setRISFileImportSummary(importRISFileSummary);
+                ({ importPrimaryFileSummary, importSecondaryFileSummary }) => {
+                    setPrimaryFileImportSummary(importPrimaryFileSummary);
 
-                    if (importSampleFileSummary) {
-                        setSampleFileImportSummary(importSampleFileSummary);
+                    if (importSecondaryFileSummary) {
+                        setSecondaryFileImportSummary(importSecondaryFileSummary);
                     }
                     setImportLoading(false);
                     changeStep(2);
                 },
                 error => {
-                    setRISFileImportSummary({
+                    setPrimaryFileImportSummary({
                         status: "ERROR",
                         importCount: { ignored: 0, imported: 0, deleted: 0, updated: 0 },
                         nonBlockingErrors: [],
@@ -196,32 +207,32 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
         }
     }, [
         batchId,
-        compositionRoot.dataSubmision,
+        compositionRoot.fileSubmission,
         moduleName,
         orgUnitCode,
         orgUnitId,
         currentPeriod,
-        risFile,
-        sampleFile,
-        setRISFileImportSummary,
-        setSampleFileImportSummary,
+        primaryFile,
+        secondaryFile,
+        setPrimaryFileImportSummary,
+        setSecondaryFileImportSummary,
         changeStep,
     ]);
 
     const continueClick = () => {
-        if (!hasSampleFile) {
-            localStorage.removeItem("sampleUploadId");
-            uploadDatasetsAsDryRun();
+        if (!hasSecondaryFile) {
+            localStorage.removeItem("secondaryUploadId");
+            uploadFileSubmissions();
         }
-        //update the sample file with ris file upload id.
+        //update the secondary file with primary file upload id.
         else {
             setImportLoading(true);
-            const risUploadId = localStorage.getItem("risUploadId");
-            const sampleUploadId = localStorage.getItem("sampleUploadId");
-            if (sampleUploadId && risUploadId)
-                compositionRoot.glassDocuments.updateSampleFileWithRisId(sampleUploadId, risUploadId).run(
+            const primaryUploadId = localStorage.getItem("primaryUploadId");
+            const secondaryUploadId = localStorage.getItem("secondaryUploadId");
+            if (secondaryUploadId && primaryUploadId)
+                compositionRoot.glassDocuments.updateSecondaryFileWithPrimaryId(secondaryUploadId, primaryUploadId).run(
                     () => {
-                        uploadDatasetsAsDryRun();
+                        uploadFileSubmissions();
                     },
                     () => {
                         console.debug("Error updating datastore");
@@ -235,11 +246,13 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
             <Backdrop open={importLoading} style={{ color: "#fff", zIndex: 1 }}>
                 <StyledLoaderContainer>
                     <CircularProgress color="inherit" size={50} />
+
                     <Typography variant="h6">
-                        {i18n.t("Performing a dry run of the import to ensure that there are no errors.")}
+                        {i18n.t(moduleProperties.get(moduleName)?.importLoadingMsg.line1 || "Loading")}
                     </Typography>
+
                     <Typography variant="h5">
-                        {i18n.t("This might take several minutes, do not refresh the page or press back.")}
+                        {i18n.t(moduleProperties.get(moduleName)?.importLoadingMsg.line2 || "")}
                     </Typography>
                 </StyledLoaderContainer>
             </Backdrop>
@@ -248,47 +261,53 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
             ) : (
                 <>
                     <div className="file-fields">
-                        <UploadRis
+                        <UploadPrimaryFile
                             validate={setIsFileValid}
                             batchId={batchId}
-                            risFile={risFile}
-                            setRisFile={setRisFile}
+                            primaryFile={primaryFile}
+                            setPrimaryFile={setPrimaryFile}
                         />
-
-                        <UploadSample
-                            batchId={batchId}
-                            sampleFile={sampleFile}
-                            setSampleFile={setSampleFile}
-                            setHasSampleFile={setHasSampleFile}
-                        />
+                        {moduleProperties.get(moduleName)?.isbatchReq && (
+                            <UploadSample
+                                batchId={batchId}
+                                sampleFile={secondaryFile}
+                                setSampleFile={setSecondaryFile}
+                                setHasSampleFile={setHasSecondaryFile}
+                            />
+                        )}
                     </div>
-
-                    <div className="batch-id">
-                        <h3>{i18n.t("Batch ID")}</h3>
-                        <FormControl variant="outlined" style={{ minWidth: 180 }}>
-                            <InputLabel id="dataset-label">{i18n.t("Choose a Dataset")}</InputLabel>
-                            <Select
-                                value={batchId}
-                                onChange={changeBatchId}
-                                label={i18n.t("Choose a Dataset")}
-                                labelId="dataset-label"
-                                MenuProps={{ disableScrollLock: true }}
-                            >
-                                {datasetOptions.map(({ label, value }) => (
-                                    <MenuItem
-                                        key={value}
-                                        value={value}
-                                        disabled={previousUploadsBatchIds.includes(value)}
-                                    >
-                                        {i18n.t(label)}
-                                    </MenuItem>
-                                ))}
-                            </Select>
-                        </FormControl>
-                    </div>
-
+                    {moduleProperties.get(moduleName)?.isbatchReq && (
+                        <div className="batch-id">
+                            <h3>{i18n.t("Batch ID")}</h3>
+                            <FormControl variant="outlined" style={{ minWidth: 180 }}>
+                                <InputLabel id="dataset-label">{i18n.t("Choose a Dataset")}</InputLabel>
+                                <Select
+                                    value={batchId}
+                                    onChange={changeBatchId}
+                                    label={i18n.t("Choose a Dataset")}
+                                    labelId="dataset-label"
+                                    MenuProps={{ disableScrollLock: true }}
+                                >
+                                    {datasetOptions.map(({ label, value }) => (
+                                        <MenuItem
+                                            key={value}
+                                            value={value}
+                                            disabled={previousUploadsBatchIds.includes(value)}
+                                        >
+                                            {i18n.t(label)}
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                            </FormControl>
+                        </div>
+                    )}
                     <div className="bottom">
-                        <PreviouslySubmittedContainer isVisible={previousUploadsBatchIds.length > 0}>
+                        <PreviouslySubmittedContainer
+                            isVisible={
+                                previousUploadsBatchIds.length > 0 &&
+                                (moduleProperties.get(moduleName)?.isbatchReq === true ? true : false)
+                            }
+                        >
                             <h4>{i18n.t("You Previously Submitted:")} </h4>
                             <ul>
                                 {previousUploadsBatchIds.map(batchId => (

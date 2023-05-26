@@ -13,9 +13,11 @@ import { useAppContext } from "../../contexts/app-context";
 import { QuestionnaireBase } from "../../../domain/entities/Questionnaire";
 import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context";
 import { useSnackbar } from "@eyeseetea/d2-ui-components";
+import { useCurrentPeriodContext } from "../../contexts/current-period-context";
 import { StyledInfoText } from "../current-data-submission/overview/CurrentStatus";
 import { useStatusDataSubmission } from "../../hooks/useStatusDataSubmission";
 import { CircularProgress } from "material-ui";
+import { moduleProperties } from "../../../domain/utils/ModuleProperties";
 
 interface ModuleCardProps {
     period: string;
@@ -26,6 +28,7 @@ const COMPLETED_STATUS = "COMPLETED";
 
 export const ModuleCard: React.FC<ModuleCardProps> = ({ period, module }) => {
     const { changeCurrentModuleAccess } = useCurrentModuleContext();
+    const { changeCurrentPeriod } = useCurrentPeriodContext();
     const { compositionRoot, currentUser } = useAppContext();
 
     const {
@@ -39,30 +42,39 @@ export const ModuleCard: React.FC<ModuleCardProps> = ({ period, module }) => {
     const [uploadsCount, setUploadsCount] = useState<number>(0);
     const currentDataSubmissionStatus = useStatusDataSubmission(module.id, orgUnitId, period);
 
-    useEffect(() => {
-        const moduleCaptureAccess = currentUser.userModulesAccess.find(m => m.moduleId === module.id)?.captureAccess;
-        const orgUnitCaptureAccess = currentUser.userOrgUnitsAccess.find(
-            ou => (ou.orgUnitId = orgUnitId)
-        )?.captureAccess;
-        const hasCurrentUserCaptureAccess =
-            (moduleCaptureAccess ? moduleCaptureAccess : false) &&
-            (orgUnitCaptureAccess ? orgUnitCaptureAccess : false);
+    const updateModuleAndPeriodContext = () => {
+        changeCurrentModuleAccess(module?.name || "");
+        changeCurrentPeriod(period);
+    };
 
-        compositionRoot.glassModules.getById(module.id).run(
-            currentModule => {
-                compositionRoot.questionnaires
-                    .getList(currentModule, { orgUnitId, year: period }, hasCurrentUserCaptureAccess)
-                    .run(
-                        questionnairesData => {
-                            setQuestionnaires(questionnairesData);
-                        },
-                        () => {}
-                    );
-            },
-            () => {
-                snackbar.error(i18n.t("Error fetching questionnaires."));
-            }
-        );
+    useEffect(() => {
+        if (moduleProperties.get(module.name)?.isQuestionnaireReq) {
+            const moduleCaptureAccess = currentUser.userModulesAccess.find(
+                m => m.moduleId === module.id
+            )?.captureAccess;
+            const orgUnitCaptureAccess = currentUser.userOrgUnitsAccess.find(
+                ou => (ou.orgUnitId = orgUnitId)
+            )?.captureAccess;
+            const hasCurrentUserCaptureAccess =
+                (moduleCaptureAccess ? moduleCaptureAccess : false) &&
+                (orgUnitCaptureAccess ? orgUnitCaptureAccess : false);
+
+            compositionRoot.glassModules.getById(module.id).run(
+                currentModule => {
+                    compositionRoot.questionnaires
+                        .getList(currentModule, { orgUnitId, year: period }, hasCurrentUserCaptureAccess)
+                        .run(
+                            questionnairesData => {
+                                setQuestionnaires(questionnairesData);
+                            },
+                            () => {}
+                        );
+                },
+                () => {
+                    snackbar.error(i18n.t("Error fetching questionnaires."));
+                }
+            );
+        }
         compositionRoot.glassUploads.getByModuleOUPeriod(module.id, orgUnitId, period.toString()).run(
             glassUploads => {
                 const completedUploads = glassUploads.filter(({ status }) => status === COMPLETED_STATUS);
@@ -79,6 +91,7 @@ export const ModuleCard: React.FC<ModuleCardProps> = ({ period, module }) => {
         currentUser.userModulesAccess,
         currentUser.userOrgUnitsAccess,
         module.id,
+        module.name,
         orgUnitId,
         period,
         snackbar,
@@ -123,11 +136,13 @@ export const ModuleCard: React.FC<ModuleCardProps> = ({ period, module }) => {
                         <Typography color="textSecondary">{i18n.t("OPEN ALL YEAR")}</Typography>
                     )}
                     <Typography color="textSecondary">{i18n.t(`${uploadsCount} files uploaded`)}</Typography>
-                    <Typography color="textSecondary">
-                        {i18n.t(
-                            `${questionnaires.filter(q => q.isCompleted === true)?.length} questionnaires completed`
-                        )}
-                    </Typography>
+                    {moduleProperties.get(module.name)?.isQuestionnaireReq && (
+                        <Typography color="textSecondary">
+                            {i18n.t(
+                                `${questionnaires.filter(q => q.isCompleted === true)?.length} questionnaires completed`
+                            )}
+                        </Typography>
+                    )}
                 </Container>
 
                 <Button
@@ -135,7 +150,7 @@ export const ModuleCard: React.FC<ModuleCardProps> = ({ period, module }) => {
                     color="primary"
                     component={NavLink}
                     to={`/current-data-submission`}
-                    onClick={() => changeCurrentModuleAccess(module?.name || "")}
+                    onClick={updateModuleAndPeriodContext}
                     exact={true}
                 >
                     <span>{i18n.t("GO")}</span>

@@ -5,6 +5,8 @@ import { DataFileTableBody } from "./DataFileTableBody";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { glassColors, palette } from "../../pages/app/themes/dhis2.theme";
 import { ArrowUpward, ArrowDownward } from "@material-ui/icons";
+import { moduleProperties } from "../../../domain/utils/ModuleProperties";
+import { useCurrentModuleContext } from "../../contexts/current-module-context";
 export interface DataFileHistoryItemProps {
     id: string;
     batchId: string;
@@ -37,6 +39,8 @@ export const DataFileTable: React.FC<DataFileTableProps> = ({ title, items, clas
     const [fileNameSortDirection, setFileNameSortDirection] = useState<SortDirection>("asc");
     const [recordsSortDirection, setRecordsSortDirection] = useState<SortDirection>("asc");
 
+    const { currentModuleAccess } = useCurrentModuleContext();
+
     return (
         <ContentWrapper className={className}>
             {title && <Typography variant="h3">{title}</Typography>}
@@ -65,29 +69,33 @@ export const DataFileTable: React.FC<DataFileTableProps> = ({ title, items, clas
                             <TableCell>
                                 <Typography variant="caption">{i18n.t("Country")}</Typography>
                             </TableCell>
-                            <TableCell
-                                onClick={() => {
-                                    batchIdSortDirection === "asc"
-                                        ? setBatchIdSortDirection("desc")
-                                        : setBatchIdSortDirection("asc");
-                                    sortByColumn("batchId", batchIdSortDirection);
-                                }}
-                            >
-                                <span>
-                                    <Typography variant="caption">{i18n.t("Batch Id")}</Typography>
-                                    {batchIdSortDirection === "asc" ? (
-                                        <ArrowUpward fontSize="small" />
-                                    ) : (
-                                        <ArrowDownward fontSize="small" />
-                                    )}
-                                </span>
-                            </TableCell>
+                            {moduleProperties.get(currentModuleAccess.moduleName)?.isbatchReq && (
+                                <TableCell
+                                    onClick={() => {
+                                        batchIdSortDirection === "asc"
+                                            ? setBatchIdSortDirection("desc")
+                                            : setBatchIdSortDirection("asc");
+                                        sortByColumn("batchId", batchIdSortDirection);
+                                    }}
+                                >
+                                    <span>
+                                        <Typography variant="caption">{i18n.t("Batch Id")}</Typography>
+                                        {batchIdSortDirection === "asc" ? (
+                                            <ArrowUpward fontSize="small" />
+                                        ) : (
+                                            <ArrowDownward fontSize="small" />
+                                        )}
+                                    </span>
+                                </TableCell>
+                            )}
                             <TableCell>
                                 <Typography variant="caption">{i18n.t("Period")}</Typography>
                             </TableCell>
-                            <TableCell>
-                                <Typography variant="caption">{i18n.t("Specimens")}</Typography>
-                            </TableCell>
+                            {moduleProperties.get(currentModuleAccess.moduleName)?.isbatchReq && (
+                                <TableCell>
+                                    <Typography variant="caption">{i18n.t("Specimens")}</Typography>
+                                </TableCell>
+                            )}
                             <TableCell>
                                 <Typography variant="caption">{i18n.t("Status")}</Typography>
                             </TableCell>

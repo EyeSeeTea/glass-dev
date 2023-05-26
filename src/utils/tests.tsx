@@ -16,6 +16,7 @@ export function getTestUser(): UserAccessInfo {
         userRoles: [],
         userOrgUnitsAccess: [],
         userModulesAccess: [],
+        quarterlyPeriodModules: [],
         gender: "male",
         email: "abc@gmail.com",
         phoneNumber: "1234",

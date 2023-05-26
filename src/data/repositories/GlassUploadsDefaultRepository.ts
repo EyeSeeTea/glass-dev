@@ -32,18 +32,6 @@ export class GlassUploadsDefaultRepository implements GlassUploadsRepository {
         });
     }
 
-    updateSampleUploadWithRisId(sampleUploadId: string, risUploadId: string): FutureData<void> {
-        return this.dataStoreClient.listCollection<GlassUploads>(DataStoreKeys.UPLOADS).flatMap(uploads => {
-            const upload = uploads?.find(upload => upload.id === sampleUploadId);
-            if (upload) {
-                upload.correspondingRisUploadId = risUploadId;
-                return this.dataStoreClient.saveObject(DataStoreKeys.UPLOADS, uploads);
-            } else {
-                return Future.error("Upload does not exist");
-            }
-        });
-    }
-
     setBatchId(id: string, batchId: string): FutureData<void> {
         return this.dataStoreClient.listCollection<GlassUploads>(DataStoreKeys.UPLOADS).flatMap(uploads => {
             const upload = uploads.find(el => el.id === id);
@@ -56,14 +44,14 @@ export class GlassUploadsDefaultRepository implements GlassUploadsRepository {
         });
     }
 
-    delete(id: string): FutureData<string> {
+    delete(id: string): FutureData<{ fileId: string; eventListFileId: string | undefined }> {
         return this.dataStoreClient.listCollection<GlassUploads>(DataStoreKeys.UPLOADS).flatMap(uploads => {
             const upload = uploads?.find(upload => upload.id === id);
             if (upload) {
                 uploads.splice(uploads.indexOf(upload), 1);
                 return this.dataStoreClient
                     .saveObject(DataStoreKeys.UPLOADS, uploads)
-                    .flatMap(() => Future.success(upload.fileId));
+                    .flatMap(() => Future.success({ fileId: upload.fileId, eventListFileId: upload.eventListFileId }));
             } else {
                 return Future.error("Upload does not exist");
             }
@@ -89,5 +77,28 @@ export class GlassUploadsDefaultRepository implements GlassUploadsRepository {
                 ["period", period],
             ])
         );
+    }
+    updateSampleUploadWithRisId(sampleUploadId: string, risUploadId: string): FutureData<void> {
+        return this.dataStoreClient.listCollection<GlassUploads>(DataStoreKeys.UPLOADS).flatMap(uploads => {
+            const upload = uploads?.find(upload => upload.id === sampleUploadId);
+            if (upload) {
+                upload.correspondingRisUploadId = risUploadId;
+                return this.dataStoreClient.saveObject(DataStoreKeys.UPLOADS, uploads);
+            } else {
+                return Future.error("Upload does not exist");
+            }
+        });
+    }
+
+    setEventListFileId(id: string, eventListFileId: string): FutureData<void> {
+        return this.dataStoreClient.listCollection<GlassUploads>(DataStoreKeys.UPLOADS).flatMap(uploads => {
+            const upload = uploads?.find(upload => upload.id === id);
+            if (upload) {
+                upload.eventListFileId = eventListFileId;
+                return this.dataStoreClient.saveObject(DataStoreKeys.UPLOADS, uploads);
+            } else {
+                return Future.error("Upload does not exist");
+            }
+        });
     }
 }
