@@ -7,7 +7,12 @@ import { GlassDataSubmissionsRepository } from "../repositories/GlassDataSubmiss
 export class GetSpecificDataSubmissionUseCase implements UseCase {
     constructor(private glassDataSubmissionRepository: GlassDataSubmissionsRepository) {}
 
-    public execute(module: string, orgUnit: string, period: string): FutureData<GlassDataSubmission> {
+    public execute(
+        module: string,
+        orgUnit: string,
+        period: string,
+        isQuarterlyModule: boolean
+    ): FutureData<GlassDataSubmission> {
         //Fix : Make sure that module, orgUnit and period are non empty before save.
         if (module !== "" && orgUnit !== "" && period) {
             return this.glassDataSubmissionRepository
@@ -21,21 +26,34 @@ export class GetSpecificDataSubmissionUseCase implements UseCase {
                     //Specific data-submission not found,
                     //Set to default status- NOT_COMPLETE, so that user can continue with upload workflow
                     else {
-                        const defaultDataSubmission: GlassDataSubmission = {
-                            id: generateId(),
-                            module: module,
-                            orgUnit: orgUnit,
-                            period: period,
-                            status: "NOT_COMPLETED",
-                            statusHistory: [{ to: "NOT_COMPLETED", changedAt: new Date().toISOString() }],
-                        };
-                        return this.glassDataSubmissionRepository.save(defaultDataSubmission).flatMap(() => {
-                            return Future.success(defaultDataSubmission);
-                        });
+                        //Adding a validation, that the datasubmission created is of correct period type - YEARLY/QUARTERLY
+                        const isValid = this.validatePeriod(module, period, isQuarterlyModule);
+                        if (isValid) {
+                            const defaultDataSubmission: GlassDataSubmission = {
+                                id: generateId(),
+                                module: module,
+                                orgUnit: orgUnit,
+                                period: period,
+                                status: "NOT_COMPLETED",
+                                statusHistory: [{ to: "NOT_COMPLETED", changedAt: new Date().toISOString() }],
+                            };
+                            return this.glassDataSubmissionRepository.save(defaultDataSubmission).flatMap(() => {
+                                return Future.success(defaultDataSubmission);
+                            });
+                        } else return Future.error("Cannot find data submission");
                     }
                 });
         } else {
             return Future.error("Cannot find data submission");
+        }
+    }
+
+    private validatePeriod(module: string, period: string, isQuarterlyModule: boolean): boolean {
+        if (isQuarterlyModule && period.includes("Q")) return true;
+        else if (!isQuarterlyModule && !period.includes("Q")) return true;
+        else {
+            console.debug(`Tried to create an incorrect DS module : ${module} and period : ${period}`);
+            return false;
         }
     }
 }

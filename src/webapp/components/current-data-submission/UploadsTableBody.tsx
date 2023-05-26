@@ -10,12 +10,13 @@ import { ConfirmationDialog, useSnackbar } from "@eyeseetea/d2-ui-components";
 import { CircularProgress } from "material-ui";
 import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context";
 import { Future } from "../../../domain/entities/Future";
-import { isEditModeStatus } from "../../utils/editModeStatus";
+import { isEditModeStatus } from "../../../utils/editModeStatus";
 import { useStatusDataSubmission } from "../../hooks/useStatusDataSubmission";
 import { useCurrentModuleContext } from "../../contexts/current-module-context";
 import { useGlassCaptureAccess } from "../../hooks/useGlassCaptureAccess";
 import { StyledLoaderContainer } from "../upload/ConsistencyChecks";
 import { useCurrentPeriodContext } from "../../contexts/current-period-context";
+import { moduleProperties } from "../../../domain/utils/ModuleProperties";
 
 export interface UploadsTableBodyProps {
     rows?: UploadsDataItem[];
@@ -67,83 +68,105 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
     };
 
     //Deleting a dataset completely has the following steps:
-    //1. Delete corresponsding datasetValue for each row in the file.
+    //1. Delete corresponsding datasetValue/event for each row in the file.
     //2. Delete corresponding document from DHIS
     //3. Delete corresponding 'upload' and 'document' from Datastore
     const deleteDataset = () => {
         hideConfirmationDialog();
         if (rowToDelete) {
-            let risFileToDelete: UploadsDataItem | undefined, sampleFileToDelete: UploadsDataItem | undefined;
-            //Ris file is mandatory, so there will be a ris file with given batch id.
+            let primaryFileToDelete: UploadsDataItem | undefined, secondaryFileToDelete: UploadsDataItem | undefined;
+            //For AMR, Ris file is mandatory, so there will be a ris file with given batch id.
             //Sample file is optional and could be absent
-            if (rowToDelete.fileType === "RIS") {
-                risFileToDelete = rowToDelete;
-                sampleFileToDelete = rows?.filter(sample => sample.correspondingRisUploadId === rowToDelete.id)?.at(0);
+            if (moduleProperties.get(currentModuleAccess.moduleName)?.isSecondaryFileApplicable) {
+                if (
+                    rowToDelete.fileType.toLowerCase() ===
+                    moduleProperties.get(currentModuleAccess.moduleName)?.primaryFileType.toLowerCase()
+                ) {
+                    primaryFileToDelete = rowToDelete;
+                    secondaryFileToDelete = rows
+                        ?.filter(sample => sample.correspondingRisUploadId === rowToDelete.id)
+                        ?.at(0);
+                } else {
+                    secondaryFileToDelete = rowToDelete;
+                    primaryFileToDelete = rows?.filter(ris => ris.id === rowToDelete.correspondingRisUploadId)?.at(0);
+                }
             } else {
-                sampleFileToDelete = rowToDelete;
-                risFileToDelete = rows?.filter(ris => ris.id === rowToDelete.correspondingRisUploadId)?.at(0);
+                primaryFileToDelete = rowToDelete;
+                secondaryFileToDelete = undefined;
             }
 
-            if (risFileToDelete) {
+            if (primaryFileToDelete) {
                 setLoading(true);
                 Future.joinObj({
-                    risFileDownload: compositionRoot.glassDocuments.download(risFileToDelete.fileId),
-                    sampleFileDownload: sampleFileToDelete
-                        ? compositionRoot.glassDocuments.download(sampleFileToDelete.fileId)
+                    primaryFileDownload: compositionRoot.glassDocuments.download(primaryFileToDelete.fileId),
+                    secondaryFileDownload: secondaryFileToDelete
+                        ? compositionRoot.glassDocuments.download(secondaryFileToDelete.fileId)
                         : Future.success(undefined),
                 }).run(
-                    ({ risFileDownload, sampleFileDownload }) => {
-                        if (risFileToDelete) {
-                            const risFile = new File([risFileDownload], risFileToDelete.fileName);
+                    ({ primaryFileDownload, secondaryFileDownload }) => {
+                        if (primaryFileToDelete) {
+                            const primaryFile = new File([primaryFileDownload], primaryFileToDelete.fileName);
                             //If the file is in uploaded status then, data vales have not been imported.
                             //No need for deletion
 
                             Future.joinObj({
-                                deleteRisFileSummary:
-                                    risFileToDelete.status.toLowerCase() !== "uploaded"
-                                        ? compositionRoot.dataSubmision.RISFile(
-                                              risFile,
-                                              risFileToDelete.batchId,
-                                              risFileToDelete.period,
-                                              "DELETES",
+                                deletePrimaryFileSummary:
+                                    primaryFileToDelete.status.toLowerCase() !== "uploaded" ||
+                                    currentModuleAccess.moduleName === "EGASP"
+                                        ? compositionRoot.fileSubmission.primaryFile(
+                                              currentModuleAccess.moduleName,
+                                              primaryFile,
+                                              primaryFileToDelete.batchId,
+                                              primaryFileToDelete.period,
+                                              "DELETE",
                                               orgUnitId,
-                                              risFileToDelete.countryCode,
-                                              false
+                                              primaryFileToDelete.countryCode,
+                                              false,
+                                              primaryFileToDelete.eventListFileId || ""
                                           )
                                         : Future.success(undefined),
-                                deleteSampleFileSummary:
-                                    sampleFileToDelete &&
-                                    sampleFileToDelete.status.toLowerCase() !== "uploaded" &&
-                                    sampleFileDownload
-                                        ? compositionRoot.dataSubmision.sampleFile(
-                                              new File([sampleFileDownload], sampleFileToDelete.fileName),
-                                              sampleFileToDelete.batchId,
-                                              sampleFileToDelete.period,
-                                              "DELETES",
+                                deleteSecondaryFileSummary:
+                                    secondaryFileToDelete &&
+                                    secondaryFileToDelete.status.toLowerCase() !== "uploaded" &&
+                                    secondaryFileDownload
+                                        ? compositionRoot.fileSubmission.secondaryFile(
+                                              new File([secondaryFileDownload], secondaryFileToDelete.fileName),
+                                              secondaryFileToDelete.batchId,
+                                              secondaryFileToDelete.period,
+                                              "DELETE",
                                               orgUnitId,
-                                              sampleFileToDelete.countryCode,
+                                              secondaryFileToDelete.countryCode,
                                               false
                                           )
                                         : Future.success(undefined),
                             }).run(
-                                ({ deleteRisFileSummary, deleteSampleFileSummary }) => {
-                                    if (deleteRisFileSummary) {
-                                        let message = `${deleteRisFileSummary.importCount.deleted} data values deleted for RIS file`;
+                                ({ deletePrimaryFileSummary, deleteSecondaryFileSummary }) => {
+                                    if (deletePrimaryFileSummary) {
+                                        let message = `${deletePrimaryFileSummary.importCount.deleted} ${
+                                            moduleProperties.get(currentModuleAccess.moduleName)?.unit
+                                        }s deleted for ${
+                                            moduleProperties.get(currentModuleAccess.moduleName)?.primaryFileType
+                                        } file`;
 
-                                        if (sampleFileToDelete && deleteSampleFileSummary) {
+                                        if (secondaryFileToDelete && deleteSecondaryFileSummary) {
                                             message =
                                                 message +
-                                                ` and ${deleteSampleFileSummary.importCount.deleted} data values deleted for SAMPLE file.`;
+                                                ` and ${deleteSecondaryFileSummary.importCount.deleted} ${
+                                                    moduleProperties.get(currentModuleAccess.moduleName)?.unit
+                                                }s deleted for ${
+                                                    moduleProperties.get(currentModuleAccess.moduleName)
+                                                        ?.secondaryFileType
+                                                } file.`;
                                         }
 
                                         snackbar.info(message);
                                     }
-                                    if (risFileToDelete) {
-                                        compositionRoot.glassDocuments.deleteByUploadId(risFileToDelete.id).run(
+                                    if (primaryFileToDelete) {
+                                        compositionRoot.glassDocuments.deleteByUploadId(primaryFileToDelete.id).run(
                                             () => {
-                                                if (sampleFileToDelete) {
+                                                if (secondaryFileToDelete) {
                                                     compositionRoot.glassDocuments
-                                                        .deleteByUploadId(sampleFileToDelete.id)
+                                                        .deleteByUploadId(secondaryFileToDelete.id)
                                                         .run(
                                                             () => {
                                                                 refreshUploads({}); //Trigger re-render of parent
@@ -177,14 +200,18 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                     },
                     error => {
                         console.debug(
-                            `Unable to download RIS fileid : ${risFileToDelete?.fileId} OR Sample fileid : ${sampleFileToDelete?.fileId}, error: ${error} `
+                            `Unable to download primary fileid : ${primaryFileToDelete?.fileId} OR secondary fileid : ${secondaryFileToDelete?.fileId}, error: ${error} `
                         );
                         setLoading(false);
                     }
                 );
             } else {
-                //RIS file doesnt exist, only sample file exists. This should never happen as RIS file is mandatory.
-                snackbar.error("Mandatory RIS file does not exist.");
+                //Primary file doesnt exist, only secondary file exists. This should never happen as Primary file is mandatory.
+                snackbar.error(
+                    `Mandatory ${
+                        moduleProperties.get(currentModuleAccess.moduleName)?.primaryFileType
+                    } file does not exist.`
+                );
             }
         }
     };
@@ -198,10 +225,12 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                             <TableCell>{row.period}</TableCell>
                             <TableCell>{row.records}</TableCell>
                             <TableCell>{row.fileType}</TableCell>
-                            <TableCell>{row.batchId}</TableCell>
+                            {moduleProperties.get(currentModuleAccess.moduleName)?.isbatchReq && (
+                                <TableCell>{row.batchId}</TableCell>
+                            )}
                             <TableCell>{i18n.t(row.status).toUpperCase()}</TableCell>
                             <TableCell>
-                                <Button onClick={() => downloadFile(row.fileId, row.fileName)}>
+                                <Button onClick={() => downloadFile(row.fileId, row.fileName)} style={{ opacity: 0.5 }}>
                                     <CloudDownloadOutlined />
                                 </Button>
                             </TableCell>
@@ -244,7 +273,7 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                                             !isEditModeStatus(currentDataSubmissionStatus.data.title)
                                         }
                                     >
-                                        <DeleteOutline />
+                                        <DeleteOutline style={{ opacity: 1 }} />
                                     </Button>
                                 ) : (
                                     <CircularProgress size={20} />

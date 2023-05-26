@@ -13,6 +13,7 @@ import { Close, Check } from "@material-ui/icons";
 import { useCurrentPeriodContext } from "../../../contexts/current-period-context";
 import { useGlassCaptureAccess } from "../../../hooks/useGlassCaptureAccess";
 import { palette } from "../../../pages/app/themes/dhis2.theme";
+import { moduleProperties } from "../../../../domain/utils/ModuleProperties";
 
 interface StatusProps {
     moduleName: string;
@@ -40,7 +41,7 @@ export const CurrentStatus: React.FC<StatusProps> = ({
 }) => {
     const { compositionRoot } = useAppContext();
     const {
-        currentModuleAccess: { moduleId },
+        currentModuleAccess: { moduleId, moduleName },
     } = useCurrentModuleContext();
     const {
         currentOrgUnitAccess: { orgUnitId },
@@ -54,21 +55,23 @@ export const CurrentStatus: React.FC<StatusProps> = ({
 
     useEffect(() => {
         if (showUploadHistory) {
-            compositionRoot.glassModules.getById(moduleId).run(
-                currentModule => {
-                    compositionRoot.questionnaires
-                        .getList(currentModule, { orgUnitId, year: currentPeriod }, hasCurrentUserCaptureAccess)
-                        .run(
-                            questionnairesData => {
-                                setQuestionnaires(questionnairesData);
-                            },
-                            () => {}
-                        );
-                },
-                () => {
-                    snackbar.error(i18n.t("Error fetching questionnaires."));
-                }
-            );
+            if (moduleProperties.get(moduleName)?.isQuestionnaireReq) {
+                compositionRoot.glassModules.getById(moduleId).run(
+                    currentModule => {
+                        compositionRoot.questionnaires
+                            .getList(currentModule, { orgUnitId, year: currentPeriod }, hasCurrentUserCaptureAccess)
+                            .run(
+                                questionnairesData => {
+                                    setQuestionnaires(questionnairesData);
+                                },
+                                () => {}
+                            );
+                    },
+                    () => {
+                        snackbar.error(i18n.t("Error fetching questionnaires."));
+                    }
+                );
+            }
             compositionRoot.glassUploads.getByModuleOUPeriod(moduleId, orgUnitId, currentPeriod.toString()).run(
                 glassUploads => {
                     const completedUploads = glassUploads.filter(({ status }) => status === COMPLETED_STATUS);
@@ -84,6 +87,7 @@ export const CurrentStatus: React.FC<StatusProps> = ({
         compositionRoot.glassUploads,
         compositionRoot.questionnaires,
         moduleId,
+        moduleName,
         orgUnitId,
         showUploadHistory,
         snackbar,

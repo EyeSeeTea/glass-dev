@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import { CompositionRoot } from "../../CompositionRoot";
 import { GlassDataSubmission } from "../../domain/entities/GlassDataSubmission";
 import { GlassModule } from "../../domain/entities/GlassModule";
 import { GlassState } from "./State";
 import { useGlassModules } from "./useGlassModules";
+import { useAppContext } from "../contexts/app-context";
+import { useCurrentOrgUnitContext } from "../contexts/current-orgUnit-context";
 
 type GlassDataSubmissionsState = GlassState<GlassDataSubmissionData[]>;
 
@@ -14,7 +15,9 @@ type GlassDataSubmissionData = {
 
 const openDataSubmissionStatuses = ["NOT_COMPLETED", "COMPLETE", "REJECTED", "UPDATE_REQUEST_ACCEPTED"];
 
-export function useOpenDataSubmissionsByOrgUnit(compositionRoot: CompositionRoot, orgUnit: string) {
+export function useOpenDataSubmissionsByOrgUnit() {
+    const { compositionRoot } = useAppContext();
+    const { currentOrgUnitAccess } = useCurrentOrgUnitContext();
     const modules = useGlassModules(compositionRoot);
     const [openDataSubmissions, setOpenDataSubmissions] = useState<GlassDataSubmissionsState>({
         kind: "loading",
@@ -22,7 +25,7 @@ export function useOpenDataSubmissionsByOrgUnit(compositionRoot: CompositionRoot
 
     useEffect(() => {
         if (modules.kind === "loaded") {
-            compositionRoot.glassDataSubmission.getOpenDataSubmissionsByOU(orgUnit).run(
+            compositionRoot.glassDataSubmission.getOpenDataSubmissionsByOU(currentOrgUnitAccess.orgUnitId).run(
                 openDataSubmissions => {
                     const submissions = openDataSubmissions
                         .filter(data => data.module !== undefined && openDataSubmissionStatuses.includes(data.status))
@@ -37,7 +40,7 @@ export function useOpenDataSubmissionsByOrgUnit(compositionRoot: CompositionRoot
                 error => setOpenDataSubmissions({ kind: "error", message: error })
             );
         }
-    }, [setOpenDataSubmissions, compositionRoot.glassDataSubmission, orgUnit, modules]);
+    }, [setOpenDataSubmissions, compositionRoot.glassDataSubmission, currentOrgUnitAccess.orgUnitId, modules]);
 
     return openDataSubmissions;
 }

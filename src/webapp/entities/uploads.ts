@@ -15,4 +15,5 @@ export interface UploadsDataItem {
     module: string;
     records: number;
     correspondingRisUploadId: string;
+    eventListFileId?: string;
 }
