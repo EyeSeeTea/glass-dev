@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2023-05-24T17:32:23.715Z\n"
-"PO-Revision-Date: 2023-05-24T17:32:23.715Z\n"
+"POT-Creation-Date: 2023-05-26T07:30:44.521Z\n"
+"PO-Revision-Date: 2023-05-26T07:30:44.521Z\n"
 
 msgid "Template {{id}} not loaded"
 msgstr ""
@@ -163,11 +163,6 @@ msgid ""
 "everything is fine send it to WHO for revision."
 msgstr ""
 
-msgid ""
-"Please click on 'Send submission' in overview tab to submit after reviewing "
-"the data submission"
-msgstr ""
-
 msgid "WAITING WHO APROVAL"
 msgstr ""
 
@@ -218,11 +213,6 @@ msgid ""
 "Your upload contains all necessary fields. You can still remove or add "
 "datasets. Please check that everything is included and once everything is "
 "fine send to WHO for revision"
-msgstr ""
-
-msgid ""
-"Please complete all mandatory questionnaires and review datasets, then "
-"click on 'Send Submission' in the overview tab to submit"
 msgstr ""
 
 msgid "Confirm submission"
@@ -281,6 +271,14 @@ msgid "Deleting Files"
 msgstr ""
 
 msgid "This might take several minutes, do not refresh the page or press back."
+msgstr ""
+
+msgid "Confirm Delete"
+msgstr ""
+
+msgid ""
+"Deleting this upload will delete both SAMPLE and RIS files for the given "
+"dataset. Are you sure you want to delete?"
 msgstr ""
 
 msgid "Overview"
