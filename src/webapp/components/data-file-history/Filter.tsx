@@ -61,7 +61,7 @@ export const Filter: React.FC<FilterProps> = ({ year, setYear, status, setStatus
     const { currentModuleAccess } = useCurrentModuleContext();
 
     const yearOptions: { label: string; value: string }[] = [];
-    if (currentUser.quarterlyPeriodModules.find(qm => qm === currentModuleAccess.moduleName)) {
+    if (currentUser.quarterlyPeriodModules.find(qm => qm.name === currentModuleAccess.moduleName)) {
         getLastNYearsQuarters().forEach(quarter => {
             yearOptions.push({ label: quarter, value: quarter });
         });

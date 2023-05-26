@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, Dispatch, SetStateAction } from "react";
 import styled from "styled-components";
 import { UploadsTable } from "./UploadsTable";
 import { GlassUploadsState } from "../../hooks/useGlassUploads";
@@ -15,6 +15,10 @@ import { useGlassUploadsByModuleOUPeriod } from "../../hooks/useGlassUploadsByMo
 import { useCurrentPeriodContext } from "../../contexts/current-period-context";
 import { useGlassCaptureAccess } from "../../hooks/useGlassCaptureAccess";
 import { moduleProperties } from "../../../domain/utils/ModuleProperties";
+import { useAppContext } from "../../contexts/app-context";
+import { useCurrentDataSubmissionId } from "../../hooks/useCurrentDataSubmissionId";
+import { useCurrentUserGroupsAccess } from "../../hooks/useCurrentUserGroupsAccess";
+import { DataSubmissionStatusTypes } from "../../../domain/entities/GlassDataSubmission";
 
 function getCompletedUploads(upload: GlassUploadsState) {
     if (upload.kind === "loaded") {
@@ -28,9 +32,13 @@ function getNotCompletedUploads(upload: GlassUploadsState) {
     }
 }
 
-export const ListOfDatasets: React.FC = () => {
-    const { currentPeriod } = useCurrentPeriodContext();
+interface ListOfDatasetsProps {
+    setRefetchStatus: Dispatch<SetStateAction<DataSubmissionStatusTypes | undefined>>;
+}
 
+export const ListOfDatasets: React.FC<ListOfDatasetsProps> = ({ setRefetchStatus }) => {
+    const { compositionRoot } = useAppContext();
+    const { currentPeriod } = useCurrentPeriodContext();
     const { currentModuleAccess } = useCurrentModuleContext();
     const { currentOrgUnitAccess } = useCurrentOrgUnitContext();
     const currentDataSubmissionStatus = useStatusDataSubmission(
@@ -43,6 +51,52 @@ export const ListOfDatasets: React.FC = () => {
 
     const completeUploads = getCompletedUploads(uploads);
     const incompleteUploads = getNotCompletedUploads(uploads);
+
+    const dataSubmissionId = useCurrentDataSubmissionId(
+        compositionRoot,
+        currentModuleAccess.moduleId,
+        currentOrgUnitAccess.orgUnitId,
+        currentPeriod
+    );
+    const { captureAccessGroup } = useCurrentUserGroupsAccess();
+    useEffect(() => {
+        if (
+            completeUploads?.length === 0 &&
+            !moduleProperties.get(currentModuleAccess.moduleName)?.isQuestionnaireReq
+        ) {
+            compositionRoot.glassDataSubmission.setStatus(dataSubmissionId, "NOT_COMPLETED").run(
+                () => {
+                    //Triggerring relaod of status in parent
+                    setRefetchStatus("NOT_COMPLETED");
+
+                    if (captureAccessGroup.kind === "loaded") {
+                        const userGroupsIds = captureAccessGroup.data.map(cag => {
+                            return cag.id;
+                        });
+                        const notificationText = `The data submission for ${currentModuleAccess.moduleName} module for year ${currentPeriod} and country ${currentOrgUnitAccess.orgUnitName} has changed to DATA TO BE APPROVED BY COUNTRY`;
+
+                        compositionRoot.notifications
+                            .send(notificationText, notificationText, userGroupsIds, [currentOrgUnitAccess.orgUnitId])
+                            .run(
+                                () => {},
+                                () => {}
+                            );
+                    }
+                },
+                () => {}
+            );
+        }
+    }, [
+        completeUploads,
+        captureAccessGroup,
+        compositionRoot.notifications,
+        compositionRoot.glassDataSubmission,
+        currentModuleAccess,
+        currentOrgUnitAccess,
+        currentPeriod,
+        dataSubmissionId,
+        setRefetchStatus,
+    ]);
 
     return (
         <ContentLoader content={uploads}>

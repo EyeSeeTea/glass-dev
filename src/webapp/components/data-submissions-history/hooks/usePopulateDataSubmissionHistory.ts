@@ -21,7 +21,7 @@ export function usePopulateDataSubmissionHistory() {
             //Ensure that the last n years of data submissions are pre populated.
             const years: string[] = [];
 
-            if (currentUser.quarterlyPeriodModules.find(qm => qm === currentModuleAccess.moduleName)) {
+            if (currentUser.quarterlyPeriodModules.find(qm => qm.name === currentModuleAccess.moduleName)) {
                 //Check if last 2 years Quarterly Data Submissions are populated
                 getLastNYearsQuarters().forEach(quarter => {
                     if (!dataSubmissions.data.find(ds => ds.period === quarter)) {
