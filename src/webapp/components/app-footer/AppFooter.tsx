@@ -3,6 +3,7 @@ import { Typography } from "@material-ui/core";
 import React from "react";
 import styled from "styled-components";
 import { palette } from "../../pages/app/themes/dhis2.theme";
+import { getCurrentYear } from "../../../utils/currentPeriodHelper";
 
 export const AppFooter: React.FC = () => {
     return (
@@ -12,7 +13,7 @@ export const AppFooter: React.FC = () => {
                     {i18n.t("WHO privacy policy")}
                 </Link>{" "}
                 <Link href="https://www.who.int/about/policies/publishing/copyright" target="_blank">
-                    {i18n.t(`©WHO ${new Date().getFullYear()}`)}
+                    {i18n.t(`©WHO ${getCurrentYear()}`)}
                 </Link>
             </Typography>
         </Wrapper>

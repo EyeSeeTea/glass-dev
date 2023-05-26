@@ -10,8 +10,10 @@ import i18n from "@eyeseetea/d2-ui-components/locales";
 import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context";
 import { useCurrentModuleContext } from "../../contexts/current-module-context";
 import { useCurrentPeriodContext } from "../../contexts/current-period-context";
+import { useAppContext } from "../../contexts/app-context";
 
 export const UploadPage: React.FC = React.memo(() => {
+    const { currentUser } = useAppContext();
     const { currentOrgUnitAccess } = useCurrentOrgUnitContext();
     const { currentModuleAccess } = useCurrentModuleContext();
     const { currentPeriod } = useCurrentPeriodContext();
@@ -21,6 +23,8 @@ export const UploadPage: React.FC = React.memo(() => {
     const [module, setModule] = useState(currentModuleAccess.moduleName);
 
     const [resetWizard, setResetWizard] = useState(false);
+
+    const periodType = currentUser.quarterlyPeriodModules.find(qm => qm.name === module) ? "Quarterly" : "Yearly";
 
     useEffect(() => {
         //Whenever period, orgUnit or module changes, go back to step 1 of Upload Wizard.
@@ -52,7 +56,7 @@ export const UploadPage: React.FC = React.memo(() => {
                     </Button>
                 </StyledBreadCrumbs>
                 <div className="info">
-                    <span>{i18n.t("Yearly data upload")}</span>, &nbsp;
+                    <span>{i18n.t(`${periodType} data upload`)}</span>, &nbsp;
                     <span>{i18n.t(orgUnit)}</span>
                 </div>
             </PreContent>

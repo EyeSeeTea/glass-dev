@@ -5,8 +5,11 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2023-05-23T12:32:32.309Z\n"
-"PO-Revision-Date: 2023-05-23T12:32:32.309Z\n"
+"POT-Creation-Date: 2023-05-26T17:29:01.131Z\n"
+"PO-Revision-Date: 2023-05-26T17:29:01.131Z\n"
+
+msgid "Template {{id}} not loaded"
+msgstr ""
 
 msgid "Error saving registration status"
 msgstr ""
@@ -93,6 +96,78 @@ msgid "View"
 msgstr ""
 
 msgid "Go"
+msgstr ""
+
+msgid "NOT COMPLETED"
+msgstr ""
+
+msgid ""
+"You need to fill at least the mandatory questionnaires/uploads before "
+"submitting for this data submission"
+msgstr ""
+
+msgid "Please complete all mandatory questionnaires/uploads."
+msgstr ""
+
+msgid "DATA TO BE APPROVED BY COUNTRY"
+msgstr ""
+
+msgid ""
+"Your submission contains all the mandatory fields. You can still add or "
+"remove datasets. Please check that everything is included and once "
+"everything is fine send it to WHO for revision."
+msgstr ""
+
+msgid "WAITING WHO APROVAL"
+msgstr ""
+
+msgid ""
+"We have received your submission. You don't have to take action at this "
+"point. WHO staff will review your data and mark it as \"ready\" or contact "
+"you in case you need to modify something."
+msgstr ""
+
+msgid "APPROVED"
+msgstr ""
+
+msgid ""
+"Congratulations, your submission of data for year 2022 was accepted.\n"
+"\n"
+"Please note that since your submission has been approved you can't modify "
+"it directly. If you want to update or add more data you need to request an "
+"update."
+msgstr ""
+
+msgid "REJECTED BY WHO"
+msgstr ""
+
+msgid ""
+"Please review the messages and the reports to find about the causes of this "
+"rejection.\n"
+" You have to upload new datasets."
+msgstr ""
+
+msgid ""
+"Please re-complete the questionnaire correctly and ensure you have uploaded "
+"correct datasets, as your previous submisison was rejected by WHO."
+msgstr ""
+
+msgid "WAITING for WHO TO ACCEPT THE DATA UPDATE REQUEST"
+msgstr ""
+
+msgid ""
+"When WHO admins approve your request you will be able to modify your "
+"upload. \n"
+" You will be notified when that happens."
+msgstr ""
+
+msgid "DATA UPDATE REQUEST ACCEPTED"
+msgstr ""
+
+msgid ""
+"Your upload contains all necessary fields. You can still remove or add "
+"datasets. Please check that everything is included and once everything is "
+"fine send to WHO for revision"
 msgstr ""
 
 msgid "Confirm submission"
@@ -341,7 +416,7 @@ msgstr ""
 msgid "Go to Validation Report"
 msgstr ""
 
-msgid "Thank! your data for now is uploaded in our system"
+msgid "Thank you! your data for now is uploaded in our system"
 msgstr ""
 
 msgid "Importing data and applying validation rules"
@@ -365,16 +440,7 @@ msgid ""
 "can still proceed with the submission."
 msgstr ""
 
-msgid "RIS File"
-msgstr ""
-
-msgid "Sample File"
-msgstr ""
-
 msgid "Continue"
-msgstr ""
-
-msgid "No sample file uploaded"
 msgstr ""
 
 msgid "Non-blocking warnings"
@@ -410,9 +476,6 @@ msgstr ""
 msgid "Error fetching previous uploads."
 msgstr ""
 
-msgid "Performing a dry run of the import to ensure that there are no errors."
-msgstr ""
-
 msgid "Choose a Dataset"
 msgstr ""
 
@@ -422,10 +485,7 @@ msgstr ""
 msgid "Error in file upload"
 msgstr ""
 
-msgid "Incorrect File Format. Please retry with a valid RIS file"
-msgstr ""
-
-msgid "Choose RIS File"
+msgid "Incorrect File Format. Please retry with a valid file"
 msgstr ""
 
 msgid "Select file"
@@ -516,9 +576,6 @@ msgid "Enable message SMS notifications"
 msgstr ""
 
 msgid "Country Information"
-msgstr ""
-
-msgid "Yearly data upload"
 msgstr ""
 
 msgid "Data File History"

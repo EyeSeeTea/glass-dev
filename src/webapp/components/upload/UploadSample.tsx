@@ -49,11 +49,11 @@ export const UploadSample: React.FC<UploadSampleProps> = ({ batchId, sampleFile,
     const removeFiles = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         event.preventDefault();
         setIsLoading(true);
-        const sampleUploadId = localStorage.getItem("sampleUploadId");
+        const sampleUploadId = localStorage.getItem("secondaryUploadId");
         if (sampleUploadId) {
             return compositionRoot.glassDocuments.deleteByUploadId(sampleUploadId).run(
                 () => {
-                    localStorage.removeItem("sampleUploadId");
+                    localStorage.removeItem("secondaryUploadId");
                     setSampleFile(null);
                     setHasSampleFile(false);
                     setIsLoading(false);
@@ -81,7 +81,7 @@ export const UploadSample: React.FC<UploadSampleProps> = ({ batchId, sampleFile,
                 if (uploadedSample) {
                     setIsLoading(true);
 
-                    return compositionRoot.dataSubmision.validateSampleFile(uploadedSample).run(
+                    return compositionRoot.fileSubmission.validateSecondaryFile(uploadedSample).run(
                         sampleData => {
                             if (sampleData.isValid) {
                                 setSampleFile(uploadedSample);
@@ -99,7 +99,7 @@ export const UploadSample: React.FC<UploadSampleProps> = ({ batchId, sampleFile,
                                 };
                                 return compositionRoot.glassDocuments.upload({ file: uploadedSample, data }).run(
                                     uploadId => {
-                                        localStorage.setItem("sampleUploadId", uploadId);
+                                        localStorage.setItem("secondaryUploadId", uploadId);
                                         setIsLoading(false);
                                         setHasSampleFile(true);
                                     },
@@ -125,7 +125,7 @@ export const UploadSample: React.FC<UploadSampleProps> = ({ batchId, sampleFile,
         },
         [
             batchId,
-            compositionRoot.dataSubmision,
+            compositionRoot.fileSubmission,
             compositionRoot.glassDocuments,
             currentPeriod,
             dataSubmissionId,
