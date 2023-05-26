@@ -12,9 +12,9 @@ export const CurrentPeriodContextProvider: React.FC = ({ children }) => {
     const { currentUser } = useAppContext();
     const { currentModuleAccess } = useCurrentModuleContext();
 
-    const getCurrentOpenPeriodByModule = (module: string) => {
+    const getCurrentOpenPeriodByModule = (moduleName: string) => {
         const today = new Date();
-        if (currentUser.quarterlyPeriodModules.find(qm => qm === module)) {
+        if (currentUser.quarterlyPeriodModules.find(qm => qm.name === moduleName)) {
             const currentQuarter = Math.floor((today.getMonth() + 3) / 3);
             if (currentQuarter !== 1) return `${today.getFullYear()}Q${currentQuarter - 1}`;
             else return `${today.getFullYear() - 1}Q4`;
@@ -32,13 +32,13 @@ export const CurrentPeriodContextProvider: React.FC = ({ children }) => {
         (updatedPeriod: string) => {
             //is a QUARTERLY module
             if (
-                currentUser.quarterlyPeriodModules.find(qm => qm === currentModuleAccess.moduleName) &&
+                currentUser.quarterlyPeriodModules.find(qm => qm.name === currentModuleAccess.moduleName) &&
                 RegExp(/^\d{4}Q[1-4]$/).test(updatedPeriod)
             ) {
                 return true;
             } //is a YEARLY module
             else if (
-                !currentUser.quarterlyPeriodModules.find(qm => qm === currentModuleAccess.moduleName) &&
+                !currentUser.quarterlyPeriodModules.find(qm => qm.name === currentModuleAccess.moduleName) &&
                 new RegExp(/^\d{4}$/).test(updatedPeriod)
             ) {
                 return true;

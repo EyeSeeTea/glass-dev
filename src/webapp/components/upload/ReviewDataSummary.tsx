@@ -10,6 +10,10 @@ import { useSnackbar } from "@eyeseetea/d2-ui-components";
 import { useAppContext } from "../../contexts/app-context";
 import { moduleProperties } from "../../../domain/utils/ModuleProperties";
 import { useCurrentModuleContext } from "../../contexts/current-module-context";
+import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context";
+import { useCurrentPeriodContext } from "../../contexts/current-period-context";
+import { useCurrentDataSubmissionId } from "../../hooks/useCurrentDataSubmissionId";
+import { useCurrentUserGroupsAccess } from "../../hooks/useCurrentUserGroupsAccess";
 
 interface ReviewDataSummaryProps {
     changeStep: (step: number) => void;
@@ -27,9 +31,18 @@ export const ReviewDataSummary: React.FC<ReviewDataSummaryProps> = ({
     const { compositionRoot } = useAppContext();
     const snackbar = useSnackbar();
     const { currentModuleAccess } = useCurrentModuleContext();
+    const { currentOrgUnitAccess } = useCurrentOrgUnitContext();
+    const { currentPeriod } = useCurrentPeriodContext();
 
     const [fileType, setFileType] = useState<string>("primary");
     const [isLoading, setIsLoading] = useState<boolean>(false);
+    const dataSubmissionId = useCurrentDataSubmissionId(
+        compositionRoot,
+        currentModuleAccess.moduleId,
+        currentOrgUnitAccess.orgUnitId,
+        currentPeriod
+    );
+    const { captureAccessGroup } = useCurrentUserGroupsAccess();
 
     const changeType = (fileType: string) => {
         setFileType(fileType);
@@ -45,6 +58,34 @@ export const ReviewDataSummary: React.FC<ReviewDataSummaryProps> = ({
                     if (!secondaryUploadId) {
                         changeStep(4);
                         setIsLoading(false);
+                        //If Questionnaires are not applicable to a module, then set status as COMPLETE on
+                        //completion of dataset.
+
+                        if (
+                            !moduleProperties.get(currentModuleAccess.moduleName)?.isQuestionnaireReq &&
+                            dataSubmissionId !== ""
+                        ) {
+                            compositionRoot.glassDataSubmission.setStatus(dataSubmissionId, "COMPLETE").run(
+                                () => {
+                                    if (captureAccessGroup.kind === "loaded") {
+                                        const userGroupsIds = captureAccessGroup.data.map(cag => {
+                                            return cag.id;
+                                        });
+                                        const notificationText = `The data submission for ${currentModuleAccess.moduleName} module for year ${currentPeriod} and country ${currentOrgUnitAccess.orgUnitName} has changed to DATA TO BE APPROVED BY COUNTRY`;
+
+                                        compositionRoot.notifications
+                                            .send(notificationText, notificationText, userGroupsIds, [
+                                                currentOrgUnitAccess.orgUnitId,
+                                            ])
+                                            .run(
+                                                () => {},
+                                                () => {}
+                                            );
+                                    }
+                                },
+                                () => {}
+                            );
+                        }
                     } else {
                         return compositionRoot.glassUploads
                             .setStatus({ id: secondaryUploadId, status: COMPLETED_STATUS })
@@ -66,7 +107,18 @@ export const ReviewDataSummary: React.FC<ReviewDataSummaryProps> = ({
                 }
             );
         }
-    }, [changeStep, compositionRoot.glassUploads, snackbar]);
+    }, [
+        changeStep,
+        compositionRoot.glassUploads,
+        snackbar,
+        captureAccessGroup,
+        compositionRoot.glassDataSubmission,
+        compositionRoot.notifications,
+        currentModuleAccess.moduleName,
+        currentOrgUnitAccess,
+        currentPeriod,
+        dataSubmissionId,
+    ]);
 
     const goToFinalStepEffect = useCallbackEffect(goToFinalStep);
 

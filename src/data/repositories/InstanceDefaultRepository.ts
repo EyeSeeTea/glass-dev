@@ -61,7 +61,7 @@ export class InstanceDefaultRepository implements InstanceRepository {
 
     mapUserGroupAccess = (
         userGroups: NamedRef[]
-    ): FutureData<{ moduleAccess: ModuleAccess[]; quarterlyPeriodModules: string[] }> => {
+    ): FutureData<{ moduleAccess: ModuleAccess[]; quarterlyPeriodModules: { id: string; name: string }[] }> => {
         return this.dataStoreClient.listCollection<GlassModule>(DataStoreKeys.MODULES).flatMap(modules => {
             //Iterate through modules and populate access for each
             const moduleAccess = modules.map(module => {
@@ -80,9 +80,11 @@ export class InstanceDefaultRepository implements InstanceRepository {
                     usergroups: [...module.userGroups.captureAccess, ...module.userGroups.readAccess],
                 };
             });
-            const quarterlyPeriodModules: string[] = modules
+            const quarterlyPeriodModules: { id: string; name: string }[] = modules
                 .filter(module => module.dataSubmissionPeriod === "QUARTERLY")
-                .map(module => module.name);
+                .map(module => {
+                    return { id: module.id, name: module.name };
+                });
 
             return Future.success({
                 moduleAccess,

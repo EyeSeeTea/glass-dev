@@ -34,7 +34,7 @@ export interface CtaButtonsProps {
 }
 
 export const CtaButtons: React.FC<CtaButtonsProps> = ({ ctas, position, setCurrentStep }) => {
-    const { compositionRoot } = useAppContext();
+    const { compositionRoot, currentUser } = useAppContext();
     const snackbar = useSnackbar();
     const hasCurrentUserCaptureAccess = useGlassCaptureAccess();
 
@@ -48,8 +48,16 @@ export const CtaButtons: React.FC<CtaButtonsProps> = ({ ctas, position, setCurre
 
     useEffect(() => {
         setIsLoading(true);
+        const isQuarterlyModule = currentUser.quarterlyPeriodModules.find(m => m.id === currentModuleAccess.moduleId)
+            ? true
+            : false;
         compositionRoot.glassDataSubmission
-            .getSpecificDataSubmission(currentModuleAccess.moduleId, currentOrgUnitAccess.orgUnitId, currentPeriod)
+            .getSpecificDataSubmission(
+                currentModuleAccess.moduleId,
+                currentOrgUnitAccess.orgUnitId,
+                currentPeriod,
+                isQuarterlyModule
+            )
             .run(
                 dataSubmission => {
                     setStatusHistory(dataSubmission.statusHistory);
@@ -66,6 +74,7 @@ export const CtaButtons: React.FC<CtaButtonsProps> = ({ ctas, position, setCurre
         currentOrgUnitAccess.orgUnitId,
         currentPeriod,
         snackbar,
+        currentUser.quarterlyPeriodModules,
     ]);
 
     const getCTAButton = (cta: CTAs, setCurrentStep: React.Dispatch<React.SetStateAction<number>>) => {

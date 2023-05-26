@@ -89,7 +89,7 @@ const renderTypeContent = (
         case 1:
             return <Questionnaires setRefetchStatus={setRefetchStatus} />;
         case 2:
-            return <ListOfDatasets />;
+            return <ListOfDatasets setRefetchStatus={setRefetchStatus} />;
         case 3:
             return <Validations />;
         case 4:

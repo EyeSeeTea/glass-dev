@@ -55,7 +55,9 @@ export const CurrentDataSubmissionPageContent: React.FC<CurrentDataSubmissionPag
             refetchStatus
         );
 
-        const periodType = currentUser.quarterlyPeriodModules.find(qm => qm === moduleName) ? "Quarterly" : "Yearly";
+        const periodType = currentUser.quarterlyPeriodModules.find(qm => qm.name === moduleName)
+            ? "Quarterly"
+            : "Yearly";
 
         return (
             <ContentLoader content={currentDataSubmissionStatus}>

@@ -24,7 +24,7 @@ export const UploadPage: React.FC = React.memo(() => {
 
     const [resetWizard, setResetWizard] = useState(false);
 
-    const periodType = currentUser.quarterlyPeriodModules.find(qm => qm === module) ? "Quarterly" : "Yearly";
+    const periodType = currentUser.quarterlyPeriodModules.find(qm => qm.name === module) ? "Quarterly" : "Yearly";
 
     useEffect(() => {
         //Whenever period, orgUnit or module changes, go back to step 1 of Upload Wizard.
