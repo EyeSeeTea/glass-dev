@@ -88,7 +88,7 @@ export const CtaButtons: React.FC<CtaButtonsProps> = ({ ctas, position, setCurre
                             variant={cta.variant || "contained"}
                             color={cta.color || "primary"}
                             onClick={() => setCurrentStep(1)}
-                            style={{ textTransform: "uppercase" }}
+                            style={{ textTransform: "uppercase", marginRight: "10px" }}
                         >
                             {i18n.t("Go to questionnaires")}
                         </Button>
@@ -103,7 +103,7 @@ export const CtaButtons: React.FC<CtaButtonsProps> = ({ ctas, position, setCurre
                         color={cta.color || "primary"}
                         onClick={() => setCurrentStep(2)}
                         disabled={!hasCurrentUserCaptureAccess}
-                        style={{ textTransform: "uppercase" }}
+                        style={{ textTransform: "uppercase", marginRight: "10px" }}
                     >
                         {i18n.t("Upload/Delete datasets")}
                     </Button>
@@ -117,7 +117,7 @@ export const CtaButtons: React.FC<CtaButtonsProps> = ({ ctas, position, setCurre
                         color={cta.color || "primary"}
                         onClick={() => setCurrentStep(5)}
                         disabled={!hasCurrentUserCaptureAccess}
-                        style={{ textTransform: "uppercase", marginRight: "20px" }}
+                        style={{ textTransform: "uppercase", marginRight: "10px" }}
                     >
                         {i18n.t("Go to submission")}
                     </Button>

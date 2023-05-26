@@ -17,6 +17,7 @@ export const statusMap = new Map<DataSubmissionStatusTypes, StatusDetails>([
                 {
                     label: "Go to questionnaires",
                     url: "/",
+                    variant: "outlined",
                 },
             ],
             rightCTAs: [
@@ -24,7 +25,6 @@ export const statusMap = new Map<DataSubmissionStatusTypes, StatusDetails>([
                     label: "Upload/Delete datasets",
                     url: "/upload",
                     color: "primary",
-                    variant: "outlined",
                 },
             ],
             showUploadHistory: true,
@@ -64,9 +64,8 @@ export const statusMap = new Map<DataSubmissionStatusTypes, StatusDetails>([
             rightCTAs: [],
             showUploadHistory: true,
             isActionRequired: true,
-            actionReqText: i18n.t(
-                "Please click on 'Send submission' in overview tab to submit after reviewing the data submission"
-            ),
+            actionReqText:
+                "Please click on 'Send submission' in Submission tab to submit after reviewing the data submission",
             isSubmissionStatus: true,
         },
     ],
@@ -200,9 +199,8 @@ export const statusMap = new Map<DataSubmissionStatusTypes, StatusDetails>([
             rightCTAs: [],
             showUploadHistory: true,
             isActionRequired: true,
-            actionReqText: i18n.t(
-                "Please complete all mandatory questionnaires and review datasets, then click on 'Send Submission' in the overview tab to submit"
-            ),
+            actionReqText:
+                "Please complete all mandatory questionnaires and review datasets, then click on 'Send Submission' in the Submission tab to submit",
             isSubmissionStatus: true,
         },
     ],

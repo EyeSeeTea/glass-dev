@@ -59,8 +59,8 @@ export const EmbeddedReport: React.FC<EmbeddedReportProps> = ({ dashboardId }) =
 
 const styles = {
     iframe: { width: "100%", border: 0, overflow: "hidden" },
-    wrapperVisible: {},
-    wrapperHidden: { visibility: "hidden" },
+    wrapperVisible: { width: "100%" },
+    wrapperHidden: { visibility: "hidden", width: "100%" },
 };
 
 function openExternalLinksInNewTab(iframe: HTMLIFrameElement) {

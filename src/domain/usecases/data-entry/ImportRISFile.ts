@@ -167,6 +167,7 @@ export class ImportRISFile {
                                             summaryWithConsistencyBlokingErrors,
                                             nonBlockingCategoryOptionErrors
                                         );
+                                        finalImportSummary.importTime = saveSummary.importTime;
 
                                         return finalImportSummary;
                                     });
@@ -191,7 +192,7 @@ export class ImportRISFile {
                             summaryWithConsistencyBlokingErrors,
                             nonBlockingCategoryOptionErrors
                         );
-
+                        finalImportSummary.importTime = saveSummary.importTime;
                         return Future.success(finalImportSummary);
                     }
                 });

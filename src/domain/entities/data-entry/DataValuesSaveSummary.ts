@@ -15,4 +15,5 @@ export interface DataValuesSaveSummary {
         object: Id;
         value: string;
     }>;
+    importTime: Date;
 }
