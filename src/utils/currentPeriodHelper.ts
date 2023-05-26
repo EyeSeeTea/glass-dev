@@ -13,7 +13,7 @@ export const getCurrentYear = () => {
     return new Date().getFullYear();
 };
 
-export const getLastNYears = (n = 8) => {
+export const getLastNYears = (n = 7) => {
     const years: string[] = [];
     for (let yearItr = getCurrentYear() - 1; yearItr > getCurrentYear() - 1 - n; yearItr--) {
         years.push(yearItr.toString());
