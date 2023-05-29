@@ -217,33 +217,33 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
     };
     return (
         <>
-            <Backdrop open={loading} style={{ color: "#fff", zIndex: 1 }}>
-                <StyledLoaderContainer>
-                    <CircularProgress color="#fff" size={50} />
-                    <Typography variant="h6">{i18n.t("Deleting Files")}</Typography>
-                    <Typography variant="h5">
-                        {i18n.t("This might take several minutes, do not refresh the page or press back.")}
-                    </Typography>
-                </StyledLoaderContainer>
-            </Backdrop>
-            <ConfirmationDialog
-                isOpen={open}
-                title={i18n.t(`${moduleProperties.get(currentModuleAccess.moduleName)?.deleteConfirmation.title}`)}
-                onSave={deleteDataset}
-                onCancel={hideConfirmationDialog}
-                saveText={i18n.t("Ok")}
-                cancelText={i18n.t("Cancel")}
-                fullWidth={true}
-                disableEnforceFocus
-            >
-                <DialogContent>
-                    <Typography>
-                        {i18n.t(
+            <>
+                <Backdrop open={loading} style={{ color: "#fff", zIndex: 1 }}>
+                    <StyledLoaderContainer>
+                        <CircularProgress color="#fff" size={50} />
+                        <Typography variant="h6">{i18n.t("Deleting Files")}</Typography>
+                        <Typography variant="h5">
+                            {i18n.t("This might take several minutes, do not refresh the page or press back.")}
+                        </Typography>
+                    </StyledLoaderContainer>
+                </Backdrop>
+                <ConfirmationDialog
+                    isOpen={open}
+                    title={`${moduleProperties.get(currentModuleAccess.moduleName)?.deleteConfirmation.title}`}
+                    onSave={deleteDataset}
+                    onCancel={hideConfirmationDialog}
+                    saveText={i18n.t("Ok")}
+                    cancelText={i18n.t("Cancel")}
+                    fullWidth={true}
+                    disableEnforceFocus
+                >
+                    <DialogContent>
+                        <Typography>
                             `${moduleProperties.get(currentModuleAccess.moduleName)?.deleteConfirmation.description}`
-                        )}
-                    </Typography>
-                </DialogContent>
-            </ConfirmationDialog>
+                        </Typography>
+                    </DialogContent>
+                </ConfirmationDialog>
+            </>
             {rows && (
                 <StyledTableBody>
                     {rows.map((row: UploadsDataItem) => (
