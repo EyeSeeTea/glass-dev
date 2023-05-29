@@ -38,7 +38,7 @@ export class ImportPrimaryFileUseCase implements UseCase {
         orgUnit: string,
         countryCode: string,
         dryRun: boolean,
-        eventListId: string
+        eventListId: string | undefined
     ): FutureData<ImportSummary> {
         if (moduleName === "AMR") {
             const importRISFile = new ImportRISFile(
