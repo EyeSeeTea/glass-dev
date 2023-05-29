@@ -80,51 +80,6 @@ msgstr ""
 msgid "Uploads with errors, or discarded"
 msgstr ""
 
-msgid "Go to questionnaires"
-msgstr ""
-
-msgid "Upload/Delete datasets"
-msgstr ""
-
-msgid "Go to submission"
-msgstr ""
-
-msgid "Full Status History"
-msgstr ""
-
-msgid "Done"
-msgstr ""
-
-msgid "From"
-msgstr ""
-
-msgid "To"
-msgstr ""
-
-msgid "Changed at"
-msgstr ""
-
-msgid "Error fetching questionnaires."
-msgstr ""
-
-msgid "Error fetching uploads."
-msgstr ""
-
-msgid "Current Status"
-msgstr ""
-
-msgid "Content"
-msgstr ""
-
-msgid "Mandatory"
-msgstr ""
-
-msgid "State"
-msgstr ""
-
-msgid "Data Submission status has errors..."
-msgstr ""
-
 msgid "There are no questionnaries for this module"
 msgstr ""
 
@@ -243,6 +198,27 @@ msgstr ""
 msgid "Send Submission"
 msgstr ""
 
+msgid "Overview"
+msgstr ""
+
+msgid "Questionnaires"
+msgstr ""
+
+msgid "Datasets"
+msgstr ""
+
+msgid "Validation Report"
+msgstr ""
+
+msgid "Advanced"
+msgstr ""
+
+msgid "Submission"
+msgstr ""
+
+msgid "No Data uploaded..."
+msgstr ""
+
 msgid "Uploaded"
 msgstr ""
 
@@ -276,22 +252,46 @@ msgstr ""
 msgid "Overview"
 msgstr ""
 
-msgid "Questionnaires"
+msgid "Upload/Delete datasets"
 msgstr ""
 
-msgid "Datasets"
+msgid "Go to submission"
 msgstr ""
 
-msgid "Validation Report"
+msgid "Full Status History"
 msgstr ""
 
-msgid "Advanced"
+msgid "Done"
 msgstr ""
 
-msgid "Submission"
+msgid "From"
 msgstr ""
 
-msgid "No Data uploaded..."
+msgid "To"
+msgstr ""
+
+msgid "Changed at"
+msgstr ""
+
+msgid "Error fetching questionnaires."
+msgstr ""
+
+msgid "Error fetching uploads."
+msgstr ""
+
+msgid "Current Status"
+msgstr ""
+
+msgid "Content"
+msgstr ""
+
+msgid "Mandatory"
+msgstr ""
+
+msgid "State"
+msgstr ""
+
+msgid "Data Submission status has errors..."
 msgstr ""
 
 msgid "File Type"
