@@ -122,7 +122,7 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                                               orgUnitId,
                                               primaryFileToDelete.countryCode,
                                               false,
-                                              primaryFileToDelete.eventListFileId || ""
+                                              primaryFileToDelete.eventListFileId
                                           )
                                         : Future.success(undefined),
                                 deleteSecondaryFileSummary:
@@ -229,7 +229,7 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                 </Backdrop>
                 <ConfirmationDialog
                     isOpen={open}
-                    title={`${moduleProperties.get(currentModuleAccess.moduleName)?.deleteConfirmation.title}`}
+                    title={moduleProperties.get(currentModuleAccess.moduleName)?.deleteConfirmation.title}
                     onSave={deleteDataset}
                     onCancel={hideConfirmationDialog}
                     saveText={i18n.t("Ok")}
@@ -239,7 +239,7 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                 >
                     <DialogContent>
                         <Typography>
-                            `${moduleProperties.get(currentModuleAccess.moduleName)?.deleteConfirmation.description}`
+                            {moduleProperties.get(currentModuleAccess.moduleName)?.deleteConfirmation.description}
                         </Typography>
                     </DialogContent>
                 </ConfirmationDialog>

@@ -22,7 +22,11 @@ export class ImportEGASPFile {
         private glassUploadsRepository: GlassUploadsRepository
     ) {}
 
-    public importEGASPFile(file: File, action: ImportStrategy, eventListId: string): FutureData<ImportSummary> {
+    public importEGASPFile(
+        file: File,
+        action: ImportStrategy,
+        eventListId: string | undefined
+    ): FutureData<ImportSummary> {
         return this.excelRepository.loadTemplate(file).flatMap(_templateId => {
             const egaspTemplate = _.values(templates).map(TemplateClass => new TemplateClass())[0];
 
@@ -31,44 +35,54 @@ export class ImportEGASPFile {
                     return this.readTemplate(egaspTemplate, egaspProgram).flatMap(dataPackage => {
                         if (dataPackage) {
                             return this.buildEventsPayload(dataPackage, action, eventListId).flatMap(events => {
-                                return this.dhis2EventsDefaultRepository.import({ events }, action).flatMap(result => {
-                                    const { importSummary, eventIdList } = this.mapToImportSummary(result);
-                                    const primaryUploadId = localStorage.getItem("primaryUploadId");
-                                    if (action === "CREATE_AND_UPDATE" && eventIdList.length > 0 && primaryUploadId) {
-                                        const eventListBlob = new Blob([JSON.stringify(eventIdList)], {
-                                            type: "text/plain",
-                                        });
+                                if (events) {
+                                    return this.dhis2EventsDefaultRepository
+                                        .import({ events }, action)
+                                        .flatMap(result => {
+                                            const { importSummary, eventIdList } = this.mapToImportSummary(result);
+                                            const primaryUploadId = localStorage.getItem("primaryUploadId");
+                                            if (
+                                                action === "CREATE_AND_UPDATE" &&
+                                                eventIdList.length > 0 &&
+                                                primaryUploadId
+                                            ) {
+                                                //Events were imported successfully, so create and uplaod a file with event ids
+                                                // and associate it with the upload datastore object
+                                                const eventListBlob = new Blob([JSON.stringify(eventIdList)], {
+                                                    type: "text/plain",
+                                                });
 
-                                        const eventIdListFile = new File(
-                                            [eventListBlob],
-                                            `${primaryUploadId}_eventIdsFile`
-                                        );
+                                                const eventIdListFile = new File(
+                                                    [eventListBlob],
+                                                    `${primaryUploadId}_eventIdsFile`
+                                                );
 
-                                        this.glassDocumentsRepository.save(eventIdListFile, "EGASP").run(
-                                            fileId => {
-                                                this.glassUploadsRepository
-                                                    .setEventListFileId(primaryUploadId, fileId)
-                                                    .run(
-                                                        () => {
-                                                            console.debug(
-                                                                `Updated upload datastore object with eventListFileId`
-                                                            );
-                                                        },
-                                                        err => {
-                                                            console.debug(
-                                                                `Error updating upload datastore object with eventListFileId :  ${err}`
-                                                            );
-                                                        }
-                                                    );
-                                            },
-                                            err => {
-                                                console.debug(`Error uploading event id list file ${err}`);
+                                                return this.glassDocumentsRepository
+                                                    .save(eventIdListFile, "EGASP")
+                                                    .flatMap(fileId => {
+                                                        return this.glassUploadsRepository
+                                                            .setEventListFileId(primaryUploadId, fileId)
+                                                            .flatMap(() => {
+                                                                console.debug(
+                                                                    `Updated upload datastore object with eventListFileId`
+                                                                );
+                                                                return Future.success(importSummary);
+                                                            });
+                                                    });
+                                            } else {
+                                                return Future.success(importSummary);
                                             }
-                                        );
-                                    }
-
-                                    return Future.success(importSummary);
-                                });
+                                        });
+                                } else {
+                                    //NO events were created on import, so no events to delete.
+                                    const noEventsToDelete: ImportSummary = {
+                                        status: "SUCCESS",
+                                        importCount: { updated: 0, ignored: 0, imported: 0, deleted: 0 },
+                                        nonBlockingErrors: [],
+                                        blockingErrors: [],
+                                    };
+                                    return Future.success(noEventsToDelete);
+                                }
                             });
                         } else {
                             return Future.error("Unknow template");
@@ -127,7 +141,7 @@ export class ImportEGASPFile {
                     status: "ERROR",
                     importCount: { ignored: 0, imported: 0, deleted: 0, updated: 0 },
                     nonBlockingErrors: [],
-                    blockingErrors: [{ error: "An unexpected error has ocurred saving events", count: 1 }],
+                    blockingErrors: [{ error: "An unexpected error has ocurred importing events", count: 1 }],
                 },
                 eventIdList: [],
             };
@@ -154,8 +168,8 @@ export class ImportEGASPFile {
     private buildEventsPayload(
         dataPackage: DataPackage,
         action: ImportStrategy,
-        eventListId: string
-    ): FutureData<Event[]> {
+        eventListId: string | undefined
+    ): FutureData<Event[] | undefined> {
         if (action === "CREATE_AND_UPDATE")
             return Future.success(
                 dataPackage.dataEntries.map(({ id, orgUnit, period, attribute, dataValues, dataForm, coordinate }) => {
@@ -172,27 +186,32 @@ export class ImportEGASPFile {
                 })
             );
         else {
-            return this.glassDocumentsRepository.download(eventListId).flatMap(file => {
-                console.debug(file);
+            if (eventListId)
+                return this.glassDocumentsRepository.download(eventListId).flatMap(file => {
+                    console.debug(file);
 
-                return Future.fromPromise(this.getStringFromFile(file)).flatMap(_events => {
-                    console.debug(_events);
-                    const eventIdList: [] = JSON.parse(_events);
-                    const events: Event[] = eventIdList.map(eventId => {
-                        return {
-                            event: eventId,
-                            program: "",
-                            status: "COMPLETED",
-                            orgUnit: "",
-                            eventDate: "",
-                            attributeOptionCombo: "",
-                            dataValues: [],
-                        };
+                    return Future.fromPromise(this.getStringFromFile(file)).flatMap(_events => {
+                        console.debug(_events);
+                        const eventIdList: [] = JSON.parse(_events);
+                        const events: Event[] = eventIdList.map(eventId => {
+                            return {
+                                event: eventId,
+                                program: "",
+                                status: "COMPLETED",
+                                orgUnit: "",
+                                eventDate: "",
+                                attributeOptionCombo: "",
+                                dataValues: [],
+                            };
+                        });
+
+                        return Future.success(events);
                     });
-
-                    return Future.success(events);
                 });
-            });
+            else {
+                //No events were created during import, so no events to delete.
+                return Future.success(undefined);
+            }
         }
     }
 
