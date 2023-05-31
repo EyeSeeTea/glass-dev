@@ -12,6 +12,8 @@ import { EventsPostResponse } from "@eyeseetea/d2-api/api/events";
 import { ImportStrategy } from "../../entities/data-entry/DataValuesSaveSummary";
 import { GlassDocumentsRepository } from "../../repositories/GlassDocumentsRepository";
 import { GlassUploadsRepository } from "../../repositories/GlassUploadsRepository";
+import { EventValidationForEGASP } from "../egasp-validate/EventValidationForEGASP";
+import { EGASPValidationRepository } from "../../repositories/egasp-validate/EGASPValidationRepository";
 
 export class ImportEGASPFile {
     constructor(
@@ -19,7 +21,8 @@ export class ImportEGASPFile {
         private egaspProgramDefaultRepository: EGASPProgramDefaultRepository,
         private excelRepository: ExcelRepository,
         private glassDocumentsRepository: GlassDocumentsRepository,
-        private glassUploadsRepository: GlassUploadsRepository
+        private glassUploadsRepository: GlassUploadsRepository,
+        private eGASPValidationRepository: EGASPValidationRepository
     ) {}
 
     public importEGASPFile(
@@ -36,43 +39,45 @@ export class ImportEGASPFile {
                         if (dataPackage) {
                             return this.buildEventsPayload(dataPackage, action, eventListId).flatMap(events => {
                                 if (events) {
-                                    return this.dhis2EventsDefaultRepository
-                                        .import({ events }, action)
-                                        .flatMap(result => {
-                                            const { importSummary, eventIdList } = this.mapToImportSummary(result);
-                                            const primaryUploadId = localStorage.getItem("primaryUploadId");
-                                            if (
-                                                action === "CREATE_AND_UPDATE" &&
-                                                eventIdList.length > 0 &&
-                                                primaryUploadId
-                                            ) {
-                                                //Events were imported successfully, so create and uplaod a file with event ids
-                                                // and associate it with the upload datastore object
-                                                const eventListBlob = new Blob([JSON.stringify(eventIdList)], {
-                                                    type: "text/plain",
-                                                });
-
-                                                const eventIdListFile = new File(
-                                                    [eventListBlob],
-                                                    `${primaryUploadId}_eventIdsFile`
-                                                );
-
-                                                return this.glassDocumentsRepository
-                                                    .save(eventIdListFile, "EGASP")
-                                                    .flatMap(fileId => {
-                                                        return this.glassUploadsRepository
-                                                            .setEventListFileId(primaryUploadId, fileId)
-                                                            .flatMap(() => {
-                                                                console.debug(
-                                                                    `Updated upload datastore object with eventListFileId`
-                                                                );
-                                                                return Future.success(importSummary);
-                                                            });
+                                    return this.validateEGASPEvents(events).flatMap(validEvents => {
+                                        return this.dhis2EventsDefaultRepository
+                                            .import({ events: validEvents }, action)
+                                            .flatMap(result => {
+                                                const { importSummary, eventIdList } = this.mapToImportSummary(result);
+                                                const primaryUploadId = localStorage.getItem("primaryUploadId");
+                                                if (
+                                                    action === "CREATE_AND_UPDATE" &&
+                                                    eventIdList.length > 0 &&
+                                                    primaryUploadId
+                                                ) {
+                                                    //Events were imported successfully, so create and uplaod a file with event ids
+                                                    // and associate it with the upload datastore object
+                                                    const eventListBlob = new Blob([JSON.stringify(eventIdList)], {
+                                                        type: "text/plain",
                                                     });
-                                            } else {
-                                                return Future.success(importSummary);
-                                            }
-                                        });
+
+                                                    const eventIdListFile = new File(
+                                                        [eventListBlob],
+                                                        `${primaryUploadId}_eventIdsFile`
+                                                    );
+
+                                                    return this.glassDocumentsRepository
+                                                        .save(eventIdListFile, "EGASP")
+                                                        .flatMap(fileId => {
+                                                            return this.glassUploadsRepository
+                                                                .setEventListFileId(primaryUploadId, fileId)
+                                                                .flatMap(() => {
+                                                                    console.debug(
+                                                                        `Updated upload datastore object with eventListFileId`
+                                                                    );
+                                                                    return Future.success(importSummary);
+                                                                });
+                                                        });
+                                                } else {
+                                                    return Future.success(importSummary);
+                                                }
+                                            });
+                                    });
                                 } else {
                                     //NO events were created on import, so no events to delete.
                                     const noEventsToDelete: ImportSummary = {
@@ -93,6 +98,13 @@ export class ImportEGASPFile {
                 }
             });
         });
+    }
+
+    private validateEGASPEvents(events: Event[]): FutureData<Event[]> {
+        const eventValidationForEGASP = new EventValidationForEGASP(this.eGASPValidationRepository);
+        return eventValidationForEGASP
+            .getValidatedEvents(events)
+            .flatMap(updatedEvents => Future.success(updatedEvents));
     }
 
     private mapToImportSummary(result: EventsPostResponse): {
@@ -174,7 +186,7 @@ export class ImportEGASPFile {
             return Future.success(
                 dataPackage.dataEntries.map(({ id, orgUnit, period, attribute, dataValues, dataForm, coordinate }) => {
                     return {
-                        event: id,
+                        event: id || "",
                         program: dataForm,
                         status: "COMPLETED",
                         orgUnit,
