@@ -98,27 +98,27 @@ export class EventValidationForEGASP {
             )
             .some(programStageContainingDE => programStageContainingDE.id === event.programStage);
 
-        if (!eventMatchesProgramStage) {
-            console.debug(
-                `Skip ASSIGN effect for event:${event.event} as dataElement:${dataElementId} not in event.programStage:${event.programStage}`
-            );
+        // if (!eventMatchesProgramStage) {
+        //     console.debug(
+        //         `Skip ASSIGN effect for event:${event.event} as dataElement:${dataElementId} not in event.programStage:${event.programStage}`
+        //     );
 
-            return undefined;
-        } else {
-            const strValue = value === null || value === undefined ? "" : value.toString();
+        //     return undefined;
+        // } else {
+        const strValue = value === null || value === undefined ? "" : value.toString();
 
-            return {
-                type: "event",
-                eventId: event.event || "",
-                teiId: event.trackedEntityInstance,
-                program,
-                programStage: event.programStage ? programStagesNamedRefById[event.programStage] : undefined,
-                orgUnit: { id: event.orgUnit, name: event.orgUnit },
-                dataElement: dataElementsById[dataElementId] || { id: dataElementId, name: "-" },
-                value: strValue,
-                valuePrev: event.dataValues.find(dv => dv.dataElement === dataElementId)?.value.toString() ?? "",
-            };
-        }
+        return {
+            type: "event",
+            eventId: event.event || "",
+            teiId: event.trackedEntityInstance,
+            program,
+            programStage: event.programStage ? programStagesNamedRefById[event.programStage] : undefined,
+            orgUnit: { id: event.orgUnit, name: event.orgUnit },
+            dataElement: dataElementsById[dataElementId] || { id: dataElementId, name: "-" },
+            value: strValue,
+            valuePrev: event.dataValues.find(dv => dv.dataElement === dataElementId)?.value.toString() ?? "",
+        };
+        // }
     }
 
     private getUpdatedEvents(actions: UpdateAction[], eventsById: _.Dictionary<Event>): D2EventToPost[] {

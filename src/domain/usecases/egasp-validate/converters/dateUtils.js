@@ -1,7 +1,8 @@
 //
 /* eslint-disable class-methods-use-this */
 import moment from "moment";
-import { trimQuotes } from "../RulesEngine";
+import { trimQuotes } from "../ValueProcessor";
+
 // import { trimQuotes } from "capture-core-utils/rulesEngine/commonUtils/trimQuotes";
 
 // import { getFormattedStringFromMomentUsingEuropeanGlyphs } from "capture-core-utils/date";
