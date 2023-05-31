@@ -6,7 +6,7 @@
 // import { d2Functions } from "./d2Functions";
 
 import { isString } from "lodash";
-import { ValueProcessor } from "./ValueProcessor";
+import { ValueProcessor, trimQuotes, typeKeys } from "./ValueProcessor";
 import { VariableService } from "./VariableService";
 import { d2Functions } from "./d2Functions";
 import { executeExpression } from "./executionService";
@@ -36,52 +36,6 @@ export const effectActions = Object.freeze({
     SEND_MESSAGE: "SENDMESSAGE",
 });
 
-export const typeKeys = {
-    TEXT: "TEXT",
-    LONG_TEXT: "LONG_TEXT",
-    LETTER: "LETTER",
-    PHONE_NUMBER: "PHONE_NUMBER",
-    EMAIL: "EMAIL",
-    BOOLEAN: "BOOLEAN", // Yes/No
-    TRUE_ONLY: "TRUE_ONLY", // Yes Only
-    DATE: "DATE",
-    DATETIME: "DATETIME",
-    TIME: "TIME",
-    NUMBER: "NUMBER",
-    UNIT_INTERVAL: "UNIT_INTERVAL",
-    PERCENTAGE: "PERCENTAGE",
-    INTEGER: "INTEGER",
-    INTEGER_POSITIVE: "INTEGER_POSITIVE",
-    INTEGER_NEGATIVE: "INTEGER_NEGATIVE",
-    INTEGER_ZERO_OR_POSITIVE: "INTEGER_ZERO_OR_POSITIVE",
-    TRACKER_ASSOCIATE: "TRACKER_ASSOCIATE",
-    USERNAME: "USERNAME",
-    COORDINATE: "COORDINATE",
-    ORGANISATION_UNIT: "ORGANISATION_UNIT",
-    AGE: "AGE",
-    URL: "URL",
-    FILE_RESOURCE: "FILE_RESOURCE",
-    IMAGE: "IMAGE",
-};
-
-export function trimQuotes(input) {
-    if (input && isString(input)) {
-        let trimmingComplete = false;
-        let beingTrimmed = input;
-
-        while (!trimmingComplete) {
-            const beforeTrimming = beingTrimmed;
-            beingTrimmed = beingTrimmed.replace(/^'/, "").replace(/'$/, "");
-            beingTrimmed = beingTrimmed.replace(/^"/, "").replace(/"$/, "");
-
-            if (beforeTrimming.length === beingTrimmed.length) {
-                trimmingComplete = true;
-            }
-        }
-        return beingTrimmed;
-    }
-    return input;
-}
 function isDefined(param) {
     return typeof param !== "undefined";
 }

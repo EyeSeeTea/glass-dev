@@ -1,4 +1,5 @@
-import { effectActions, normalizeRuleVariable, typeKeys } from "./RulesEngine";
+import { effectActions, normalizeRuleVariable } from "./RulesEngine";
+import { typeKeys } from "./ValueProcessor";
 
 const sanitiseFalsy = value => {
     if (value) {
