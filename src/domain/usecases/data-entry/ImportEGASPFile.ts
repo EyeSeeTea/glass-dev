@@ -39,45 +39,58 @@ export class ImportEGASPFile {
                         if (dataPackage) {
                             return this.buildEventsPayload(dataPackage, action, eventListId).flatMap(events => {
                                 if (events) {
-                                    return this.validateEGASPEvents(events).flatMap(validEvents => {
-                                        return this.dhis2EventsDefaultRepository
-                                            .import({ events: validEvents }, action)
-                                            .flatMap(result => {
-                                                const { importSummary, eventIdList } = this.mapToImportSummary(result);
-                                                const primaryUploadId = localStorage.getItem("primaryUploadId");
-                                                if (
-                                                    action === "CREATE_AND_UPDATE" &&
-                                                    eventIdList.length > 0 &&
-                                                    primaryUploadId
-                                                ) {
-                                                    //Events were imported successfully, so create and uplaod a file with event ids
-                                                    // and associate it with the upload datastore object
-                                                    const eventListBlob = new Blob([JSON.stringify(eventIdList)], {
-                                                        type: "text/plain",
-                                                    });
-
-                                                    const eventIdListFile = new File(
-                                                        [eventListBlob],
-                                                        `${primaryUploadId}_eventIdsFile`
-                                                    );
-
-                                                    return this.glassDocumentsRepository
-                                                        .save(eventIdListFile, "EGASP")
-                                                        .flatMap(fileId => {
-                                                            return this.glassUploadsRepository
-                                                                .setEventListFileId(primaryUploadId, fileId)
-                                                                .flatMap(() => {
-                                                                    console.debug(
-                                                                        `Updated upload datastore object with eventListFileId`
-                                                                    );
-                                                                    return Future.success(importSummary);
-                                                                });
-                                                        });
-                                                } else {
-                                                    return Future.success(importSummary);
-                                                }
+                                    if (action === "CREATE_AND_UPDATE") {
+                                        //Run validations only on import
+                                        return this.validateEGASPEvents(events).flatMap(validEvents => {
+                                            const eventsWithoutId = validEvents.map(e => {
+                                                e.event = "";
+                                                return e;
                                             });
-                                    });
+                                            return this.dhis2EventsDefaultRepository
+                                                .import({ events: eventsWithoutId }, action)
+                                                .flatMap(result => {
+                                                    const { importSummary, eventIdList } =
+                                                        this.mapToImportSummary(result);
+                                                    const primaryUploadId = localStorage.getItem("primaryUploadId");
+                                                    if (eventIdList.length > 0 && primaryUploadId) {
+                                                        //Events were imported successfully, so create and uplaod a file with event ids
+                                                        // and associate it with the upload datastore object
+                                                        const eventListBlob = new Blob([JSON.stringify(eventIdList)], {
+                                                            type: "text/plain",
+                                                        });
+
+                                                        const eventIdListFile = new File(
+                                                            [eventListBlob],
+                                                            `${primaryUploadId}_eventIdsFile`
+                                                        );
+
+                                                        return this.glassDocumentsRepository
+                                                            .save(eventIdListFile, "EGASP")
+                                                            .flatMap(fileId => {
+                                                                return this.glassUploadsRepository
+                                                                    .setEventListFileId(primaryUploadId, fileId)
+                                                                    .flatMap(() => {
+                                                                        console.debug(
+                                                                            `Updated upload datastore object with eventListFileId`
+                                                                        );
+                                                                        return Future.success(importSummary);
+                                                                    });
+                                                            });
+                                                    } else {
+                                                        return Future.success(importSummary);
+                                                    }
+                                                });
+                                        });
+                                    } //if (action === "DELETE")
+                                    else {
+                                        return this.dhis2EventsDefaultRepository
+                                            .import({ events }, action)
+                                            .flatMap(result => {
+                                                const { importSummary } = this.mapToImportSummary(result);
+
+                                                return Future.success(importSummary);
+                                            });
+                                    }
                                 } else {
                                     //NO events were created on import, so no events to delete.
                                     const noEventsToDelete: ImportSummary = {
