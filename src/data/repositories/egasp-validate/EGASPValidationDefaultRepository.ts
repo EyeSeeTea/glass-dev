@@ -19,7 +19,11 @@ export class EGASPValidationDefaultRepository implements EGASPValidationReposito
         return apiToFuture(
             this.api.metadata.get({
                 ...metadataQuery,
-                programs: { ...metadataQuery.programs, filter: { id: { in: [EGASP_PROGRAM_ID] } } },
+                programs: { ...metadataQuery.programs, filter: { id: { eq: EGASP_PROGRAM_ID } } },
+                programRules: {
+                    ...metadataQuery.programRules,
+                    filter: { "program.id": { eq: EGASP_PROGRAM_ID } },
+                },
             })
         ).map(baseMetadata => {
             return { ...baseMetadata, dataElementsById: _.keyBy(baseMetadata.dataElements, de => de.id) };
