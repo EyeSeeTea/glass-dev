@@ -30,10 +30,11 @@ export class EventValidationForEGASP {
         return this.eGASPProgramRepository.getMetadata().flatMap(metadata => {
             const eventEffects = this.getEventEffectsForEGASP(events, metadata);
             const actions = this.getActions(eventEffects, metadata);
-            const eventsCurrent = _.flatMap(eventEffects, eventEffect => eventEffect.events);
-            const eventsById = _.keyBy(eventsCurrent, "event");
+            const eventsToBeUpdated = _.flatMap(eventEffects, eventEffect => eventEffect.events);
+            const eventsById = _.keyBy(eventsToBeUpdated, "event");
             const eventsUpdated = this.getUpdatedEvents(actions, eventsById);
-            return Future.success(eventsUpdated);
+            const unChangedEvents = events.filter(e => !eventsUpdated.some(ue => ue.event === e.event));
+            return Future.success([...eventsUpdated, ...unChangedEvents]);
         });
     }
 
@@ -42,6 +43,7 @@ export class EventValidationForEGASP {
             .flatMap(eventEffect => {
                 return _(eventEffect.effects)
                     .flatMap(ruleEffect => this.getUpdateAction(ruleEffect, eventEffect, metadata))
+                    .compact()
                     .value();
             })
             .uniqWith(_.isEqual)
@@ -52,8 +54,8 @@ export class EventValidationForEGASP {
         effect: RuleEffect,
         eventEffect: EventEffect,
         metadata: EGASPProgramMetadata
-    ): UpdateAction[] {
-        const { program, events } = eventEffect;
+    ): UpdateAction | undefined {
+        const { program, event } = eventEffect;
 
         switch (effect.type) {
             case "ASSIGN":
@@ -61,12 +63,8 @@ export class EventValidationForEGASP {
 
                 switch (effect.targetDataType) {
                     case "dataElement":
-                        return _(events)
-                            .map(event => {
-                                return this.getUpdateActionEvent(metadata, program, event, effect.id, effect.value);
-                            })
-                            .compact()
-                            .value();
+                        return this.getUpdateActionEvent(metadata, program, event, effect.id, effect.value);
+
                     // case "trackedEntityAttribute":
                     //     if (!tei) {
                     //         log.error("No TEI to assign effect to");
@@ -75,10 +73,10 @@ export class EventValidationForEGASP {
                     //         return _.compact([getUpdateActionTeiAttribute(program, event, tei, effect)]);
                     //     }
                     default:
-                        return [];
+                        return;
                 }
             default:
-                return [];
+                return;
         }
     }
 
@@ -92,19 +90,6 @@ export class EventValidationForEGASP {
         const dataElementsById = _.keyBy(metadata.dataElements, de => de.id);
         const programStagesNamedRefById = _.keyBy(program.programStages, programStage => programStage.id);
 
-        const eventMatchesProgramStage = program.programStages
-            .filter(programStage =>
-                _(programStage.programStageDataElements).some(psde => psde.dataElement.id === dataElementId)
-            )
-            .some(programStageContainingDE => programStageContainingDE.id === event.programStage);
-
-        // if (!eventMatchesProgramStage) {
-        //     console.debug(
-        //         `Skip ASSIGN effect for event:${event.event} as dataElement:${dataElementId} not in event.programStage:${event.programStage}`
-        //     );
-
-        //     return undefined;
-        // } else {
         const strValue = value === null || value === undefined ? "" : value.toString();
 
         return {
@@ -113,12 +98,11 @@ export class EventValidationForEGASP {
             teiId: event.trackedEntityInstance,
             program,
             programStage: event.programStage ? programStagesNamedRefById[event.programStage] : undefined,
-            orgUnit: { id: event.orgUnit, name: event.orgUnit },
+            orgUnit: { id: event.orgUnit, name: "" },
             dataElement: dataElementsById[dataElementId] || { id: dataElementId, name: "-" },
             value: strValue,
             valuePrev: event.dataValues.find(dv => dv.dataElement === dataElementId)?.value.toString() ?? "",
         };
-        // }
     }
 
     private getUpdatedEvents(actions: UpdateAction[], eventsById: _.Dictionary<Event>): D2EventToPost[] {
@@ -162,8 +146,6 @@ export class EventValidationForEGASP {
     }
 
     public getEventEffectsForEGASP(events: Event[], metadata: EGASPProgramMetadata): EventEffect[] {
-        //WIP
-
         const program = metadata.programs[0]; //EGASP PROGRAM
         const eventsGroups = _(events)
             .filter(ev => Boolean(ev.eventDate))
@@ -172,8 +154,8 @@ export class EventValidationForEGASP {
             .value();
         console.debug(eventsGroups);
 
-        //TO DO : Get all Program rule ids for EGASP PRogram. For now hardcoding
-        const programRulesIds: Id[] = ["CmZUkw9e5lU", "hOX5x3WGHx6"];
+        const programRulesIds: Id[] = metadata.programRules.map(pr => pr.id);
+        console.debug(`Program Rules Ids: ${programRulesIds}`);
 
         if (program) {
             const eventEffects = _(eventsGroups)
@@ -270,7 +252,7 @@ export class EventValidationForEGASP {
         };
 
         const [effects, errors] = this.captureConsoleError(() => {
-            return this.getProgramRuleEffects(getEffectsOptions).filter(effect => effect.type === "ASSIGN");
+            return this.getProgramRuleEffects(getEffectsOptions);
         });
 
         if (errors) {
