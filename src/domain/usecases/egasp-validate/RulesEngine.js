@@ -1,21 +1,9 @@
-// import isString from "d2-utilizr/lib/isString";
-// import isDefined from "d2-utilizr/lib/isDefined";
-// import { VariableService } from "./services/VariableService/VariableService";
-// import { ValueProcessor } from "./processors/ValueProcessor";
-// import { executeExpression } from "./services/executionService";
-// import { d2Functions } from "./d2Functions";
-
 import { isString } from "lodash";
 import { ValueProcessor, trimQuotes, typeKeys } from "./ValueProcessor";
 import { VariableService } from "./VariableService";
 import { d2Functions } from "./d2Functions";
 import { executeExpression } from "./executionService";
 import { getRulesEffectsProcessor } from "./rulesEffectsProcessor";
-
-// import { getRulesEffectsProcessor } from "./processors/rulesEffectsProcessor/rulesEffectsProcessor";
-// import { effectActions } from "./constants";
-// import { trimQuotes } from "./commonUtils/trimQuotes";
-// import { normalizeRuleVariable } from "./commonUtils/normalizeRuleVariable";
 
 export const effectActions = Object.freeze({
     ASSIGN_VALUE: "ASSIGN",
