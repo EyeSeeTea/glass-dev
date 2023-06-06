@@ -1,6 +1,7 @@
 import { D2ProgramRuleAction, D2ProgramRuleVariable, MetadataPick } from "@eyeseetea/d2-api/2.34";
 import { Id } from "../Ref";
 import { Event, EventsPostRequest } from "../../../data/repositories/Dhis2EventsDefaultRepository";
+import { ConsistencyError } from "../data-entry/ImportSummary";
 
 export const metadataQuery = {
     programs: {
@@ -79,13 +80,31 @@ export interface EGASPProgramMetadata extends MetadataPick<MetadataQuery> {
 // }
 
 export type Program = EGASPProgramMetadata["programs"][number];
-export type RuleEffect = RuleEffectAssign | RuleEffectOther;
+export type RuleEffect = RuleEffectAssign | RuleEffectShowError | RuleEffectShowWarn | RuleEffectOther;
 
 export interface RuleEffectAssign {
     type: "ASSIGN";
     id: Id;
     targetDataType?: "dataElement" | "trackedEntityAttribute";
     value: string | number | boolean | undefined;
+}
+
+export interface RuleEffectShowError {
+    type: "SHOWERROR";
+    message?: string;
+    error: {
+        message: string;
+        id: string;
+    };
+}
+
+export interface RuleEffectShowWarn {
+    type: "SHOWWARNING";
+    message?: string;
+    warning: {
+        message: string;
+        id: string;
+    };
 }
 
 export interface RuleEffectOther {
@@ -107,6 +126,18 @@ export interface EventEffect {
     events: Event[];
     effects: RuleEffect[];
     orgUnit: OrgUnit;
+}
+
+export interface ActionResult {
+    actions: UpdateActionEvent[];
+    blockingErrors: ConsistencyError[];
+    nonBlockingErrors: ConsistencyError[];
+}
+
+export interface EventResult {
+    events: Event[];
+    blockingErrors: ConsistencyError[];
+    nonBlockingErrors: ConsistencyError[];
 }
 
 export type UpdateAction = UpdateActionEvent;

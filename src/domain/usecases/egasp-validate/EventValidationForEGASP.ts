@@ -1,8 +1,10 @@
 import {
+    ActionResult,
     D2DataValueToPost,
     D2EventToPost,
     EGASPProgramMetadata,
     EventEffect,
+    EventResult,
     GetProgramRuleEffectsOptions,
     OrgUnit,
     Program,
@@ -22,59 +24,115 @@ import { RulesEngine } from "./RulesEngine";
 import { inputConverter } from "./converters/inputConverter";
 import { outputConverter } from "./converters/outputConverter";
 import { dateUtils } from "./converters/dateUtils";
+import { BlockingError, NonBlockingError } from "../../entities/data-entry/ImportSummary";
 
 export class EventValidationForEGASP {
     constructor(private eGASPProgramRepository: EGASPValidationRepository) {}
 
-    public getValidatedEvents(events: Event[]): FutureData<Event[]> {
+    public getValidatedEvents(events: Event[]): FutureData<EventResult> {
         return this.eGASPProgramRepository.getMetadata().flatMap(metadata => {
             const eventEffects = this.getEventEffectsForEGASP(events, metadata);
-            const actions = this.getActions(eventEffects, metadata);
-            const eventsToBeUpdated = _.flatMap(eventEffects, eventEffect => eventEffect.events);
-            const eventsById = _.keyBy(eventsToBeUpdated, "event");
-            const eventsUpdated = this.getUpdatedEvents(actions, eventsById);
-            const unChangedEvents = events.filter(e => !eventsUpdated.some(ue => ue.event === e.event));
-            return Future.success([...eventsUpdated, ...unChangedEvents]);
+            const actionsResult = this.getActions(eventEffects, metadata);
+            if (actionsResult.blockingErrors.length > 0) {
+                //If there are blocking errors, do not process further. return the errors.
+                const errors: EventResult = {
+                    events: [],
+                    blockingErrors: actionsResult.blockingErrors,
+                    nonBlockingErrors: actionsResult.nonBlockingErrors,
+                };
+                return Future.success(errors);
+            } else {
+                const eventsToBeUpdated = _.flatMap(eventEffects, eventEffect => eventEffect.events);
+                const eventsById = _.keyBy(eventsToBeUpdated, "event");
+                const eventsUpdated = this.getUpdatedEvents(actionsResult.actions, eventsById);
+                const unChangedEvents = events.filter(e => !eventsUpdated.some(ue => ue.event === e.event));
+                const consolidatedEvents = [...eventsUpdated, ...unChangedEvents];
+                const results: EventResult = {
+                    events: consolidatedEvents,
+                    blockingErrors: [],
+                    nonBlockingErrors: actionsResult.nonBlockingErrors,
+                };
+                return Future.success(results);
+            }
         });
     }
 
-    private getActions(eventEffects: EventEffect[], metadata: EGASPProgramMetadata): UpdateAction[] {
-        return _(eventEffects)
+    private getActions(eventEffects: EventEffect[], metadata: EGASPProgramMetadata): ActionResult {
+        const updateActions: ActionResult = { actions: [], blockingErrors: [], nonBlockingErrors: [] };
+
+        _(eventEffects)
             .flatMap(eventEffect => {
-                return _(eventEffect.effects)
-                    .flatMap(ruleEffect => this.getUpdateAction(ruleEffect, eventEffect, metadata))
-                    .compact()
-                    .value();
+                return _(eventEffect.effects).flatMap(ruleEffect => {
+                    const result = this.getUpdateAction(ruleEffect, eventEffect, metadata);
+
+                    if (result?.type === "event") {
+                        updateActions.actions.push(result);
+                    } else if (result?.type === "blocking") {
+                        updateActions.blockingErrors.push(result.error);
+                    } else if (result?.type === "non-blocking") {
+                        updateActions.nonBlockingErrors.push(result.error);
+                    }
+                });
             })
             .uniqWith(_.isEqual)
             .value();
+
+        const uniqBlockingErrors = _(updateActions.blockingErrors).uniqWith(_.isEqual).groupBy("error").value();
+        const uniqNonBlockingErrors = _(updateActions.nonBlockingErrors).uniqWith(_.isEqual).groupBy("error").value();
+        const uniqActions = {
+            actions: _(updateActions.actions).uniqWith(_.isEqual).value(),
+            blockingErrors: Object.entries(uniqBlockingErrors).map(err => {
+                return { error: err[0], count: err[1].length, lines: err[1].flatMap(a => (a.lines ? a.lines : [])) };
+            }),
+            nonBlockingErrors: Object.entries(uniqNonBlockingErrors).map(err => {
+                return { error: err[0], count: err[1].length, lines: err[1].flatMap(a => (a.lines ? a.lines : [])) };
+            }),
+        };
+
+        return uniqActions;
     }
 
     private getUpdateAction(
         effect: RuleEffect,
         eventEffect: EventEffect,
         metadata: EGASPProgramMetadata
-    ): UpdateAction | undefined {
+    ): UpdateAction | BlockingError | NonBlockingError | undefined {
         const { program, event } = eventEffect;
 
         switch (effect.type) {
-            case "ASSIGN":
+            case "ASSIGN": {
                 console.debug(`Effect ${effect.type} ${effect.targetDataType}:${effect.id} -> ${effect.value}`);
 
                 switch (effect.targetDataType) {
                     case "dataElement":
                         return this.getUpdateActionEvent(metadata, program, event, effect.id, effect.value);
-
-                    // case "trackedEntityAttribute":
-                    //     if (!tei) {
-                    //         log.error("No TEI to assign effect to");
-                    //         return [];
-                    //     } else {
-                    //         return _.compact([getUpdateActionTeiAttribute(program, event, tei, effect)]);
-                    //     }
                     default:
                         return;
                 }
+            }
+            case "SHOWERROR": {
+                const error: BlockingError = {
+                    type: "blocking",
+                    error: {
+                        error: effect.message ? effect.message : effect.error?.message,
+                        count: 1,
+                        lines: [parseInt(event.event)],
+                    },
+                };
+                return error;
+            }
+
+            case "SHOWWARNING": {
+                const error: NonBlockingError = {
+                    type: "non-blocking",
+                    error: {
+                        error: effect.message ? effect.message : effect.warning?.message,
+                        count: 1,
+                        lines: [parseInt(event.event)],
+                    },
+                };
+                return error;
+            }
             default:
                 return;
         }
