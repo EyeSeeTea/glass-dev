@@ -65,7 +65,9 @@ export function getRulesEffectsProcessor(outputConverters) {
     function createErrorDetectionEffect(effect, type) {
         const result = createEffectsForConfiguredDataTypes(effect, () => ({
             type,
-            message: `${effect.displayContent} ${sanitiseFalsy(effect.data)}`,
+            message: effect.displayContent
+                ? `${effect.displayContent} ${sanitiseFalsy(effect.data)}`
+                : `${effect.content} ${sanitiseFalsy(effect.data)}`,
         }));
         return result.length !== 0
             ? result
@@ -82,7 +84,9 @@ export function getRulesEffectsProcessor(outputConverters) {
         }
         result.warning = {
             id: effect.id,
-            message: `${effect.displayContent} ${sanitiseFalsy(effect.data)}`,
+            message: effect.displayContent
+                ? `${effect.displayContent} ${sanitiseFalsy(effect.data)}`
+                : `${effect.content} ${sanitiseFalsy(effect.data)}`,
         };
         return result;
     }
@@ -94,7 +98,10 @@ export function getRulesEffectsProcessor(outputConverters) {
         }
         result.error = {
             id: effect.id,
-            message: `${effect.displayContent} ${sanitiseFalsy(effect.data)}`,
+
+            message: effect.displayContent
+                ? `${effect.displayContent} ${sanitiseFalsy(effect.data)}`
+                : `${effect.content} ${sanitiseFalsy(effect.data)}`,
         };
         return result;
     }
