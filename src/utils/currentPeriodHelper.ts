@@ -21,7 +21,7 @@ export const getLastNYears = (n = 7) => {
     return years;
 };
 
-export const getLastNYearsQuarters = (n = 2) => {
+export const getLastNYearsQuarters = (n = 8) => {
     const years: string[] = [];
     const openYearAndQuarter = getCurrentOpenQuarterlyPeriod().split("Q");
 
