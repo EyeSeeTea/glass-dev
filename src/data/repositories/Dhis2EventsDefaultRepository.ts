@@ -12,7 +12,7 @@ export interface EventsPostRequest {
 }
 
 export interface Event {
-    event?: string;
+    event: string;
     orgUnit: string;
     program: string;
     status: EventStatus;

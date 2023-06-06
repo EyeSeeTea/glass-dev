@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: i18next-conv\n"
-"POT-Creation-Date: 2023-05-26T16:35:55.176Z\n"
+"POT-Creation-Date: 2023-06-06T12:23:21.971Z\n"
 "PO-Revision-Date: 2018-10-25T09:02:35.143Z\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -248,14 +248,6 @@ msgid "Deleting Files"
 msgstr ""
 
 msgid "This might take several minutes, do not refresh the page or press back."
-msgstr ""
-
-msgid "Confirm Delete"
-msgstr ""
-
-msgid ""
-"Deleting this upload will delete both SAMPLE and RIS files for the given "
-"dataset. Are you sure you want to delete?"
 msgstr ""
 
 msgid "Go to questionnaires"
