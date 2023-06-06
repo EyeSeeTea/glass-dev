@@ -2,11 +2,6 @@
 /* eslint-disable class-methods-use-this */
 import moment from "moment";
 import { trimQuotes } from "../ValueProcessor";
-
-// import { trimQuotes } from "capture-core-utils/rulesEngine/commonUtils/trimQuotes";
-
-// import { getFormattedStringFromMomentUsingEuropeanGlyphs } from "capture-core-utils/date";
-
 const momentFormat = "YYYY-MM-DD";
 
 /* Some locales are using numeral glyphs other than european. This method ensures the moment format method returns a value in european glyphs

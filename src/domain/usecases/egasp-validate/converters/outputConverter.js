@@ -3,9 +3,6 @@
 import log from "loglevel";
 import moment from "moment";
 import { systemSettingsStore } from "../systemSettings.store";
-
-// import { convertMomentToDateFormatString } from "../../utils/converters/date";
-
 const dateMomentFormat = "YYYY-MM-DD";
 
 export function convertMomentToDateFormatString(moment) {

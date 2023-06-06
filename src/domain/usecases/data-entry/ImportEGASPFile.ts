@@ -52,10 +52,8 @@ export class ImportEGASPFile {
                                                         deleted: 0,
                                                         updated: 0,
                                                     },
-                                                    nonBlockingErrors: validatedEventResults.nonBlockingErrors.map(
-                                                        nbe => nbe
-                                                    ),
-                                                    blockingErrors: validatedEventResults.blockingErrors.map(be => be),
+                                                    nonBlockingErrors: validatedEventResults.nonBlockingErrors,
+                                                    blockingErrors: validatedEventResults.blockingErrors,
                                                 };
                                                 return Future.success(errorSummary);
                                             } else {
