@@ -15,7 +15,7 @@ import { Future, FutureData } from "../../domain/entities/Future";
 
 type RowWithCells = XLSX.Row & { _cells: XLSX.Cell[] };
 
-export class ExcelPopulateRepository extends ExcelRepository {
+export class ExcelPopulateDefaultRepository extends ExcelRepository {
     private workbooks: Record<string, ExcelWorkbook> = {};
 
     public loadTemplate(file: Blob): FutureData<string> {

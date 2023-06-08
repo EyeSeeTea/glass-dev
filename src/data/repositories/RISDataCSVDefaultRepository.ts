@@ -1,10 +1,10 @@
-import { RISData } from "../../domain/entities/data-entry/external/RISData";
+import { RISData } from "../../domain/entities/data-entry/amr-external/RISData";
 import { Future, FutureData } from "../../domain/entities/Future";
 import { RISDataRepository } from "../../domain/repositories/data-entry/RISDataRepository";
-import { SpreadsheetXlsxDataSource } from "../../domain/repositories/SpreadsheetXlsxRepository";
+import { SpreadsheetXlsxDataSource } from "./SpreadsheetXlsxDefaultRepository";
 import { doesColumnExist, getNumberValue, getTextValue } from "./utils/CSVUtils";
 
-export class RISDataCSVRepository implements RISDataRepository {
+export class RISDataCSVDefaultRepository implements RISDataRepository {
     get(file: File): FutureData<RISData[]> {
         return Future.fromPromise(new SpreadsheetXlsxDataSource().read(file)).map(spreadsheet => {
             const sheet = spreadsheet.sheets[0]; //Only one sheet for AMR RIS

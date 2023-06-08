@@ -1,14 +1,14 @@
 import { D2Api } from "@eyeseetea/d2-api/2.34";
 import { FutureData } from "../../../domain/entities/Future";
-import { EGASPProgramMetadata, metadataQuery } from "../../../domain/entities/egasp-validate/eventEffectTypes";
-import { EGASPValidationRepository } from "../../../domain/repositories/egasp-validate/EGASPValidationRepository";
+import { ProgramRulesMetadataRepository } from "../../../domain/repositories/program-rules/ProgramRulesMetadataRepository";
 import { apiToFuture } from "../../../utils/futures";
 import { Instance } from "../../entities/Instance";
 import { getD2APiFromInstance } from "../../../utils/d2-api";
+import { EGASPProgramMetadata, metadataQuery } from "../../../domain/entities/program-rules/EventEffectTypes";
 
-const EGASP_PROGRAM_ID = "SOjanrinfuG";
+export const EGASP_PROGRAM_ID = "SOjanrinfuG";
 
-export class EGASPValidationDefaultRepository implements EGASPValidationRepository {
+export class ProgramRulesMetadataDefaultRepository implements ProgramRulesMetadataRepository {
     private api: D2Api;
 
     constructor(instance: Instance) {
