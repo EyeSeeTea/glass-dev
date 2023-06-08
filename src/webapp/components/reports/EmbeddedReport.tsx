@@ -13,7 +13,7 @@ interface State {
 export const EmbeddedReport: React.FC<EmbeddedReportProps> = ({ dashboardId }) => {
     const { api } = useAppContext();
     const baseUrl = api.baseUrl;
-    const [state, setState] = React.useState<State>({ type: "loading", height: 10000 });
+    const [state, setState] = React.useState<State>({ type: "loading", height: 50000 });
     const iframeRef: React.RefObject<HTMLIFrameElement> = React.createRef();
     const dashboardUrlBase = `${baseUrl}/dhis-web-dashboard`;
     const dashboardUrl = dashboardUrlBase + `/#/${dashboardId}`;

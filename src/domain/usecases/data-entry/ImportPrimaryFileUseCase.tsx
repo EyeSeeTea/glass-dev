@@ -8,12 +8,12 @@ import { GlassModuleRepository } from "../../repositories/GlassModuleRepository"
 import { ImportStrategy } from "../../entities/data-entry/DataValuesSaveSummary";
 import { ImportRISFile } from "./ImportRISFile";
 import { ImportEGASPFile } from "./ImportEGASPFile";
-import { EGASPDataRepository } from "../../repositories/data-entry/EGASPDataRepository";
 import { Dhis2EventsDefaultRepository } from "../../../data/repositories/Dhis2EventsDefaultRepository";
 import { EGASPProgramDefaultRepository } from "../../../data/repositories/bulk-load/EGASPProgramDefaultRepository";
 import { ExcelRepository } from "../../repositories/ExcelRepository";
 import { GlassDocumentsRepository } from "../../repositories/GlassDocumentsRepository";
 import { GlassUploadsDefaultRepository } from "../../../data/repositories/GlassUploadsDefaultRepository";
+import { EGASPValidationRepository } from "../../repositories/egasp-validate/EGASPValidationRepository";
 
 export class ImportPrimaryFileUseCase implements UseCase {
     constructor(
@@ -21,12 +21,12 @@ export class ImportPrimaryFileUseCase implements UseCase {
         private metadataRepository: MetadataRepository,
         private dataValuesRepository: DataValuesRepository,
         private moduleRepository: GlassModuleRepository,
-        private egaspDataRepository: EGASPDataRepository,
         private dhis2EventsDefaultRepository: Dhis2EventsDefaultRepository,
         private egaspProgramDefaultRepository: EGASPProgramDefaultRepository,
         private excelRepository: ExcelRepository,
         private glassDocumentsRepository: GlassDocumentsRepository,
-        private glassUploadsRepository: GlassUploadsDefaultRepository
+        private glassUploadsRepository: GlassUploadsDefaultRepository,
+        private eGASPValidationRepository: EGASPValidationRepository
     ) {}
 
     public execute(
@@ -38,7 +38,7 @@ export class ImportPrimaryFileUseCase implements UseCase {
         orgUnit: string,
         countryCode: string,
         dryRun: boolean,
-        eventListId: string
+        eventListId: string | undefined
     ): FutureData<ImportSummary> {
         if (moduleName === "AMR") {
             const importRISFile = new ImportRISFile(
@@ -54,7 +54,8 @@ export class ImportPrimaryFileUseCase implements UseCase {
                 this.egaspProgramDefaultRepository,
                 this.excelRepository,
                 this.glassDocumentsRepository,
-                this.glassUploadsRepository
+                this.glassUploadsRepository,
+                this.eGASPValidationRepository
             );
 
             return importEGASPFile.importEGASPFile(inputFile, action, eventListId);

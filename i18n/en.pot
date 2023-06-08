@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2023-05-26T17:29:01.131Z\n"
-"PO-Revision-Date: 2023-05-26T17:29:01.131Z\n"
+"POT-Creation-Date: 2023-06-08T11:58:17.869Z\n"
+"PO-Revision-Date: 2023-06-08T11:58:17.869Z\n"
 
 msgid "Template {{id}} not loaded"
 msgstr ""
@@ -247,14 +247,6 @@ msgid "Deleting Files"
 msgstr ""
 
 msgid "This might take several minutes, do not refresh the page or press back."
-msgstr ""
-
-msgid "Confirm Delete"
-msgstr ""
-
-msgid ""
-"Deleting this upload will delete both SAMPLE and RIS files for the given "
-"dataset. Are you sure you want to delete?"
 msgstr ""
 
 msgid "Go to questionnaires"
