@@ -136,7 +136,6 @@ export class EGASPProgramDefaultRepository {
             });
         }
     }
-    
 }
 
 const dataElementFields = {
