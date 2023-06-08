@@ -53,7 +53,7 @@ export const moduleProperties = new Map<string, ModuleDetails>([
             },
             deleteConfirmation: {
                 title: "Confirm Delete",
-                description: "Are you sure you want to delete?",
+                description: "Are you sure you want to delete this EGASP file and corresponding events?",
             },
             primaryFileType: "EGASP",
             secondaryFileType: "",

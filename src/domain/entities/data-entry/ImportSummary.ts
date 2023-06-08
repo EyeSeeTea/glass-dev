@@ -16,3 +16,13 @@ export type ConsistencyError = {
     count: number;
     lines?: number[];
 };
+
+export type BlockingError = {
+    type: "blocking";
+    error: ConsistencyError;
+};
+
+export type NonBlockingError = {
+    type: "non-blocking";
+    error: ConsistencyError;
+};

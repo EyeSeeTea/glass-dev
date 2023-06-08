@@ -235,16 +235,13 @@ export class InstanceDefaultRepository implements InstanceRepository {
     ): FutureData<{ name: string; id: string; code: string }[]> {
         const result: { name: string; id: string; code: string }[] = [];
 
-        const filteredOrgUnits = orgUnits.filter(ou => ou.code !== "NA");
-
         const recursiveGetOrgUnits = (
-            filteredOrgUnits: { name: string; id: string; code: string }[],
+            filteredOUs: { name: string; id: string; code: string }[],
             countryLevel: number
         ): FutureData<{ name: string; id: string; code: string }[]> => {
             const childrenOrgUnits = apiToFuture(
                 this.api.models.organisationUnits.get({
                     filter: {
-                        "parent.id": { in: filteredOrgUnits.map(ou => ou.id) },
                         level: { le: countryLevel.toString() },
                     },
                     fields: {
@@ -252,10 +249,17 @@ export class InstanceDefaultRepository implements InstanceRepository {
                         name: true,
                         code: true,
                         level: true,
+                        parent: {
+                            id: true,
+                        },
                     },
                     paging: false,
                 })
-            ).map(res => res.objects);
+            ).map(res => {
+                const filteredIds = filteredOUs.map(ou => ou.id);
+                const childOrgUnits = res.objects.filter(ou => filteredIds.includes(ou.parent?.id));
+                return childOrgUnits;
+            });
 
             return childrenOrgUnits.flatMap(childrenOrgUnits => {
                 if (childrenOrgUnits[0] && childrenOrgUnits[0]?.level < countryLevel) {
@@ -274,6 +278,7 @@ export class InstanceDefaultRepository implements InstanceRepository {
             });
         };
 
+        const filteredOrgUnits = orgUnits.filter(ou => ou.code !== "NA");
         return recursiveGetOrgUnits(filteredOrgUnits, countryLevel).flatMap(orgUnits => {
             return Future.success(orgUnits);
         });
