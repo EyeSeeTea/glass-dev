@@ -1,42 +1,41 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Grid, Typography } from "@material-ui/core";
 import { LandingNews } from "./LandingNews";
 import styled from "styled-components";
 import { OpenDataSubmissions } from "./OpenDataSubmissions";
 import { YourNotifications } from "./notifications/YourNotifications";
-import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context";
 import { useAppContext } from "../../contexts/app-context";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
 import { CustomCard } from "../custom-card/CustomCard";
+import { CircularProgress } from "material-ui";
+import { useGlassModules } from "../../hooks/useGlassModules";
 
 export const LandingContent: React.FC = () => {
     const { compositionRoot } = useAppContext();
-    const { currentOrgUnitAccess } = useCurrentOrgUnitContext();
-    const [showNoModuleCard, setShowNoModuleCard] = useState(false);
-
-    useEffect(() => {
-        compositionRoot.glassModules.getAll(currentOrgUnitAccess.orgUnitId).run(
-            modules => {
-                if (modules.length > 0) setShowNoModuleCard(false);
-                else setShowNoModuleCard(true);
-            },
-            () => {}
-        );
-    }, [compositionRoot.glassModules, currentOrgUnitAccess]);
+    const modules = useGlassModules(compositionRoot);
 
     return (
         <StyledGrid container spacing={4} alignItems="flex-start">
-            {showNoModuleCard && (
-                <Grid item xs={6}>
-                    <CustomCard>
-                        <TitleContainer />
-                        <NotEnrolledText>
-                            You are not enrolled to any of the modules in GLASS. Please contact your Admin for access.
-                        </NotEnrolledText>
-                    </CustomCard>
-                </Grid>
+            {modules.kind === "loading" && <CircularProgress />}
+
+            {modules.kind === "loaded" && (
+                <>
+                    {modules.data.length === 0 ? (
+                        <Grid item xs={6}>
+                            <CustomCard>
+                                <TitleContainer />
+                                <NotEnrolledText>
+                                    You are not enrolled to any of the modules in GLASS. Please contact your Admin for
+                                    access.
+                                </NotEnrolledText>
+                            </CustomCard>
+                        </Grid>
+                    ) : (
+                        <OpenDataSubmissions />
+                    )}
+                </>
             )}
-            <OpenDataSubmissions />
+
             <YourNotifications />
             <LandingNews />
         </StyledGrid>
