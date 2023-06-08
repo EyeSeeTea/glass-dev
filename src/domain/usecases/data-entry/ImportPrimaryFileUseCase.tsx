@@ -13,7 +13,7 @@ import { EGASPProgramDefaultRepository } from "../../../data/repositories/bulk-l
 import { ExcelRepository } from "../../repositories/ExcelRepository";
 import { GlassDocumentsRepository } from "../../repositories/GlassDocumentsRepository";
 import { GlassUploadsDefaultRepository } from "../../../data/repositories/GlassUploadsDefaultRepository";
-import { EGASPValidationRepository } from "../../repositories/egasp-validate/EGASPValidationRepository";
+import { ProgramRulesMetadataRepository } from "../../repositories/program-rules/ProgramRulesMetadataRepository";
 
 export class ImportPrimaryFileUseCase implements UseCase {
     constructor(
@@ -26,7 +26,7 @@ export class ImportPrimaryFileUseCase implements UseCase {
         private excelRepository: ExcelRepository,
         private glassDocumentsRepository: GlassDocumentsRepository,
         private glassUploadsRepository: GlassUploadsDefaultRepository,
-        private eGASPValidationRepository: EGASPValidationRepository
+        private eGASPValidationRepository: ProgramRulesMetadataRepository
     ) {}
 
     public execute(

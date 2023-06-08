@@ -1,20 +1,20 @@
 import { Dhis2EventsDefaultRepository, Event } from "../../../data/repositories/Dhis2EventsDefaultRepository";
 import { Future, FutureData } from "../../entities/Future";
 import { ConsistencyError, ImportSummary } from "../../entities/data-entry/ImportSummary";
-import * as templates from "../../../data/templates";
+import * as templates from "../../entities/data-entry/egasp-templates";
 import { EGASPProgramDefaultRepository } from "../../../data/repositories/bulk-load/EGASPProgramDefaultRepository";
 import { Template } from "../../entities/Template";
 import { DataForm } from "../../entities/DataForm";
 import { ExcelReader } from "../../utils/ExcelReader";
 import { ExcelRepository } from "../../repositories/ExcelRepository";
-import { DataPackage, DataPackageDataValue } from "../../entities/data-entry/EGASPData";
+import { DataPackage, DataPackageDataValue } from "../../entities/data-entry/DataPackage";
 import { EventsPostResponse } from "@eyeseetea/d2-api/api/events";
 import { ImportStrategy } from "../../entities/data-entry/DataValuesSaveSummary";
 import { GlassDocumentsRepository } from "../../repositories/GlassDocumentsRepository";
 import { GlassUploadsRepository } from "../../repositories/GlassUploadsRepository";
-import { EventValidationForEGASP } from "../egasp-validate/EventValidationForEGASP";
-import { EGASPValidationRepository } from "../../repositories/egasp-validate/EGASPValidationRepository";
-import { EventResult } from "../../entities/egasp-validate/eventEffectTypes";
+import { EventValidationForEGASP } from "../program-rules-processing/EventValidationForEGASP";
+import { ProgramRulesMetadataRepository } from "../../repositories/program-rules/ProgramRulesMetadataRepository";
+import { EventResult } from "../../entities/program-rules/EventEffectTypes";
 
 export class ImportEGASPFile {
     constructor(
@@ -23,7 +23,7 @@ export class ImportEGASPFile {
         private excelRepository: ExcelRepository,
         private glassDocumentsRepository: GlassDocumentsRepository,
         private glassUploadsRepository: GlassUploadsRepository,
-        private eGASPValidationRepository: EGASPValidationRepository
+        private eGASPValidationRepository: ProgramRulesMetadataRepository
     ) {}
 
     public importEGASPFile(

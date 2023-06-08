@@ -1,5 +1,5 @@
 import i18n from "../../../../locales";
-import { RISData } from "../../../entities/data-entry/external/RISData";
+import { RISData } from "../../../entities/data-entry/amr-external/RISData";
 import { ConsistencyError } from "../../../entities/data-entry/ImportSummary";
 
 export function checkASTResults(risData: RISData[]): ConsistencyError[] {

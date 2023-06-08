@@ -77,11 +77,9 @@ const ContentWrapper = styled.div`
             }
             td:nth-child(5) {
                 text-transform: uppercase;
-                opacity: 0.5;
             }
             td:nth-child(7) {
                 text-transform: uppercase;
-                opacity: 0.5;
             }
         }
     }

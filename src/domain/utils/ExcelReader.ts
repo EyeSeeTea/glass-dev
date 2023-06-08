@@ -12,7 +12,7 @@ import { ExcelRepository, ExcelValue } from "../repositories/ExcelRepository";
 
 import { promiseMap } from "../../utils/promises";
 import moment from "moment";
-import { DataPackage, DataPackageData } from "../entities/data-entry/EGASPData";
+import { DataPackage, DataPackageData } from "../entities/data-entry/DataPackage";
 export const isDefined = <T>(item: T) => item !== undefined && item !== null;
 export function removeCharacters(value: unknown): string {
     return value === undefined ? "" : String(value).replace(/[^a-zA-Z0-9.]/g, "");

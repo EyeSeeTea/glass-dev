@@ -1,4 +1,4 @@
-import { SampleData } from "../../entities/data-entry/external/SampleData";
+import { SampleData } from "../../entities/data-entry/amr-external/SampleData";
 import { FutureData } from "../../entities/Future";
 
 export interface SampleDataRepository {
