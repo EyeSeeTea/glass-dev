@@ -130,28 +130,30 @@ export const CurrentStatus: React.FC<StatusProps> = ({
                                     </Box>
                                 </TableCell>
                             </TableRow>
-                            {questionnaires && questionnaires[0] && (
-                                <TableRow>
-                                    <TableCell>{`${questionnaires.length} Questionnaires`}</TableCell>
-                                    <TableCell>{`${questionnaires[0].isMandatory ? "Yes" : "No"}`}</TableCell>
-                                    <TableCell>
-                                        {hasCurrentUserCaptureAccess ? (
-                                            <Box display={"flex"} alignItems="center">
-                                                {/* Only user with capture access, can see the Questionnaire complete status */}
+                            {moduleProperties.get(moduleName)?.isQuestionnaireReq &&
+                                questionnaires &&
+                                questionnaires[0] && (
+                                    <TableRow>
+                                        <TableCell>{`${questionnaires.length} Questionnaires`}</TableCell>
+                                        <TableCell>{`${questionnaires[0].isMandatory ? "Yes" : "No"}`}</TableCell>
+                                        <TableCell>
+                                            {hasCurrentUserCaptureAccess ? (
+                                                <Box display={"flex"} alignItems="center">
+                                                    {/* Only user with capture access, can see the Questionnaire complete status */}
 
-                                                {`${questionnaires.filter(el => el.isCompleted).length} completed`}
-                                                {questionnaires.filter(el => el.isCompleted).length < 1 ? (
-                                                    <Close color="error"></Close>
-                                                ) : (
-                                                    <Check style={{ color: "green" }}></Check>
-                                                )}
-                                            </Box>
-                                        ) : (
-                                            <Box>No Access</Box>
-                                        )}
-                                    </TableCell>
-                                </TableRow>
-                            )}
+                                                    {`${questionnaires.filter(el => el.isCompleted).length} completed`}
+                                                    {questionnaires.filter(el => el.isCompleted).length < 1 ? (
+                                                        <Close color="error"></Close>
+                                                    ) : (
+                                                        <Check style={{ color: "green" }}></Check>
+                                                    )}
+                                                </Box>
+                                            ) : (
+                                                <Box>No Access</Box>
+                                            )}
+                                        </TableCell>
+                                    </TableRow>
+                                )}
                         </tbody>
                     </Table>
                 </TableContainer>
