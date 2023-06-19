@@ -1,16 +1,16 @@
-import { D2Api } from "@eyeseetea/d2-api/2.34";
 import { getD2APiFromInstance } from "../../utils/d2-api";
 import { Instance } from "../entities/Instance";
 import { ImportStrategy } from "../../domain/entities/data-entry/DataValuesSaveSummary";
 import { EventsPostResponse } from "@eyeseetea/d2-api/api/events";
 import { Future, FutureData } from "../../domain/entities/Future";
 import { HttpResponse } from "@eyeseetea/d2-api/api/common";
+import { EGASP_PROGRAM_ID } from "./program-rule/ProgramRulesMetadataDefaultRepository";
+import { D2Api, Pager } from "@eyeseetea/d2-api/2.34";
 
 export declare type EventStatus = "ACTIVE" | "COMPLETED" | "VISITED" | "SCHEDULED" | "OVERDUE" | "SKIPPED";
 export interface EventsPostRequest {
     events: Array<Event>;
 }
-
 export interface Event {
     event: string;
     orgUnit: string;
@@ -29,12 +29,47 @@ export interface Event {
         value: string | number | boolean;
     }>;
 }
+interface PagedEventsApiResponse {
+    pager: Pager;
+    events: Event[];
+}
 
 export class Dhis2EventsDefaultRepository {
     private api: D2Api;
 
     constructor(instance: Instance) {
         this.api = getD2APiFromInstance(instance);
+    }
+
+    getEGASPEvents(orgUnit: string, page: number): Promise<PagedEventsApiResponse> {
+        return this.api
+            .get<PagedEventsApiResponse>("/events", {
+                program: EGASP_PROGRAM_ID,
+                orgUnit,
+                paging: true,
+                totalPages: true,
+                pageSize: 250,
+                page,
+            })
+            .getData();
+    }
+
+    async getEGASPEventsByOrgUnitAsync(orgUnit: string): Promise<Event[]> {
+        const eventsByOU: Event[] = [];
+        let page = 1;
+        let result;
+
+        do {
+            result = await this.getEGASPEvents(orgUnit, page);
+            eventsByOU.push(...result.events);
+            page++;
+        } while (result.pager.pageCount >= page);
+
+        return eventsByOU;
+    }
+
+    getEGASPEventsByOrgUnit(orgUnit: string): FutureData<Event[]> {
+        return Future.fromPromise(this.getEGASPEventsByOrgUnitAsync(orgUnit));
     }
 
     import(events: EventsPostRequest, action: ImportStrategy): FutureData<EventsPostResponse> {
