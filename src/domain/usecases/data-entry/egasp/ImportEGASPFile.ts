@@ -146,7 +146,7 @@ export class ImportEGASPFile {
         const programRuleValidationForEGASP = new ProgramRuleValidationForEGASP(this.eGASPValidationRepository);
 
         //2. Run Custom EGASP Validations
-        const customEGASPValidations = new CustomValidationForEGASP();
+        const customEGASPValidations = new CustomValidationForEGASP(this.dhis2EventsDefaultRepository);
 
         return Future.joinObj({
             programRuleValidationResults: programRuleValidationForEGASP.getValidatedEvents(events),
