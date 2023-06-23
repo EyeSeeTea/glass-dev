@@ -26,11 +26,11 @@ import { outputConverter } from "./converters/outputConverter";
 import { dateUtils } from "./converters/dateUtils";
 import { BlockingError, NonBlockingError } from "../../entities/data-entry/ImportSummary";
 
-export class EventValidationForEGASP {
-    constructor(private eGASPProgramRepository: ProgramRulesMetadataRepository) {}
+export class ProgramRuleValidationForEGASP {
+    constructor(private programRulesMetadataRepository: ProgramRulesMetadataRepository) {}
 
     public getValidatedEvents(events: Event[]): FutureData<EventResult> {
-        return this.eGASPProgramRepository.getMetadata().flatMap(metadata => {
+        return this.programRulesMetadataRepository.getMetadata().flatMap(metadata => {
             const eventEffects = this.getEventEffectsForEGASP(events, metadata);
             const actionsResult = this.getActions(eventEffects, metadata);
             if (actionsResult.blockingErrors.length > 0) {
