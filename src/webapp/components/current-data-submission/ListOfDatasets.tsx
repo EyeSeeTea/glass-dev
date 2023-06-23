@@ -76,7 +76,7 @@ export const ListOfDatasets: React.FC<ListOfDatasetsProps> = ({ setRefetchStatus
                         const notificationText = `The data submission for ${currentModuleAccess.moduleName} module for year ${currentPeriod} and country ${currentOrgUnitAccess.orgUnitName} has changed to DATA TO BE APPROVED BY COUNTRY`;
 
                         compositionRoot.notifications
-                            .send(notificationText, notificationText, userGroupsIds, [currentOrgUnitAccess.orgUnitId])
+                            .send(notificationText, notificationText, userGroupsIds, currentOrgUnitAccess.orgUnitId)
                             .run(
                                 () => {},
                                 () => {}

@@ -84,7 +84,7 @@ export const CtaButtons: React.FC<CtaButtonsProps> = ({ ctas, position, setCurre
                 if (moduleProperties.get(currentModuleAccess.moduleName)?.isQuestionnaireReq)
                     return (
                         <Button
-                            key={cta.label}
+                            key={cta.key}
                             variant={cta.variant || "contained"}
                             color={cta.color || "primary"}
                             onClick={() => setCurrentStep(1)}
@@ -98,7 +98,7 @@ export const CtaButtons: React.FC<CtaButtonsProps> = ({ ctas, position, setCurre
             case "Upload/Delete datasets":
                 return (
                     <Button
-                        key={cta.label}
+                        key={cta.key}
                         variant={cta.variant || "contained"}
                         color={cta.color || "primary"}
                         onClick={() => setCurrentStep(2)}
@@ -112,7 +112,7 @@ export const CtaButtons: React.FC<CtaButtonsProps> = ({ ctas, position, setCurre
             case "Go to submission":
                 return (
                     <Button
-                        key={cta.label}
+                        key={cta.key}
                         variant={cta.variant || "contained"}
                         color={cta.color || "primary"}
                         onClick={() => setCurrentStep(5)}
@@ -126,7 +126,7 @@ export const CtaButtons: React.FC<CtaButtonsProps> = ({ ctas, position, setCurre
             case "Review submitted datasets":
                 return (
                     <Button
-                        key={cta.label}
+                        key={cta.key}
                         variant={cta.variant}
                         color={cta.color}
                         onClick={() => setCurrentStep(2)}
@@ -138,7 +138,7 @@ export const CtaButtons: React.FC<CtaButtonsProps> = ({ ctas, position, setCurre
             case "Request data update":
                 return (
                     <Button
-                        key={cta.label}
+                        key={cta.key}
                         variant={cta.variant}
                         color={cta.color}
                         onClick={() => setCurrentStep(4)}
@@ -152,7 +152,7 @@ export const CtaButtons: React.FC<CtaButtonsProps> = ({ ctas, position, setCurre
                     <Button
                         variant={cta.variant}
                         color={cta.color}
-                        key={cta.label}
+                        key={cta.key}
                         onClick={() => setIsStatusHistoryDialogOpen(true)}
                         style={{ textTransform: "uppercase" }}
                     >
@@ -162,7 +162,7 @@ export const CtaButtons: React.FC<CtaButtonsProps> = ({ ctas, position, setCurre
             default:
                 return (
                     <Button
-                        key={cta.label}
+                        key={cta.key}
                         variant={cta.variant || "contained"}
                         color={cta.color || "primary"}
                         component={NavLink}

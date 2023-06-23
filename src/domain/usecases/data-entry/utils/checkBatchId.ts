@@ -1,6 +1,6 @@
 import i18n from "../../../../locales";
-import { RISData } from "../../../entities/data-entry/external/RISData";
-import { SampleData } from "../../../entities/data-entry/external/SampleData";
+import { RISData } from "../../../entities/data-entry/amr-external/RISData";
+import { SampleData } from "../../../entities/data-entry/amr-external/SampleData";
 import { ConsistencyError } from "../../../entities/data-entry/ImportSummary";
 
 export function checkBatchId(risData: (RISData | SampleData)[], batchId: string): ConsistencyError[] {

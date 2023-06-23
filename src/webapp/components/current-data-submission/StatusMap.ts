@@ -15,6 +15,7 @@ export const statusMap = new Map<DataSubmissionStatusTypes, StatusDetails>([
             colour: glassColors.statusActionReq,
             leftCTAs: [
                 {
+                    key: 0,
                     label: "Go to questionnaires",
                     url: "/",
                     variant: "outlined",
@@ -22,6 +23,7 @@ export const statusMap = new Map<DataSubmissionStatusTypes, StatusDetails>([
             ],
             rightCTAs: [
                 {
+                    key: 1,
                     label: "Upload/Delete datasets",
                     url: "/upload",
                     color: "primary",
@@ -43,18 +45,21 @@ export const statusMap = new Map<DataSubmissionStatusTypes, StatusDetails>([
             colour: glassColors.statusActionReq,
             leftCTAs: [
                 {
+                    key: 2,
                     label: "Go to questionnaires",
                     color: "primary",
                     variant: "outlined",
                     url: "/",
                 },
                 {
+                    key: 3,
                     label: "Upload/Delete datasets",
                     color: "primary",
                     variant: "outlined",
                     url: "/data-file-history",
                 },
                 {
+                    key: 4,
                     label: "Go to submission",
                     color: "primary",
                     variant: "outlined",
@@ -95,6 +100,7 @@ export const statusMap = new Map<DataSubmissionStatusTypes, StatusDetails>([
             colour: glassColors.statusPositive,
             leftCTAs: [
                 {
+                    key: 5,
                     label: "Review submitted datasets",
                     variant: "outlined",
                     color: "primary",
@@ -103,6 +109,7 @@ export const statusMap = new Map<DataSubmissionStatusTypes, StatusDetails>([
             ],
             rightCTAs: [
                 {
+                    key: 6,
                     label: "Request data update",
                     color: "primary",
                     variant: "contained",
@@ -125,6 +132,7 @@ export const statusMap = new Map<DataSubmissionStatusTypes, StatusDetails>([
             colour: glassColors.statusNegative,
             leftCTAs: [
                 {
+                    key: 7,
                     label: "Display full status history",
                     color: "primary",
                     variant: "outlined",
@@ -133,6 +141,7 @@ export const statusMap = new Map<DataSubmissionStatusTypes, StatusDetails>([
             ],
             rightCTAs: [
                 {
+                    key: 8,
                     label: "Upload/Delete datasets",
                     url: "/upload",
                 },
@@ -155,6 +164,7 @@ export const statusMap = new Map<DataSubmissionStatusTypes, StatusDetails>([
             colour: glassColors.statusNeutral,
             leftCTAs: [
                 {
+                    key: 9,
                     label: "Display full status history",
                     variant: "contained",
                     color: "primary",
@@ -178,18 +188,21 @@ export const statusMap = new Map<DataSubmissionStatusTypes, StatusDetails>([
             colour: glassColors.statusActionReq,
             leftCTAs: [
                 {
+                    key: 10,
                     label: "Go to questionnaires",
                     color: "primary",
                     variant: "outlined",
                     url: "/",
                 },
                 {
+                    key: 11,
                     label: "Upload/Delete datasets",
                     color: "primary",
                     variant: "outlined",
                     url: "/data-file-history",
                 },
                 {
+                    key: 12,
                     label: "Go to submission",
                     color: "primary",
                     variant: "outlined",

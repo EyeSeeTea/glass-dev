@@ -9,6 +9,7 @@ export type StatusCTAs =
     | "Go to submission";
 
 export type CTAs = {
+    key: number;
     label: StatusCTAs;
     url: string;
     color?: "primary" | "default" | "secondary";
