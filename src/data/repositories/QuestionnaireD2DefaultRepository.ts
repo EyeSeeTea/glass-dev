@@ -17,7 +17,7 @@ import { apiToFuture } from "../../utils/futures";
 import { DataElement } from "../dhis2/DataElement";
 import { DataFormD2Source } from "../dhis2/DataFormD2Source";
 
-export class QuestionnaireD2Repository implements QuestionnaireRepository {
+export class QuestionnaireD2DefaultRepository implements QuestionnaireRepository {
     constructor(private api: D2Api) {}
 
     getList(

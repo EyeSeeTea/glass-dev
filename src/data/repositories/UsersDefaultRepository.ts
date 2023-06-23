@@ -6,18 +6,23 @@ import { Ref } from "../../domain/entities/Ref";
 
 export class UsersDefaultRepository implements UsersRepository {
     constructor(private api: D2Api) {}
-    getAllFilteredbyOUsAndUserGroups(orgUnits: string[], userGroups: string[]): FutureData<Ref[]> {
+    getAllFilteredbyOUsAndUserGroups(orgUnitId: string, userGroups: string[]): FutureData<Ref[]> {
         return apiToFuture(
             this.api.models.users.get({
                 fields: {
                     id: true,
+                    userGroups: {
+                        id: true,
+                    },
                 },
                 filter: {
-                    "organisationUnits.id": { in: orgUnits },
-                    "userGroups.id": { in: userGroups },
+                    "organisationUnits.id": { eq: orgUnitId },
                 },
             })
-        ).map(res => res.objects);
+        ).map(res => {
+            const filteredOUs = res.objects.filter(ou => ou.userGroups.some(ug => userGroups.includes(ug.id)));
+            return filteredOUs;
+        });
     }
 
     savePassword(password: string): FutureData<void | unknown> {

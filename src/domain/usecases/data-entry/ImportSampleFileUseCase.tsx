@@ -7,7 +7,7 @@ import {
     getCategoryOptionComboByDataElement,
     getCategoryOptionComboByOptionCodes,
 } from "./utils/getCategoryOptionCombo";
-import { SampleData } from "../../entities/data-entry/external/SampleData";
+import { SampleData } from "../../entities/data-entry/amr-external/SampleData";
 import { SampleDataRepository } from "../../repositories/data-entry/SampleDataRepository";
 import { ImportSummary } from "../../entities/data-entry/ImportSummary";
 import { mapToImportSummary } from "./utils/mapDhis2Summary";

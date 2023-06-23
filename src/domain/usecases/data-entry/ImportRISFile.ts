@@ -22,7 +22,7 @@ import {
 } from "./utils/getCategoryOptionCombo";
 import { includeBlokingErrors } from "./utils/includeBlockingErrors";
 import { mapToImportSummary } from "./utils/mapDhis2Summary";
-import { RISData } from "../../entities/data-entry/external/RISData";
+import { RISData } from "../../entities/data-entry/amr-external/RISData";
 
 const AMR_AMR_DS_INPUT_FILES_RIS_DS_ID = "CeQPmXgrhHF";
 const AMR_DATA_PATHOGEN_ANTIBIOTIC_BATCHID_CC_ID = "S427AvQESbw";

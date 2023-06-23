@@ -1,5 +1,5 @@
 import { CategoryCombo } from "../../../entities/metadata/CategoryCombo";
-import { ExternalData } from "../../../entities/data-entry/external/ExternalData";
+import { ExternalData } from "../../../entities/data-entry/amr-external/ExternalData";
 import { DataElement } from "../../../entities/metadata/DataSet";
 
 export const AMR_SPECIMEN_GENDER_AGE_ORIGIN_CC_ID = "OwKsZQnHCJu";
