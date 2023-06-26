@@ -61,4 +61,25 @@ export const moduleProperties = new Map<string, ModuleDetails>([
             unit: "event",
         },
     ],
+    [
+        "AMR - Individual",
+        {
+            isbatchReq: false,
+            isQuestionnaireReq: false,
+            isSecondaryFileApplicable: false,
+            isDryRunReq: false,
+            importLoadingMsg: {
+                line1: "Importing data,",
+                line2: "This might take several minutes, do not refresh the page or press back.",
+            },
+            deleteConfirmation: {
+                title: "Confirm Delete",
+                description: "Are you sure you want to delete this RIS individual file and corresponding events?",
+            },
+            primaryFileType: "RIS Individual",
+            secondaryFileType: "",
+            primaryUploadLabel: "Choose RIS Individual File",
+            unit: "event",
+        },
+    ],
 ]);

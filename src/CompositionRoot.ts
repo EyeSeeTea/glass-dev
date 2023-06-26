@@ -65,6 +65,7 @@ import { SavePasswordUseCase } from "./domain/usecases/SavePasswordUseCase";
 import { SaveKeyDbLocaleUseCase } from "./domain/usecases/SaveKeyDbLocaleUseCase";
 import { SaveKeyUiLocaleUseCase } from "./domain/usecases/SaveKeyUiLocaleUseCase";
 import { ProgramRulesMetadataDefaultRepository } from "./data/repositories/program-rule/ProgramRulesMetadataDefaultRepository";
+import { RISIndividualDataCSVDefaultRepository } from "./data/repositories/RISIndividualDataCSVDefaultRepository";
 
 export function getCompositionRoot(instance: Instance) {
     const api = getD2APiFromInstance(instance);
@@ -76,6 +77,7 @@ export function getCompositionRoot(instance: Instance) {
     const glassUploadsRepository = new GlassUploadsDefaultRepository(dataStoreClient);
     const glassDocumentsRepository = new GlassDocumentsDefaultRepository(dataStoreClient, instance);
     const risDataRepository = new RISDataCSVDefaultRepository();
+    const risIndividualRepository = new RISIndividualDataCSVDefaultRepository();
     const sampleDataRepository = new SampleDataCSVDeafultRepository();
     const dataValuesRepository = new DataValuesDefaultRepository(instance);
     const metadataRepository = new MetadataDefaultRepository(instance);
@@ -132,6 +134,7 @@ export function getCompositionRoot(instance: Instance) {
         fileSubmission: getExecute({
             primaryFile: new ImportPrimaryFileUseCase(
                 risDataRepository,
+                risIndividualRepository,
                 metadataRepository,
                 dataValuesRepository,
                 glassModuleRepository,
@@ -144,6 +147,7 @@ export function getCompositionRoot(instance: Instance) {
             ),
             validatePrimaryFile: new ValidatePrimaryFileUseCase(
                 risDataRepository,
+                risIndividualRepository,
                 egaspDataRepository,
                 glassModuleRepository
             ),

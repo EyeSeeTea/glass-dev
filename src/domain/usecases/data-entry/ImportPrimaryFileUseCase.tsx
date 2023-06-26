@@ -14,10 +14,13 @@ import { ExcelRepository } from "../../repositories/ExcelRepository";
 import { GlassDocumentsRepository } from "../../repositories/GlassDocumentsRepository";
 import { GlassUploadsDefaultRepository } from "../../../data/repositories/GlassUploadsDefaultRepository";
 import { ProgramRulesMetadataRepository } from "../../repositories/program-rules/ProgramRulesMetadataRepository";
+import { ImportRISIndividualFile } from "./amr-i/ImportRISIndividualFile";
+import { RISIndividualDataRepository } from "../../repositories/data-entry/RISIndividualDataRepository";
 
 export class ImportPrimaryFileUseCase implements UseCase {
     constructor(
         private risDataRepository: RISDataRepository,
+        private risIndividualRepository: RISIndividualDataRepository,
         private metadataRepository: MetadataRepository,
         private dataValuesRepository: DataValuesRepository,
         private moduleRepository: GlassModuleRepository,
@@ -40,27 +43,42 @@ export class ImportPrimaryFileUseCase implements UseCase {
         dryRun: boolean,
         eventListId: string | undefined
     ): FutureData<ImportSummary> {
-        if (moduleName === "AMR") {
-            const importRISFile = new ImportRISFile(
-                this.risDataRepository,
-                this.metadataRepository,
-                this.dataValuesRepository,
-                this.moduleRepository
-            );
-            return importRISFile.importRISFile(inputFile, batchId, period, action, orgUnit, countryCode, dryRun);
-        } else if (moduleName === "EGASP") {
-            const importEGASPFile = new ImportEGASPFile(
-                this.dhis2EventsDefaultRepository,
-                this.egaspProgramDefaultRepository,
-                this.excelRepository,
-                this.glassDocumentsRepository,
-                this.glassUploadsRepository,
-                this.eGASPValidationRepository
-            );
+        switch (moduleName) {
+            case "AMR": {
+                const importRISFile = new ImportRISFile(
+                    this.risDataRepository,
+                    this.metadataRepository,
+                    this.dataValuesRepository,
+                    this.moduleRepository
+                );
+                return importRISFile.importRISFile(inputFile, batchId, period, action, orgUnit, countryCode, dryRun);
+            }
 
-            return importEGASPFile.importEGASPFile(inputFile, action, eventListId, orgUnit, period);
-        } else {
-            return Future.error("Unknown module type");
+            case "EGASP": {
+                const importEGASPFile = new ImportEGASPFile(
+                    this.dhis2EventsDefaultRepository,
+                    this.egaspProgramDefaultRepository,
+                    this.excelRepository,
+                    this.glassDocumentsRepository,
+                    this.glassUploadsRepository,
+                    this.eGASPValidationRepository
+                );
+
+                return importEGASPFile.importEGASPFile(inputFile, action, eventListId, orgUnit, period);
+            }
+
+            case "AMR - Individual": {
+                const importRISIndividualFile = new ImportRISIndividualFile(this.risIndividualRepository);
+                return importRISIndividualFile.importRISIndividualFile(
+                    inputFile,
+                    action,
+                    orgUnit,
+                    period
+                );
+            }
+            default: {
+                return Future.error("Unknown module type");
+            }
         }
     }
 }

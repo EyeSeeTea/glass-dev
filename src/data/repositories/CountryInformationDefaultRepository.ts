@@ -9,6 +9,7 @@ import { Instance } from "../entities/Instance";
 import { getCurrentYear } from "../../utils/currentPeriodHelper";
 
 const ARMFocalPointProgram = "oo0bqS0AqMI";
+const AMRIProgramID = "mMAj6Gofe49";
 const moduleAttribute = "Fh6atHPjdxC";
 
 export class CountryInformationDefaultRepository implements CountryInformationRepository {
@@ -30,7 +31,7 @@ export class CountryInformationDefaultRepository implements CountryInformationRe
                 countryName = orgUnits.find(ou => ou.id === countryId)?.shortName || "";
 
                 return Future.joinObj({
-                    program: this.getProgram(),
+                    program: this.getProgram(module),
                     tei: this.getTEI(countryId, module),
                     orgUnits: Future.success(orgUnits),
                 });
@@ -99,25 +100,37 @@ export class CountryInformationDefaultRepository implements CountryInformationRe
     private getTEI(countryId: string, module: string): FutureData<D2TEI | undefined> {
         const cacheKey = `TEI-${countryId}-${module}`;
 
+        let programId = ARMFocalPointProgram;
+        let filterStr = `${moduleAttribute}:eq:${module}`;
+        if (module === "AMR - Individual") {
+            programId = AMRIProgramID;
+            filterStr = ``;
+        }
+
         return this.getFromCacheOrRemote(
             cacheKey,
             apiToFuture(
                 this.api.get<D2TEIsResponse>("/trackedEntityInstances", {
-                    program: ARMFocalPointProgram,
+                    program: programId,
                     ou: [countryId],
                     fields: "*",
                     totalPages: true,
                     page: 1,
                     pageSize: 1,
-                    filter: `${moduleAttribute}:eq:${module}`,
+                    filter: filterStr,
                     order: "created:Desc",
                 })
             ).map(response => response.trackedEntityInstances[0])
         );
     }
 
-    private getProgram(): FutureData<D2Program | undefined> {
-        const cacheKey = `program`;
+    private getProgram(module: string): FutureData<D2Program | undefined> {
+        const cacheKey = `program-${module}`;
+
+        let programId = ARMFocalPointProgram;
+        if (module === "AMR - Individual") {
+            programId = AMRIProgramID;
+        }
 
         return this.getFromCacheOrRemote(
             cacheKey,
@@ -125,7 +138,7 @@ export class CountryInformationDefaultRepository implements CountryInformationRe
                 this.api.models.programs.get({
                     fields: programFields,
                     includeAncestors: true,
-                    filter: { id: { eq: ARMFocalPointProgram } },
+                    filter: { id: { eq: programId } },
                 })
             ).map(response => response.objects[0])
         );
