@@ -13,9 +13,9 @@ import {
     RuleEffect,
     UpdateAction,
     UpdateActionEvent,
-} from "../../entities/egasp-validate/eventEffectTypes";
+} from "../../entities/program-rules/EventEffectTypes";
 import { Event } from "../../../data/repositories/Dhis2EventsDefaultRepository";
-import { EGASPValidationRepository } from "../../repositories/egasp-validate/EGASPValidationRepository";
+import { ProgramRulesMetadataRepository } from "../../repositories/program-rules/ProgramRulesMetadataRepository";
 import { Id } from "../../entities/Ref";
 import { Future, FutureData } from "../../entities/Future";
 
@@ -26,11 +26,11 @@ import { outputConverter } from "./converters/outputConverter";
 import { dateUtils } from "./converters/dateUtils";
 import { BlockingError, NonBlockingError } from "../../entities/data-entry/ImportSummary";
 
-export class EventValidationForEGASP {
-    constructor(private eGASPProgramRepository: EGASPValidationRepository) {}
+export class ProgramRuleValidationForEGASP {
+    constructor(private programRulesMetadataRepository: ProgramRulesMetadataRepository) {}
 
     public getValidatedEvents(events: Event[]): FutureData<EventResult> {
-        return this.eGASPProgramRepository.getMetadata().flatMap(metadata => {
+        return this.programRulesMetadataRepository.getMetadata().flatMap(metadata => {
             const eventEffects = this.getEventEffectsForEGASP(events, metadata);
             const actionsResult = this.getActions(eventEffects, metadata);
             if (actionsResult.blockingErrors.length > 0) {

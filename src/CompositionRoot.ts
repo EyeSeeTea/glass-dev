@@ -27,7 +27,7 @@ import { DeleteDocumentInfoByUploadIdUseCase } from "./domain/usecases/DeleteDoc
 import { ImportPrimaryFileUseCase } from "./domain/usecases/data-entry/ImportPrimaryFileUseCase";
 import { GetOpenDataSubmissionsByOUUseCase } from "./domain/usecases/GetOpenDataSubmissionsByOUUseCase";
 import { getD2APiFromInstance } from "./utils/d2-api";
-import { QuestionnaireD2Repository } from "./data/repositories/QuestionnaireD2Repository";
+import { QuestionnaireD2DefaultRepository } from "./data/repositories/QuestionnaireD2DefaultRepository";
 import { GetQuestionnaireUseCase } from "./domain/usecases/GetQuestionnaireUseCase";
 import { SaveQuestionnaireResponseUseCase } from "./domain/usecases/SaveQuestionUseCase";
 import { SetAsQuestionnaireCompletionUseCase } from "./domain/usecases/SetAsQuestionnaireCompletionUseCase";
@@ -40,8 +40,8 @@ import { GetCountryInformationUseCase } from "./domain/usecases/GetCountryInform
 import { CountryInformationDefaultRepository } from "./data/repositories/CountryInformationDefaultRepository";
 import { GetNotificationByIdUseCase } from "./domain/usecases/GetNotificationByIdUseCase";
 import { ImportSampleFileUseCase } from "./domain/usecases/data-entry/ImportSampleFileUseCase";
-import { RISDataCSVRepository } from "./data/repositories/RISDataCSVRepository";
-import { SampleDataCSVRepository } from "./data/repositories/SampleDataCSVRepository";
+import { RISDataCSVDefaultRepository } from "./data/repositories/RISDataCSVDefaultRepository";
+import { SampleDataCSVDeafultRepository } from "./data/repositories/SampleDataCSVDeafultRepository";
 import { GetGlassUploadsByModuleOUPeriodUseCase } from "./domain/usecases/GetGlassUploadsByModuleOUPeriodUseCase";
 import { SetDataSubmissionStatusUseCase } from "./domain/usecases/SetDataSubmissionStatusUseCase";
 import { DownloadDocumentUseCase } from "./domain/usecases/DownloadDocumentUseCase";
@@ -57,14 +57,14 @@ import { UsersDefaultRepository } from "./data/repositories/UsersDefaultReposito
 import { GetUiLocalesUseCase } from "./domain/usecases/GetUiLocalesUseCase";
 import { GetDatabaseLocalesUseCase } from "./domain/usecases/GetDatabaseLocalesUseCase";
 import { LocalesDefaultRepository } from "./data/repositories/LocalesDefaultRepository";
-import { EGASPDataCSVRepository } from "./data/repositories/EGASPDataCSVRepository";
+import { EGASPDataCSVDefaultRepository } from "./data/repositories/EGASPDataCSVDefaultRepository";
 import { Dhis2EventsDefaultRepository } from "./data/repositories/Dhis2EventsDefaultRepository";
 import { EGASPProgramDefaultRepository } from "./data/repositories/bulk-load/EGASPProgramDefaultRepository";
-import { ExcelPopulateRepository } from "./data/repositories/ExcelPopulateRepository";
+import { ExcelPopulateDefaultRepository } from "./data/repositories/ExcelPopulateDefaultRepository";
 import { SavePasswordUseCase } from "./domain/usecases/SavePasswordUseCase";
 import { SaveKeyDbLocaleUseCase } from "./domain/usecases/SaveKeyDbLocaleUseCase";
 import { SaveKeyUiLocaleUseCase } from "./domain/usecases/SaveKeyUiLocaleUseCase";
-import { EGASPValidationDefaultRepository } from "./data/repositories/egasp-validate/EGASPValidationDefaultRepository";
+import { ProgramRulesMetadataDefaultRepository } from "./data/repositories/program-rule/ProgramRulesMetadataDefaultRepository";
 
 export function getCompositionRoot(instance: Instance) {
     const api = getD2APiFromInstance(instance);
@@ -75,21 +75,21 @@ export function getCompositionRoot(instance: Instance) {
     const glassDataSubmissionRepository = new GlassDataSubmissionsDefaultRepository(dataStoreClient);
     const glassUploadsRepository = new GlassUploadsDefaultRepository(dataStoreClient);
     const glassDocumentsRepository = new GlassDocumentsDefaultRepository(dataStoreClient, instance);
-    const risDataRepository = new RISDataCSVRepository();
-    const sampleDataRepository = new SampleDataCSVRepository();
+    const risDataRepository = new RISDataCSVDefaultRepository();
+    const sampleDataRepository = new SampleDataCSVDeafultRepository();
     const dataValuesRepository = new DataValuesDefaultRepository(instance);
     const metadataRepository = new MetadataDefaultRepository(instance);
-    const questionnaireD2Repository = new QuestionnaireD2Repository(api);
+    const questionnaireD2Repository = new QuestionnaireD2DefaultRepository(api);
     const notificationRepository = new NotificationDefaultRepository(instance);
     const countryInformationRepository = new CountryInformationDefaultRepository(instance);
     const systemInfoRepository = new SystemInfoDefaultRepository(api);
     const usersRepository = new UsersDefaultRepository(api);
     const localeRepository = new LocalesDefaultRepository(instance);
-    const egaspDataRepository = new EGASPDataCSVRepository();
+    const egaspDataRepository = new EGASPDataCSVDefaultRepository();
     const dhis2EventsDefaultRepository = new Dhis2EventsDefaultRepository(instance);
     const egaspProgramRepository = new EGASPProgramDefaultRepository(instance);
-    const excelRepository = new ExcelPopulateRepository();
-    const eGASPValidationDefaultRepository = new EGASPValidationDefaultRepository(instance);
+    const excelRepository = new ExcelPopulateDefaultRepository();
+    const eGASPValidationDefaultRepository = new ProgramRulesMetadataDefaultRepository(instance);
 
     return {
         instance: getExecute({
@@ -142,7 +142,11 @@ export function getCompositionRoot(instance: Instance) {
                 glassUploadsRepository,
                 eGASPValidationDefaultRepository
             ),
-            validatePrimaryFile: new ValidatePrimaryFileUseCase(risDataRepository, egaspDataRepository),
+            validatePrimaryFile: new ValidatePrimaryFileUseCase(
+                risDataRepository,
+                egaspDataRepository,
+                glassModuleRepository
+            ),
             secondaryFile: new ImportSampleFileUseCase(sampleDataRepository, metadataRepository, dataValuesRepository),
             validateSecondaryFile: new ValidateSampleFileUseCase(sampleDataRepository),
         }),

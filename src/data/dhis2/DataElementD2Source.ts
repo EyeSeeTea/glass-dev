@@ -24,10 +24,12 @@ export class DataElementD2Source {
             this.api.metadata.get({
                 categoryCombos: {
                     fields: categoryComboFields,
-                    filter: { id: { in: categoryComboIds } },
                 },
             })
-        ).map(res => res.categoryCombos);
+        ).map(res => {
+            const filteredCategoryCombos = res.categoryCombos.filter(cc => categoryComboIds.includes(cc.id));
+            return filteredCategoryCombos;
+        });
 
         return categoryCombos$.map(categoryCombos => {
             const categoryComboById = _.keyBy(categoryCombos, getId);

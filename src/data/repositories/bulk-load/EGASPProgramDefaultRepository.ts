@@ -4,6 +4,7 @@ import { Instance } from "../../entities/Instance";
 import { getD2APiFromInstance } from "../../../utils/d2-api";
 import { Future, FutureData } from "../../../domain/entities/Future";
 import { apiToFuture } from "../../../utils/futures";
+import { EGASP_PROGRAM_ID } from "../program-rule/ProgramRulesMetadataDefaultRepository";
 
 export type DataElementType =
     | "TEXT"
@@ -65,7 +66,7 @@ export class EGASPProgramDefaultRepository {
                 this.api.models.programs.get({
                     fields: EGASPProgramFields,
                     includeAncestors: true,
-                    filter: { id: { eq: "SOjanrinfuG" } },
+                    filter: { id: { eq: EGASP_PROGRAM_ID } },
                 })
             ).map(response => {
                 console.debug(response);

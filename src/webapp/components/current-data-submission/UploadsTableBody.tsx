@@ -217,35 +217,46 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
     };
     return (
         <>
-            <>
-                <Backdrop open={loading} style={{ color: "#fff", zIndex: 1 }}>
-                    <StyledLoaderContainer>
-                        <CircularProgress color="#fff" size={50} />
-                        <Typography variant="h6">{i18n.t("Deleting Files")}</Typography>
-                        <Typography variant="h5">
-                            {i18n.t("This might take several minutes, do not refresh the page or press back.")}
-                        </Typography>
-                    </StyledLoaderContainer>
-                </Backdrop>
-                <ConfirmationDialog
-                    isOpen={open}
-                    title={moduleProperties.get(currentModuleAccess.moduleName)?.deleteConfirmation.title}
-                    onSave={deleteDataset}
-                    onCancel={hideConfirmationDialog}
-                    saveText={i18n.t("Ok")}
-                    cancelText={i18n.t("Cancel")}
-                    fullWidth={true}
-                    disableEnforceFocus
-                >
-                    <DialogContent>
-                        <Typography>
-                            {moduleProperties.get(currentModuleAccess.moduleName)?.deleteConfirmation.description}
-                        </Typography>
-                    </DialogContent>
-                </ConfirmationDialog>
-            </>
             {rows && (
                 <StyledTableBody>
+                    <TableRow>
+                        <TableCell style={{ border: "none", padding: 0 }}>
+                            <>
+                                <Backdrop open={loading} style={{ color: "#fff", zIndex: 1 }}>
+                                    <StyledLoaderContainer>
+                                        <CircularProgress color="#fff" size={50} />
+                                        <Typography variant="h6">{i18n.t("Deleting Files")}</Typography>
+                                        <Typography variant="h5">
+                                            {i18n.t(
+                                                "This might take several minutes, do not refresh the page or press back."
+                                            )}
+                                        </Typography>
+                                    </StyledLoaderContainer>
+                                </Backdrop>
+                                <ConfirmationDialog
+                                    isOpen={open}
+                                    title={
+                                        moduleProperties.get(currentModuleAccess.moduleName)?.deleteConfirmation.title
+                                    }
+                                    onSave={deleteDataset}
+                                    onCancel={hideConfirmationDialog}
+                                    saveText={i18n.t("Ok")}
+                                    cancelText={i18n.t("Cancel")}
+                                    fullWidth={true}
+                                    disableEnforceFocus
+                                >
+                                    <DialogContent>
+                                        <Typography>
+                                            {
+                                                moduleProperties.get(currentModuleAccess.moduleName)?.deleteConfirmation
+                                                    .description
+                                            }
+                                        </Typography>
+                                    </DialogContent>
+                                </ConfirmationDialog>
+                            </>
+                        </TableCell>
+                    </TableRow>
                     {rows.map((row: UploadsDataItem) => (
                         <TableRow key={row.id}>
                             <TableCell>{dayjs(row.uploadDate).format("DD-MM-YYYY")}</TableCell>
@@ -253,15 +264,15 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                             <TableCell>{row.records}</TableCell>
                             <TableCell>{row.fileType}</TableCell>
                             {moduleProperties.get(currentModuleAccess.moduleName)?.isbatchReq && (
-                                <TableCell>{row.batchId}</TableCell>
+                                <TableCell style={{ opacity: 0.5 }}>{row.batchId}</TableCell>
                             )}
                             <TableCell>{i18n.t(row.status).toUpperCase()}</TableCell>
-                            <TableCell>
-                                <Button onClick={() => downloadFile(row.fileId, row.fileName)} style={{ opacity: 0.5 }}>
+                            <TableCell style={{ opacity: 0.5 }}>
+                                <Button onClick={() => downloadFile(row.fileId, row.fileName)}>
                                     <CloudDownloadOutlined />
                                 </Button>
                             </TableCell>
-                            <TableCell>
+                            <TableCell style={{ opacity: 0.5 }}>
                                 {currentDataSubmissionStatus.kind === "loaded" ? (
                                     <Button
                                         onClick={() => showConfirmationDialog(row)}
@@ -270,7 +281,7 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                                             !isEditModeStatus(currentDataSubmissionStatus.data.title)
                                         }
                                     >
-                                        <DeleteOutline style={{ opacity: 1 }} />
+                                        <DeleteOutline />
                                     </Button>
                                 ) : (
                                     <CircularProgress size={20} />

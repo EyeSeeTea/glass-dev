@@ -6,14 +6,14 @@ import { RISDataRepository } from "../../repositories/data-entry/RISDataReposito
 import { ImportSummary } from "../../entities/data-entry/ImportSummary";
 import { GlassModuleRepository } from "../../repositories/GlassModuleRepository";
 import { ImportStrategy } from "../../entities/data-entry/DataValuesSaveSummary";
-import { ImportRISFile } from "./ImportRISFile";
-import { ImportEGASPFile } from "./ImportEGASPFile";
+import { ImportRISFile } from "./amr/ImportRISFile";
+import { ImportEGASPFile } from "./egasp/ImportEGASPFile";
 import { Dhis2EventsDefaultRepository } from "../../../data/repositories/Dhis2EventsDefaultRepository";
 import { EGASPProgramDefaultRepository } from "../../../data/repositories/bulk-load/EGASPProgramDefaultRepository";
 import { ExcelRepository } from "../../repositories/ExcelRepository";
 import { GlassDocumentsRepository } from "../../repositories/GlassDocumentsRepository";
 import { GlassUploadsDefaultRepository } from "../../../data/repositories/GlassUploadsDefaultRepository";
-import { EGASPValidationRepository } from "../../repositories/egasp-validate/EGASPValidationRepository";
+import { ProgramRulesMetadataRepository } from "../../repositories/program-rules/ProgramRulesMetadataRepository";
 
 export class ImportPrimaryFileUseCase implements UseCase {
     constructor(
@@ -26,14 +26,14 @@ export class ImportPrimaryFileUseCase implements UseCase {
         private excelRepository: ExcelRepository,
         private glassDocumentsRepository: GlassDocumentsRepository,
         private glassUploadsRepository: GlassUploadsDefaultRepository,
-        private eGASPValidationRepository: EGASPValidationRepository
+        private eGASPValidationRepository: ProgramRulesMetadataRepository
     ) {}
 
     public execute(
         moduleName: string,
         inputFile: File,
         batchId: string,
-        year: string,
+        period: string,
         action: ImportStrategy,
         orgUnit: string,
         countryCode: string,
@@ -47,7 +47,7 @@ export class ImportPrimaryFileUseCase implements UseCase {
                 this.dataValuesRepository,
                 this.moduleRepository
             );
-            return importRISFile.importRISFile(inputFile, batchId, year, action, orgUnit, countryCode, dryRun);
+            return importRISFile.importRISFile(inputFile, batchId, period, action, orgUnit, countryCode, dryRun);
         } else if (moduleName === "EGASP") {
             const importEGASPFile = new ImportEGASPFile(
                 this.dhis2EventsDefaultRepository,
@@ -58,7 +58,7 @@ export class ImportPrimaryFileUseCase implements UseCase {
                 this.eGASPValidationRepository
             );
 
-            return importEGASPFile.importEGASPFile(inputFile, action, eventListId);
+            return importEGASPFile.importEGASPFile(inputFile, action, eventListId, orgUnit, period);
         } else {
             return Future.error("Unknown module type");
         }

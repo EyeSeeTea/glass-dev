@@ -25,6 +25,7 @@ export interface GlassModule {
         validationReport: string;
     };
     dataSubmissionPeriod: DataSubmissionPeriodTypes;
+    dataColumns: string[];
 }
 
 interface QuestionnaireConfig {
