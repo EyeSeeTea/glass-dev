@@ -1,4 +1,4 @@
-import { DataSource, GeneratedTemplate, StyleSource } from "../../domain/entities/Template";
+import { DataSource, GeneratedTemplate, StyleSource } from "../../Template";
 
 export class ProgramGenerated04 implements GeneratedTemplate {
     public readonly type = "generated";

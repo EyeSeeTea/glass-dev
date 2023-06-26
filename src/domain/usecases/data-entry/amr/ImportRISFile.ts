@@ -1,28 +1,28 @@
 import i18n from "@eyeseetea/d2-ui-components/locales";
-import { D2ValidationResponse } from "../../../data/repositories/MetadataDefaultRepository";
-import { Future, FutureData } from "../../entities/Future";
-import { DataValue } from "../../entities/data-entry/DataValue";
-import { ImportStrategy } from "../../entities/data-entry/DataValuesSaveSummary";
-import { ImportSummary } from "../../entities/data-entry/ImportSummary";
-import { GlassModuleRepository } from "../../repositories/GlassModuleRepository";
-import { MetadataRepository } from "../../repositories/MetadataRepository";
-import { DataValuesRepository } from "../../repositories/data-entry/DataValuesRepository";
-import { RISDataRepository } from "../../repositories/data-entry/RISDataRepository";
-import { checkASTResults } from "./utils/checkASTResults";
-import { checkBatchId } from "./utils/checkBatchId";
-import { checkCountry } from "./utils/checkCountry";
-import { checkDhis2Validations } from "./utils/checkDhis2Validations";
-import { checkPathogenAntibiotic } from "./utils/checkPathogenAntibiotic";
-import { checkSpecimenPathogen } from "./utils/checkSpecimenPathogen";
-import { checkYear } from "./utils/checkYear";
+import { D2ValidationResponse } from "../../../../data/repositories/MetadataDefaultRepository";
+import { Future, FutureData } from "../../../entities/Future";
+import { DataValue } from "../../../entities/data-entry/DataValue";
+import { ImportStrategy } from "../../../entities/data-entry/DataValuesSaveSummary";
+import { ImportSummary } from "../../../entities/data-entry/ImportSummary";
+import { GlassModuleRepository } from "../../../repositories/GlassModuleRepository";
+import { MetadataRepository } from "../../../repositories/MetadataRepository";
+import { DataValuesRepository } from "../../../repositories/data-entry/DataValuesRepository";
+import { RISDataRepository } from "../../../repositories/data-entry/RISDataRepository";
+import { checkASTResults } from "../utils/checkASTResults";
+import { checkBatchId } from "../utils/checkBatchId";
+import { checkCountry } from "../utils/checkCountry";
+import { checkDhis2Validations } from "../utils/checkDhis2Validations";
+import { checkPathogenAntibiotic } from "../utils/checkPathogenAntibiotic";
+import { checkSpecimenPathogen } from "../utils/checkSpecimenPathogen";
+import { checkYear } from "../utils/checkYear";
 import {
     AMR_SPECIMEN_GENDER_AGE_ORIGIN_CC_ID,
     getCategoryOptionComboByDataElement,
     getCategoryOptionComboByOptionCodes,
-} from "./utils/getCategoryOptionCombo";
-import { includeBlokingErrors } from "./utils/includeBlockingErrors";
-import { mapToImportSummary } from "./utils/mapDhis2Summary";
-import { RISData } from "../../entities/data-entry/external/RISData";
+} from "../utils/getCategoryOptionCombo";
+import { includeBlokingErrors } from "../utils/includeBlockingErrors";
+import { mapToImportSummary } from "../utils/mapDhis2Summary";
+import { RISData } from "../../../entities/data-entry/amr-external/RISData";
 
 const AMR_AMR_DS_INPUT_FILES_RIS_DS_ID = "CeQPmXgrhHF";
 const AMR_DATA_PATHOGEN_ANTIBIOTIC_BATCHID_CC_ID = "S427AvQESbw";

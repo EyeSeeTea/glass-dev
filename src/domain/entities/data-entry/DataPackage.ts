@@ -1,7 +1,5 @@
 import { Id } from "../Ref";
 
-export interface EGASPData {} //TO DO: EGASP Data format
-
 export interface DataPackage {
     type: "programs";
     dataEntries: DataPackageData[];
