@@ -74,12 +74,12 @@ export const moduleProperties = new Map<string, ModuleDetails>([
             },
             deleteConfirmation: {
                 title: "Confirm Delete",
-                description: "Are you sure you want to delete this RIS individual file and corresponding events?",
+                description: "Are you sure you want to delete this RIS individual file and corresponding enrollments?",
             },
             primaryFileType: "RIS Individual",
             secondaryFileType: "",
             primaryUploadLabel: "Choose RIS Individual File",
-            unit: "event",
+            unit: "enrollments",
         },
     ],
 ]);

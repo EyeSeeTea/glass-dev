@@ -10,8 +10,8 @@ import { ImportSummary } from "../../../entities/data-entry/ImportSummary";
 import { RISIndividualData } from "../../../entities/data-entry/amr-i-external/RISIndividualData";
 import { TrackerRepository } from "../../../repositories/TrackerRepository";
 import { RISIndividualDataRepository } from "../../../repositories/data-entry/RISIndividualDataRepository";
-import { AMRIProgramID } from "../../../../data/repositories/CountryInformationDefaultRepository";
 
+const AMRIProgramID = "mMAj6Gofe49";
 const AMR_GLASS_AMR_TET_PATIENT = "CcgnfemKr5U";
 export class ImportRISIndividualFile {
     constructor(
