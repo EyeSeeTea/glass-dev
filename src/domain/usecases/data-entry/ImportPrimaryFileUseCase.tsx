@@ -16,6 +16,7 @@ import { GlassUploadsDefaultRepository } from "../../../data/repositories/GlassU
 import { ProgramRulesMetadataRepository } from "../../repositories/program-rules/ProgramRulesMetadataRepository";
 import { ImportRISIndividualFile } from "./amr-i/ImportRISIndividualFile";
 import { RISIndividualDataRepository } from "../../repositories/data-entry/RISIndividualDataRepository";
+import { TrackerRepository } from "../../repositories/TrackerRepository";
 
 export class ImportPrimaryFileUseCase implements UseCase {
     constructor(
@@ -29,7 +30,8 @@ export class ImportPrimaryFileUseCase implements UseCase {
         private excelRepository: ExcelRepository,
         private glassDocumentsRepository: GlassDocumentsRepository,
         private glassUploadsRepository: GlassUploadsDefaultRepository,
-        private eGASPValidationRepository: ProgramRulesMetadataRepository
+        private eGASPValidationRepository: ProgramRulesMetadataRepository,
+        private trackerRepository: TrackerRepository
     ) {}
 
     public execute(
@@ -68,13 +70,11 @@ export class ImportPrimaryFileUseCase implements UseCase {
             }
 
             case "AMR - Individual": {
-                const importRISIndividualFile = new ImportRISIndividualFile(this.risIndividualRepository);
-                return importRISIndividualFile.importRISIndividualFile(
-                    inputFile,
-                    action,
-                    orgUnit,
-                    period
+                const importRISIndividualFile = new ImportRISIndividualFile(
+                    this.risIndividualRepository,
+                    this.trackerRepository
                 );
+                return importRISIndividualFile.importRISIndividualFile(inputFile, action, orgUnit, period);
             }
             default: {
                 return Future.error("Unknown module type");

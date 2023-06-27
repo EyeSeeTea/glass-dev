@@ -9,7 +9,7 @@ import { Instance } from "../entities/Instance";
 import { getCurrentYear } from "../../utils/currentPeriodHelper";
 
 const ARMFocalPointProgram = "oo0bqS0AqMI";
-const AMRIProgramID = "mMAj6Gofe49";
+export const AMRIProgramID = "mMAj6Gofe49";
 const moduleAttribute = "Fh6atHPjdxC";
 
 export class CountryInformationDefaultRepository implements CountryInformationRepository {
