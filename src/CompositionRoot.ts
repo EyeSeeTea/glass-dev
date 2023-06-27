@@ -66,6 +66,7 @@ import { SaveKeyDbLocaleUseCase } from "./domain/usecases/SaveKeyDbLocaleUseCase
 import { SaveKeyUiLocaleUseCase } from "./domain/usecases/SaveKeyUiLocaleUseCase";
 import { ProgramRulesMetadataDefaultRepository } from "./data/repositories/program-rule/ProgramRulesMetadataDefaultRepository";
 import { RISIndividualDataCSVDefaultRepository } from "./data/repositories/RISIndividualDataCSVDefaultRepository";
+import { TrackerDefaultRepository } from "./data/repositories/TrackerDefaultRepository";
 
 export function getCompositionRoot(instance: Instance) {
     const api = getD2APiFromInstance(instance);
@@ -92,6 +93,7 @@ export function getCompositionRoot(instance: Instance) {
     const egaspProgramRepository = new EGASPProgramDefaultRepository(instance);
     const excelRepository = new ExcelPopulateDefaultRepository();
     const eGASPValidationDefaultRepository = new ProgramRulesMetadataDefaultRepository(instance);
+    const trackerRepository = new TrackerDefaultRepository(instance);
 
     return {
         instance: getExecute({
@@ -143,7 +145,8 @@ export function getCompositionRoot(instance: Instance) {
                 excelRepository,
                 glassDocumentsRepository,
                 glassUploadsRepository,
-                eGASPValidationDefaultRepository
+                eGASPValidationDefaultRepository,
+                trackerRepository
             ),
             validatePrimaryFile: new ValidatePrimaryFileUseCase(
                 risDataRepository,
