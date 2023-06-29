@@ -57,7 +57,6 @@ export class RISIndividualDataCSVDefaultRepository implements RISIndividualDataR
                     doesColumnExist(firstRow, "COUNTRY") &&
                     doesColumnExist(firstRow, "YEAR") &&
                     doesColumnExist(firstRow, "HCF_ID") &&
-                    // doesColumnExist(firstRow, "HCF_TYPE") &&
                     doesColumnExist(firstRow, "HOSPITALUNITTYPE") &&
                     doesColumnExist(firstRow, "PATIENT_ID") &&
                     doesColumnExist(firstRow, "AGE") &&
@@ -74,14 +73,6 @@ export class RISIndividualDataCSVDefaultRepository implements RISIndividualDataR
                     doesColumnExist(firstRow, "SIR") &&
                     doesColumnExist(firstRow, "REFERENCEGUIDELINESSIR") &&
                     doesColumnExist(firstRow, "DISKLOAD");
-                // doesColumnExist(firstRow, "RESULTETESTSIGN") &&
-                // doesColumnExist(firstRow, "RESULTETESTVALUE") &&
-                // doesColumnExist(firstRow, "RESULTETESTSIR") &&
-                // doesColumnExist(firstRow, "RESULTZONEVALUE") &&
-                // doesColumnExist(firstRow, "RESULTZONESIR") &&
-                // doesColumnExist(firstRow, "RESULTMICSIGN") &&
-                // doesColumnExist(firstRow, "RESULTMICVALUE") &&
-                // doesColumnExist(firstRow, "RESULTMICSIR");
 
                 const uniqSpecimens = _(sheet.rows)
                     .uniqBy("SPECIMEN")
@@ -100,12 +91,5 @@ export class RISIndividualDataCSVDefaultRepository implements RISIndividualDataR
                     specimens: [],
                 };
         });
-    }
-
-    validateABCLASS(absClass: string) {
-        //TODO: Remove this function when ABCLASS bring value from the file
-        //ABCLASS is not in the file for the moment, if value is empty
-        // set ABCLASS Missing
-        return absClass || "ABCLASS Missing";
     }
 }

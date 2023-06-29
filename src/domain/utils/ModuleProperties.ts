@@ -79,7 +79,7 @@ export const moduleProperties = new Map<string, ModuleDetails>([
             primaryFileType: "RIS Individual",
             secondaryFileType: "",
             primaryUploadLabel: "Choose RIS Individual File",
-            unit: "enrollments",
+            unit: "enrollment",
         },
     ],
 ]);
