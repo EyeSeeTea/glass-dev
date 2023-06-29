@@ -72,9 +72,11 @@ export class ImportPrimaryFileUseCase implements UseCase {
             case "AMR - Individual": {
                 const importRISIndividualFile = new ImportRISIndividualFile(
                     this.risIndividualRepository,
-                    this.trackerRepository
+                    this.trackerRepository,
+                    this.glassDocumentsRepository,
+                    this.glassUploadsRepository
                 );
-                return importRISIndividualFile.importRISIndividualFile(inputFile, action, orgUnit, period);
+                return importRISIndividualFile.importRISIndividualFile(inputFile, action, orgUnit, period, eventListId);
             }
             default: {
                 return Future.error("Unknown module type");

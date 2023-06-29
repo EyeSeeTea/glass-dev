@@ -1,6 +1,7 @@
-import { TrackedEntity } from "../../data/repositories/TrackerDefaultRepository";
+import { Enrollment, TrackerPostRequest, TrackerPostResponse } from "../../data/repositories/TrackerDefaultRepository";
 import { FutureData } from "../entities/Future";
+import { ImportStrategy } from "../entities/data-entry/DataValuesSaveSummary";
 
 export interface TrackerRepository {
-    import(entities: TrackedEntity[]): FutureData<void>;
+    import(req: TrackerPostRequest, action: ImportStrategy): FutureData<TrackerPostResponse>;
 }
