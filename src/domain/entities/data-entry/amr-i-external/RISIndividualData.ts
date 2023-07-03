@@ -22,6 +22,7 @@ export interface RISIndividualData {
     RESULTETESTSIGN: string;
     RESULTETESTVALUE: number;
     RESULTETESTSIR: string;
+    RESULTZONESIGN: string;
     RESULTZONEVALUE: number;
     RESULTZONESIR: string;
     RESULTMICSIGN: string;

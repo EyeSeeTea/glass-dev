@@ -5,6 +5,7 @@ import { HttpResponse } from "@eyeseetea/d2-api/api/common";
 import { D2Api } from "@eyeseetea/d2-api/2.34";
 import { TrackerRepository } from "../../domain/repositories/TrackerRepository";
 import { ImportStrategy } from "../../domain/entities/data-entry/DataValuesSaveSummary";
+import { apiToFuture } from "../../utils/futures";
 
 export interface TrackerPostRequest {
     trackedEntities: TrackedEntity[];
@@ -81,19 +82,16 @@ export interface Enrollment {
     program: string;
     enrollment: string;
     trackedEntityType: string;
-    enrolledAt: string;
-    deleted: false;
-    occurredAt: string;
-    status: "ACTIVE";
     notes: [];
     relationships: [];
     attributes: EnrollmentAttribute[];
     events: EnrollmentEvent[];
+    enrolledAt: string;
+    occurredAt: string;
 }
 
 export interface EnrollmentAttribute {
     attribute: string;
-    // code: string;
     value: Date | string | number;
 }
 export interface EnrollmentEvent {
@@ -123,5 +121,36 @@ export class TrackerDefaultRepository implements TrackerRepository {
                     else return error;
                 })
         );
+    }
+
+    public getAMRIProgramMetadata(AMRIProgramID: string, AMRDataProgramStageId: string): FutureData<any> {
+        return apiToFuture(
+            this.api.models.programs.get({
+                fields: {
+                    id: true,
+                    programStages: {
+                        id: true,
+                        name: true,
+                        programStageDataElements: {
+                            dataElement: {
+                                id: true,
+                                name: true,
+                                code: true,
+                            },
+                        },
+                    },
+                    programTrackedEntityAttributes: { trackedEntityAttribute: { id: true, name: true, code: true } },
+                },
+                filter: { id: { eq: AMRIProgramID } },
+            })
+        ).map(response => {
+            const programStage = response.objects[0]?.programStages.find(ps => ps.id === AMRDataProgramStageId);
+            return {
+                programAttributes: response.objects[0]?.programTrackedEntityAttributes.map(
+                    atr => atr.trackedEntityAttribute
+                ),
+                programStageDataElements: programStage?.programStageDataElements.map(de => de.dataElement),
+            };
+        });
     }
 }

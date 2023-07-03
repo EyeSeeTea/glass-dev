@@ -17,6 +17,7 @@ import { ProgramRulesMetadataRepository } from "../../repositories/program-rules
 import { ImportRISIndividualFile } from "./amr-i/ImportRISIndividualFile";
 import { RISIndividualDataRepository } from "../../repositories/data-entry/RISIndividualDataRepository";
 import { TrackerRepository } from "../../repositories/TrackerRepository";
+import { GlassModuleDefaultRepository } from "../../../data/repositories/GlassModuleDefaultRepository";
 
 export class ImportPrimaryFileUseCase implements UseCase {
     constructor(
@@ -31,7 +32,8 @@ export class ImportPrimaryFileUseCase implements UseCase {
         private glassDocumentsRepository: GlassDocumentsRepository,
         private glassUploadsRepository: GlassUploadsDefaultRepository,
         private eGASPValidationRepository: ProgramRulesMetadataRepository,
-        private trackerRepository: TrackerRepository
+        private trackerRepository: TrackerRepository,
+        private glassModuleDefaultRepository: GlassModuleDefaultRepository
     ) {}
 
     public execute(
@@ -76,7 +78,16 @@ export class ImportPrimaryFileUseCase implements UseCase {
                     this.glassDocumentsRepository,
                     this.glassUploadsRepository
                 );
-                return importRISIndividualFile.importRISIndividualFile(inputFile, action, orgUnit, period, eventListId);
+                return this.glassModuleDefaultRepository.getByName(moduleName).flatMap(module => {
+                    return importRISIndividualFile.importRISIndividualFile(
+                        inputFile,
+                        action,
+                        orgUnit,
+                        period,
+                        eventListId,
+                        module.programs !== undefined ? module.programs.at(0) : undefined
+                    );
+                });
             }
             default: {
                 return Future.error("Unknown module type");

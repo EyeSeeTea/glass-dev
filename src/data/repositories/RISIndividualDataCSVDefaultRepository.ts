@@ -36,6 +36,7 @@ export class RISIndividualDataCSVDefaultRepository implements RISIndividualDataR
                         RESULTETESTSIGN: getTextValue(row, "RESULTETESTSIGN"),
                         RESULTETESTVALUE: getNumberValue(row, "RESULTETESTVALUE"),
                         RESULTETESTSIR: getTextValue(row, "RESULTETESTSIR"),
+                        RESULTZONESIGN: getTextValue(row, "RESULTZONESIGN"),
                         RESULTZONEVALUE: getNumberValue(row, "RESULTZONEVALUE"),
                         RESULTZONESIR: getTextValue(row, "RESULTZONESIR"),
                         RESULTMICSIGN: getTextValue(row, "RESULTMICSIGN"),
