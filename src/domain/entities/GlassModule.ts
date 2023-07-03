@@ -26,6 +26,10 @@ export interface GlassModule {
     };
     dataSubmissionPeriod: DataSubmissionPeriodTypes;
     dataColumns: string[];
+    programs?: {
+        id: string;
+        programStageId: string;
+    }[];
 }
 
 interface QuestionnaireConfig {
