@@ -1,3 +1,4 @@
+import i18n from "@eyeseetea/d2-ui-components/locales";
 import {
     Enrollment,
     EnrollmentAttribute,
@@ -7,7 +8,7 @@ import {
 } from "../../../../data/repositories/TrackerDefaultRepository";
 import { Future, FutureData } from "../../../entities/Future";
 import { ImportStrategy } from "../../../entities/data-entry/DataValuesSaveSummary";
-import { ImportSummary } from "../../../entities/data-entry/ImportSummary";
+import { ConsistencyError, ImportSummary } from "../../../entities/data-entry/ImportSummary";
 import { RISIndividualData } from "../../../entities/data-entry/amr-i-external/RISIndividualData";
 import { GlassDocumentsRepository } from "../../../repositories/GlassDocumentsRepository";
 import { GlassUploadsRepository } from "../../../repositories/GlassUploadsRepository";
@@ -30,6 +31,7 @@ export class ImportRISIndividualFile {
         inputFile: File,
         action: ImportStrategy,
         orgUnit: string,
+        countryCode: string,
         period: string,
         eventListId: string | undefined,
         program:
@@ -41,48 +43,56 @@ export class ImportRISIndividualFile {
     ): FutureData<ImportSummary> {
         if (action === "CREATE_AND_UPDATE") {
             return this.risIndividualRepository.get(inputFile).flatMap(risIndividualDataItems => {
-                console.debug(risIndividualDataItems, action, orgUnit, period);
-                //TO DO : Add Validation
-
-                //Import RIS data
-                const AMRIProgramIDl = program ? program.id : AMRIProgramID;
-                const AMRDataProgramStageIdl = program ? program.programStageId : AMRDataProgramStageId;
-
-                return this.mapIndividualDataItemsToEntities(
-                    risIndividualDataItems,
-                    orgUnit,
-                    AMRIProgramIDl,
-                    AMRDataProgramStageIdl
-                ).flatMap(entities => {
-                    return this.trackerRepository.import({ trackedEntities: entities }, action).flatMap(response => {
-                        const { summary, entityIdsList } = this.mapResponseToImportSummary(response);
-
-                        const primaryUploadId = localStorage.getItem("primaryUploadId");
-                        if (entityIdsList.length > 0 && primaryUploadId) {
-                            //Enrollments were imported successfully, so create and uplaod a file with enrollments ids
-                            // and associate it with the upload datastore object
-                            const enrollmentIdListBlob = new Blob([JSON.stringify(entityIdsList)], {
-                                type: "text/plain",
-                            });
-
-                            const enrollmentIdsListFile = new File(
-                                [enrollmentIdListBlob],
-                                `${primaryUploadId}_enrollmentIdsFile`
-                            );
-
-                            return this.glassDocumentsRepository.save(enrollmentIdsListFile, "AMR").flatMap(fileId => {
-                                return this.glassUploadsRepository
-                                    .setEventListFileId(primaryUploadId, fileId)
-                                    .flatMap(() => {
-                                        console.debug(`Updated upload datastore object with entityListFileId`);
-                                        return Future.success(summary);
-                                    });
-                            });
-                        } else {
-                            return Future.success(summary);
+                return this.validateDataItems(risIndividualDataItems, countryCode, period).flatMap(
+                    validationSummary => {
+                        //If there are blocking errors on custom validation, do not import. Return immediately.
+                        if (validationSummary.blockingErrors.length > 0) {
+                            return Future.success(validationSummary);
                         }
-                    });
-                });
+                        //Import RIS data
+                        const AMRIProgramIDl = program ? program.id : AMRIProgramID;
+                        const AMRDataProgramStageIdl = program ? program.programStageId : AMRDataProgramStageId;
+
+                        return this.mapIndividualDataItemsToEntities(
+                            risIndividualDataItems,
+                            orgUnit,
+                            AMRIProgramIDl,
+                            AMRDataProgramStageIdl
+                        ).flatMap(entities => {
+                            return this.trackerRepository
+                                .import({ trackedEntities: entities }, action)
+                                .flatMap(response => {
+                                    const { summary, entityIdsList } = this.mapResponseToImportSummary(response);
+
+                                    const primaryUploadId = localStorage.getItem("primaryUploadId");
+                                    if (entityIdsList.length > 0 && primaryUploadId) {
+                                        //Enrollments were imported successfully, so create and uplaod a file with enrollments ids
+                                        // and associate it with the upload datastore object
+                                        const enrollmentIdListBlob = new Blob([JSON.stringify(entityIdsList)], {
+                                            type: "text/plain",
+                                        });
+
+                                        const enrollmentIdsListFile = new File(
+                                            [enrollmentIdListBlob],
+                                            `${primaryUploadId}_enrollmentIdsFile`
+                                        );
+
+                                        return this.glassDocumentsRepository
+                                            .save(enrollmentIdsListFile, "AMR")
+                                            .flatMap(fileId => {
+                                                return this.glassUploadsRepository
+                                                    .setEventListFileId(primaryUploadId, fileId)
+                                                    .flatMap(() => {
+                                                        return Future.success(summary);
+                                                    });
+                                            });
+                                    } else {
+                                        return Future.success(summary);
+                                    }
+                                });
+                        });
+                    }
+                );
             });
         } else if (action === "DELETE") {
             if (eventListId) {
@@ -122,6 +132,71 @@ export class ImportRISIndividualFile {
         }
     }
 
+    private validateDataItems(
+        risIndividualDataItems: RISIndividualData[],
+        orgUnit: string,
+        period: string
+    ): FutureData<ImportSummary> {
+        const orgUnitErrors = this.checkCountry(risIndividualDataItems, orgUnit);
+        const periodErrors = this.checkPeriod(risIndividualDataItems, period);
+        const summary: ImportSummary = {
+            status: "ERROR",
+            importCount: { ignored: 0, imported: 0, deleted: 0, updated: 0 },
+            nonBlockingErrors: [],
+            blockingErrors: [...orgUnitErrors, ...periodErrors],
+        };
+        return Future.success(summary);
+    }
+
+    private checkCountry(risIndividualDataItems: RISIndividualData[], orgUnit: string): ConsistencyError[] {
+        const errors = _(
+            risIndividualDataItems.map((dataItem, index) => {
+                if (dataItem.COUNTRY !== orgUnit) {
+                    return {
+                        error: i18n.t(
+                            `Country is different: Selected Data Submission Country : ${orgUnit}, Country in file: ${dataItem.COUNTRY}`
+                        ),
+                        line: index,
+                    };
+                }
+            })
+        )
+            .omitBy(_.isNil)
+            .groupBy(error => error?.error)
+            .mapValues(value => value.map(el => el?.line || 0))
+            .value();
+
+        return Object.keys(errors).map(error => ({
+            error: error,
+            count: errors[error]?.length || 0,
+            lines: errors[error] || [],
+        }));
+    }
+    private checkPeriod(risIndividualDataItems: RISIndividualData[], period: string): ConsistencyError[] {
+        const errors = _(
+            risIndividualDataItems.map((dataItem, index) => {
+                if (dataItem.YEAR !== parseInt(period)) {
+                    return {
+                        error: i18n.t(
+                            `Year is different: Selected Data Submission Country : ${period}, Country in file: ${dataItem.YEAR}`
+                        ),
+                        line: index,
+                    };
+                }
+            })
+        )
+            .omitBy(_.isNil)
+            .groupBy(error => error?.error)
+            .mapValues(value => value.map(el => el?.line || 0))
+            .value();
+
+        return Object.keys(errors).map(error => ({
+            error: error,
+            count: errors[error]?.length || 0,
+            lines: errors[error] || [],
+        }));
+    }
+
     private mapIndividualDataItemsToEntities(
         individualDataItems: RISIndividualData[],
         orgUnit: string,
@@ -131,7 +206,6 @@ export class ImportRISIndividualFile {
         return this.trackerRepository
             .getAMRIProgramMetadata(AMRIProgramIDl, AMRDataProgramStageIdl)
             .flatMap(metadata => {
-                console.debug(metadata);
                 const trackedEntities = individualDataItems.map(dataItem => {
                     const attributes: EnrollmentAttribute[] = metadata.programAttributes.map(
                         (attr: { id: string; name: string; code: string }) => {
@@ -144,7 +218,6 @@ export class ImportRISIndividualFile {
                     );
                     const AMRDataStage: { dataElement: string; value: string | number }[] =
                         metadata.programStageDataElements.map((de: { id: string; name: string; code: string }) => {
-                            console.debug(de);
                             return {
                                 dataElement: de.id,
                                 // @ts-ignore
@@ -194,13 +267,13 @@ export class ImportRISIndividualFile {
         entityIdsList: string[];
     } {
         const blockingErrors = _.countBy(
-            response.validationReport.errorReports.map(be => {
+            response.validationReport?.errorReports.map(be => {
                 return be.message;
             })
         );
 
         const nonBlockingErrors = _.countBy(
-            response.validationReport.warningReports.map(nbe => {
+            response.validationReport?.warningReports.map(nbe => {
                 return nbe.message;
             })
         );

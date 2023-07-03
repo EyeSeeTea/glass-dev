@@ -83,6 +83,7 @@ export class ImportPrimaryFileUseCase implements UseCase {
                         inputFile,
                         action,
                         orgUnit,
+                        countryCode,
                         period,
                         eventListId,
                         module.programs !== undefined ? module.programs.at(0) : undefined
