@@ -91,7 +91,7 @@ export const DataFileTable: React.FC<DataFileTableProps> = ({ title, items, clas
                             <TableCell>
                                 <Typography variant="caption">{i18n.t("Period")}</Typography>
                             </TableCell>
-                            {moduleProperties.get(currentModuleAccess.moduleName)?.isbatchReq && (
+                            {moduleProperties.get(currentModuleAccess.moduleName)?.isSpecimenReq && (
                                 <TableCell>
                                     <Typography variant="caption">{i18n.t("Specimens")}</Typography>
                                 </TableCell>

@@ -97,9 +97,6 @@ export class ImportEGASPFile {
                                                                         return this.glassUploadsRepository
                                                                             .setEventListFileId(primaryUploadId, fileId)
                                                                             .flatMap(() => {
-                                                                                console.debug(
-                                                                                    `Updated upload datastore object with eventListFileId`
-                                                                                );
                                                                                 return Future.success(importSummary);
                                                                             });
                                                                     });
