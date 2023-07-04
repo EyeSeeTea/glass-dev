@@ -94,7 +94,7 @@ export const Submission: React.FC<SubmissionProps> = ({ setRefetchStatus, setCur
                             "Please review that the submission package contains all the datasets that you want to include."
                         )}
                         {i18n.t(
-                            "After you submit this package, you wont be able to edit it anymore wihout WHO permissions"
+                            "After you submit this package, you wont be able to edit it anymore without WHO permissions"
                         )}
                     </Typography>
                 </DialogContent>
