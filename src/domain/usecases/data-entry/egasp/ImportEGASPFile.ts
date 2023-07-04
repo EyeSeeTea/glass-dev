@@ -199,6 +199,7 @@ export class ImportEGASPFile {
                     return { error: err[0], count: err[1] };
                 }),
                 nonBlockingErrors: nonBlockingErrors,
+                importTime: new Date(),
             };
 
             const eventIdList = result.importSummaries.map(summary => {

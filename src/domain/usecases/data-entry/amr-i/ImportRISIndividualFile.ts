@@ -292,6 +292,7 @@ export class ImportRISIndividualFile {
             blockingErrors: Object.entries(blockingErrors).map(err => {
                 return { error: err[0], count: err[1] };
             }),
+            importTime: new Date(),
         };
 
         let entityListIds: string[] = [];
