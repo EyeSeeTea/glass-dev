@@ -1,11 +1,4 @@
 import i18n from "@eyeseetea/d2-ui-components/locales";
-import {
-    Enrollment,
-    EnrollmentAttribute,
-    EnrollmentEvent,
-    TrackedEntity,
-    TrackerPostResponse,
-} from "../../../../data/repositories/TrackerDefaultRepository";
 import { Future, FutureData } from "../../../entities/Future";
 import { ImportStrategy } from "../../../entities/data-entry/DataValuesSaveSummary";
 import { ConsistencyError, ImportSummary } from "../../../entities/data-entry/ImportSummary";
@@ -15,6 +8,7 @@ import { GlassUploadsRepository } from "../../../repositories/GlassUploadsReposi
 import { TrackerRepository } from "../../../repositories/TrackerRepository";
 import { RISIndividualDataRepository } from "../../../repositories/data-entry/RISIndividualDataRepository";
 import { getStringFromFile } from "../utils/fileToString";
+import { EnrollmentAttribute, EnrollmentEvent, TrackedEntity, Enrollment, TrackerPostResponse } from "@eyeseetea/d2-api/api/tracker";
 
 const AMRIProgramID = "mMAj6Gofe49";
 const AMR_GLASS_AMR_TET_PATIENT = "CcgnfemKr5U";
