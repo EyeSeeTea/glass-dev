@@ -130,10 +130,12 @@ export class CustomValidationForEGASP {
         //1. Patient ids of events in file.
         const filePatientIDs = fileEvents.map(event => {
             const patientDataElement = event.dataValues.find(dv => dv.dataElement === PATIENT_DATAELEMENT_ID);
-            if (patientDataElement)
+            const eventDate = new Date(event.eventDate);
+
+            if (patientDataElement && eventDate instanceof Date && !isNaN(eventDate.getTime()))
                 return {
                     eventId: event.event,
-                    patientIdAndDate: `${patientDataElement.value},${new Date(event.eventDate).toISOString()}`,
+                    patientIdAndDate: `${patientDataElement.value},${eventDate.toISOString()}`,
                 };
             else return null;
         });
@@ -141,10 +143,11 @@ export class CustomValidationForEGASP {
         //2. Egasp ids of existing events.
         const existingPatientsIDs = existingEvents.map(event => {
             const patientDataElement = event.dataValues.find(dv => dv.dataElement === PATIENT_DATAELEMENT_ID);
-            if (patientDataElement)
+            const eventDate = new Date(event.eventDate);
+            if (patientDataElement && eventDate instanceof Date && !isNaN(eventDate.getTime()))
                 return {
                     eventId: event.event,
-                    patientIdAndDate: `${patientDataElement.value},${new Date(event.eventDate).toISOString()}`,
+                    patientIdAndDate: `${patientDataElement.value},${eventDate.toISOString()}`,
                 };
             else return null;
         });
