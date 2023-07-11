@@ -15,6 +15,7 @@ type ModuleDetails = {
     secondaryFileType: string;
     primaryUploadLabel: string;
     unit: string;
+    populateCurrentYearInHistory: boolean;
 };
 
 export const moduleProperties = new Map<string, ModuleDetails>([
@@ -38,6 +39,7 @@ export const moduleProperties = new Map<string, ModuleDetails>([
             secondaryFileType: "SAMPLE",
             primaryUploadLabel: "Choose RIS File",
             unit: "data value",
+            populateCurrentYearInHistory: false,
         },
     ],
     [
@@ -59,6 +61,7 @@ export const moduleProperties = new Map<string, ModuleDetails>([
             secondaryFileType: "",
             primaryUploadLabel: "Choose EGASP File",
             unit: "event",
+            populateCurrentYearInHistory: true,
         },
     ],
 ]);
