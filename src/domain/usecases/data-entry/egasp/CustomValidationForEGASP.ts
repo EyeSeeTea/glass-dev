@@ -3,7 +3,6 @@ import { Dhis2EventsDefaultRepository, Event } from "../../../../data/repositori
 import { Future, FutureData } from "../../../entities/Future";
 import { ConsistencyError } from "../../../entities/data-entry/ImportSummary";
 import { EventResult } from "../../../entities/program-rules/EventEffectTypes";
-import { firstDayOfQuarter, lastDayOfQuarter } from "../../../utils/quarterlyPeriodHelper";
 
 const EGASP_DATAELEMENT_ID = "KaS2YBRN8eH";
 const PATIENT_DATAELEMENT_ID = "aocFHBxcQa0";
@@ -12,7 +11,7 @@ export class CustomValidationForEGASP {
     public getValidatedEvents(events: Event[], orgUnit: string, period: string): FutureData<EventResult> {
         //1. Org unit validation
         const orgUnitErrors = this.checkCountry(events, orgUnit);
-        //2. Quarterly period validation
+        //2. Period validation
         const periodErrors = this.checkPeriod(events, period);
 
         //Fetch all existing EGASP events for the given org unit
@@ -66,10 +65,10 @@ export class CustomValidationForEGASP {
         const errors = _(
             events.map(event => {
                 const eventDate = new Date(event.eventDate);
-                if (eventDate < firstDayOfQuarter(period) || eventDate > lastDayOfQuarter(period)) {
+                if (eventDate.getFullYear().toString() !== period) {
                     return {
                         error: i18n.t(
-                            `Event date is incorrect: Selected Quarterly period : ${period}, date in file: ${event.eventDate}`
+                            `Event date is incorrect: Selected period : ${period}, date in file: ${event.eventDate}`
                         ),
                         line: parseInt(event.event),
                     };
