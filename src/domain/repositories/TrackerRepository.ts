@@ -1,4 +1,4 @@
-import { TrackerPostRequest, TrackerPostResponse } from "../../data/repositories/TrackerDefaultRepository";
+import { TrackerPostRequest, TrackerPostResponse } from "@eyeseetea/d2-api/api/tracker";
 import { FutureData } from "../entities/Future";
 import { ImportStrategy } from "../entities/data-entry/DataValuesSaveSummary";
 
