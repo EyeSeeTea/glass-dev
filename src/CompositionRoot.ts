@@ -65,6 +65,8 @@ import { SavePasswordUseCase } from "./domain/usecases/SavePasswordUseCase";
 import { SaveKeyDbLocaleUseCase } from "./domain/usecases/SaveKeyDbLocaleUseCase";
 import { SaveKeyUiLocaleUseCase } from "./domain/usecases/SaveKeyUiLocaleUseCase";
 import { ProgramRulesMetadataDefaultRepository } from "./data/repositories/program-rule/ProgramRulesMetadataDefaultRepository";
+import { RISIndividualDataCSVDefaultRepository } from "./data/repositories/RISIndividualDataCSVDefaultRepository";
+import { TrackerDefaultRepository } from "./data/repositories/TrackerDefaultRepository";
 
 export function getCompositionRoot(instance: Instance) {
     const api = getD2APiFromInstance(instance);
@@ -76,6 +78,7 @@ export function getCompositionRoot(instance: Instance) {
     const glassUploadsRepository = new GlassUploadsDefaultRepository(dataStoreClient);
     const glassDocumentsRepository = new GlassDocumentsDefaultRepository(dataStoreClient, instance);
     const risDataRepository = new RISDataCSVDefaultRepository();
+    const risIndividualRepository = new RISIndividualDataCSVDefaultRepository();
     const sampleDataRepository = new SampleDataCSVDeafultRepository();
     const dataValuesRepository = new DataValuesDefaultRepository(instance);
     const metadataRepository = new MetadataDefaultRepository(instance);
@@ -90,6 +93,7 @@ export function getCompositionRoot(instance: Instance) {
     const egaspProgramRepository = new EGASPProgramDefaultRepository(instance);
     const excelRepository = new ExcelPopulateDefaultRepository();
     const eGASPValidationDefaultRepository = new ProgramRulesMetadataDefaultRepository(instance);
+    const trackerRepository = new TrackerDefaultRepository(instance);
 
     return {
         instance: getExecute({
@@ -132,6 +136,7 @@ export function getCompositionRoot(instance: Instance) {
         fileSubmission: getExecute({
             primaryFile: new ImportPrimaryFileUseCase(
                 risDataRepository,
+                risIndividualRepository,
                 metadataRepository,
                 dataValuesRepository,
                 glassModuleRepository,
@@ -140,10 +145,13 @@ export function getCompositionRoot(instance: Instance) {
                 excelRepository,
                 glassDocumentsRepository,
                 glassUploadsRepository,
-                eGASPValidationDefaultRepository
+                eGASPValidationDefaultRepository,
+                trackerRepository,
+                glassModuleRepository
             ),
             validatePrimaryFile: new ValidatePrimaryFileUseCase(
                 risDataRepository,
+                risIndividualRepository,
                 egaspDataRepository,
                 glassModuleRepository
             ),

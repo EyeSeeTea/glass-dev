@@ -210,10 +210,8 @@ export class ProgramRuleValidationForEGASP {
             .groupBy(ev => [ev.orgUnit, ev.program, ev.attributeOptionCombo, ev.trackedEntityInstance].join("."))
             .values()
             .value();
-        console.debug(eventsGroups);
 
         const programRulesIds: Id[] = metadata.programRules.map(pr => pr.id);
-        console.debug(`Program Rules Ids: ${programRulesIds}`);
 
         if (program) {
             const eventEffects = _(eventsGroups)
@@ -246,8 +244,6 @@ export class ProgramRuleValidationForEGASP {
         const { event: d2Event, program, programRulesIds, metadata, events } = options;
         const allEvents = events.map(event => this.getProgramEvent(event, metadata));
         const event = this.getProgramEvent(d2Event, metadata);
-
-        console.debug(`Process event: ${event.eventId}`);
 
         const selectedOrgUnit: OrgUnit = {
             id: event.orgUnitId,
@@ -385,7 +381,6 @@ export class ProgramRuleValidationForEGASP {
     }
 
     private getProgramRuleEffects(options: GetProgramRuleEffectsOptions): RuleEffect[] {
-        console.debug(options);
         const rulesEngine = new RulesEngine(inputConverter, outputConverter, dateUtils, "WebClient");
         return rulesEngine.getProgramRuleEffects(options);
     }

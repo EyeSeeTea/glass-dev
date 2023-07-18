@@ -15,6 +15,7 @@ type ModuleDetails = {
     secondaryFileType: string;
     primaryUploadLabel: string;
     unit: string;
+    isSpecimenReq: boolean;
 };
 
 export const moduleProperties = new Map<string, ModuleDetails>([
@@ -38,6 +39,7 @@ export const moduleProperties = new Map<string, ModuleDetails>([
             secondaryFileType: "SAMPLE",
             primaryUploadLabel: "Choose RIS File",
             unit: "data value",
+            isSpecimenReq: true,
         },
     ],
     [
@@ -59,6 +61,29 @@ export const moduleProperties = new Map<string, ModuleDetails>([
             secondaryFileType: "",
             primaryUploadLabel: "Choose EGASP File",
             unit: "event",
+            isSpecimenReq: false,
+        },
+    ],
+    [
+        "AMR - Individual",
+        {
+            isbatchReq: false,
+            isQuestionnaireReq: false,
+            isSecondaryFileApplicable: false,
+            isDryRunReq: false,
+            importLoadingMsg: {
+                line1: "Importing data,",
+                line2: "This might take several minutes, do not refresh the page or press back.",
+            },
+            deleteConfirmation: {
+                title: "Confirm Delete",
+                description: "Are you sure you want to delete this RIS individual file and corresponding enrollments?",
+            },
+            primaryFileType: "RIS Individual",
+            secondaryFileType: "",
+            primaryUploadLabel: "Choose RIS Individual File",
+            unit: "enrollment",
+            isSpecimenReq: true,
         },
     ],
 ]);

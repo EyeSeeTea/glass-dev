@@ -99,6 +99,9 @@ export class CountryInformationDefaultRepository implements CountryInformationRe
     private getTEI(countryId: string, module: string): FutureData<D2TEI | undefined> {
         const cacheKey = `TEI-${countryId}-${module}`;
 
+        const sanitizedModule = module.replaceAll(" ", "").replace("-", "_"); //AMR - Individual --> AMR_Individual
+        const filterStr = `${moduleAttribute}:eq:${sanitizedModule}`;
+
         return this.getFromCacheOrRemote(
             cacheKey,
             apiToFuture(
@@ -109,7 +112,7 @@ export class CountryInformationDefaultRepository implements CountryInformationRe
                     totalPages: true,
                     page: 1,
                     pageSize: 1,
-                    filter: `${moduleAttribute}:eq:${module}`,
+                    filter: filterStr,
                     order: "created:Desc",
                 })
             ).map(response => response.trackedEntityInstances[0])
