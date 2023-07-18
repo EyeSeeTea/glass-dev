@@ -3,10 +3,12 @@ import { GlassModuleDefaultRepository } from "../../../data/repositories/GlassMo
 import { FutureData, Future } from "../../entities/Future";
 import { EGASPDataRepository } from "../../repositories/data-entry/EGASPDataRepository";
 import { RISDataRepository } from "../../repositories/data-entry/RISDataRepository";
+import { RISIndividualDataRepository } from "../../repositories/data-entry/RISIndividualDataRepository";
 
 export class ValidatePrimaryFileUseCase implements UseCase {
     constructor(
         private risDataRepository: RISDataRepository,
+        private risIndividualRepository: RISIndividualDataRepository,
         private egaspDataRepository: EGASPDataRepository,
         private glassModuleDefaultRepository: GlassModuleDefaultRepository
     ) {}
@@ -15,14 +17,23 @@ export class ValidatePrimaryFileUseCase implements UseCase {
         inputFile: File,
         moduleName: string
     ): FutureData<{ isValid: boolean; records: number; specimens: string[] }> {
-        if (moduleName === "AMR") {
-            return this.risDataRepository.validate(inputFile);
-        } else if (moduleName === "EGASP") {
-            return this.glassModuleDefaultRepository.getByName(moduleName).flatMap(module => {
-                return this.egaspDataRepository.validate(inputFile, module.dataColumns);
-            });
-        } else {
-            return Future.error("Unkonwm module type");
+        switch (moduleName) {
+            case "AMR": {
+                return this.risDataRepository.validate(inputFile);
+            }
+
+            case "EGASP": {
+                return this.glassModuleDefaultRepository.getByName(moduleName).flatMap(module => {
+                    return this.egaspDataRepository.validate(inputFile, module.dataColumns);
+                });
+            }
+            case "AMR - Individual": {
+                return this.risIndividualRepository.validate(inputFile);
+            }
+
+            default: {
+                return Future.error("Unkonwm module type");
+            }
         }
     }
 }
