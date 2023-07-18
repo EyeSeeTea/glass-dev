@@ -1,0 +1,31 @@
+export interface RISIndividualData {
+    COUNTRY: string;
+    YEAR: number;
+    HCF_ID: string;
+    HCF_TYPE: string;
+    HOSPITALUNITTYPE: string;
+    PATIENT_ID: string;
+    AGE: string;
+    GENDER: string;
+    PATIENTTYPE: string;
+    DATEOFHOSPITALISATION_VISIT: string;
+    LABORATORYCODE: number;
+    SAMPLE_DATE: string;
+    ISOLATE_ID: number;
+    SPECIMEN: string;
+    PATIENTCOUNTER: number;
+    PATHOGEN: string;
+    ANTIBIOTIC: string;
+    SIR: string;
+    REFERENCEGUIDELINESSIR: string;
+    DISKLOAD: string;
+    RESULTETESTSIGN: string;
+    RESULTETESTVALUE: number;
+    RESULTETESTSIR: string;
+    RESULTZONESIGN: string;
+    RESULTZONEVALUE: number;
+    RESULTZONESIR: string;
+    RESULTMICSIGN: string;
+    RESULTMICVALUE: number;
+    RESULTMICSIR: string;
+}
