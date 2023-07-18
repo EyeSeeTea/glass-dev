@@ -1,5 +1,5 @@
 import { D2Api, MetadataPick } from "@eyeseetea/d2-api/2.34";
-import { Event as ProgramEvent } from "@eyeseetea/d2-api/api/events";
+import { D2Event as ProgramEvent } from "@eyeseetea/d2-api/api/events";
 import { CountryInformation } from "../../domain/entities/CountryInformation";
 import { Future, FutureData } from "../../domain/entities/Future";
 import { CountryInformationRepository } from "../../domain/repositories/CountryInformationRepository";

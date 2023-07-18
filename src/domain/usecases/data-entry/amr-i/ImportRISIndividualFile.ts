@@ -1,11 +1,4 @@
 import i18n from "@eyeseetea/d2-ui-components/locales";
-import {
-    Enrollment,
-    EnrollmentAttribute,
-    EnrollmentEvent,
-    TrackedEntity,
-    TrackerPostResponse,
-} from "../../../../data/repositories/TrackerDefaultRepository";
 import { Future, FutureData } from "../../../entities/Future";
 import { ImportStrategy } from "../../../entities/data-entry/DataValuesSaveSummary";
 import { ConsistencyError, ImportSummary } from "../../../entities/data-entry/ImportSummary";
@@ -15,6 +8,12 @@ import { GlassUploadsRepository } from "../../../repositories/GlassUploadsReposi
 import { TrackerRepository } from "../../../repositories/TrackerRepository";
 import { RISIndividualDataRepository } from "../../../repositories/data-entry/RISIndividualDataRepository";
 import { getStringFromFile } from "../utils/fileToString";
+import { TrackedEntity, TrackerPostResponse } from "@eyeseetea/d2-api/api/tracker";
+import {
+    D2TrackerEnrollment,
+    D2TrackerEnrollmentAttribute,
+    D2TrackerEnrollmentEvent,
+} from "@eyeseetea/d2-api/api/trackerEnrollments";
 
 const AMRIProgramID = "mMAj6Gofe49";
 const AMR_GLASS_AMR_TET_PATIENT = "CcgnfemKr5U";
@@ -57,7 +56,8 @@ export class ImportRISIndividualFile {
                             risIndividualDataItems,
                             orgUnit,
                             AMRIProgramIDl,
-                            AMRDataProgramStageIdl
+                            AMRDataProgramStageIdl,
+                            countryCode
                         ).flatMap(entities => {
                             return this.trackerRepository
                                 .import({ trackedEntities: entities }, action)
@@ -201,13 +201,14 @@ export class ImportRISIndividualFile {
         individualDataItems: RISIndividualData[],
         orgUnit: string,
         AMRIProgramIDl: string,
-        AMRDataProgramStageIdl: string
+        AMRDataProgramStageIdl: string,
+        countryCode: string
     ): FutureData<TrackedEntity[]> {
         return this.trackerRepository
             .getAMRIProgramMetadata(AMRIProgramIDl, AMRDataProgramStageIdl)
             .flatMap(metadata => {
                 const trackedEntities = individualDataItems.map(dataItem => {
-                    const attributes: EnrollmentAttribute[] = metadata.programAttributes.map(
+                    const attributes: D2TrackerEnrollmentAttribute[] = metadata.programAttributes.map(
                         (attr: { id: string; name: string; code: string }) => {
                             return {
                                 attribute: attr.id,
@@ -225,7 +226,7 @@ export class ImportRISIndividualFile {
                             };
                         });
 
-                    const events: EnrollmentEvent[] = [
+                    const events: D2TrackerEnrollmentEvent[] = [
                         {
                             program: AMRIProgramIDl,
                             event: "",
@@ -235,7 +236,7 @@ export class ImportRISIndividualFile {
                             occurredAt: new Date().getTime().toString(),
                         },
                     ];
-                    const enrollments: Enrollment[] = [
+                    const enrollments: D2TrackerEnrollment[] = [
                         {
                             orgUnit,
                             program: AMRIProgramIDl,
@@ -247,6 +248,15 @@ export class ImportRISIndividualFile {
                             events: events,
                             enrolledAt: new Date().getTime().toString(),
                             occurredAt: new Date().getTime().toString(),
+                            createdAt: new Date().getTime().toString(),
+                            createdAtClient: new Date().getTime().toString(),
+                            updatedAt: new Date().getTime().toString(),
+                            updatedAtClient: new Date().getTime().toString(),
+                            status: "ACTIVE",
+                            orgUnitName: countryCode,
+                            followUp: false,
+                            deleted: false,
+                            storedBy: "",
                         },
                     ];
 
