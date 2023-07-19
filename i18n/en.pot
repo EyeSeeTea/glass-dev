@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2023-07-18T13:26:31.021Z\n"
-"PO-Revision-Date: 2023-07-18T13:26:31.021Z\n"
+"POT-Creation-Date: 2023-07-18T16:44:39.855Z\n"
+"PO-Revision-Date: 2023-07-18T16:44:39.855Z\n"
 
 msgid "Template {{id}} not loaded"
 msgstr ""
@@ -78,6 +78,51 @@ msgid "You can add up to 6 datasets to this submission with different BATCH IDS.
 msgstr ""
 
 msgid "Uploads with errors, or discarded"
+msgstr ""
+
+msgid "Go to questionnaires"
+msgstr ""
+
+msgid "Upload/Delete datasets"
+msgstr ""
+
+msgid "Go to submission"
+msgstr ""
+
+msgid "Full Status History"
+msgstr ""
+
+msgid "Done"
+msgstr ""
+
+msgid "From"
+msgstr ""
+
+msgid "To"
+msgstr ""
+
+msgid "Changed at"
+msgstr ""
+
+msgid "Error fetching questionnaires."
+msgstr ""
+
+msgid "Error fetching uploads."
+msgstr ""
+
+msgid "Current Status"
+msgstr ""
+
+msgid "Content"
+msgstr ""
+
+msgid "Mandatory"
+msgstr ""
+
+msgid "State"
+msgstr ""
+
+msgid "Data Submission status has errors..."
 msgstr ""
 
 msgid "There are no questionnaries for this module"
@@ -198,27 +243,6 @@ msgstr ""
 msgid "Send Submission"
 msgstr ""
 
-msgid "Overview"
-msgstr ""
-
-msgid "Questionnaires"
-msgstr ""
-
-msgid "Datasets"
-msgstr ""
-
-msgid "Validation Report"
-msgstr ""
-
-msgid "Advanced"
-msgstr ""
-
-msgid "Submission"
-msgstr ""
-
-msgid "No Data uploaded..."
-msgstr ""
-
 msgid "Uploaded"
 msgstr ""
 
@@ -249,49 +273,25 @@ msgstr ""
 msgid "This might take several minutes, do not refresh the page or press back."
 msgstr ""
 
-msgid "Go to questionnaires"
+msgid "Overview"
 msgstr ""
 
-msgid "Upload/Delete datasets"
+msgid "Questionnaires"
 msgstr ""
 
-msgid "Go to submission"
+msgid "Datasets"
 msgstr ""
 
-msgid "Full Status History"
+msgid "Validation Report"
 msgstr ""
 
-msgid "Done"
+msgid "Advanced"
 msgstr ""
 
-msgid "From"
+msgid "Submission"
 msgstr ""
 
-msgid "To"
-msgstr ""
-
-msgid "Changed at"
-msgstr ""
-
-msgid "Error fetching questionnaires."
-msgstr ""
-
-msgid "Error fetching uploads."
-msgstr ""
-
-msgid "Current Status"
-msgstr ""
-
-msgid "Content"
-msgstr ""
-
-msgid "Mandatory"
-msgstr ""
-
-msgid "State"
-msgstr ""
-
-msgid "Data Submission status has errors..."
+msgid "No Data uploaded..."
 msgstr ""
 
 msgid "File Type"

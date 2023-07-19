@@ -109,7 +109,10 @@ export class CustomValidationForEGASP {
         const errors = _(egaspIDs)
             .groupBy("egaspId")
             .map(duplicateEgaspIdGroup => {
-                if (duplicateEgaspIdGroup.length > 1) {
+                if (
+                    duplicateEgaspIdGroup.length > 1 &&
+                    duplicateEgaspIdGroup.some(pg => fileEgaspIDs.some(fe => pg?.eventId === fe?.eventId))
+                ) {
                     return {
                         error: i18n.t(`This EGASP ID already exists : ${duplicateEgaspIdGroup[0]?.egaspId}`),
                         lines: _(duplicateEgaspIdGroup.map(event => parseInt(event.eventId)))
@@ -158,7 +161,10 @@ export class CustomValidationForEGASP {
         const errors = _(patientIDs)
             .groupBy("patientIdAndDate")
             .map(duplicatePatientIdGroup => {
-                if (duplicatePatientIdGroup.length > 1) {
+                if (
+                    duplicatePatientIdGroup.length > 1 &&
+                    duplicatePatientIdGroup.some(pg => filePatientIDs.some(fp => pg?.eventId === fp?.eventId))
+                ) {
                     if (duplicatePatientIdGroup[0]) {
                         const [patientId, eventDate] = duplicatePatientIdGroup[0]?.patientIdAndDate.split(",");
                         return {
