@@ -15,6 +15,8 @@ import { CurrentPeriodContextProvider } from "../context-providers/CurrentPeriod
 import { MainLayout } from "../components/layouts/main-layout/MainLayout";
 import { ReportsPage } from "./reports/ReportsPage";
 import { UserSettingsPage } from "./user-profile/UserSettings";
+import { SignalsPage } from "./signals/SignalsPage";
+import { NewSignalPage } from "./new-signal/NewSignalPage";
 
 export const Router: React.FC = React.memo(() => {
     return (
@@ -93,6 +95,22 @@ export const Router: React.FC = React.memo(() => {
                                     render={({ location }) => (
                                         <PrivateRoute pathname={location.pathname}>
                                             <UserSettingsPage />
+                                        </PrivateRoute>
+                                    )}
+                                />
+                                <Route
+                                    path="/signals"
+                                    render={({ location }) => (
+                                        <PrivateRoute pathname={location.pathname}>
+                                            <SignalsPage />
+                                        </PrivateRoute>
+                                    )}
+                                />
+                                <Route
+                                    path="/new-signal"
+                                    render={({ location }) => (
+                                        <PrivateRoute pathname={location.pathname}>
+                                            <NewSignalPage />
                                         </PrivateRoute>
                                     )}
                                 />
