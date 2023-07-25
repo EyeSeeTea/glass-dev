@@ -32,28 +32,70 @@ interface EARDataElements {
     optionSet?: { id: string };
 }
 
-export interface OptionSets {
+interface OptionSet {
     id: string;
     name: string;
     options: { id: string };
+}
+interface Option {
+    id: string;
+    name: string;
+    optionSet: { id: string };
 }
 export interface ProgramMetadata {
     programs: EARProgram[];
     programStageSections: ProgramStageSections[];
     dataElements: EARDataElements[];
-    optionSets: OptionSets;
+    optionSets: OptionSet[];
+    options: Option[];
 }
 export class CaptureFormDefaultRepository implements CaptureFormRepository {
     constructor(private api: D2Api) {}
 
-    get(): FutureData<Question[]> {
-        const questions: Question[] = [];
-        return Future.success(questions);
+    getForm(): FutureData<Questionnaire> {
+        return apiToFuture(
+            this.api.request<ProgramMetadata>({
+                method: "get",
+                url: `/programs/${EAR_PROGRAM_ID}/metadata.json?fields=programs,dataElements,programStageSections`,
+            })
+        ).flatMap(resp => {
+            if (resp.programs[0]) {
+                const form: Questionnaire = {
+                    id: resp.programs[0].id,
+                    name: resp.programs[0].name,
+                    description: resp.programs[0].name,
+                    orgUnit: { id: "" },
+                    year: "",
+                    isCompleted: false,
+                    isMandatory: false,
+                    rules: [],
+                    sections: resp.programStageSections.map(section => {
+                        const questions: Question[] = this.mapProgramDataElementToQuestions(
+                            section,
+                            resp.dataElements,
+                            resp.options
+                        );
+
+                        return {
+                            title: section.name,
+                            code: section.id,
+                            questions: questions,
+                            isVisible: true,
+                        };
+                    }),
+                };
+
+                return Future.success(form);
+            } else {
+                return Future.error("Program not found");
+            }
+        });
     }
 
     private mapProgramDataElementToQuestions(
         section: ProgramStageSections,
-        dataElements: EARDataElements[]
+        dataElements: EARDataElements[],
+        options: Option[]
     ): Question[] {
         const questions: Question[] = _.compact(
             section.dataElements.map(dataElement => {
@@ -76,26 +118,16 @@ export class CaptureFormDefaultRepository implements CaptureFormRepository {
 
                         case "TEXT": {
                             if (curDataElement[0].optionSet) {
-                                // const resp = this.api.metadata
-                                //     .get({
-                                //         optionSets: {
-                                //             fields: { id: true, name: true, options: { name: true, id: true } },
-                                //             filter: { id: { eq: curDataElement[0].optionSet.id } },
-                                //         },
-                                //     })
-                                //     .getData();
-
-                                // let options: NamedRef[] = [];
-                                // if (resp.optionSets[0]) {
-                                //     options = resp.optionSets[0].options;
-                                // }
+                                const selectOptions = options.filter(
+                                    op => op.optionSet.id === curDataElement[0]?.optionSet?.id
+                                );
 
                                 const selectQ: SelectQuestion = {
                                     id: curDataElement[0]?.id || "",
                                     code: curDataElement[0]?.code || "",
                                     text: curDataElement[0]?.formName || "",
                                     type: "select",
-                                    options: [],
+                                    options: selectOptions,
                                     value: { name: "", id: "" },
                                 };
                                 return selectQ;
@@ -131,43 +163,5 @@ export class CaptureFormDefaultRepository implements CaptureFormRepository {
         );
 
         return questions;
-    }
-
-    getForm(): FutureData<Questionnaire> {
-        return apiToFuture(
-            this.api.request<ProgramMetadata>({
-                method: "get",
-                url: `/programs/${EAR_PROGRAM_ID}/metadata.json?fields=programs,dataElements,programStageSections`,
-            })
-        ).flatMap(resp => {
-            console.debug(resp);
-
-            if (resp.programs[0]) {
-                const form: Questionnaire = {
-                    id: resp.programs[0].id,
-                    name: resp.programs[0].name,
-                    description: resp.programs[0].name,
-                    orgUnit: { id: "" },
-                    year: "",
-                    isCompleted: false,
-                    isMandatory: false,
-                    rules: [],
-                    sections: resp.programStageSections.map(section => {
-                        const questions: Question[] = this.mapProgramDataElementToQuestions(section, resp.dataElements);
-
-                        return {
-                            title: section.name,
-                            code: section.id,
-                            questions: questions,
-                            isVisible: true,
-                        };
-                    }),
-                };
-
-                return Future.success(form);
-            } else {
-                return Future.error("Program not found");
-            }
-        });
     }
 }
