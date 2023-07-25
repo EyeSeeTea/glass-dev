@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Breadcrumbs, Button } from "@material-ui/core";
 import { useCurrentModuleContext } from "../../contexts/current-module-context";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
@@ -6,9 +6,33 @@ import { NavLink } from "react-router-dom";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import styled from "styled-components";
 import { glassColors, palette } from "../app/themes/dhis2.theme";
+// @ts-ignore
+import { DataTable, TableHead, DataTableRow, DataTableColumnHeader, TableBody } from "@dhis2/ui";
+import QuestionRow from "../../components/questionnaire/QuestionRow";
+import { useStyles } from "../../components/questionnaire/QuestionnaireForm";
+import { useAppContext } from "../../contexts/app-context";
+import { Questionnaire } from "../../../domain/entities/Questionnaire";
+import { PageHeader } from "../../components/page-header/PageHeader";
 
 export const NewSignalPage: React.FC = React.memo(() => {
     const { currentModuleAccess } = useCurrentModuleContext();
+    const { compositionRoot } = useAppContext();
+    const [questionnaire, setQuestionnaire] = useState<Questionnaire>();
+    // const [questions, setQuestions] = useState<Question[]>();
+    const classes = useStyles();
+
+    useEffect(() => {
+        return compositionRoot.captureForm.getForm().run(
+            qs => {
+                setQuestionnaire(qs);
+            },
+            err => console.debug(err)
+        );
+    }, [compositionRoot]);
+
+    const setQuestion = () => {
+        console.debug("Set Question called");
+    };
 
     return (
         <ContentWrapper>
@@ -23,7 +47,38 @@ export const NewSignalPage: React.FC = React.memo(() => {
                     </Button>
                 </StyledBreadCrumbs>
             </PreContent>
-            <div> Coming soon!</div>
+            <div>
+                <PageHeader title={questionnaire?.name || ""} />
+
+                {questionnaire?.sections.map(section => {
+                    if (!section.isVisible) return null;
+
+                    return (
+                        <div key={section.title} className={classes.wrapper}>
+                            <DataTable>
+                                <TableHead>
+                                    <DataTableRow>
+                                        <DataTableColumnHeader colSpan="2">
+                                            <span className={classes.header}>{section.title}</span>
+                                        </DataTableColumnHeader>
+                                    </DataTableRow>
+                                </TableHead>
+
+                                <TableBody>
+                                    {section.questions.map(question => (
+                                        <QuestionRow
+                                            key={question.id}
+                                            disabled={false}
+                                            question={question}
+                                            setQuestion={setQuestion}
+                                        />
+                                    ))}
+                                </TableBody>
+                            </DataTable>
+                        </div>
+                    );
+                })}
+            </div>
         </ContentWrapper>
     );
 });

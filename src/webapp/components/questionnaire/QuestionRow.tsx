@@ -9,7 +9,7 @@ import styled from "styled-components";
 import { QuestionWidget } from "./QuestionInput";
 
 export interface DataElementItemProps {
-    selector: QuestionnaireSelector;
+    selector?: QuestionnaireSelector;
     question: Question;
     disabled: boolean;
     setQuestion(newQuestion: Question): void;
@@ -49,17 +49,19 @@ function useSaveActions(options: DataElementItemProps) {
     React.useEffect(() => {
         if (!questionToSave) return;
 
-        setSaveState("saving");
-        return compositionRoot.questionnaires.saveResponse(selector, questionToSave).run(
-            () => {
-                setSaveState("saveSuccessful");
-                setQuestion(questionToSave);
-            },
-            err => {
-                setSaveState("saveError");
-                snackbar.error(err);
-            }
-        );
+        if (selector) {
+            setSaveState("saving");
+            return compositionRoot.questionnaires.saveResponse(selector, questionToSave).run(
+                () => {
+                    setSaveState("saveSuccessful");
+                    setQuestion(questionToSave);
+                },
+                err => {
+                    setSaveState("saveError");
+                    snackbar.error(err);
+                }
+            );
+        }
     }, [compositionRoot, snackbar, selector, setQuestion, questionToSave]);
 
     return [saveState, setQuestionToSave] as const;
