@@ -67,6 +67,8 @@ import { SaveKeyUiLocaleUseCase } from "./domain/usecases/SaveKeyUiLocaleUseCase
 import { ProgramRulesMetadataDefaultRepository } from "./data/repositories/program-rule/ProgramRulesMetadataDefaultRepository";
 import { RISIndividualDataCSVDefaultRepository } from "./data/repositories/RISIndividualDataCSVDefaultRepository";
 import { TrackerDefaultRepository } from "./data/repositories/TrackerDefaultRepository";
+import { GetCaptureFormQuestions } from "./domain/usecases/GetCaptureFormQuestions";
+import { CaptureFormDefaultRepository } from "./data/repositories/CaptureFormDefaultRepository";
 
 export function getCompositionRoot(instance: Instance) {
     const api = getD2APiFromInstance(instance);
@@ -94,6 +96,7 @@ export function getCompositionRoot(instance: Instance) {
     const excelRepository = new ExcelPopulateDefaultRepository();
     const eGASPValidationDefaultRepository = new ProgramRulesMetadataDefaultRepository(instance);
     const trackerRepository = new TrackerDefaultRepository(instance);
+    const captureFormRepository = new CaptureFormDefaultRepository(api);
 
     return {
         instance: getExecute({
@@ -186,6 +189,9 @@ export function getCompositionRoot(instance: Instance) {
             savePassword: new SavePasswordUseCase(usersRepository),
             saveKeyUiLocale: new SaveKeyUiLocaleUseCase(usersRepository),
             saveKeyDbLocale: new SaveKeyDbLocaleUseCase(usersRepository),
+        }),
+        captureForm: getExecute({
+            getForm: new GetCaptureFormQuestions(captureFormRepository),
         }),
     };
 }
