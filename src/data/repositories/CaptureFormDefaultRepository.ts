@@ -3,6 +3,7 @@ import { CaptureFormRepository } from "../../domain/repositories/CaptureFormRepo
 import { FutureData, Future } from "../../domain/entities/Future";
 import {
     BooleanQuestion,
+    DateQuestion,
     Question,
     Questionnaire,
     SelectQuestion,
@@ -156,6 +157,18 @@ export class CaptureFormDefaultRepository implements CaptureFormRepository {
                             };
 
                             return singleLineTextQ;
+                        }
+
+                        case "DATE": {
+                            const dateQ: DateQuestion = {
+                                id: curDataElement[0].id,
+                                code: curDataElement[0].code,
+                                text: curDataElement[0].formName,
+                                type: "date",
+                                value: new Date(),
+                            };
+
+                            return dateQ;
                         }
                     }
                 }

@@ -297,6 +297,14 @@ export class QuestionnaireD2DefaultRepository implements QuestionnaireRepository
                         ...deleted(!question.value),
                     },
                 ];
+            case "date":
+                return [
+                    {
+                        ...base,
+                        value: question.value?.toISOString().split("T")?.at(0) ?? "",
+                        ...deleted(!question.value),
+                    },
+                ];
 
             default:
                 assertUnreachable(type);

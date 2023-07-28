@@ -29,7 +29,7 @@ export interface QuestionnaireSection {
     isVisible: boolean;
 }
 
-export type Question = SelectQuestion | NumberQuestion | TextQuestion | BooleanQuestion;
+export type Question = SelectQuestion | NumberQuestion | TextQuestion | BooleanQuestion | DateQuestion;
 
 export interface QuestionBase {
     id: Id;
@@ -65,6 +65,11 @@ export interface BooleanQuestion extends QuestionBase {
     type: "boolean";
     storeFalse: boolean;
     value: Maybe<boolean>;
+}
+
+export interface DateQuestion extends QuestionBase {
+    type: "date";
+    value: Maybe<Date>;
 }
 
 export interface QuestionOption extends NamedRef {
