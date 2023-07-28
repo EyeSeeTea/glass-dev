@@ -16,6 +16,7 @@ import { useSnackbar } from "@eyeseetea/d2-ui-components";
 import { QuestionWidget } from "../../components/questionnaire/QuestionInput";
 import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context";
 import { StyledLoaderContainer } from "../../components/upload/ConsistencyChecks";
+import { useCurrentUserGroupsAccess } from "../../hooks/useCurrentUserGroupsAccess";
 
 export const NewSignalPage: React.FC = React.memo(() => {
     const { currentModuleAccess } = useCurrentModuleContext();
@@ -24,17 +25,23 @@ export const NewSignalPage: React.FC = React.memo(() => {
     const [formVisibility, setFormVisibility] = useState<boolean>(false);
     const [loading, setLoading] = useState<boolean>(false);
     const { currentOrgUnitAccess } = useCurrentOrgUnitContext();
+    const { readAccessGroup, confidentialAccessGroup } = useCurrentUserGroupsAccess();
 
     const classes = useStyles();
     const formClasses = useFormStyles();
     const snackbar = useSnackbar();
 
     useEffect(() => {
+        setLoading(true);
         return compositionRoot.captureForm.getForm().run(
             questionnaireForm => {
                 setQuestionnaire(questionnaireForm);
+                setLoading(false);
             },
-            err => snackbar.error(err)
+            err => {
+                snackbar.error(err);
+                setLoading(false);
+            }
         );
     }, [compositionRoot, snackbar]);
 
@@ -42,12 +49,69 @@ export const NewSignalPage: React.FC = React.memo(() => {
         setFormVisibility(true);
     };
 
+    const saveQuestionnaire = () => {
+        setLoading(true);
+
+        if (questionnaire && readAccessGroup.kind === "loaded" && confidentialAccessGroup.kind === "loaded") {
+            const readAccessGroups = readAccessGroup.data.map(aag => {
+                return aag.id;
+            });
+            const confidentialAccessGroups = confidentialAccessGroup.data.map(cag => {
+                return cag.id;
+            });
+
+            compositionRoot.captureForm
+                .importData(
+                    questionnaire,
+                    {
+                        id: currentOrgUnitAccess.orgUnitId,
+                        name: currentOrgUnitAccess.orgUnitName,
+                        path: currentOrgUnitAccess.orgUnitPath,
+                    },
+                    { id: currentModuleAccess.moduleId, name: currentModuleAccess.moduleName },
+                    "Save",
+                    readAccessGroups,
+                    confidentialAccessGroups
+                )
+                .run(
+                    () => {
+                        snackbar.info("Submission Success!");
+                        setLoading(false);
+                        setFormVisibility(false);
+                    },
+                    () => {
+                        snackbar.error("Submission Failed!");
+                        setLoading(false);
+                        setFormVisibility(false);
+                    }
+                );
+        }
+    };
+
     const submitQuestionnaire = () => {
         setLoading(true);
 
-        if (questionnaire) {
+        if (questionnaire && readAccessGroup.kind === "loaded" && confidentialAccessGroup.kind === "loaded") {
+            const readAccessGroups = readAccessGroup.data.map(aag => {
+                return aag.id;
+            });
+            const confidentialAccessGroups = confidentialAccessGroup.data.map(cag => {
+                return cag.id;
+            });
+
             compositionRoot.captureForm
-                .importData(questionnaire, currentOrgUnitAccess.orgUnitId, currentModuleAccess.moduleId, "Submit")
+                .importData(
+                    questionnaire,
+                    {
+                        id: currentOrgUnitAccess.orgUnitId,
+                        name: currentOrgUnitAccess.orgUnitName,
+                        path: currentOrgUnitAccess.orgUnitPath,
+                    },
+                    { id: currentModuleAccess.moduleId, name: currentModuleAccess.moduleName },
+                    "Publish",
+                    readAccessGroups,
+                    confidentialAccessGroups
+                )
                 .run(
                     () => {
                         snackbar.info("Submission Success!");
@@ -150,6 +214,15 @@ export const NewSignalPage: React.FC = React.memo(() => {
                     })}
 
                     <PageFooter>
+                        <Button
+                            style={{ marginRight: "10px" }}
+                            variant="outlined"
+                            color="primary"
+                            onClick={saveQuestionnaire}
+                        >
+                            {i18n.t("Save")}
+                        </Button>
+
                         <Button variant="contained" color="primary" onClick={submitQuestionnaire}>
                             {i18n.t("Submit")}
                         </Button>
@@ -219,6 +292,7 @@ const CenteredDiv = styled.div`
 
 const PageFooter = styled.div`
     display: flex;
-    flex-direction: column;
-    align-items: flex-end;
+    flex-direction: row;
+    justify-content: flex-end;
+    padding: 20px;
 `;
