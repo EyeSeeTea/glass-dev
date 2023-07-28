@@ -1,4 +1,8 @@
-import { Dhis2EventsDefaultRepository, Event } from "../../../../data/repositories/Dhis2EventsDefaultRepository";
+import {
+    Dhis2EventsDefaultRepository,
+    Event,
+    EventStatus,
+} from "../../../../data/repositories/Dhis2EventsDefaultRepository";
 import { SignalDefaultRepository } from "../../../../data/repositories/SignalDefaultRepository";
 import { UsersDefaultRepository } from "../../../../data/repositories/UsersDefaultRepository";
 import { Future, FutureData } from "../../../entities/Future";
@@ -9,6 +13,7 @@ import { NotificationRepository } from "../../../repositories/NotificationReposi
 
 export const EAR_PROGRAM_ID = "SQe26z0smFP";
 const EAR_CONFIDENTIAL_DATAELEMENT = "KycX5z7NLqU";
+type SignalAction = "Save" | "Publish";
 
 export class ImportCaptureDataUseCase {
     constructor(
@@ -22,13 +27,13 @@ export class ImportCaptureDataUseCase {
         questionnaire: Questionnaire,
         orgUnit: { id: string; name: string; path: string },
         module: { id: string; name: string },
-        action: "Save" | "Publish",
+        action: SignalAction,
         nonConfidentialUserGroups: string[],
         confidentialUserGroups: string[]
     ): FutureData<void> {
         //1.Create Event
         const events: Event[] = [];
-        const { event, confidential, message } = this.mapQuestionnaireToEvent(questionnaire, orgUnit.id);
+        const { event, confidential, message } = this.mapQuestionnaireToEvent(questionnaire, orgUnit.id, action);
         events.push(event);
 
         return this.dhis2EventsDefaultRepository
@@ -97,18 +102,19 @@ export class ImportCaptureDataUseCase {
 
     private mapQuestionnaireToEvent(
         questionnaire: Questionnaire,
-        orgUnitId: string
+        orgUnitId: string,
+        signalAction: SignalAction
     ): { event: Event; confidential: boolean; message: string } {
         const questions = questionnaire.sections.flatMap(section => section.questions);
-        let confidential = true;
+        let confidential = false; //Non confidential by default
         let message = "";
         const dataValues = _.compact(
             questions.map(q => {
                 if (q && q.value) {
                     if (q.type === "select") {
                         message = message + `${q.text} : ${q.value.name} \n<br>`;
-                        if (q.id === EAR_CONFIDENTIAL_DATAELEMENT && q.value.code === "NONCONFIDENTIAL") {
-                            confidential = false;
+                        if (q.id === EAR_CONFIDENTIAL_DATAELEMENT && q.value.code === "CONFIDENTIAL") {
+                            confidential = true;
                         }
                         return {
                             dataElement: q.id,
@@ -125,11 +131,13 @@ export class ImportCaptureDataUseCase {
             })
         );
 
+        const eventStatus: EventStatus = signalAction === "Save" ? "ACTIVE" : "COMPLETED";
+
         const event: Event = {
             event: "",
             orgUnit: orgUnitId,
             program: EAR_PROGRAM_ID,
-            status: "ACTIVE",
+            status: eventStatus,
             eventDate: new Date().toISOString().split("T")?.at(0) || "",
             //@ts-ignore
             dataValues: dataValues,
