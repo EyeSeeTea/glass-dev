@@ -10,8 +10,6 @@ import {
 } from "../../domain/entities/Questionnaire";
 import { apiToFuture } from "../../utils/futures";
 
-const EAR_PROGRAM_ID = "SQe26z0smFP";
-
 interface EARProgram {
     code: string;
     id: string;
@@ -40,6 +38,7 @@ interface OptionSet {
 interface Option {
     id: string;
     name: string;
+    code: string;
     optionSet: { id: string };
 }
 export interface ProgramMetadata {
@@ -49,6 +48,7 @@ export interface ProgramMetadata {
     optionSets: OptionSet[];
     options: Option[];
 }
+const EAR_PROGRAM_ID = "SQe26z0smFP";
 export class CaptureFormDefaultRepository implements CaptureFormRepository {
     constructor(private api: D2Api) {}
 
@@ -128,7 +128,7 @@ export class CaptureFormDefaultRepository implements CaptureFormRepository {
                                     text: curDataElement[0]?.formName || "",
                                     type: "select",
                                     options: selectOptions,
-                                    value: { name: "", id: "" },
+                                    value: { name: "", id: "", code: "" },
                                 };
                                 return selectQ;
                             } else {
@@ -163,5 +163,9 @@ export class CaptureFormDefaultRepository implements CaptureFormRepository {
         );
 
         return questions;
+    }
+
+    importData(): FutureData<string> {
+        return Future.error("Not implemented");
     }
 }

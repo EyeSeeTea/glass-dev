@@ -67,8 +67,10 @@ import { SaveKeyUiLocaleUseCase } from "./domain/usecases/SaveKeyUiLocaleUseCase
 import { ProgramRulesMetadataDefaultRepository } from "./data/repositories/program-rule/ProgramRulesMetadataDefaultRepository";
 import { RISIndividualDataCSVDefaultRepository } from "./data/repositories/RISIndividualDataCSVDefaultRepository";
 import { TrackerDefaultRepository } from "./data/repositories/TrackerDefaultRepository";
-import { GetCaptureFormQuestions } from "./domain/usecases/GetCaptureFormQuestions";
+import { GetCaptureFormQuestionsUseCase } from "./domain/usecases/GetCaptureFormQuestionsUseCase";
 import { CaptureFormDefaultRepository } from "./data/repositories/CaptureFormDefaultRepository";
+import { ImportCaptureDataUseCase } from "./domain/usecases/data-entry/ear/ImportCaptureDataUseCase";
+import { SignalDefaultRepository } from "./data/repositories/SignalDefaultRepository";
 
 export function getCompositionRoot(instance: Instance) {
     const api = getD2APiFromInstance(instance);
@@ -97,6 +99,7 @@ export function getCompositionRoot(instance: Instance) {
     const eGASPValidationDefaultRepository = new ProgramRulesMetadataDefaultRepository(instance);
     const trackerRepository = new TrackerDefaultRepository(instance);
     const captureFormRepository = new CaptureFormDefaultRepository(api);
+    const signalRepository = new SignalDefaultRepository(dataStoreClient);
 
     return {
         instance: getExecute({
@@ -191,7 +194,12 @@ export function getCompositionRoot(instance: Instance) {
             saveKeyDbLocale: new SaveKeyDbLocaleUseCase(usersRepository),
         }),
         captureForm: getExecute({
-            getForm: new GetCaptureFormQuestions(captureFormRepository),
+            getForm: new GetCaptureFormQuestionsUseCase(captureFormRepository),
+            importData: new ImportCaptureDataUseCase(
+                captureFormRepository,
+                dhis2EventsDefaultRepository,
+                signalRepository
+            ),
         }),
     };
 }

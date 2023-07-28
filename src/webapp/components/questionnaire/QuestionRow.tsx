@@ -20,6 +20,10 @@ const QuestionRow: React.FC<DataElementItemProps> = React.memo(props => {
     const classes = useStyles();
     const [saveState, setQuestionToSave] = useSaveActions(props);
 
+    const updateQuestion = (question: Question) => {
+        setQuestionToSave(question);
+    };
+
     return (
         <DataTableRowWithSavingFeedback saveState={saveState}>
             <DataTableCell width="60%">
@@ -29,7 +33,7 @@ const QuestionRow: React.FC<DataElementItemProps> = React.memo(props => {
             <DataTableCell>
                 <div className={classes.valueWrapper}>
                     <div className={classes.valueInput}>
-                        <QuestionWidget {...props} onChange={setQuestionToSave} />
+                        <QuestionWidget {...props} onChange={updateQuestion} />
                     </div>
                 </div>
             </DataTableCell>

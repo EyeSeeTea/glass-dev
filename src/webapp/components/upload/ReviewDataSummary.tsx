@@ -107,7 +107,7 @@ export const ReviewDataSummary: React.FC<ReviewDataSummaryProps> = ({
                                                 notificationText,
                                                 notificationText,
                                                 userGroupsIds,
-                                                currentOrgUnitAccess.orgUnitId
+                                                currentOrgUnitAccess.orgUnitPath
                                             )
                                             .run(
                                                 () => {},

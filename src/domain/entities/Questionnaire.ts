@@ -67,7 +67,9 @@ export interface BooleanQuestion extends QuestionBase {
     value: Maybe<boolean>;
 }
 
-export type QuestionOption = NamedRef;
+export interface QuestionOption extends NamedRef {
+    code?: string;
+}
 
 export type QuestionnaireRule = RuleToggleSectionsVisibility;
 
