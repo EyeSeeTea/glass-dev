@@ -1,6 +1,6 @@
 import { CaptureFormRepository } from "../repositories/CaptureFormRepository";
 
-export class GetCaptureFormQuestions {
+export class GetCaptureFormQuestionsUseCase {
     constructor(private captureFormRepository: CaptureFormRepository) {}
 
     execute() {

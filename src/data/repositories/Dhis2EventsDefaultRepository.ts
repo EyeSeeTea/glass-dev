@@ -6,6 +6,7 @@ import { Future, FutureData } from "../../domain/entities/Future";
 import { HttpResponse } from "@eyeseetea/d2-api/api/common";
 import { EGASP_PROGRAM_ID } from "./program-rule/ProgramRulesMetadataDefaultRepository";
 import { D2Api, Pager } from "@eyeseetea/d2-api/2.34";
+import { NamedRef } from "../../domain/entities/Ref";
 
 export declare type EventStatus = "ACTIVE" | "COMPLETED" | "VISITED" | "SCHEDULED" | "OVERDUE" | "SKIPPED";
 export interface EventsPostRequest {
@@ -26,7 +27,7 @@ export interface Event {
     programStage?: string;
     dataValues: Array<{
         dataElement: string;
-        value: string | number | boolean;
+        value: string | number | boolean | NamedRef;
     }>;
 }
 interface PagedEventsApiResponse {
