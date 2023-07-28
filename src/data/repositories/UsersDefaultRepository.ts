@@ -21,16 +21,20 @@ export class UsersDefaultRepository implements UsersRepository {
                 },
             })
         ).map(res => {
-            //1. Filter users by org unit
-            const usersFilteredByOrgUnitHeirarchy = res.objects.filter(user =>
-                user.dataViewOrganisationUnits.some(ou => orgUnitPath.includes(ou.id))
-            );
+            const users = res.objects;
 
-            //2. Filter users by user group
-            const usersByUserGroupAndOU = usersFilteredByOrgUnitHeirarchy.filter(user =>
-                user.userGroups.some(ug => userGroups.includes(ug.id))
-            );
-            return usersByUserGroupAndOU;
+            //1. Filter users by user group
+            const usersByUserGroupAndOU = users.filter(user => user.userGroups.some(ug => userGroups.includes(ug.id)));
+
+            //2. Filter users by org unit if applicable
+            if (orgUnitPath !== "") {
+                const usersFilteredByOrgUnitHeirarchy = usersByUserGroupAndOU.filter(user =>
+                    user.dataViewOrganisationUnits.some(ou => orgUnitPath.includes(ou.id))
+                );
+                return usersFilteredByOrgUnitHeirarchy;
+            } else {
+                return usersByUserGroupAndOU;
+            }
         });
     }
 

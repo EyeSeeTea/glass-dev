@@ -196,9 +196,10 @@ export function getCompositionRoot(instance: Instance) {
         captureForm: getExecute({
             getForm: new GetCaptureFormQuestionsUseCase(captureFormRepository),
             importData: new ImportCaptureDataUseCase(
-                captureFormRepository,
                 dhis2EventsDefaultRepository,
-                signalRepository
+                signalRepository,
+                notificationRepository,
+                usersRepository
             ),
         }),
     };

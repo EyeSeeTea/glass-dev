@@ -164,8 +164,4 @@ export class CaptureFormDefaultRepository implements CaptureFormRepository {
 
         return questions;
     }
-
-    importData(): FutureData<string> {
-        return Future.error("Not implemented");
-    }
 }
