@@ -7,6 +7,10 @@ import { DataStoreKeys } from "../data-store/DataStoreKeys";
 export class SignalDefaultRepository implements SignalRepository {
     constructor(private dataStoreClient: DataStoreClient) {}
 
+    getAll(): FutureData<Signal[]> {
+        return this.dataStoreClient.listCollection<Signal>(DataStoreKeys.SIGNALS);
+    }
+
     save(signal: Signal): FutureData<void> {
         return this.dataStoreClient.listCollection(DataStoreKeys.SIGNALS).flatMap(signals => {
             const newSignalList = [...signals, signal];
