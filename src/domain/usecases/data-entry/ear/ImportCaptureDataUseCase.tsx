@@ -110,8 +110,8 @@ export class ImportCaptureDataUseCase {
         let message = "";
         const dataValues = _.compact(
             questions.map(q => {
-                if (q && q.value) {
-                    if (q.type === "select") {
+                if (q) {
+                    if (q.type === "select" && q.value) {
                         message = message + `${q.text} : ${q.value.name} \n<br>`;
                         if (q.id === EAR_CONFIDENTIAL_DATAELEMENT && q.value.code === "CONFIDENTIAL") {
                             confidential = true;

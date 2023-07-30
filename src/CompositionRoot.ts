@@ -71,6 +71,7 @@ import { GetCaptureFormQuestionsUseCase } from "./domain/usecases/GetCaptureForm
 import { CaptureFormDefaultRepository } from "./data/repositories/CaptureFormDefaultRepository";
 import { ImportCaptureDataUseCase } from "./domain/usecases/data-entry/ear/ImportCaptureDataUseCase";
 import { SignalDefaultRepository } from "./data/repositories/SignalDefaultRepository";
+import { GetSignalsUseCase } from "./domain/usecases/GetSignalsUseCase";
 
 export function getCompositionRoot(instance: Instance) {
     const api = getD2APiFromInstance(instance);
@@ -193,7 +194,7 @@ export function getCompositionRoot(instance: Instance) {
             saveKeyUiLocale: new SaveKeyUiLocaleUseCase(usersRepository),
             saveKeyDbLocale: new SaveKeyDbLocaleUseCase(usersRepository),
         }),
-        captureForm: getExecute({
+        signals: getExecute({
             getForm: new GetCaptureFormQuestionsUseCase(captureFormRepository),
             importData: new ImportCaptureDataUseCase(
                 dhis2EventsDefaultRepository,
@@ -201,6 +202,7 @@ export function getCompositionRoot(instance: Instance) {
                 notificationRepository,
                 usersRepository
             ),
+            getSignals: new GetSignalsUseCase(signalRepository),
         }),
     };
 }

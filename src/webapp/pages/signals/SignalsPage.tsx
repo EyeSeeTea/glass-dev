@@ -6,6 +6,7 @@ import { NavLink } from "react-router-dom";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import styled from "styled-components";
 import { glassColors, palette } from "../app/themes/dhis2.theme";
+import { SignalTableContent } from "../../components/signals/SignalTableContent";
 
 export const SignalsPage: React.FC = React.memo(() => {
     const { currentModuleAccess } = useCurrentModuleContext();
@@ -23,7 +24,7 @@ export const SignalsPage: React.FC = React.memo(() => {
                     </Button>
                 </StyledBreadCrumbs>
             </PreContent>
-            <div> Coming soon!</div>
+            <SignalTableContent />
         </ContentWrapper>
     );
 });

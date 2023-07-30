@@ -29,7 +29,7 @@ export const NewSignalForm: React.FC<{ hideForm: () => void }> = props => {
 
     useEffect(() => {
         setLoading(true);
-        return compositionRoot.captureForm.getForm().run(
+        return compositionRoot.signals.getForm().run(
             questionnaireForm => {
                 setQuestionnaire(questionnaireForm);
                 setLoading(false);
@@ -52,7 +52,7 @@ export const NewSignalForm: React.FC<{ hideForm: () => void }> = props => {
                 return cag.id;
             });
 
-            compositionRoot.captureForm
+            compositionRoot.signals
                 .importData(
                     questionnaire,
                     {
@@ -91,7 +91,7 @@ export const NewSignalForm: React.FC<{ hideForm: () => void }> = props => {
                 return cag.id;
             });
 
-            compositionRoot.captureForm
+            compositionRoot.signals
                 .importData(
                     questionnaire,
                     {
