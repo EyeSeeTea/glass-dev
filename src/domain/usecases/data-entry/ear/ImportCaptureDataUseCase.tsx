@@ -42,7 +42,6 @@ export class ImportCaptureDataUseCase {
                 const eventId = importSummary.importSummaries?.at(0)?.reference;
                 if (importSummary.status === "SUCCESS" && eventId) {
                     //2.Create datastore entry
-
                     let status: SignalStatusTypes = "DRAFT";
                     if (action === "Publish") {
                         if (confidential) {
@@ -51,13 +50,13 @@ export class ImportCaptureDataUseCase {
                             status = "APPROVED";
                         }
                     }
-
                     const signal: Signal = {
                         id: generateId(),
                         creationDate: new Date().toISOString(),
                         eventId: eventId,
                         module: module.id,
-                        orgUnit: orgUnit.id,
+                        orgUnit: { id: orgUnit.id, name: orgUnit.name },
+                        levelOfConfidentiality: confidential ? "CONFIDENTIAL" : "NONCONFIDENTIAL",
                         status: status,
                         statusHistory: [
                             {
@@ -72,14 +71,14 @@ export class ImportCaptureDataUseCase {
                             return Future.success(undefined);
 
                         //3.Send notification
-                        //a.Non-confidential
                         let usergroupIds: string[] = [];
                         let orgUnitPath = "";
-                        //b.Confidential
                         if (confidential) {
+                            //a.Confidential
                             orgUnitPath = orgUnit.path;
                             usergroupIds = confidentialUserGroups;
                         } else {
+                            //b.Non-confidential
                             usergroupIds = nonConfidentialUserGroups;
                         }
 
@@ -112,7 +111,7 @@ export class ImportCaptureDataUseCase {
             questions.map(q => {
                 if (q) {
                     if (q.type === "select" && q.value) {
-                        message = message + `${q.text} : ${q.value.name} \n<br>`;
+                        message = message + `${q.text} : ${q.value.name} \n\n`;
                         if (q.id === EAR_CONFIDENTIAL_DATAELEMENT && q.value.code === "CONFIDENTIAL") {
                             confidential = true;
                         }
@@ -121,7 +120,7 @@ export class ImportCaptureDataUseCase {
                             value: q.value.code,
                         };
                     } else {
-                        message = message + `${q.text} : ${q.value} \n<br>`;
+                        message = message + `${q.text} : ${q.value} \n\n`;
                         return {
                             dataElement: q.id,
                             value: q.value,

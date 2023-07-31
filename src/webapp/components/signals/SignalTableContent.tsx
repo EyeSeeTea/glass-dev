@@ -47,9 +47,9 @@ export const SignalTableContent: React.FC = () => {
                                         <StyledTableBody>
                                             {signals.data.map(signal => (
                                                 <TableRow key={signal.id}>
-                                                    <TableCell>{signal.creationDate}</TableCell>
-                                                    <TableCell>{signal.orgUnit}</TableCell>
-                                                    <TableCell>{signal.status}</TableCell>
+                                                    <TableCell>{signal.creationDate.split("T")?.at(0) || ""}</TableCell>
+                                                    <TableCell>{signal.orgUnit.name}</TableCell>
+                                                    <TableCell>{signal.levelOfConfidentiality}</TableCell>
                                                     <TableCell>{signal.status}</TableCell>
                                                 </TableRow>
                                             ))}
