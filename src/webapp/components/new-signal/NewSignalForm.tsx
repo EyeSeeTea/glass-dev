@@ -18,6 +18,7 @@ import { useCurrentModuleContext } from "../../contexts/current-module-context";
 export interface NewSignalFormProps {
     hideForm?: () => void;
     readonly: boolean;
+    eventId?: string;
 }
 
 export const NewSignalForm: React.FC<NewSignalFormProps> = props => {
@@ -34,17 +35,33 @@ export const NewSignalForm: React.FC<NewSignalFormProps> = props => {
 
     useEffect(() => {
         setLoading(true);
-        return compositionRoot.signals.getForm().run(
-            questionnaireForm => {
-                setQuestionnaire(questionnaireForm);
-                setLoading(false);
-            },
-            err => {
-                snackbar.error(err);
-                setLoading(false);
-            }
-        );
-    }, [compositionRoot, snackbar]);
+        if (!props.eventId) {
+            //Empty Questionnaire form
+            return compositionRoot.signals.getForm().run(
+                questionnaireForm => {
+                    setQuestionnaire(questionnaireForm);
+                    setLoading(false);
+                },
+                err => {
+                    snackbar.error(err);
+                    setLoading(false);
+                }
+            );
+        } else {
+            //Pre-populate data in QUestionnaire
+            return compositionRoot.signals.getSignal(props.eventId).run(
+                questionnaireWithData => {
+                    console.debug(questionnaireWithData);
+                    setQuestionnaire(questionnaireWithData);
+                    setLoading(false);
+                },
+                err => {
+                    snackbar.error(err);
+                    setLoading(false);
+                }
+            );
+        }
+    }, [compositionRoot, snackbar, props.eventId]);
 
     const saveQuestionnaire = () => {
         setLoading(true);
