@@ -15,7 +15,12 @@ import i18n from "@eyeseetea/d2-ui-components/locales";
 import styled from "styled-components";
 import { useCurrentModuleContext } from "../../contexts/current-module-context";
 
-export const NewSignalForm: React.FC<{ hideForm?: () => void }> = props => {
+export interface NewSignalFormProps {
+    hideForm?: () => void;
+    readonly: boolean;
+}
+
+export const NewSignalForm: React.FC<NewSignalFormProps> = props => {
     const { compositionRoot } = useAppContext();
     const { currentModuleAccess } = useCurrentModuleContext();
     const [questionnaire, setQuestionnaire] = useState<Questionnaire>();
@@ -172,7 +177,7 @@ export const NewSignalForm: React.FC<{ hideForm?: () => void }> = props => {
                                                     <QuestionWidget
                                                         onChange={updateQuestion}
                                                         question={question}
-                                                        disabled={false}
+                                                        disabled={props.readonly ? true : false}
                                                     />
                                                 </div>
                                             </div>
@@ -184,16 +189,22 @@ export const NewSignalForm: React.FC<{ hideForm?: () => void }> = props => {
                     </div>
                 );
             })}
+            {!props.readonly && (
+                <PageFooter>
+                    <Button
+                        style={{ marginRight: "10px" }}
+                        variant="outlined"
+                        color="primary"
+                        onClick={saveQuestionnaire}
+                    >
+                        {i18n.t("Save Draft")}
+                    </Button>
 
-            <PageFooter>
-                <Button style={{ marginRight: "10px" }} variant="outlined" color="primary" onClick={saveQuestionnaire}>
-                    {i18n.t("Save Draft")}
-                </Button>
-
-                <Button variant="contained" color="primary" onClick={publishQuestionnaire}>
-                    {i18n.t("Publish")}
-                </Button>
-            </PageFooter>
+                    <Button variant="contained" color="primary" onClick={publishQuestionnaire}>
+                        {i18n.t("Publish")}
+                    </Button>
+                </PageFooter>
+            )}
         </div>
     );
 };

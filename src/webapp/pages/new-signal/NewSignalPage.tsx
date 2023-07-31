@@ -42,7 +42,7 @@ export const NewSignalPage: React.FC = () => {
                     </Button>
                 </CenteredDiv>
             )}
-            {formVisibility && <NewSignalForm hideForm={hideForm} />}
+            {formVisibility && <NewSignalForm hideForm={hideForm} readonly={false} />}
         </ContentWrapper>
     );
 };
