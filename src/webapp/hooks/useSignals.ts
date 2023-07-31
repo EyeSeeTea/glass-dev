@@ -25,7 +25,8 @@ export function useSignals() {
                                 if (
                                     currentUser.userOrgUnitsAccess.some(
                                         ou => signal.orgUnit.id === ou.orgUnitId && ou.readAccess === true
-                                    )
+                                    ) ||
+                                    signal.status === "APPROVED"
                                 ) {
                                     return signal;
                                 }
