@@ -4,5 +4,6 @@ import { Questionnaire } from "../entities/Questionnaire";
 
 export interface CaptureFormRepository {
     getForm(): FutureData<Questionnaire>;
+    getPopulatedForm(event: Event): FutureData<Questionnaire>;
     getSignalEvent(eventId: string): FutureData<Event>;
 }

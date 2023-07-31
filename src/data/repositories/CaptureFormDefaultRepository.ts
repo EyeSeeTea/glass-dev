@@ -94,52 +94,102 @@ export class CaptureFormDefaultRepository implements CaptureFormRepository {
         });
     }
 
+    getPopulatedForm(event: Event): FutureData<Questionnaire> {
+        return apiToFuture(
+            this.api.request<ProgramMetadata>({
+                method: "get",
+                url: `/programs/${EAR_PROGRAM_ID}/metadata.json?fields=programs,dataElements,programStageSections`,
+            })
+        ).flatMap(resp => {
+            if (resp.programs[0]) {
+                const form: Questionnaire = {
+                    id: resp.programs[0].id,
+                    name: resp.programs[0].name,
+                    description: resp.programs[0].name,
+                    orgUnit: { id: "" },
+                    year: "",
+                    isCompleted: false,
+                    isMandatory: false,
+                    rules: [],
+                    sections: resp.programStageSections.map(section => {
+                        const questions: Question[] = this.mapProgramDataElementToQuestions(
+                            section,
+                            resp.dataElements,
+                            resp.options,
+                            event
+                        );
+
+                        return {
+                            title: section.name,
+                            code: section.id,
+                            questions: questions,
+                            isVisible: true,
+                        };
+                    }),
+                };
+
+                return Future.success(form);
+            } else {
+                return Future.error("Program not found");
+            }
+        });
+    }
+
     private mapProgramDataElementToQuestions(
         section: ProgramStageSections,
         dataElements: EARDataElements[],
-        options: Option[]
+        options: Option[],
+        event: Event | undefined = undefined
     ): Question[] {
         const questions: Question[] = _.compact(
             section.dataElements.map(dataElement => {
-                const curDataElement = dataElements.filter(de => de.id === dataElement.id);
+                const curDataEleemnt = dataElements.filter(de => de.id === dataElement.id);
 
-                if (curDataElement[0]) {
-                    switch (curDataElement[0].valueType) {
+                if (curDataEleemnt[0]) {
+                    const dataElement = curDataEleemnt[0];
+                    const dataValue = event
+                        ? event.dataValues.find(dv => dv.dataElement === dataElement.id)
+                        : undefined;
+                    switch (dataElement.valueType) {
                         case "BOOLEAN": {
                             const boolQ: BooleanQuestion = {
-                                id: curDataElement[0].id,
-                                code: curDataElement[0].code, //code
-                                text: curDataElement[0].formName, //formName
+                                id: dataElement.id,
+                                code: dataElement.code, //code
+                                text: dataElement.formName, //formName
                                 type: "boolean",
                                 storeFalse: true,
-                                value: true,
+                                value: dataValue ? (dataValue.value as boolean) : true,
                             };
 
                             return boolQ;
                         }
 
                         case "TEXT": {
-                            if (curDataElement[0].optionSet) {
+                            if (dataElement.optionSet) {
                                 const selectOptions = options.filter(
-                                    op => op.optionSet.id === curDataElement[0]?.optionSet?.id
+                                    op => op.optionSet.id === dataElement.optionSet?.id
                                 );
 
+                                const selectedOption = dataValue
+                                    ? selectOptions.find(o => o.code === dataValue.value)
+                                    : undefined;
+
                                 const selectQ: SelectQuestion = {
-                                    id: curDataElement[0]?.id || "",
-                                    code: curDataElement[0]?.code || "",
-                                    text: curDataElement[0]?.formName || "",
+                                    id: dataElement.id || "",
+                                    code: dataElement.code || "",
+                                    text: dataElement.formName || "",
                                     type: "select",
                                     options: selectOptions,
-                                    value: { name: "", id: "", code: "" },
+                                    value: selectedOption ? selectedOption : { name: "", id: "", code: "" },
                                 };
                                 return selectQ;
                             } else {
                                 const singleLineText: TextQuestion = {
-                                    id: curDataElement[0].id,
-                                    code: curDataElement[0].code,
-                                    text: curDataElement[0].formName,
+                                    id: dataElement.id,
+                                    code: dataElement.code,
+                                    text: dataElement.formName,
                                     type: "text",
-                                    value: "",
+                                    value: dataValue ? (dataValue.value as string) : "",
                                     multiline: false,
                                 };
 
@@ -149,11 +199,11 @@ export class CaptureFormDefaultRepository implements CaptureFormRepository {
 
                         case "LONG_TEXT": {
                             const singleLineTextQ: TextQuestion = {
-                                id: curDataElement[0].id,
-                                code: curDataElement[0].code,
-                                text: curDataElement[0].formName,
+                                id: dataElement.id,
+                                code: dataElement.code,
+                                text: dataElement.formName,
                                 type: "text",
-                                value: "",
+                                value: dataValue ? (dataValue.value as string) : "",
                                 multiline: true,
                             };
 
@@ -162,11 +212,11 @@ export class CaptureFormDefaultRepository implements CaptureFormRepository {
 
                         case "DATE": {
                             const dateQ: DateQuestion = {
-                                id: curDataElement[0].id,
-                                code: curDataElement[0].code,
-                                text: curDataElement[0].formName,
+                                id: dataElement.id,
+                                code: dataElement.code,
+                                text: dataElement.formName,
                                 type: "date",
-                                value: new Date(),
+                                value: dataValue ? new Date(dataValue.value as string) : new Date(),
                             };
 
                             return dateQ;
@@ -186,7 +236,6 @@ export class CaptureFormDefaultRepository implements CaptureFormRepository {
                 url: `/tracker/events/${eventId}?fields=dataValues`,
             })
         ).flatMap(resp => {
-            console.debug(resp);
             return Future.success(resp);
         });
     }
