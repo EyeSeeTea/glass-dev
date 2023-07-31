@@ -24,7 +24,7 @@ export const SignalPage: React.FC = () => {
 
     return (
         <ContentWrapper>
-            <NewSignalForm />
+            <NewSignalForm readonly={true} />
         </ContentWrapper>
     );
 };
