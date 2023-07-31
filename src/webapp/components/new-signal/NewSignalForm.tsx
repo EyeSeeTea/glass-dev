@@ -45,10 +45,10 @@ export const NewSignalForm: React.FC<{ hideForm: () => void }> = props => {
         setLoading(true);
 
         if (questionnaire && readAccessGroup.kind === "loaded" && confidentialAccessGroup.kind === "loaded") {
-            const readAccessGroups = readAccessGroup.data.map(aag => {
+            const readAccessGroups: string[] = readAccessGroup.data.map(aag => {
                 return aag.id;
             });
-            const confidentialAccessGroups = confidentialAccessGroup.data.map(cag => {
+            const confidentialAccessGroups: string[] = confidentialAccessGroup.data.map(cag => {
                 return cag.id;
             });
 
