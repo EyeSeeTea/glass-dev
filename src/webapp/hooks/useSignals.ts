@@ -24,7 +24,7 @@ export function useSignals() {
                             signals.map(signal => {
                                 if (
                                     currentUser.userOrgUnitsAccess.some(
-                                        ou => signal.orgUnit === ou.orgUnitId && ou.readAccess === true
+                                        ou => signal.orgUnit.id === ou.orgUnitId && ou.readAccess === true
                                     )
                                 ) {
                                     return signal;
