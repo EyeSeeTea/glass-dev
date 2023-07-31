@@ -72,6 +72,7 @@ import { CaptureFormDefaultRepository } from "./data/repositories/CaptureFormDef
 import { ImportCaptureDataUseCase } from "./domain/usecases/data-entry/ear/ImportCaptureDataUseCase";
 import { SignalDefaultRepository } from "./data/repositories/SignalDefaultRepository";
 import { GetSignalsUseCase } from "./domain/usecases/GetSignalsUseCase";
+import { GetSignalEventUseCase } from "./domain/usecases/GetSignalEventUseCase";
 
 export function getCompositionRoot(instance: Instance) {
     const api = getD2APiFromInstance(instance);
@@ -203,6 +204,7 @@ export function getCompositionRoot(instance: Instance) {
                 usersRepository
             ),
             getSignals: new GetSignalsUseCase(signalRepository),
+            getSignal: new GetSignalEventUseCase(captureFormRepository),
         }),
     };
 }

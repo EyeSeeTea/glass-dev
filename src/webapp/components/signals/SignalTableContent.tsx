@@ -1,5 +1,4 @@
 import styled from "styled-components";
-import { useEffect } from "react";
 import { CustomCard } from "../custom-card/CustomCard";
 import { ContentLoader } from "../content-loader/ContentLoader";
 import { TableContentWrapper } from "../data-file-history/DataFileTable";
@@ -9,11 +8,15 @@ import { StyledTableBody } from "../data-file-history/DataFileTableBody";
 import { useSignals } from "../../hooks/useSignals";
 
 import { Paper, Table, TableCell, TableContainer, TableHead, TableRow, Typography } from "@material-ui/core";
+import { useHistory } from "react-router-dom";
 
 export const SignalTableContent: React.FC = () => {
     const signals = useSignals();
+    const history = useHistory();
 
-    useEffect(() => {}, []);
+    const handleSignalClick = (eventId: string) => {
+        history.push(`/signal/${eventId}`);
+    };
 
     return (
         <ContentLoader content={signals}>
@@ -46,7 +49,10 @@ export const SignalTableContent: React.FC = () => {
                                     {signals && signals.data.length ? (
                                         <StyledTableBody>
                                             {signals.data.map(signal => (
-                                                <TableRow key={signal.id}>
+                                                <TableRow
+                                                    key={signal.id}
+                                                    onClick={() => handleSignalClick(signal.eventId)}
+                                                >
                                                     <TableCell>{signal.creationDate.split("T")?.at(0) || ""}</TableCell>
                                                     <TableCell>{signal.orgUnit.name}</TableCell>
                                                     <TableCell>{signal.levelOfConfidentiality}</TableCell>

@@ -17,6 +17,7 @@ import { ReportsPage } from "./reports/ReportsPage";
 import { UserSettingsPage } from "./user-profile/UserSettings";
 import { SignalsPage } from "./signals/SignalsPage";
 import { NewSignalPage } from "./new-signal/NewSignalPage";
+import { SignalPage } from "./new-signal/SignalPage";
 
 export const Router: React.FC = React.memo(() => {
     return (
@@ -111,6 +112,15 @@ export const Router: React.FC = React.memo(() => {
                                     render={({ location }) => (
                                         <PrivateRoute pathname={location.pathname}>
                                             <NewSignalPage />
+                                        </PrivateRoute>
+                                    )}
+                                />
+
+                                <Route
+                                    path="/signal/:id"
+                                    render={({ location }) => (
+                                        <PrivateRoute pathname={location.pathname}>
+                                            <SignalPage />
                                         </PrivateRoute>
                                     )}
                                 />

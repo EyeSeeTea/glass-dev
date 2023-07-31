@@ -15,7 +15,7 @@ import i18n from "@eyeseetea/d2-ui-components/locales";
 import styled from "styled-components";
 import { useCurrentModuleContext } from "../../contexts/current-module-context";
 
-export const NewSignalForm: React.FC<{ hideForm: () => void }> = props => {
+export const NewSignalForm: React.FC<{ hideForm?: () => void }> = props => {
     const { compositionRoot } = useAppContext();
     const { currentModuleAccess } = useCurrentModuleContext();
     const [questionnaire, setQuestionnaire] = useState<Questionnaire>();
@@ -69,12 +69,12 @@ export const NewSignalForm: React.FC<{ hideForm: () => void }> = props => {
                     () => {
                         snackbar.info("Submission Success!");
                         setLoading(false);
-                        props.hideForm();
+                        if (props.hideForm) props.hideForm();
                     },
                     () => {
                         snackbar.error("Submission Failed!");
                         setLoading(false);
-                        props.hideForm();
+                        if (props.hideForm) props.hideForm();
                     }
                 );
         }
@@ -108,12 +108,12 @@ export const NewSignalForm: React.FC<{ hideForm: () => void }> = props => {
                     () => {
                         snackbar.info("Submission Success!");
                         setLoading(false);
-                        props.hideForm();
+                        if (props.hideForm) props.hideForm();
                     },
                     () => {
                         snackbar.error("Submission Failed!");
                         setLoading(false);
-                        props.hideForm();
+                        if (props.hideForm) props.hideForm();
                     }
                 );
         }

@@ -10,6 +10,7 @@ import {
     TextQuestion,
 } from "../../domain/entities/Questionnaire";
 import { apiToFuture } from "../../utils/futures";
+import { Event } from "./Dhis2EventsDefaultRepository";
 
 interface EARProgram {
     code: string;
@@ -176,5 +177,17 @@ export class CaptureFormDefaultRepository implements CaptureFormRepository {
         );
 
         return questions;
+    }
+
+    getSignalEvent(eventId: string): FutureData<Event> {
+        return apiToFuture(
+            this.api.request<Event>({
+                method: "get",
+                url: `/tracker/events/${eventId}?fields=dataValues`,
+            })
+        ).flatMap(resp => {
+            console.debug(resp);
+            return Future.success(resp);
+        });
     }
 }
