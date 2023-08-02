@@ -56,6 +56,21 @@ export class NotificationDefaultRepository implements NotificationRepository {
         ).flatMap(_res => Future.success(undefined));
     }
 
+    delete(notificationId: string, userId: string): FutureData<void> {
+        return apiToFuture(
+            this.api.delete<{ removed?: string[]; message?: string }>(
+                `/messageConversations/${notificationId}/${userId}`
+            )
+        ).flatMap(res => {
+            console.log("res", res);
+            console.log("status", res.removed);
+
+            return res.removed?.includes(notificationId)
+                ? Future.success(undefined)
+                : Future.error(res.message || "Error deleting notification");
+        });
+    }
+
     private buildNotification(messageConversation: D2MessageConversation): Notification {
         return {
             id: messageConversation.id,

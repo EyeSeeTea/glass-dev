@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2023-07-18T12:17:58.699Z\n"
-"PO-Revision-Date: 2023-07-18T12:17:58.699Z\n"
+"POT-Creation-Date: 2023-08-02T13:45:26.126Z\n"
+"PO-Revision-Date: 2023-08-02T13:45:26.126Z\n"
 
 msgid "Template {{id}} not loaded"
 msgstr ""
@@ -343,6 +343,9 @@ msgid "Me"
 msgstr ""
 
 msgid "Message from {{sender}}"
+msgstr ""
+
+msgid "Notification deleted successfully"
 msgstr ""
 
 msgid "Your Notifications"
