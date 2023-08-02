@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from "react";
-import { Backdrop, CircularProgress, DialogActions, DialogContent, Grid, Typography } from "@material-ui/core";
+import { CircularProgress, DialogActions, DialogContent, Grid, Typography } from "@material-ui/core";
 import styled from "styled-components";
 import { CustomCard } from "../../custom-card/CustomCard";
 import { glassColors } from "../../../pages/app/themes/dhis2.theme";
@@ -112,9 +112,6 @@ export const YourNotifications: React.FC = () => {
                 </DialogContent>
                 <DialogActions>{isDeleting && <CircularProgress size={25} />}</DialogActions>
             </ConfirmationDialog>
-            {/*             <Backdrop open={isDeleting} style={{ color: "#fff", zIndex: 1 }}>
-                <StyledCircularProgress color="inherit" size={30} />
-            </Backdrop> */}
         </>
     );
 };
