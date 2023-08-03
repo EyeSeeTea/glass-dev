@@ -62,9 +62,6 @@ export class NotificationDefaultRepository implements NotificationRepository {
                 `/messageConversations/${notificationId}/${userId}`
             )
         ).flatMap(res => {
-            console.log("res", res);
-            console.log("status", res.removed);
-
             return res.removed?.includes(notificationId)
                 ? Future.success(undefined)
                 : Future.error(res.message || "Error deleting notification");
