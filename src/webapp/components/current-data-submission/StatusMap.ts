@@ -2,7 +2,6 @@ import i18n from "@eyeseetea/d2-ui-components/locales";
 import { DataSubmissionStatusTypes } from "../../../domain/entities/GlassDataSubmission";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
 import { StatusDetails } from "./overview/StatusDetails";
-import { moduleProperties } from "../../../domain/utils/ModuleProperties";
 
 //Map of data submission statuses with correponding UI details.
 export const statusMap = (module?: string) =>
