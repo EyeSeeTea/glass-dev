@@ -3,35 +3,13 @@ import { Instance } from "../entities/Instance";
 import { ImportStrategy } from "../../domain/entities/data-entry/DataValuesSaveSummary";
 import { EventsPostResponse } from "@eyeseetea/d2-api/api/events";
 import { Future, FutureData } from "../../domain/entities/Future";
-import { HttpResponse } from "@eyeseetea/d2-api/api/common";
 import { EGASP_PROGRAM_ID } from "./program-rule/ProgramRulesMetadataDefaultRepository";
-import { D2Api, Pager } from "@eyeseetea/d2-api/2.34";
+import { D2Api } from "@eyeseetea/d2-api/2.34";
+import { D2TrackerEvent, TrackerEventsResponse } from "@eyeseetea/d2-api/api/trackerEvents";
 
 export declare type EventStatus = "ACTIVE" | "COMPLETED" | "VISITED" | "SCHEDULED" | "OVERDUE" | "SKIPPED";
-export interface EventsPostRequest {
-    events: Array<Event>;
-}
-export interface Event {
-    event: string;
-    orgUnit: string;
-    program: string;
-    status: EventStatus;
-    eventDate: string;
-    coordinate?: {
-        latitude: number;
-        longitude: number;
-    };
-    attributeOptionCombo?: string;
-    trackedEntityInstance?: string;
-    programStage?: string;
-    dataValues: Array<{
-        dataElement: string;
-        value: string | number | boolean;
-    }>;
-}
-interface PagedEventsApiResponse {
-    pager: Pager;
-    events: Event[];
+export interface TrackerEventsPostRequest {
+    events: D2TrackerEvent[];
 }
 
 export class Dhis2EventsDefaultRepository {
@@ -41,12 +19,12 @@ export class Dhis2EventsDefaultRepository {
         this.api = getD2APiFromInstance(instance);
     }
 
-    getEGASPEvents(orgUnit: string, page: number): Promise<PagedEventsApiResponse> {
-        return this.api
-            .get<PagedEventsApiResponse>("/events", {
+    getEGASPEvents(orgUnit: string, page: number): Promise<TrackerEventsResponse> {
+        return this.api.tracker.events
+            .get({
+                fields: { $owner: true },
                 program: EGASP_PROGRAM_ID,
                 orgUnit,
-                paging: true,
                 totalPages: true,
                 pageSize: 250,
                 page,
@@ -54,28 +32,28 @@ export class Dhis2EventsDefaultRepository {
             .getData();
     }
 
-    async getEGASPEventsByOrgUnitAsync(orgUnit: string): Promise<Event[]> {
-        const eventsByOU: Event[] = [];
+    async getEGASPEventsByOrgUnitAsync(orgUnit: string): Promise<D2TrackerEvent[]> {
+        const eventsByOU: D2TrackerEvent[] = [];
         let page = 1;
         let result;
 
         do {
             result = await this.getEGASPEvents(orgUnit, page);
-            eventsByOU.push(...result.events);
+            eventsByOU.push(...result.instances);
             page++;
-        } while (result.pager.pageCount >= page);
+        } while (result.page >= page);
 
         return eventsByOU;
     }
 
-    getEGASPEventsByOrgUnit(orgUnit: string): FutureData<Event[]> {
+    getEGASPEventsByOrgUnit(orgUnit: string): FutureData<D2TrackerEvent[]> {
         return Future.fromPromise(this.getEGASPEventsByOrgUnitAsync(orgUnit));
     }
 
-    import(events: EventsPostRequest, action: ImportStrategy): FutureData<EventsPostResponse> {
+    import(events: TrackerEventsPostRequest, action: ImportStrategy): FutureData<EventsPostResponse> {
         return Future.fromPromise(
-            this.api
-                .post<HttpResponse<EventsPostResponse>>("/events", { strategy: action }, events)
+            this.api.tracker
+                .post({ importStrategy: action }, { events: events.events })
                 .getData()
                 .then(result => {
                     return result?.response;
