@@ -8,7 +8,8 @@ import { GlassUploadsRepository } from "../../../repositories/GlassUploadsReposi
 import { TrackerRepository } from "../../../repositories/TrackerRepository";
 import { RISIndividualDataRepository } from "../../../repositories/data-entry/RISIndividualDataRepository";
 import { getStringFromFile } from "../utils/fileToString";
-import { TrackedEntity, TrackerPostResponse } from "@eyeseetea/d2-api/api/tracker";
+import { TrackerPostResponse } from "@eyeseetea/d2-api/api/tracker";
+import { D2TrackerTrackedEntity as TrackedEntity } from "@eyeseetea/d2-api/api/trackerTrackedEntities";
 import {
     D2TrackerEnrollment,
     D2TrackerEnrollmentAttribute,

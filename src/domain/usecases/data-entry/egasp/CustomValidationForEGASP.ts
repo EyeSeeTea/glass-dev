@@ -1,9 +1,10 @@
 import i18n from "@eyeseetea/d2-ui-components/locales";
-import { Dhis2EventsDefaultRepository, Event } from "../../../../data/repositories/Dhis2EventsDefaultRepository";
+import { Dhis2EventsDefaultRepository } from "../../../../data/repositories/Dhis2EventsDefaultRepository";
 import { Future, FutureData } from "../../../entities/Future";
 import { ConsistencyError } from "../../../entities/data-entry/ImportSummary";
 import { EventResult } from "../../../entities/program-rules/EventEffectTypes";
 import { firstDayOfQuarter, lastDayOfQuarter } from "../../../utils/quarterlyPeriodHelper";
+import { D2TrackerEvent as Event } from "@eyeseetea/d2-api/api/trackerEvents";
 
 const EGASP_DATAELEMENT_ID = "KaS2YBRN8eH";
 const PATIENT_DATAELEMENT_ID = "aocFHBxcQa0";
@@ -65,11 +66,11 @@ export class CustomValidationForEGASP {
     private checkPeriod(events: Event[], period: string): ConsistencyError[] {
         const errors = _(
             events.map(event => {
-                const eventDate = new Date(event.eventDate);
+                const eventDate = new Date(event.occurredAt);
                 if (eventDate < firstDayOfQuarter(period) || eventDate > lastDayOfQuarter(period)) {
                     return {
                         error: i18n.t(
-                            `Event date is incorrect: Selected Quarterly period : ${period}, date in file: ${event.eventDate}`
+                            `Event date is incorrect: Selected Quarterly period : ${period}, date in file: ${event.occurredAt}`
                         ),
                         line: parseInt(event.event),
                     };
@@ -133,7 +134,7 @@ export class CustomValidationForEGASP {
             if (patientDataElement)
                 return {
                     eventId: event.event,
-                    patientIdAndDate: `${patientDataElement.value},${new Date(event.eventDate).toISOString()}`,
+                    patientIdAndDate: `${patientDataElement.value},${new Date(event.occurredAt).toISOString()}`,
                 };
             else return null;
         });
@@ -144,7 +145,7 @@ export class CustomValidationForEGASP {
             if (patientDataElement)
                 return {
                     eventId: event.event,
-                    patientIdAndDate: `${patientDataElement.value},${new Date(event.eventDate).toISOString()}`,
+                    patientIdAndDate: `${patientDataElement.value},${new Date(event.occurredAt).toISOString()}`,
                 };
             else return null;
         });

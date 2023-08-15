@@ -1,4 +1,5 @@
-import { Dhis2EventsDefaultRepository, Event } from "../../../../data/repositories/Dhis2EventsDefaultRepository";
+import { Dhis2EventsDefaultRepository } from "../../../../data/repositories/Dhis2EventsDefaultRepository";
+import { D2TrackerEvent as Event } from "@eyeseetea/d2-api/api/trackerEvents";
 import { Future, FutureData } from "../../../entities/Future";
 import { ConsistencyError, ImportSummary } from "../../../entities/data-entry/ImportSummary";
 import * as templates from "../../../entities/data-entry/egasp-templates";
@@ -253,7 +254,7 @@ export class ImportEGASPFile {
                             program: dataForm,
                             status: "COMPLETED",
                             orgUnit,
-                            eventDate: period,
+                            occurredAt: period,
                             attributeOptionCombo: attribute,
                             dataValues: dataValues,
                             coordinate,
@@ -272,7 +273,7 @@ export class ImportEGASPFile {
                                 program: "",
                                 status: "COMPLETED",
                                 orgUnit: "",
-                                eventDate: "",
+                                occurredAt: "",
                                 attributeOptionCombo: "",
                                 dataValues: [],
                             };
@@ -290,7 +291,7 @@ export class ImportEGASPFile {
 
     private formatDhis2Value(item: DataPackageDataValue, dataForm: DataForm): DataPackageDataValue | undefined {
         const dataElement = dataForm.dataElements.find(({ id }) => item.dataElement === id);
-        const booleanValue = String(item.optionId) === "true" || item.optionId === "true";
+        const booleanValue = String(item.value) === "true" || item.value === "true";
 
         if (dataElement?.valueType === "BOOLEAN") {
             return { ...item, value: booleanValue };
