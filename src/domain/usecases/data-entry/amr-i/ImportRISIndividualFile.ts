@@ -10,11 +10,8 @@ import { RISIndividualDataRepository } from "../../../repositories/data-entry/RI
 import { getStringFromFile } from "../utils/fileToString";
 import { TrackerPostResponse } from "@eyeseetea/d2-api/api/tracker";
 import { D2TrackerTrackedEntity as TrackedEntity } from "@eyeseetea/d2-api/api/trackerTrackedEntities";
-import {
-    D2TrackerEnrollment,
-    D2TrackerEnrollmentAttribute,
-    D2TrackerEnrollmentEvent,
-} from "@eyeseetea/d2-api/api/trackerEnrollments";
+import { D2TrackerEnrollment, D2TrackerEnrollmentAttribute } from "@eyeseetea/d2-api/api/trackerEnrollments";
+import { D2TrackerEvent } from "@eyeseetea/d2-api/api/trackerEvents";
 
 const AMRIProgramID = "mMAj6Gofe49";
 const AMR_GLASS_AMR_TET_PATIENT = "CcgnfemKr5U";
@@ -227,7 +224,7 @@ export class ImportRISIndividualFile {
                             };
                         });
 
-                    const events: D2TrackerEnrollmentEvent[] = [
+                    const events: D2TrackerEvent[] = [
                         {
                             program: AMRIProgramIDl,
                             event: "",
@@ -235,6 +232,7 @@ export class ImportRISIndividualFile {
                             orgUnit,
                             dataValues: AMRDataStage,
                             occurredAt: new Date().getTime().toString(),
+                            status: "ACTIVE",
                         },
                     ];
                     const enrollments: D2TrackerEnrollment[] = [
