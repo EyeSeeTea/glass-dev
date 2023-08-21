@@ -16,6 +16,7 @@ type ModuleDetails = {
     primaryUploadLabel: string;
     unit: string;
     isSpecimenReq: boolean;
+    populateCurrentYearInHistory: boolean;
 };
 
 export const moduleProperties = new Map<string, ModuleDetails>([
@@ -40,6 +41,7 @@ export const moduleProperties = new Map<string, ModuleDetails>([
             primaryUploadLabel: "Choose RIS File",
             unit: "data value",
             isSpecimenReq: true,
+            populateCurrentYearInHistory: false,
         },
     ],
     [
@@ -62,6 +64,7 @@ export const moduleProperties = new Map<string, ModuleDetails>([
             primaryUploadLabel: "Choose EGASP File",
             unit: "event",
             isSpecimenReq: false,
+            populateCurrentYearInHistory: true,
         },
     ],
     [
@@ -84,6 +87,7 @@ export const moduleProperties = new Map<string, ModuleDetails>([
             primaryUploadLabel: "Choose RIS Individual File",
             unit: "enrollment",
             isSpecimenReq: true,
+            populateCurrentYearInHistory: false,
         },
     ],
 ]);
