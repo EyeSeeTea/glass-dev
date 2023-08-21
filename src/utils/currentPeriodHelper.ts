@@ -13,11 +13,15 @@ export const getCurrentYear = () => {
     return new Date().getFullYear();
 };
 
-export const getLastNYears = (n = 7) => {
+export const getLastNYears = (addCurrentYear = false, n = 7) => {
     const years: string[] = [];
+    if (addCurrentYear) {
+        years.push(getCurrentYear().toString());
+    }
     for (let yearItr = getCurrentYear() - 1; yearItr > getCurrentYear() - 1 - n; yearItr--) {
         years.push(yearItr.toString());
     }
+
     return years;
 };
 
