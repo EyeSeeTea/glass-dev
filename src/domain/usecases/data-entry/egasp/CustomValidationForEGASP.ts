@@ -13,7 +13,7 @@ export class CustomValidationForEGASP {
     public getValidatedEvents(events: Event[], orgUnit: string, period: string): FutureData<EventResult> {
         //1. Org unit validation
         const orgUnitErrors = this.checkCountry(events, orgUnit);
-        //2. Quarterly period validation
+        //2. Period validation
         const periodErrors = this.checkPeriod(events, period);
 
         //Fetch all existing EGASP events for the given org unit
@@ -111,7 +111,10 @@ export class CustomValidationForEGASP {
         const errors = _(egaspIDs)
             .groupBy("egaspId")
             .map(duplicateEgaspIdGroup => {
-                if (duplicateEgaspIdGroup.length > 1) {
+                if (
+                    duplicateEgaspIdGroup.length > 1 &&
+                    duplicateEgaspIdGroup.some(pg => fileEgaspIDs.some(fe => pg?.eventId === fe?.eventId))
+                ) {
                     return {
                         error: i18n.t(`This EGASP ID already exists : ${duplicateEgaspIdGroup[0]?.egaspId}`),
                         lines: _(duplicateEgaspIdGroup.map(event => parseInt(event.eventId)))
@@ -131,7 +134,9 @@ export class CustomValidationForEGASP {
         //1. Patient ids of events in file.
         const filePatientIDs = fileEvents.map(event => {
             const patientDataElement = event.dataValues.find(dv => dv.dataElement === PATIENT_DATAELEMENT_ID);
-            if (patientDataElement)
+            const eventDate = new Date(event.occurredAt);
+
+            if (patientDataElement && eventDate instanceof Date && !isNaN(eventDate.getTime()))
                 return {
                     eventId: event.event,
                     patientIdAndDate: `${patientDataElement.value},${new Date(event.occurredAt).toISOString()}`,
@@ -142,7 +147,8 @@ export class CustomValidationForEGASP {
         //2. Egasp ids of existing events.
         const existingPatientsIDs = existingEvents.map(event => {
             const patientDataElement = event.dataValues.find(dv => dv.dataElement === PATIENT_DATAELEMENT_ID);
-            if (patientDataElement)
+            const eventDate = new Date(event.occurredAt);
+            if (patientDataElement && eventDate instanceof Date && !isNaN(eventDate.getTime()))
                 return {
                     eventId: event.event,
                     patientIdAndDate: `${patientDataElement.value},${new Date(event.occurredAt).toISOString()}`,
@@ -157,7 +163,10 @@ export class CustomValidationForEGASP {
         const errors = _(patientIDs)
             .groupBy("patientIdAndDate")
             .map(duplicatePatientIdGroup => {
-                if (duplicatePatientIdGroup.length > 1) {
+                if (
+                    duplicatePatientIdGroup.length > 1 &&
+                    duplicatePatientIdGroup.some(pg => filePatientIDs.some(fp => pg?.eventId === fp?.eventId))
+                ) {
                     if (duplicatePatientIdGroup[0]) {
                         const [patientId, eventDate] = duplicatePatientIdGroup[0]?.patientIdAndDate.split(",");
                         return {
