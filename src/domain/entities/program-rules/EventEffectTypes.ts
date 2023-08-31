@@ -145,7 +145,7 @@ type NamedRef = { id: Id; name: string };
 export interface UpdateActionEvent {
     type: "event";
     eventId: Id;
-    teiId?: Id;
+    trackedEntityId?: Id;
     program: NamedRef;
     programStage?: NamedRef;
     orgUnit: NamedRef;
@@ -163,7 +163,7 @@ export interface ProgramRuleEvent {
     programStageId?: Id;
     orgUnitId: Id;
     orgUnitName: string;
-    trackedEntityInstanceId?: Id | undefined;
+    trackedEntityId?: Id | undefined;
     enrollmentId?: Id;
     enrollmentStatus?: "ACTIVE" | "COMPLETED" | "CANCELLED";
     status?: EventStatus;

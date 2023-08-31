@@ -9,7 +9,6 @@ import { DataForm } from "../../../entities/DataForm";
 import { ExcelReader } from "../../../utils/ExcelReader";
 import { ExcelRepository } from "../../../repositories/ExcelRepository";
 import { DataPackage, DataPackageDataValue } from "../../../entities/data-entry/DataPackage";
-import { EventsPostResponse } from "@eyeseetea/d2-api/api/events";
 import { ImportStrategy } from "../../../entities/data-entry/DataValuesSaveSummary";
 import { GlassDocumentsRepository } from "../../../repositories/GlassDocumentsRepository";
 import { GlassUploadsRepository } from "../../../repositories/GlassUploadsRepository";
@@ -18,6 +17,7 @@ import { ProgramRulesMetadataRepository } from "../../../repositories/program-ru
 import { EventResult } from "../../../entities/program-rules/EventEffectTypes";
 import { CustomValidationForEGASP } from "./CustomValidationForEGASP";
 import { getStringFromFile } from "../utils/fileToString";
+import { TrackerPostResponse } from "@eyeseetea/d2-api/api/tracker";
 
 export class ImportEGASPFile {
     constructor(
@@ -167,34 +167,27 @@ export class ImportEGASPFile {
     }
 
     private mapToImportSummary(
-        result: EventsPostResponse,
+        result: TrackerPostResponse,
         nonBlockingErrors: ConsistencyError[]
     ): {
         importSummary: ImportSummary;
         eventIdList: string[];
     } {
-        if (result && result.importSummaries) {
+        if (result && result.validationReport.errorReports.length > 0) {
             const blockingErrorList = _.compact(
-                result.importSummaries.map(summary => {
-                    if (summary.status === "ERROR") {
-                        if (summary.description) return summary.description;
-                        else {
-                            return summary.conflicts.map(
-                                conflict => `Object : ${conflict.object}, Value : ${conflict.value}`
-                            );
-                        }
-                    }
+                result.validationReport.errorReports.map(summary => {
+                    if (summary.message) return summary.message;
                 })
             );
 
             const blockingErrorsByCount = _.countBy(blockingErrorList);
-            const importSummary = {
-                status: result.status,
+            const importSummary: ImportSummary = {
+                status: result.status === "OK" ? "SUCCESS" : result.status,
                 importCount: {
-                    imported: result.imported,
-                    updated: result.updated,
-                    ignored: result.ignored,
-                    deleted: result.deleted,
+                    imported: result.stats.created,
+                    updated: result.stats.updated,
+                    ignored: result.stats.ignored,
+                    deleted: result.stats.deleted,
                 },
                 blockingErrors: Object.entries(blockingErrorsByCount).map(err => {
                     return { error: err[0], count: err[1] };
@@ -203,11 +196,10 @@ export class ImportEGASPFile {
                 importTime: new Date(),
             };
 
-            const eventIdList = result.importSummaries.map(summary => {
-                if (summary.status === "SUCCESS") {
-                    return summary.reference;
-                }
-            });
+            const eventIdList =
+                result.status === "OK"
+                    ? result.bundleReport.typeReportMap.EVENT.objectReports.map(report => report.uid)
+                    : [];
 
             return { importSummary, eventIdList: _.compact(eventIdList) };
         } else {

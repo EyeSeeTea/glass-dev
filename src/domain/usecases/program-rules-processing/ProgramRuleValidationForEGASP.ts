@@ -153,6 +153,7 @@ export class ProgramRuleValidationForEGASP {
         return {
             type: "event",
             eventId: event.event || "",
+            trackedEntityId: event.trackedEntity || "",
             program,
             programStage: event.programStage ? programStagesNamedRefById[event.programStage] : undefined,
             orgUnit: { id: event.orgUnit, name: "" },
@@ -350,6 +351,8 @@ export class ProgramRuleValidationForEGASP {
     }
 
     private getProgramEvent(event: Event, metadata: EGASPProgramMetadata): ProgramRuleEvent {
+        const trackedEntityId = event.trackedEntity;
+
         return {
             eventId: event.event,
             programId: event.program,
@@ -361,6 +364,7 @@ export class ProgramRuleValidationForEGASP {
             status: event.status,
             occurredAt: event.occurredAt,
             scheduledAt: event.occurredAt,
+            trackedEntityId,
             // Add data values: Record<DataElementId, Value>
             ...fromPairs(
                 event.dataValues.map(dv => {
