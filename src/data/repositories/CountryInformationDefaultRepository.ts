@@ -44,7 +44,7 @@ export class CountryInformationDefaultRepository implements CountryInformationRe
                     orgUnits.find(ou => ou.id !== countryId && ou.level === countryLevel - 1)?.shortName || "";
 
                 const enrollment = tei?.enrollments?.[0];
-                const events = tei?.enrollments?.[0]?.events || [];
+                const events = enrollment?.events || [];
                 const programstageDataElements = program?.programStages[0]?.programStageDataElements || [];
 
                 return {
