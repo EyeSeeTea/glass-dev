@@ -36,9 +36,9 @@ export function useSignals() {
         compositionRoot.signals.getSignals().run(
             signals => {
                 if (confidentialAccessGroup.kind === "loaded" && readAccessGroup.kind === "loaded") {
-                    //1. If the user has confidential user group access,
-                    //show all signals belonging to org units the user has read access for
-                    //and all APPROVED signals.
+                    //1. If the user has confidential user group access show:
+                    //a. signals belonging to org units the user has read access for and
+                    //b. signals with APPROVED status.
                     if (currentUser.userGroups.some(ug => confidentialAccessGroup.data.find(cag => cag.id === ug.id))) {
                         const accessibleSignals = getSignalsByUserOUReadAccess(signals);
                         setSignals({ kind: "loaded", data: accessibleSignals });
