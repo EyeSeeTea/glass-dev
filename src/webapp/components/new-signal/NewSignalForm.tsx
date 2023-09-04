@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Backdrop, Button, CircularProgress, makeStyles } from "@material-ui/core";
 // @ts-ignore
 import { DataTable, TableHead, DataTableRow, DataTableColumnHeader, TableBody, DataTableCell } from "@dhis2/ui";
 import { useStyles } from "../questionnaire/QuestionnaireForm";
 import { useAppContext } from "../../contexts/app-context";
-import { Question, Questionnaire } from "../../../domain/entities/Questionnaire";
+import { Question } from "../../../domain/entities/Questionnaire";
 import { PageHeader } from "../page-header/PageHeader";
 import { useSnackbar } from "@eyeseetea/d2-ui-components";
 import { QuestionWidget } from "../questionnaire/QuestionInput";
@@ -14,6 +14,7 @@ import { useCurrentUserGroupsAccess } from "../../hooks/useCurrentUserGroupsAcce
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import styled from "styled-components";
 import { useCurrentModuleContext } from "../../contexts/current-module-context";
+import { useNewSignalForm } from "./hook/useNewSignalForm";
 
 export interface NewSignalFormProps {
     hideForm?: () => void;
@@ -24,8 +25,6 @@ export interface NewSignalFormProps {
 export const NewSignalForm: React.FC<NewSignalFormProps> = props => {
     const { compositionRoot } = useAppContext();
     const { currentModuleAccess } = useCurrentModuleContext();
-    const [questionnaire, setQuestionnaire] = useState<Questionnaire>();
-    const [loading, setLoading] = useState<boolean>(false);
     const { currentOrgUnitAccess } = useCurrentOrgUnitContext();
     const { readAccessGroup, confidentialAccessGroup } = useCurrentUserGroupsAccess();
 
@@ -33,35 +32,7 @@ export const NewSignalForm: React.FC<NewSignalFormProps> = props => {
     const formClasses = useFormStyles();
     const snackbar = useSnackbar();
 
-    useEffect(() => {
-        setLoading(true);
-        if (!props.eventId) {
-            //Empty Questionnaire form
-            return compositionRoot.signals.getForm().run(
-                questionnaireForm => {
-                    setQuestionnaire(questionnaireForm);
-                    setLoading(false);
-                },
-                err => {
-                    snackbar.error(err);
-                    setLoading(false);
-                }
-            );
-        } else {
-            //Pre-populate data in QUestionnaire
-            return compositionRoot.signals.getSignal(props.eventId).run(
-                questionnaireWithData => {
-                    console.debug(questionnaireWithData);
-                    setQuestionnaire(questionnaireWithData);
-                    setLoading(false);
-                },
-                err => {
-                    snackbar.error(err);
-                    setLoading(false);
-                }
-            );
-        }
-    }, [compositionRoot, snackbar, props.eventId]);
+    const { questionnaire, setQuestionnaire, loading, setLoading } = useNewSignalForm(props.eventId);
 
     const saveQuestionnaire = () => {
         setLoading(true);
