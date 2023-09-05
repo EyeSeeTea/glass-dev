@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from "react";
-import { Grid, Typography } from "@material-ui/core";
+import { CircularProgress, DialogActions, DialogContent, Grid, Typography } from "@material-ui/core";
 import styled from "styled-components";
 import { CustomCard } from "../../custom-card/CustomCard";
 import { glassColors } from "../../../pages/app/themes/dhis2.theme";
@@ -10,13 +10,21 @@ import { useAppContext } from "../../../contexts/app-context";
 import { ContentLoader } from "../../content-loader/ContentLoader";
 import moment from "moment";
 import { NotificationDialog } from "./NotificationDialog";
+import DeleteIcon from "@material-ui/icons/Delete";
+import { ConfirmationDialog, useSnackbar } from "@eyeseetea/d2-ui-components";
 
 export const YourNotifications: React.FC = () => {
     const [notificationToOpen, setNotificationToOpen] = useState<string | undefined>(undefined);
+    const [isDeleting, setIsDeleting] = useState(false);
+    const [open, setOpen] = React.useState(false);
+    const [selectedNotification, setSelectedNotification] = useState("");
+    const {
+        compositionRoot,
+        currentUser: { id: userId },
+    } = useAppContext();
 
-    const { compositionRoot } = useAppContext();
-
-    const notifications = useNotifications(compositionRoot);
+    const { notifications, refreshUploads } = useNotifications(compositionRoot);
+    const snackbar = useSnackbar();
 
     const openNotification = useCallback((id: string) => {
         setNotificationToOpen(id);
@@ -25,6 +33,23 @@ export const YourNotifications: React.FC = () => {
     const closeNotification = useCallback(() => {
         setNotificationToOpen(undefined);
     }, []);
+
+    const deleteNotification = () => {
+        setIsDeleting(true);
+        compositionRoot.notifications.delete(selectedNotification, userId).run(
+            () => {
+                snackbar.success(i18n.t("Notification deleted successfully"));
+                setIsDeleting(false);
+                refreshUploads({});
+                setOpen(false);
+            },
+            error => {
+                snackbar.warning(i18n.t(error));
+                setIsDeleting(false);
+                setOpen(false);
+            }
+        );
+    };
 
     return (
         <>
@@ -39,14 +64,27 @@ export const YourNotifications: React.FC = () => {
                             <NotificationsList>
                                 {notifications.data.map(notification => {
                                     return (
-                                        <Item key={notification.id} onClick={() => openNotification(notification.id)}>
-                                            <span className="date">
-                                                {moment(notification.date).format("MM/DD/YYYY")}
-                                            </span>
-                                            <p className="summary">{notification.subject}</p>
-                                            <button>
-                                                <ChevronRightIcon />
-                                            </button>
+                                        <Item key={notification.id}>
+                                            <DetailsContainer onClick={() => openNotification(notification.id)}>
+                                                <span className="date">
+                                                    {moment(notification.date).format("MM/DD/YYYY")}
+                                                </span>
+                                                <p className="summary">{notification.subject}</p>
+                                            </DetailsContainer>
+                                            <ButtonsContainer>
+                                                <button onClick={() => openNotification(notification.id)}>
+                                                    <ChevronRightIcon />
+                                                </button>
+                                                <button
+                                                    onClick={() => {
+                                                        setSelectedNotification(notification.id);
+                                                        setOpen(true);
+                                                    }}
+                                                    style={{}}
+                                                >
+                                                    <StyledDeleteIcon />
+                                                </button>
+                                            </ButtonsContainer>
                                         </Item>
                                     );
                                 })}
@@ -59,6 +97,21 @@ export const YourNotifications: React.FC = () => {
             {notificationToOpen && (
                 <NotificationDialog isOpen={true} onCancel={closeNotification} notificationId={notificationToOpen} />
             )}
+            <ConfirmationDialog
+                isOpen={open}
+                title={i18n.t("Notification")}
+                onSave={deleteNotification}
+                onCancel={() => setOpen(false)}
+                saveText={i18n.t("Yes")}
+                cancelText={i18n.t("Cancel")}
+                fullWidth={true}
+                disableEnforceFocus
+            >
+                <DialogContent>
+                    <Typography>{i18n.t("Are you sure you want to delete this notification?")}</Typography>
+                </DialogContent>
+                <DialogActions>{isDeleting && <CircularProgress size={25} />}</DialogActions>
+            </ConfirmationDialog>
         </>
     );
 };
@@ -100,4 +153,20 @@ const Item = styled.div`
             color: ${glassColors.greyBlack};
         }
     }
+`;
+
+const DetailsContainer = styled.div`
+    display: flex;
+    align-items: center;
+    gap: 20px;
+`;
+
+const ButtonsContainer = styled.div`
+    display: flex;
+    margin-left: auto;
+    gap: 20px;
+`;
+
+const StyledDeleteIcon = styled(DeleteIcon)`
+    cursor: pointer;
 `;

@@ -112,7 +112,7 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                             Future.joinObj({
                                 deletePrimaryFileSummary:
                                     primaryFileToDelete.status.toLowerCase() !== "uploaded" ||
-                                    currentModuleAccess.moduleName === "EGASP"
+                                    !moduleProperties.get(currentModuleAccess.moduleName)?.isDryRunReq
                                         ? compositionRoot.fileSubmission.primaryFile(
                                               currentModuleAccess.moduleName,
                                               primaryFile,

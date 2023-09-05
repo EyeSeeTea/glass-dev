@@ -115,7 +115,11 @@ export const ReviewDataSummary: React.FC<ReviewDataSummaryProps> = ({
                                             );
                                     }
                                 },
-                                () => {}
+                                error => {
+                                    console.debug(
+                                        "Error occurred when setting data submission status, error: " + error
+                                    );
+                                }
                             );
                         }
                     } else {
