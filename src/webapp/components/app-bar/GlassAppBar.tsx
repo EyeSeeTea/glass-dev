@@ -54,7 +54,7 @@ export const GlassAppBar: React.FC<GlassAppBarProps> = ({ toggleShowMenu }) => {
 
     const { currentUser, compositionRoot } = useAppContext();
     const { currentOrgUnitAccess, changeCurrentOrgUnitAccess } = useCurrentOrgUnitContext();
-    const notifications = useNotifications(compositionRoot);
+    const { notifications } = useNotifications(compositionRoot);
 
     const [anchorEl, setAnchorEl] = React.useState(null);
     const [orgUnitName, setOrgUnitName] = React.useState(currentOrgUnitAccess.orgUnitName);

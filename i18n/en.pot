@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2023-08-04T08:25:24.207Z\n"
-"PO-Revision-Date: 2023-08-04T08:25:24.207Z\n"
+"POT-Creation-Date: 2023-08-02T14:17:37.190Z\n"
+"PO-Revision-Date: 2023-08-02T14:17:37.190Z\n"
 
 msgid "Template {{id}} not loaded"
 msgstr ""
@@ -348,7 +348,16 @@ msgstr ""
 msgid "Message from {{sender}}"
 msgstr ""
 
+msgid "Notification deleted successfully"
+msgstr ""
+
 msgid "Your Notifications"
+msgstr ""
+
+msgid "Yes"
+msgstr ""
+
+msgid "Are you sure you want to delete this notification?"
 msgstr ""
 
 msgid "OPEN ALL YEAR"
@@ -373,9 +382,6 @@ msgid "Set as incomplete"
 msgstr ""
 
 msgid "Set as completed"
-msgstr ""
-
-msgid "Yes"
 msgstr ""
 
 msgid "No"
