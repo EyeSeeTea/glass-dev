@@ -65,7 +65,9 @@ export const NewSignalForm: React.FC<NewSignalFormProps> = props => {
                         if (props.hideForm) props.hideForm();
                     },
                     () => {
-                        snackbar.error("Submission Failed!");
+                        snackbar.error(
+                            "Submission Failed! You do not have the necessary permissions, please contact your administrator"
+                        );
                         setLoading(false);
                         if (props.hideForm) props.hideForm();
                     }
@@ -104,7 +106,9 @@ export const NewSignalForm: React.FC<NewSignalFormProps> = props => {
                         if (props.hideForm) props.hideForm();
                     },
                     () => {
-                        snackbar.error("Submission Failed!");
+                        snackbar.error(
+                            "Submission Failed! You do not have the necessary permissions, please contact your administrator"
+                        );
                         setLoading(false);
                         if (props.hideForm) props.hideForm();
                     }
