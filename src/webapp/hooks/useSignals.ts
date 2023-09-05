@@ -14,7 +14,7 @@ export function useSignals() {
     const { readAccessGroup, confidentialAccessGroup } = useCurrentUserGroupsAccess();
     const { currentUser } = useAppContext();
 
-    const getSignalsByUserOUReadAccess = useCallback(
+    const getSignalsByUserOUAccess = useCallback(
         (signals: Signal[]) => {
             return _.compact(
                 signals.map(signal => {
@@ -32,6 +32,20 @@ export function useSignals() {
         [currentUser.userOrgUnitsAccess]
     );
 
+    const getNonConfidentailSignalsByUserOUAccess = useCallback(
+        (signals: Signal[]) => {
+            return signals.filter(
+                signal =>
+                    signal.status === "APPROVED" ||
+                    (signal.status === "DRAFT" &&
+                        currentUser.userOrgUnitsAccess.some(
+                            ou => signal.orgUnit.id === ou.orgUnitId && ou.readAccess === true
+                        ))
+            );
+        },
+        [currentUser.userOrgUnitsAccess]
+    );
+
     React.useEffect(() => {
         compositionRoot.signals.getSignals().run(
             signals => {
@@ -40,12 +54,14 @@ export function useSignals() {
                     //a. signals belonging to org units the user has read access for and
                     //b. signals with APPROVED status.
                     if (currentUser.userGroups.some(ug => confidentialAccessGroup.data.find(cag => cag.id === ug.id))) {
-                        const accessibleSignals = getSignalsByUserOUReadAccess(signals);
+                        const accessibleSignals = getSignalsByUserOUAccess(signals);
                         setSignals({ kind: "loaded", data: accessibleSignals });
                     }
-                    //2. If the user has read usergroup access, show all approved signals.
+                    //2. If the user has read usergroup access, show
+                    //a. approved signals for all Org Units
+                    //b. draft signals for Org Units user has read access to.
                     else if (currentUser.userGroups.some(ug => readAccessGroup.data.find(cag => cag.id === ug.id))) {
-                        const approvedSignals = signals.filter(signal => signal.status === "APPROVED");
+                        const approvedSignals = getNonConfidentailSignalsByUserOUAccess(signals);
                         setSignals({ kind: "loaded", data: approvedSignals });
                     }
                     //3. If the user does not have either confidential or read access, show no signals.
@@ -62,7 +78,8 @@ export function useSignals() {
         readAccessGroup,
         currentUser.userGroups,
         currentUser.userOrgUnitsAccess,
-        getSignalsByUserOUReadAccess,
+        getSignalsByUserOUAccess,
+        getNonConfidentailSignalsByUserOUAccess,
     ]);
 
     return signals;
