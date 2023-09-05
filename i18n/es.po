@@ -107,6 +107,9 @@ msgid ""
 "submitting for this data submission"
 msgstr ""
 
+msgid "Please complete the mandatory implementation questionnaire"
+msgstr ""
+
 msgid "Please complete all mandatory questionnaires/uploads."
 msgstr ""
 
