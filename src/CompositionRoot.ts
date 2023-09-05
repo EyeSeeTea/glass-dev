@@ -53,6 +53,7 @@ import { GetDashboardUseCase } from "./domain/usecases/GetDashboardUseCase";
 import { SystemInfoDefaultRepository } from "./data/repositories/SystemInfoDefaultRepository";
 import { GetLastAnalyticsRunTimeUseCase } from "./domain/usecases/GetLastAnalyticsRunTimeUseCase";
 import { SendNotificationsUseCase } from "./domain/usecases/SendNotificationsUseCase";
+import { DeleteNotificationUseCase } from "./domain/usecases/DeleteNotificationUseCase";
 import { UsersDefaultRepository } from "./data/repositories/UsersDefaultRepository";
 import { GetUiLocalesUseCase } from "./domain/usecases/GetUiLocalesUseCase";
 import { GetDatabaseLocalesUseCase } from "./domain/usecases/GetDatabaseLocalesUseCase";
@@ -168,6 +169,7 @@ export function getCompositionRoot(instance: Instance) {
             getAll: new GetNotificationsUseCase(notificationRepository),
             getById: new GetNotificationByIdUseCase(notificationRepository),
             send: new SendNotificationsUseCase(notificationRepository, usersRepository),
+            delete: new DeleteNotificationUseCase(notificationRepository),
         }),
         countries: getExecute({
             getInformation: new GetCountryInformationUseCase(countryInformationRepository),
