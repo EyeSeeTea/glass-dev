@@ -11,7 +11,7 @@ import {
 export class SpreadsheetXlsxDataSource implements SpreadsheetDataSource {
     async read(inputFile: File): Async<Spreadsheet> {
         try {
-            const workbook = XLSX.read(await inputFile?.arrayBuffer());
+            const workbook = XLSX.read(await inputFile?.arrayBuffer(), { cellDates: true });
 
             const sheets = _(workbook.Sheets)
                 .toPairs()
