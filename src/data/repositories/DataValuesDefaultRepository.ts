@@ -23,7 +23,7 @@ export class DataValuesDefaultRepository implements DataValuesRepository {
                 {
                     importStrategy: action,
                     dryRun: dryRun,
-                    preheatCache: true,
+                    preheatCache: !dryRun,
                 },
                 { dataValues }
             )
