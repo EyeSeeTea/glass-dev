@@ -15,14 +15,14 @@ export const StatusCapsule: React.FC<StatusCapsuleProps> = ({ status }) => {
         case "COMPLETE":
         case "APPROVED":
         case "UPDATE_REQUEST_ACCEPTED":
-            return <Approved>{statusMap.get(status) ? statusMap.get(status)?.title : status}</Approved>;
+            return <Approved>{statusMap().get(status) ? statusMap().get(status)?.title : status}</Approved>;
         case "NOT_COMPLETED":
         case "PENDING_APPROVAL":
         case "PENDING_UPDATE_APPROVAL":
         case "REJECTED":
             return (
                 <Warning>
-                    <ErrorIcon /> {statusMap.get(status) ? statusMap.get(status)?.title : status}
+                    <ErrorIcon /> {statusMap().get(status) ? statusMap().get(status)?.title : status}
                 </Warning>
             );
         default:
