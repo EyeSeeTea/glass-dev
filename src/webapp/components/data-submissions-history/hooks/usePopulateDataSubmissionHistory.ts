@@ -4,6 +4,7 @@ import { useCurrentOrgUnitContext } from "../../../contexts/current-orgUnit-cont
 import { useCurrentModuleContext } from "../../../contexts/current-module-context";
 import { useGlassDataSubmissionsByModuleAndOU } from "../../../hooks/useGlassDataSubmissionsByModuleAndOU";
 import { getLastNYears, getLastNYearsQuarters } from "../../../../utils/currentPeriodHelper";
+import { moduleProperties } from "../../../../domain/utils/ModuleProperties";
 
 export function usePopulateDataSubmissionHistory() {
     const { compositionRoot } = useAppContext();
@@ -29,9 +30,10 @@ export function usePopulateDataSubmissionHistory() {
                     }
                 });
             } else {
-                //Check if last 5 Yearly Data Submissions are populated
-
-                getLastNYears().forEach(year => {
+                //Check if Data Submissions history is populated
+                const addCurrentYear =
+                    moduleProperties.get(currentModuleAccess.moduleName)?.populateCurrentYearInHistory || false;
+                getLastNYears(addCurrentYear).forEach(year => {
                     if (!dataSubmissions.data.find(ds => ds.period === year)) {
                         years.push(year);
                     }
