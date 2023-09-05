@@ -40,7 +40,7 @@ export const ModuleCard: React.FC<ModuleCardProps> = ({ period, module }) => {
 
     const [questionnaires, setQuestionnaires] = useState<QuestionnaireBase[]>([]);
     const [uploadsCount, setUploadsCount] = useState<number>(0);
-    const currentDataSubmissionStatus = useStatusDataSubmission(module.id, orgUnitId, period);
+    const currentDataSubmissionStatus = useStatusDataSubmission(module.id, orgUnitId, period, module.name);
 
     const updateModuleAndPeriodContext = () => {
         changeCurrentModuleAccess(module?.name || "");
