@@ -19,7 +19,8 @@ import { useNewSignalForm } from "./hook/useNewSignalForm";
 export interface NewSignalFormProps {
     hideForm?: () => void;
     readonly: boolean;
-    eventId?: string;
+    signalId?: string;
+    signalEventId?: string;
 }
 
 export const NewSignalForm: React.FC<NewSignalFormProps> = props => {
@@ -32,7 +33,7 @@ export const NewSignalForm: React.FC<NewSignalFormProps> = props => {
     const formClasses = useFormStyles();
     const snackbar = useSnackbar();
 
-    const { questionnaire, setQuestionnaire, loading, setLoading } = useNewSignalForm(props.eventId);
+    const { questionnaire, setQuestionnaire, loading, setLoading } = useNewSignalForm(props.signalEventId);
 
     const saveQuestionnaire = () => {
         setLoading(true);
@@ -47,6 +48,8 @@ export const NewSignalForm: React.FC<NewSignalFormProps> = props => {
 
             compositionRoot.signals
                 .importData(
+                    props.signalId,
+                    props.signalEventId,
                     questionnaire,
                     {
                         id: currentOrgUnitAccess.orgUnitId,
@@ -88,6 +91,8 @@ export const NewSignalForm: React.FC<NewSignalFormProps> = props => {
 
             compositionRoot.signals
                 .importData(
+                    props.signalId,
+                    props.signalEventId,
                     questionnaire,
                     {
                         id: currentOrgUnitAccess.orgUnitId,
@@ -183,15 +188,16 @@ export const NewSignalForm: React.FC<NewSignalFormProps> = props => {
             })}
             {!props.readonly && (
                 <PageFooter>
-                    <Button
-                        style={{ marginRight: "10px" }}
-                        variant="outlined"
-                        color="primary"
-                        onClick={saveQuestionnaire}
-                    >
-                        {i18n.t("Save Draft")}
-                    </Button>
-
+                    {!props.signalEventId && (
+                        <Button
+                            style={{ marginRight: "10px" }}
+                            variant="outlined"
+                            color="primary"
+                            onClick={saveQuestionnaire}
+                        >
+                            {i18n.t("Save Draft")}
+                        </Button>
+                    )}
                     <Button variant="contained" color="primary" onClick={publishQuestionnaire}>
                         {i18n.t("Publish")}
                     </Button>

@@ -2,20 +2,23 @@ import styled from "styled-components";
 import { CustomCard } from "../custom-card/CustomCard";
 import { ContentLoader } from "../content-loader/ContentLoader";
 import { TableContentWrapper } from "../data-file-history/DataFileTable";
-
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { StyledTableBody } from "../data-file-history/DataFileTableBody";
 import { useSignals } from "../../hooks/useSignals";
-
 import { Paper, Table, TableCell, TableContainer, TableHead, TableRow, Typography } from "@material-ui/core";
 import { useHistory } from "react-router-dom";
+import { SignalStatusTypes } from "../../../domain/entities/Signal";
 
 export const SignalTableContent: React.FC = () => {
     const signals = useSignals();
     const history = useHistory();
 
-    const handleSignalClick = (eventId: string) => {
-        history.push(`/signal/${eventId}`);
+    const handleSignalClick = (signalId: string, eventId: string, status: SignalStatusTypes) => {
+        const readOnlySignal = status === "DRAFT" ? false : true;
+        history.push({
+            pathname: `/signal/${eventId}`,
+            state: { readOnly: readOnlySignal, signalId: signalId, signalEvtId: eventId },
+        });
     };
 
     return (
@@ -51,7 +54,9 @@ export const SignalTableContent: React.FC = () => {
                                             {signals.data.map(signal => (
                                                 <TableRow
                                                     key={signal.id}
-                                                    onClick={() => handleSignalClick(signal.eventId)}
+                                                    onClick={() =>
+                                                        handleSignalClick(signal.id, signal.eventId, signal.status)
+                                                    }
                                                 >
                                                     <TableCell>{signal.creationDate.split("T")?.at(0) || ""}</TableCell>
                                                     <TableCell>{signal.orgUnit.name}</TableCell>
