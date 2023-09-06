@@ -12,10 +12,18 @@ export class SignalDefaultRepository implements SignalRepository {
     }
 
     save(signal: Signal): FutureData<void> {
-        return this.dataStoreClient.listCollection(DataStoreKeys.SIGNALS).flatMap(signals => {
-            const newSignalList = [...signals, signal];
-            console.debug(newSignalList);
-            return this.dataStoreClient.saveObject(DataStoreKeys.SIGNALS, newSignalList);
+        return this.dataStoreClient.listCollection<Signal>(DataStoreKeys.SIGNALS).flatMap((signals: Signal[]) => {
+            const existingSignalId = signals.findIndex(s => s.id === signal.id);
+            //If signal with same id already exists, update it.
+            if (existingSignalId !== -1) {
+                signals[existingSignalId] = signal;
+                return this.dataStoreClient.saveObject(DataStoreKeys.SIGNALS, signals);
+            }
+            //Else add a new signal.
+            else {
+                const newSignalList = [...signals, signal];
+                return this.dataStoreClient.saveObject(DataStoreKeys.SIGNALS, newSignalList);
+            }
         });
     }
 }

@@ -24,6 +24,8 @@ export class ImportCaptureDataUseCase {
     ) {}
 
     execute(
+        signalId: string | undefined,
+        signalEventId: string | undefined,
         questionnaire: Questionnaire,
         orgUnit: { id: string; name: string; path: string },
         module: { id: string; name: string },
@@ -33,7 +35,12 @@ export class ImportCaptureDataUseCase {
     ): FutureData<void> {
         //1.Create Event
         const events: Event[] = [];
-        const { event, confidential, message } = this.mapQuestionnaireToEvent(questionnaire, orgUnit.id, action);
+        const { event, confidential, message } = this.mapQuestionnaireToEvent(
+            signalEventId,
+            questionnaire,
+            orgUnit.id,
+            action
+        );
         events.push(event);
 
         return this.dhis2EventsDefaultRepository
@@ -51,7 +58,7 @@ export class ImportCaptureDataUseCase {
                         }
                     }
                     const signal: Signal = {
-                        id: generateId(),
+                        id: signalId ? signalId : generateId(),
                         creationDate: new Date().toISOString(),
                         eventId: eventId,
                         module: module.id,
@@ -100,6 +107,7 @@ export class ImportCaptureDataUseCase {
     }
 
     private mapQuestionnaireToEvent(
+        eventId: string | undefined,
         questionnaire: Questionnaire,
         orgUnitId: string,
         signalAction: SignalAction
@@ -133,7 +141,7 @@ export class ImportCaptureDataUseCase {
         const eventStatus: EventStatus = signalAction === "Save" ? "ACTIVE" : "COMPLETED";
 
         const event: Event = {
-            event: "",
+            event: eventId ? eventId : "",
             orgUnit: orgUnitId,
             program: EAR_PROGRAM_ID,
             status: eventStatus,
