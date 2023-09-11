@@ -50,7 +50,7 @@ export interface ProgramMetadata {
     optionSets: OptionSet[];
     options: Option[];
 }
-const EAR_PROGRAM_ID = "SQe26z0smFP";
+export const EAR_PROGRAM_ID = "SQe26z0smFP";
 export class CaptureFormDefaultRepository implements CaptureFormRepository {
     constructor(private api: D2Api) {}
 

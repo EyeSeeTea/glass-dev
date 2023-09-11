@@ -13,6 +13,7 @@ export function useSignals() {
     });
     const { readAccessGroup, confidentialAccessGroup } = useCurrentUserGroupsAccess();
     const { currentUser } = useAppContext();
+    const [shouldRefreshSignals, refreshSignals] = React.useState({});
 
     const getSignalsByUserOUAccess = useCallback(
         (signals: Signal[]) => {
@@ -80,7 +81,8 @@ export function useSignals() {
         currentUser.userOrgUnitsAccess,
         getSignalsByUserOUAccess,
         getNonConfidentailSignalsByUserOUAccess,
+        shouldRefreshSignals,
     ]);
 
-    return signals;
+    return { signals, refreshSignals };
 }

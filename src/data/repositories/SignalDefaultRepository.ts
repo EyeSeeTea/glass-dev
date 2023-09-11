@@ -1,4 +1,4 @@
-import { FutureData } from "../../domain/entities/Future";
+import { Future, FutureData } from "../../domain/entities/Future";
 import { Signal } from "../../domain/entities/Signal";
 import { SignalRepository } from "../../domain/repositories/SignalRepository";
 import { DataStoreClient } from "../data-store/DataStoreClient";
@@ -23,6 +23,19 @@ export class SignalDefaultRepository implements SignalRepository {
             else {
                 const newSignalList = [...signals, signal];
                 return this.dataStoreClient.saveObject(DataStoreKeys.SIGNALS, newSignalList);
+            }
+        });
+    }
+
+    delete(signalId: string): FutureData<void> {
+        return this.dataStoreClient.listCollection<Signal>(DataStoreKeys.SIGNALS).flatMap((signals: Signal[]) => {
+            const signal = signals.find(s => s.id === signalId);
+            //If signal with same id already exists, update it.
+            if (signal) {
+                signals.splice(signals.indexOf(signal), 1);
+                return this.dataStoreClient.saveObject(DataStoreKeys.SIGNALS, signals);
+            } else {
+                return Future.error("Signal could not be found");
             }
         });
     }
