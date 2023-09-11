@@ -3,7 +3,6 @@ import { Dhis2EventsDefaultRepository } from "../../../../data/repositories/Dhis
 import { Future, FutureData } from "../../../entities/Future";
 import { ConsistencyError } from "../../../entities/data-entry/ImportSummary";
 import { EventResult } from "../../../entities/program-rules/EventEffectTypes";
-import { firstDayOfQuarter, lastDayOfQuarter } from "../../../utils/quarterlyPeriodHelper";
 import { D2TrackerEvent as Event } from "@eyeseetea/d2-api/api/trackerEvents";
 
 const EGASP_DATAELEMENT_ID = "KaS2YBRN8eH";
@@ -67,10 +66,10 @@ export class CustomValidationForEGASP {
         const errors = _(
             events.map(event => {
                 const eventDate = new Date(event.occurredAt);
-                if (eventDate < firstDayOfQuarter(period) || eventDate > lastDayOfQuarter(period)) {
+                if (eventDate.getFullYear().toString() !== period) {
                     return {
                         error: i18n.t(
-                            `Event date is incorrect: Selected Quarterly period : ${period}, date in file: ${event.occurredAt}`
+                            `Event date is incorrect: Selected period : ${period}, date in file: ${event.occurredAt}`
                         ),
                         line: parseInt(event.event),
                     };
@@ -92,14 +91,14 @@ export class CustomValidationForEGASP {
     private checkUniqueEgaspId(fileEvents: Event[], existingEvents: Event[]): ConsistencyError[] {
         //1. Egasp ids of events in file.
         const fileEgaspIDs = fileEvents.map(event => {
-            const egaspDataElement = event.dataValues.find(dv => dv.dataElement === EGASP_DATAELEMENT_ID);
+            const egaspDataElement = event?.dataValues?.find(dv => dv.dataElement === EGASP_DATAELEMENT_ID);
             if (egaspDataElement) return { eventId: event.event, egaspId: egaspDataElement.value };
             else return null;
         });
 
         //2. Egasp ids of existing events.
         const existingEgaspIDs = existingEvents.map(event => {
-            const egaspDataElement = event.dataValues.find(dv => dv.dataElement === EGASP_DATAELEMENT_ID);
+            const egaspDataElement = event?.dataValues?.find(dv => dv.dataElement === EGASP_DATAELEMENT_ID);
             if (egaspDataElement) return { eventId: event.event, egaspId: egaspDataElement.value };
             else return null;
         });
@@ -139,19 +138,19 @@ export class CustomValidationForEGASP {
             if (patientDataElement && eventDate instanceof Date && !isNaN(eventDate.getTime()))
                 return {
                     eventId: event.event,
-                    patientIdAndDate: `${patientDataElement.value},${new Date(event.occurredAt).toISOString()}`,
+                    patientIdAndDate: `${patientDataElement.value},${eventDate.toISOString()}`,
                 };
             else return null;
         });
 
         //2. Egasp ids of existing events.
         const existingPatientsIDs = existingEvents.map(event => {
-            const patientDataElement = event.dataValues.find(dv => dv.dataElement === PATIENT_DATAELEMENT_ID);
+            const patientDataElement = event?.dataValues?.find(dv => dv.dataElement === PATIENT_DATAELEMENT_ID);
             const eventDate = new Date(event.occurredAt);
             if (patientDataElement && eventDate instanceof Date && !isNaN(eventDate.getTime()))
                 return {
                     eventId: event.event,
-                    patientIdAndDate: `${patientDataElement.value},${new Date(event.occurredAt).toISOString()}`,
+                    patientIdAndDate: `${patientDataElement.value},${eventDate.toISOString()}`,
                 };
             else return null;
         });

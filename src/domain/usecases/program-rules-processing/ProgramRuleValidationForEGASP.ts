@@ -207,7 +207,7 @@ export class ProgramRuleValidationForEGASP {
         const program = metadata.programs[0]; //EGASP PROGRAM
         const eventsGroups = _(events)
             .filter(ev => Boolean(ev.occurredAt))
-            .groupBy(ev => [ev.orgUnit, ev.program, ev.attributeOptionCombo].join("."))
+            .groupBy(ev => [ev.orgUnit, ev.program, ev.attributeOptionCombo, ev.trackedEntity].join("."))
             .values()
             .value();
 
