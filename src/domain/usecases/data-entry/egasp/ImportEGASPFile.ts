@@ -173,7 +173,7 @@ export class ImportEGASPFile {
         importSummary: ImportSummary;
         eventIdList: string[];
     } {
-        if (result && result.validationReport.errorReports.length > 0) {
+        if (result && result.status !== "ERROR") {
             const blockingErrorList = _.compact(
                 result.validationReport.errorReports.map(summary => {
                     if (summary.message) return summary.message;

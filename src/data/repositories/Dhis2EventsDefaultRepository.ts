@@ -6,6 +6,7 @@ import { EGASP_PROGRAM_ID } from "./program-rule/ProgramRulesMetadataDefaultRepo
 import { D2Api } from "@eyeseetea/d2-api/2.34";
 import { D2TrackerEvent, TrackerEventsResponse } from "@eyeseetea/d2-api/api/trackerEvents";
 import { TrackerPostResponse } from "@eyeseetea/d2-api/api/tracker";
+import { apiToFuture } from "../../utils/futures";
 
 export interface TrackerEventsPostRequest {
     events: D2TrackerEvent[];
@@ -50,17 +51,6 @@ export class Dhis2EventsDefaultRepository {
     }
 
     import(events: TrackerEventsPostRequest, action: ImportStrategy): FutureData<TrackerPostResponse> {
-        return Future.fromPromise(
-            this.api.tracker
-                .post({ importStrategy: action }, { events: events.events })
-                .getData()
-                .then(result => {
-                    return result?.response;
-                })
-                .catch(error => {
-                    if (error?.response?.data) return error.response.data.response;
-                    else return error;
-                })
-        );
+        return apiToFuture(this.api.tracker.post({ importStrategy: action }, events));
     }
 }
