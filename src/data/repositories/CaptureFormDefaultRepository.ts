@@ -158,7 +158,7 @@ export class CaptureFormDefaultRepository implements CaptureFormRepository {
                                 text: dataElement.formName, //formName
                                 type: "boolean",
                                 storeFalse: true,
-                                value: dataValue ? (dataValue.value as boolean) : true,
+                                value: dataValue ? (dataValue.value === "true" ? true : false) : true,
                             };
 
                             return boolQ;
