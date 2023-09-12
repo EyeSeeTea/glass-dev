@@ -6,22 +6,35 @@ import { Ref } from "../../domain/entities/Ref";
 
 export class UsersDefaultRepository implements UsersRepository {
     constructor(private api: D2Api) {}
-    getAllFilteredbyOUsAndUserGroups(orgUnitId: string, userGroups: string[]): FutureData<Ref[]> {
+    getUsersFilteredbyOUsAndUserGroups(orgUnitPath: string, userGroups: string[]): FutureData<Ref[]> {
         return apiToFuture(
             this.api.models.users.get({
+                paging: false,
                 fields: {
                     id: true,
                     userGroups: {
                         id: true,
                     },
-                },
-                filter: {
-                    "organisationUnits.id": { eq: orgUnitId },
+                    dataViewOrganisationUnits: {
+                        id: true,
+                    },
                 },
             })
         ).map(res => {
-            const filteredOUs = res.objects.filter(ou => ou.userGroups.some(ug => userGroups.includes(ug.id)));
-            return filteredOUs;
+            const users = res.objects;
+
+            //1. Filter users by user group
+            const usersByUserGroupAndOU = users.filter(user => user.userGroups.some(ug => userGroups.includes(ug.id)));
+
+            //2. Filter users by org unit if applicable
+            if (orgUnitPath !== "") {
+                const usersFilteredByOrgUnitHeirarchy = usersByUserGroupAndOU.filter(user =>
+                    user.dataViewOrganisationUnits.some(ou => orgUnitPath.includes(ou.id))
+                );
+                return usersFilteredByOrgUnitHeirarchy;
+            } else {
+                return usersByUserGroupAndOU;
+            }
         });
     }
 

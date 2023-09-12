@@ -5,4 +5,5 @@ export const DataStoreKeys = {
     UPLOADS: "uploads",
     DOCUMENTS: "documents",
     GENERAL: "general",
+    SIGNALS: "signals",
 };
