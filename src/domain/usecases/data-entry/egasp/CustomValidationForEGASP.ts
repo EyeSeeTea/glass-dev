@@ -3,73 +3,80 @@ import { Dhis2EventsDefaultRepository, Event } from "../../../../data/repositori
 import { Future, FutureData } from "../../../entities/Future";
 import { ConsistencyError } from "../../../entities/data-entry/ImportSummary";
 import { EventResult } from "../../../entities/program-rules/EventEffectTypes";
-import { firstDayOfQuarter, lastDayOfQuarter } from "../../../utils/quarterlyPeriodHelper";
+import { MetadataRepository } from "../../../repositories/MetadataRepository";
 
 const EGASP_DATAELEMENT_ID = "KaS2YBRN8eH";
 const PATIENT_DATAELEMENT_ID = "aocFHBxcQa0";
 export class CustomValidationForEGASP {
-    constructor(private dhis2EventsDefaultRepository: Dhis2EventsDefaultRepository) {}
-    public getValidatedEvents(events: Event[], orgUnit: string, period: string): FutureData<EventResult> {
+    constructor(
+        private dhis2EventsDefaultRepository: Dhis2EventsDefaultRepository,
+        private metadataRepository: MetadataRepository
+    ) {}
+    public getValidatedEvents(events: Event[], orgUnit: string, period: string): FutureData<any> {
         //1. Org unit validation
-        const orgUnitErrors = this.checkCountry(events, orgUnit);
-        //2. Quarterly period validation
-        const periodErrors = this.checkPeriod(events, period);
+        return this.checkCountry(events, orgUnit).flatMap(orgUnitErrors => {
+            //2. Period validation
+            const periodErrors = this.checkPeriod(events, period);
 
-        //Fetch all existing EGASP events for the given org unit
-        return this.dhis2EventsDefaultRepository.getEGASPEventsByOrgUnit(orgUnit).flatMap(existingEvents => {
-            //3. Duplicate EGASP ID within org unit validation
-            const duplicateEGASPIdErrors = this.checkUniqueEgaspId(events, existingEvents);
+            //Fetch all existing EGASP events for the given org unit
+            return this.dhis2EventsDefaultRepository.getEGASPEventsByOrgUnit(orgUnit).flatMap(existingEvents => {
+                //3. Duplicate EGASP ID within org unit validation
+                const duplicateEGASPIdErrors = this.checkUniqueEgaspId(events, existingEvents);
 
-            //4. Duplicate Patient ID and Event date combo within org unit validation
-            const duplicatePatientIdErrors = this.checkUniquePatientIdAndDate(events, existingEvents);
+                //4. Duplicate Patient ID and Event date combo within org unit validation
+                const duplicatePatientIdErrors = this.checkUniquePatientIdAndDate(events, existingEvents);
 
-            const results: EventResult = {
-                events: events,
-                blockingErrors: [
-                    ...orgUnitErrors,
-                    ...periodErrors,
-                    ...duplicateEGASPIdErrors,
-                    ...duplicatePatientIdErrors,
-                ],
-                nonBlockingErrors: [],
-            };
-            return Future.success(results);
+                const results: EventResult = {
+                    events: events,
+                    blockingErrors: [
+                        ...orgUnitErrors,
+                        ...periodErrors,
+                        ...duplicateEGASPIdErrors,
+                        ...duplicatePatientIdErrors,
+                    ],
+                    nonBlockingErrors: [],
+                };
+
+                return Future.success(results);
+            });
         });
     }
 
-    private checkCountry(events: Event[], country: string): ConsistencyError[] {
-        const errors = _(
-            events.map(event => {
-                if (event.orgUnit !== country) {
-                    return {
-                        error: i18n.t(
-                            `Country is different: Selected Data Submission Country : ${country}, Country in file: ${event.orgUnit}`
-                        ),
-                        line: parseInt(event.event),
-                    };
-                }
-            })
-        )
-            .omitBy(_.isNil)
-            .groupBy(error => error?.error)
-            .mapValues(value => value.map(el => el?.line || 0))
-            .value();
+    private checkCountry(events: Event[], country: string): FutureData<ConsistencyError[]> {
+        return this.metadataRepository.getClinicsInOrgUnitId(country).map(clinicsInCountry => {
+            const errors = _(
+                events.map(event => {
+                    if (!clinicsInCountry?.includes(event.orgUnit)) {
+                        return {
+                            error: i18n.t(
+                                `Clinic is not part of selected country: Selected Data Submission Country : ${country}, Clinic in file: ${event.orgUnit}`
+                            ),
+                            line: parseInt(event.event),
+                        };
+                    }
+                })
+            )
+                .omitBy(_.isNil)
+                .groupBy(error => error?.error)
+                .mapValues(value => value.map(el => el?.line || 0))
+                .value();
 
-        return Object.keys(errors).map(error => ({
-            error: error,
-            count: errors[error]?.length || 0,
-            lines: errors[error] || [],
-        }));
+            return Object.keys(errors).map(error => ({
+                error: error,
+                count: errors[error]?.length || 0,
+                lines: errors[error] || [],
+            }));
+        });
     }
 
     private checkPeriod(events: Event[], period: string): ConsistencyError[] {
         const errors = _(
             events.map(event => {
                 const eventDate = new Date(event.eventDate);
-                if (eventDate < firstDayOfQuarter(period) || eventDate > lastDayOfQuarter(period)) {
+                if (eventDate.getFullYear().toString() !== period) {
                     return {
                         error: i18n.t(
-                            `Event date is incorrect: Selected Quarterly period : ${period}, date in file: ${event.eventDate}`
+                            `Event date is incorrect: Selected period : ${period}, date in file: ${event.eventDate}`
                         ),
                         line: parseInt(event.event),
                     };
@@ -110,7 +117,10 @@ export class CustomValidationForEGASP {
         const errors = _(egaspIDs)
             .groupBy("egaspId")
             .map(duplicateEgaspIdGroup => {
-                if (duplicateEgaspIdGroup.length > 1) {
+                if (
+                    duplicateEgaspIdGroup.length > 1 &&
+                    duplicateEgaspIdGroup.some(pg => fileEgaspIDs.some(fe => pg?.eventId === fe?.eventId))
+                ) {
                     return {
                         error: i18n.t(`This EGASP ID already exists : ${duplicateEgaspIdGroup[0]?.egaspId}`),
                         lines: _(duplicateEgaspIdGroup.map(event => parseInt(event.eventId)))
@@ -130,10 +140,12 @@ export class CustomValidationForEGASP {
         //1. Patient ids of events in file.
         const filePatientIDs = fileEvents.map(event => {
             const patientDataElement = event.dataValues.find(dv => dv.dataElement === PATIENT_DATAELEMENT_ID);
-            if (patientDataElement)
+            const eventDate = new Date(event.eventDate);
+
+            if (patientDataElement && eventDate instanceof Date && !isNaN(eventDate.getTime()))
                 return {
                     eventId: event.event,
-                    patientIdAndDate: `${patientDataElement.value},${new Date(event.eventDate).toISOString()}`,
+                    patientIdAndDate: `${patientDataElement.value},${eventDate.toISOString()}`,
                 };
             else return null;
         });
@@ -141,10 +153,11 @@ export class CustomValidationForEGASP {
         //2. Egasp ids of existing events.
         const existingPatientsIDs = existingEvents.map(event => {
             const patientDataElement = event.dataValues.find(dv => dv.dataElement === PATIENT_DATAELEMENT_ID);
-            if (patientDataElement)
+            const eventDate = new Date(event.eventDate);
+            if (patientDataElement && eventDate instanceof Date && !isNaN(eventDate.getTime()))
                 return {
                     eventId: event.event,
-                    patientIdAndDate: `${patientDataElement.value},${new Date(event.eventDate).toISOString()}`,
+                    patientIdAndDate: `${patientDataElement.value},${eventDate.toISOString()}`,
                 };
             else return null;
         });
@@ -156,7 +169,10 @@ export class CustomValidationForEGASP {
         const errors = _(patientIDs)
             .groupBy("patientIdAndDate")
             .map(duplicatePatientIdGroup => {
-                if (duplicatePatientIdGroup.length > 1) {
+                if (
+                    duplicatePatientIdGroup.length > 1 &&
+                    duplicatePatientIdGroup.some(pg => filePatientIDs.some(fp => pg?.eventId === fp?.eventId))
+                ) {
                     if (duplicatePatientIdGroup[0]) {
                         const [patientId, eventDate] = duplicatePatientIdGroup[0]?.patientIdAndDate.split(",");
                         return {

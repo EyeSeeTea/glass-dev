@@ -107,7 +107,7 @@ export const ReviewDataSummary: React.FC<ReviewDataSummaryProps> = ({
                                                 notificationText,
                                                 notificationText,
                                                 userGroupsIds,
-                                                currentOrgUnitAccess.orgUnitId
+                                                currentOrgUnitAccess.orgUnitPath
                                             )
                                             .run(
                                                 () => {},
@@ -115,7 +115,11 @@ export const ReviewDataSummary: React.FC<ReviewDataSummaryProps> = ({
                                             );
                                     }
                                 },
-                                () => {}
+                                error => {
+                                    console.debug(
+                                        "Error occurred when setting data submission status, error: " + error
+                                    );
+                                }
                             );
                         }
                     } else {

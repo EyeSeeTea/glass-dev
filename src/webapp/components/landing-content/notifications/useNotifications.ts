@@ -6,16 +6,18 @@ import { GlassState } from "../../../hooks/State";
 export type NotificationsState = GlassState<Notification[]>;
 
 export function useNotifications(compositionRoot: CompositionRoot) {
-    const [result, setResult] = React.useState<NotificationsState>({
+    const [notifications, setNotifications] = React.useState<NotificationsState>({
         kind: "loading",
     });
 
+    const [shouldRefresh, refreshUploads] = React.useState({});
+
     React.useEffect(() => {
         compositionRoot.notifications.getAll().run(
-            notifications => setResult({ kind: "loaded", data: notifications }),
-            error => setResult({ kind: "error", message: error })
+            notifications => setNotifications({ kind: "loaded", data: notifications }),
+            error => setNotifications({ kind: "error", message: error })
         );
-    }, [compositionRoot]);
+    }, [compositionRoot, shouldRefresh]);
 
-    return result;
+    return { notifications, refreshUploads };
 }

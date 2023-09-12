@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2023-06-26T09:51:37.729Z\n"
-"PO-Revision-Date: 2023-06-26T09:51:37.729Z\n"
+"POT-Creation-Date: 2023-08-02T14:17:37.190Z\n"
+"PO-Revision-Date: 2023-08-02T14:17:37.190Z\n"
 
 msgid "Template {{id}} not loaded"
 msgstr ""
@@ -106,6 +106,9 @@ msgid ""
 "submitting for this data submission"
 msgstr ""
 
+msgid "Please complete the mandatory implementation questionnaire"
+msgstr ""
+
 msgid "Please complete all mandatory questionnaires/uploads."
 msgstr ""
 
@@ -185,7 +188,7 @@ msgid ""
 msgstr ""
 
 msgid ""
-"After you submit this package, you wont be able to edit it anymore wihout "
+"After you submit this package, you wont be able to edit it anymore without "
 "WHO permissions"
 msgstr ""
 
@@ -345,13 +348,31 @@ msgstr ""
 msgid "Message from {{sender}}"
 msgstr ""
 
+msgid "Notification deleted successfully"
+msgstr ""
+
 msgid "Your Notifications"
+msgstr ""
+
+msgid "Yes"
+msgstr ""
+
+msgid "Are you sure you want to delete this notification?"
 msgstr ""
 
 msgid "OPEN ALL YEAR"
 msgstr ""
 
 msgid "GO"
+msgstr ""
+
+msgid "Importing data and applying validation rules"
+msgstr ""
+
+msgid "Save Draft"
+msgstr ""
+
+msgid "Publish"
 msgstr ""
 
 msgid "Back"
@@ -372,9 +393,6 @@ msgstr ""
 msgid "Set as completed"
 msgstr ""
 
-msgid "Yes"
-msgstr ""
-
 msgid "No"
 msgstr ""
 
@@ -385,6 +403,9 @@ msgid "HOME"
 msgstr ""
 
 msgid "Log Out"
+msgstr ""
+
+msgid "Level of Confidentiality"
 msgstr ""
 
 msgid "Blocking Errors"
@@ -409,9 +430,6 @@ msgid "Go to Validation Report"
 msgstr ""
 
 msgid "Thank you! your data for now is uploaded in our system"
-msgstr ""
-
-msgid "Importing data and applying validation rules"
 msgstr ""
 
 msgid "These Consistency Checks ensure that incorrect data is not imported."
@@ -579,5 +597,14 @@ msgstr ""
 msgid "All Data Submissions"
 msgstr ""
 
+msgid "New Signal"
+msgstr ""
+
+msgid "Draft New Signal"
+msgstr ""
+
 msgid "Reports"
+msgstr ""
+
+msgid "Signals"
 msgstr ""
