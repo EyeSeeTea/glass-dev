@@ -71,7 +71,9 @@ export const NotificationDialog: React.FC<NotificationDialogProps> = ({ isOpen, 
                                                                 {moment(message.date).format("MM/DD/YYYY")}
                                                             </Typography>
                                                         </MessageHeader>
-                                                        <Typography variant="body2">{message.text}</Typography>
+                                                        <Typography style={{ whiteSpace: "pre-line" }} variant="body2">
+                                                            {message.text}
+                                                        </Typography>
                                                     </ListItem>
                                                     {index < messageCount - 1 && <Divider />}
                                                 </>

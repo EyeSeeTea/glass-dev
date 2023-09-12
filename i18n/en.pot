@@ -366,6 +366,15 @@ msgstr ""
 msgid "GO"
 msgstr ""
 
+msgid "Importing data and applying validation rules"
+msgstr ""
+
+msgid "Save Draft"
+msgstr ""
+
+msgid "Publish"
+msgstr ""
+
 msgid "Back"
 msgstr ""
 
@@ -396,6 +405,9 @@ msgstr ""
 msgid "Log Out"
 msgstr ""
 
+msgid "Level of Confidentiality"
+msgstr ""
+
 msgid "Blocking Errors"
 msgstr ""
 
@@ -418,9 +430,6 @@ msgid "Go to Validation Report"
 msgstr ""
 
 msgid "Thank you! your data for now is uploaded in our system"
-msgstr ""
-
-msgid "Importing data and applying validation rules"
 msgstr ""
 
 msgid "These Consistency Checks ensure that incorrect data is not imported."
@@ -588,5 +597,14 @@ msgstr ""
 msgid "All Data Submissions"
 msgstr ""
 
+msgid "New Signal"
+msgstr ""
+
+msgid "Draft New Signal"
+msgstr ""
+
 msgid "Reports"
+msgstr ""
+
+msgid "Signals"
 msgstr ""

@@ -5,6 +5,7 @@ export interface OrgUnitAccess {
     orgUnitId: Id;
     orgUnitName: string;
     orgUnitCode: string;
+    orgUnitPath: string;
     readAccess: boolean;
     captureAccess: boolean;
 }
