@@ -25,6 +25,7 @@ const glassModules: GlassModule[] = [
             readAccess: [],
             captureAccess: [],
             approveAccess: [],
+            confidentialAccess: [],
         },
         questionnaires: [],
         consistencyChecks: {
@@ -174,6 +175,7 @@ const glassModules: GlassModule[] = [
             readAccess: [],
             captureAccess: [],
             approveAccess: [],
+            confidentialAccess: [],
         },
         questionnaires: [],
         dashboards: {
@@ -191,6 +193,7 @@ const glassModules: GlassModule[] = [
             readAccess: [],
             captureAccess: [],
             approveAccess: [],
+            confidentialAccess: [],
         },
         questionnaires: [],
         dashboards: {
