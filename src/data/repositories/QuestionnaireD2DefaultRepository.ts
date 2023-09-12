@@ -304,10 +304,12 @@ export class QuestionnaireD2DefaultRepository implements QuestionnaireRepository
     }
 
     private postDataValues(d2DataValues: D2DataValue[]): FutureData<void> {
-        return apiToFuture(this.api.dataValues.postSet({}, { dataValues: d2DataValues })).flatMap(res => {
-            const status = res.status as string;
-            return status === "OK" || status === "SUCCESS" ? Future.success(undefined) : Future.error(res.status);
-        });
+        return apiToFuture(this.api.dataValues.postSet({ preheatCache: true }, { dataValues: d2DataValues })).flatMap(
+            res => {
+                const status = res.status as string;
+                return status === "OK" || status === "SUCCESS" ? Future.success(undefined) : Future.error(res.status);
+            }
+        );
     }
 
     private getDataSetsInfo(
