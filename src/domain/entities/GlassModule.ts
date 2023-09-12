@@ -6,6 +6,7 @@ interface ModuleUserGroups {
     readAccess: UserGroup[];
     captureAccess: UserGroup[];
     approveAccess: UserGroup[];
+    confidentialAccess: UserGroup[];
 }
 
 type DataSubmissionPeriodTypes = "YEARLY" | "QUARTERLY";
@@ -26,6 +27,10 @@ export interface GlassModule {
     };
     dataSubmissionPeriod: DataSubmissionPeriodTypes;
     dataColumns: string[];
+    programs?: {
+        id: string;
+        programStageId: string;
+    }[];
 }
 
 interface QuestionnaireConfig {

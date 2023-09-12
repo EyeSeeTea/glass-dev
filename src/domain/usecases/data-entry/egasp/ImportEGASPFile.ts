@@ -16,6 +16,8 @@ import { ProgramRuleValidationForEGASP } from "../../program-rules-processing/Pr
 import { ProgramRulesMetadataRepository } from "../../../repositories/program-rules/ProgramRulesMetadataRepository";
 import { EventResult } from "../../../entities/program-rules/EventEffectTypes";
 import { CustomValidationForEGASP } from "./CustomValidationForEGASP";
+import { getStringFromFile } from "../utils/fileToString";
+import { MetadataRepository } from "../../../repositories/MetadataRepository";
 
 export class ImportEGASPFile {
     constructor(
@@ -24,7 +26,8 @@ export class ImportEGASPFile {
         private excelRepository: ExcelRepository,
         private glassDocumentsRepository: GlassDocumentsRepository,
         private glassUploadsRepository: GlassUploadsRepository,
-        private eGASPValidationRepository: ProgramRulesMetadataRepository
+        private eGASPValidationRepository: ProgramRulesMetadataRepository,
+        private metadataRepository: MetadataRepository
     ) {}
 
     public importEGASPFile(
@@ -96,9 +99,6 @@ export class ImportEGASPFile {
                                                                         return this.glassUploadsRepository
                                                                             .setEventListFileId(primaryUploadId, fileId)
                                                                             .flatMap(() => {
-                                                                                console.debug(
-                                                                                    `Updated upload datastore object with eventListFileId`
-                                                                                );
                                                                                 return Future.success(importSummary);
                                                                             });
                                                                     });
@@ -146,7 +146,10 @@ export class ImportEGASPFile {
         const programRuleValidationForEGASP = new ProgramRuleValidationForEGASP(this.eGASPValidationRepository);
 
         //2. Run Custom EGASP Validations
-        const customEGASPValidations = new CustomValidationForEGASP(this.dhis2EventsDefaultRepository);
+        const customEGASPValidations = new CustomValidationForEGASP(
+            this.dhis2EventsDefaultRepository,
+            this.metadataRepository
+        );
 
         return Future.joinObj({
             programRuleValidationResults: programRuleValidationForEGASP.getValidatedEvents(events),
@@ -201,6 +204,7 @@ export class ImportEGASPFile {
                     return { error: err[0], count: err[1] };
                 }),
                 nonBlockingErrors: nonBlockingErrors,
+                importTime: new Date(),
             };
 
             const eventIdList = result.importSummaries.map(summary => {
@@ -265,10 +269,7 @@ export class ImportEGASPFile {
         else {
             if (eventListId)
                 return this.glassDocumentsRepository.download(eventListId).flatMap(file => {
-                    console.debug(file);
-
-                    return Future.fromPromise(this.getStringFromFile(file)).flatMap(_events => {
-                        console.debug(_events);
+                    return Future.fromPromise(getStringFromFile(file)).flatMap(_events => {
                         const eventIdList: [] = JSON.parse(_events);
                         const events: Event[] = eventIdList.map(eventId => {
                             return {
@@ -291,15 +292,6 @@ export class ImportEGASPFile {
             }
         }
     }
-
-    private getStringFromFile = (file: Blob): Promise<string> => {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.readAsText(file, "utf-8");
-            reader.onload = () => resolve(String(reader.result));
-            reader.onerror = error => reject(error);
-        });
-    };
 
     private formatDhis2Value(item: DataPackageDataValue, dataForm: DataForm): DataPackageDataValue | undefined {
         const dataElement = dataForm.dataElements.find(({ id }) => item.dataElement === id);

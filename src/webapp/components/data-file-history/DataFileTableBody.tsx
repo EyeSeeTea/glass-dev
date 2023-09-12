@@ -44,7 +44,7 @@ export const DataFileTableBody: React.FC<DataFileTableBodyProps> = ({ rows }) =>
                                 <TableCell>{row.batchId}</TableCell>
                             )}
                             <TableCell>{row.period}</TableCell>
-                            {moduleProperties.get(currentModuleAccess.moduleName)?.isbatchReq && (
+                            {moduleProperties.get(currentModuleAccess.moduleName)?.isSpecimenReq && (
                                 <TableCell style={{ maxWidth: "150px", wordWrap: "break-word" }}>
                                     {row.specimens.join(", ")}
                                 </TableCell>
@@ -72,7 +72,7 @@ export const DataFileTableBody: React.FC<DataFileTableBodyProps> = ({ rows }) =>
     );
 };
 
-const StyledTableBody = styled(TableBody)`
+export const StyledTableBody = styled(TableBody)`
     td.cta {
         text-align: center;
         svg {

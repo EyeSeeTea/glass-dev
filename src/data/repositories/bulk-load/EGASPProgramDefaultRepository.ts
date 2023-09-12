@@ -69,9 +69,6 @@ export class EGASPProgramDefaultRepository {
                     filter: { id: { eq: EGASP_PROGRAM_ID } },
                 })
             ).map(response => {
-                console.debug(response);
-                // return response.objects[0];
-
                 if (response.objects[0])
                     return {
                         type: response.objects[0].programType === "WITH_REGISTRATION" ? "trackerPrograms" : "programs",

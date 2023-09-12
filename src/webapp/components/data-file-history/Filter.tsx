@@ -6,6 +6,7 @@ import { Dispatch, SetStateAction } from "react";
 import { getLastNYears, getLastNYearsQuarters } from "../../../utils/currentPeriodHelper";
 import { useCurrentModuleContext } from "../../contexts/current-module-context";
 import { useAppContext } from "../../contexts/app-context";
+import { moduleProperties } from "../../../domain/utils/ModuleProperties";
 
 const useStyles = makeStyles(theme => ({
     formControl: {
@@ -66,7 +67,9 @@ export const Filter: React.FC<FilterProps> = ({ year, setYear, status, setStatus
             yearOptions.push({ label: quarter, value: quarter });
         });
     } else {
-        getLastNYears().forEach(year => {
+        const addCurrentYear =
+            moduleProperties.get(currentModuleAccess.moduleName)?.populateCurrentYearInHistory || false;
+        getLastNYears(addCurrentYear).forEach(year => {
             yearOptions.push({ label: year, value: year });
         });
     }

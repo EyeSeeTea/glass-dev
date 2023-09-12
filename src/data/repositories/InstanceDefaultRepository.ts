@@ -30,13 +30,14 @@ export class InstanceDefaultRepository implements InstanceRepository {
     }
 
     mapUserOrgUnitsAccess = (
-        organisationUnits: { name: string; id: string; code: string }[],
-        dataViewOrganisationUnits: { name: string; id: string; code: string }[]
+        organisationUnits: { name: string; id: string; code: string; path: string }[],
+        dataViewOrganisationUnits: { name: string; id: string; code: string; path: string }[]
     ): OrgUnitAccess[] => {
         let orgUnitsAccess = organisationUnits.map(ou => ({
             orgUnitId: ou.id,
             orgUnitName: ou.name,
             orgUnitCode: ou.code,
+            orgUnitPath: ou.path,
             readAccess: dataViewOrganisationUnits.some(dvou => dvou.id === ou.id),
             captureAccess: true,
         }));
@@ -48,6 +49,7 @@ export class InstanceDefaultRepository implements InstanceRepository {
                 orgUnitId: raou.id,
                 orgUnitName: raou.name,
                 orgUnitCode: raou.code,
+                orgUnitPath: raou.path,
                 readAccess: true,
                 captureAccess: false, //orgUnits in dataViewOrganisationUnits dont have capture access
             }));
@@ -126,6 +128,7 @@ export class InstanceDefaultRepository implements InstanceRepository {
                         id: true,
                         name: true,
                         code: true,
+                        path: true,
                         children: true,
                         level: true,
                         parent: {
@@ -138,6 +141,7 @@ export class InstanceDefaultRepository implements InstanceRepository {
                         name: true,
                         code: true,
                         level: true,
+                        path: true,
                         parent: {
                             id: true,
                             code: true,
@@ -153,15 +157,20 @@ export class InstanceDefaultRepository implements InstanceRepository {
                 ou => ou.code !== "NA" && ou.parent?.code !== "NA"
             );
 
-            const countryOrgUnits: { name: string; id: string; code: string }[] = [];
-            const dataViewCountryOrgUnits: { name: string; id: string; code: string }[] = [];
+            const countryOrgUnits: { name: string; id: string; code: string; path: string }[] = [];
+            const dataViewCountryOrgUnits: { name: string; id: string; code: string; path: string }[] = [];
 
             return this.dataStoreClient.getObject(DataStoreKeys.GENERAL).flatMap(generalInfo => {
                 const countryLevel = (generalInfo as GeneralInfoType).countryLevel;
 
                 filteredOrgUnits.forEach(orgUnit => {
                     if (orgUnit.level === countryLevel && orgUnit.parent.code !== "NA") {
-                        countryOrgUnits.push({ name: orgUnit.name, id: orgUnit.id, code: orgUnit.code });
+                        countryOrgUnits.push({
+                            name: orgUnit.name,
+                            id: orgUnit.id,
+                            code: orgUnit.code,
+                            path: orgUnit.path,
+                        });
                     }
                 });
 
@@ -171,6 +180,7 @@ export class InstanceDefaultRepository implements InstanceRepository {
                             name: dataViewOrgUnit.name,
                             id: dataViewOrgUnit.id,
                             code: dataViewOrgUnit.code,
+                            path: dataViewOrgUnit.path,
                         });
                     }
                 });
@@ -230,15 +240,15 @@ export class InstanceDefaultRepository implements InstanceRepository {
     }
 
     private getAllCountryOrgUnits(
-        orgUnits: { name: string; id: string; code: string }[],
+        orgUnits: { name: string; id: string; code: string; path: string }[],
         countryLevel: number
-    ): FutureData<{ name: string; id: string; code: string }[]> {
-        const result: { name: string; id: string; code: string }[] = [];
+    ): FutureData<{ name: string; id: string; code: string; path: string }[]> {
+        const result: { name: string; id: string; code: string; path: string }[] = [];
 
         const recursiveGetOrgUnits = (
-            filteredOUs: { name: string; id: string; code: string }[],
+            filteredOUs: { name: string; id: string; code: string; path: string }[],
             countryLevel: number
-        ): FutureData<{ name: string; id: string; code: string }[]> => {
+        ): FutureData<{ name: string; id: string; code: string; path: string }[]> => {
             const childrenOrgUnits = apiToFuture(
                 this.api.models.organisationUnits.get({
                     filter: {
@@ -248,6 +258,7 @@ export class InstanceDefaultRepository implements InstanceRepository {
                         id: true,
                         name: true,
                         code: true,
+                        path: true,
                         level: true,
                         parent: {
                             id: true,
@@ -265,13 +276,13 @@ export class InstanceDefaultRepository implements InstanceRepository {
                 if (childrenOrgUnits[0] && childrenOrgUnits[0]?.level < countryLevel) {
                     return this.getAllCountryOrgUnits(
                         childrenOrgUnits.map(el => {
-                            return { name: el.name, id: el.id, code: el.code };
+                            return { name: el.name, id: el.id, code: el.code, path: el.path };
                         }),
                         countryLevel
                     );
                 } else {
                     childrenOrgUnits.forEach(el => {
-                        result.push({ name: el.name, id: el.id, code: el.code });
+                        result.push({ name: el.name, id: el.id, code: el.code, path: el.path });
                     });
                     return Future.success(result);
                 }

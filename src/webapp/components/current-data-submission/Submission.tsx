@@ -60,7 +60,7 @@ export const Submission: React.FC<SubmissionProps> = ({ setRefetchStatus, setCur
                     const userGroupsIds = [...approveAccessGroups, ...captureAccessGroups];
                     const notificationText = `The data submission for ${currentModuleAccess.moduleName} module for year ${currentPeriod} and country ${currentOrgUnitAccess.orgUnitName} has changed to WAITING WHO APROVAL`;
                     compositionRoot.notifications
-                        .send(notificationText, notificationText, userGroupsIds, currentOrgUnitAccess.orgUnitId)
+                        .send(notificationText, notificationText, userGroupsIds, currentOrgUnitAccess.orgUnitPath)
                         .run(
                             () => {},
                             () => {}
@@ -94,7 +94,7 @@ export const Submission: React.FC<SubmissionProps> = ({ setRefetchStatus, setCur
                             "Please review that the submission package contains all the datasets that you want to include."
                         )}
                         {i18n.t(
-                            "After you submit this package, you wont be able to edit it anymore wihout WHO permissions"
+                            "After you submit this package, you wont be able to edit it anymore without WHO permissions"
                         )}
                     </Typography>
                 </DialogContent>

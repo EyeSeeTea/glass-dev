@@ -53,6 +53,7 @@ import { GetDashboardUseCase } from "./domain/usecases/GetDashboardUseCase";
 import { SystemInfoDefaultRepository } from "./data/repositories/SystemInfoDefaultRepository";
 import { GetLastAnalyticsRunTimeUseCase } from "./domain/usecases/GetLastAnalyticsRunTimeUseCase";
 import { SendNotificationsUseCase } from "./domain/usecases/SendNotificationsUseCase";
+import { DeleteNotificationUseCase } from "./domain/usecases/DeleteNotificationUseCase";
 import { UsersDefaultRepository } from "./data/repositories/UsersDefaultRepository";
 import { GetUiLocalesUseCase } from "./domain/usecases/GetUiLocalesUseCase";
 import { GetDatabaseLocalesUseCase } from "./domain/usecases/GetDatabaseLocalesUseCase";
@@ -65,6 +66,15 @@ import { SavePasswordUseCase } from "./domain/usecases/SavePasswordUseCase";
 import { SaveKeyDbLocaleUseCase } from "./domain/usecases/SaveKeyDbLocaleUseCase";
 import { SaveKeyUiLocaleUseCase } from "./domain/usecases/SaveKeyUiLocaleUseCase";
 import { ProgramRulesMetadataDefaultRepository } from "./data/repositories/program-rule/ProgramRulesMetadataDefaultRepository";
+import { RISIndividualDataCSVDefaultRepository } from "./data/repositories/RISIndividualDataCSVDefaultRepository";
+import { TrackerDefaultRepository } from "./data/repositories/TrackerDefaultRepository";
+import { GetCaptureFormQuestionsUseCase } from "./domain/usecases/GetCaptureFormQuestionsUseCase";
+import { CaptureFormDefaultRepository } from "./data/repositories/CaptureFormDefaultRepository";
+import { ImportCaptureDataUseCase } from "./domain/usecases/data-entry/ear/ImportCaptureDataUseCase";
+import { SignalDefaultRepository } from "./data/repositories/SignalDefaultRepository";
+import { GetSignalsUseCase } from "./domain/usecases/GetSignalsUseCase";
+import { GetSignalEventUseCase } from "./domain/usecases/GetSignalEventUseCase";
+import { DeleteSignalUseCase } from "./domain/usecases/DeleteSignalUseCase";
 
 export function getCompositionRoot(instance: Instance) {
     const api = getD2APiFromInstance(instance);
@@ -76,6 +86,7 @@ export function getCompositionRoot(instance: Instance) {
     const glassUploadsRepository = new GlassUploadsDefaultRepository(dataStoreClient);
     const glassDocumentsRepository = new GlassDocumentsDefaultRepository(dataStoreClient, instance);
     const risDataRepository = new RISDataCSVDefaultRepository();
+    const risIndividualRepository = new RISIndividualDataCSVDefaultRepository();
     const sampleDataRepository = new SampleDataCSVDeafultRepository();
     const dataValuesRepository = new DataValuesDefaultRepository(instance);
     const metadataRepository = new MetadataDefaultRepository(instance);
@@ -90,6 +101,9 @@ export function getCompositionRoot(instance: Instance) {
     const egaspProgramRepository = new EGASPProgramDefaultRepository(instance);
     const excelRepository = new ExcelPopulateDefaultRepository();
     const eGASPValidationDefaultRepository = new ProgramRulesMetadataDefaultRepository(instance);
+    const trackerRepository = new TrackerDefaultRepository(instance);
+    const captureFormRepository = new CaptureFormDefaultRepository(api);
+    const signalRepository = new SignalDefaultRepository(dataStoreClient);
 
     return {
         instance: getExecute({
@@ -132,6 +146,7 @@ export function getCompositionRoot(instance: Instance) {
         fileSubmission: getExecute({
             primaryFile: new ImportPrimaryFileUseCase(
                 risDataRepository,
+                risIndividualRepository,
                 metadataRepository,
                 dataValuesRepository,
                 glassModuleRepository,
@@ -140,10 +155,13 @@ export function getCompositionRoot(instance: Instance) {
                 excelRepository,
                 glassDocumentsRepository,
                 glassUploadsRepository,
-                eGASPValidationDefaultRepository
+                eGASPValidationDefaultRepository,
+                trackerRepository,
+                glassModuleRepository
             ),
             validatePrimaryFile: new ValidatePrimaryFileUseCase(
                 risDataRepository,
+                risIndividualRepository,
                 egaspDataRepository,
                 glassModuleRepository
             ),
@@ -160,6 +178,7 @@ export function getCompositionRoot(instance: Instance) {
             getAll: new GetNotificationsUseCase(notificationRepository),
             getById: new GetNotificationByIdUseCase(notificationRepository),
             send: new SendNotificationsUseCase(notificationRepository, usersRepository),
+            delete: new DeleteNotificationUseCase(notificationRepository),
         }),
         countries: getExecute({
             getInformation: new GetCountryInformationUseCase(countryInformationRepository),
@@ -178,6 +197,18 @@ export function getCompositionRoot(instance: Instance) {
             savePassword: new SavePasswordUseCase(usersRepository),
             saveKeyUiLocale: new SaveKeyUiLocaleUseCase(usersRepository),
             saveKeyDbLocale: new SaveKeyDbLocaleUseCase(usersRepository),
+        }),
+        signals: getExecute({
+            getForm: new GetCaptureFormQuestionsUseCase(captureFormRepository),
+            importData: new ImportCaptureDataUseCase(
+                dhis2EventsDefaultRepository,
+                signalRepository,
+                notificationRepository,
+                usersRepository
+            ),
+            getSignals: new GetSignalsUseCase(signalRepository),
+            getSignal: new GetSignalEventUseCase(captureFormRepository),
+            delete: new DeleteSignalUseCase(dhis2EventsDefaultRepository, signalRepository),
         }),
     };
 }
