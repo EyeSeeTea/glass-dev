@@ -1,7 +1,7 @@
 import styled from "styled-components";
 import { CustomCard } from "../custom-card/CustomCard";
 import { ContentLoader } from "../content-loader/ContentLoader";
-import { TableContentWrapper } from "../data-file-history/DataFileTable";
+import { SortDirection, TableContentWrapper } from "../data-file-history/DataFileTable";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { StyledTableBody } from "../data-file-history/DataFileTableBody";
 import { useSignals } from "../../hooks/useSignals";
@@ -19,7 +19,7 @@ import {
 } from "@material-ui/core";
 import { useHistory } from "react-router-dom";
 import { Signal, SignalStatusTypes } from "../../../domain/entities/Signal";
-import { DeleteOutline } from "@material-ui/icons";
+import { ArrowDownward, ArrowUpward, DeleteOutline } from "@material-ui/icons";
 import { useState } from "react";
 import { ConfirmationDialog, useSnackbar } from "@eyeseetea/d2-ui-components";
 import { useAppContext } from "../../contexts/app-context";
@@ -29,12 +29,16 @@ import { CircularProgress } from "material-ui";
 
 export const SignalTableContent: React.FC = () => {
     const { compositionRoot } = useAppContext();
-    const { signals, refreshSignals } = useSignals();
+    const { signals, setSignals, refreshSignals } = useSignals();
     const history = useHistory();
     const [open, setOpen] = useState(false);
     const [signalToDelete, setSignalToDelete] = useState<Signal>();
     const [loading, setLoading] = useState<boolean>(false);
     const { currentOrgUnitAccess } = useCurrentOrgUnitContext();
+    const [dateSortDirection, setDateSortDirection] = useState<SortDirection>("asc");
+    const [countrySortDirection, setCountrySortDirection] = useState<SortDirection>("asc");
+    const [confidentialitySortDirection, setConfidentialitySortDirection] = useState<SortDirection>("asc");
+    const [statusSortDirection, setStatusSortDirection] = useState<SortDirection>("asc");
     const snackbar = useSnackbar();
 
     const handleSignalClick = (signalId: string, eventId: string, status: SignalStatusTypes) => {
@@ -51,6 +55,14 @@ export const SignalTableContent: React.FC = () => {
     };
     const hideConfirmationDialog = () => {
         setOpen(false);
+    };
+
+    const sortByColumn = (columnName: string, sortDirection: SortDirection) => {
+        setSignals(prevSignals => {
+            if (prevSignals.kind === "loaded") {
+                return { kind: "loaded", data: _.orderBy(prevSignals.data, columnName, sortDirection) };
+            } else return prevSignals;
+        });
     };
 
     const deleteSignal = () => {
@@ -107,21 +119,76 @@ export const SignalTableContent: React.FC = () => {
                                 <Table>
                                     <TableHead>
                                         <TableRow>
-                                            <TableCell>
+                                            <TableCell
+                                                style={{ cursor: "pointer" }}
+                                                onClick={() => {
+                                                    dateSortDirection === "asc"
+                                                        ? setDateSortDirection("desc")
+                                                        : setDateSortDirection("asc");
+                                                    sortByColumn("creationDate", dateSortDirection);
+                                                }}
+                                            >
                                                 <Typography variant="caption">{i18n.t("Date")}</Typography>
+                                                {dateSortDirection === "asc" ? (
+                                                    <ArrowUpward fontSize="small" />
+                                                ) : (
+                                                    <ArrowDownward fontSize="small" />
+                                                )}
                                             </TableCell>
-                                            <TableCell>
+                                            <TableCell
+                                                style={{ cursor: "pointer" }}
+                                                onClick={() => {
+                                                    countrySortDirection === "asc"
+                                                        ? setCountrySortDirection("desc")
+                                                        : setCountrySortDirection("asc");
+                                                    sortByColumn("orgUnit.name", countrySortDirection);
+                                                }}
+                                            >
                                                 <Typography variant="caption">{i18n.t("Country")}</Typography>
+                                                {countrySortDirection === "asc" ? (
+                                                    <ArrowUpward fontSize="small" />
+                                                ) : (
+                                                    <ArrowDownward fontSize="small" />
+                                                )}
                                             </TableCell>
 
-                                            <TableCell>
+                                            <TableCell
+                                                style={{ cursor: "pointer" }}
+                                                onClick={() => {
+                                                    confidentialitySortDirection === "asc"
+                                                        ? setConfidentialitySortDirection("desc")
+                                                        : setConfidentialitySortDirection("asc");
+                                                    sortByColumn(
+                                                        "levelOfConfidentiality",
+                                                        confidentialitySortDirection
+                                                    );
+                                                }}
+                                            >
                                                 <Typography variant="caption">
                                                     {i18n.t("Level of Confidentiality")}
                                                 </Typography>
+                                                {confidentialitySortDirection === "asc" ? (
+                                                    <ArrowUpward fontSize="small" />
+                                                ) : (
+                                                    <ArrowDownward fontSize="small" />
+                                                )}
                                             </TableCell>
 
-                                            <TableCell>
+                                            <TableCell
+                                                style={{ cursor: "pointer" }}
+                                                onClick={() => {
+                                                    statusSortDirection === "asc"
+                                                        ? setStatusSortDirection("desc")
+                                                        : setStatusSortDirection("asc");
+                                                    sortByColumn("status", statusSortDirection);
+                                                }}
+                                            >
                                                 <Typography variant="caption">{i18n.t("Status")}</Typography>
+                                                {statusSortDirection === "asc" ? (
+                                                    <ArrowUpward fontSize="small" />
+                                                ) : (
+                                                    <ArrowDownward fontSize="small" />
+                                                )}
                                             </TableCell>
                                             <TableCell>
                                                 <Typography variant="caption">{i18n.t("Delete")}</Typography>

@@ -84,5 +84,5 @@ export function useSignals() {
         shouldRefreshSignals,
     ]);
 
-    return { signals, refreshSignals };
+    return { signals, setSignals, refreshSignals };
 }
