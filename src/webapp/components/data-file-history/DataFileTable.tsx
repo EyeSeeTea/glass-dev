@@ -42,7 +42,7 @@ export const DataFileTable: React.FC<DataFileTableProps> = ({ title, items, clas
     const { currentModuleAccess } = useCurrentModuleContext();
 
     return (
-        <ContentWrapper className={className}>
+        <TableContentWrapper className={className}>
             {title && <Typography variant="h3">{title}</Typography>}
 
             <TableContainer component={Paper}>
@@ -160,11 +160,11 @@ export const DataFileTable: React.FC<DataFileTableProps> = ({ title, items, clas
                     <DataFileTableBody rows={items} />
                 </Table>
             </TableContainer>
-        </ContentWrapper>
+        </TableContentWrapper>
     );
 };
 
-const ContentWrapper = styled.div`
+export const TableContentWrapper = styled.div`
     h3 {
         font-size: 22px;
         color: ${palette.text.primary};
