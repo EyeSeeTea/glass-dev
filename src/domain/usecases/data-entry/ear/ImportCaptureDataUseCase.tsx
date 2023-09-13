@@ -143,7 +143,7 @@ export class ImportCaptureDataUseCase {
             orgUnit: orgUnitId,
             program: EAR_PROGRAM_ID,
             status: eventStatus,
-            eventDate: new Date().toISOString().split("T")?.at(0) || "",
+            occurredAt: new Date().toISOString().split("T")?.at(0) || "",
             //@ts-ignore
             dataValues: dataValues,
         };
