@@ -7,30 +7,8 @@ import { D2TrackerEvent, TrackerEventsResponse } from "@eyeseetea/d2-api/api/tra
 import { TrackerPostResponse } from "@eyeseetea/d2-api/api/tracker";
 import { apiToFuture } from "../../utils/futures";
 import { D2Api } from "@eyeseetea/d2-api/2.34";
-import { NamedRef } from "../../domain/entities/Ref";
 
 export declare type EventStatus = "ACTIVE" | "COMPLETED" | "VISITED" | "SCHEDULED" | "OVERDUE" | "SKIPPED";
-export interface EventsPostRequest {
-    events: Array<Event>;
-}
-export interface Event {
-    event: string;
-    orgUnit: string;
-    program: string;
-    status: EventStatus;
-    eventDate: string;
-    coordinate?: {
-        latitude: number;
-        longitude: number;
-    };
-    attributeOptionCombo?: string;
-    trackedEntityInstance?: string;
-    programStage?: string;
-    dataValues: Array<{
-        dataElement: string;
-        value: string | number | boolean | NamedRef;
-    }>;
-}
 
 export interface TrackerEventsPostRequest {
     events: D2TrackerEvent[];
