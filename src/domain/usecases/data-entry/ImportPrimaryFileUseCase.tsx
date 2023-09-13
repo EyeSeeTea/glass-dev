@@ -65,7 +65,8 @@ export class ImportPrimaryFileUseCase implements UseCase {
                     this.excelRepository,
                     this.glassDocumentsRepository,
                     this.glassUploadsRepository,
-                    this.eGASPValidationRepository
+                    this.eGASPValidationRepository,
+                    this.metadataRepository
                 );
 
                 return importEGASPFile.importEGASPFile(inputFile, action, eventListId, orgUnit, period);

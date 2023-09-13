@@ -3,6 +3,7 @@ import { Future, FutureData } from "../entities/Future";
 import { GlassDataSubmission } from "../entities/GlassDataSubmission";
 import { generateId } from "../entities/Ref";
 import { GlassDataSubmissionsRepository } from "../repositories/GlassDataSubmissionRepository";
+import { moduleProperties } from "../utils/ModuleProperties";
 
 export class GetSpecificDataSubmissionUseCase implements UseCase {
     constructor(private glassDataSubmissionRepository: GlassDataSubmissionsRepository) {}
@@ -27,8 +28,9 @@ export class GetSpecificDataSubmissionUseCase implements UseCase {
                     //Set to default status- NOT_COMPLETE, so that user can continue with upload workflow
                     else {
                         //Adding a validation, that the datasubmission created is of correct period type - YEARLY/QUARTERLY
-                        const isValid = this.validatePeriod(module, period, isQuarterlyModule);
-                        if (isValid) {
+                        const isValidPeriod = this.validatePeriod(module, period, isQuarterlyModule);
+                        const isValidModule = this.validateModule(module);
+                        if (isValidPeriod && isValidModule) {
                             const defaultDataSubmission: GlassDataSubmission = {
                                 id: generateId(),
                                 module: module,
@@ -55,5 +57,9 @@ export class GetSpecificDataSubmissionUseCase implements UseCase {
             console.debug(`Tried to create an incorrect DS module : ${module} and period : ${period}`);
             return false;
         }
+    }
+
+    private validateModule(module: string): boolean {
+        return moduleProperties.has(module);
     }
 }

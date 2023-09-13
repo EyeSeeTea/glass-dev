@@ -18,6 +18,7 @@ import { EventResult } from "../../../entities/program-rules/EventEffectTypes";
 import { CustomValidationForEGASP } from "./CustomValidationForEGASP";
 import { getStringFromFile } from "../utils/fileToString";
 import { TrackerPostResponse } from "@eyeseetea/d2-api/api/tracker";
+import { MetadataRepository } from "../../../repositories/MetadataRepository";
 
 export class ImportEGASPFile {
     constructor(
@@ -26,7 +27,8 @@ export class ImportEGASPFile {
         private excelRepository: ExcelRepository,
         private glassDocumentsRepository: GlassDocumentsRepository,
         private glassUploadsRepository: GlassUploadsRepository,
-        private eGASPValidationRepository: ProgramRulesMetadataRepository
+        private eGASPValidationRepository: ProgramRulesMetadataRepository,
+        private metadataRepository: MetadataRepository
     ) {}
 
     public importEGASPFile(
@@ -145,7 +147,10 @@ export class ImportEGASPFile {
         const programRuleValidationForEGASP = new ProgramRuleValidationForEGASP(this.eGASPValidationRepository);
 
         //2. Run Custom EGASP Validations
-        const customEGASPValidations = new CustomValidationForEGASP(this.dhis2EventsDefaultRepository);
+        const customEGASPValidations = new CustomValidationForEGASP(
+            this.dhis2EventsDefaultRepository,
+            this.metadataRepository
+        );
 
         return Future.joinObj({
             programRuleValidationResults: programRuleValidationForEGASP.getValidatedEvents(events),
