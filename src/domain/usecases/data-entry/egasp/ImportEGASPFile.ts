@@ -208,12 +208,20 @@ export class ImportEGASPFile {
 
             return { importSummary, eventIdList: _.compact(eventIdList) };
         } else {
+            const blockingErrorList = _.compact(
+                result.validationReport.errorReports.map(summary => {
+                    if (summary.message) return summary.message;
+                })
+            );
+            const blockingErrorsByCount = _.countBy(blockingErrorList);
             return {
                 importSummary: {
                     status: "ERROR",
                     importCount: { ignored: 0, imported: 0, deleted: 0, updated: 0 },
                     nonBlockingErrors: [],
-                    blockingErrors: [{ error: "An unexpected error has ocurred importing events", count: 1 }],
+                    blockingErrors: Object.entries(blockingErrorsByCount).map(err => {
+                        return { error: err[0], count: err[1] };
+                    }),
                 },
                 eventIdList: [],
             };
