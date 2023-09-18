@@ -5,8 +5,68 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2023-08-02T14:17:37.190Z\n"
-"PO-Revision-Date: 2023-08-02T14:17:37.190Z\n"
+"POT-Creation-Date: 2023-09-18T14:01:16.511Z\n"
+"PO-Revision-Date: 2023-09-18T14:01:16.511Z\n"
+
+msgid "Name"
+msgstr ""
+
+msgid "Description"
+msgstr ""
+
+msgid "Value Type"
+msgstr ""
+
+msgid "Option Set"
+msgstr ""
+
+msgid "Possible Values"
+msgstr ""
+
+msgid "Organisation Units"
+msgstr ""
+
+msgid "Options"
+msgstr ""
+
+msgid "Boolean"
+msgstr ""
+
+msgid "True only"
+msgstr ""
+
+msgid "Identifier"
+msgstr ""
+
+msgid "Type"
+msgstr ""
+
+msgid "Metadata version"
+msgstr ""
+
+msgid "Yes"
+msgstr ""
+
+msgid "No"
+msgstr ""
+
+msgid "Event id"
+msgstr ""
+
+msgid "Org Unit *"
+msgstr ""
+
+msgid "Latitude"
+msgstr ""
+
+msgid "Longitude"
+msgstr ""
+
+msgid "Date"
+msgstr ""
+
+msgid "Invalid choice was chosen"
+msgstr ""
 
 msgid "Template {{id}} not loaded"
 msgstr ""
@@ -78,6 +138,51 @@ msgid "You can add up to 6 datasets to this submission with different BATCH IDS.
 msgstr ""
 
 msgid "Uploads with errors, or discarded"
+msgstr ""
+
+msgid "Go to questionnaires"
+msgstr ""
+
+msgid "Upload/Delete datasets"
+msgstr ""
+
+msgid "Go to submission"
+msgstr ""
+
+msgid "Full Status History"
+msgstr ""
+
+msgid "Done"
+msgstr ""
+
+msgid "From"
+msgstr ""
+
+msgid "To"
+msgstr ""
+
+msgid "Changed at"
+msgstr ""
+
+msgid "Error fetching questionnaires."
+msgstr ""
+
+msgid "Error fetching uploads."
+msgstr ""
+
+msgid "Current Status"
+msgstr ""
+
+msgid "Content"
+msgstr ""
+
+msgid "Mandatory"
+msgstr ""
+
+msgid "State"
+msgstr ""
+
+msgid "Data Submission status has errors..."
 msgstr ""
 
 msgid "There are no questionnaries for this module"
@@ -201,6 +306,33 @@ msgstr ""
 msgid "Send Submission"
 msgstr ""
 
+msgid "Uploaded"
+msgstr ""
+
+msgid "Period"
+msgstr ""
+
+msgid "Records"
+msgstr ""
+
+msgid "Batch ID"
+msgstr ""
+
+msgid "Status"
+msgstr ""
+
+msgid "Download File"
+msgstr ""
+
+msgid "Delete"
+msgstr ""
+
+msgid "Deleting Files"
+msgstr ""
+
+msgid "This might take several minutes, do not refresh the page or press back."
+msgstr ""
+
 msgid "Overview"
 msgstr ""
 
@@ -222,81 +354,6 @@ msgstr ""
 msgid "No Data uploaded..."
 msgstr ""
 
-msgid "Uploaded"
-msgstr ""
-
-msgid "Period"
-msgstr ""
-
-msgid "Records"
-msgstr ""
-
-msgid "Type"
-msgstr ""
-
-msgid "Batch ID"
-msgstr ""
-
-msgid "Status"
-msgstr ""
-
-msgid "Download File"
-msgstr ""
-
-msgid "Delete"
-msgstr ""
-
-msgid "Deleting Files"
-msgstr ""
-
-msgid "This might take several minutes, do not refresh the page or press back."
-msgstr ""
-
-msgid "Go to questionnaires"
-msgstr ""
-
-msgid "Upload/Delete datasets"
-msgstr ""
-
-msgid "Go to submission"
-msgstr ""
-
-msgid "Full Status History"
-msgstr ""
-
-msgid "Done"
-msgstr ""
-
-msgid "From"
-msgstr ""
-
-msgid "To"
-msgstr ""
-
-msgid "Changed at"
-msgstr ""
-
-msgid "Error fetching questionnaires."
-msgstr ""
-
-msgid "Error fetching uploads."
-msgstr ""
-
-msgid "Current Status"
-msgstr ""
-
-msgid "Content"
-msgstr ""
-
-msgid "Mandatory"
-msgstr ""
-
-msgid "State"
-msgstr ""
-
-msgid "Data Submission status has errors..."
-msgstr ""
-
 msgid "File Type"
 msgstr ""
 
@@ -304,9 +361,6 @@ msgid "Batch Id"
 msgstr ""
 
 msgid "Specimens"
-msgstr ""
-
-msgid "Date"
 msgstr ""
 
 msgid "Filename"
@@ -354,9 +408,6 @@ msgstr ""
 msgid "Your Notifications"
 msgstr ""
 
-msgid "Yes"
-msgstr ""
-
 msgid "Are you sure you want to delete this notification?"
 msgstr ""
 
@@ -393,9 +444,6 @@ msgstr ""
 msgid "Set as completed"
 msgstr ""
 
-msgid "No"
-msgstr ""
-
 msgid "Error fetching User Modules"
 msgstr ""
 
@@ -409,9 +457,6 @@ msgid "Level of Confidentiality"
 msgstr ""
 
 msgid "Blocking Errors"
-msgstr ""
-
-msgid "Name"
 msgstr ""
 
 msgid "Count"
@@ -487,6 +532,9 @@ msgid "Error fetching previous uploads."
 msgstr ""
 
 msgid "Choose a Dataset"
+msgstr ""
+
+msgid "Download empty template"
 msgstr ""
 
 msgid "Multiple uploads not allowed, please select one file"

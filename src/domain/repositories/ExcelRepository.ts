@@ -10,6 +10,7 @@ export interface ReadCellOptions {
 
 export abstract class ExcelRepository {
     public abstract loadTemplate(file: File): FutureData<string>;
+    public abstract toBlob(id: string): FutureData<Blob>;
     public abstract findRelativeCell(id: string, location?: SheetRef, cell?: CellRef): Promise<CellRef | undefined>;
     public abstract readCell(
         id: string,
