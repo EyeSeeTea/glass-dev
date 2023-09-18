@@ -1,0 +1,194 @@
+{
+    "type": "programs",
+    "id": "SOjanrinfuG",
+    "orgUnits": [
+        "mGoT0CEx5L5",
+        "Afg36ufog4c",
+        "Ya24YDMHQrJ",
+        "r4ybCAbt9iL",
+        "Sl1FciKNwcR",
+        "ZItPnys97yP",
+        "LGmH9EAVssn",
+        "ymWqKDUIPkc",
+        "IrJCJURmzcq",
+        "kc0npoPyK82",
+        "TEhQJLJeF8x"
+    ],
+    "startDate": "2021-12-31T23:00:00.000Z",
+    "endDate": "2022-12-31T22:59:59.999Z",
+    "relationshipsOuFilter": "CAPTURE",
+    "populate": false,
+    "downloadRelationships": true,
+    "filterTEIEnrollmentDate": false,
+    "language": "en",
+    "settings": {
+        "programStageFilter": {
+            "DYeZSPG235y": {
+                "attributesIncluded": [],
+                "dataElementsExcluded": [
+                    {
+                        "id": "yauwar4jJW3"
+                    },
+                    {
+                        "id": "eGyqqlhiPtK"
+                    },
+                    {
+                        "id": "yUwVWs1UP1I"
+                    },
+                    {
+                        "id": "GaKCNlrmjkR"
+                    },
+                    {
+                        "id": "mUWsTbWenAz"
+                    },
+                    {
+                        "id": "SSKeB3gBcJx"
+                    },
+                    {
+                        "id": "CQWMdxIPeIL"
+                    },
+                    {
+                        "id": "SyCSvR1kZEt"
+                    },
+                    {
+                        "id": "OymeVyZl592"
+                    },
+                    {
+                        "id": "uUkn2ckL2nH"
+                    },
+                    {
+                        "id": "qkQBBlGLo03"
+                    },
+                    {
+                        "id": "WwYZQnQ2VJs"
+                    },
+                    {
+                        "id": "ykWiOVOL6Yr"
+                    },
+                    {
+                        "id": "XdbaeWbU5eH"
+                    },
+                    {
+                        "id": "ztlTTWLm9iV"
+                    },
+                    {
+                        "id": "s2ZysASpUxf"
+                    }
+                ],
+                "externalDataElementsIncluded": []
+            },
+            "ioSih2sAIUb": {
+                "attributesIncluded": [],
+                "dataElementsExcluded": [
+                    {
+                        "id": "yUwVWs1UP1I"
+                    },
+                    {
+                        "id": "eGyqqlhiPtK"
+                    },
+                    {
+                        "id": "yauwar4jJW3"
+                    },
+                    {
+                        "id": "GaKCNlrmjkR"
+                    },
+                    {
+                        "id": "mUWsTbWenAz"
+                    },
+                    {
+                        "id": "SyCSvR1kZEt"
+                    },
+                    {
+                        "id": "CQWMdxIPeIL"
+                    },
+                    {
+                        "id": "SSKeB3gBcJx"
+                    },
+                    {
+                        "id": "OymeVyZl592"
+                    },
+                    {
+                        "id": "WwYZQnQ2VJs"
+                    },
+                    {
+                        "id": "qkQBBlGLo03"
+                    },
+                    {
+                        "id": "uUkn2ckL2nH"
+                    },
+                    {
+                        "id": "ykWiOVOL6Yr"
+                    },
+                    {
+                        "id": "XdbaeWbU5eH"
+                    },
+                    {
+                        "id": "ztlTTWLm9iV"
+                    },
+                    {
+                        "id": "s2ZysASpUxf"
+                    }
+                ],
+                "externalDataElementsIncluded": []
+            },
+            "spJqSeFl1GZ": {
+                "attributesIncluded": [],
+                "dataElementsExcluded": [
+                    {
+                        "id": "yauwar4jJW3"
+                    },
+                    {
+                        "id": "eGyqqlhiPtK"
+                    },
+                    {
+                        "id": "yUwVWs1UP1I"
+                    },
+                    {
+                        "id": "GaKCNlrmjkR"
+                    },
+                    {
+                        "id": "mUWsTbWenAz"
+                    },
+                    {
+                        "id": "SSKeB3gBcJx"
+                    },
+                    {
+                        "id": "CQWMdxIPeIL"
+                    },
+                    {
+                        "id": "SyCSvR1kZEt"
+                    },
+                    {
+                        "id": "OymeVyZl592"
+                    },
+                    {
+                        "id": "uUkn2ckL2nH"
+                    },
+                    {
+                        "id": "qkQBBlGLo03"
+                    },
+                    {
+                        "id": "WwYZQnQ2VJs"
+                    },
+                    {
+                        "id": "ykWiOVOL6Yr"
+                    },
+                    {
+                        "id": "XdbaeWbU5eH"
+                    },
+                    {
+                        "id": "ztlTTWLm9iV"
+                    },
+                    {
+                        "id": "s2ZysASpUxf"
+                    }
+                ],
+                "externalDataElementsIncluded": []
+            }
+        }
+    },
+    "splitDataEntryTabsBySection": false,
+    "useCodesForMetadata": true,
+    "templateId": "SOjanrinfuG",
+    "templateType": "generated"
+}

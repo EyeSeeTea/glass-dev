@@ -75,6 +75,8 @@ import { SignalDefaultRepository } from "./data/repositories/SignalDefaultReposi
 import { GetSignalsUseCase } from "./domain/usecases/GetSignalsUseCase";
 import { GetSignalEventUseCase } from "./domain/usecases/GetSignalEventUseCase";
 import { DeleteSignalUseCase } from "./domain/usecases/DeleteSignalUseCase";
+import { GetEGASPEmptyTemplateUseCase } from "./domain/usecases/data-entry/egasp/GetEGASPEmptyTemplateUseCase";
+import { EGASPDownloadEmptyTemplate } from "./data/repositories/bulk-load/EGASPDownloadEmptyTemplate";
 
 export function getCompositionRoot(instance: Instance) {
     const api = getD2APiFromInstance(instance);
@@ -104,6 +106,7 @@ export function getCompositionRoot(instance: Instance) {
     const trackerRepository = new TrackerDefaultRepository(instance);
     const captureFormRepository = new CaptureFormDefaultRepository(api);
     const signalRepository = new SignalDefaultRepository(dataStoreClient);
+    const downloadEmptyTemplateRepository = new EGASPDownloadEmptyTemplate(instance);
 
     return {
         instance: getExecute({
@@ -167,6 +170,7 @@ export function getCompositionRoot(instance: Instance) {
             ),
             secondaryFile: new ImportSampleFileUseCase(sampleDataRepository, metadataRepository, dataValuesRepository),
             validateSecondaryFile: new ValidateSampleFileUseCase(sampleDataRepository),
+            downloadEmptyTemplate: new GetEGASPEmptyTemplateUseCase(downloadEmptyTemplateRepository, excelRepository),
         }),
         questionnaires: getExecute({
             get: new GetQuestionnaireUseCase(questionnaireD2Repository),
