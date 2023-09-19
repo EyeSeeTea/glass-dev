@@ -6,6 +6,7 @@ interface ModuleUserGroups {
     readAccess: UserGroup[];
     captureAccess: UserGroup[];
     approveAccess: UserGroup[];
+    confidentialAccess: UserGroup[];
 }
 
 type DataSubmissionPeriodTypes = "YEARLY" | "QUARTERLY";

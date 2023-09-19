@@ -11,6 +11,7 @@ export function useStatusDataSubmission(
     moduleId: string,
     orgUnit: string,
     period: string,
+    moduleName?: string,
     refetch: DataSubmissionStatusTypes | undefined = undefined
 ) {
     const { compositionRoot, currentUser } = useAppContext();
@@ -22,7 +23,8 @@ export function useStatusDataSubmission(
         const isQuarterlyModule = currentUser.quarterlyPeriodModules.find(m => m.id === moduleId) ? true : false;
         compositionRoot.glassDataSubmission.getSpecificDataSubmission(moduleId, orgUnit, period, isQuarterlyModule).run(
             currentDataSubmission => {
-                const dataSubmissionStatusDetails = statusMap.get(currentDataSubmission.status);
+                const dataSubmissionStatusDetails = statusMap(moduleName).get(currentDataSubmission.status);
+
                 if (dataSubmissionStatusDetails)
                     setDataSubmissionStatus({ kind: "loaded", data: dataSubmissionStatusDetails });
             },
@@ -38,6 +40,7 @@ export function useStatusDataSubmission(
         period,
         refetch,
         currentUser.quarterlyPeriodModules,
+        moduleName,
     ]);
 
     return dataSubmissionStatus;
