@@ -47,7 +47,7 @@ export const AdvancedButtons: React.FC<AdvancedButtonsProps> = ({ setRefetchStat
                     const userGroupsIds = [...approveAccessGroups, ...captureAccessGroups];
                     const notificationText = `The data submission for ${currentModuleAccess.moduleName} module for year ${currentPeriod} and country ${currentOrgUnitAccess.orgUnitName} has changed to WAITING for WHO TO ACCEPT THE DATA UPDATE REQUEST`;
                     compositionRoot.notifications
-                        .send(notificationText, notificationText, userGroupsIds, currentOrgUnitAccess.orgUnitId)
+                        .send(notificationText, notificationText, userGroupsIds, currentOrgUnitAccess.orgUnitPath)
                         .run(
                             () => {},
                             () => {}

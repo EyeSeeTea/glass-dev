@@ -13,6 +13,7 @@ export function useCurrentUserGroupsAccess() {
     const [approveAccessGroup, setApproveAccessGroup] = React.useState<GlassModuleState>({ kind: "loading" });
     const [captureAccessGroup, setCaptureAccessGroup] = React.useState<GlassModuleState>({ kind: "loading" });
     const [readAccessGroup, setReadAccessGroup] = React.useState<GlassModuleState>({ kind: "loading" });
+    const [confidentialAccessGroup, setConfidentialAccessGroup] = React.useState<GlassModuleState>({ kind: "loading" });
 
     React.useEffect(() => {
         compositionRoot.glassModules.getById(currentModuleAccess.moduleId).run(
@@ -26,10 +27,13 @@ export function useCurrentUserGroupsAccess() {
                 if (glassModule.userGroups.approveAccess) {
                     setApproveAccessGroup({ kind: "loaded", data: glassModule.userGroups.approveAccess });
                 }
+                if (glassModule.userGroups.confidentialAccess) {
+                    setConfidentialAccessGroup({ kind: "loaded", data: glassModule.userGroups.confidentialAccess });
+                }
             },
             () => {}
         );
     }, [compositionRoot, currentModuleAccess.moduleId]);
 
-    return { approveAccessGroup, captureAccessGroup, readAccessGroup };
+    return { approveAccessGroup, captureAccessGroup, readAccessGroup, confidentialAccessGroup };
 }
