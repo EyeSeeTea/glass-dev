@@ -2,7 +2,7 @@ import { Dhis2EventsDefaultRepository, Event } from "../../../../data/repositori
 import { Future, FutureData } from "../../../entities/Future";
 import { ConsistencyError, ImportSummary } from "../../../entities/data-entry/ImportSummary";
 import * as templates from "../../../entities/data-entry/egasp-templates";
-import { EGASPProgramDefaultRepository } from "../../../../data/repositories/bulk-load/EGASPProgramDefaultRepository";
+import { EGASPProgramDefaultRepository } from "../../../../data/repositories/download-empty-template/EGASPProgramDefaultRepository";
 import { Template } from "../../../entities/Template";
 import { DataForm } from "../../../entities/DataForm";
 import { ExcelReader } from "../../../utils/ExcelReader";

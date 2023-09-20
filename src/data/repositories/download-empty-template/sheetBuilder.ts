@@ -3,8 +3,8 @@ import * as Excel from "excel4node";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import _ from "lodash";
 import "lodash.product";
-import { defaultColorScale } from "../utils/colors";
-import { GeneratedTemplate } from "../../../../domain/entities/Template";
+import { defaultColorScale } from "./utils/colors";
+import { GeneratedTemplate } from "../../../domain/entities/Template";
 
 const maxRow = 1048576;
 

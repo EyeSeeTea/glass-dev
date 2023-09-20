@@ -3,12 +3,9 @@ import { DownloadEmptyTemplateRepository } from "../../../domain/repositories/Do
 import { Instance } from "../../entities/Instance";
 import { getD2APiFromInstance } from "../../../utils/d2-api";
 import * as templates from "../../../domain/entities/data-entry/egasp-templates";
-import { SheetBuilder } from "./logic/sheetBuilder";
+import { SheetBuilder } from "./sheetBuilder";
 import { promiseMap } from "../../../utils/promises";
 import { GeneratedTemplate } from "../../../domain/entities/Template";
-
-// NOTICE fakeDataFromBulkLoad HARDCODED: templateToDownload data from Bulk-Load when compositionRoot.templates.download is executed usign Republic of Philippines (7 Clinics and 4 Labs)
-import fakeDataFromBulkLoad from "./fakeDataFromBulkLoad.json";
 import { CategoryOptionCombo } from "../../dhis2/DataElement";
 
 const DATA_FORM_TYPE = "programs";
@@ -25,7 +22,7 @@ export class EGASPDownloadEmptyTemplate implements DownloadEmptyTemplateReposito
         this.api = getD2APiFromInstance(instance);
     }
 
-    async getEmptyTemplate(): Promise<File> {
+    async getEmptyTemplate(orgUnits: string[], settings: Record<string, any>): Promise<File> {
         const egaspTemplate = this.getEGASPTemplate();
 
         const element = await getElement(this.api, DATA_FORM_TYPE, AMR_GLASS_EGASP_PRE_INPUT_FILES_ID);
@@ -33,7 +30,7 @@ export class EGASPDownloadEmptyTemplate implements DownloadEmptyTemplateReposito
         const result = await getElementMetadata({
             api: this.api,
             element,
-            orgUnitIds: fakeDataFromBulkLoad.orgUnits,
+            orgUnitIds: orgUnits,
         });
 
         // FIXME: Legacy code, sheet generator
@@ -41,7 +38,7 @@ export class EGASPDownloadEmptyTemplate implements DownloadEmptyTemplateReposito
             ...result,
             language: "en",
             template: egaspTemplate,
-            settings: fakeDataFromBulkLoad.settings,
+            settings: settings,
             downloadRelationships: true,
             splitDataEntryTabsBySection: false,
             useCodesForMetadata: true,

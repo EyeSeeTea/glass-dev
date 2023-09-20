@@ -1,3 +1,3 @@
 export interface DownloadEmptyTemplateRepository {
-    getEmptyTemplate(): Promise<File>;
+    getEmptyTemplate(orgUnits: string[], settings: Record<string, any>): Promise<File>;
 }

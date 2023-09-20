@@ -86,6 +86,7 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
     const [hasSecondaryFile, setHasSecondaryFile] = useState<boolean>(false);
     const [importLoading, setImportLoading] = useState<boolean>(false);
     const [previousBatchIdsLoading, setPreviousBatchIdsLoading] = useState<boolean>(true);
+    const [loading, setLoading] = useState<boolean>(false);
 
     const {
         currentModuleAccess: { moduleId, moduleName },
@@ -237,8 +238,9 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
         }
     };
 
-    const onDownloadEmptyTemplate = useCallback(() => {
-        compositionRoot.fileSubmission.downloadEmptyTemplate().run(
+    const downloadEmptyTemplate = useCallback(() => {
+        setLoading(true);
+        compositionRoot.fileSubmission.downloadEmptyTemplate(orgUnitId).run(
             file => {
                 const fileName = "AMR_GLASS_EGASP_PRE_INPUT_FILES.xlsx";
 
@@ -249,16 +251,25 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
                 // simulate link click
                 document.body.appendChild(downloadSimulateAnchor);
                 downloadSimulateAnchor.click();
+                setLoading(false);
             },
             error => {
                 snackbar.error("Error downloading file");
                 console.error(error);
+                setLoading(false);
             }
         );
-    }, [compositionRoot.fileSubmission, snackbar]);
+    }, [compositionRoot.fileSubmission, snackbar, orgUnitId]);
 
     return (
         <ContentWrapper>
+            <Backdrop open={loading} style={{ color: "#fff", zIndex: 1 }}>
+                <StyledLoaderContainer>
+                    <CircularProgress color="inherit" size={50} />
+                    <Typography variant="h6">{i18n.t("Downloading")}</Typography>
+                </StyledLoaderContainer>
+            </Backdrop>
+
             <Backdrop open={importLoading} style={{ color: "#fff", zIndex: 1 }}>
                 <StyledLoaderContainer>
                     <CircularProgress color="inherit" size={50} />
@@ -329,12 +340,7 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
                             </div>
                         ) : null}
                         {moduleName === "EGASP" && (
-                            <Button
-                                variant="outlined"
-                                color="primary"
-                                disableElevation
-                                onClick={onDownloadEmptyTemplate}
-                            >
+                            <Button variant="outlined" color="primary" disableElevation onClick={downloadEmptyTemplate}>
                                 {i18n.t("Download empty template")}
                             </Button>
                         )}
