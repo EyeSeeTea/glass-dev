@@ -29,10 +29,8 @@ export const OrgUnitSelector: React.FC<OrgUnitProps> = React.memo(() => {
     useEffect(() => {
         if (searchTerm) {
             setFilteredOrgUnits(
-                userOrgUnitsAccess.filter(
-                    orgUnit =>
-                        orgUnit.orgUnitName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                        orgUnit.orgUnitShortName.toLowerCase().includes(searchTerm.toLowerCase())
+                userOrgUnitsAccess.filter(orgUnit =>
+                    orgUnit.orgUnitShortName.toLowerCase().includes(searchTerm.toLowerCase())
                 )
             );
         } else {
@@ -58,43 +56,35 @@ export const OrgUnitSelector: React.FC<OrgUnitProps> = React.memo(() => {
 
     return (
         userOrgUnitsAccess && (
-            <>
-                <Select
-                    value={orgUnitName}
-                    onChange={changeOrgUnit}
-                    disableUnderline
-                    style={{ maxHeight: "400px", backgroundColor: "white" }}
-                    MenuProps={{
-                        autoFocus: false,
-                        MenuListProps: { disablePadding: true },
-                        disableScrollLock: true,
-                    }}
-                    open={isOpen}
-                    onOpen={handleOpen}
-                    onClose={handleClose}
-                >
-                    <SearchInputContainer>
-                        <StyledSearchInput value={searchTerm} onChange={term => setSearchTerm(term)} autoFocus />
-                    </SearchInputContainer>
-                    <br />
-                    {filteredOrgUnits.length > 0 ? (
-                        filteredOrgUnits.map((orgUnit, i) => (
-                            <MenuItem
-                                style={i === 0 ? { marginTop: "60px", minWidth: "300px" } : { minWidth: "300px" }}
-                                key={orgUnit.orgUnitId}
-                                data-key={orgUnit.orgUnitId}
-                                value={orgUnit.orgUnitName}
-                            >
-                                {i18n.t(orgUnit.orgUnitShortName)}
-                            </MenuItem>
-                        ))
-                    ) : (
-                        <MenuItem disabled style={{ marginTop: "60px", minWidth: "300px" }}>
-                            {i18n.t("No Organisation Units found")}
-                        </MenuItem>
-                    )}
-                </Select>
-            </>
+            <StyledSelect
+                value={orgUnitName}
+                onChange={changeOrgUnit}
+                disableUnderline
+                MenuProps={{
+                    autoFocus: false,
+                    MenuListProps: { disablePadding: true },
+                    disableScrollLock: true,
+                }}
+                open={isOpen}
+                onOpen={handleOpen}
+                onClose={handleClose}
+            >
+                <SearchInputContainer>
+                    <StyledSearchInput value={searchTerm} onChange={term => setSearchTerm(term)} autoFocus />
+                </SearchInputContainer>
+                <br />
+                {filteredOrgUnits.length > 0 ? (
+                    filteredOrgUnits.map((orgUnit, i) => (
+                        <StyledMenuItem key={i} data-key={orgUnit.orgUnitId} value={orgUnit.orgUnitName} index={i}>
+                            {i18n.t(orgUnit.orgUnitShortName)}
+                        </StyledMenuItem>
+                    ))
+                ) : (
+                    <StyledMenuItem index={0} disabled>
+                        {i18n.t("No Organisation Units found")}
+                    </StyledMenuItem>
+                )}
+            </StyledSelect>
         )
     );
 });
@@ -115,4 +105,14 @@ const StyledSearchInput = styled(SearchInput)`
     position: fixed;
     margin: 10px 10px 0px 10px;
     z-index: 10;
+`;
+
+const StyledMenuItem = styled(MenuItem)<{ index: number }>`
+    margin-top: ${props => (props.index === 0 ? "60px" : "initial")};
+    width: 300px;
+`;
+
+const StyledSelect = styled(Select)`
+    max-height: 400px;
+    background-color: white;
 `;

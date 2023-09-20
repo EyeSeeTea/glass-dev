@@ -70,7 +70,6 @@ const SearchInput: React.FC<SearchInputProps> = ({ value, className, onChange, s
         <Paper className={clsx(classes.root, className)} style={style} elevation={0} role="search">
             <SearchIcon className={classes.icon} htmlColor="black" />
             <Input
-                key={"a"}
                 className={classes.input}
                 inputRef={ref}
                 disableUnderline

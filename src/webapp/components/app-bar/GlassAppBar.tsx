@@ -117,7 +117,7 @@ export const GlassAppBar: React.FC<GlassAppBarProps> = ({ toggleShowMenu }) => {
                             <IconButton aria-label="search" color="primary">
                                 <LocationIcon />
                             </IconButton>
-                            {currentUser?.userOrgUnitsAccess && <OrgUnitSelector />}
+                            <OrgUnitSelector />
                         </SelectContainer>
                         <SelectContainer>
                             <AvatarContainer id="demo-positioned-button" onClick={handleClick}>
