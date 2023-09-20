@@ -215,7 +215,7 @@ export class ImportRISIndividualFile {
                             };
                         }
                     );
-                    const AMRDataStage: { dataElement: string; value: string | number }[] =
+                    const AMRDataStage: { dataElement: string; value: string }[] =
                         metadata.programStageDataElements.map((de: { id: string; name: string; code: string }) => {
                             return {
                                 dataElement: de.id,

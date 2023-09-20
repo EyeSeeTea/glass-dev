@@ -86,7 +86,7 @@ export interface RuleEffectAssign {
     type: "ASSIGN";
     id: Id;
     targetDataType?: "dataElement" | "trackedEntityAttribute";
-    value: string | number | boolean | undefined;
+    value: string | undefined;
 }
 
 export interface RuleEffectShowError {

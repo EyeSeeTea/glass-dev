@@ -250,7 +250,7 @@ export class ImportEGASPFile {
         action: ImportStrategy,
         eventListId: string | undefined
     ): FutureData<Event[] | undefined> {
-        if (action === "CREATE_AND_UPDATE")
+        if (action === "CREATE_AND_UPDATE") {
             return Future.success(
                 dataPackage.dataEntries.map(
                     ({ id, orgUnit, period, attribute, dataValues, dataForm, coordinate }, index) => {
@@ -261,13 +261,15 @@ export class ImportEGASPFile {
                             orgUnit,
                             occurredAt: period,
                             attributeOptionCombo: attribute,
-                            dataValues: dataValues,
+                            dataValues: dataValues.map(el => {
+                                return { ...el, value: el.value.toString() };
+                            }),
                             coordinate,
                         };
                     }
                 )
             );
-        else {
+        } else {
             if (eventListId)
                 return this.glassDocumentsRepository.download(eventListId).flatMap(file => {
                     return Future.fromPromise(getStringFromFile(file)).flatMap(_events => {
