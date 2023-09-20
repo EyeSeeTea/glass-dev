@@ -60,7 +60,7 @@ import { GetDatabaseLocalesUseCase } from "./domain/usecases/GetDatabaseLocalesU
 import { LocalesDefaultRepository } from "./data/repositories/LocalesDefaultRepository";
 import { EGASPDataCSVDefaultRepository } from "./data/repositories/EGASPDataCSVDefaultRepository";
 import { Dhis2EventsDefaultRepository } from "./data/repositories/Dhis2EventsDefaultRepository";
-import { EGASPProgramDefaultRepository } from "./data/repositories/bulk-load/EGASPProgramDefaultRepository";
+import { EGASPProgramDefaultRepository } from "./data/repositories/download-empty-template/EGASPProgramDefaultRepository";
 import { ExcelPopulateDefaultRepository } from "./data/repositories/ExcelPopulateDefaultRepository";
 import { SavePasswordUseCase } from "./domain/usecases/SavePasswordUseCase";
 import { SaveKeyDbLocaleUseCase } from "./domain/usecases/SaveKeyDbLocaleUseCase";
@@ -76,11 +76,13 @@ import { GetSignalsUseCase } from "./domain/usecases/GetSignalsUseCase";
 import { GetSignalEventUseCase } from "./domain/usecases/GetSignalEventUseCase";
 import { DeleteSignalUseCase } from "./domain/usecases/DeleteSignalUseCase";
 import { GetEGASPEmptyTemplateUseCase } from "./domain/usecases/data-entry/egasp/GetEGASPEmptyTemplateUseCase";
-import { EGASPDownloadEmptyTemplate } from "./data/repositories/bulk-load/EGASPDownloadEmptyTemplate";
+import { EGASPDownloadEmptyTemplate } from "./data/repositories/download-empty-template/EGASPDownloadEmptyTemplate";
+import { BulkLoadDataStoreClient } from "./data/data-store/BulkLoadDataStoreClient";
 
 export function getCompositionRoot(instance: Instance) {
     const api = getD2APiFromInstance(instance);
     const dataStoreClient = new DataStoreClient(instance);
+    const bulkLoadDatastoreClient = new BulkLoadDataStoreClient(instance);
     const instanceRepository = new InstanceDefaultRepository(instance, dataStoreClient);
     const glassModuleRepository = new GlassModuleDefaultRepository(dataStoreClient);
     const glassNewsRepository = new GlassNewsDefaultRepository(dataStoreClient);
@@ -100,7 +102,7 @@ export function getCompositionRoot(instance: Instance) {
     const localeRepository = new LocalesDefaultRepository(instance);
     const egaspDataRepository = new EGASPDataCSVDefaultRepository();
     const dhis2EventsDefaultRepository = new Dhis2EventsDefaultRepository(instance);
-    const egaspProgramRepository = new EGASPProgramDefaultRepository(instance);
+    const egaspProgramRepository = new EGASPProgramDefaultRepository(instance, bulkLoadDatastoreClient);
     const excelRepository = new ExcelPopulateDefaultRepository();
     const eGASPValidationDefaultRepository = new ProgramRulesMetadataDefaultRepository(instance);
     const trackerRepository = new TrackerDefaultRepository(instance);
@@ -170,7 +172,12 @@ export function getCompositionRoot(instance: Instance) {
             ),
             secondaryFile: new ImportSampleFileUseCase(sampleDataRepository, metadataRepository, dataValuesRepository),
             validateSecondaryFile: new ValidateSampleFileUseCase(sampleDataRepository),
-            downloadEmptyTemplate: new GetEGASPEmptyTemplateUseCase(downloadEmptyTemplateRepository, excelRepository),
+            downloadEmptyTemplate: new GetEGASPEmptyTemplateUseCase(
+                metadataRepository,
+                downloadEmptyTemplateRepository,
+                excelRepository,
+                egaspProgramRepository
+            ),
         }),
         questionnaires: getExecute({
             get: new GetQuestionnaireUseCase(questionnaireD2Repository),
