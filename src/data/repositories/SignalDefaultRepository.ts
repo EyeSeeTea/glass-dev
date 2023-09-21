@@ -1,3 +1,4 @@
+import { Id } from "@eyeseetea/d2-api";
 import { Future, FutureData } from "../../domain/entities/Future";
 import { Signal } from "../../domain/entities/Signal";
 import { SignalRepository } from "../../domain/repositories/SignalRepository";
@@ -9,6 +10,10 @@ export class SignalDefaultRepository implements SignalRepository {
 
     getAll(): FutureData<Signal[]> {
         return this.dataStoreClient.listCollection<Signal>(DataStoreKeys.SIGNALS);
+    }
+
+    getById(id: Id): FutureData<Signal> {
+        return this.dataStoreClient.getObjectCollectionByProp<Signal>(DataStoreKeys.SIGNALS, "id", id);
     }
 
     save(signal: Signal): FutureData<void> {
