@@ -339,7 +339,7 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
                                 </ul>
                             </div>
                         ) : null}
-                        {moduleName === "EGASP" && (
+                        {moduleProperties.get(moduleName)?.isDownloadEmptyTemplateReq && (
                             <Button variant="outlined" color="primary" disableElevation onClick={downloadEmptyTemplate}>
                                 {i18n.t("Download empty template")}
                             </Button>
