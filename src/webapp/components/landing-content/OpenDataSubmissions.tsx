@@ -13,9 +13,14 @@ export const OpenDataSubmissions: React.FC = () => {
                 <>
                     {openDataSubmissions.data.map(data => {
                         return (
-                            <Grid item xs={6} key={data.dataSubmission.id}>
-                                {data.module && <ModuleCard period={data.dataSubmission.period} module={data.module} />}
-                            </Grid>
+                            data.dataSubmission &&
+                            data.module && (
+                                <Grid item xs={6} key={data.dataSubmission.id}>
+                                    {data.module && (
+                                        <ModuleCard period={data.dataSubmission.period} module={data.module} />
+                                    )}
+                                </Grid>
+                            )
                         );
                     })}
                 </>
