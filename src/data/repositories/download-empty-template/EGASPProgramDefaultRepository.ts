@@ -138,9 +138,7 @@ export class EGASPProgramDefaultRepository {
 
     public getEGASPTemplateSettings(): FutureData<any> {
         return this.bulkLoadDataStoreClient.getObject("BULK_LOAD_SETTINGS").flatMap(settings => {
-            console.debug(settings);
             const egaspsettings = settings as Record<string, any>;
-
             return Future.success(egaspsettings);
         });
     }

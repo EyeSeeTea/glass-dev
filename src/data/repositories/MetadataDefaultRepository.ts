@@ -9,7 +9,8 @@ import { CodedRef } from "../../domain/entities/Ref";
 import { MetadataRepository } from "../../domain/repositories/MetadataRepository";
 import { Id } from "../../domain/entities/Base";
 
-const ORG_UNIT_CLINICS_LEVEL = "7";
+const AMR_EGASP_Clinics = "lohCVAxPxMM";
+const AMR_EGASP_Labs = "KhLlLrKWPKu";
 
 export class MetadataDefaultRepository implements MetadataRepository {
     private api: D2Api;
@@ -37,7 +38,7 @@ export class MetadataDefaultRepository implements MetadataRepository {
         ).map(response => response.objects);
     }
 
-    getClinicsInOrgUnitId(id: string): FutureData<Id[]> {
+    getClinicsAndLabsInOrgUnitId(id: string): FutureData<Id[]> {
         const cacheKey = `clinics-in-${id}`;
 
         return this.getFromCacheOrRemote(
@@ -47,13 +48,24 @@ export class MetadataDefaultRepository implements MetadataRepository {
                     paging: false,
                     fields: {
                         id: true,
+                        organisationUnitGroups: {
+                            id: true,
+                        },
                     },
                     filter: {
-                        level: { eq: ORG_UNIT_CLINICS_LEVEL },
                         "ancestors.id": { eq: id },
                     },
                 })
-            ).map(response => response.objects.map(({ id }) => id))
+            ).map(response => {
+                //Filter by org unit group name
+                const orgUnitsFilteredGroup = response.objects.filter(
+                    ou =>
+                        ou.organisationUnitGroups.length > 0 &&
+                        (ou.organisationUnitGroups.some(o => o.id === AMR_EGASP_Clinics) ||
+                            ou.organisationUnitGroups.some(o => o.id === AMR_EGASP_Labs))
+                );
+                return orgUnitsFilteredGroup.map(({ id }) => id);
+            })
         );
     }
 

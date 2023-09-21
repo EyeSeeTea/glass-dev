@@ -14,7 +14,7 @@ export class GetEGASPEmptyTemplateUseCase implements UseCase {
     ) {}
 
     public execute(orgUnitId: string): FutureData<any> {
-        return this.metadataRepository.getClinicsInOrgUnitId(orgUnitId).flatMap(orgUnits => {
+        return this.metadataRepository.getClinicsAndLabsInOrgUnitId(orgUnitId).flatMap(orgUnits => {
             return this.egaspReposiotry.getEGASPTemplateSettings().flatMap(settings => {
                 return Future.fromPromise(
                     this.downloadEmptyTemplateRepository.getEmptyTemplate(orgUnits, settings)
