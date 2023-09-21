@@ -72,6 +72,12 @@ export class ImportCaptureDataUseCase {
                             },
                         ],
                     };
+                    if (signalId) {
+                        this.signalRepository
+                            .getById(signalId)
+                            .toPromise()
+                            .then(existingSignal => (signal.creationDate = existingSignal.creationDate));
+                    }
                     return this.signalRepository.save(signal).flatMap(() => {
                         if (action === "Save")
                             //If the action is save, then do not send any notification till publish
