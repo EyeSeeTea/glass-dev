@@ -30,7 +30,7 @@ export function getCategoryOptionComboByOptionCodes(categoryCombo: CategoryCombo
     );
 
     if (!categoryOptionCombo) {
-        const errorMessage = `categoryOptionCombos not found in categoryCombo ${
+        const errorMessage = `Combination of antibiotic, pathogen and batchId not found ${
             categoryCombo.name
         } for codes: ${codes.join(",")}`;
         return { categoryOptionComboId: "", error: errorMessage };
