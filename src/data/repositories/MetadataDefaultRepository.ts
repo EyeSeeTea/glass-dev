@@ -91,7 +91,7 @@ export class MetadataDefaultRepository implements MetadataRepository {
             if (categoryCombination) {
                 return Future.success(this.buildCategoryCombo(categoryCombination));
             } else {
-                return Future.error(`CategoryCombo with id ${id} not found`);
+                return Future.error(`Category Combination with id ${id} not found`);
             }
         });
     }
