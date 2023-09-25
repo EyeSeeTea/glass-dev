@@ -34,7 +34,8 @@ export class ImportEGASPFile {
         file: File,
         action: ImportStrategy,
         eventListId: string | undefined,
-        orgUnit: string,
+        orgUnitId: string,
+        orgUnitName: string,
         period: string
     ): FutureData<ImportSummary> {
         return this.excelRepository.loadTemplate(file).flatMap(_templateId => {
@@ -48,7 +49,7 @@ export class ImportEGASPFile {
                                 if (events) {
                                     if (action === "CREATE_AND_UPDATE") {
                                         //Run validations only on import
-                                        return this.validateEGASPEvents(events, orgUnit, period).flatMap(
+                                        return this.validateEGASPEvents(events, orgUnitId, orgUnitName, period).flatMap(
                                             validatedEventResults => {
                                                 if (validatedEventResults.blockingErrors.length > 0) {
                                                     const errorSummary: ImportSummary = {
@@ -141,7 +142,7 @@ export class ImportEGASPFile {
         });
     }
 
-    private validateEGASPEvents(events: Event[], orgUnit: string, period: string): FutureData<EventResult> {
+    private validateEGASPEvents(events: Event[], orgUnitId: string, orgUnitName: string, period: string): FutureData<EventResult> {
         //1. Run Program Rule Validations
         const programRuleValidationForEGASP = new ProgramRuleValidationForEGASP(this.eGASPValidationRepository);
 
@@ -153,7 +154,7 @@ export class ImportEGASPFile {
 
         return Future.joinObj({
             programRuleValidationResults: programRuleValidationForEGASP.getValidatedEvents(events),
-            customRuleValidationsResults: customEGASPValidations.getValidatedEvents(events, orgUnit, period),
+            customRuleValidationsResults: customEGASPValidations.getValidatedEvents(events, orgUnitId, orgUnitName, period),
         }).flatMap(({ programRuleValidationResults, customRuleValidationsResults }) => {
             const consolidatedValidationResults: EventResult = {
                 events: programRuleValidationResults.events,
