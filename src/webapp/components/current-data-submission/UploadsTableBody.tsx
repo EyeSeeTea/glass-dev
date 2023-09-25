@@ -28,7 +28,7 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
     const snackbar = useSnackbar();
     const [loading, setLoading] = useState<boolean>(false);
     const {
-        currentOrgUnitAccess: { orgUnitId },
+        currentOrgUnitAccess: { orgUnitId, orgUnitName },
     } = useCurrentOrgUnitContext();
     const [open, setOpen] = React.useState(false);
     const [rowToDelete, setRowToDelete] = useState<UploadsDataItem>();
@@ -120,6 +120,7 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                                               primaryFileToDelete.period,
                                               "DELETE",
                                               orgUnitId,
+                                              orgUnitName,
                                               primaryFileToDelete.countryCode,
                                               false,
                                               primaryFileToDelete.eventListFileId

@@ -57,6 +57,21 @@ export class MetadataDefaultRepository implements MetadataRepository {
         );
     }
 
+    getClinicOrLabNames(clinicLabIds: string[]): FutureData<{ id: string; name: string }[]> {
+        return apiToFuture(
+            this.api.models.organisationUnits.get({
+                paging: false,
+                fields: {
+                    id: true,
+                    name: true,
+                },
+                filter: {
+                    id: { in: clinicLabIds },
+                },
+            })
+        ).map(response => response.objects);
+    }
+
     getDataSet(id: string): FutureData<DataSet> {
         return apiToFuture(
             this.api.models.dataSets.get({

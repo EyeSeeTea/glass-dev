@@ -42,7 +42,8 @@ export class ImportPrimaryFileUseCase implements UseCase {
         batchId: string,
         period: string,
         action: ImportStrategy,
-        orgUnit: string,
+        orgUnitId: string,
+        orgUnitName: string,
         countryCode: string,
         dryRun: boolean,
         eventListId: string | undefined
@@ -55,7 +56,7 @@ export class ImportPrimaryFileUseCase implements UseCase {
                     this.dataValuesRepository,
                     this.moduleRepository
                 );
-                return importRISFile.importRISFile(inputFile, batchId, period, action, orgUnit, countryCode, dryRun);
+                return importRISFile.importRISFile(inputFile, batchId, period, action, orgUnitId, countryCode, dryRun);
             }
 
             case "EGASP": {
@@ -69,7 +70,7 @@ export class ImportPrimaryFileUseCase implements UseCase {
                     this.metadataRepository
                 );
 
-                return importEGASPFile.importEGASPFile(inputFile, action, eventListId, orgUnit, period);
+                return importEGASPFile.importEGASPFile(inputFile, action, eventListId, orgUnitId, orgUnitName, period);
             }
 
             case "AMR - Individual": {
@@ -83,7 +84,7 @@ export class ImportPrimaryFileUseCase implements UseCase {
                     return importRISIndividualFile.importRISIndividualFile(
                         inputFile,
                         action,
-                        orgUnit,
+                        orgUnitId,
                         countryCode,
                         period,
                         eventListId,
