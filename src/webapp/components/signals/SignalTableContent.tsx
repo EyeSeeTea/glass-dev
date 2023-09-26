@@ -232,7 +232,9 @@ export const SignalTableContent: React.FC = () => {
 
                                                     <TableCell style={{ opacity: 0.5 }}>
                                                         <Button
-                                                            disabled={!hasCaptureAccess}
+                                                            disabled={
+                                                                !hasCaptureAccess || !signal.userHasDeletePermission
+                                                            }
                                                             onClick={() => showConfirmationDialog(signal)}
                                                         >
                                                             <DeleteOutline />
