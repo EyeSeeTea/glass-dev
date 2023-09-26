@@ -39,8 +39,7 @@ export class MetadataDefaultRepository implements MetadataRepository {
     }
 
     getClinicsAndLabsInOrgUnitId(id: string): FutureData<Id[]> {
-        const cacheKey = `clinics-in-${id}`;
-
+        const cacheKey = `clinics-labs-in-${id}`;
         return this.getFromCacheOrRemote(
             cacheKey,
             apiToFuture(
@@ -53,7 +52,7 @@ export class MetadataDefaultRepository implements MetadataRepository {
                         },
                     },
                     filter: {
-                        "ancestors.id": { eq: id },
+                        path: { like: id },
                     },
                 })
             ).map(response => {
