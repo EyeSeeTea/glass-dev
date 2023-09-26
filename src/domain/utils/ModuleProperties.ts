@@ -17,6 +17,7 @@ type ModuleDetails = {
     unit: string;
     isSpecimenReq: boolean;
     populateCurrentYearInHistory: boolean;
+    isDownloadEmptyTemplateReq: boolean;
 };
 
 export const moduleProperties = new Map<string, ModuleDetails>([
@@ -42,6 +43,7 @@ export const moduleProperties = new Map<string, ModuleDetails>([
             unit: "data value",
             isSpecimenReq: true,
             populateCurrentYearInHistory: false,
+            isDownloadEmptyTemplateReq: false,
         },
     ],
     [
@@ -65,6 +67,7 @@ export const moduleProperties = new Map<string, ModuleDetails>([
             unit: "event",
             isSpecimenReq: false,
             populateCurrentYearInHistory: true,
+            isDownloadEmptyTemplateReq: true,
         },
     ],
     [
@@ -88,6 +91,7 @@ export const moduleProperties = new Map<string, ModuleDetails>([
             unit: "enrollment",
             isSpecimenReq: true,
             populateCurrentYearInHistory: false,
+            isDownloadEmptyTemplateReq: false,
         },
     ],
 ]);

@@ -38,10 +38,6 @@ interface UploadFilesProps {
     setSecondaryFileImportSummary: React.Dispatch<React.SetStateAction<ImportSummary | undefined>>;
 }
 
-interface PreviouslySubmittedContainerProps {
-    isVisible: boolean;
-}
-
 const UPLOADED_STATUS = "uploaded";
 
 const datasetOptions = [
@@ -90,6 +86,7 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
     const [hasSecondaryFile, setHasSecondaryFile] = useState<boolean>(false);
     const [importLoading, setImportLoading] = useState<boolean>(false);
     const [previousBatchIdsLoading, setPreviousBatchIdsLoading] = useState<boolean>(true);
+    const [loading, setLoading] = useState<boolean>(false);
 
     const {
         currentModuleAccess: { moduleId, moduleName },
@@ -241,8 +238,38 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
         }
     };
 
+    const downloadEmptyTemplate = useCallback(() => {
+        setLoading(true);
+        compositionRoot.fileSubmission.downloadEmptyTemplate(orgUnitId).run(
+            file => {
+                const fileName = "AMR_GLASS_EGASP_PRE_INPUT_FILES.xlsx";
+
+                //download file automatically
+                const downloadSimulateAnchor = document.createElement("a");
+                downloadSimulateAnchor.href = URL.createObjectURL(file);
+                downloadSimulateAnchor.download = fileName;
+                // simulate link click
+                document.body.appendChild(downloadSimulateAnchor);
+                downloadSimulateAnchor.click();
+                setLoading(false);
+            },
+            error => {
+                snackbar.error("Error downloading file");
+                console.error(error);
+                setLoading(false);
+            }
+        );
+    }, [compositionRoot.fileSubmission, snackbar, orgUnitId]);
+
     return (
         <ContentWrapper>
+            <Backdrop open={loading} style={{ color: "#fff", zIndex: 1 }}>
+                <StyledLoaderContainer>
+                    <CircularProgress color="inherit" size={50} />
+                    <Typography variant="h6">{i18n.t("Downloading")}</Typography>
+                </StyledLoaderContainer>
+            </Backdrop>
+
             <Backdrop open={importLoading} style={{ color: "#fff", zIndex: 1 }}>
                 <StyledLoaderContainer>
                     <CircularProgress color="inherit" size={50} />
@@ -301,21 +328,22 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
                             </FormControl>
                         </div>
                     )}
-                    <div className="bottom">
-                        <PreviouslySubmittedContainer
-                            isVisible={
-                                previousUploadsBatchIds.length > 0 &&
-                                (moduleProperties.get(moduleName)?.isbatchReq === true ? true : false)
-                            }
-                        >
-                            <h4>{i18n.t("You Previously Submitted:")} </h4>
-                            <ul>
-                                {previousUploadsBatchIds.map(batchId => (
-                                    <li key={batchId}>{`Batch Id ${batchId}`}</li>
-                                ))}
-                            </ul>
-                        </PreviouslySubmittedContainer>
-
+                    <BottomContainer>
+                        {previousUploadsBatchIds.length > 0 && moduleProperties.get(moduleName)?.isbatchReq ? (
+                            <div>
+                                <h4>{i18n.t("You Previously Submitted:")} </h4>
+                                <ul>
+                                    {previousUploadsBatchIds.map(batchId => (
+                                        <li key={batchId}>{`Batch Id ${batchId}`}</li>
+                                    ))}
+                                </ul>
+                            </div>
+                        ) : null}
+                        {moduleProperties.get(moduleName)?.isDownloadEmptyTemplateReq && (
+                            <Button variant="outlined" color="primary" disableElevation onClick={downloadEmptyTemplate}>
+                                {i18n.t("Download empty template")}
+                            </Button>
+                        )}
                         <Button
                             variant="contained"
                             color={isValidated ? "primary" : "default"}
@@ -326,7 +354,7 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
                         >
                             {i18n.t("Continue")}
                         </Button>
-                    </div>
+                    </BottomContainer>
                 </>
             )}
         </ContentWrapper>
@@ -399,15 +427,6 @@ const ContentWrapper = styled.div`
             font-weight: 600;
         }
     }
-    .bottom {
-        display: flex;
-        flex-direction: row;
-        align-items: baseline;
-        justify-content: space-between;
-        margin: 0 auto 30px auto;
-        align-items: flex-end;
-        width: 100%;
-    }
 `;
 
 export const StyledRemoveButton = styled.button`
@@ -427,9 +446,12 @@ export const RemoveContainer = styled.div`
     display: flex;
 `;
 
-const PreviouslySubmittedContainer = styled.div<PreviouslySubmittedContainerProps>`
-    ${props =>
-        !props.isVisible && {
-            visibility: "hidden",
-        }}
+export const BottomContainer = styled.div`
+    display: flex;
+    flex-direction: row;
+    align-items: baseline;
+    justify-content: space-between;
+    margin: 0 auto 30px auto;
+    align-items: flex-end;
+    width: 100%;
 `;
