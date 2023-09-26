@@ -142,7 +142,12 @@ export class ImportEGASPFile {
         });
     }
 
-    private validateEGASPEvents(events: Event[], orgUnitId: string, orgUnitName: string, period: string): FutureData<EventResult> {
+    private validateEGASPEvents(
+        events: Event[],
+        orgUnitId: string,
+        orgUnitName: string,
+        period: string
+    ): FutureData<EventResult> {
         //1. Run Program Rule Validations
         const programRuleValidationForEGASP = new ProgramRuleValidationForEGASP(this.eGASPValidationRepository);
 
@@ -154,7 +159,12 @@ export class ImportEGASPFile {
 
         return Future.joinObj({
             programRuleValidationResults: programRuleValidationForEGASP.getValidatedEvents(events),
-            customRuleValidationsResults: customEGASPValidations.getValidatedEvents(events, orgUnitId, orgUnitName, period),
+            customRuleValidationsResults: customEGASPValidations.getValidatedEvents(
+                events,
+                orgUnitId,
+                orgUnitName,
+                period
+            ),
         }).flatMap(({ programRuleValidationResults, customRuleValidationsResults }) => {
             const consolidatedValidationResults: EventResult = {
                 events: programRuleValidationResults.events,
