@@ -31,6 +31,7 @@ export const Questionnaires: React.FC<QuestionnairesProps> = ({ setRefetchStatus
     const { orgUnit, year } = useSelector();
     const [formState, actions] = useFormState();
     const { currentModuleAccess } = useCurrentModuleContext();
+
     const dataSubmissionId = useCurrentDataSubmissionId(
         compositionRoot,
         currentModuleAccess.moduleId,
@@ -61,7 +62,7 @@ export const Questionnaires: React.FC<QuestionnairesProps> = ({ setRefetchStatus
                             const notificationText = `The data submission for ${currentModuleAccess.moduleName} module for year ${year} and country ${orgUnit.name} has changed to DATA TO BE APPROVED BY COUNTRY`;
 
                             compositionRoot.notifications
-                                .send(notificationText, notificationText, userGroupsIds, orgUnit.id)
+                                .send(notificationText, notificationText, userGroupsIds, orgUnit.path)
                                 .run(
                                     () => {},
                                     () => {}
@@ -204,8 +205,11 @@ const QuestionnaireCard = styled.div`
 // This should be probably abstracted to a common hook (with a more descriptive name)
 function useSelector() {
     const { currentOrgUnitAccess } = useCurrentOrgUnitContext();
-    const { orgUnitId, orgUnitName } = currentOrgUnitAccess;
-    const orgUnit = React.useMemo(() => ({ id: orgUnitId, name: orgUnitName }), [orgUnitId, orgUnitName]);
+    const { orgUnitId, orgUnitName, orgUnitPath } = currentOrgUnitAccess;
+    const orgUnit = React.useMemo(
+        () => ({ id: orgUnitId, name: orgUnitName, path: orgUnitPath }),
+        [orgUnitId, orgUnitName, orgUnitPath]
+    );
 
     const { currentPeriod } = useCurrentPeriodContext();
 
