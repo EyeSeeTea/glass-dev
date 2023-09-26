@@ -1,14 +1,14 @@
-import { Dhis2EventsDefaultRepository, Event } from "../../../../data/repositories/Dhis2EventsDefaultRepository";
+import { Dhis2EventsDefaultRepository } from "../../../../data/repositories/Dhis2EventsDefaultRepository";
+import { D2TrackerEvent as Event } from "@eyeseetea/d2-api/api/trackerEvents";
 import { Future, FutureData } from "../../../entities/Future";
 import { ConsistencyError, ImportSummary } from "../../../entities/data-entry/ImportSummary";
 import * as templates from "../../../entities/data-entry/egasp-templates";
-import { EGASPProgramDefaultRepository } from "../../../../data/repositories/bulk-load/EGASPProgramDefaultRepository";
+import { EGASPProgramDefaultRepository } from "../../../../data/repositories/download-empty-template/EGASPProgramDefaultRepository";
 import { Template } from "../../../entities/Template";
 import { DataForm } from "../../../entities/DataForm";
 import { ExcelReader } from "../../../utils/ExcelReader";
 import { ExcelRepository } from "../../../repositories/ExcelRepository";
 import { DataPackage, DataPackageDataValue } from "../../../entities/data-entry/DataPackage";
-import { EventsPostResponse } from "@eyeseetea/d2-api/api/events";
 import { ImportStrategy } from "../../../entities/data-entry/DataValuesSaveSummary";
 import { GlassDocumentsRepository } from "../../../repositories/GlassDocumentsRepository";
 import { GlassUploadsRepository } from "../../../repositories/GlassUploadsRepository";
@@ -17,6 +17,7 @@ import { ProgramRulesMetadataRepository } from "../../../repositories/program-ru
 import { EventResult } from "../../../entities/program-rules/EventEffectTypes";
 import { CustomValidationForEGASP } from "./CustomValidationForEGASP";
 import { getStringFromFile } from "../utils/fileToString";
+import { TrackerPostResponse } from "@eyeseetea/d2-api/api/tracker";
 import { MetadataRepository } from "../../../repositories/MetadataRepository";
 
 export class ImportEGASPFile {
@@ -171,34 +172,27 @@ export class ImportEGASPFile {
     }
 
     private mapToImportSummary(
-        result: EventsPostResponse,
+        result: TrackerPostResponse,
         nonBlockingErrors: ConsistencyError[]
     ): {
         importSummary: ImportSummary;
         eventIdList: string[];
     } {
-        if (result && result.importSummaries) {
+        if (result && result.validationReport && result.stats) {
             const blockingErrorList = _.compact(
-                result.importSummaries.map(summary => {
-                    if (summary.status === "ERROR") {
-                        if (summary.description) return summary.description;
-                        else {
-                            return summary.conflicts.map(
-                                conflict => `Object : ${conflict.object}, Value : ${conflict.value}`
-                            );
-                        }
-                    }
+                result.validationReport.errorReports.map(summary => {
+                    if (summary.message) return summary.message;
                 })
             );
 
             const blockingErrorsByCount = _.countBy(blockingErrorList);
-            const importSummary = {
-                status: result.status,
+            const importSummary: ImportSummary = {
+                status: result.status === "OK" ? "SUCCESS" : result.status,
                 importCount: {
-                    imported: result.imported,
-                    updated: result.updated,
-                    ignored: result.ignored,
-                    deleted: result.deleted,
+                    imported: result.stats.created,
+                    updated: result.stats.updated,
+                    ignored: result.stats.ignored,
+                    deleted: result.stats.deleted,
                 },
                 blockingErrors: Object.entries(blockingErrorsByCount).map(err => {
                     return { error: err[0], count: err[1] };
@@ -207,11 +201,10 @@ export class ImportEGASPFile {
                 importTime: new Date(),
             };
 
-            const eventIdList = result.importSummaries.map(summary => {
-                if (summary.status === "SUCCESS") {
-                    return summary.reference;
-                }
-            });
+            const eventIdList =
+                result.status === "OK"
+                    ? result.bundleReport.typeReportMap.EVENT.objectReports.map(report => report.uid)
+                    : [];
 
             return { importSummary, eventIdList: _.compact(eventIdList) };
         } else {
@@ -220,7 +213,7 @@ export class ImportEGASPFile {
                     status: "ERROR",
                     importCount: { ignored: 0, imported: 0, deleted: 0, updated: 0 },
                     nonBlockingErrors: [],
-                    blockingErrors: [{ error: "An unexpected error has ocurred importing events", count: 1 }],
+                    blockingErrors: [{ error: result?.message ?? "An error occurred during EGASP import. ", count: 1 }],
                 },
                 eventIdList: [],
             };
@@ -249,7 +242,7 @@ export class ImportEGASPFile {
         action: ImportStrategy,
         eventListId: string | undefined
     ): FutureData<Event[] | undefined> {
-        if (action === "CREATE_AND_UPDATE")
+        if (action === "CREATE_AND_UPDATE") {
             return Future.success(
                 dataPackage.dataEntries.map(
                     ({ id, orgUnit, period, attribute, dataValues, dataForm, coordinate }, index) => {
@@ -258,15 +251,17 @@ export class ImportEGASPFile {
                             program: dataForm,
                             status: "COMPLETED",
                             orgUnit,
-                            eventDate: period,
+                            occurredAt: period,
                             attributeOptionCombo: attribute,
-                            dataValues: dataValues,
+                            dataValues: dataValues.map(el => {
+                                return { ...el, value: el.value.toString() };
+                            }),
                             coordinate,
                         };
                     }
                 )
             );
-        else {
+        } else {
             if (eventListId)
                 return this.glassDocumentsRepository.download(eventListId).flatMap(file => {
                     return Future.fromPromise(getStringFromFile(file)).flatMap(_events => {
@@ -277,7 +272,7 @@ export class ImportEGASPFile {
                                 program: "",
                                 status: "COMPLETED",
                                 orgUnit: "",
-                                eventDate: "",
+                                occurredAt: "",
                                 attributeOptionCombo: "",
                                 dataValues: [],
                             };
@@ -295,7 +290,7 @@ export class ImportEGASPFile {
 
     private formatDhis2Value(item: DataPackageDataValue, dataForm: DataForm): DataPackageDataValue | undefined {
         const dataElement = dataForm.dataElements.find(({ id }) => item.dataElement === id);
-        const booleanValue = String(item.optionId) === "true" || item.optionId === "true";
+        const booleanValue = String(item.value) === "true" || item.value === "true";
 
         if (dataElement?.valueType === "BOOLEAN") {
             return { ...item, value: booleanValue };

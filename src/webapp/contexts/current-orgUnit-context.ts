@@ -10,6 +10,7 @@ export const defaultOrgUnitContextState = {
     currentOrgUnitAccess: {
         orgUnitId: "",
         orgUnitName: "",
+        orgUnitShortName: "",
         orgUnitCode: "",
         orgUnitPath: "",
         readAccess: false,
