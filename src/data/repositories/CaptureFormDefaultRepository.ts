@@ -10,7 +10,7 @@ import {
     TextQuestion,
 } from "../../domain/entities/Questionnaire";
 import { apiToFuture } from "../../utils/futures";
-import { Event } from "./Dhis2EventsDefaultRepository";
+import { D2TrackerEvent } from "@eyeseetea/d2-api/api/trackerEvents";
 
 interface EARProgram {
     code: string;
@@ -94,7 +94,7 @@ export class CaptureFormDefaultRepository implements CaptureFormRepository {
         });
     }
 
-    getPopulatedForm(event: Event): FutureData<Questionnaire> {
+    getPopulatedForm(event: D2TrackerEvent): FutureData<Questionnaire> {
         return apiToFuture(
             this.api.request<ProgramMetadata>({
                 method: "get",
@@ -139,7 +139,7 @@ export class CaptureFormDefaultRepository implements CaptureFormRepository {
         section: ProgramStageSections,
         dataElements: EARDataElements[],
         options: Option[],
-        event: Event | undefined = undefined
+        event: D2TrackerEvent | undefined = undefined
     ): Question[] {
         const questions: Question[] = _.compact(
             section.dataElements.map(dataElement => {
@@ -229,11 +229,10 @@ export class CaptureFormDefaultRepository implements CaptureFormRepository {
         return questions;
     }
 
-    getSignalEvent(eventId: string): FutureData<Event> {
+    getSignalEvent(eventId: string): FutureData<D2TrackerEvent> {
         return apiToFuture(
-            this.api.request<Event>({
-                method: "get",
-                url: `/tracker/events/${eventId}?fields=dataValues`,
+            this.api.tracker.events.getById(eventId, {
+                fields: { dataValues: true },
             })
         ).flatMap(resp => {
             return Future.success(resp);
