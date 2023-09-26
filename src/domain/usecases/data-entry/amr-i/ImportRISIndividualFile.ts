@@ -8,12 +8,10 @@ import { GlassUploadsRepository } from "../../../repositories/GlassUploadsReposi
 import { TrackerRepository } from "../../../repositories/TrackerRepository";
 import { RISIndividualDataRepository } from "../../../repositories/data-entry/RISIndividualDataRepository";
 import { getStringFromFile } from "../utils/fileToString";
-import { TrackedEntity, TrackerPostResponse } from "@eyeseetea/d2-api/api/tracker";
-import {
-    D2TrackerEnrollment,
-    D2TrackerEnrollmentAttribute,
-    D2TrackerEnrollmentEvent,
-} from "@eyeseetea/d2-api/api/trackerEnrollments";
+import { TrackerPostResponse } from "@eyeseetea/d2-api/api/tracker";
+import { D2TrackerTrackedEntity as TrackedEntity } from "@eyeseetea/d2-api/api/trackerTrackedEntities";
+import { D2TrackerEnrollment, D2TrackerEnrollmentAttribute } from "@eyeseetea/d2-api/api/trackerEnrollments";
+import { D2TrackerEvent } from "@eyeseetea/d2-api/api/trackerEvents";
 
 const AMRIProgramID = "mMAj6Gofe49";
 const AMR_GLASS_AMR_TET_PATIENT = "CcgnfemKr5U";
@@ -217,7 +215,7 @@ export class ImportRISIndividualFile {
                             };
                         }
                     );
-                    const AMRDataStage: { dataElement: string; value: string | number }[] =
+                    const AMRDataStage: { dataElement: string; value: string }[] =
                         metadata.programStageDataElements.map((de: { id: string; name: string; code: string }) => {
                             return {
                                 dataElement: de.id,
@@ -226,7 +224,7 @@ export class ImportRISIndividualFile {
                             };
                         });
 
-                    const events: D2TrackerEnrollmentEvent[] = [
+                    const events: D2TrackerEvent[] = [
                         {
                             program: AMRIProgramIDl,
                             event: "",
@@ -234,6 +232,7 @@ export class ImportRISIndividualFile {
                             orgUnit,
                             dataValues: AMRDataStage,
                             occurredAt: new Date().getTime().toString(),
+                            status: "ACTIVE",
                         },
                     ];
                     const enrollments: D2TrackerEnrollment[] = [

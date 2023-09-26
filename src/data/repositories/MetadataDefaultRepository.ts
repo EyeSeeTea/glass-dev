@@ -7,9 +7,16 @@ import { Instance } from "../entities/Instance";
 import { DataSet } from "../../domain/entities/metadata/DataSet";
 import { CodedRef } from "../../domain/entities/Ref";
 import { MetadataRepository } from "../../domain/repositories/MetadataRepository";
+import { Id } from "../../domain/entities/Base";
+
+const ORG_UNIT_CLINICS_LEVEL = "7";
 
 export class MetadataDefaultRepository implements MetadataRepository {
     private api: D2Api;
+
+    //TODO: @cache does not work with futures
+    // I've created here an manual in memory cache to avoid many requests
+    private inmemoryCache: Record<string, unknown> = {};
 
     constructor(instance: Instance) {
         this.api = getD2APiFromInstance(instance);
@@ -28,6 +35,26 @@ export class MetadataDefaultRepository implements MetadataRepository {
                 },
             })
         ).map(response => response.objects);
+    }
+
+    getClinicsInOrgUnitId(id: string): FutureData<Id[]> {
+        const cacheKey = `clinics-in-${id}`;
+
+        return this.getFromCacheOrRemote(
+            cacheKey,
+            apiToFuture(
+                this.api.models.organisationUnits.get({
+                    paging: false,
+                    fields: {
+                        id: true,
+                    },
+                    filter: {
+                        level: { eq: ORG_UNIT_CLINICS_LEVEL },
+                        "ancestors.id": { eq: id },
+                    },
+                })
+            ).map(response => response.objects.map(({ id }) => id))
+        );
     }
 
     getDataSet(id: string): FutureData<DataSet> {
@@ -134,6 +161,18 @@ export class MetadataDefaultRepository implements MetadataRepository {
                 };
             }),
         };
+    }
+
+    private getFromCacheOrRemote<T>(cacheKey: string, future: FutureData<T>): FutureData<T> {
+        if (this.inmemoryCache[cacheKey]) {
+            const responseInCache = this.inmemoryCache[cacheKey] as T;
+            return Future.success(responseInCache);
+        } else {
+            return future.map(response => {
+                this.inmemoryCache[cacheKey] = response;
+                return response;
+            });
+        }
     }
 }
 
