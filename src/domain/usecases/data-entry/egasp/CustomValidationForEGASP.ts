@@ -19,7 +19,7 @@ export class CustomValidationForEGASP {
             //2. Period validation
             const periodErrors = this.checkPeriod(events, period);
 
-            //Fetch all existing EGASP events for the given org unit
+            //Fetch all existing EGASP events for the given org unit and all its labs and clinics
             return this.dhis2EventsDefaultRepository.getEGASPEventsByOrgUnit(orgUnit).flatMap(existingEvents => {
                 //3. Duplicate EGASP ID within org unit validation
                 const duplicateEGASPIdErrors = this.checkUniqueEgaspId(events, existingEvents);
@@ -44,7 +44,7 @@ export class CustomValidationForEGASP {
     }
 
     private checkCountry(events: Event[], country: string): FutureData<ConsistencyError[]> {
-        return this.metadataRepository.getClinicsInOrgUnitId(country).map(clinicsInCountry => {
+        return this.metadataRepository.getClinicsAndLabsInOrgUnitId(country).map(clinicsInCountry => {
             const errors = _(
                 events.map(event => {
                     if (!clinicsInCountry?.includes(event.orgUnit)) {

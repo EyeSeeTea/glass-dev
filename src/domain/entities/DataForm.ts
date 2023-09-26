@@ -1,4 +1,4 @@
-import { DataElementType } from "../../data/repositories/bulk-load/EGASPProgramDefaultRepository";
+import { DataElementType } from "../../data/repositories/download-empty-template/EGASPProgramDefaultRepository";
 import { Id, NamedRef } from "./Ref";
 
 export type DataFormPeriod = "Daily" | "Monthly" | "Yearly" | "Weekly";

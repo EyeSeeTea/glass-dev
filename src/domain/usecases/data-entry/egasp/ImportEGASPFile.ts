@@ -3,7 +3,7 @@ import { D2TrackerEvent as Event } from "@eyeseetea/d2-api/api/trackerEvents";
 import { Future, FutureData } from "../../../entities/Future";
 import { ConsistencyError, ImportSummary } from "../../../entities/data-entry/ImportSummary";
 import * as templates from "../../../entities/data-entry/egasp-templates";
-import { EGASPProgramDefaultRepository } from "../../../../data/repositories/bulk-load/EGASPProgramDefaultRepository";
+import { EGASPProgramDefaultRepository } from "../../../../data/repositories/download-empty-template/EGASPProgramDefaultRepository";
 import { Template } from "../../../entities/Template";
 import { DataForm } from "../../../entities/DataForm";
 import { ExcelReader } from "../../../utils/ExcelReader";
@@ -178,7 +178,7 @@ export class ImportEGASPFile {
         importSummary: ImportSummary;
         eventIdList: string[];
     } {
-        if (result && result.status !== "ERROR") {
+        if (result && result.validationReport && result.stats) {
             const blockingErrorList = _.compact(
                 result.validationReport.errorReports.map(summary => {
                     if (summary.message) return summary.message;
@@ -208,20 +208,12 @@ export class ImportEGASPFile {
 
             return { importSummary, eventIdList: _.compact(eventIdList) };
         } else {
-            const blockingErrorList = _.compact(
-                result.validationReport.errorReports.map(summary => {
-                    if (summary.message) return summary.message;
-                })
-            );
-            const blockingErrorsByCount = _.countBy(blockingErrorList);
             return {
                 importSummary: {
                     status: "ERROR",
                     importCount: { ignored: 0, imported: 0, deleted: 0, updated: 0 },
                     nonBlockingErrors: [],
-                    blockingErrors: Object.entries(blockingErrorsByCount).map(err => {
-                        return { error: err[0], count: err[1] };
-                    }),
+                    blockingErrors: [{ error: result?.message ?? "An error occurred during EGASP import. ", count: 1 }],
                 },
                 eventIdList: [],
             };
