@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import AppBar from "@material-ui/core/AppBar";
 import Toolbar from "@material-ui/core/Toolbar";
 import IconButton from "@material-ui/core/IconButton";
@@ -7,11 +7,10 @@ import MenuIcon from "@material-ui/icons/Menu";
 import LocationIcon from "@material-ui/icons/LocationOn";
 import whoLogo from "../../assets/who-logo-blue.png";
 import glassLogo from "../../assets/glass-logo.png";
-import { Avatar, Badge, Box, ListItemIcon, ListItemText, Menu, MenuItem, Select } from "@material-ui/core";
+import { Avatar, Badge, Box, ListItemIcon, ListItemText, Menu, MenuItem } from "@material-ui/core";
 import styled from "styled-components";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { useAppContext } from "../../contexts/app-context";
-import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context";
 import MailOutlineIcon from "@material-ui/icons/MailOutline";
 import { useNotifications } from "../landing-content/notifications/useNotifications";
 import { ContentLoader } from "../content-loader/ContentLoader";
@@ -21,6 +20,7 @@ import KeyboardArrowUpIcon from "@material-ui/icons/KeyboardArrowUp";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
 import PersonOutlineIcon from "@material-ui/icons/PersonOutline";
 import SettingsIcon from "@material-ui/icons/Settings";
+import { OrgUnitSelector } from "./OrgUnitSelector";
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -53,11 +53,9 @@ export const GlassAppBar: React.FC<GlassAppBarProps> = ({ toggleShowMenu }) => {
     const history = useHistory();
 
     const { currentUser, compositionRoot } = useAppContext();
-    const { currentOrgUnitAccess, changeCurrentOrgUnitAccess } = useCurrentOrgUnitContext();
     const { notifications } = useNotifications(compositionRoot);
 
     const [anchorEl, setAnchorEl] = React.useState(null);
-    const [orgUnitName, setOrgUnitName] = React.useState(currentOrgUnitAccess.orgUnitName);
 
     const { api } = useAppContext();
     const baseUrl = api.baseUrl;
@@ -69,19 +67,6 @@ export const GlassAppBar: React.FC<GlassAppBarProps> = ({ toggleShowMenu }) => {
         } else {
             return nameArray.map(name => name.charAt(0)).join("");
         }
-    };
-
-    useEffect(() => {
-        if (orgUnitName !== currentOrgUnitAccess.orgUnitName) {
-            //if orgUnit has been changed manually in url
-            setOrgUnitName(currentOrgUnitAccess.orgUnitName);
-        }
-    }, [orgUnitName, setOrgUnitName, currentOrgUnitAccess.orgUnitName]);
-
-    const changeOrgUnit = (e: React.ChangeEvent<{ name?: string | undefined; value: unknown }>) => {
-        if (e.target?.value) setOrgUnitName(e.target?.value as string);
-        const orgUnitId = (e.currentTarget as HTMLInputElement).getAttribute("data-key");
-        if (orgUnitId) changeCurrentOrgUnitAccess(orgUnitId);
     };
 
     const handleClick = (event: React.BaseSyntheticEvent) => {
@@ -132,24 +117,7 @@ export const GlassAppBar: React.FC<GlassAppBarProps> = ({ toggleShowMenu }) => {
                             <IconButton aria-label="search" color="primary">
                                 <LocationIcon />
                             </IconButton>
-                            {currentUser?.userOrgUnitsAccess && (
-                                <Select
-                                    value={orgUnitName}
-                                    disableUnderline
-                                    onChange={changeOrgUnit}
-                                    MenuProps={{ disableScrollLock: true }}
-                                >
-                                    {currentUser.userOrgUnitsAccess.map(orgUnit => (
-                                        <MenuItem
-                                            key={orgUnit.orgUnitId}
-                                            data-key={orgUnit.orgUnitId}
-                                            value={orgUnit.orgUnitName}
-                                        >
-                                            {i18n.t(orgUnit.orgUnitName)}
-                                        </MenuItem>
-                                    ))}
-                                </Select>
-                            )}
+                            <OrgUnitSelector />
                         </SelectContainer>
                         <SelectContainer>
                             <AvatarContainer id="demo-positioned-button" onClick={handleClick}>
