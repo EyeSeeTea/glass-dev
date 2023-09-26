@@ -8,7 +8,6 @@ import { DataStoreClient } from "../data-store/DataStoreClient";
 import { DataStoreKeys } from "../data-store/DataStoreKeys";
 import { Instance } from "../entities/Instance";
 import { apiToFuture } from "../../utils/futures";
-import { HttpResponse } from "@eyeseetea/d2-api/api/common";
 
 export class GlassDocumentsDefaultRepository implements GlassDocumentsRepository {
     private api: D2Api;
@@ -98,9 +97,7 @@ export class GlassDocumentsDefaultRepository implements GlassDocumentsRepository
     }
 
     deleteDocumentApi(id: string): FutureData<void> {
-        return apiToFuture(
-            this.api.request<HttpResponse<Response>>({ url: `/documents/${id}`, method: "delete" })
-        ).flatMap(response => {
+        return apiToFuture(this.api.files.delete(id)).flatMap(response => {
             if (response.httpStatus === "OK") return Future.success(undefined);
             else return Future.error("Error when deleting document");
         });
