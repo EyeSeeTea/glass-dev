@@ -103,7 +103,7 @@ export function getCompositionRoot(instance: Instance) {
     const eGASPValidationDefaultRepository = new ProgramRulesMetadataDefaultRepository(instance);
     const trackerRepository = new TrackerDefaultRepository(instance);
     const captureFormRepository = new CaptureFormDefaultRepository(api);
-    const signalRepository = new SignalDefaultRepository(dataStoreClient);
+    const signalRepository = new SignalDefaultRepository(dataStoreClient, api);
 
     return {
         instance: getExecute({
