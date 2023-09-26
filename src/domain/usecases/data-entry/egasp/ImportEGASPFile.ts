@@ -178,7 +178,7 @@ export class ImportEGASPFile {
         importSummary: ImportSummary;
         eventIdList: string[];
     } {
-        if (result) {
+        if (result && result.validationReport && result.stats) {
             const blockingErrorList = _.compact(
                 result.validationReport.errorReports.map(summary => {
                     if (summary.message) return summary.message;
@@ -213,7 +213,7 @@ export class ImportEGASPFile {
                     status: "ERROR",
                     importCount: { ignored: 0, imported: 0, deleted: 0, updated: 0 },
                     nonBlockingErrors: [],
-                    blockingErrors: [{ error: "An error occurred during EGASP import. ", count: 1 }],
+                    blockingErrors: [{ error: result?.message ?? "An error occurred during EGASP import. ", count: 1 }],
                 },
                 eventIdList: [],
             };
