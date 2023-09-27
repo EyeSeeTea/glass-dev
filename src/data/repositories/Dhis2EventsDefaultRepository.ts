@@ -23,9 +23,10 @@ export class Dhis2EventsDefaultRepository {
     getEGASPEvents(orgUnit: string, page: number): Promise<TrackerEventsResponse> {
         return this.api.tracker.events
             .get({
-                fields: { $owner: true },
+                fields: { $owner: true, event: true, dataValues: true, orgUnit: true, occurredAt: true },
                 program: EGASP_PROGRAM_ID,
                 orgUnit,
+                ouMode: "DESCENDANTS",
                 totalPages: true,
                 pageSize: 250,
                 page,
