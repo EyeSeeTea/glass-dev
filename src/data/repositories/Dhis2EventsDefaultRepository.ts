@@ -5,7 +5,8 @@ import { Future, FutureData } from "../../domain/entities/Future";
 import { EGASP_PROGRAM_ID } from "./program-rule/ProgramRulesMetadataDefaultRepository";
 import { D2TrackerEvent, TrackerEventsResponse } from "@eyeseetea/d2-api/api/trackerEvents";
 import { TrackerPostResponse } from "@eyeseetea/d2-api/api/tracker";
-import { D2Api } from "@eyeseetea/d2-api/2.34";
+import { D2Api, Id } from "@eyeseetea/d2-api/2.34";
+import { apiToFuture } from "../../utils/futures";
 
 export declare type EventStatus = "ACTIVE" | "COMPLETED" | "VISITED" | "SCHEDULED" | "OVERDUE" | "SKIPPED";
 
@@ -62,6 +63,16 @@ export class Dhis2EventsDefaultRepository {
                 .catch(err => {
                     return err?.response?.data;
                 })
+        );
+    }
+
+    getEventById(id: Id): FutureData<D2TrackerEvent> {
+        return apiToFuture(
+            this.api.tracker.events.getById(id, {
+                fields: {
+                    $all: true,
+                },
+            })
         );
     }
 }
