@@ -1,8 +1,8 @@
 import { D2ProgramRuleAction, D2ProgramRuleVariable, MetadataPick } from "@eyeseetea/d2-api/2.34";
 import { Id } from "../Ref";
-import { Event, EventsPostRequest } from "../../../data/repositories/Dhis2EventsDefaultRepository";
+import { TrackerEventsPostRequest } from "../../../data/repositories/Dhis2EventsDefaultRepository";
 import { ConsistencyError } from "../data-entry/ImportSummary";
-
+import { D2TrackerEvent as Event } from "@eyeseetea/d2-api/api/trackerEvents";
 export const metadataQuery = {
     programs: {
         fields: {
@@ -86,7 +86,7 @@ export interface RuleEffectAssign {
     type: "ASSIGN";
     id: Id;
     targetDataType?: "dataElement" | "trackedEntityAttribute";
-    value: string | number | boolean | undefined;
+    value: string | undefined;
 }
 
 export interface RuleEffectShowError {
@@ -145,7 +145,7 @@ type NamedRef = { id: Id; name: string };
 export interface UpdateActionEvent {
     type: "event";
     eventId: Id;
-    teiId?: Id;
+    trackedEntityId?: Id;
     program: NamedRef;
     programStage?: NamedRef;
     orgUnit: NamedRef;
@@ -154,7 +154,7 @@ export interface UpdateActionEvent {
     valuePrev: string;
 }
 
-export type D2EventToPost = EventsPostRequest["events"][number];
+export type D2EventToPost = TrackerEventsPostRequest["events"][number];
 export type D2DataValueToPost = D2EventToPost["dataValues"][number];
 export declare type EventStatus = "ACTIVE" | "COMPLETED" | "VISITED" | "SCHEDULED" | "OVERDUE" | "SKIPPED";
 export interface ProgramRuleEvent {
@@ -163,7 +163,7 @@ export interface ProgramRuleEvent {
     programStageId?: Id;
     orgUnitId: Id;
     orgUnitName: string;
-    trackedEntityInstanceId?: Id | undefined;
+    trackedEntityId?: Id | undefined;
     enrollmentId?: Id;
     enrollmentStatus?: "ACTIVE" | "COMPLETED" | "CANCELLED";
     status?: EventStatus;
