@@ -51,15 +51,15 @@ export class SignalDefaultRepository implements SignalRepository {
                     id: true,
                     level: true,
                 },
-                filter: {
-                    id: { in: [...signals.map(signal => signal.orgUnit.id), currentOrgUnitId] },
-                },
             })
         ).map(({ objects }) => {
+            const filteredOrgUnits = objects.filter(orgUnit =>
+                [...signals.map(signal => signal.orgUnit.id), currentOrgUnitId].includes(orgUnit.id)
+            );
             const extendedSignals: Signal[] = [];
-            const currentOrgUnit = objects.find(orgUnit => orgUnit.id === currentOrgUnitId);
+            const currentOrgUnit = filteredOrgUnits.find(orgUnit => orgUnit.id === currentOrgUnitId);
             signals.forEach(signal => {
-                const signalOrgUnitLevel = objects.find(orgUnit => orgUnit.id === signal?.orgUnit.id)?.level;
+                const signalOrgUnitLevel = filteredOrgUnits.find(orgUnit => orgUnit.id === signal?.orgUnit.id)?.level;
                 if (
                     signal.orgUnit.id === currentOrgUnitId ||
                     (signalOrgUnitLevel && currentOrgUnit && signalOrgUnitLevel > currentOrgUnit?.level)
