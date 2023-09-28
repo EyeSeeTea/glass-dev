@@ -26,6 +26,19 @@ export class ExcelPopulateDefaultRepository extends ExcelRepository {
         });
     }
 
+    public toBlob(id: string): FutureData<Blob> {
+        return Future.fromPromise(this.toBuffer(id)).map(data => {
+            return new Blob([data], {
+                type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            });
+        });
+    }
+
+    public async toBuffer(id: string): Promise<Buffer> {
+        const workbook = await this.getWorkbook(id);
+        return workbook.outputAsync() as unknown as Buffer;
+    }
+
     private async parseFile(file: Blob): Promise<ExcelWorkbook> {
         return XLSX.fromDataAsync(file);
     }
