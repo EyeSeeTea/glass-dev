@@ -1,8 +1,9 @@
 import i18n from "@eyeseetea/d2-ui-components/locales";
-import { Dhis2EventsDefaultRepository, Event } from "../../../../data/repositories/Dhis2EventsDefaultRepository";
+import { Dhis2EventsDefaultRepository } from "../../../../data/repositories/Dhis2EventsDefaultRepository";
 import { Future, FutureData } from "../../../entities/Future";
 import { ConsistencyError } from "../../../entities/data-entry/ImportSummary";
 import { EventResult } from "../../../entities/program-rules/EventEffectTypes";
+import { D2TrackerEvent as Event } from "@eyeseetea/d2-api/api/trackerEvents";
 import { MetadataRepository } from "../../../repositories/MetadataRepository";
 
 const EGASP_DATAELEMENT_ID = "KaS2YBRN8eH";
@@ -50,7 +51,7 @@ export class CustomValidationForEGASP {
     private checkCountry(events: Event[], countryId: string, countryName: string): FutureData<ConsistencyError[]> {
         const clinicsInEvents = events.map(e => e.orgUnit);
         return Future.joinObj({
-            clinicsInCountry: this.metadataRepository.getClinicsInOrgUnitId(countryId),
+            clinicsInCountry: this.metadataRepository.getClinicsAndLabsInOrgUnitId(countryId),
             clinicNamesInEvents: this.metadataRepository.getClinicOrLabNames(clinicsInEvents),
         }).map(({ clinicsInCountry, clinicNamesInEvents }) => {
             const errors = _(
@@ -82,13 +83,11 @@ export class CustomValidationForEGASP {
     private checkPeriod(events: Event[], period: string): ConsistencyError[] {
         const errors = _(
             events.map(event => {
-                const eventDate = new Date(event.eventDate);
+                const eventDate = new Date(event.occurredAt);
                 if (eventDate.getFullYear().toString() !== period) {
                     return {
                         error: i18n.t(
-                            `Event date is incorrect: Selected period : ${period}, date in file: ${event.eventDate
-                                .split("T")
-                                ?.at(0)}`
+                            `Event date is incorrect: Selected period : ${period}, date in file: ${event.occurredAt}`
                         ),
                         line: parseInt(event.event),
                     };
@@ -110,14 +109,14 @@ export class CustomValidationForEGASP {
     private checkUniqueEgaspId(fileEvents: Event[], existingEvents: Event[]): ConsistencyError[] {
         //1. Egasp ids of events in file.
         const fileEgaspIDs = fileEvents.map(event => {
-            const egaspDataElement = event.dataValues.find(dv => dv.dataElement === EGASP_DATAELEMENT_ID);
+            const egaspDataElement = event?.dataValues?.find(dv => dv.dataElement === EGASP_DATAELEMENT_ID);
             if (egaspDataElement) return { eventId: event.event, egaspId: egaspDataElement.value };
             else return null;
         });
 
         //2. Egasp ids of existing events.
         const existingEgaspIDs = existingEvents.map(event => {
-            const egaspDataElement = event.dataValues.find(dv => dv.dataElement === EGASP_DATAELEMENT_ID);
+            const egaspDataElement = event?.dataValues?.find(dv => dv.dataElement === EGASP_DATAELEMENT_ID);
             if (egaspDataElement) return { eventId: event.event, egaspId: egaspDataElement.value };
             else return null;
         });
@@ -152,7 +151,7 @@ export class CustomValidationForEGASP {
         //1. Patient ids of events in file.
         const filePatientIDs = fileEvents.map(event => {
             const patientDataElement = event.dataValues.find(dv => dv.dataElement === PATIENT_DATAELEMENT_ID);
-            const eventDate = new Date(event.eventDate);
+            const eventDate = new Date(event.occurredAt);
 
             if (patientDataElement && eventDate instanceof Date && !isNaN(eventDate.getTime()))
                 return {
@@ -164,8 +163,8 @@ export class CustomValidationForEGASP {
 
         //2. Egasp ids of existing events.
         const existingPatientsIDs = existingEvents.map(event => {
-            const patientDataElement = event.dataValues.find(dv => dv.dataElement === PATIENT_DATAELEMENT_ID);
-            const eventDate = new Date(event.eventDate);
+            const patientDataElement = event?.dataValues?.find(dv => dv.dataElement === PATIENT_DATAELEMENT_ID);
+            const eventDate = new Date(event.occurredAt);
             if (patientDataElement && eventDate instanceof Date && !isNaN(eventDate.getTime()))
                 return {
                     eventId: event.event,

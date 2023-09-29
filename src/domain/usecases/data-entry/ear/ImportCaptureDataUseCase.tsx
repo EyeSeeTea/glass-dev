@@ -1,8 +1,5 @@
-import {
-    Dhis2EventsDefaultRepository,
-    Event,
-    EventStatus,
-} from "../../../../data/repositories/Dhis2EventsDefaultRepository";
+import { D2TrackerEvent } from "@eyeseetea/d2-api/api/trackerEvents";
+import { Dhis2EventsDefaultRepository, EventStatus } from "../../../../data/repositories/Dhis2EventsDefaultRepository";
 import { SignalDefaultRepository } from "../../../../data/repositories/SignalDefaultRepository";
 import { UsersDefaultRepository } from "../../../../data/repositories/UsersDefaultRepository";
 import { Future, FutureData } from "../../../entities/Future";
@@ -34,7 +31,7 @@ export class ImportCaptureDataUseCase {
         confidentialUserGroups: string[]
     ): FutureData<void> {
         //1.Create Event
-        const events: Event[] = [];
+        const events: D2TrackerEvent[] = [];
         const { event, confidential, message } = this.mapQuestionnaireToEvent(
             signalEventId,
             questionnaire,
@@ -46,8 +43,9 @@ export class ImportCaptureDataUseCase {
         return this.dhis2EventsDefaultRepository
             .import({ events: events }, "CREATE_AND_UPDATE")
             .flatMap(importSummary => {
-                const eventId = importSummary.importSummaries?.at(0)?.reference;
-                if (importSummary.status === "SUCCESS" && eventId) {
+                // const eventId = importSummary.importSummaries?.at(0)?.reference;
+                const eventId = importSummary.bundleReport.typeReportMap.EVENT.objectReports[0]?.uid;
+                if (importSummary.status === "OK" && eventId) {
                     //2.Create datastore entry
                     let status: SignalStatusTypes = "DRAFT";
                     if (action === "Publish") {
@@ -111,7 +109,7 @@ export class ImportCaptureDataUseCase {
         questionnaire: Questionnaire,
         orgUnitId: string,
         signalAction: SignalAction
-    ): { event: Event; confidential: boolean; message: string } {
+    ): { event: D2TrackerEvent; confidential: boolean; message: string } {
         const questions = questionnaire.sections.flatMap(section => section.questions);
         let confidential = false; //Non confidential by default
         let message = "";
@@ -140,12 +138,12 @@ export class ImportCaptureDataUseCase {
 
         const eventStatus: EventStatus = signalAction === "Save" ? "ACTIVE" : "COMPLETED";
 
-        const event: Event = {
+        const event: D2TrackerEvent = {
             event: eventId ? eventId : "",
             orgUnit: orgUnitId,
             program: EAR_PROGRAM_ID,
             status: eventStatus,
-            eventDate: new Date().toISOString().split("T")?.at(0) || "",
+            occurredAt: new Date().toISOString().split("T")?.at(0) || "",
             //@ts-ignore
             dataValues: dataValues,
         };

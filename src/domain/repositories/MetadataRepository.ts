@@ -6,8 +6,8 @@ import { CodedRef } from "../entities/Ref";
 
 export interface MetadataRepository {
     getOrgUnitsByCode(orgUnitCodes: string[]): FutureData<CodedRef[]>;
-    getClinicsInOrgUnitId(id: string): FutureData<Id[]>;
     getClinicOrLabNames(clinicLabIds: string[]): FutureData<{ id: string; name: string }[]>;
+    getClinicsAndLabsInOrgUnitId(id: string): FutureData<Id[]>;
     getDataSet(id: string): FutureData<DataSet>;
     getCategoryCombination(id: string): FutureData<CategoryCombo>;
     validateDataSet(dataset: string, period: string, orgUnit: string, AOCs: string[]): FutureData<unknown>;
