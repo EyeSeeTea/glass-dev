@@ -14,7 +14,7 @@ import {
     UpdateAction,
     UpdateActionEvent,
 } from "../../entities/program-rules/EventEffectTypes";
-import { Event } from "../../../data/repositories/Dhis2EventsDefaultRepository";
+import { D2TrackerEvent as Event } from "@eyeseetea/d2-api/api/trackerEvents";
 import { ProgramRulesMetadataRepository } from "../../repositories/program-rules/ProgramRulesMetadataRepository";
 import { Id } from "../../entities/Ref";
 import { Future, FutureData } from "../../entities/Future";
@@ -153,7 +153,7 @@ export class ProgramRuleValidationForEGASP {
         return {
             type: "event",
             eventId: event.event || "",
-            teiId: event.trackedEntityInstance,
+            trackedEntityId: event.trackedEntity || "",
             program,
             programStage: event.programStage ? programStagesNamedRefById[event.programStage] : undefined,
             orgUnit: { id: event.orgUnit, name: "" },
@@ -206,8 +206,8 @@ export class ProgramRuleValidationForEGASP {
     public getEventEffectsForEGASP(events: Event[], metadata: EGASPProgramMetadata): EventEffect[] {
         const program = metadata.programs[0]; //EGASP PROGRAM
         const eventsGroups = _(events)
-            .filter(ev => Boolean(ev.eventDate))
-            .groupBy(ev => [ev.orgUnit, ev.program, ev.attributeOptionCombo, ev.trackedEntityInstance].join("."))
+            .filter(ev => Boolean(ev.occurredAt))
+            .groupBy(ev => [ev.orgUnit, ev.program, ev.attributeOptionCombo, ev.trackedEntity].join("."))
             .values()
             .value();
 
@@ -351,7 +351,7 @@ export class ProgramRuleValidationForEGASP {
     }
 
     private getProgramEvent(event: Event, metadata: EGASPProgramMetadata): ProgramRuleEvent {
-        const teiId = event.trackedEntityInstance;
+        const trackedEntityId = event.trackedEntity;
 
         return {
             eventId: event.event,
@@ -362,10 +362,9 @@ export class ProgramRuleValidationForEGASP {
             enrollmentId: undefined,
             enrollmentStatus: undefined,
             status: event.status,
-            eventDate: event.eventDate,
-            occurredAt: event.eventDate,
-            trackedEntityInstanceId: teiId,
-            scheduledAt: event.eventDate,
+            occurredAt: event.occurredAt,
+            scheduledAt: event.occurredAt,
+            trackedEntityId,
             // Add data values: Record<DataElementId, Value>
             ...fromPairs(
                 event.dataValues.map(dv => {

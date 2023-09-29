@@ -1,5 +1,4 @@
 import { D2Api, MetadataPick } from "@eyeseetea/d2-api/2.34";
-import { D2Event as ProgramEvent } from "@eyeseetea/d2-api/api/events";
 import { CountryInformation } from "../../domain/entities/CountryInformation";
 import { Future, FutureData } from "../../domain/entities/Future";
 import { CountryInformationRepository } from "../../domain/repositories/CountryInformationRepository";
@@ -7,6 +6,8 @@ import { getD2APiFromInstance } from "../../utils/d2-api";
 import { apiToFuture } from "../../utils/futures";
 import { Instance } from "../entities/Instance";
 import { getCurrentYear } from "../../utils/currentPeriodHelper";
+import { D2TrackerTrackedEntity } from "@eyeseetea/d2-api/api/trackerTrackedEntities";
+import { D2TrackerEvent } from "@eyeseetea/d2-api/api/trackerEvents";
 
 const ARMFocalPointProgram = "oo0bqS0AqMI";
 const moduleAttribute = "Fh6atHPjdxC";
@@ -42,8 +43,8 @@ export class CountryInformationDefaultRepository implements CountryInformationRe
                 const regionName =
                     orgUnits.find(ou => ou.id !== countryId && ou.level === countryLevel - 1)?.shortName || "";
 
-                const enrollment = tei?.enrollments[0];
-                const events = tei?.enrollments[0]?.events || [];
+                const enrollment = tei?.enrollments?.[0];
+                const events = enrollment?.events || [];
                 const programstageDataElements = program?.programStages[0]?.programStageDataElements || [];
 
                 return {
@@ -53,9 +54,9 @@ export class CountryInformationDefaultRepository implements CountryInformationRe
                     year: getCurrentYear(),
                     nationalFocalPointId: enrollment?.enrollment,
                     enrolmentStatus: enrollment?.status || "",
-                    enrolmentDate: enrollment?.enrollmentDate || "",
+                    enrolmentDate: enrollment?.enrolledAt || "",
                     nationalFocalPoints:
-                        events.map((event: ProgramEvent) => {
+                        events.map((event: D2TrackerEvent) => {
                             return {
                                 id: event.event,
                                 values: programstageDataElements.map(programStageDataElement => {
@@ -96,7 +97,7 @@ export class CountryInformationDefaultRepository implements CountryInformationRe
         );
     }
 
-    private getTEI(countryId: string, module: string): FutureData<D2TEI | undefined> {
+    private getTEI(countryId: string, module: string): FutureData<D2TrackerTrackedEntity | undefined> {
         const cacheKey = `TEI-${countryId}-${module}`;
 
         const sanitizedModule = module.replaceAll(" ", "").replace("-", "_"); //AMR - Individual --> AMR_Individual
@@ -105,17 +106,16 @@ export class CountryInformationDefaultRepository implements CountryInformationRe
         return this.getFromCacheOrRemote(
             cacheKey,
             apiToFuture(
-                this.api.get<D2TEIsResponse>("/trackedEntityInstances", {
+                this.api.tracker.trackedEntities.get({
+                    orgUnit: countryId,
+                    fields: { $all: true },
                     program: ARMFocalPointProgram,
-                    ou: [countryId],
-                    fields: "*",
                     totalPages: true,
                     page: 1,
                     pageSize: 1,
                     filter: filterStr,
-                    order: "created:Desc",
                 })
-            ).map(response => response.trackedEntityInstances[0])
+            ).map(response => response.instances[0])
         );
     }
 
@@ -146,30 +146,6 @@ export class CountryInformationDefaultRepository implements CountryInformationRe
             });
         }
     }
-}
-
-export interface D2TEIsResponse {
-    trackedEntityInstances: D2TEI[];
-    pager: {
-        pageSize: number;
-        total: number;
-        page: number;
-    };
-}
-
-export interface D2TEI {
-    trackedEntityInstance: string;
-    enrollments: Enrollment[];
-}
-
-export interface Enrollment {
-    enrollment: string;
-    program: string;
-    orgUnit: string;
-    trackedEntityInstance: string;
-    enrollmentDate: string;
-    status: "ACTIVE" | "COMPLETED" | "CANCELED";
-    events: ProgramEvent[];
 }
 
 const programFields = {
