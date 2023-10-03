@@ -4,7 +4,6 @@ import styled from "styled-components";
 import { GlassAppBar } from "../../app-bar/GlassAppBar";
 import { SideBar } from "../../sidebar/SideBar";
 import { AppFooter } from "../../app-footer/AppFooter";
-import { SideBarProvider } from "../../../context-providers/SideBarProvider";
 
 export const MainLayout: React.FC = ({ children }) => {
     const [showMenu, setShowMenu] = useState(true);
@@ -21,7 +20,7 @@ export const MainLayout: React.FC = ({ children }) => {
     };
 
     return (
-        <SideBarProvider>
+        <>
             <GlassAppBar toggleShowMenu={toggleShowMenu} />
             <LandingContainer>
                 <Grid container spacing={6}>
@@ -34,7 +33,7 @@ export const MainLayout: React.FC = ({ children }) => {
                     </Grid>
                 </Grid>
             </LandingContainer>
-        </SideBarProvider>
+        </>
     );
 };
 

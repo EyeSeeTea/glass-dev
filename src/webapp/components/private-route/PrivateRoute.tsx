@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { useHistory } from "react-router-dom";
 import { useGlassCaptureAccess } from "../../hooks/useGlassCaptureAccess";
 import { useGlassReadAccess } from "../../hooks/useGlassReadAccess";
+import { useSideBarModulesContext } from "../../contexts/sidebar-modules-context";
 
 const CAPTURE_ACCESS_PAGES = ["/upload"];
 
@@ -12,8 +13,13 @@ export const PrivateRoute = ({ children, pathname }: { children: JSX.Element; pa
     const hasCaptureAccess = useGlassCaptureAccess();
     const history = useHistory();
     const snackbar = useSnackbar();
+    const { accessibleModules } = useSideBarModulesContext();
 
     useEffect(() => {
+        if (!accessibleModules.some(module => module.name === "EAR")) {
+            history.push("/");
+            snackbar.warning(i18n.t("You don't have access to this page"));
+        }
         if (CAPTURE_ACCESS_PAGES.includes(pathname)) {
             if (hasCaptureAccess === false) {
                 history.push("/");
@@ -25,7 +31,7 @@ export const PrivateRoute = ({ children, pathname }: { children: JSX.Element; pa
                 snackbar.warning(i18n.t("You don't have read access to this page"));
             }
         }
-    }, [hasCaptureAccess, hasReadAccess, history, pathname, snackbar]);
+    }, [accessibleModules, hasCaptureAccess, hasReadAccess, history, pathname, snackbar]);
 
     return <div>{children}</div>;
 };
