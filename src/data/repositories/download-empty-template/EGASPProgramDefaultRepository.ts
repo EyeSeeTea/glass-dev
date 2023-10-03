@@ -5,6 +5,7 @@ import { getD2APiFromInstance } from "../../../utils/d2-api";
 import { Future, FutureData } from "../../../domain/entities/Future";
 import { apiToFuture } from "../../../utils/futures";
 import { EGASP_PROGRAM_ID } from "../program-rule/ProgramRulesMetadataDefaultRepository";
+import { BulkLoadDataStoreClient } from "../../data-store/BulkLoadDataStoreClient";
 
 export type DataElementType =
     | "TEXT"
@@ -53,7 +54,7 @@ export class EGASPProgramDefaultRepository {
     // I've created here an manual in memory cache to avoid many requests
     private inmemoryCache: Record<string, unknown> = {};
 
-    constructor(instance: Instance) {
+    constructor(instance: Instance, private bulkLoadDataStoreClient: BulkLoadDataStoreClient) {
         this.api = getD2APiFromInstance(instance);
     }
 
@@ -133,6 +134,13 @@ export class EGASPProgramDefaultRepository {
                 return response;
             });
         }
+    }
+
+    public getEGASPTemplateSettings(): FutureData<any> {
+        return this.bulkLoadDataStoreClient.getObject("BULK_LOAD_SETTINGS").flatMap(settings => {
+            const egaspsettings = settings as Record<string, any>;
+            return Future.success(egaspsettings);
+        });
     }
 }
 
