@@ -3,11 +3,15 @@ import { GlassState } from "./State";
 import { useAppContext } from "../contexts/app-context";
 import { Signal } from "../../domain/entities/Signal";
 import { useCurrentUserGroupsAccess } from "./useCurrentUserGroupsAccess";
+import { useCurrentOrgUnitContext } from "../contexts/current-orgUnit-context";
 
 export type SignalsState = GlassState<Signal[]>;
 
 export function useSignals() {
     const { compositionRoot } = useAppContext();
+    const {
+        currentOrgUnitAccess: { orgUnitId },
+    } = useCurrentOrgUnitContext();
     const [signals, setSignals] = React.useState<SignalsState>({
         kind: "loading",
     });
@@ -48,7 +52,7 @@ export function useSignals() {
     );
 
     React.useEffect(() => {
-        compositionRoot.signals.getSignals().run(
+        compositionRoot.signals.getSignals(orgUnitId).run(
             signals => {
                 if (confidentialAccessGroup.kind === "loaded" && readAccessGroup.kind === "loaded") {
                     //1. If the user has confidential user group access show:
@@ -82,6 +86,7 @@ export function useSignals() {
         getSignalsByUserOUAccess,
         getNonConfidentailSignalsByUserOUAccess,
         shouldRefreshSignals,
+        orgUnitId,
     ]);
 
     return { signals, setSignals, refreshSignals };
