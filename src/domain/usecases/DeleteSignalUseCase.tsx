@@ -1,4 +1,5 @@
-import { Dhis2EventsDefaultRepository, Event } from "../../data/repositories/Dhis2EventsDefaultRepository";
+import { D2TrackerEvent } from "@eyeseetea/d2-api/api/trackerEvents";
+import { Dhis2EventsDefaultRepository } from "../../data/repositories/Dhis2EventsDefaultRepository";
 import { SignalDefaultRepository } from "../../data/repositories/SignalDefaultRepository";
 import { Future, FutureData } from "../entities/Future";
 import { SignalStatusTypes } from "../entities/Signal";
@@ -17,20 +18,19 @@ export class DeleteSignalUseCase {
         orgUnitId: string
     ): FutureData<void> {
         //1.Delete Event
-        const events: Event[] = [];
-        const event: Event = {
+        const events: D2TrackerEvent[] = [];
+        const event: D2TrackerEvent = {
             event: signalEventId,
             orgUnit: orgUnitId,
             program: EAR_PROGRAM_ID,
             status: status === "DRAFT" ? "ACTIVE" : "COMPLETED",
-            eventDate: "",
+            occurredAt: "",
             dataValues: [],
         };
         events.push(event);
 
         return this.dhis2EventsDefaultRepository.import({ events: events }, "DELETE").flatMap(importSummary => {
-            const eventId = importSummary.importSummaries?.at(0)?.reference;
-            if (importSummary.status === "SUCCESS" && eventId && signalId) {
+            if (importSummary.status === "OK" && signalId) {
                 //2.Delete datastore entry
                 return this.signalRepository.delete(signalId);
             } else {

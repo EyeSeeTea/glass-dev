@@ -26,10 +26,12 @@ import { useAppContext } from "../../contexts/app-context";
 import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context";
 import { StyledLoaderContainer } from "../upload/ConsistencyChecks";
 import { CircularProgress } from "material-ui";
+import { useGlassCaptureAccess } from "../../hooks/useGlassCaptureAccess";
 
 export const SignalTableContent: React.FC = () => {
     const { compositionRoot } = useAppContext();
     const { signals, setSignals, refreshSignals } = useSignals();
+    const hasCaptureAccess = useGlassCaptureAccess();
     const history = useHistory();
     const [open, setOpen] = useState(false);
     const [signalToDelete, setSignalToDelete] = useState<Signal>();
@@ -229,7 +231,12 @@ export const SignalTableContent: React.FC = () => {
                                                     </TableCell>
 
                                                     <TableCell style={{ opacity: 0.5 }}>
-                                                        <Button onClick={() => showConfirmationDialog(signal)}>
+                                                        <Button
+                                                            disabled={
+                                                                !hasCaptureAccess || !signal.userHasDeletePermission
+                                                            }
+                                                            onClick={() => showConfirmationDialog(signal)}
+                                                        >
                                                             <DeleteOutline />
                                                         </Button>
                                                     </TableCell>

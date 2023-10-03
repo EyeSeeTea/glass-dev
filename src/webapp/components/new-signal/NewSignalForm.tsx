@@ -1,5 +1,5 @@
 import React from "react";
-import { Backdrop, Button, CircularProgress, makeStyles } from "@material-ui/core";
+import { Backdrop, Button, CircularProgress, makeStyles, withStyles } from "@material-ui/core";
 // @ts-ignore
 import { DataTable, TableHead, DataTableRow, DataTableColumnHeader, TableBody, DataTableCell } from "@dhis2/ui";
 import { useStyles } from "../questionnaire/QuestionnaireForm";
@@ -15,6 +15,8 @@ import i18n from "@eyeseetea/d2-ui-components/locales";
 import styled from "styled-components";
 import { useCurrentModuleContext } from "../../contexts/current-module-context";
 import { useNewSignalForm } from "./hook/useNewSignalForm";
+import { useHistory } from "react-router-dom";
+import { red300 } from "material-ui/styles/colors";
 
 export interface NewSignalFormProps {
     hideForm?: () => void;
@@ -23,11 +25,23 @@ export interface NewSignalFormProps {
     signalEventId?: string;
 }
 
+const CancelButton = withStyles(() => ({
+    root: {
+        color: "white",
+        backgroundColor: "#bd1818",
+        "&:hover": {
+            backgroundColor: red300,
+        },
+        marginRight: "10px",
+    },
+}))(Button);
+
 export const NewSignalForm: React.FC<NewSignalFormProps> = props => {
     const { compositionRoot } = useAppContext();
     const { currentModuleAccess } = useCurrentModuleContext();
     const { currentOrgUnitAccess } = useCurrentOrgUnitContext();
     const { readAccessGroup, confidentialAccessGroup } = useCurrentUserGroupsAccess();
+    const history = useHistory();
 
     const classes = useStyles();
     const formClasses = useFormStyles();
@@ -134,6 +148,14 @@ export const NewSignalForm: React.FC<NewSignalFormProps> = props => {
         });
     };
 
+    const onCancel = () => {
+        if (props.hideForm && history.location.pathname.includes("new-signal")) {
+            props.hideForm();
+        } else {
+            history.goBack();
+        }
+    };
+
     return (
         <div>
             <Backdrop open={loading} style={{ color: "#fff", zIndex: 1 }}>
@@ -188,16 +210,17 @@ export const NewSignalForm: React.FC<NewSignalFormProps> = props => {
             })}
             {!props.readonly && (
                 <PageFooter>
-                    {!props.signalEventId && (
-                        <Button
-                            style={{ marginRight: "10px" }}
-                            variant="outlined"
-                            color="primary"
-                            onClick={saveQuestionnaire}
-                        >
-                            {i18n.t("Save Draft")}
-                        </Button>
-                    )}
+                    <CancelButton variant="outlined" onClick={onCancel}>
+                        {i18n.t("Cancel")}
+                    </CancelButton>
+                    <Button
+                        style={{ marginRight: "10px" }}
+                        variant="outlined"
+                        color="primary"
+                        onClick={saveQuestionnaire}
+                    >
+                        {i18n.t("Save Draft")}
+                    </Button>
                     <Button variant="contained" color="primary" onClick={publishQuestionnaire}>
                         {i18n.t("Publish")}
                     </Button>
