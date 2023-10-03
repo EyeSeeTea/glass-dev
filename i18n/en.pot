@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2023-09-26T12:53:54.220Z\n"
-"PO-Revision-Date: 2023-09-26T12:53:54.220Z\n"
+"POT-Creation-Date: 2023-10-03T13:07:40.008Z\n"
+"PO-Revision-Date: 2023-10-03T13:07:40.008Z\n"
 
 msgid "Template {{id}} not loaded"
 msgstr ""
@@ -438,6 +438,9 @@ msgstr ""
 msgid "Help"
 msgstr ""
 
+msgid "You don't have access to this page"
+msgstr ""
+
 msgid "You don't have capture access to this page"
 msgstr ""
 
@@ -448,9 +451,6 @@ msgid "Set as incomplete"
 msgstr ""
 
 msgid "Set as completed"
-msgstr ""
-
-msgid "Error fetching User Modules"
 msgstr ""
 
 msgid "HOME"
@@ -640,6 +640,9 @@ msgid "Enable message email notifications"
 msgstr ""
 
 msgid "Enable message SMS notifications"
+msgstr ""
+
+msgid "Error fetching user Modules"
 msgstr ""
 
 msgid "Country Information"
