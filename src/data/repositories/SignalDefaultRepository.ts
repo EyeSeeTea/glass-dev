@@ -1,3 +1,4 @@
+import { Id } from "@eyeseetea/d2-api";
 import { Future, FutureData } from "../../domain/entities/Future";
 import { Signal } from "../../domain/entities/Signal";
 import { SignalRepository } from "../../domain/repositories/SignalRepository";
@@ -13,6 +14,10 @@ export class SignalDefaultRepository implements SignalRepository {
         return this.dataStoreClient.listCollection<Signal>(DataStoreKeys.SIGNALS).flatMap((signals: Signal[]) => {
             return this.hasDeletePermission(signals, currentOrgUnitId);
         });
+    }
+
+    getById(id: Id): FutureData<Signal> {
+        return this.dataStoreClient.getObjectCollectionByProp<Signal>(DataStoreKeys.SIGNALS, "id", id);
     }
 
     save(signal: Signal): FutureData<void> {
