@@ -18,6 +18,7 @@ import { UserSettingsPage } from "./user-profile/UserSettings";
 import { SignalsPage } from "./signals/SignalsPage";
 import { NewSignalPage } from "./new-signal/NewSignalPage";
 import { SignalPage } from "./new-signal/SignalPage";
+import { SideBarModulesContextProvider } from "../context-providers/SideBarModulesContextProvider";
 
 export const Router: React.FC = React.memo(() => {
     return (
@@ -25,108 +26,110 @@ export const Router: React.FC = React.memo(() => {
             <CurrentOrgUnitContextProvider>
                 <CurrentModuleContextProvider>
                     <CurrentPeriodContextProvider>
-                        <MainLayout>
-                            <Switch>
-                                <Route
-                                    path="/data-submissions-history/"
-                                    render={({ location }) => (
-                                        <PrivateRoute pathname={location.pathname}>
-                                            <DataSubmissionsHistoryPage />
-                                        </PrivateRoute>
-                                    )}
-                                />
-                                <Route
-                                    path="/current-data-submission/"
-                                    render={({ location }) => (
-                                        <PrivateRoute pathname={location.pathname}>
-                                            <CurrentDataSubmissionPage />
-                                        </PrivateRoute>
-                                    )}
-                                />
-                                <Route
-                                    path="/reports/"
-                                    render={({ location }) => (
-                                        <PrivateRoute pathname={location.pathname}>
-                                            <ReportsPage />
-                                        </PrivateRoute>
-                                    )}
-                                />
-                                <Route
-                                    path="/upload/"
-                                    render={({ location }) => (
-                                        <PrivateRoute pathname={location.pathname}>
-                                            <UploadPage />
-                                        </PrivateRoute>
-                                    )}
-                                />
-                                <Route
-                                    path="/data-file-history"
-                                    render={({ location }) => (
-                                        <PrivateRoute pathname={location.pathname}>
-                                            <DataFileHistoryPage />
-                                        </PrivateRoute>
-                                    )}
-                                />
-                                <Route
-                                    path="/country-information"
-                                    render={({ location }) => (
-                                        <PrivateRoute pathname={location.pathname}>
-                                            <CountryInformationPage />
-                                        </PrivateRoute>
-                                    )}
-                                />
-                                <Route
-                                    path="/questionnaire"
-                                    render={({ location }) => (
-                                        <PrivateRoute pathname={location.pathname}>
-                                            <QuestionnaireFormTest />
-                                        </PrivateRoute>
-                                    )}
-                                />
-                                <Route
-                                    path="/user-profile"
-                                    render={({ location }) => (
-                                        <PrivateRoute pathname={location.pathname}>
-                                            <UserProfilePage />
-                                        </PrivateRoute>
-                                    )}
-                                />
-                                <Route
-                                    path="/user-settings"
-                                    render={({ location }) => (
-                                        <PrivateRoute pathname={location.pathname}>
-                                            <UserSettingsPage />
-                                        </PrivateRoute>
-                                    )}
-                                />
-                                <Route
-                                    path="/signals"
-                                    render={({ location }) => (
-                                        <PrivateRoute pathname={location.pathname}>
-                                            <SignalsPage />
-                                        </PrivateRoute>
-                                    )}
-                                />
-                                <Route
-                                    path="/new-signal"
-                                    render={({ location }) => (
-                                        <PrivateRoute pathname={location.pathname}>
-                                            <NewSignalPage />
-                                        </PrivateRoute>
-                                    )}
-                                />
+                        <SideBarModulesContextProvider>
+                            <MainLayout>
+                                <Switch>
+                                    <Route
+                                        path="/data-submissions-history/"
+                                        render={({ location }) => (
+                                            <PrivateRoute pathname={location.pathname}>
+                                                <DataSubmissionsHistoryPage />
+                                            </PrivateRoute>
+                                        )}
+                                    />
+                                    <Route
+                                        path="/current-data-submission/"
+                                        render={({ location }) => (
+                                            <PrivateRoute pathname={location.pathname}>
+                                                <CurrentDataSubmissionPage />
+                                            </PrivateRoute>
+                                        )}
+                                    />
+                                    <Route
+                                        path="/reports/"
+                                        render={({ location }) => (
+                                            <PrivateRoute pathname={location.pathname}>
+                                                <ReportsPage />
+                                            </PrivateRoute>
+                                        )}
+                                    />
+                                    <Route
+                                        path="/upload/"
+                                        render={({ location }) => (
+                                            <PrivateRoute pathname={location.pathname}>
+                                                <UploadPage />
+                                            </PrivateRoute>
+                                        )}
+                                    />
+                                    <Route
+                                        path="/data-file-history"
+                                        render={({ location }) => (
+                                            <PrivateRoute pathname={location.pathname}>
+                                                <DataFileHistoryPage />
+                                            </PrivateRoute>
+                                        )}
+                                    />
+                                    <Route
+                                        path="/country-information"
+                                        render={({ location }) => (
+                                            <PrivateRoute pathname={location.pathname}>
+                                                <CountryInformationPage />
+                                            </PrivateRoute>
+                                        )}
+                                    />
+                                    <Route
+                                        path="/questionnaire"
+                                        render={({ location }) => (
+                                            <PrivateRoute pathname={location.pathname}>
+                                                <QuestionnaireFormTest />
+                                            </PrivateRoute>
+                                        )}
+                                    />
+                                    <Route
+                                        path="/user-profile"
+                                        render={({ location }) => (
+                                            <PrivateRoute pathname={location.pathname}>
+                                                <UserProfilePage />
+                                            </PrivateRoute>
+                                        )}
+                                    />
+                                    <Route
+                                        path="/user-settings"
+                                        render={({ location }) => (
+                                            <PrivateRoute pathname={location.pathname}>
+                                                <UserSettingsPage />
+                                            </PrivateRoute>
+                                        )}
+                                    />
+                                    <Route
+                                        path="/signals"
+                                        render={({ location }) => (
+                                            <PrivateRoute pathname={location.pathname}>
+                                                <SignalsPage />
+                                            </PrivateRoute>
+                                        )}
+                                    />
+                                    <Route
+                                        path="/new-signal"
+                                        render={({ location }) => (
+                                            <PrivateRoute pathname={location.pathname}>
+                                                <NewSignalPage />
+                                            </PrivateRoute>
+                                        )}
+                                    />
 
-                                <Route
-                                    path="/signal/:id"
-                                    render={({ location }) => (
-                                        <PrivateRoute pathname={location.pathname}>
-                                            <SignalPage />
-                                        </PrivateRoute>
-                                    )}
-                                />
-                                <Route render={() => <LandingPage />} />
-                            </Switch>
-                        </MainLayout>
+                                    <Route
+                                        path="/signal/:id"
+                                        render={({ location }) => (
+                                            <PrivateRoute pathname={location.pathname}>
+                                                <SignalPage />
+                                            </PrivateRoute>
+                                        )}
+                                    />
+                                    <Route render={() => <LandingPage />} />
+                                </Switch>
+                            </MainLayout>
+                        </SideBarModulesContextProvider>
                     </CurrentPeriodContextProvider>
                 </CurrentModuleContextProvider>
             </CurrentOrgUnitContextProvider>
