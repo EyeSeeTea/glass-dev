@@ -7,24 +7,19 @@ import SidebarNav, { Menu } from "../sidebar-nav/SidebarNav";
 import i18n from "../../../locales";
 import { NavLink } from "react-router-dom";
 import ExitToAppIcon from "@material-ui/icons/ExitToApp";
-import { useAppContext } from "../../contexts/app-context";
 import { mapModuleToMenu } from "./mapModuleToMenu";
 import { useCurrentModuleContext } from "../../contexts/current-module-context";
-import { useSnackbar } from "@eyeseetea/d2-ui-components";
-import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context";
 import { useConfig } from "@dhis2/app-runtime";
 import { goToDhis2Url } from "../../utils/helpers";
 import { useCurrentPeriodContext } from "../../contexts/current-period-context";
+import { useSideBarModulesContext } from "../../contexts/sidebar-modules-context";
 
 export const SideBar: React.FC = () => {
     const { baseUrl } = useConfig();
-    const { compositionRoot } = useAppContext();
-    const snackbar = useSnackbar();
-    const [isLoading, setIsLoading] = useState(false);
     const [storedMenuData, setStoredMenuData] = useState<Menu[] | null>();
-    const { currentOrgUnitAccess } = useCurrentOrgUnitContext();
     const { changeCurrentPeriod, getCurrentOpenPeriodByModule } = useCurrentPeriodContext();
     const { resetCurrentModuleAccess } = useCurrentModuleContext();
+    const { accessibleModules, isLoading } = useSideBarModulesContext();
 
     const logout = () => {
         goToDhis2Url(baseUrl, "/dhis-web-commons-security/logout.action");
@@ -36,19 +31,9 @@ export const SideBar: React.FC = () => {
     };
 
     useEffect(() => {
-        setIsLoading(true);
-        compositionRoot.glassModules.getAll(currentOrgUnitAccess.orgUnitId).run(
-            modules => {
-                const menuData = modules.map(module => mapModuleToMenu(module));
-                setStoredMenuData(menuData);
-                setIsLoading(false);
-            },
-            () => {
-                snackbar.warning(i18n.t("Error fetching User Modules"));
-                setIsLoading(false);
-            }
-        );
-    }, [compositionRoot.glassModules, currentOrgUnitAccess.orgUnitId, snackbar]);
+        const menuData = accessibleModules.map(module => mapModuleToMenu(module));
+        setStoredMenuData(menuData);
+    }, [accessibleModules]);
 
     return (
         <SideBarContainer>

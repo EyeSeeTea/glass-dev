@@ -1,8 +1,5 @@
-import {
-    Dhis2EventsDefaultRepository,
-    Event,
-    EventStatus,
-} from "../../../../data/repositories/Dhis2EventsDefaultRepository";
+import { D2TrackerEvent, DataValue } from "@eyeseetea/d2-api/api/trackerEvents";
+import { Dhis2EventsDefaultRepository, EventStatus } from "../../../../data/repositories/Dhis2EventsDefaultRepository";
 import { SignalDefaultRepository } from "../../../../data/repositories/SignalDefaultRepository";
 import { UsersDefaultRepository } from "../../../../data/repositories/UsersDefaultRepository";
 import { Future, FutureData } from "../../../entities/Future";
@@ -34,84 +31,94 @@ export class ImportCaptureDataUseCase {
         confidentialUserGroups: string[]
     ): FutureData<void> {
         //1.Create Event
-        const events: Event[] = [];
-        const { event, confidential, message } = this.mapQuestionnaireToEvent(
-            signalEventId,
-            questionnaire,
-            orgUnit.id,
-            action
-        );
-        events.push(event);
+        const events: D2TrackerEvent[] = [];
+        return this.mapQuestionnaireToEvent(signalEventId, questionnaire, orgUnit.id, orgUnit.name, action).flatMap(
+            ({ event, confidential, message }) => {
+                events.push(event);
 
-        return this.dhis2EventsDefaultRepository
-            .import({ events: events }, "CREATE_AND_UPDATE")
-            .flatMap(importSummary => {
-                const eventId = importSummary.importSummaries?.at(0)?.reference;
-                if (importSummary.status === "SUCCESS" && eventId) {
-                    //2.Create datastore entry
-                    let status: SignalStatusTypes = "DRAFT";
-                    if (action === "Publish") {
-                        if (confidential) {
-                            status = "PENDING_APPROVAL";
+                return this.dhis2EventsDefaultRepository
+                    .import({ events: events }, "CREATE_AND_UPDATE")
+                    .flatMap(importSummary => {
+                        // const eventId = importSummary.importSummaries?.at(0)?.reference;
+                        const eventId = importSummary.bundleReport.typeReportMap.EVENT.objectReports[0]?.uid;
+                        if (importSummary.status === "OK" && eventId) {
+                            //2.Create datastore entry
+                            let status: SignalStatusTypes = "DRAFT";
+                            if (action === "Publish") {
+                                if (confidential) {
+                                    status = "PENDING_APPROVAL";
+                                } else {
+                                    status = "APPROVED";
+                                }
+                            }
+                            const levelOfConfidentiality = confidential ? "CONFIDENTIAL" : "NONCONFIDENTIAL";
+                            if (signalId) {
+                                return this.signalRepository.getById(signalId).flatMap(existingSignal => {
+                                    const updatedSignal: Signal = { ...existingSignal, levelOfConfidentiality, status };
+                                    if (
+                                        existingSignal.statusHistory[existingSignal.statusHistory.length - 1]?.to !==
+                                        status
+                                    ) {
+                                        updatedSignal.statusHistory.push({
+                                            from: existingSignal.statusHistory[existingSignal.statusHistory.length - 1]
+                                                ?.to,
+                                            to: status,
+                                            changedAt: new Date().toISOString(),
+                                        });
+                                    }
+                                    return this.saveSignal(
+                                        updatedSignal,
+                                        action,
+                                        confidential,
+                                        orgUnit,
+                                        confidentialUserGroups,
+                                        nonConfidentialUserGroups,
+                                        module,
+                                        message
+                                    );
+                                });
+                            } else {
+                                const signal: Signal = {
+                                    id: generateId(),
+                                    creationDate: new Date().toISOString(),
+                                    eventId: eventId,
+                                    module: module.id,
+                                    orgUnit: { id: orgUnit.id, name: orgUnit.name },
+                                    levelOfConfidentiality,
+                                    status: status,
+                                    statusHistory: [
+                                        {
+                                            to: status,
+                                            changedAt: new Date().toISOString(),
+                                        },
+                                    ],
+                                };
+                                return this.saveSignal(
+                                    signal,
+                                    action,
+                                    confidential,
+                                    orgUnit,
+                                    confidentialUserGroups,
+                                    nonConfidentialUserGroups,
+                                    module,
+                                    message
+                                );
+                            }
                         } else {
-                            status = "APPROVED";
+                            return Future.error("Error creating EAR event");
                         }
-                    }
-                    const signal: Signal = {
-                        id: signalId ? signalId : generateId(),
-                        creationDate: new Date().toISOString(),
-                        eventId: eventId,
-                        module: module.id,
-                        orgUnit: { id: orgUnit.id, name: orgUnit.name },
-                        levelOfConfidentiality: confidential ? "CONFIDENTIAL" : "NONCONFIDENTIAL",
-                        status: status,
-                        statusHistory: [
-                            {
-                                to: status,
-                                changedAt: new Date().toISOString(),
-                            },
-                        ],
-                    };
-                    return this.signalRepository.save(signal).flatMap(() => {
-                        if (action === "Save")
-                            //If the action is save, then do not send any notification till publish
-                            return Future.success(undefined);
-
-                        //3.Send notification
-                        let usergroupIds: string[] = [];
-                        let orgUnitPath = "";
-                        if (confidential) {
-                            //a.Confidential
-                            orgUnitPath = orgUnit.path;
-                            usergroupIds = confidentialUserGroups;
-                        } else {
-                            //b.Non-confidential
-                            usergroupIds = nonConfidentialUserGroups;
-                        }
-
-                        const confidentialTypeText = confidential ? "Confidential" : "Non-confidential";
-                        const subject = `${confidentialTypeText} Signal for ${module.name} module and country ${
-                            orgUnit.name
-                        } created at ${new Date().toISOString()}`;
-
-                        return this.usersDefaultRepository
-                            .getUsersFilteredbyOUsAndUserGroups(orgUnitPath, usergroupIds)
-                            .flatMap(users => {
-                                return this.notificationRepository.send(subject, message, users);
-                            });
                     });
-                } else {
-                    return Future.error("Error creating EAR event");
-                }
-            });
+            }
+        );
     }
 
     private mapQuestionnaireToEvent(
         eventId: string | undefined,
         questionnaire: Questionnaire,
         orgUnitId: string,
+        orgUnitName: string,
         signalAction: SignalAction
-    ): { event: Event; confidential: boolean; message: string } {
+    ): FutureData<{ event: D2TrackerEvent; confidential: boolean; message: string }> {
         const questions = questionnaire.sections.flatMap(section => section.questions);
         let confidential = false; //Non confidential by default
         let message = "";
@@ -137,19 +144,69 @@ export class ImportCaptureDataUseCase {
                 }
             })
         );
-
         const eventStatus: EventStatus = signalAction === "Save" ? "ACTIVE" : "COMPLETED";
 
-        const event: Event = {
-            event: eventId ? eventId : "",
-            orgUnit: orgUnitId,
-            program: EAR_PROGRAM_ID,
-            status: eventStatus,
-            eventDate: new Date().toISOString().split("T")?.at(0) || "",
-            //@ts-ignore
-            dataValues: dataValues,
-        };
+        if (eventId) {
+            return this.dhis2EventsDefaultRepository.getEventById(eventId).flatMap(event => {
+                const updatedEvent: D2TrackerEvent = {
+                    ...event,
+                    status: eventStatus,
+                    dataValues: dataValues as DataValue[],
+                };
+                return Future.success({ event: updatedEvent, confidential, message });
+            });
+        } else {
+            const event: D2TrackerEvent = {
+                event: "",
+                orgUnit: orgUnitId,
+                orgUnitName,
+                program: EAR_PROGRAM_ID,
+                status: eventStatus,
+                occurredAt: new Date().toISOString().split("T")?.at(0) || "",
+                //@ts-ignore
+                dataValues: dataValues,
+            };
+            return Future.success({ event, confidential, message });
+        }
+    }
 
-        return { event, confidential, message };
+    private saveSignal(
+        signal: Signal,
+        action: SignalAction,
+        confidential: boolean,
+        orgUnit: { id: string; name: string; path: string },
+        confidentialUserGroups: string[],
+        nonConfidentialUserGroups: string[],
+        module: { id: string; name: string },
+        message: string
+    ): FutureData<void> {
+        return this.signalRepository.save(signal).flatMap(() => {
+            if (action === "Save")
+                //If the action is save, then do not send any notification till publish
+                return Future.success(undefined);
+
+            //3.Send notification
+            let usergroupIds: string[] = [];
+            let orgUnitPath = "";
+            if (confidential) {
+                //a.Confidential
+                orgUnitPath = orgUnit.path;
+                usergroupIds = confidentialUserGroups;
+            } else {
+                //b.Non-confidential
+                usergroupIds = nonConfidentialUserGroups;
+            }
+
+            const confidentialTypeText = confidential ? "Confidential" : "Non-confidential";
+            const subject = `${confidentialTypeText} Signal for ${module.name} module and country ${
+                orgUnit.name
+            } created at ${new Date().toISOString()}`;
+
+            return this.usersDefaultRepository
+                .getUsersFilteredbyOUsAndUserGroups(orgUnitPath, usergroupIds)
+                .flatMap(users => {
+                    return this.notificationRepository.send(subject, message, users);
+                });
+        });
     }
 }
