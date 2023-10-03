@@ -2,7 +2,7 @@ import { Id } from "@eyeseetea/d2-api";
 import { Future, FutureData } from "../../domain/entities/Future";
 import { Signal } from "../../domain/entities/Signal";
 import { SignalRepository } from "../../domain/repositories/SignalRepository";
-import { D2Api, Id } from "../../types/d2-api";
+import { D2Api } from "../../types/d2-api";
 import { apiToFuture } from "../../utils/futures";
 import { DataStoreClient } from "../data-store/DataStoreClient";
 import { DataStoreKeys } from "../data-store/DataStoreKeys";
