@@ -2,14 +2,18 @@ import { Id } from "@eyeseetea/d2-api";
 import { Future, FutureData } from "../../domain/entities/Future";
 import { Signal } from "../../domain/entities/Signal";
 import { SignalRepository } from "../../domain/repositories/SignalRepository";
+import { D2Api, Id } from "../../types/d2-api";
+import { apiToFuture } from "../../utils/futures";
 import { DataStoreClient } from "../data-store/DataStoreClient";
 import { DataStoreKeys } from "../data-store/DataStoreKeys";
 
 export class SignalDefaultRepository implements SignalRepository {
-    constructor(private dataStoreClient: DataStoreClient) {}
+    constructor(private dataStoreClient: DataStoreClient, private api: D2Api) {}
 
-    getAll(): FutureData<Signal[]> {
-        return this.dataStoreClient.listCollection<Signal>(DataStoreKeys.SIGNALS);
+    getAll(currentOrgUnitId: Id): FutureData<Signal[]> {
+        return this.dataStoreClient.listCollection<Signal>(DataStoreKeys.SIGNALS).flatMap((signals: Signal[]) => {
+            return this.hasDeletePermission(signals, currentOrgUnitId);
+        });
     }
 
     getById(id: Id): FutureData<Signal> {
@@ -42,6 +46,36 @@ export class SignalDefaultRepository implements SignalRepository {
             } else {
                 return Future.error("Signal could not be found");
             }
+        });
+    }
+
+    private hasDeletePermission(signals: Signal[], currentOrgUnitId: string): FutureData<Signal[]> {
+        return apiToFuture(
+            this.api.models.organisationUnits.get({
+                fields: {
+                    id: true,
+                    level: true,
+                },
+            })
+        ).map(({ objects }) => {
+            const filteredOrgUnits = objects.filter(orgUnit =>
+                [...signals.map(signal => signal.orgUnit.id), currentOrgUnitId].includes(orgUnit.id)
+            );
+            const extendedSignals: Signal[] = [];
+            const currentOrgUnit = filteredOrgUnits.find(orgUnit => orgUnit.id === currentOrgUnitId);
+            signals.forEach(signal => {
+                const signalOrgUnitLevel = filteredOrgUnits.find(orgUnit => orgUnit.id === signal?.orgUnit.id)?.level;
+                if (
+                    signal.orgUnit.id === currentOrgUnitId ||
+                    (signalOrgUnitLevel && currentOrgUnit && signalOrgUnitLevel > currentOrgUnit?.level)
+                ) {
+                    extendedSignals.push({ ...signal, userHasDeletePermission: true });
+                } else {
+                    extendedSignals.push({ ...signal, userHasDeletePermission: false });
+                }
+            });
+
+            return extendedSignals;
         });
     }
 }
