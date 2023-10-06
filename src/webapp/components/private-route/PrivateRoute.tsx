@@ -16,10 +16,6 @@ export const PrivateRoute = ({ children, pathname }: { children: JSX.Element; pa
     const { accessibleModules } = useSideBarModulesContext();
 
     useEffect(() => {
-        if (!accessibleModules.some(module => module.name === "EAR")) {
-            history.push("/");
-            snackbar.warning(i18n.t("You don't have access to this page"));
-        }
         if (CAPTURE_ACCESS_PAGES.includes(pathname)) {
             if (hasCaptureAccess === false) {
                 history.push("/");
