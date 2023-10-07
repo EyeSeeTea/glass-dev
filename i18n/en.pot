@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2023-09-26T12:53:54.220Z\n"
-"PO-Revision-Date: 2023-09-26T12:53:54.220Z\n"
+"POT-Creation-Date: 2023-10-06T08:14:40.002Z\n"
+"PO-Revision-Date: 2023-10-06T08:14:40.002Z\n"
 
 msgid "Template {{id}} not loaded"
 msgstr ""
@@ -450,9 +450,6 @@ msgstr ""
 msgid "Set as completed"
 msgstr ""
 
-msgid "Error fetching User Modules"
-msgstr ""
-
 msgid "HOME"
 msgstr ""
 
@@ -640,6 +637,9 @@ msgid "Enable message email notifications"
 msgstr ""
 
 msgid "Enable message SMS notifications"
+msgstr ""
+
+msgid "Error fetching user Modules"
 msgstr ""
 
 msgid "Country Information"

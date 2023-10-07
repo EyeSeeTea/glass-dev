@@ -11,6 +11,7 @@ export interface Signal {
     creationDate: string;
     status: SignalStatusTypes;
     statusHistory: SignalStatusHistoryType[];
+    userHasDeletePermission?: boolean;
 }
 
 type SignalStatusHistoryType = {
