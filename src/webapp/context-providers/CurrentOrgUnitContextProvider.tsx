@@ -19,12 +19,14 @@ export const CurrentOrgUnitContextProvider: React.FC = ({ children }) => {
 
     const changeCurrentOrgUnitAccess = useCallback(
         (updatedOrgUnit: string) => {
-            const currentOrgUnitAccess = currentUser.userOrgUnitsAccess.find(ou => ou.orgUnitId === updatedOrgUnit);
-            if (currentOrgUnitAccess) {
-                setCurrentOrgUnitAccess(currentOrgUnitAccess);
+            const currentOrgUnitAccess = currentUser.userOrgUnitsAccess.filter(ou => ou.orgUnitId === updatedOrgUnit);
+            console.log(currentUser.userOrgUnitsAccess);
+
+            if (currentOrgUnitAccess && currentOrgUnitAccess[0]) {
+                setCurrentOrgUnitAccess(currentOrgUnitAccess[0]);
                 if (orgUnitQueryParam) {
                     const queryParameters = new URLSearchParams(location.search);
-                    queryParameters.set("orgUnit", currentOrgUnitAccess.orgUnitId);
+                    queryParameters.set("orgUnit", currentOrgUnitAccess[0].orgUnitId);
                     history.replace({ search: queryParameters.toString() });
                 }
             }
