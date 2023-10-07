@@ -5,7 +5,7 @@ import { getD2APiFromInstance } from "../../utils/d2-api";
 import { apiToFuture } from "../../utils/futures";
 import { Instance } from "../entities/Instance";
 import { DataSet } from "../../domain/entities/metadata/DataSet";
-import { CodedRef } from "../../domain/entities/Ref";
+import { CodedRef, NamedRef } from "../../domain/entities/Ref";
 import { MetadataRepository } from "../../domain/repositories/MetadataRepository";
 import { Id } from "../../domain/entities/Base";
 
@@ -21,6 +21,30 @@ export class MetadataDefaultRepository implements MetadataRepository {
 
     constructor(instance: Instance) {
         this.api = getD2APiFromInstance(instance);
+    }
+
+    getDataElementNames(dataElementIds: string[]): FutureData<NamedRef[]> {
+        return apiToFuture(
+            this.api.metadata
+                .get({
+                    dataElements: {
+                        fields: { shortName: true, code: true, id: true },
+                        filter: { id: { in: dataElementIds } },
+                    },
+                })
+                .map(response => {
+                    if (response?.data?.dataElements) {
+                        return response?.data?.dataElements.map(de => {
+                            return {
+                                id: de.id,
+                                name: `${de.shortName}(${de.code})`,
+                            };
+                        });
+                    } else {
+                        return [];
+                    }
+                })
+        );
     }
 
     getOrgUnitsByCode(orgUnitCodes: string[]): FutureData<CodedRef[]> {
