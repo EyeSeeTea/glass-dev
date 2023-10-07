@@ -214,12 +214,17 @@ export class ImportEGASPFile {
                     const pattern1 = /(?<=DataElement )`([A-Za-z0-9]{11})`/g;
                     const dataelementIds1 = pattern1.exec(errMsg);
 
-                    //Error message type 1 contains  regex in format : {dataElementId} DataElement
+                    //Error message type 2 contains  regex in format : {dataElementId} DataElement
                     const pattern2 = /([A-Za-z0-9]{11}) DataElement/g;
                     const dataelementsIds2 = pattern2.exec(errMsg);
 
+                    //Error message type 3 contains  regex in format : `DataElement``{dataElementId}`
+                    const pattern3 = /`(DataElement)` `([A-Za-z0-9]{11})`/g;
+                    const dataelementsIds3 = pattern3.exec(errMsg);
+
                     if (dataelementIds1 && dataelementIds1[1]) return dataelementIds1[1];
                     else if (dataelementsIds2 && dataelementsIds2[1]) return dataelementsIds2[1];
+                    else if (dataelementsIds3 && dataelementsIds3[1]) return dataelementsIds3[2];
                 })
             );
 
