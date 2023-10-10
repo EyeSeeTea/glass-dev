@@ -146,7 +146,7 @@ function useQuestionnaire(options: QuestionnarieFormProps) {
     return [questionnaire, selector, actions, isSaving] as const;
 }
 
-const useStyles = makeStyles({
+export const useStyles = makeStyles({
     wrapper: { margin: 10 },
     header: { fontWeight: "bold" as const },
     center: { display: "table", margin: "0 auto" },

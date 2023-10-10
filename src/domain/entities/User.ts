@@ -4,7 +4,9 @@ import { Id, NamedRef } from "./Ref";
 export interface OrgUnitAccess {
     orgUnitId: Id;
     orgUnitName: string;
+    orgUnitShortName: string;
     orgUnitCode: string;
+    orgUnitPath: string;
     readAccess: boolean;
     captureAccess: boolean;
 }

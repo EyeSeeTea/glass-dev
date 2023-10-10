@@ -9,7 +9,7 @@ import styled from "styled-components";
 import { QuestionWidget } from "./QuestionInput";
 
 export interface DataElementItemProps {
-    selector: QuestionnaireSelector;
+    selector?: QuestionnaireSelector;
     question: Question;
     disabled: boolean;
     setQuestion(newQuestion: Question): void;
@@ -20,6 +20,10 @@ const QuestionRow: React.FC<DataElementItemProps> = React.memo(props => {
     const classes = useStyles();
     const [saveState, setQuestionToSave] = useSaveActions(props);
 
+    const updateQuestion = (question: Question) => {
+        setQuestionToSave(question);
+    };
+
     return (
         <DataTableRowWithSavingFeedback saveState={saveState}>
             <DataTableCell width="60%">
@@ -29,7 +33,7 @@ const QuestionRow: React.FC<DataElementItemProps> = React.memo(props => {
             <DataTableCell>
                 <div className={classes.valueWrapper}>
                     <div className={classes.valueInput}>
-                        <QuestionWidget {...props} onChange={setQuestionToSave} />
+                        <QuestionWidget {...props} onChange={updateQuestion} />
                     </div>
                 </div>
             </DataTableCell>
@@ -49,17 +53,19 @@ function useSaveActions(options: DataElementItemProps) {
     React.useEffect(() => {
         if (!questionToSave) return;
 
-        setSaveState("saving");
-        return compositionRoot.questionnaires.saveResponse(selector, questionToSave).run(
-            () => {
-                setSaveState("saveSuccessful");
-                setQuestion(questionToSave);
-            },
-            err => {
-                setSaveState("saveError");
-                snackbar.error(err);
-            }
-        );
+        if (selector) {
+            setSaveState("saving");
+            return compositionRoot.questionnaires.saveResponse(selector, questionToSave).run(
+                () => {
+                    setSaveState("saveSuccessful");
+                    setQuestion(questionToSave);
+                },
+                err => {
+                    setSaveState("saveError");
+                    snackbar.error(err);
+                }
+            );
+        }
     }, [compositionRoot, snackbar, selector, setQuestion, questionToSave]);
 
     return [saveState, setQuestionToSave] as const;

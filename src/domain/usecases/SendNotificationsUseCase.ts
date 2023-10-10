@@ -9,9 +9,11 @@ export class SendNotificationsUseCase implements UseCase {
         private usersDefaultRepository: UsersDefaultRepository
     ) {}
 
-    public execute(subject: string, message: string, usergroupIds: string[], orgUnitId: string): FutureData<void> {
-        return this.usersDefaultRepository.getAllFilteredbyOUsAndUserGroups(orgUnitId, usergroupIds).flatMap(users => {
-            return this.notificationRepository.send(subject, message, users);
-        });
+    public execute(subject: string, message: string, usergroupIds: string[], orgUnitPath: string): FutureData<void> {
+        return this.usersDefaultRepository
+            .getUsersFilteredbyOUsAndUserGroups(orgUnitPath, usergroupIds)
+            .flatMap(users => {
+                return this.notificationRepository.send(subject, message, users);
+            });
     }
 }

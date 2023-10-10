@@ -1,19 +1,15 @@
 import { createContext, useContext } from "react";
-import { Menu } from "../components/sidebar-nav/SidebarNav";
+import { GlassModule } from "../../domain/entities/GlassModule";
 
 export type CurrentMenuItem = string[];
 export interface SideBarContextProps {
-    loaded: boolean;
-    menuData: Menu[];
-    currentNavItem: CurrentMenuItem;
-    setLoaded: (newLoaded: boolean) => void;
-    setMenuData: (newMenuData: Menu[]) => void;
-    setCurrentNavItem: (newCurrentNavItem: CurrentMenuItem) => void;
+    accessibleModules: GlassModule[];
+    isLoading: boolean;
 }
 
 export const SideBarContext = createContext<SideBarContextProps | null>(null);
 
-export function useSideBarContext() {
+export function useSideBarModulesContext() {
     const context = useContext(SideBarContext);
     if (context) {
         return context;

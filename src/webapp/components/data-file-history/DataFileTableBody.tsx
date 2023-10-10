@@ -72,7 +72,7 @@ export const DataFileTableBody: React.FC<DataFileTableBodyProps> = ({ rows }) =>
     );
 };
 
-const StyledTableBody = styled(TableBody)`
+export const StyledTableBody = styled(TableBody)`
     td.cta {
         text-align: center;
         svg {
