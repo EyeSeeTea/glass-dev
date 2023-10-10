@@ -9,7 +9,7 @@ import { ImportStrategy } from "../../entities/data-entry/DataValuesSaveSummary"
 import { ImportRISFile } from "./amr/ImportRISFile";
 import { ImportEGASPFile } from "./egasp/ImportEGASPFile";
 import { Dhis2EventsDefaultRepository } from "../../../data/repositories/Dhis2EventsDefaultRepository";
-import { EGASPProgramDefaultRepository } from "../../../data/repositories/bulk-load/EGASPProgramDefaultRepository";
+import { EGASPProgramDefaultRepository } from "../../../data/repositories/download-empty-template/EGASPProgramDefaultRepository";
 import { ExcelRepository } from "../../repositories/ExcelRepository";
 import { GlassDocumentsRepository } from "../../repositories/GlassDocumentsRepository";
 import { GlassUploadsDefaultRepository } from "../../../data/repositories/GlassUploadsDefaultRepository";
@@ -65,7 +65,8 @@ export class ImportPrimaryFileUseCase implements UseCase {
                     this.excelRepository,
                     this.glassDocumentsRepository,
                     this.glassUploadsRepository,
-                    this.eGASPValidationRepository
+                    this.eGASPValidationRepository,
+                    this.metadataRepository
                 );
 
                 return importEGASPFile.importEGASPFile(inputFile, action, eventListId, orgUnit, period);

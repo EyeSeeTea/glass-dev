@@ -17,5 +17,5 @@ export interface NationalFocalPoint {
 export interface NationalFocalPointValue {
     id: string;
     name: string;
-    value: string;
+    value: string | number | boolean;
 }

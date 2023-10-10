@@ -7,9 +7,17 @@ import { Instance } from "../entities/Instance";
 import { DataSet } from "../../domain/entities/metadata/DataSet";
 import { CodedRef } from "../../domain/entities/Ref";
 import { MetadataRepository } from "../../domain/repositories/MetadataRepository";
+import { Id } from "../../domain/entities/Base";
+
+const AMR_EGASP_Clinics = "lohCVAxPxMM";
+const AMR_EGASP_Labs = "KhLlLrKWPKu";
 
 export class MetadataDefaultRepository implements MetadataRepository {
     private api: D2Api;
+
+    //TODO: @cache does not work with futures
+    // I've created here an manual in memory cache to avoid many requests
+    private inmemoryCache: Record<string, unknown> = {};
 
     constructor(instance: Instance) {
         this.api = getD2APiFromInstance(instance);
@@ -28,6 +36,36 @@ export class MetadataDefaultRepository implements MetadataRepository {
                 },
             })
         ).map(response => response.objects);
+    }
+
+    getClinicsAndLabsInOrgUnitId(id: string): FutureData<Id[]> {
+        const cacheKey = `clinics-labs-in-${id}`;
+        return this.getFromCacheOrRemote(
+            cacheKey,
+            apiToFuture(
+                this.api.models.organisationUnits.get({
+                    paging: false,
+                    fields: {
+                        id: true,
+                        organisationUnitGroups: {
+                            id: true,
+                        },
+                    },
+                    filter: {
+                        path: { like: id },
+                    },
+                })
+            ).map(response => {
+                //Filter by org unit group name
+                const orgUnitsFilteredGroup = response.objects.filter(
+                    ou =>
+                        ou.organisationUnitGroups.length > 0 &&
+                        (ou.organisationUnitGroups.some(o => o.id === AMR_EGASP_Clinics) ||
+                            ou.organisationUnitGroups.some(o => o.id === AMR_EGASP_Labs))
+                );
+                return orgUnitsFilteredGroup.map(({ id }) => id);
+            })
+        );
     }
 
     getDataSet(id: string): FutureData<DataSet> {
@@ -134,6 +172,18 @@ export class MetadataDefaultRepository implements MetadataRepository {
                 };
             }),
         };
+    }
+
+    private getFromCacheOrRemote<T>(cacheKey: string, future: FutureData<T>): FutureData<T> {
+        if (this.inmemoryCache[cacheKey]) {
+            const responseInCache = this.inmemoryCache[cacheKey] as T;
+            return Future.success(responseInCache);
+        } else {
+            return future.map(response => {
+                this.inmemoryCache[cacheKey] = response;
+                return response;
+            });
+        }
     }
 }
 
