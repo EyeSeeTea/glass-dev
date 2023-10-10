@@ -17,7 +17,9 @@ interface ContentWrapperProps {
 export const SupportButtons: React.FC<SupportButtonsProps> = ({ changeStep, primaryFileImportSummary }) => {
     const onHelpClick = (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault();
-        const helpWidgetButton = document.querySelector(".feedback-btn.feedback-btn-gray") as HTMLElement | null;
+        const helpWidgetButton = document.querySelector(
+            ".feedback-btn.feedback-init-btn.feedback-btn-bottom"
+        ) as HTMLElement | null;
         helpWidgetButton?.click();
     };
 
