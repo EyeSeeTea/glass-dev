@@ -36,29 +36,13 @@ interface SearchInputProps {
 
 const SearchInput: React.FC<SearchInputProps> = ({ className, onTermChange, style }) => {
     const classes = useStyles();
-    // const ref = useRef<HTMLInputElement>(null);
-    // useEffect(() => updateStateValue(value), [value]);
 
-    // const onChangeDebounced = useCallback(
-    //     _.debounce((value: string) => {
-    //         if (onChange) {
-    //             onChange(value);
-    //         }
-    //     }, 400),
-    //     [onChange]
-    // );
-
-    // const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    //     const targetValue = event.target.value;
-    //     onChangeDebounced(targetValue);
-    //     event.stopPropagation();
-    //     // setSearchInput(targetValue);
-    // };
-
+    const onChangeDebounced = _.debounce((value: string) => {
+        onTermChange(value);
+    }, 400);
     const updateSearchString = (event: React.ChangeEvent<HTMLInputElement>) => {
         const targetValue = event.target.value;
-        onTermChange(targetValue);
-        // setSearchInput(targetValue);
+        onChangeDebounced(targetValue);
     };
 
     const handleKeydown = useCallback((event: React.KeyboardEvent<HTMLInputElement>) => {
@@ -70,16 +54,13 @@ const SearchInput: React.FC<SearchInputProps> = ({ className, onTermChange, styl
             <SearchIcon className={classes.icon} htmlColor="black" />
             <Input
                 className={classes.input}
-                // inputRef={ref}
                 disableUnderline
                 onChange={updateSearchString}
                 placeholder={i18n.t("Search")}
-                // value={searchInput}
                 role="searchbox"
                 onKeyDown={handleKeydown}
                 onClick={e => {
                     e.stopPropagation();
-                    // ref.current?.focus();
                 }}
             />
         </Paper>
