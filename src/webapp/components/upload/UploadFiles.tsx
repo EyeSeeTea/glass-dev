@@ -92,7 +92,7 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
         currentModuleAccess: { moduleId, moduleName },
     } = useCurrentModuleContext();
     const {
-        currentOrgUnitAccess: { orgUnitId, orgUnitCode },
+        currentOrgUnitAccess: { orgUnitId, orgUnitName, orgUnitCode },
     } = useCurrentOrgUnitContext();
 
     const { currentPeriod } = useCurrentPeriodContext();
@@ -165,6 +165,7 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
                     currentPeriod,
                     "CREATE_AND_UPDATE",
                     orgUnitId,
+                    orgUnitName,
                     orgUnitCode,
                     true,
                     ""
@@ -208,6 +209,7 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
         moduleName,
         orgUnitCode,
         orgUnitId,
+        orgUnitName,
         currentPeriod,
         primaryFile,
         secondaryFile,
