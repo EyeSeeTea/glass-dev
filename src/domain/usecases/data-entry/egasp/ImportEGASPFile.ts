@@ -35,7 +35,8 @@ export class ImportEGASPFile {
         file: File,
         action: ImportStrategy,
         eventListId: string | undefined,
-        orgUnit: string,
+        orgUnitId: string,
+        orgUnitName: string,
         period: string
     ): FutureData<ImportSummary> {
         return this.excelRepository.loadTemplate(file).flatMap(_templateId => {
@@ -49,7 +50,7 @@ export class ImportEGASPFile {
                                 if (events) {
                                     if (action === "CREATE_AND_UPDATE") {
                                         //Run validations only on import
-                                        return this.validateEGASPEvents(events, orgUnit, period).flatMap(
+                                        return this.validateEGASPEvents(events, orgUnitId, orgUnitName, period).flatMap(
                                             validatedEventResults => {
                                                 if (validatedEventResults.blockingErrors.length > 0) {
                                                     const errorSummary: ImportSummary = {
@@ -72,40 +73,45 @@ export class ImportEGASPFile {
                                                     return this.dhis2EventsDefaultRepository
                                                         .import({ events: eventsWithoutId }, action)
                                                         .flatMap(result => {
-                                                            const { importSummary, eventIdList } =
-                                                                this.mapToImportSummary(
-                                                                    result,
-                                                                    validatedEventResults.nonBlockingErrors
-                                                                );
-                                                            const primaryUploadId =
-                                                                localStorage.getItem("primaryUploadId");
-                                                            if (eventIdList.length > 0 && primaryUploadId) {
-                                                                //Events were imported successfully, so create and uplaod a file with event ids
-                                                                // and associate it with the upload datastore object
-                                                                const eventListBlob = new Blob(
-                                                                    [JSON.stringify(eventIdList)],
-                                                                    {
-                                                                        type: "text/plain",
-                                                                    }
-                                                                );
+                                                            return this.mapToImportSummary(
+                                                                result,
+                                                                validatedEventResults.nonBlockingErrors
+                                                            ).flatMap(({ importSummary, eventIdList }) => {
+                                                                const primaryUploadId =
+                                                                    localStorage.getItem("primaryUploadId");
+                                                                if (eventIdList.length > 0 && primaryUploadId) {
+                                                                    //Events were imported successfully, so create and uplaod a file with event ids
+                                                                    // and associate it with the upload datastore object
+                                                                    const eventListBlob = new Blob(
+                                                                        [JSON.stringify(eventIdList)],
+                                                                        {
+                                                                            type: "text/plain",
+                                                                        }
+                                                                    );
 
-                                                                const eventIdListFile = new File(
-                                                                    [eventListBlob],
-                                                                    `${primaryUploadId}_eventIdsFile`
-                                                                );
+                                                                    const eventIdListFile = new File(
+                                                                        [eventListBlob],
+                                                                        `${primaryUploadId}_eventIdsFile`
+                                                                    );
 
-                                                                return this.glassDocumentsRepository
-                                                                    .save(eventIdListFile, "EGASP")
-                                                                    .flatMap(fileId => {
-                                                                        return this.glassUploadsRepository
-                                                                            .setEventListFileId(primaryUploadId, fileId)
-                                                                            .flatMap(() => {
-                                                                                return Future.success(importSummary);
-                                                                            });
-                                                                    });
-                                                            } else {
-                                                                return Future.success(importSummary);
-                                                            }
+                                                                    return this.glassDocumentsRepository
+                                                                        .save(eventIdListFile, "EGASP")
+                                                                        .flatMap(fileId => {
+                                                                            return this.glassUploadsRepository
+                                                                                .setEventListFileId(
+                                                                                    primaryUploadId,
+                                                                                    fileId
+                                                                                )
+                                                                                .flatMap(() => {
+                                                                                    return Future.success(
+                                                                                        importSummary
+                                                                                    );
+                                                                                });
+                                                                        });
+                                                                } else {
+                                                                    return Future.success(importSummary);
+                                                                }
+                                                            });
                                                         });
                                                 }
                                             }
@@ -115,9 +121,11 @@ export class ImportEGASPFile {
                                         return this.dhis2EventsDefaultRepository
                                             .import({ events }, action)
                                             .flatMap(result => {
-                                                const { importSummary } = this.mapToImportSummary(result, []);
-
-                                                return Future.success(importSummary);
+                                                return this.mapToImportSummary(result, []).flatMap(
+                                                    ({ importSummary }) => {
+                                                        return Future.success(importSummary);
+                                                    }
+                                                );
                                             });
                                     }
                                 } else {
@@ -142,7 +150,12 @@ export class ImportEGASPFile {
         });
     }
 
-    private validateEGASPEvents(events: Event[], orgUnit: string, period: string): FutureData<EventResult> {
+    private validateEGASPEvents(
+        events: Event[],
+        orgUnitId: string,
+        orgUnitName: string,
+        period: string
+    ): FutureData<EventResult> {
         //1. Run Program Rule Validations
         const programRuleValidationForEGASP = new ProgramRuleValidationForEGASP(this.eGASPValidationRepository);
 
@@ -154,7 +167,12 @@ export class ImportEGASPFile {
 
         return Future.joinObj({
             programRuleValidationResults: programRuleValidationForEGASP.getValidatedEvents(events),
-            customRuleValidationsResults: customEGASPValidations.getValidatedEvents(events, orgUnit, period),
+            customRuleValidationsResults: customEGASPValidations.getValidatedEvents(
+                events,
+                orgUnitId,
+                orgUnitName,
+                period
+            ),
         }).flatMap(({ programRuleValidationResults, customRuleValidationsResults }) => {
             const consolidatedValidationResults: EventResult = {
                 events: programRuleValidationResults.events,
@@ -174,10 +192,10 @@ export class ImportEGASPFile {
     private mapToImportSummary(
         result: TrackerPostResponse,
         nonBlockingErrors: ConsistencyError[]
-    ): {
+    ): FutureData<{
         importSummary: ImportSummary;
         eventIdList: string[];
-    } {
+    }> {
         if (result && result.validationReport && result.stats) {
             const blockingErrorList = _.compact(
                 result.validationReport.errorReports.map(summary => {
@@ -186,29 +204,69 @@ export class ImportEGASPFile {
             );
 
             const blockingErrorsByCount = _.countBy(blockingErrorList);
-            const importSummary: ImportSummary = {
-                status: result.status === "OK" ? "SUCCESS" : result.status,
-                importCount: {
-                    imported: result.stats.created,
-                    updated: result.stats.updated,
-                    ignored: result.stats.ignored,
-                    deleted: result.stats.deleted,
-                },
-                blockingErrors: Object.entries(blockingErrorsByCount).map(err => {
-                    return { error: err[0], count: err[1] };
-                }),
-                nonBlockingErrors: nonBlockingErrors,
-                importTime: new Date(),
-            };
 
-            const eventIdList =
-                result.status === "OK"
-                    ? result.bundleReport.typeReportMap.EVENT.objectReports.map(report => report.uid)
-                    : [];
+            //Get list of DataElement Ids in error messages.
+            const dataElementIds = _.compact(
+                Object.entries(blockingErrorsByCount).map(err => {
+                    const errMsg = err[0];
 
-            return { importSummary, eventIdList: _.compact(eventIdList) };
+                    //Error message type 1 contains regex in format : DataElement `{dataElementId}`
+                    const pattern1 = /(?<=DataElement )`([A-Za-z0-9]{11})`/g;
+                    const dataelementIds1 = pattern1.exec(errMsg);
+
+                    //Error message type 2 contains  regex in format : {dataElementId} DataElement
+                    const pattern2 = /([A-Za-z0-9]{11}) DataElement/g;
+                    const dataelementsIds2 = pattern2.exec(errMsg);
+
+                    //Error message type 3 contains  regex in format : `DataElement``{dataElementId}`
+                    const pattern3 = /`(DataElement)` `([A-Za-z0-9]{11})`/g;
+                    const dataelementsIds3 = pattern3.exec(errMsg);
+
+                    if (dataelementIds1 && dataelementIds1[1]) return dataelementIds1[1];
+                    else if (dataelementsIds2 && dataelementsIds2[1]) return dataelementsIds2[1];
+                    else if (dataelementsIds3 && dataelementsIds3[1]) return dataelementsIds3[2];
+                })
+            );
+
+            //Get list of DataElement Names in error messages.
+            return this.metadataRepository.getDataElementNames(dataElementIds).flatMap(dataElementMap => {
+                const importSummary: ImportSummary = {
+                    status: result.status === "OK" ? "SUCCESS" : result.status,
+                    importCount: {
+                        imported: result.stats.created,
+                        updated: result.stats.updated,
+                        ignored: result.stats.ignored,
+                        deleted: result.stats.deleted,
+                    },
+                    blockingErrors: Object.entries(blockingErrorsByCount).map(err => {
+                        const dataElementInErrMsg = dataElementIds.filter(de => err[0].includes(de));
+
+                        if (dataElementInErrMsg && dataElementInErrMsg[0] && dataElementInErrMsg.length === 1) {
+                            //There should be only one dataelement id in each errMsg
+
+                            const dataElementName = dataElementMap.find(de => de.id === dataElementInErrMsg[0]);
+                            //Replace DataElement Ids with DataElement Names in error messages.
+                            const parsedErrMsg = err[0].replace(
+                                dataElementInErrMsg[0],
+                                dataElementName?.name ?? dataElementInErrMsg[0]
+                            );
+
+                            return { error: parsedErrMsg, count: err[1] };
+                        } else return { error: err[0], count: err[1] };
+                    }),
+                    nonBlockingErrors: nonBlockingErrors,
+                    importTime: new Date(),
+                };
+
+                const eventIdList =
+                    result.status === "OK"
+                        ? result.bundleReport.typeReportMap.EVENT.objectReports.map(report => report.uid)
+                        : [];
+
+                return Future.success({ importSummary, eventIdList: _.compact(eventIdList) });
+            });
         } else {
-            return {
+            return Future.success({
                 importSummary: {
                     status: "ERROR",
                     importCount: { ignored: 0, imported: 0, deleted: 0, updated: 0 },
@@ -216,7 +274,7 @@ export class ImportEGASPFile {
                     blockingErrors: [{ error: result?.message ?? "An error occurred during EGASP import. ", count: 1 }],
                 },
                 eventIdList: [],
-            };
+            });
         }
     }
 
