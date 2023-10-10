@@ -94,4 +94,28 @@ export const moduleProperties = new Map<string, ModuleDetails>([
             isDownloadEmptyTemplateReq: false,
         },
     ],
+    [
+        "AMC",
+        {
+            isbatchReq: false,
+            isQuestionnaireReq: true,
+            isSecondaryFileApplicable: false,
+            isDryRunReq: false,
+            importLoadingMsg: {
+                line1: "Importing data,",
+                line2: "This might take several minutes, do not refresh the page or press back.",
+            },
+            deleteConfirmation: {
+                title: "Confirm Delete",
+                description: "Are you sure you want to delete this file",
+            },
+            primaryFileType: "Product Level Data",
+            secondaryFileType: "Sunstance Level Data",
+            primaryUploadLabel: "Choose File",
+            unit: "",
+            isSpecimenReq: false,
+            populateCurrentYearInHistory: false,
+            isDownloadEmptyTemplateReq: false,
+        },
+    ],
 ]);
