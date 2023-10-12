@@ -23,6 +23,7 @@ export interface QuestionnarieFormProps {
     onBackClick(): void;
     onSave(questionnaire: QuestionnaireBase): void;
     validateAndUpdateDataSubmissionStatus(complete: boolean, questionnaireId: string): void;
+    questionnaireType: "Dataset" | "Program";
 }
 
 const QuestionnaireForm: React.FC<QuestionnarieFormProps> = props => {
@@ -103,9 +104,21 @@ function useQuestionnaire(options: QuestionnarieFormProps) {
 
     useEffect(() => {
         if (module.kind !== "loaded") return;
-        return compositionRoot.questionnaires
-            .get(module.data, selector, hasCurrentUserCaptureAccess)
-            .run(setQuestionnaire, err => snackbar.error(err));
+
+        if (module.data.questionnaireType === "Program") {
+            return compositionRoot.programQuestionnaires.getForm(selector.id).run(
+                questionnaireForm => {
+                    setQuestionnaire(questionnaireForm);
+                },
+                err => {
+                    snackbar.error(err);
+                }
+            );
+        } else {
+            return compositionRoot.questionnaires
+                .get(module.data, selector, hasCurrentUserCaptureAccess)
+                .run(setQuestionnaire, err => snackbar.error(err));
+        }
     }, [compositionRoot, snackbar, selector, module, hasCurrentUserCaptureAccess]);
 
     React.useEffect(() => {

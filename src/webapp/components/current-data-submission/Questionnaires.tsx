@@ -27,7 +27,7 @@ export const Questionnaires: React.FC<QuestionnairesProps> = ({ setRefetchStatus
     const { compositionRoot } = useAppContext();
     const hasCurrentUserCaptureAccess = useGlassCaptureAccess();
     const hasCurrentUserViewAccess = useGlassReadAccess();
-    const [questionnaires, updateQuestionnarie] = useQuestionnaires();
+    const [questionnaires, updateQuestionnarie, questionnaireType] = useQuestionnaires();
     const { orgUnit, year } = useSelector();
     const [formState, actions] = useFormState();
     const { currentModuleAccess } = useCurrentModuleContext();
@@ -98,6 +98,8 @@ export const Questionnaires: React.FC<QuestionnairesProps> = ({ setRefetchStatus
                 mode={formState.mode}
                 onSave={updateQuestionnarie}
                 validateAndUpdateDataSubmissionStatus={validateAndUpdateStatus}
+                questionnaireType = {questionnaireType}
+
             />
         );
     } else {
@@ -221,12 +223,15 @@ function useQuestionnaires() {
 
     const module = useGlassModule(compositionRoot);
     const [questionnaires, setQuestionnaires] = React.useState<QuestionnaireBase[]>();
+    const [questionnaireType, setQuestionnaireType] = React.useState<"Dataset" | "Program">("Dataset");
     const snackbar = useSnackbar();
     const { orgUnit, year } = useSelector();
     const hasCurrentUserCaptureAccess = useGlassCaptureAccess() ? true : false;
 
     React.useEffect(() => {
         if (module.kind !== "loaded") return;
+
+        setQuestionnaireType(module.data.questionnaireType ? module.data.questionnaireType : "Dataset")
 
         return compositionRoot.questionnaires
             .getList(module.data, { orgUnitId: orgUnit.id, year: year }, hasCurrentUserCaptureAccess)
@@ -241,7 +246,7 @@ function useQuestionnaires() {
         );
     }, []);
 
-    return [questionnaires, updateQuestionnarie] as const;
+    return [questionnaires, updateQuestionnarie, questionnaireType ] as const;
 }
 
 type QuestionnaireFormState = { mode: "closed" } | { mode: "show"; id: Id } | { mode: "edit"; id: Id };

@@ -3,7 +3,7 @@ import { FutureData } from "../entities/Future";
 import { Questionnaire } from "../entities/Questionnaire";
 
 export interface CaptureFormRepository {
-    getForm(): FutureData<Questionnaire>;
+    getForm(programId: string): FutureData<Questionnaire>;
     getPopulatedForm(event: D2TrackerEvent): FutureData<Questionnaire>;
     getSignalEvent(eventId: string): FutureData<D2TrackerEvent>;
 }

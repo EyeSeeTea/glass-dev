@@ -51,14 +51,15 @@ export interface ProgramMetadata {
     options: Option[];
 }
 export const EAR_PROGRAM_ID = "SQe26z0smFP";
+
 export class CaptureFormDefaultRepository implements CaptureFormRepository {
     constructor(private api: D2Api) {}
 
-    getForm(): FutureData<Questionnaire> {
+    getForm(programId: string): FutureData<Questionnaire> {
         return apiToFuture(
             this.api.request<ProgramMetadata>({
                 method: "get",
-                url: `/programs/${EAR_PROGRAM_ID}/metadata.json?fields=programs,dataElements,programStageSections`,
+                url: `/programs/${programId}/metadata.json?fields=programs,dataElements,programStageSections`,
             })
         ).flatMap(resp => {
             if (resp.programs[0]) {

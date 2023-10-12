@@ -25,6 +25,18 @@ export class QuestionnaireD2DefaultRepository implements QuestionnaireRepository
         options: { orgUnitId: Id; year: string },
         captureAccess: boolean
     ): FutureData<QuestionnaireBase[]> {
+        if (module.questionnaireType && module.questionnaireType === "Program") {
+            return this.getProgramQuestionnaireList(module, options);
+        } else {
+            return this.getDatasetQuestionnaireList(module, options, captureAccess);
+        }
+    }
+
+    getDatasetQuestionnaireList(
+        module: GlassModule,
+        options: { orgUnitId: Id; year: string },
+        captureAccess: boolean
+    ): FutureData<QuestionnaireBase[]> {
         const dataSetIds = module.questionnaires.map(getId);
         const configByDataSetId = _.keyBy(module.questionnaires, getId);
 
@@ -58,6 +70,40 @@ export class QuestionnaireD2DefaultRepository implements QuestionnaireRepository
                     rules: config?.rules || [],
                 };
             });
+        });
+    }
+
+    getProgramQuestionnaireList(
+        module: GlassModule,
+        options: { orgUnitId: Id; year: string }
+    ): FutureData<QuestionnaireBase[]> {
+        const ProgramIds = module.questionnaires.map(getId);
+        const configByProgramId = _.keyBy(module.questionnaires, getId);
+
+        return apiToFuture(
+            this.api.metadata.get({
+                programs: {
+                    fields: { id: true, displayName: true, displayDescription: true },
+                    filter: { id: { in: ProgramIds } },
+                },
+            })
+        ).map(res => {
+            const Qs = res.programs.map(program => {
+                const config = configByProgramId[program.id];
+
+                return {
+                    id: program.id,
+                    name: program.displayName,
+                    orgUnit: { id: options.orgUnitId },
+                    year: options.year,
+                    description: program.displayDescription,
+                    isCompleted: false, //TO DO : fetch status of program.
+                    isMandatory: config?.mandatory || false,
+                    rules: [],
+                };
+            });
+
+            return Qs;
         });
     }
 

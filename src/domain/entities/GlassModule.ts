@@ -16,6 +16,7 @@ export interface GlassModule {
     color: string;
     id: string;
     userGroups: ModuleUserGroups;
+    questionnaireType?: "Dataset" | "Program";
     questionnaires: QuestionnaireConfig[];
     consistencyChecks?: {
         specimenPathogen: Record<string, string[]>;

@@ -11,6 +11,7 @@ export const QuestionnaireFormTest: React.FC = React.memo(() => {
             onBackClick={console.debug}
             onSave={console.debug}
             validateAndUpdateDataSubmissionStatus={console.debug}
+            questionnaireType="Dataset"
         />
     );
 });

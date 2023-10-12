@@ -209,7 +209,7 @@ export function getCompositionRoot(instance: Instance) {
             saveKeyUiLocale: new SaveKeyUiLocaleUseCase(usersRepository),
             saveKeyDbLocale: new SaveKeyDbLocaleUseCase(usersRepository),
         }),
-        signals: getExecute({
+        programQuestionnaires: getExecute({
             getForm: new GetCaptureFormQuestionsUseCase(captureFormRepository),
             importData: new ImportCaptureDataUseCase(
                 dhis2EventsDefaultRepository,

@@ -14,7 +14,7 @@ import { useCurrentUserGroupsAccess } from "../../hooks/useCurrentUserGroupsAcce
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import styled from "styled-components";
 import { useCurrentModuleContext } from "../../contexts/current-module-context";
-import { useNewSignalForm } from "./hook/useNewSignalForm";
+import { useProgramQuestionnaireForm } from "../../hooks/useNewSignalForm";
 import { useHistory } from "react-router-dom";
 import { red300 } from "material-ui/styles/colors";
 
@@ -47,7 +47,7 @@ export const NewSignalForm: React.FC<NewSignalFormProps> = props => {
     const formClasses = useFormStyles();
     const snackbar = useSnackbar();
 
-    const { questionnaire, setQuestionnaire, loading, setLoading } = useNewSignalForm(props.signalEventId);
+    const { questionnaire, setQuestionnaire, loading, setLoading } = useProgramQuestionnaireForm(props.signalEventId);
 
     const saveQuestionnaire = () => {
         setLoading(true);
@@ -60,7 +60,7 @@ export const NewSignalForm: React.FC<NewSignalFormProps> = props => {
                 return cag.id;
             });
 
-            compositionRoot.signals
+            compositionRoot.programQuestionnaires
                 .importData(
                     props.signalId,
                     props.signalEventId,
@@ -103,7 +103,7 @@ export const NewSignalForm: React.FC<NewSignalFormProps> = props => {
                 return cag.id;
             });
 
-            compositionRoot.signals
+            compositionRoot.programQuestionnaires
                 .importData(
                     props.signalId,
                     props.signalEventId,
@@ -161,10 +161,6 @@ export const NewSignalForm: React.FC<NewSignalFormProps> = props => {
             <Backdrop open={loading} style={{ color: "#fff", zIndex: 1 }}>
                 <StyledLoaderContainer>
                     <CircularProgress color="inherit" size={50} />
-                    {/* <Typography variant="h6">{i18n.t("Importing data and applying validation rules")}</Typography>
-                    <Typography variant="h5">
-                        {i18n.t("This might take several minutes, do not refresh the page or press back.")}
-                    </Typography> */}
                 </StyledLoaderContainer>
             </Backdrop>
             <PageHeader title={questionnaire?.name || ""} />
