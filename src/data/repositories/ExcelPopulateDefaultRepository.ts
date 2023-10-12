@@ -9,7 +9,6 @@ import XLSX, {
     Workbook,
 } from "@eyeseetea/xlsx-populate";
 import { CellRef, Range, SheetRef, ValueRef } from "../../domain/entities/Template";
-import { cache } from "../../utils/cache";
 import moment from "moment";
 import { Future, FutureData } from "../../domain/entities/Future";
 
@@ -130,7 +129,6 @@ export class ExcelPopulateDefaultRepository extends ExcelRepository {
         }));
     }
 
-    @cache()
     public async getSheetRowsCount(id: string, sheetId: string | number): Promise<number | undefined> {
         const workbook = await this.getWorkbook(id);
         const sheet = workbook.sheet(sheetId);
@@ -148,7 +146,6 @@ export class ExcelPopulateDefaultRepository extends ExcelRepository {
         return lastRowWithValues ? lastRowWithValues.rowNumber() : 0;
     }
 
-    @cache()
     public async getSheetFinalColumn(id: string, sheetId: string | number): Promise<string | undefined> {
         const workbook = await this.getWorkbook(id);
         const sheet = workbook.sheet(sheetId);

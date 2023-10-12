@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2023-10-06T08:14:40.002Z\n"
-"PO-Revision-Date: 2023-10-06T08:14:40.002Z\n"
+"POT-Creation-Date: 2023-10-12T08:57:01.991Z\n"
+"PO-Revision-Date: 2023-10-12T08:57:01.991Z\n"
 
 msgid "Template {{id}} not loaded"
 msgstr ""
@@ -423,9 +423,6 @@ msgstr ""
 msgid "GO"
 msgstr ""
 
-msgid "Importing data and applying validation rules"
-msgstr ""
-
 msgid "Save Draft"
 msgstr ""
 
@@ -478,6 +475,9 @@ msgid "Go to Validation Report"
 msgstr ""
 
 msgid "Thank you! your data for now is uploaded in our system"
+msgstr ""
+
+msgid "Importing data and applying validation rules"
 msgstr ""
 
 msgid "These Consistency Checks ensure that incorrect data is not imported."

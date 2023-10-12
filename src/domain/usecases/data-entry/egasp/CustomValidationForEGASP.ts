@@ -13,14 +13,19 @@ export class CustomValidationForEGASP {
         private dhis2EventsDefaultRepository: Dhis2EventsDefaultRepository,
         private metadataRepository: MetadataRepository
     ) {}
-    public getValidatedEvents(events: Event[], orgUnit: string, period: string): FutureData<any> {
+    public getValidatedEvents(
+        events: Event[],
+        orgUnitId: string,
+        orgUnitName: string,
+        period: string
+    ): FutureData<any> {
         //1. Org unit validation
-        return this.checkCountry(events, orgUnit).flatMap(orgUnitErrors => {
+        return this.checkCountry(events, orgUnitId, orgUnitName).flatMap(orgUnitErrors => {
             //2. Period validation
             const periodErrors = this.checkPeriod(events, period);
 
-            //Fetch all existing EGASP events for the given org unit and all its labs and clinics
-            return this.dhis2EventsDefaultRepository.getEGASPEventsByOrgUnit(orgUnit).flatMap(existingEvents => {
+            //Fetch all existing EGASP events for the given org unit
+            return this.dhis2EventsDefaultRepository.getEGASPEventsByOrgUnit(orgUnitId).flatMap(existingEvents => {
                 //3. Duplicate EGASP ID within org unit validation
                 const duplicateEGASPIdErrors = this.checkUniqueEgaspId(events, existingEvents);
 
@@ -43,14 +48,19 @@ export class CustomValidationForEGASP {
         });
     }
 
-    private checkCountry(events: Event[], country: string): FutureData<ConsistencyError[]> {
-        return this.metadataRepository.getClinicsAndLabsInOrgUnitId(country).map(clinicsInCountry => {
+    private checkCountry(events: Event[], countryId: string, countryName: string): FutureData<ConsistencyError[]> {
+        const clinicsInEvents = events.map(e => e.orgUnit);
+        return Future.joinObj({
+            clinicsInCountry: this.metadataRepository.getClinicsAndLabsInOrgUnitId(countryId),
+            clinicNamesInEvents: this.metadataRepository.getClinicOrLabNames(clinicsInEvents),
+        }).map(({ clinicsInCountry, clinicNamesInEvents }) => {
             const errors = _(
                 events.map(event => {
                     if (!clinicsInCountry?.includes(event.orgUnit)) {
+                        const clinicName = clinicNamesInEvents.find(c => c.id === event.orgUnit)?.name ?? event.orgUnit;
                         return {
                             error: i18n.t(
-                                `Clinic is not part of selected country: Selected Data Submission Country : ${country}, Clinic in file: ${event.orgUnit}`
+                                `Clinics in file, are not part of the selected country: Selected Country : ${countryName}, Clinic in file: ${clinicName}`
                             ),
                             line: parseInt(event.event),
                         };

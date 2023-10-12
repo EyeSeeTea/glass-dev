@@ -98,8 +98,7 @@ export const Questionnaires: React.FC<QuestionnairesProps> = ({ setRefetchStatus
                 mode={formState.mode}
                 onSave={updateQuestionnarie}
                 validateAndUpdateDataSubmissionStatus={validateAndUpdateStatus}
-                questionnaireType = {questionnaireType}
-
+                questionnaireType={questionnaireType}
             />
         );
     } else {
@@ -231,7 +230,7 @@ function useQuestionnaires() {
     React.useEffect(() => {
         if (module.kind !== "loaded") return;
 
-        setQuestionnaireType(module.data.questionnaireType ? module.data.questionnaireType : "Dataset")
+        setQuestionnaireType(module.data.questionnaireType ? module.data.questionnaireType : "Dataset");
 
         return compositionRoot.questionnaires
             .getList(module.data, { orgUnitId: orgUnit.id, year: year }, hasCurrentUserCaptureAccess)
@@ -246,7 +245,7 @@ function useQuestionnaires() {
         );
     }, []);
 
-    return [questionnaires, updateQuestionnarie, questionnaireType ] as const;
+    return [questionnaires, updateQuestionnarie, questionnaireType] as const;
 }
 
 type QuestionnaireFormState = { mode: "closed" } | { mode: "show"; id: Id } | { mode: "edit"; id: Id };
