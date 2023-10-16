@@ -17,6 +17,7 @@ type ModuleDetails = {
     unit: string;
     isSpecimenReq: boolean;
     isDownloadEmptyTemplateReq: boolean;
+    datasetString?: string;
 };
 
 export const moduleProperties = new Map<string, ModuleDetails>([
@@ -42,6 +43,7 @@ export const moduleProperties = new Map<string, ModuleDetails>([
             unit: "data value",
             isSpecimenReq: true,
             isDownloadEmptyTemplateReq: false,
+            datasetString: "Upto 6 datasets",
         },
     ],
     [
