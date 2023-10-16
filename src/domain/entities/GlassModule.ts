@@ -31,6 +31,7 @@ export interface GlassModule {
         id: string;
         programStageId: string;
     }[];
+    populateCurrentYearInHistory?: boolean;
 }
 
 interface QuestionnaireConfig {
