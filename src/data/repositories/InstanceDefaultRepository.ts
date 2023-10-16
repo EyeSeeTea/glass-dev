@@ -79,6 +79,7 @@ export class InstanceDefaultRepository implements InstanceRepository {
                 return {
                     moduleId: module.id,
                     moduleName: module.name,
+                    populateCurrentYearInHistory: module.populateCurrentYearInHistory ? true : false,
                     readAccess: readAccess,
                     captureAccess: writeAccess,
                     usergroups: [...module.userGroups.captureAccess, ...module.userGroups.readAccess],
