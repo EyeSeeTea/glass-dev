@@ -19,6 +19,7 @@ import { CustomValidationForEGASP } from "./CustomValidationForEGASP";
 import { getStringFromFile } from "../utils/fileToString";
 import { TrackerPostResponse } from "@eyeseetea/d2-api/api/tracker";
 import { MetadataRepository } from "../../../repositories/MetadataRepository";
+import { generateId } from "../../../entities/Ref";
 
 export class ImportEGASPFile {
     constructor(
@@ -66,8 +67,14 @@ export class ImportEGASPFile {
                                                     };
                                                     return Future.success(errorSummary);
                                                 } else {
+                                                    const eventIdLineNoMap: { id: string; lineNo: number }[] = [];
                                                     const eventsWithoutId = validatedEventResults.events.map(e => {
-                                                        e.event = "";
+                                                        const generatedId = generateId();
+                                                        eventIdLineNoMap.push({
+                                                            id: generatedId,
+                                                            lineNo: isNaN(parseInt(e.event)) ? 0 : parseInt(e.event),
+                                                        });
+                                                        e.event = generatedId;
                                                         return e;
                                                     });
                                                     return this.dhis2EventsDefaultRepository
@@ -75,7 +82,8 @@ export class ImportEGASPFile {
                                                         .flatMap(result => {
                                                             return this.mapToImportSummary(
                                                                 result,
-                                                                validatedEventResults.nonBlockingErrors
+                                                                validatedEventResults.nonBlockingErrors,
+                                                                eventIdLineNoMap
                                                             ).flatMap(({ importSummary, eventIdList }) => {
                                                                 const primaryUploadId =
                                                                     localStorage.getItem("primaryUploadId");
@@ -121,7 +129,7 @@ export class ImportEGASPFile {
                                         return this.dhis2EventsDefaultRepository
                                             .import({ events }, action)
                                             .flatMap(result => {
-                                                return this.mapToImportSummary(result, []).flatMap(
+                                                return this.mapToImportSummary(result, [], []).flatMap(
                                                     ({ importSummary }) => {
                                                         return Future.success(importSummary);
                                                     }
@@ -191,7 +199,8 @@ export class ImportEGASPFile {
 
     private mapToImportSummary(
         result: TrackerPostResponse,
-        nonBlockingErrors: ConsistencyError[]
+        nonBlockingErrors: ConsistencyError[],
+        eventIdLineNoMap: { id: string; lineNo: number }[]
     ): FutureData<{
         importSummary: ImportSummary;
         eventIdList: string[];
@@ -199,15 +208,15 @@ export class ImportEGASPFile {
         if (result && result.validationReport && result.stats) {
             const blockingErrorList = _.compact(
                 result.validationReport.errorReports.map(summary => {
-                    if (summary.message) return summary.message;
+                    if (summary.message) return { error: summary.message, eventId: summary.uid };
                 })
             );
 
-            const blockingErrorsByCount = _.countBy(blockingErrorList);
+            const blockingErrorsByGroup = _(blockingErrorList).groupBy("error").value();
 
             //Get list of DataElement Ids in error messages.
             const dataElementIds = _.compact(
-                Object.entries(blockingErrorsByCount).map(err => {
+                Object.entries(blockingErrorsByGroup).map(err => {
                     const errMsg = err[0];
 
                     //Error message type 1 contains regex in format : DataElement `{dataElementId}`
@@ -238,7 +247,7 @@ export class ImportEGASPFile {
                         ignored: result.stats.ignored,
                         deleted: result.stats.deleted,
                     },
-                    blockingErrors: Object.entries(blockingErrorsByCount).map(err => {
+                    blockingErrors: Object.entries(blockingErrorsByGroup).map(err => {
                         const dataElementInErrMsg = dataElementIds.filter(de => err[0].includes(de));
 
                         if (dataElementInErrMsg && dataElementInErrMsg[0] && dataElementInErrMsg.length === 1) {
@@ -251,8 +260,17 @@ export class ImportEGASPFile {
                                 dataElementName?.name ?? dataElementInErrMsg[0]
                             );
 
-                            return { error: parsedErrMsg, count: err[1] };
-                        } else return { error: err[0], count: err[1] };
+                            const lines = err[1].flatMap(a => eventIdLineNoMap.find(e => e.id === a.eventId)?.lineNo);
+                            console.debug(lines);
+                            return {
+                                error: parsedErrMsg,
+                                count: err[1].length,
+                                lines: _.compact(lines),
+                            };
+                        } else {
+                            const lines = err[1].flatMap(a => eventIdLineNoMap.find(e => e.id === a.eventId)?.lineNo);
+                            return { error: err[0], count: err[1].length, lines: _.compact(lines) };
+                        }
                     }),
                     nonBlockingErrors: nonBlockingErrors,
                     importTime: new Date(),
