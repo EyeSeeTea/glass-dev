@@ -1,10 +1,9 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback } from "react";
 import clsx from "clsx";
 import { makeStyles } from "@material-ui/styles";
 import { Paper, Input } from "@material-ui/core";
 import SearchIcon from "@material-ui/icons/Search";
 import i18n from "../../../locales";
-import _ from "lodash";
 
 const useStyles = makeStyles(() => ({
     root: {
@@ -28,39 +27,23 @@ const useStyles = makeStyles(() => ({
 }));
 
 interface SearchInputProps {
-    value: string;
     className?: string;
-    onChange?: (value: string) => void;
+    onTermChange: (value: string) => void;
     style?: React.CSSProperties;
     autoFocus?: boolean;
     searchTerm?: string;
 }
 
-const SearchInput: React.FC<SearchInputProps> = ({ value, className, onChange, style, autoFocus = false }) => {
+const SearchInput: React.FC<SearchInputProps> = ({ className, onTermChange, style }) => {
     const classes = useStyles();
 
-    const [stateValue, updateStateValue] = useState(value);
-    const ref = useRef<HTMLInputElement>(null);
-    useEffect(() => updateStateValue(value), [value]);
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    const onChangeDebounced = useCallback(
-        _.debounce((value: string) => {
-            if (onChange) {
-                onChange(value);
-            }
-        }, 400),
-        [onChange]
-    );
-
-    const handleChange = useCallback(
-        (event: React.ChangeEvent<HTMLInputElement>) => {
-            const value = event.target.value;
-            onChangeDebounced(value);
-            updateStateValue(value);
-        },
-        [onChangeDebounced, updateStateValue]
-    );
+    const onChangeDebounced = _.debounce((value: string) => {
+        onTermChange(value);
+    }, 400);
+    const updateSearchString = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const targetValue = event.target.value;
+        onChangeDebounced(targetValue);
+    };
 
     const handleKeydown = useCallback((event: React.KeyboardEvent<HTMLInputElement>) => {
         event.stopPropagation();
@@ -71,17 +54,13 @@ const SearchInput: React.FC<SearchInputProps> = ({ value, className, onChange, s
             <SearchIcon className={classes.icon} htmlColor="black" />
             <Input
                 className={classes.input}
-                inputRef={ref}
                 disableUnderline
-                onChange={handleChange}
+                onChange={updateSearchString}
                 placeholder={i18n.t("Search")}
-                value={stateValue}
                 role="searchbox"
                 onKeyDown={handleKeydown}
-                autoFocus={autoFocus}
                 onClick={e => {
                     e.stopPropagation();
-                    ref.current?.focus();
                 }}
             />
         </Paper>
