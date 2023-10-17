@@ -53,7 +53,7 @@ export const ModuleCard: React.FC<ModuleCardProps> = ({ period, module }) => {
                 m => m.moduleId === module.id
             )?.captureAccess;
             const orgUnitCaptureAccess = currentUser.userOrgUnitsAccess.find(
-                ou => (ou.orgUnitId = orgUnitId)
+                ou => ou.orgUnitId === orgUnitId
             )?.captureAccess;
             const hasCurrentUserCaptureAccess =
                 (moduleCaptureAccess ? moduleCaptureAccess : false) &&
