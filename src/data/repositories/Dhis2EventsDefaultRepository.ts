@@ -7,6 +7,7 @@ import { D2TrackerEvent, TrackerEventsResponse } from "@eyeseetea/d2-api/api/tra
 import { TrackerPostResponse } from "@eyeseetea/d2-api/api/tracker";
 import { D2Api, Id } from "@eyeseetea/d2-api/2.34";
 import { apiToFuture } from "../../utils/futures";
+import { trackerPostResponseDefaultError } from "./utils/TrackerPostResponseDefaultError";
 
 export declare type EventStatus = "ACTIVE" | "COMPLETED" | "VISITED" | "SCHEDULED" | "OVERDUE" | "SKIPPED";
 
@@ -54,17 +55,15 @@ export class Dhis2EventsDefaultRepository {
     }
 
     import(events: TrackerEventsPostRequest, action: ImportStrategy): FutureData<TrackerPostResponse> {
-        return Future.fromPromise(
-            this.api.tracker
-                .post({ importStrategy: action }, events)
-                .getData()
-                .then(resp => {
-                    return resp;
-                })
-                .catch(err => {
-                    return err?.response?.data;
-                })
-        );
+        return apiToFuture(this.api.tracker.postAsync({ importStrategy: action }, events)).flatMap(response => {
+            return apiToFuture(this.api.system.waitFor("TRACKER_IMPORT_JOB", response.response.id)).flatMap(result => {
+                if (result) {
+                    return Future.success(result);
+                } else {
+                    return Future.success(trackerPostResponseDefaultError);
+                }
+            });
+        });
     }
 
     getEventById(id: Id): FutureData<D2TrackerEvent> {
