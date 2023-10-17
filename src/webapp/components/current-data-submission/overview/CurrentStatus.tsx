@@ -121,11 +121,7 @@ export const CurrentStatus: React.FC<StatusProps> = ({
                         </TableHead>
                         <tbody>
                             <TableRow>
-                                <TableCell>
-                                    {moduleProperties.get(moduleName)?.datasetString
-                                        ? moduleProperties.get(moduleName)?.datasetString
-                                        : "Datasets"}
-                                </TableCell>
+                                <TableCell>{moduleProperties.get(moduleName)?.datasetString ?? "Datasets"}</TableCell>
                                 <TableCell>{`No`}</TableCell>
                                 <TableCell>
                                     <Box display={"flex"} alignItems="center">
