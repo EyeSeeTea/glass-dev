@@ -93,7 +93,7 @@ const FormWrapper = styled.div`
 function useQuestionnaire(options: QuestionnarieFormProps) {
     const { compositionRoot } = useAppContext();
     const snackbar = useSnackbar();
-    const module = useGlassModule(compositionRoot);
+    const module = useGlassModule();
     const [isSaving, savingActions] = useBooleanState(false);
 
     const { onSave, id, orgUnitId, year } = options;

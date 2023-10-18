@@ -1,5 +1,5 @@
 import { Id } from "./Base";
-import { QuestionnaireRule, QuestionnaireType } from "./Questionnaire";
+import { QuestionnaireRule, QuestionnairesType } from "./Questionnaire";
 import { UserGroup } from "./User";
 
 interface ModuleUserGroups {
@@ -16,7 +16,7 @@ export interface GlassModule {
     color: string;
     id: string;
     userGroups: ModuleUserGroups;
-    questionnairesType?: QuestionnaireType;
+    questionnairesType?: QuestionnairesType;
     questionnaires: QuestionnaireConfig[];
     consistencyChecks?: {
         specimenPathogen: Record<string, string[]>;

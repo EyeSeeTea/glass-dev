@@ -4,7 +4,7 @@ import { Button, LinearProgress } from "@material-ui/core";
 import React, { Dispatch, SetStateAction } from "react";
 import styled from "styled-components";
 import { Id } from "../../../domain/entities/Base";
-import { QuestionnaireBase, QuestionnaireType } from "../../../domain/entities/Questionnaire";
+import { QuestionnaireBase, QuestionnairesType } from "../../../domain/entities/Questionnaire";
 import { useAppContext } from "../../contexts/app-context";
 import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context";
 import { useGlassCaptureAccess } from "../../hooks/useGlassCaptureAccess";
@@ -222,10 +222,9 @@ function useSelector() {
 
 function useQuestionnaires() {
     const { compositionRoot } = useAppContext();
-
-    const module = useGlassModule(compositionRoot);
+    const module = useGlassModule();
     const [questionnaires, setQuestionnaires] = React.useState<QuestionnaireBase[]>();
-    const [questionnairesType, setQuestionnairesType] = React.useState<QuestionnaireType>();
+    const [questionnairesType, setQuestionnairesType] = React.useState<QuestionnairesType>();
     const snackbar = useSnackbar();
     const { orgUnit, year } = useSelector();
     const hasCurrentUserCaptureAccess = useGlassCaptureAccess() ? true : false;
