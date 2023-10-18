@@ -6,6 +6,8 @@ export class GetQuestionnaireListUseCase {
     constructor(private questionnaireRepository: QuestionnaireRepository) {}
 
     execute(module: GlassModule, options: { orgUnitId: Id; year: string }, captureAccess: boolean) {
-        return this.questionnaireRepository.getList(module, options, captureAccess);
+        if (module.questionnairesType === "Dataset")
+            return this.questionnaireRepository.getDatasetList(module, options, captureAccess);
+        else return this.questionnaireRepository.getProgramList(module, options);
     }
 }
