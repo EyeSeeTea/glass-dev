@@ -4,7 +4,7 @@ import { Button, LinearProgress } from "@material-ui/core";
 import React, { Dispatch, SetStateAction } from "react";
 import styled from "styled-components";
 import { Id } from "../../../domain/entities/Base";
-import { QuestionnaireBase } from "../../../domain/entities/Questionnaire";
+import { QuestionnaireBase, QuestionnaireType } from "../../../domain/entities/Questionnaire";
 import { useAppContext } from "../../contexts/app-context";
 import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context";
 import { useGlassCaptureAccess } from "../../hooks/useGlassCaptureAccess";
@@ -27,7 +27,7 @@ export const Questionnaires: React.FC<QuestionnairesProps> = ({ setRefetchStatus
     const { compositionRoot } = useAppContext();
     const hasCurrentUserCaptureAccess = useGlassCaptureAccess();
     const hasCurrentUserViewAccess = useGlassReadAccess();
-    const [questionnaires, updateQuestionnarie] = useQuestionnaires();
+    const [questionnaires, updateQuestionnarie, questionnairesType] = useQuestionnaires();
     const { orgUnit, year } = useSelector();
     const [formState, actions] = useFormState();
     const { currentModuleAccess } = useCurrentModuleContext();
@@ -89,17 +89,21 @@ export const Questionnaires: React.FC<QuestionnairesProps> = ({ setRefetchStatus
     if (!questionnaires) {
         return <LinearProgress />;
     } else if (formState.mode !== "closed") {
-        return (
-            <QuestionnarieForm
-                id={formState.id}
-                orgUnitId={orgUnit.id}
-                year={year}
-                onBackClick={actions.closeQuestionnarie}
-                mode={formState.mode}
-                onSave={updateQuestionnarie}
-                validateAndUpdateDataSubmissionStatus={validateAndUpdateStatus}
-            />
-        );
+        if (questionnairesType === "Dataset") {
+            return (
+                <QuestionnarieForm
+                    id={formState.id}
+                    orgUnitId={orgUnit.id}
+                    year={year}
+                    onBackClick={actions.closeQuestionnarie}
+                    mode={formState.mode}
+                    onSave={updateQuestionnarie}
+                    validateAndUpdateDataSubmissionStatus={validateAndUpdateStatus}
+                />
+            );
+        } else {
+            return <>Coming soon! Program Questionnaire. Reuse signals Ui</>;
+        }
     } else {
         return (
             <QuestionnairesGrid>
@@ -221,12 +225,14 @@ function useQuestionnaires() {
 
     const module = useGlassModule(compositionRoot);
     const [questionnaires, setQuestionnaires] = React.useState<QuestionnaireBase[]>();
+    const [questionnairesType, setQuestionnairesType] = React.useState<QuestionnaireType>();
     const snackbar = useSnackbar();
     const { orgUnit, year } = useSelector();
     const hasCurrentUserCaptureAccess = useGlassCaptureAccess() ? true : false;
 
     React.useEffect(() => {
         if (module.kind !== "loaded") return;
+        setQuestionnairesType(module.data.questionnairesType);
 
         return compositionRoot.questionnaires
             .getList(module.data, { orgUnitId: orgUnit.id, year: year }, hasCurrentUserCaptureAccess)
@@ -241,7 +247,7 @@ function useQuestionnaires() {
         );
     }, []);
 
-    return [questionnaires, updateQuestionnarie] as const;
+    return [questionnaires, updateQuestionnarie, questionnairesType] as const;
 }
 
 type QuestionnaireFormState = { mode: "closed" } | { mode: "show"; id: Id } | { mode: "edit"; id: Id };
