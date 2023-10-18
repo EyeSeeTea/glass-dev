@@ -1,7 +1,7 @@
 import { assertUnreachable, Maybe } from "../../types/utils";
 import { Code, Id, NamedRef, Ref, updateCollection } from "./Base";
 
-export type QuestionnaireType = "Program" | "Dataset";
+export type QuestionnairesType = "Program" | "Dataset";
 export interface QuestionnaireBase {
     id: Id;
     name: string;
