@@ -1,6 +1,6 @@
 import { CaptureFormRepository } from "../repositories/CaptureFormRepository";
 
-export class GetSignalEventUseCase {
+export class GetPopulatedCaptureFormQuestionsUseCase {
     constructor(private captureFormRepository: CaptureFormRepository) {}
 
     execute(eventId: string) {

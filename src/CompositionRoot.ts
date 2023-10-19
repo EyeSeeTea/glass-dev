@@ -70,10 +70,10 @@ import { RISIndividualDataCSVDefaultRepository } from "./data/repositories/RISIn
 import { TrackerDefaultRepository } from "./data/repositories/TrackerDefaultRepository";
 import { GetCaptureFormQuestionsUseCase } from "./domain/usecases/GetCaptureFormQuestionsUseCase";
 import { CaptureFormDefaultRepository } from "./data/repositories/CaptureFormDefaultRepository";
-import { ImportCaptureDataUseCase } from "./domain/usecases/data-entry/ear/ImportCaptureDataUseCase";
+import { ImportCaptureDataUseCase } from "./domain/usecases/data-entry/ImportCaptureDataUseCase";
 import { SignalDefaultRepository } from "./data/repositories/SignalDefaultRepository";
 import { GetSignalsUseCase } from "./domain/usecases/GetSignalsUseCase";
-import { GetSignalEventUseCase } from "./domain/usecases/GetSignalEventUseCase";
+import { GetPopulatedCaptureFormQuestionsUseCase } from "./domain/usecases/GetPopulatedCaptureFormQuestionsUseCase";
 import { DeleteSignalUseCase } from "./domain/usecases/DeleteSignalUseCase";
 import { GetEGASPEmptyTemplateUseCase } from "./domain/usecases/data-entry/egasp/GetEGASPEmptyTemplateUseCase";
 import { EGASPDownloadEmptyTemplate } from "./data/repositories/download-empty-template/EGASPDownloadEmptyTemplate";
@@ -181,7 +181,7 @@ export function getCompositionRoot(instance: Instance) {
         }),
         questionnaires: getExecute({
             get: new GetQuestionnaireUseCase(questionnaireD2Repository),
-            getList: new GetQuestionnaireListUseCase(questionnaireD2Repository),
+            getList: new GetQuestionnaireListUseCase(questionnaireD2Repository, dhis2EventsDefaultRepository),
             saveResponse: new SaveQuestionnaireResponseUseCase(questionnaireD2Repository),
             setAsCompleted: new SetAsQuestionnaireCompletionUseCase(questionnaireD2Repository),
         }),
@@ -209,7 +209,7 @@ export function getCompositionRoot(instance: Instance) {
             saveKeyUiLocale: new SaveKeyUiLocaleUseCase(usersRepository),
             saveKeyDbLocale: new SaveKeyDbLocaleUseCase(usersRepository),
         }),
-        signals: getExecute({
+        programQuestionnaires: getExecute({
             getForm: new GetCaptureFormQuestionsUseCase(captureFormRepository),
             importData: new ImportCaptureDataUseCase(
                 dhis2EventsDefaultRepository,
@@ -217,8 +217,9 @@ export function getCompositionRoot(instance: Instance) {
                 notificationRepository,
                 usersRepository
             ),
-            getSignals: new GetSignalsUseCase(signalRepository),
-            getSignal: new GetSignalEventUseCase(captureFormRepository),
+            getList: new GetSignalsUseCase(signalRepository),
+            //TO DO : Rename to getPopulated form
+            getSignal: new GetPopulatedCaptureFormQuestionsUseCase(captureFormRepository),
             delete: new DeleteSignalUseCase(dhis2EventsDefaultRepository, signalRepository),
         }),
     };

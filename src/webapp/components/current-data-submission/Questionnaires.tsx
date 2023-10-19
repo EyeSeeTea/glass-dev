@@ -19,6 +19,7 @@ import { useStatusDataSubmission } from "../../hooks/useStatusDataSubmission";
 import { useCurrentPeriodContext } from "../../contexts/current-period-context";
 import { isEditModeStatus } from "../../../utils/editModeStatus";
 import { useCurrentUserGroupsAccess } from "../../hooks/useCurrentUserGroupsAccess";
+import { ProgramQuestionnaireForm } from "../new-signal/ProgramQuestionnaireForm";
 
 interface QuestionnairesProps {
     setRefetchStatus: Dispatch<SetStateAction<DataSubmissionStatusTypes | undefined>>;
@@ -102,7 +103,13 @@ export const Questionnaires: React.FC<QuestionnairesProps> = ({ setRefetchStatus
                 />
             );
         } else {
-            return <>Coming soon! Program Questionnaire. Reuse signals Ui</>;
+            return (
+                <ProgramQuestionnaireForm
+                    hideForm={actions.closeQuestionnarie}
+                    readonly={false}
+                    questionnaireId={formState.id}
+                />
+            );
         }
     } else {
         return (
@@ -235,7 +242,12 @@ function useQuestionnaires() {
 
         return compositionRoot.questionnaires
             .getList(module.data, { orgUnitId: orgUnit.id, year: year }, hasCurrentUserCaptureAccess)
-            .run(setQuestionnaires, err => snackbar.error(err));
+            .run(
+                questionnaires => {
+                    setQuestionnaires(questionnaires);
+                },
+                err => snackbar.error(err)
+            );
     }, [compositionRoot, snackbar, module, orgUnit, year, hasCurrentUserCaptureAccess]);
 
     const updateQuestionnarie = React.useCallback<QuestionnarieFormProps["onSave"]>(updatedQuestionnaire => {

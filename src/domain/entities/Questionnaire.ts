@@ -1,6 +1,7 @@
 import { assertUnreachable, Maybe } from "../../types/utils";
 import { Code, Id, NamedRef, Ref, updateCollection } from "./Base";
 
+export const AMCDataQuestionnaire = "qGG6BjULAaf";
 export type QuestionnairesType = "Program" | "Dataset";
 export interface QuestionnaireBase {
     id: Id;

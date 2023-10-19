@@ -7,6 +7,7 @@ import { D2TrackerEvent, TrackerEventsResponse } from "@eyeseetea/d2-api/api/tra
 import { TrackerPostResponse } from "@eyeseetea/d2-api/api/tracker";
 import { D2Api, Id } from "@eyeseetea/d2-api/2.34";
 import { apiToFuture } from "../../utils/futures";
+import { AMCDataQuestionnaire } from "../../domain/entities/Questionnaire";
 
 export declare type EventStatus = "ACTIVE" | "COMPLETED" | "VISITED" | "SCHEDULED" | "OVERDUE" | "SKIPPED";
 
@@ -75,5 +76,21 @@ export class Dhis2EventsDefaultRepository {
                 },
             })
         );
+    }
+
+    //The AMC-Data Questionnaire is implemented as a Event Program
+    //There could be a maximum of 6 events for this Program - no need of paging.
+    getAMCDataQuestionnaireEventsByOrgUnit(orgUnitId: Id, year: string): FutureData<D2TrackerEvent[]> {
+        console.debug(year);
+        return apiToFuture(
+            this.api.tracker.events.get({
+                fields: { $owner: true, event: true, dataValues: true, orgUnit: true, scheduledAt: true },
+                program: AMCDataQuestionnaire,
+                orgUnit: orgUnitId,
+            })
+        ).flatMap(res => {
+            //Filter by year
+            return Future.success(res.instances);
+        });
     }
 }
