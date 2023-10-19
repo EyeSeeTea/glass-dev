@@ -14,15 +14,16 @@ import { useCurrentUserGroupsAccess } from "../../hooks/useCurrentUserGroupsAcce
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import styled from "styled-components";
 import { useCurrentModuleContext } from "../../contexts/current-module-context";
-import { useNewSignalForm } from "./hook/useNewSignalForm";
+import { useNewSignalForm as useProgramQuestionnaireForm } from "./hook/useProgramQuestionnaireForm";
 import { useHistory } from "react-router-dom";
 import { red300 } from "material-ui/styles/colors";
 
-export interface NewSignalFormProps {
+export interface ProgramQuestionnaireFormProps {
     hideForm?: () => void;
     readonly: boolean;
     signalId?: string;
     signalEventId?: string;
+    questionnaireId: string;
 }
 
 const CancelButton = withStyles(() => ({
@@ -36,7 +37,7 @@ const CancelButton = withStyles(() => ({
     },
 }))(Button);
 
-export const NewSignalForm: React.FC<NewSignalFormProps> = props => {
+export const ProgramQuestionnaireForm: React.FC<ProgramQuestionnaireFormProps> = props => {
     const { compositionRoot } = useAppContext();
     const { currentModuleAccess } = useCurrentModuleContext();
     const { currentOrgUnitAccess } = useCurrentOrgUnitContext();
@@ -47,7 +48,10 @@ export const NewSignalForm: React.FC<NewSignalFormProps> = props => {
     const formClasses = useFormStyles();
     const snackbar = useSnackbar();
 
-    const { questionnaire, setQuestionnaire, loading, setLoading } = useNewSignalForm(props.signalEventId);
+    const { questionnaire, setQuestionnaire, loading, setLoading } = useProgramQuestionnaireForm(
+        props.questionnaireId,
+        props.signalEventId
+    );
 
     const saveQuestionnaire = () => {
         setLoading(true);
@@ -60,7 +64,7 @@ export const NewSignalForm: React.FC<NewSignalFormProps> = props => {
                 return cag.id;
             });
 
-            compositionRoot.signals
+            compositionRoot.programQuestionnaires
                 .importData(
                     props.signalId,
                     props.signalEventId,
@@ -103,7 +107,7 @@ export const NewSignalForm: React.FC<NewSignalFormProps> = props => {
                 return cag.id;
             });
 
-            compositionRoot.signals
+            compositionRoot.programQuestionnaires
                 .importData(
                     props.signalId,
                     props.signalEventId,
@@ -161,10 +165,6 @@ export const NewSignalForm: React.FC<NewSignalFormProps> = props => {
             <Backdrop open={loading} style={{ color: "#fff", zIndex: 1 }}>
                 <StyledLoaderContainer>
                     <CircularProgress color="inherit" size={50} />
-                    {/* <Typography variant="h6">{i18n.t("Importing data and applying validation rules")}</Typography>
-                    <Typography variant="h5">
-                        {i18n.t("This might take several minutes, do not refresh the page or press back.")}
-                    </Typography> */}
                 </StyledLoaderContainer>
             </Backdrop>
             <PageHeader title={questionnaire?.name || ""} />

@@ -3,7 +3,7 @@ import { useSnackbar } from "@eyeseetea/d2-ui-components";
 import { useAppContext } from "../../../contexts/app-context";
 import { Questionnaire } from "../../../../domain/entities/Questionnaire";
 
-export function useNewSignalForm(eventId: string | undefined) {
+export function useNewSignalForm(questionnaireId: string, eventId: string | undefined) {
     const { compositionRoot } = useAppContext();
     const [questionnaire, setQuestionnaire] = useState<Questionnaire>();
     const [loading, setLoading] = useState<boolean>(false);
@@ -13,7 +13,7 @@ export function useNewSignalForm(eventId: string | undefined) {
         setLoading(true);
         if (!eventId) {
             //If Event id not specified, load an Empty Questionnaire form
-            return compositionRoot.signals.getForm().run(
+            return compositionRoot.programQuestionnaires.getForm(questionnaireId).run(
                 questionnaireForm => {
                     setQuestionnaire(questionnaireForm);
                     setLoading(false);
@@ -25,7 +25,7 @@ export function useNewSignalForm(eventId: string | undefined) {
             );
         } else {
             //If Event Id has been specified, pre-populate event data in Questionnaire form
-            return compositionRoot.signals.getSignal(eventId).run(
+            return compositionRoot.programQuestionnaires.getSignal(eventId).run(
                 questionnaireWithData => {
                     console.debug(questionnaireWithData);
                     setQuestionnaire(questionnaireWithData);
@@ -37,7 +37,7 @@ export function useNewSignalForm(eventId: string | undefined) {
                 }
             );
         }
-    }, [compositionRoot, snackbar, eventId]);
+    }, [compositionRoot, snackbar, eventId, questionnaireId]);
 
     return { questionnaire, setQuestionnaire, loading, setLoading };
 }
