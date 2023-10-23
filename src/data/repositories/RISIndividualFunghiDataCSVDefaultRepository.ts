@@ -1,12 +1,12 @@
 import { Future, FutureData } from "../../domain/entities/Future";
-import { RISIndividualData } from "../../domain/entities/data-entry/amr-i-external/RISIndividualData";
+import { RISIndividualFunghiData } from "../../domain/entities/data-entry/amr-individual-funghi-external/RISIndividualFunghiData";
+import { RISIndividualFunghiDataRepository } from "../../domain/repositories/data-entry/RISIndividualFunghiDataRepository";
 
-import { RISIndividualDataRepository } from "../../domain/repositories/data-entry/RISIndividualDataRepository";
 import { SpreadsheetXlsxDataSource } from "./SpreadsheetXlsxDefaultRepository";
 import { doesColumnExist, getNumberValue, getTextValue } from "./utils/CSVUtils";
 
-export class RISIndividualDataCSVDefaultRepository implements RISIndividualDataRepository {
-    get(file: File): FutureData<RISIndividualData[]> {
+export class RISIndividualFunghiDataCSVDefaultRepository implements RISIndividualFunghiDataRepository {
+    get(file: File): FutureData<RISIndividualFunghiData[]> {
         return Future.fromPromise(new SpreadsheetXlsxDataSource().read(file)).map(spreadsheet => {
             const sheet = spreadsheet.sheets[0]; //Only one sheet for AMR Individual
 
@@ -54,7 +54,7 @@ export class RISIndividualDataCSVDefaultRepository implements RISIndividualDataR
             const firstRow = sheet?.rows[0];
 
             if (firstRow) {
-                const allRISIndividualColsPresent =
+                const allRISIndividualFunghiColsPresent =
                     doesColumnExist(firstRow, "COUNTRY") &&
                     doesColumnExist(firstRow, "YEAR") &&
                     doesColumnExist(firstRow, "HCF_ID") &&
@@ -81,7 +81,7 @@ export class RISIndividualDataCSVDefaultRepository implements RISIndividualDataR
                     .map(row => (row["SPECIMEN"] ? row["SPECIMEN"] : ""));
 
                 return {
-                    isValid: allRISIndividualColsPresent ? true : false,
+                    isValid: allRISIndividualFunghiColsPresent ? true : false,
                     records: sheet.rows.length,
                     specimens: uniqSpecimens,
                 };
