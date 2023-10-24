@@ -14,6 +14,8 @@ export interface QuestionWidgetProps {
     disabled: boolean;
 }
 
+const YesOption = { id: "1", name: "Yes" };
+
 export const QuestionWidget: React.FC<QuestionWidgetProps> = React.memo(props => {
     const { question, disabled, onChange } = props;
     const { type } = question;
@@ -63,6 +65,15 @@ export const QuestionWidget: React.FC<QuestionWidgetProps> = React.memo(props =>
                 <DatePickerWidget
                     value={question.value}
                     onChange={value => onChange(update(question, value))}
+                    disabled={disabled}
+                />
+            );
+        case "singleCheck":
+            return (
+                <SingleSelect
+                    value={question.value ? YesOption.id : ""}
+                    options={[YesOption]}
+                    onChange={value => onChange(update(question, value?.name === YesOption.name ? true : false))}
                     disabled={disabled}
                 />
             );
