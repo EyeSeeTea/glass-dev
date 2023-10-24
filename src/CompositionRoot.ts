@@ -78,6 +78,7 @@ import { DeleteSignalUseCase } from "./domain/usecases/DeleteSignalUseCase";
 import { GetEGASPEmptyTemplateUseCase } from "./domain/usecases/data-entry/egasp/GetEGASPEmptyTemplateUseCase";
 import { EGASPDownloadEmptyTemplate } from "./data/repositories/download-empty-template/EGASPDownloadEmptyTemplate";
 import { BulkLoadDataStoreClient } from "./data/data-store/BulkLoadDataStoreClient";
+import { ApplyProgramQuestionnaireValidationUseCase } from "./domain/usecases/ApplyProgramQuestionnaireValidationUseCase";
 
 export function getCompositionRoot(instance: Instance) {
     const api = getD2APiFromInstance(instance);
@@ -218,9 +219,9 @@ export function getCompositionRoot(instance: Instance) {
                 usersRepository
             ),
             getList: new GetSignalsUseCase(signalRepository),
-            //TO DO : Rename to getPopulated form
-            getSignal: new GetPopulatedCaptureFormQuestionsUseCase(captureFormRepository),
+            getPopulatedForm: new GetPopulatedCaptureFormQuestionsUseCase(captureFormRepository),
             delete: new DeleteSignalUseCase(dhis2EventsDefaultRepository, signalRepository),
+            applyValidations: new ApplyProgramQuestionnaireValidationUseCase(),
         }),
     };
 }

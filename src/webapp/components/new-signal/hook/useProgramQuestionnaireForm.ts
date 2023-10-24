@@ -3,10 +3,11 @@ import { useSnackbar } from "@eyeseetea/d2-ui-components";
 import { useAppContext } from "../../../contexts/app-context";
 import { Questionnaire } from "../../../../domain/entities/Questionnaire";
 
-export function useNewSignalForm(questionnaireId: string, eventId: string | undefined) {
+export function useProgramQuestionnaireForm(questionnaireId: string, eventId: string | undefined) {
     const { compositionRoot } = useAppContext();
     const [questionnaire, setQuestionnaire] = useState<Questionnaire>();
     const [loading, setLoading] = useState<boolean>(false);
+
     const snackbar = useSnackbar();
 
     useEffect(() => {
@@ -25,7 +26,7 @@ export function useNewSignalForm(questionnaireId: string, eventId: string | unde
             );
         } else {
             //If Event Id has been specified, pre-populate event data in Questionnaire form
-            return compositionRoot.programQuestionnaires.getSignal(eventId).run(
+            return compositionRoot.programQuestionnaires.getPopulatedForm(eventId).run(
                 questionnaireWithData => {
                     console.debug(questionnaireWithData);
                     setQuestionnaire(questionnaireWithData);
