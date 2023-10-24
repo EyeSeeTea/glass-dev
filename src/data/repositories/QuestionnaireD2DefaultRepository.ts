@@ -336,7 +336,16 @@ export class QuestionnaireD2DefaultRepository implements QuestionnaireRepository
                         ...deleted(!question.value),
                     },
                 ];
-
+            case "singleCheck": {
+                const strValue = question.value ? "true" : question.storeFalse ? "false" : "";
+                return [
+                    {
+                        ...base,
+                        value: strValue,
+                        ...deleted(!strValue),
+                    },
+                ];
+            }
             default:
                 assertUnreachable(type);
         }

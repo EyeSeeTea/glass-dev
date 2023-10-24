@@ -1,4 +1,3 @@
-
 import { D2TrackerEvent } from "@eyeseetea/d2-api/api/trackerEvents";
 import { FutureData } from "../entities/Future";
 import { Questionnaire } from "../entities/Questionnaire";
