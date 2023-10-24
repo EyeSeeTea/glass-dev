@@ -106,8 +106,9 @@ export const Questionnaires: React.FC<QuestionnairesProps> = ({ setRefetchStatus
             return (
                 <ProgramQuestionnaireForm
                     hideForm={actions.closeQuestionnarie}
-                    readonly={false}
                     questionnaireId={formState.id}
+                    readonly={formState.mode === "show" ? true : false}
+                    hidePublish={true}
                 />
             );
         }

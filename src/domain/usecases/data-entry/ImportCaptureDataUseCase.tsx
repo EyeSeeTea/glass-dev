@@ -45,13 +45,8 @@ export class ImportCaptureDataUseCase {
                 );
             }
             case "AMC": {
-                const importAMCData = new ImportAMCQuestionnaireData(
-                    this.dhis2EventsDefaultRepository,
-                    this.signalRepository,
-                    this.notificationRepository,
-                    this.usersDefaultRepository
-                );
-                return importAMCData.importAMCQuestionnaireData();
+                const importAMCData = new ImportAMCQuestionnaireData(this.dhis2EventsDefaultRepository);
+                return importAMCData.importAMCQuestionnaireData(questionnaire, orgUnit.id);
             }
             default: {
                 return Future.error("Unkown module");
