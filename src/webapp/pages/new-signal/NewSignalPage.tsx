@@ -44,7 +44,12 @@ export const NewSignalPage: React.FC = () => {
                 </CenteredDiv>
             )}
             {formVisibility && (
-                <ProgramQuestionnaireForm hideForm={hideForm} readonly={false} questionnaireId={EAR_PROGRAM_ID} />
+                <ProgramQuestionnaireForm
+                    hideForm={hideForm}
+                    readonly={false}
+                    questionnaireId={EAR_PROGRAM_ID}
+                    hidePublish={false}
+                />
             )}
         </ContentWrapper>
     );

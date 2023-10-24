@@ -25,6 +25,7 @@ export interface ProgramQuestionnaireFormProps {
     signalId?: string;
     signalEventId?: string;
     questionnaireId: string;
+    hidePublish: boolean;
 }
 
 const CancelButton = withStyles(() => ({
@@ -54,6 +55,49 @@ export const ProgramQuestionnaireForm: React.FC<ProgramQuestionnaireFormProps> =
         props.questionnaireId,
         props.signalEventId
     );
+
+    const publishQuestionnaire = () => {
+        setLoading(true);
+
+        if (questionnaire && readAccessGroup.kind === "loaded" && confidentialAccessGroup.kind === "loaded") {
+            const readAccessGroups = readAccessGroup.data.map(aag => {
+                return aag.id;
+            });
+            const confidentialAccessGroups = confidentialAccessGroup.data.map(cag => {
+                return cag.id;
+            });
+
+            compositionRoot.programQuestionnaires
+                .importData(
+                    props.signalId,
+                    props.signalEventId,
+                    questionnaire,
+                    {
+                        id: currentOrgUnitAccess.orgUnitId,
+                        name: currentOrgUnitAccess.orgUnitName,
+                        path: currentOrgUnitAccess.orgUnitPath,
+                    },
+                    { id: currentModuleAccess.moduleId, name: currentModuleAccess.moduleName },
+                    "Publish",
+                    readAccessGroups,
+                    confidentialAccessGroups
+                )
+                .run(
+                    () => {
+                        snackbar.info("Submission Success!");
+                        setLoading(false);
+                        if (props.hideForm) props.hideForm();
+                    },
+                    () => {
+                        snackbar.error(
+                            "Submission Failed! You do not have the necessary permissions, please contact your administrator"
+                        );
+                        setLoading(false);
+                        if (props.hideForm) props.hideForm();
+                    }
+                );
+        }
+    };
 
     const saveQuestionnaire = () => {
         setLoading(true);
@@ -100,49 +144,6 @@ export const ProgramQuestionnaireForm: React.FC<ProgramQuestionnaireFormProps> =
 
     useEffect(() => {}, [refresh]);
 
-    // const publishQuestionnaire = () => {
-    //     setLoading(true);
-
-    //     if (questionnaire && readAccessGroup.kind === "loaded" && confidentialAccessGroup.kind === "loaded") {
-    //         const readAccessGroups = readAccessGroup.data.map(aag => {
-    //             return aag.id;
-    //         });
-    //         const confidentialAccessGroups = confidentialAccessGroup.data.map(cag => {
-    //             return cag.id;
-    //         });
-
-    //         compositionRoot.programQuestionnaires
-    //             .importData(
-    //                 props.signalId,
-    //                 props.signalEventId,
-    //                 questionnaire,
-    //                 {
-    //                     id: currentOrgUnitAccess.orgUnitId,
-    //                     name: currentOrgUnitAccess.orgUnitName,
-    //                     path: currentOrgUnitAccess.orgUnitPath,
-    //                 },
-    //                 { id: currentModuleAccess.moduleId, name: currentModuleAccess.moduleName },
-    //                 "Publish",
-    //                 readAccessGroups,
-    //                 confidentialAccessGroups
-    //             )
-    //             .run(
-    //                 () => {
-    //                     snackbar.info("Submission Success!");
-    //                     setLoading(false);
-    //                     if (props.hideForm) props.hideForm();
-    //                 },
-    //                 () => {
-    //                     snackbar.error(
-    //                         "Submission Failed! You do not have the necessary permissions, please contact your administrator"
-    //                     );
-    //                     setLoading(false);
-    //                     if (props.hideForm) props.hideForm();
-    //                 }
-    //             );
-    //     }
-    // };
-
     const updateQuestion = (question: Question) => {
         if (moduleProperties.get(currentModuleAccess.moduleName)?.applyQuestionnaireValidation) {
             setQuestionnaire(questionnaire => {
@@ -171,7 +172,7 @@ export const ProgramQuestionnaireForm: React.FC<ProgramQuestionnaireFormProps> =
     };
 
     const onCancel = () => {
-        if (props.hideForm && history.location.pathname.includes("new-signal")) {
+        if (props.hideForm) {
             props.hideForm();
         } else {
             history.goBack();
@@ -243,11 +244,13 @@ export const ProgramQuestionnaireForm: React.FC<ProgramQuestionnaireFormProps> =
                         color="primary"
                         onClick={saveQuestionnaire}
                     >
-                        {i18n.t("Save Draft")}
+                        {props.hidePublish ? i18n.t("Save") : i18n.t("Save Draft")}
                     </Button>
-                    {/* <Button variant="contained" color="primary" onClick={publishQuestionnaire}>
-                        {i18n.t("Publish")}
-                    </Button> */}
+                    {!props.hidePublish && (
+                        <Button variant="contained" color="primary" onClick={publishQuestionnaire}>
+                            {i18n.t("Publish")}
+                        </Button>
+                    )}
                 </PageFooter>
             )}
         </div>

@@ -29,6 +29,7 @@ export const SignalPage: React.FC = () => {
                 signalEventId={signalEvtId}
                 hideForm={hideForm}
                 questionnaireId={EAR_PROGRAM_ID}
+                hidePublish={false}
             />
         </ContentWrapper>
     );
