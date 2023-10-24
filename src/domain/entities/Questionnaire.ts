@@ -84,6 +84,7 @@ export interface SingleCheckQuestion extends QuestionBase {
     type: "singleCheck";
     storeFalse: boolean;
     value: Maybe<boolean>;
+    disabled?: boolean;
 }
 
 export interface QuestionOption extends NamedRef {

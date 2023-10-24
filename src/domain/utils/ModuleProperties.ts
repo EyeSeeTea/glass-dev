@@ -18,6 +18,7 @@ type ModuleDetails = {
     isSpecimenReq: boolean;
     populateCurrentYearInHistory: boolean;
     isDownloadEmptyTemplateReq: boolean;
+    applyQuestionnaireValidation: boolean;
 };
 
 export const moduleProperties = new Map<string, ModuleDetails>([
@@ -44,6 +45,7 @@ export const moduleProperties = new Map<string, ModuleDetails>([
             isSpecimenReq: true,
             populateCurrentYearInHistory: false,
             isDownloadEmptyTemplateReq: false,
+            applyQuestionnaireValidation: false,
         },
     ],
     [
@@ -68,6 +70,7 @@ export const moduleProperties = new Map<string, ModuleDetails>([
             isSpecimenReq: false,
             populateCurrentYearInHistory: true,
             isDownloadEmptyTemplateReq: true,
+            applyQuestionnaireValidation: false,
         },
     ],
     [
@@ -92,6 +95,7 @@ export const moduleProperties = new Map<string, ModuleDetails>([
             isSpecimenReq: true,
             populateCurrentYearInHistory: false,
             isDownloadEmptyTemplateReq: false,
+            applyQuestionnaireValidation: false,
         },
     ],
     [
@@ -116,6 +120,7 @@ export const moduleProperties = new Map<string, ModuleDetails>([
             isSpecimenReq: false,
             populateCurrentYearInHistory: false,
             isDownloadEmptyTemplateReq: false,
+            applyQuestionnaireValidation: true,
         },
     ],
 ]);
