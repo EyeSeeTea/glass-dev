@@ -18,6 +18,7 @@ import { useProgramQuestionnaireForm } from "./hook/useProgramQuestionnaireForm"
 import { useHistory } from "react-router-dom";
 import { red300 } from "material-ui/styles/colors";
 import { moduleProperties } from "../../../domain/utils/ModuleProperties";
+import { useCurrentPeriodContext } from "../../contexts/current-period-context";
 
 export interface ProgramQuestionnaireFormProps {
     hideForm?: () => void;
@@ -44,6 +45,7 @@ export const ProgramQuestionnaireForm: React.FC<ProgramQuestionnaireFormProps> =
     const { currentModuleAccess } = useCurrentModuleContext();
     const { currentOrgUnitAccess } = useCurrentOrgUnitContext();
     const { readAccessGroup, confidentialAccessGroup } = useCurrentUserGroupsAccess();
+    const { currentPeriod } = useCurrentPeriodContext();
     const [refresh, setRefresh] = useState({});
     const history = useHistory();
 
@@ -77,6 +79,7 @@ export const ProgramQuestionnaireForm: React.FC<ProgramQuestionnaireFormProps> =
                         name: currentOrgUnitAccess.orgUnitName,
                         path: currentOrgUnitAccess.orgUnitPath,
                     },
+                    currentPeriod,
                     { id: currentModuleAccess.moduleId, name: currentModuleAccess.moduleName },
                     "Publish",
                     readAccessGroups,
@@ -120,6 +123,7 @@ export const ProgramQuestionnaireForm: React.FC<ProgramQuestionnaireFormProps> =
                         name: currentOrgUnitAccess.orgUnitName,
                         path: currentOrgUnitAccess.orgUnitPath,
                     },
+                    currentPeriod,
                     { id: currentModuleAccess.moduleId, name: currentModuleAccess.moduleName },
                     "Save",
                     readAccessGroups,

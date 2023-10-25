@@ -118,10 +118,17 @@ export const Questionnaires: React.FC<QuestionnairesProps> = ({ setRefetchStatus
                 {questionnaires.length === 0 && <h3>{i18n.t("There are no questionnaries for this module")}</h3>}
 
                 {questionnaires.map(questionnaire => (
-                    <QuestionnaireCard key={questionnaire.id}>
+                    <QuestionnaireCard key={`${questionnaire.id}${questionnaire.name}`}>
                         <div className="head">
                             <h3 style={{ wordBreak: "break-all" }}>{questionnaire.name}</h3>
                             <span className="desc">{questionnaire.description}</span>
+                            <br />
+                            <span className="comp completed">Filled Subquestionnaires</span>
+                            {questionnaire.filledSubQuestionnaires?.map(fq => (
+                                <span className="comp completed" key={fq}>
+                                    {fq}
+                                </span>
+                            ))}
                         </div>
 
                         {questionnaire.isMandatory && <span className="mand">{i18n.t("mandatory")}</span>}

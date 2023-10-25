@@ -12,6 +12,8 @@ export interface QuestionnaireBase {
     isCompleted: boolean;
     isMandatory: boolean;
     rules: QuestionnaireRule[];
+    filledSubQuestionnaires?: string[];
+    eventId?: Id;
 }
 
 export interface QuestionnaireSelector {
