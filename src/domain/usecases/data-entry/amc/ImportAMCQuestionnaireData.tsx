@@ -1,17 +1,22 @@
-import { D2TrackerEvent } from "@eyeseetea/d2-api/api/trackerEvents";
+import { D2TrackerEvent, DataValue } from "@eyeseetea/d2-api/api/trackerEvents";
 import { Dhis2EventsDefaultRepository } from "../../../../data/repositories/Dhis2EventsDefaultRepository";
 import { Future, FutureData } from "../../../entities/Future";
 import { Questionnaire } from "../../../entities/Questionnaire";
 import { Id } from "../../../entities/Ref";
 import { AMC_PROGRAM_ID } from "../../GetCaptureFormQuestionsUseCase";
 
-const AMR_GLASS_AMC_DET_DS_PERIOD = "HeeDWGJrFcV";
+export const AMR_GLASS_AMC_DET_DS_PERIOD = "HeeDWGJrFcV";
 export class ImportAMCQuestionnaireData {
     constructor(private dhis2EventsDefaultRepository: Dhis2EventsDefaultRepository) {}
 
-    importAMCQuestionnaireData(questionnaire: Questionnaire, orgUnitId: Id, period: string): FutureData<void> {
+    importAMCQuestionnaireData(
+        questionnaire: Questionnaire,
+        orgUnitId: Id,
+        period: string,
+        eventId: string | undefined
+    ): FutureData<void> {
         const events: D2TrackerEvent[] = [];
-        return this.mapQuestionnaireToEvent(questionnaire, orgUnitId, period).flatMap(event => {
+        return this.mapQuestionnaireToEvent(eventId, questionnaire, orgUnitId, period).flatMap(event => {
             events.push(event);
             return this.dhis2EventsDefaultRepository
                 .import({ events: events }, "CREATE_AND_UPDATE")
@@ -26,6 +31,7 @@ export class ImportAMCQuestionnaireData {
     }
 
     private mapQuestionnaireToEvent(
+        eventId: string | undefined,
         questionnaire: Questionnaire,
         orgUnitId: string,
         period: string
@@ -62,27 +68,25 @@ export class ImportAMCQuestionnaireData {
         );
 
         //TO DO :  Save existing events
-        // if (eventId) {
-        //     return this.dhis2EventsDefaultRepository.getEventById(eventId).flatMap(event => {
-        //         const updatedEvent: D2TrackerEvent = {
-        //             ...event,
-        //             status: eventStatus,
-        //             dataValues: dataValues as DataValue[],
-        //         };
-        //         return Future.success({ event: updatedEvent, confidential, message });
-        //     });
-        // } else {
-
-        const event: D2TrackerEvent = {
-            event: "",
-            orgUnit: orgUnitId,
-            program: AMC_PROGRAM_ID,
-            status: "ACTIVE",
-            occurredAt: new Date().toISOString().split("T")?.at(0) || "",
-            //@ts-ignore
-            dataValues: dataValues,
-        };
-        return Future.success(event);
-        // }
+        if (eventId) {
+            return this.dhis2EventsDefaultRepository.getEventById(eventId).flatMap(event => {
+                const updatedEvent: D2TrackerEvent = {
+                    ...event,
+                    dataValues: dataValues as DataValue[],
+                };
+                return Future.success(updatedEvent);
+            });
+        } else {
+            const event: D2TrackerEvent = {
+                event: "",
+                orgUnit: orgUnitId,
+                program: AMC_PROGRAM_ID,
+                status: "ACTIVE",
+                occurredAt: new Date().toISOString().split("T")?.at(0) || "",
+                //@ts-ignore
+                dataValues: dataValues,
+            };
+            return Future.success(event);
+        }
     }
 }

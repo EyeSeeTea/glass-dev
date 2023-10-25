@@ -19,6 +19,7 @@ import { useHistory } from "react-router-dom";
 import { red300 } from "material-ui/styles/colors";
 import { moduleProperties } from "../../../domain/utils/ModuleProperties";
 import { useCurrentPeriodContext } from "../../contexts/current-period-context";
+import { NamedRef } from "../../../domain/entities/Ref";
 
 export interface ProgramQuestionnaireFormProps {
     hideForm?: () => void;
@@ -27,6 +28,8 @@ export interface ProgramQuestionnaireFormProps {
     signalEventId?: string;
     questionnaireId: string;
     hidePublish: boolean;
+    selectedSubQuestionnaires?: NamedRef[];
+    disabledSubQuestionnaires?: string[];
 }
 
 const CancelButton = withStyles(() => ({
@@ -134,6 +137,7 @@ export const ProgramQuestionnaireForm: React.FC<ProgramQuestionnaireFormProps> =
                         snackbar.info("Submission Success!");
                         setLoading(false);
                         if (props.hideForm) props.hideForm();
+                        setRefresh({});
                     },
                     () => {
                         snackbar.error(
@@ -141,6 +145,7 @@ export const ProgramQuestionnaireForm: React.FC<ProgramQuestionnaireFormProps> =
                         );
                         setLoading(false);
                         if (props.hideForm) props.hideForm();
+                        setRefresh({});
                     }
                 );
         }
@@ -183,6 +188,13 @@ export const ProgramQuestionnaireForm: React.FC<ProgramQuestionnaireFormProps> =
         }
     };
 
+    const isDisabled = (question: Question): boolean => {
+        if (props.disabledSubQuestionnaires) {
+            if (props.disabledSubQuestionnaires.find(dsq => dsq === question.id)) return true;
+        }
+        return false;
+    };
+
     return (
         <div>
             <Backdrop open={loading} style={{ color: "#fff", zIndex: 1 }}>
@@ -222,8 +234,8 @@ export const ProgramQuestionnaireForm: React.FC<ProgramQuestionnaireFormProps> =
                                                         disabled={
                                                             props.readonly
                                                                 ? true
-                                                                : question.type === "singleCheck" && question.disabled
-                                                                ? true
+                                                                : question.type === "singleCheck"
+                                                                ? isDisabled(question)
                                                                 : false
                                                         }
                                                     />

@@ -20,6 +20,7 @@ import { useCurrentPeriodContext } from "../../contexts/current-period-context";
 import { isEditModeStatus } from "../../../utils/editModeStatus";
 import { useCurrentUserGroupsAccess } from "../../hooks/useCurrentUserGroupsAccess";
 import { ProgramQuestionnaireForm } from "../new-signal/ProgramQuestionnaireForm";
+import { NamedRef } from "../../../domain/entities/Ref";
 
 interface QuestionnairesProps {
     setRefetchStatus: Dispatch<SetStateAction<DataSubmissionStatusTypes | undefined>>;
@@ -109,6 +110,9 @@ export const Questionnaires: React.FC<QuestionnairesProps> = ({ setRefetchStatus
                     questionnaireId={formState.id}
                     readonly={formState.mode === "show" ? true : false}
                     hidePublish={true}
+                    signalEventId={formState.eventId}
+                    selectedSubQuestionnaires={formState.selectedSubQuestionnaires}
+                    disabledSubQuestionnaires={formState.disabledSubQuestionnaires}
                 />
             );
         }
@@ -123,12 +127,15 @@ export const Questionnaires: React.FC<QuestionnairesProps> = ({ setRefetchStatus
                             <h3 style={{ wordBreak: "break-all" }}>{questionnaire.name}</h3>
                             <span className="desc">{questionnaire.description}</span>
                             <br />
-                            <span className="comp completed">Filled Subquestionnaires</span>
-                            {questionnaire.filledSubQuestionnaires?.map(fq => (
-                                <span className="comp completed" key={fq}>
-                                    {fq}
-                                </span>
-                            ))}
+                            {questionnaire.selectedSubQuestionnaires &&
+                                questionnaire.selectedSubQuestionnaires.length > 0 && (
+                                    <>
+                                        <span className="comp completed">Filled Subquestionnaires</span>
+                                        {questionnaire.selectedSubQuestionnaires.map(fq => (
+                                            <span key={fq.id}>{fq.name}</span>
+                                        ))}
+                                    </>
+                                )}
                         </div>
 
                         {questionnaire.isMandatory && <span className="mand">{i18n.t("mandatory")}</span>}
@@ -269,14 +276,35 @@ function useQuestionnaires() {
     return [questionnaires, updateQuestionnarie, questionnairesType] as const;
 }
 
-type QuestionnaireFormState = { mode: "closed" } | { mode: "show"; id: Id } | { mode: "edit"; id: Id };
+type QuestionnaireFormState =
+    | { mode: "closed" }
+    | {
+          mode: "show";
+          id: Id;
+          eventId?: Id;
+          selectedSubQuestionnaires?: NamedRef[];
+          disabledSubQuestionnaires?: string[];
+      }
+    | {
+          mode: "edit";
+          id: Id;
+          eventId?: Id;
+          selectedSubQuestionnaires?: NamedRef[];
+          disabledSubQuestionnaires?: string[];
+      };
 
 function useFormState() {
     const [formState, setFormState] = React.useState<QuestionnaireFormState>({ mode: "closed" });
 
     const goToQuestionnarie = React.useCallback(
         (questionnaire: QuestionnaireBase, options: { mode: "show" | "edit" }) => {
-            setFormState({ mode: options.mode, id: questionnaire.id });
+            setFormState({
+                mode: options.mode,
+                id: questionnaire.id,
+                eventId: questionnaire.eventId,
+                selectedSubQuestionnaires: questionnaire.selectedSubQuestionnaires,
+                disabledSubQuestionnaires: questionnaire.disabledSubQuestionnaires,
+            });
         },
         []
     );

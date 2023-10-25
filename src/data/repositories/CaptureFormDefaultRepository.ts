@@ -14,7 +14,6 @@ import {
 import { apiToFuture } from "../../utils/futures";
 import { D2TrackerEvent } from "@eyeseetea/d2-api/api/trackerEvents";
 import { Id } from "../../domain/entities/Ref";
-import { EAR_PROGRAM_ID } from "../../domain/usecases/GetCaptureFormQuestionsUseCase";
 
 interface EARProgram {
     code: string;
@@ -98,11 +97,11 @@ export class CaptureFormDefaultRepository implements CaptureFormRepository {
         });
     }
 
-    getPopulatedForm(event: D2TrackerEvent): FutureData<Questionnaire> {
+    getPopulatedForm(event: D2TrackerEvent, programId: string): FutureData<Questionnaire> {
         return apiToFuture(
             this.api.request<ProgramMetadata>({
                 method: "get",
-                url: `/programs/${EAR_PROGRAM_ID}/metadata.json?fields=programs,dataElements,programStageSections`,
+                url: `/programs/${programId}/metadata.json?fields=programs,dataElements,programStageSections`,
             })
         ).flatMap(resp => {
             if (resp.programs[0]) {

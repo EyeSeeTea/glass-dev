@@ -48,10 +48,37 @@ export class GetAMCQuestionnaireListUseCase {
                             isCompleted: false, //TO DO : fetch status of program.
                             isMandatory: questionnaire.isMandatory,
                             rules: [],
-                            filledSubQuestionnaires: selectedSQDEs.map(de => de.dataElement),
+                            selectedSubQuestionnaires: _(
+                                selectedSQDEs.map(de => {
+                                    const deDetails = amcQuestionMap.find(qm => qm.id === de.dataElement);
+                                    if (deDetails) return { id: deDetails?.id ?? "", name: deDetails?.name ?? "" };
+                                })
+                            )
+                                .compact()
+                                .value(),
                             eventId: e.event,
                         };
                     });
+
+                    //Get all filled sub questionaires across events
+                    const allSelectedSQs = splitAMCQuestionnaires.flatMap(q => q.selectedSubQuestionnaires);
+
+                    //Get all disabled sub questionnaires based on AMC split logic.
+                    const sqsToDisable: string[] = [];
+                    allSelectedSQs.forEach(selSQ => {
+                        if (selSQ) {
+                            sqsToDisable.push(selSQ.id);
+                            const sqMap = amcQuestionMap.find(qm => qm.id === selSQ.id);
+                            if (sqMap) sqsToDisable.push(...sqMap.questionsToDisable);
+                        }
+                    });
+                    splitAMCQuestionnaires.forEach(sq => {
+                        sq.disabledSubQuestionnaires = sqsToDisable;
+                    });
+
+                    if (sqsToDisable.length < 9) {
+                        splitAMCQuestionnaires.push(questionnaire);
+                    }
 
                     return Future.success(splitAMCQuestionnaires);
                 }

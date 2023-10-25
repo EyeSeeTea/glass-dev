@@ -8,6 +8,7 @@ import { TrackerPostResponse } from "@eyeseetea/d2-api/api/tracker";
 import { D2Api, Id } from "@eyeseetea/d2-api/2.34";
 import { apiToFuture } from "../../utils/futures";
 import { AMCDataQuestionnaire } from "../../domain/entities/Questionnaire";
+import { AMR_GLASS_AMC_DET_DS_PERIOD } from "../../domain/usecases/data-entry/amc/ImportAMCQuestionnaireData";
 
 export declare type EventStatus = "ACTIVE" | "COMPLETED" | "VISITED" | "SCHEDULED" | "OVERDUE" | "SKIPPED";
 
@@ -90,7 +91,7 @@ export class Dhis2EventsDefaultRepository {
         ).flatMap(res => {
             //Filter by year
             const amcQuestionnaireEvents = res.instances.filter(
-                e => e.dataValues.find(dv => dv.dataElement === "HeeDWGJrFcV")?.value === year
+                e => e.dataValues.find(dv => dv.dataElement === AMR_GLASS_AMC_DET_DS_PERIOD)?.value === year
             );
             return Future.success(amcQuestionnaireEvents);
         });

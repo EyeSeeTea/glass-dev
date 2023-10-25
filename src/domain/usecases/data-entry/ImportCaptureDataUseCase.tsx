@@ -47,7 +47,7 @@ export class ImportCaptureDataUseCase {
             }
             case "AMC": {
                 const importAMCData = new ImportAMCQuestionnaireData(this.dhis2EventsDefaultRepository);
-                return importAMCData.importAMCQuestionnaireData(questionnaire, orgUnit.id, period);
+                return importAMCData.importAMCQuestionnaireData(questionnaire, orgUnit.id, period, signalEventId);
             }
             default: {
                 return Future.error("Unkown module");
