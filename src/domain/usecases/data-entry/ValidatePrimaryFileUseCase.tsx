@@ -29,7 +29,7 @@ export class ValidatePrimaryFileUseCase implements UseCase {
             }
             case "AMR - Individual":
             case "AMR - Funghi": {
-                return this.risIndividualFunghiRepository.validate(inputFile);
+                return this.risIndividualFunghiRepository.validate(moduleName, inputFile);
             }
 
             default: {

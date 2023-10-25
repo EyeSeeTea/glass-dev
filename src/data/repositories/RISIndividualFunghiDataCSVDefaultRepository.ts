@@ -6,9 +6,9 @@ import { SpreadsheetXlsxDataSource } from "./SpreadsheetXlsxDefaultRepository";
 import { doesColumnExist, getNumberValue, getTextValue } from "./utils/CSVUtils";
 
 export class RISIndividualFunghiDataCSVDefaultRepository implements RISIndividualFunghiDataRepository {
-    get(file: File): FutureData<RISIndividualFunghiData[]> {
+    get(moduleName: string, file: File): FutureData<RISIndividualFunghiData[]> {
         return Future.fromPromise(new SpreadsheetXlsxDataSource().read(file)).map(spreadsheet => {
-            const sheet = spreadsheet.sheets[0]; //Only one sheet for AMR Individual
+            const sheet = spreadsheet.sheets[0]; //Only one sheet for AMR Individual & Funghi
 
             return (
                 sheet?.rows.map(row => {
@@ -42,13 +42,16 @@ export class RISIndividualFunghiDataCSVDefaultRepository implements RISIndividua
                         RESULTMICSIGN: getTextValue(row, "RESULTMICSIGN"),
                         RESULTMICVALUE: getNumberValue(row, "RESULTMICVALUE"),
                         RESULTMICSIR: getTextValue(row, "RESULTMICSIR"),
+                        ...(moduleName === "AMR - Individual" && {
+                            ABCLASS: getTextValue(row, "ABCLASS"),
+                        }),
                     };
                 }) || []
             );
         });
     }
 
-    validate(file: File): FutureData<{ isValid: boolean; records: number; specimens: string[] }> {
+    validate(moduleName: string, file: File): FutureData<{ isValid: boolean; records: number; specimens: string[] }> {
         return Future.fromPromise(new SpreadsheetXlsxDataSource().read(file)).map(spreadsheet => {
             const sheet = spreadsheet.sheets[0]; //Only one sheet for AMR RIS
             const firstRow = sheet?.rows[0];
@@ -73,7 +76,10 @@ export class RISIndividualFunghiDataCSVDefaultRepository implements RISIndividua
                     doesColumnExist(firstRow, "ANTIBIOTIC") &&
                     doesColumnExist(firstRow, "SIR") &&
                     doesColumnExist(firstRow, "REFERENCEGUIDELINESSIR") &&
-                    doesColumnExist(firstRow, "DISKLOAD");
+                    doesColumnExist(firstRow, "DISKLOAD") &&
+                    moduleName === "AMR - Individual"
+                        ? doesColumnExist(firstRow, "ABCLASS")
+                        : !doesColumnExist(firstRow, "ABCLASS");
 
                 const uniqSpecimens = _(sheet.rows)
                     .uniqBy("SPECIMEN")
