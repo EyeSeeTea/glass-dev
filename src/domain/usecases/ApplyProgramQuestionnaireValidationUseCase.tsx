@@ -19,7 +19,7 @@ const sl_glo_pub = "mQS6OUXAaRr";
 const sl_glo_pri = "GWac7iDfHv3";
 const sl_glo_tot = "mks6wWdSZRq";
 
-const amcQuestionMap: AMCQuestionDisableMap[] = [
+export const amcQuestionMap: AMCQuestionDisableMap[] = [
     //Community sector levels
     {
         id: sl_pub_com,

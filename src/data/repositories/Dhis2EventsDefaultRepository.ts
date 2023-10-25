@@ -81,7 +81,6 @@ export class Dhis2EventsDefaultRepository {
     //The AMC-Data Questionnaire is implemented as a Event Program
     //There could be a maximum of 6 events for this Program - no need of paging.
     getAMCDataQuestionnaireEventsByOrgUnit(orgUnitId: Id, year: string): FutureData<D2TrackerEvent[]> {
-        console.debug(year);
         return apiToFuture(
             this.api.tracker.events.get({
                 fields: { $owner: true, event: true, dataValues: true, orgUnit: true, scheduledAt: true },
@@ -90,7 +89,10 @@ export class Dhis2EventsDefaultRepository {
             })
         ).flatMap(res => {
             //Filter by year
-            return Future.success(res.instances);
+            const amcQuestionnaireEvents = res.instances.filter(
+                e => e.dataValues.find(dv => dv.dataElement === "HeeDWGJrFcV")?.value === year
+            );
+            return Future.success(amcQuestionnaireEvents);
         });
     }
 }
