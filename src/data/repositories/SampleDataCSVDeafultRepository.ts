@@ -30,19 +30,19 @@ export class SampleDataCSVDeafultRepository implements SampleDataRepository {
     validate(file: File): FutureData<{ isValid: boolean; records: number }> {
         return Future.fromPromise(new SpreadsheetXlsxDataSource().read(file)).map(spreadsheet => {
             const sheet = spreadsheet.sheets[0]; //Only one sheet for AMR RIS
-            const firstRow = sheet?.rows[0];
+            const headerRow = sheet?.headers;
 
-            if (firstRow) {
+            if (headerRow) {
                 const allSampleColsPresent =
-                    doesColumnExist(firstRow, "COUNTRY") &&
-                    doesColumnExist(firstRow, "YEAR") &&
-                    doesColumnExist(firstRow, "SPECIMEN") &&
-                    doesColumnExist(firstRow, "GENDER") &&
-                    doesColumnExist(firstRow, "ORIGIN") &&
-                    doesColumnExist(firstRow, "AGEGROUP") &&
+                    doesColumnExist(headerRow, "COUNTRY") &&
+                    doesColumnExist(headerRow, "YEAR") &&
+                    doesColumnExist(headerRow, "SPECIMEN") &&
+                    doesColumnExist(headerRow, "GENDER") &&
+                    doesColumnExist(headerRow, "ORIGIN") &&
+                    doesColumnExist(headerRow, "AGEGROUP") &&
                     // doesColumnExist(firstRow, "NUMINFECTED") &&
-                    doesColumnExist(firstRow, "NUMSAMPLEDPATIENTS") &&
-                    doesColumnExist(firstRow, "BATCHID");
+                    doesColumnExist(headerRow, "NUMSAMPLEDPATIENTS") &&
+                    doesColumnExist(headerRow, "BATCHID");
 
                 return { isValid: allSampleColsPresent ? true : false, records: sheet.rows.length };
             } else
