@@ -5,6 +5,6 @@ import { Id } from "../entities/Ref";
 
 export interface CaptureFormRepository {
     getForm(programId: Id): FutureData<Questionnaire>;
-    getPopulatedForm(event: D2TrackerEvent): FutureData<Questionnaire>;
+    getPopulatedForm(event: D2TrackerEvent, programId: string): FutureData<Questionnaire>;
     getSignalEvent(eventId: string): FutureData<D2TrackerEvent>;
 }

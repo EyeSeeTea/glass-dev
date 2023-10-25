@@ -12,7 +12,8 @@ export interface QuestionnaireBase {
     isCompleted: boolean;
     isMandatory: boolean;
     rules: QuestionnaireRule[];
-    filledSubQuestionnaires?: string[];
+    selectedSubQuestionnaires?: NamedRef[];
+    disabledSubQuestionnaires?: string[];
     eventId?: Id;
 }
 
@@ -86,7 +87,8 @@ export interface SingleCheckQuestion extends QuestionBase {
     type: "singleCheck";
     storeFalse: boolean;
     value: Maybe<boolean>;
-    disabled?: boolean;
+    selfDisabled?: boolean;
+    dependantDisable?: boolean;
 }
 
 export interface QuestionOption extends NamedRef {

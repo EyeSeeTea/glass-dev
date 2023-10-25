@@ -3,6 +3,7 @@ import { Id } from "../entities/Ref";
 
 interface AMCQuestionDisableMap {
     id: Id;
+    name: string;
     questionsToDisable: Id[];
 }
 
@@ -19,44 +20,65 @@ const sl_glo_pub = "mQS6OUXAaRr";
 const sl_glo_pri = "GWac7iDfHv3";
 const sl_glo_tot = "mks6wWdSZRq";
 
+export const amcSubQuestionnaireDEList = [
+    sl_pub_com,
+    sl_pri_com,
+    sl_glo_com,
+    sl_pub_hos,
+    sl_pri_hos,
+    sl_glo_hos,
+    sl_glo_pub,
+    sl_glo_pri,
+    sl_glo_tot,
+];
+
 export const amcQuestionMap: AMCQuestionDisableMap[] = [
     //Community sector levels
     {
         id: sl_pub_com,
+        name: "Community level & Public sector",
         questionsToDisable: [sl_glo_com, sl_glo_pub, sl_glo_tot],
     },
     {
         id: sl_pri_com,
+        name: "Community level & Private sector",
         questionsToDisable: [sl_glo_com, sl_glo_pri, sl_glo_tot],
     },
     {
         id: sl_glo_com,
+        name: "Community level & Global sector",
         questionsToDisable: [sl_pub_com, sl_pri_com, sl_glo_tot],
     },
     //Hospital sector levels
     {
         id: sl_pub_hos,
+        name: "Hospital level & Public sector",
         questionsToDisable: [sl_glo_hos, sl_glo_pub, sl_glo_tot],
     },
     {
         id: sl_pri_hos,
+        name: "Hospital level & Private sector",
         questionsToDisable: [sl_glo_hos, sl_glo_pri, sl_glo_tot],
     },
     {
         id: sl_glo_hos,
+        name: "Hospital level & Global sector",
         questionsToDisable: [sl_pub_hos, sl_pri_hos, sl_glo_tot],
     },
     //Total sector levels
     {
         id: sl_glo_pub,
+        name: "Total level & Public sector",
         questionsToDisable: [sl_glo_tot, sl_pub_com, sl_pub_hos],
     },
     {
         id: sl_glo_pri,
+        name: "Total level & Private sector",
         questionsToDisable: [sl_glo_tot, sl_pri_com, sl_pri_hos],
     },
     {
         id: sl_glo_tot,
+        name: "Total level & Global sector",
         questionsToDisable: [
             sl_glo_pub,
             sl_glo_pri,
@@ -92,7 +114,7 @@ export class ApplyProgramQuestionnaireValidationUseCase {
                     .compact()
                     .value();
                 if (questionToUpdate && questionToUpdate[0] && questionToUpdate[0].type === "singleCheck") {
-                    questionToUpdate[0].disabled = question.value ? true : false;
+                    questionToUpdate[0].selfDisabled = question.value ? true : false;
                 } else {
                     console.debug("An error occured, there should be a corresponding question");
                 }
@@ -124,7 +146,7 @@ export class ApplyProgramQuestionnaireValidationUseCase {
                     .value();
 
                 if (questionToUpdate && questionToUpdate[0] && questionToUpdate[0].type === "singleCheck") {
-                    questionToUpdate[0].disabled = true;
+                    questionToUpdate[0].selfDisabled = true;
                 } else {
                     console.debug("An error occured, there should be a corresponding question");
                 }
