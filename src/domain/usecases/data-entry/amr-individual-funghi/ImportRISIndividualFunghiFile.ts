@@ -45,68 +45,70 @@ export class ImportRISIndividualFunghiFile {
         moduleName: string
     ): FutureData<ImportSummary> {
         if (action === "CREATE_AND_UPDATE") {
-            return this.risIndividualFunghiRepository.get(inputFile).flatMap(risIndividualFunghiDataItems => {
-                return this.validateDataItems(risIndividualFunghiDataItems, countryCode, period).flatMap(
-                    validationSummary => {
-                        //If there are blocking errors on custom validation, do not import. Return immediately.
-                        if (validationSummary.blockingErrors.length > 0) {
-                            return Future.success(validationSummary);
-                        }
-                        //Import RIS data
-                        const AMRIProgramIDl = program ? program.id : AMRIProgramID;
-                        //const AMRDataProgramStageIdl = program ? program.programStageId : AMRDataProgramStageId;
-                        const AMRDataProgramStageIdl = () => {
-                            if (program) {
-                                return program.programStageId;
-                            } else {
-                                return moduleName === "AMR - Individual"
-                                    ? AMRDataProgramStageId
-                                    : AMRCandidaProgramStageId;
+            return this.risIndividualFunghiRepository
+                .get(moduleName, inputFile)
+                .flatMap(risIndividualFunghiDataItems => {
+                    return this.validateDataItems(risIndividualFunghiDataItems, countryCode, period).flatMap(
+                        validationSummary => {
+                            //If there are blocking errors on custom validation, do not import. Return immediately.
+                            if (validationSummary.blockingErrors.length > 0) {
+                                return Future.success(validationSummary);
                             }
-                        };
+                            //Import RIS data
+                            const AMRIProgramIDl = program ? program.id : AMRIProgramID;
+                            //const AMRDataProgramStageIdl = program ? program.programStageId : AMRDataProgramStageId;
+                            const AMRDataProgramStageIdl = () => {
+                                if (program) {
+                                    return program.programStageId;
+                                } else {
+                                    return moduleName === "AMR - Individual"
+                                        ? AMRDataProgramStageId
+                                        : AMRCandidaProgramStageId;
+                                }
+                            };
 
-                        return this.mapIndividualFunghiDataItemsToEntities(
-                            risIndividualFunghiDataItems,
-                            orgUnit,
-                            AMRIProgramIDl,
-                            AMRDataProgramStageIdl(),
-                            countryCode
-                        ).flatMap(entities => {
-                            return this.trackerRepository
-                                .import({ trackedEntities: entities }, action)
-                                .flatMap(response => {
-                                    const { summary, entityIdsList } = this.mapResponseToImportSummary(response);
+                            return this.mapIndividualFunghiDataItemsToEntities(
+                                risIndividualFunghiDataItems,
+                                orgUnit,
+                                AMRIProgramIDl,
+                                AMRDataProgramStageIdl(),
+                                countryCode
+                            ).flatMap(entities => {
+                                return this.trackerRepository
+                                    .import({ trackedEntities: entities }, action)
+                                    .flatMap(response => {
+                                        const { summary, entityIdsList } = this.mapResponseToImportSummary(response);
 
-                                    const primaryUploadId = localStorage.getItem("primaryUploadId");
-                                    if (entityIdsList.length > 0 && primaryUploadId) {
-                                        //Enrollments were imported successfully, so create and uplaod a file with enrollments ids
-                                        // and associate it with the upload datastore object
-                                        const enrollmentIdListBlob = new Blob([JSON.stringify(entityIdsList)], {
-                                            type: "text/plain",
-                                        });
-
-                                        const enrollmentIdsListFile = new File(
-                                            [enrollmentIdListBlob],
-                                            `${primaryUploadId}_enrollmentIdsFile`
-                                        );
-
-                                        return this.glassDocumentsRepository
-                                            .save(enrollmentIdsListFile, "AMR")
-                                            .flatMap(fileId => {
-                                                return this.glassUploadsRepository
-                                                    .setEventListFileId(primaryUploadId, fileId)
-                                                    .flatMap(() => {
-                                                        return Future.success(summary);
-                                                    });
+                                        const primaryUploadId = localStorage.getItem("primaryUploadId");
+                                        if (entityIdsList.length > 0 && primaryUploadId) {
+                                            //Enrollments were imported successfully, so create and uplaod a file with enrollments ids
+                                            // and associate it with the upload datastore object
+                                            const enrollmentIdListBlob = new Blob([JSON.stringify(entityIdsList)], {
+                                                type: "text/plain",
                                             });
-                                    } else {
-                                        return Future.success(summary);
-                                    }
-                                });
-                        });
-                    }
-                );
-            });
+
+                                            const enrollmentIdsListFile = new File(
+                                                [enrollmentIdListBlob],
+                                                `${primaryUploadId}_enrollmentIdsFile`
+                                            );
+
+                                            return this.glassDocumentsRepository
+                                                .save(enrollmentIdsListFile, "AMR")
+                                                .flatMap(fileId => {
+                                                    return this.glassUploadsRepository
+                                                        .setEventListFileId(primaryUploadId, fileId)
+                                                        .flatMap(() => {
+                                                            return Future.success(summary);
+                                                        });
+                                                });
+                                        } else {
+                                            return Future.success(summary);
+                                        }
+                                    });
+                            });
+                        }
+                    );
+                });
         } else if (action === "DELETE") {
             if (eventListId) {
                 return this.glassDocumentsRepository.download(eventListId).flatMap(file => {
