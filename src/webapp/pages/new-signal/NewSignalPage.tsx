@@ -8,7 +8,7 @@ import styled from "styled-components";
 import { glassColors, palette } from "../app/themes/dhis2.theme";
 
 import { ProgramQuestionnaireForm } from "../../components/new-signal/ProgramQuestionnaireForm";
-import { EAR_PROGRAM_ID } from "../../../domain/usecases/GetProgramQuestionnaireQuestionsUseCase";
+import { EAR_PROGRAM_ID } from "../../../domain/usecases/GetProgramQuestionnaireUseCase";
 
 export const NewSignalPage: React.FC = () => {
     const { currentModuleAccess } = useCurrentModuleContext();

@@ -1,7 +1,7 @@
 import { useSnackbar } from "@eyeseetea/d2-ui-components";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { Button, LinearProgress } from "@material-ui/core";
-import React, { Dispatch, SetStateAction, useEffect } from "react";
+import React, { Dispatch, SetStateAction } from "react";
 import styled from "styled-components";
 import { Id } from "../../../domain/entities/Base";
 import { QuestionnaireBase, QuestionnairesType } from "../../../domain/entities/Questionnaire";
@@ -29,13 +29,10 @@ export const Questionnaires: React.FC<QuestionnairesProps> = ({ setRefetchStatus
     const { compositionRoot } = useAppContext();
     const hasCurrentUserCaptureAccess = useGlassCaptureAccess();
     const hasCurrentUserViewAccess = useGlassReadAccess();
-    const [questionnaires, updateQuestionnarie, questionnairesType] = useQuestionnaires();
+    const [questionnaires, updateQuestionnarie, questionnairesType, setRefresh] = useQuestionnaires();
     const { orgUnit, year } = useSelector();
     const [formState, actions] = useFormState();
     const { currentModuleAccess } = useCurrentModuleContext();
-    const [refresh, setRefresh] = React.useState({});
-
-    useEffect(() => {}, [refresh]);
 
     const dataSubmissionId = useCurrentDataSubmissionId(
         compositionRoot,
@@ -253,6 +250,7 @@ function useQuestionnaires() {
     const snackbar = useSnackbar();
     const { orgUnit, year } = useSelector();
     const hasCurrentUserCaptureAccess = useGlassCaptureAccess() ? true : false;
+    const [refresh, setRefresh] = React.useState({});
 
     React.useEffect(() => {
         if (module.kind !== "loaded") return;
@@ -266,7 +264,7 @@ function useQuestionnaires() {
                 },
                 err => snackbar.error(err)
             );
-    }, [compositionRoot, snackbar, module, orgUnit, year, hasCurrentUserCaptureAccess]);
+    }, [compositionRoot, snackbar, module, orgUnit, year, hasCurrentUserCaptureAccess, refresh]);
 
     const updateQuestionnarie = React.useCallback<QuestionnarieFormProps["onSave"]>(updatedQuestionnaire => {
         setQuestionnaires(prevQuestionnaries =>
@@ -276,7 +274,7 @@ function useQuestionnaires() {
         );
     }, []);
 
-    return [questionnaires, updateQuestionnarie, questionnairesType] as const;
+    return [questionnaires, updateQuestionnarie, questionnairesType, setRefresh] as const;
 }
 
 type QuestionnaireFormState =

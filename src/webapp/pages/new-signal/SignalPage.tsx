@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { useHistory, useLocation } from "react-router-dom";
 import styled from "styled-components";
-import { EAR_PROGRAM_ID } from "../../../domain/usecases/GetProgramQuestionnaireQuestionsUseCase";
+import { EAR_PROGRAM_ID } from "../../../domain/usecases/GetProgramQuestionnaireUseCase";
 import { ProgramQuestionnaireForm } from "../../components/new-signal/ProgramQuestionnaireForm";
 
 export const SignalPage: React.FC = () => {

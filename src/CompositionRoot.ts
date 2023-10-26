@@ -68,12 +68,12 @@ import { SaveKeyUiLocaleUseCase } from "./domain/usecases/SaveKeyUiLocaleUseCase
 import { ProgramRulesMetadataDefaultRepository } from "./data/repositories/program-rule/ProgramRulesMetadataDefaultRepository";
 import { RISIndividualDataCSVDefaultRepository } from "./data/repositories/RISIndividualDataCSVDefaultRepository";
 import { TrackerDefaultRepository } from "./data/repositories/TrackerDefaultRepository";
-import { GetProgramQuestionnaireQuestionsUseCase } from "./domain/usecases/GetProgramQuestionnaireQuestionsUseCase";
+import { GetProgramQuestionnaireUseCase } from "./domain/usecases/GetProgramQuestionnaireUseCase";
 import { CaptureFormDefaultRepository } from "./data/repositories/CaptureFormDefaultRepository";
-import { ImportCaptureDataUseCase } from "./domain/usecases/data-entry/ImportCaptureDataUseCase";
+import { ImportProgramQuestionnaireDataUseCase } from "./domain/usecases/data-entry/ImportProgramQuestionnaireDataUseCase";
 import { SignalDefaultRepository } from "./data/repositories/SignalDefaultRepository";
-import { GetSignalsUseCase } from "./domain/usecases/GetSignalsUseCase";
-import { GetPopulatedProgramQuestionnaireQuestionsUseCase } from "./domain/usecases/GetPopulatedProgramQuestionnaireQuestionsUseCase";
+import { GetProgramQuestionnairesUseCase } from "./domain/usecases/GetProgramQuestionnairesUseCase";
+import { GetPopulatedProgramQuestionnaireUseCase } from "./domain/usecases/GetPopulatedProgramQuestionnaireUseCase";
 import { DeleteSignalUseCase } from "./domain/usecases/DeleteSignalUseCase";
 import { GetEGASPEmptyTemplateUseCase } from "./domain/usecases/data-entry/egasp/GetEGASPEmptyTemplateUseCase";
 import { EGASPDownloadEmptyTemplate } from "./data/repositories/download-empty-template/EGASPDownloadEmptyTemplate";
@@ -211,15 +211,15 @@ export function getCompositionRoot(instance: Instance) {
             saveKeyDbLocale: new SaveKeyDbLocaleUseCase(usersRepository),
         }),
         programQuestionnaires: getExecute({
-            getForm: new GetProgramQuestionnaireQuestionsUseCase(captureFormRepository),
-            importData: new ImportCaptureDataUseCase(
+            getForm: new GetProgramQuestionnaireUseCase(captureFormRepository),
+            importData: new ImportProgramQuestionnaireDataUseCase(
                 dhis2EventsDefaultRepository,
                 signalRepository,
                 notificationRepository,
                 usersRepository
             ),
-            getList: new GetSignalsUseCase(signalRepository),
-            getPopulatedForm: new GetPopulatedProgramQuestionnaireQuestionsUseCase(captureFormRepository),
+            getList: new GetProgramQuestionnairesUseCase(signalRepository),
+            getPopulatedForm: new GetPopulatedProgramQuestionnaireUseCase(captureFormRepository),
             delete: new DeleteSignalUseCase(dhis2EventsDefaultRepository, signalRepository),
             applyValidations: new ApplyAMCQuestionUpdationUseCase(),
         }),
