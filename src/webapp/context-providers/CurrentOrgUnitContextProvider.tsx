@@ -20,6 +20,7 @@ export const CurrentOrgUnitContextProvider: React.FC = ({ children }) => {
     const changeCurrentOrgUnitAccess = useCallback(
         (updatedOrgUnit: string) => {
             const currentOrgUnitAccess = currentUser.userOrgUnitsAccess.find(ou => ou.orgUnitId === updatedOrgUnit);
+
             if (currentOrgUnitAccess) {
                 setCurrentOrgUnitAccess(currentOrgUnitAccess);
                 if (orgUnitQueryParam) {

@@ -15,7 +15,12 @@ export function useGlassDataSubmissionsByModuleAndOU(moduleId: string, orgUnit: 
     useEffect(() => {
         if (moduleId !== "" && orgUnit !== "")
             compositionRoot.glassDataSubmission.getDataSubmissionsByModuleAndOU(moduleId, orgUnit).run(
-                dataSubmissionsByModule => setDataSubmissions({ kind: "loaded", data: dataSubmissionsByModule }),
+                dataSubmissionsByModule => {
+                    setDataSubmissions({
+                        kind: "loaded",
+                        data: _.orderBy(dataSubmissionsByModule, ["period"], ["desc"]),
+                    });
+                },
                 error => setDataSubmissions({ kind: "error", message: error })
             );
     }, [setDataSubmissions, compositionRoot.glassDataSubmission, moduleId, orgUnit, refetch]);
