@@ -56,6 +56,15 @@ export class GetAMCQuestionnaireListUseCase {
                             )
                                 .compact()
                                 .value(),
+
+                            selfDisabledSubQuestionnaires: _(
+                                selectedSQDEs.flatMap(de => {
+                                    const deDetails = amcQuestionMap.find(qm => qm.id === de.dataElement);
+                                    if (deDetails) return deDetails.questionsToDisable;
+                                })
+                            )
+                                .compact()
+                                .value(),
                             eventId: e.event,
                         };
                     });
@@ -72,11 +81,18 @@ export class GetAMCQuestionnaireListUseCase {
                             if (sqMap) sqsToDisable.push(...sqMap.questionsToDisable);
                         }
                     });
+
+                    const uniqsqsToDisable = _(sqsToDisable).uniq().value();
                     splitAMCQuestionnaires.forEach(sq => {
-                        sq.disabledSubQuestionnaires = sqsToDisable;
+                        sq.dependencyDisabledSubQuestionnaires = uniqsqsToDisable.filter(
+                            de => sq.selfDisabledSubQuestionnaires?.find(sd => sd === de) === undefined
+                        );
                     });
 
-                    if (sqsToDisable.length < 9) {
+                    if (uniqsqsToDisable.length < 9) {
+                        questionnaire.dependencyDisabledSubQuestionnaires = uniqsqsToDisable.filter(
+                            de => questionnaire.selfDisabledSubQuestionnaires?.find(sd => sd === de) === undefined
+                        );
                         splitAMCQuestionnaires.push(questionnaire);
                     }
 

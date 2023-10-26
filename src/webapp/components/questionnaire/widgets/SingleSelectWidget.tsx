@@ -9,12 +9,14 @@ import { makeStyles } from "@material-ui/core";
 export interface SingleSelectWidgetProps extends BaseWidgetProps<Option> {
     value: Maybe<Id>;
     options: Option[];
+    selfDisabled?: boolean;
+    dependecyDisabled?: boolean;
 }
 
 type Option = { id: string; name: string };
 
 const SingleSelectWidget: React.FC<SingleSelectWidgetProps> = props => {
-    const { onChange: onValueChange, value, options } = props;
+    const { onChange: onValueChange, value, options, selfDisabled, dependecyDisabled } = props;
 
     const [stateValue, setStateValue] = React.useState(value);
     React.useEffect(() => setStateValue(value), [value]);
@@ -38,16 +40,24 @@ const SingleSelectWidget: React.FC<SingleSelectWidgetProps> = props => {
                         key={option.id}
                         checked={stateValue === option.id}
                         label={option.name}
-                        disabled={props.disabled}
+                        disabled={props.disabled || selfDisabled || dependecyDisabled}
                         onChange={() => notifyChange(option.id)}
                     />
                 ))}
             </div>
             <div>
-                <Button small onClick={() => notifyChange(undefined)} tabIndex="-1">
+                <Button
+                    small
+                    onClick={() => notifyChange(undefined)}
+                    tabIndex="-1"
+                    disabled={props.disabled || (dependecyDisabled && value === "") || (selfDisabled && value === "")}
+                >
                     ✕
                 </Button>
             </div>
+
+            {selfDisabled && value === "" && <p>Disabled due to selection in current form</p>}
+            {dependecyDisabled && value === "" && <p>Disabled due to selection in another form</p>}
         </div>
     );
 };

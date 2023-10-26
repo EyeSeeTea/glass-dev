@@ -1,7 +1,7 @@
 import { useSnackbar } from "@eyeseetea/d2-ui-components";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { Button, LinearProgress } from "@material-ui/core";
-import React, { Dispatch, SetStateAction } from "react";
+import React, { Dispatch, SetStateAction, useEffect } from "react";
 import styled from "styled-components";
 import { Id } from "../../../domain/entities/Base";
 import { QuestionnaireBase, QuestionnairesType } from "../../../domain/entities/Questionnaire";
@@ -33,6 +33,9 @@ export const Questionnaires: React.FC<QuestionnairesProps> = ({ setRefetchStatus
     const { orgUnit, year } = useSelector();
     const [formState, actions] = useFormState();
     const { currentModuleAccess } = useCurrentModuleContext();
+    const [refresh, setRefresh] = React.useState({});
+
+    useEffect(() => {}, [refresh]);
 
     const dataSubmissionId = useCurrentDataSubmissionId(
         compositionRoot,
@@ -112,7 +115,9 @@ export const Questionnaires: React.FC<QuestionnairesProps> = ({ setRefetchStatus
                     hidePublish={true}
                     signalEventId={formState.eventId}
                     selectedSubQuestionnaires={formState.selectedSubQuestionnaires}
-                    disabledSubQuestionnaires={formState.disabledSubQuestionnaires}
+                    selfDisabledSubQuestionnaires={formState.selfDisabledSubQuestionnaires}
+                    dependencyDisabledSubQuestionnaires={formState.dependencyDisabledSubQuestionnaires}
+                    refreshGrid={setRefresh}
                 />
             );
         }
@@ -283,14 +288,16 @@ type QuestionnaireFormState =
           id: Id;
           eventId?: Id;
           selectedSubQuestionnaires?: NamedRef[];
-          disabledSubQuestionnaires?: string[];
+          selfDisabledSubQuestionnaires?: string[];
+          dependencyDisabledSubQuestionnaires?: string[];
       }
     | {
           mode: "edit";
           id: Id;
           eventId?: Id;
           selectedSubQuestionnaires?: NamedRef[];
-          disabledSubQuestionnaires?: string[];
+          selfDisabledSubQuestionnaires?: string[];
+          dependencyDisabledSubQuestionnaires?: string[];
       };
 
 function useFormState() {
@@ -303,7 +310,8 @@ function useFormState() {
                 id: questionnaire.id,
                 eventId: questionnaire.eventId,
                 selectedSubQuestionnaires: questionnaire.selectedSubQuestionnaires,
-                disabledSubQuestionnaires: questionnaire.disabledSubQuestionnaires,
+                selfDisabledSubQuestionnaires: questionnaire.selfDisabledSubQuestionnaires,
+                dependencyDisabledSubQuestionnaires: questionnaire.dependencyDisabledSubQuestionnaires,
             });
         },
         []
