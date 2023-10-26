@@ -114,9 +114,8 @@ export const Questionnaires: React.FC<QuestionnairesProps> = ({ setRefetchStatus
                     readonly={formState.mode === "show" ? true : false}
                     hidePublish={true}
                     signalEventId={formState.eventId}
-                    selectedSubQuestionnaires={formState.selectedSubQuestionnaires}
-                    selfDisabledSubQuestionnaires={formState.selfDisabledSubQuestionnaires}
-                    dependencyDisabledSubQuestionnaires={formState.dependencyDisabledSubQuestionnaires}
+                    subQuestionnaires={formState.subQuestionnaires}
+                    aggsubQuestionnaires={formState.aggSubQuestionnaires}
                     refreshGrid={setRefresh}
                 />
             );
@@ -132,15 +131,14 @@ export const Questionnaires: React.FC<QuestionnairesProps> = ({ setRefetchStatus
                             <h3 style={{ wordBreak: "break-all" }}>{questionnaire.name}</h3>
                             <span className="desc">{questionnaire.description}</span>
                             <br />
-                            {questionnaire.selectedSubQuestionnaires &&
-                                questionnaire.selectedSubQuestionnaires.length > 0 && (
-                                    <>
-                                        <span className="comp completed">Filled Subquestionnaires</span>
-                                        {questionnaire.selectedSubQuestionnaires.map(fq => (
-                                            <span key={fq.id}>{fq.name}</span>
-                                        ))}
-                                    </>
-                                )}
+                            {questionnaire.subQuestionnaires && questionnaire.subQuestionnaires.length > 0 && (
+                                <>
+                                    <span className="comp completed">Filled Subquestionnaires</span>
+                                    {questionnaire.subQuestionnaires.map(fq => (
+                                        <span key={fq.id}>{fq.name}</span>
+                                    ))}
+                                </>
+                            )}
                         </div>
 
                         {questionnaire.isMandatory && <span className="mand">{i18n.t("mandatory")}</span>}
@@ -287,17 +285,15 @@ type QuestionnaireFormState =
           mode: "show";
           id: Id;
           eventId?: Id;
-          selectedSubQuestionnaires?: NamedRef[];
-          selfDisabledSubQuestionnaires?: string[];
-          dependencyDisabledSubQuestionnaires?: string[];
+          subQuestionnaires?: NamedRef[];
+          aggSubQuestionnaires?: NamedRef[];
       }
     | {
           mode: "edit";
           id: Id;
           eventId?: Id;
-          selectedSubQuestionnaires?: NamedRef[];
-          selfDisabledSubQuestionnaires?: string[];
-          dependencyDisabledSubQuestionnaires?: string[];
+          subQuestionnaires?: NamedRef[];
+          aggSubQuestionnaires?: NamedRef[];
       };
 
 function useFormState() {
@@ -309,9 +305,8 @@ function useFormState() {
                 mode: options.mode,
                 id: questionnaire.id,
                 eventId: questionnaire.eventId,
-                selectedSubQuestionnaires: questionnaire.selectedSubQuestionnaires,
-                selfDisabledSubQuestionnaires: questionnaire.selfDisabledSubQuestionnaires,
-                dependencyDisabledSubQuestionnaires: questionnaire.dependencyDisabledSubQuestionnaires,
+                subQuestionnaires: questionnaire.subQuestionnaires,
+                aggSubQuestionnaires: questionnaire.aggSubQuestionnaires,
             });
         },
         []
