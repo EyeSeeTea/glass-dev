@@ -13,7 +13,8 @@ export interface QuestionnaireBase {
     isMandatory: boolean;
     rules: QuestionnaireRule[];
     selectedSubQuestionnaires?: NamedRef[];
-    disabledSubQuestionnaires?: string[];
+    selfDisabledSubQuestionnaires?: string[];
+    dependencyDisabledSubQuestionnaires?: string[];
     eventId?: Id;
 }
 

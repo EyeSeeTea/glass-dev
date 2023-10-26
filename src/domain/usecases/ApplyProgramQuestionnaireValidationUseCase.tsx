@@ -20,18 +20,6 @@ const sl_glo_pub = "mQS6OUXAaRr";
 const sl_glo_pri = "GWac7iDfHv3";
 const sl_glo_tot = "mks6wWdSZRq";
 
-export const amcSubQuestionnaireDEList = [
-    sl_pub_com,
-    sl_pri_com,
-    sl_glo_com,
-    sl_pub_hos,
-    sl_pri_hos,
-    sl_glo_hos,
-    sl_glo_pub,
-    sl_glo_pri,
-    sl_glo_tot,
-];
-
 export const amcQuestionMap: AMCQuestionDisableMap[] = [
     //Community sector levels
     {
