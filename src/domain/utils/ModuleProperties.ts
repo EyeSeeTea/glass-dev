@@ -16,7 +16,6 @@ type ModuleDetails = {
     primaryUploadLabel: string;
     unit: string;
     isSpecimenReq: boolean;
-    populateCurrentYearInHistory: boolean;
     isDownloadEmptyTemplateReq: boolean;
     applyQuestionnaireValidation: boolean;
     datasetString?: string;
@@ -44,7 +43,6 @@ export const moduleProperties = new Map<string, ModuleDetails>([
             primaryUploadLabel: "Choose RIS File",
             unit: "data value",
             isSpecimenReq: true,
-            populateCurrentYearInHistory: false,
             isDownloadEmptyTemplateReq: false,
             applyQuestionnaireValidation: false,
             datasetString: "Upto 6 datasets",
@@ -70,7 +68,6 @@ export const moduleProperties = new Map<string, ModuleDetails>([
             primaryUploadLabel: "Choose EGASP File",
             unit: "event",
             isSpecimenReq: false,
-            populateCurrentYearInHistory: true,
             isDownloadEmptyTemplateReq: true,
             applyQuestionnaireValidation: false,
         },
@@ -95,7 +92,6 @@ export const moduleProperties = new Map<string, ModuleDetails>([
             primaryUploadLabel: "Choose RIS Individual File",
             unit: "enrollment",
             isSpecimenReq: true,
-            populateCurrentYearInHistory: false,
             isDownloadEmptyTemplateReq: false,
             applyQuestionnaireValidation: false,
         },
@@ -116,11 +112,10 @@ export const moduleProperties = new Map<string, ModuleDetails>([
                 description: "Are you sure you want to delete this file",
             },
             primaryFileType: "Product Level Data",
-            secondaryFileType: "Sunstance Level Data",
+            secondaryFileType: "Substance Level Data",
             primaryUploadLabel: "Choose File Type",
             unit: "",
             isSpecimenReq: false,
-            populateCurrentYearInHistory: false,
             isDownloadEmptyTemplateReq: false,
             applyQuestionnaireValidation: true,
         },

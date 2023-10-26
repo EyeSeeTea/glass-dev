@@ -6,7 +6,7 @@ import { Signal } from "../entities/Signal";
 
 import { SignalRepository } from "../repositories/SignalRepository";
 
-export class GetSignalsUseCase implements UseCase {
+export class GetProgramQuestionnairesUseCase implements UseCase {
     constructor(private signalRepository: SignalRepository) {}
 
     public execute(currentOrgUnitId: Id): FutureData<Signal[]> {

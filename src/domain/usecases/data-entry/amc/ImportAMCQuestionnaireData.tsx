@@ -3,7 +3,7 @@ import { Dhis2EventsDefaultRepository } from "../../../../data/repositories/Dhis
 import { Future, FutureData } from "../../../entities/Future";
 import { Questionnaire } from "../../../entities/Questionnaire";
 import { Id } from "../../../entities/Ref";
-import { AMC_PROGRAM_ID } from "../../GetProgramQuestionnaireQuestionsUseCase";
+import { AMC_PROGRAM_ID } from "../../GetProgramQuestionnaireUseCase";
 
 export const AMR_GLASS_AMC_DET_DS_PERIOD = "HeeDWGJrFcV";
 export class ImportAMCQuestionnaireData {
@@ -67,7 +67,6 @@ export class ImportAMCQuestionnaireData {
             })
         );
 
-        //TO DO :  Save existing events
         if (eventId) {
             return this.dhis2EventsDefaultRepository.getEventById(eventId).flatMap(event => {
                 const updatedEvent: D2TrackerEvent = {

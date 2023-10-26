@@ -6,7 +6,7 @@ import { amcQuestionMap } from "./ApplyAMCQuestionUpdationUseCase";
 export const EAR_PROGRAM_ID = "SQe26z0smFP";
 export const AMC_PROGRAM_ID = "qGG6BjULAaf";
 
-export class GetProgramQuestionnaireQuestionsUseCase {
+export class GetProgramQuestionnaireUseCase {
     constructor(private captureFormRepository: CaptureFormRepository) {}
 
     execute(questionnaireId: string, moduleName: string, subQuestionnaires?: NamedRef[]) {

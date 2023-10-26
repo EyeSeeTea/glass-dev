@@ -82,7 +82,7 @@ export class QuestionnaireD2DefaultRepository implements QuestionnaireRepository
                     orgUnit: { id: options.orgUnitId },
                     year: options.year,
                     description: program.displayDescription,
-                    isCompleted: false, //TO DO : fetch status of program.
+                    isCompleted: false,
                     isMandatory: config?.mandatory || false,
                     rules: [],
                 };

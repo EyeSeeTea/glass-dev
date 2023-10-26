@@ -7,7 +7,7 @@ import { NotificationRepository } from "../../repositories/NotificationRepositor
 import { ImportAMCQuestionnaireData } from "./amc/ImportAMCQuestionnaireData";
 import { ImportSignalsUseCase, SignalAction } from "./ear/ImportSignalsUseCase";
 
-export class ImportCaptureDataUseCase {
+export class ImportProgramQuestionnaireDataUseCase {
     constructor(
         private dhis2EventsDefaultRepository: Dhis2EventsDefaultRepository,
         private signalRepository: SignalDefaultRepository,

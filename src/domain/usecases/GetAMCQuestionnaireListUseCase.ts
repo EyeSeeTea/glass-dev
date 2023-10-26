@@ -79,11 +79,27 @@ export class GetAMCQuestionnaireListUseCase {
 
                         return sq;
                     });
+
+                    //Check If there is already an empty Questionnaire
+                    let emptyQuestionnaireExists = false;
+
+                    updatedSplitAMCQuestionnaires.forEach(q => {
+                        if (!q.subQuestionnaires || q.subQuestionnaires.length === 0) {
+                            emptyQuestionnaireExists = true;
+                        }
+                    });
+
+                    //If all sub questionnaires are not filled
                     if (uniqSubQuestionnairesToDisable.length + allSelectedQuestiosMap.length < 9) {
-                        questionnaire.aggSubQuestionnaires = allSelectedQuestiosMap.map(sq => {
-                            return { id: sq.id, name: sq.name };
-                        });
-                        updatedSplitAMCQuestionnaires.push(questionnaire);
+                        //And an empty questionnaire does not already exist
+                        if (!emptyQuestionnaireExists) {
+                            //Add an empty questionnaire form
+                            questionnaire.aggSubQuestionnaires = allSelectedQuestiosMap.map(sq => {
+                                return { id: sq.id, name: sq.name };
+                            });
+
+                            updatedSplitAMCQuestionnaires.push(questionnaire);
+                        }
                     } else {
                         updatedSplitAMCQuestionnaires.map(cq => (cq.isCompleted = true));
                     }

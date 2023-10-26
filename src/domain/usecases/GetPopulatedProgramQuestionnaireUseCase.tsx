@@ -2,9 +2,9 @@ import { Future } from "../entities/Future";
 import { NamedRef } from "../entities/Ref";
 import { CaptureFormRepository } from "../repositories/CaptureFormRepository";
 import { amcQuestionMap } from "./ApplyAMCQuestionUpdationUseCase";
-import { AMC_PROGRAM_ID, EAR_PROGRAM_ID } from "./GetProgramQuestionnaireQuestionsUseCase";
+import { AMC_PROGRAM_ID, EAR_PROGRAM_ID } from "./GetProgramQuestionnaireUseCase";
 
-export class GetPopulatedProgramQuestionnaireQuestionsUseCase {
+export class GetPopulatedProgramQuestionnaireUseCase {
     constructor(private captureFormRepository: CaptureFormRepository) {}
 
     execute(eventId: string, moduleName: string, subQuestionnaires?: NamedRef[]) {
@@ -26,7 +26,6 @@ export class GetPopulatedProgramQuestionnaireQuestionsUseCase {
                             }
                             //and disable already selected questions
                             else if (subQuestionnaires?.find(sq => sq.id === q.id) && q.value !== true) {
-                                // q.value = true;
                                 q.disabled = true;
                             }
                         })
