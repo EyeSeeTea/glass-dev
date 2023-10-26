@@ -19,6 +19,7 @@ type ModuleDetails = {
     populateCurrentYearInHistory: boolean;
     isDownloadEmptyTemplateReq: boolean;
     applyQuestionnaireValidation: boolean;
+    datasetString?: string;
 };
 
 export const moduleProperties = new Map<string, ModuleDetails>([
@@ -46,6 +47,7 @@ export const moduleProperties = new Map<string, ModuleDetails>([
             populateCurrentYearInHistory: false,
             isDownloadEmptyTemplateReq: false,
             applyQuestionnaireValidation: false,
+            datasetString: "Upto 6 datasets",
         },
     ],
     [

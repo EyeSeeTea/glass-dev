@@ -15,6 +15,7 @@ export const defaultModuleContextState = {
         captureAccess: false,
         usergroups: [],
         quarterlyPeriodModules: [],
+        populateCurrentYearInHistory: false,
     },
     changeCurrentModuleAccess: () => {},
     resetCurrentModuleAccess: () => {},
