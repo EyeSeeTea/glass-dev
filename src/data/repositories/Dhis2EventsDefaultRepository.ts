@@ -81,7 +81,7 @@ export class Dhis2EventsDefaultRepository {
 
     //The AMC-Data Questionnaire is implemented as a Event Program
     //There could be a maximum of 6 events for this Program - no need of paging.
-    getAMCDataQuestionnaireEventsByOrgUnit(orgUnitId: Id, year: string): FutureData<D2TrackerEvent[]> {
+    getAMCDataQuestionnaireEvtsByOUAndPeriod(orgUnitId: Id, year: string): FutureData<D2TrackerEvent[]> {
         return apiToFuture(
             this.api.tracker.events.get({
                 fields: { $owner: true, event: true, dataValues: true, orgUnit: true, scheduledAt: true },

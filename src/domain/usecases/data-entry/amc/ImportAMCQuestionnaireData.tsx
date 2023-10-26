@@ -3,7 +3,7 @@ import { Dhis2EventsDefaultRepository } from "../../../../data/repositories/Dhis
 import { Future, FutureData } from "../../../entities/Future";
 import { Questionnaire } from "../../../entities/Questionnaire";
 import { Id } from "../../../entities/Ref";
-import { AMC_PROGRAM_ID } from "../../GetCaptureFormQuestionsUseCase";
+import { AMC_PROGRAM_ID } from "../../GetProgramQuestionnaireQuestionsUseCase";
 
 export const AMR_GLASS_AMC_DET_DS_PERIOD = "HeeDWGJrFcV";
 export class ImportAMCQuestionnaireData {

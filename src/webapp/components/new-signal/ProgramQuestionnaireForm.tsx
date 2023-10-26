@@ -28,9 +28,8 @@ export interface ProgramQuestionnaireFormProps {
     signalEventId?: string;
     questionnaireId: string;
     hidePublish: boolean;
-    selectedSubQuestionnaires?: NamedRef[];
-    selfDisabledSubQuestionnaires?: string[];
-    dependencyDisabledSubQuestionnaires?: string[];
+    subQuestionnaires?: NamedRef[];
+    aggsubQuestionnaires?: NamedRef[];
     refreshGrid?: React.Dispatch<React.SetStateAction<{}>>;
 }
 
@@ -60,7 +59,8 @@ export const ProgramQuestionnaireForm: React.FC<ProgramQuestionnaireFormProps> =
 
     const { questionnaire, setQuestionnaire, loading, setLoading } = useProgramQuestionnaireForm(
         props.questionnaireId,
-        props.signalEventId
+        props.signalEventId,
+        props.aggsubQuestionnaires
     );
 
     const publishQuestionnaire = () => {
@@ -161,7 +161,8 @@ export const ProgramQuestionnaireForm: React.FC<ProgramQuestionnaireFormProps> =
                     const updatedQuestionnaire = compositionRoot.programQuestionnaires.applyValidations(
                         currentModuleAccess.moduleName,
                         question,
-                        questionnaire
+                        questionnaire,
+                        props.aggsubQuestionnaires
                     );
                     return updatedQuestionnaire;
                 } else return questionnaire;
@@ -187,20 +188,6 @@ export const ProgramQuestionnaireForm: React.FC<ProgramQuestionnaireFormProps> =
         } else {
             history.goBack();
         }
-    };
-
-    const isSelfDisabled = (question: Question): boolean => {
-        if (props.selfDisabledSubQuestionnaires) {
-            if (props.selfDisabledSubQuestionnaires.find(dsq => dsq === question.id)) return true;
-        }
-        return false;
-    };
-
-    const isDependencyDisabled = (question: Question): boolean => {
-        if (props.dependencyDisabledSubQuestionnaires) {
-            if (props.dependencyDisabledSubQuestionnaires.find(dsq => dsq === question.id)) return true;
-        }
-        return false;
     };
 
     return (
@@ -240,20 +227,9 @@ export const ProgramQuestionnaireForm: React.FC<ProgramQuestionnaireFormProps> =
                                                         onChange={updateQuestion}
                                                         question={question}
                                                         disabled={
-                                                            props.readonly
-                                                                ? true
-                                                                : question.type === "singleCheck" &&
-                                                                  question.selfDisabled
-                                                                ? true
-                                                                : false
+                                                            props.readonly ? true : question.disabled ? true : false
                                                         }
-                                                        selfDisabled={
-                                                            question.type === "singleCheck" && isSelfDisabled(question)
-                                                        }
-                                                        dependecyDisabled={
-                                                            question.type === "singleCheck" &&
-                                                            isDependencyDisabled(question)
-                                                        }
+                                                        infoText={question.infoText}
                                                     />
                                                 </div>
                                             </div>

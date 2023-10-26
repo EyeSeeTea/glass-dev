@@ -6,7 +6,7 @@ import { Future, FutureData } from "../entities/Future";
 import { GlassModule } from "../entities/GlassModule";
 import { AMCDataQuestionnaire, QuestionnaireBase } from "../entities/Questionnaire";
 import { QuestionnaireRepository } from "../repositories/QuestionnaireRepository";
-import { amcQuestionMap } from "./ApplyProgramQuestionnaireValidationUseCase";
+import { amcQuestionMap } from "./ApplyAMCQuestionUpdationUseCase";
 
 export class GetAMCQuestionnaireListUseCase {
     constructor(
@@ -21,23 +21,19 @@ export class GetAMCQuestionnaireListUseCase {
     ): FutureData<QuestionnaireBase[]> {
         //1. Get all events for given org Unit and period.
         return this.dhis2EventsDefaultRepository
-            .getAMCDataQuestionnaireEventsByOrgUnit(orgUnitId, year)
+            .getAMCDataQuestionnaireEvtsByOUAndPeriod(orgUnitId, year)
             .flatMap(events => {
-                //Questionnaire has not been filled yet, display single questionnaire will all options enabled.
+                //Questionnaire has not been filled yet, display single questionnaire with all options enabled.
                 if (events.length === 0) {
                     return Future.success([questionnaire]);
                 } else {
                     //For each event, create a Questionnaire Base/Grid with
                     //sub questionnaire details filled in.
-
                     const splitAMCQuestionnaires: QuestionnaireBase[] = events.map((e, index) => {
-                        //Get all Sub Questionnaire data elements
-                        const subQuestionnaireDEs = e.dataValues.filter(dv =>
-                            amcQuestionMap.some(qm => qm.id === dv.dataElement)
+                        //Get selected Sub Questionnaires
+                        const selectedSQs: DataValue[] = e.dataValues.filter(
+                            dv => amcQuestionMap.some(qm => qm.id === dv.dataElement) && dv.value === "true"
                         );
-
-                        //Get all selected Sub Questionnaire data elements
-                        const selectedSQDEs: DataValue[] = subQuestionnaireDEs.filter(sqde => sqde.value === "true");
 
                         return {
                             id: questionnaire.id,
@@ -48,19 +44,10 @@ export class GetAMCQuestionnaireListUseCase {
                             isCompleted: false, //TO DO : fetch status of program.
                             isMandatory: questionnaire.isMandatory,
                             rules: [],
-                            selectedSubQuestionnaires: _(
-                                selectedSQDEs.map(de => {
+                            subQuestionnaires: _(
+                                selectedSQs.map(de => {
                                     const deDetails = amcQuestionMap.find(qm => qm.id === de.dataElement);
                                     if (deDetails) return { id: deDetails?.id ?? "", name: deDetails?.name ?? "" };
-                                })
-                            )
-                                .compact()
-                                .value(),
-
-                            selfDisabledSubQuestionnaires: _(
-                                selectedSQDEs.flatMap(de => {
-                                    const deDetails = amcQuestionMap.find(qm => qm.id === de.dataElement);
-                                    if (deDetails) return deDetails.questionsToDisable;
                                 })
                             )
                                 .compact()
@@ -69,34 +56,38 @@ export class GetAMCQuestionnaireListUseCase {
                         };
                     });
 
-                    //Get all filled sub questionaires across events
-                    const allSelectedSQs = splitAMCQuestionnaires.flatMap(q => q.selectedSubQuestionnaires);
+                    //Check if any sub questionnaires are still enabled, requiring an empty Questionnaire form to be displayed
+                    const allSelectedQuestiosMap = _(
+                        splitAMCQuestionnaires.flatMap(q =>
+                            q.subQuestionnaires?.flatMap(sq => {
+                                return amcQuestionMap.filter(qm => qm.id === sq.id);
+                            })
+                        )
+                    )
+                        .compact()
+                        .value();
+                    const uniqSubQuestionnairesToDisable = _(
+                        allSelectedQuestiosMap.flatMap(qm => qm.questionsToDisable)
+                    )
+                        .uniq()
+                        .value();
 
-                    //Get all disabled sub questionnaires based on AMC split logic.
-                    const sqsToDisable: string[] = [];
-                    allSelectedSQs.forEach(selSQ => {
-                        if (selSQ) {
-                            sqsToDisable.push(selSQ.id);
-                            const sqMap = amcQuestionMap.find(qm => qm.id === selSQ.id);
-                            if (sqMap) sqsToDisable.push(...sqMap.questionsToDisable);
-                        }
+                    const updatedSplitAMCQuestionnaires = splitAMCQuestionnaires.map(sq => {
+                        sq.aggSubQuestionnaires = allSelectedQuestiosMap.map(sq => {
+                            return { id: sq.id, name: sq.name };
+                        });
+
+                        return sq;
                     });
-
-                    const uniqsqsToDisable = _(sqsToDisable).uniq().value();
-                    splitAMCQuestionnaires.forEach(sq => {
-                        sq.dependencyDisabledSubQuestionnaires = uniqsqsToDisable.filter(
-                            de => sq.selfDisabledSubQuestionnaires?.find(sd => sd === de) === undefined
-                        );
-                    });
-
-                    if (uniqsqsToDisable.length < 9) {
-                        questionnaire.dependencyDisabledSubQuestionnaires = uniqsqsToDisable.filter(
-                            de => questionnaire.selfDisabledSubQuestionnaires?.find(sd => sd === de) === undefined
-                        );
-                        splitAMCQuestionnaires.push(questionnaire);
+                    if (uniqSubQuestionnairesToDisable.length + allSelectedQuestiosMap.length < 9) {
+                        questionnaire.aggSubQuestionnaires = allSelectedQuestiosMap.map(sq => {
+                            return { id: sq.id, name: sq.name };
+                        });
+                        updatedSplitAMCQuestionnaires.push(questionnaire);
+                    } else {
+                        updatedSplitAMCQuestionnaires.map(cq => (cq.isCompleted = true));
                     }
-
-                    return Future.success(splitAMCQuestionnaires);
+                    return Future.success(updatedSplitAMCQuestionnaires);
                 }
             });
     }

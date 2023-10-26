@@ -12,14 +12,11 @@ export interface QuestionWidgetProps {
     onChange: (question: Question) => void;
     question: Question;
     disabled: boolean;
-    selfDisabled?: boolean;
-    dependecyDisabled?: boolean;
+    infoText?: string;
 }
 
-const YesOption = { id: "1", name: "Yes" };
-
 export const QuestionWidget: React.FC<QuestionWidgetProps> = React.memo(props => {
-    const { question, disabled, onChange, selfDisabled, dependecyDisabled } = props;
+    const { question, disabled, onChange, infoText } = props;
     const { type } = question;
     const { update } = QuestionnaireQuestionM;
 
@@ -72,13 +69,11 @@ export const QuestionWidget: React.FC<QuestionWidgetProps> = React.memo(props =>
             );
         case "singleCheck":
             return (
-                <SingleSelect
-                    value={question.value ? YesOption.id : ""}
-                    options={[YesOption]}
-                    onChange={value => onChange(update(question, value?.name === YesOption.name ? true : false))}
+                <BooleanWidget
+                    value={question.value}
+                    onChange={value => onChange(update(question, value))}
                     disabled={disabled}
-                    selfDisabled={selfDisabled}
-                    dependecyDisabled={dependecyDisabled}
+                    infoText={infoText}
                 />
             );
         default:
