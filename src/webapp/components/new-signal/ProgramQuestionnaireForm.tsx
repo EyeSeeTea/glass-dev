@@ -51,6 +51,7 @@ export const ProgramQuestionnaireForm: React.FC<ProgramQuestionnaireFormProps> =
     const { readAccessGroup, confidentialAccessGroup } = useCurrentUserGroupsAccess();
     const { currentPeriod } = useCurrentPeriodContext();
     const [refresh, setRefresh] = useState({});
+    const [localAggSubQuestionnaires, setLocalAggSubQuestionnaires] = useState(props.aggsubQuestionnaires);
     const history = useHistory();
 
     const classes = useStyles();
@@ -158,12 +159,14 @@ export const ProgramQuestionnaireForm: React.FC<ProgramQuestionnaireFormProps> =
         if (moduleProperties.get(currentModuleAccess.moduleName)?.applyQuestionnaireValidation) {
             setQuestionnaire(questionnaire => {
                 if (questionnaire) {
-                    const updatedQuestionnaire = compositionRoot.programQuestionnaires.applyValidations(
-                        currentModuleAccess.moduleName,
-                        question,
-                        questionnaire,
-                        props.aggsubQuestionnaires
-                    );
+                    const { updatedQuestionnaire, updatedAggSubQuestionnaires } =
+                        compositionRoot.programQuestionnaires.applyValidations(
+                            currentModuleAccess.moduleName,
+                            question,
+                            questionnaire,
+                            localAggSubQuestionnaires
+                        );
+                    setLocalAggSubQuestionnaires(updatedAggSubQuestionnaires);
                     return updatedQuestionnaire;
                 } else return questionnaire;
             });

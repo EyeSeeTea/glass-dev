@@ -86,7 +86,7 @@ export class ApplyAMCQuestionUpdationUseCase {
         question: Question,
         questionnaire: Questionnaire,
         selectedSubQuestionnaires?: NamedRef[]
-    ): Questionnaire {
+    ): { updatedQuestionnaire: Questionnaire; updatedAggSubQuestionnaires: NamedRef[] | undefined } {
         //update question in questionnaire
         const sectionToBeUpdated = questionnaire?.sections.filter(sec =>
             sec.questions.find(q => q.id === question?.id)
@@ -159,6 +159,10 @@ export class ApplyAMCQuestionUpdationUseCase {
                 });
             }
         }
-        return questionnaire;
+        if (question.value === false && selectedSubQuestionnaires?.find(sq => sq.id === question.id)) {
+            const updatedAggSubQuestionnaires = selectedSubQuestionnaires.filter(sq => sq.id !== question.id);
+            return { updatedQuestionnaire: questionnaire, updatedAggSubQuestionnaires: updatedAggSubQuestionnaires };
+        }
+        return { updatedQuestionnaire: questionnaire, updatedAggSubQuestionnaires: selectedSubQuestionnaires };
     }
 }
