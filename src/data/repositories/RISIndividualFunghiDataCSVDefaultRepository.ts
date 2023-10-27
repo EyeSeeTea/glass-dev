@@ -54,32 +54,33 @@ export class RISIndividualFunghiDataCSVDefaultRepository implements RISIndividua
     validate(moduleName: string, file: File): FutureData<{ isValid: boolean; records: number; specimens: string[] }> {
         return Future.fromPromise(new SpreadsheetXlsxDataSource().read(file)).map(spreadsheet => {
             const sheet = spreadsheet.sheets[0]; //Only one sheet for AMR RIS
-            const firstRow = sheet?.rows[0];
 
-            if (firstRow) {
+            const headerRow = sheet?.headers;
+
+            if (headerRow) {
                 const allRISIndividualFunghiColsPresent =
-                    doesColumnExist(firstRow, "COUNTRY") &&
-                    doesColumnExist(firstRow, "YEAR") &&
-                    doesColumnExist(firstRow, "HCF_ID") &&
-                    doesColumnExist(firstRow, "HOSPITALUNITTYPE") &&
-                    doesColumnExist(firstRow, "PATIENT_ID") &&
-                    doesColumnExist(firstRow, "AGE") &&
-                    doesColumnExist(firstRow, "GENDER") &&
-                    doesColumnExist(firstRow, "PATIENTTYPE") &&
-                    doesColumnExist(firstRow, "DATEOFHOSPITALISATION_VISIT") &&
-                    doesColumnExist(firstRow, "LABORATORYCODE") &&
-                    doesColumnExist(firstRow, "SAMPLE_DATE") &&
-                    doesColumnExist(firstRow, "ISOLATE_ID") &&
-                    doesColumnExist(firstRow, "SPECIMEN") &&
-                    doesColumnExist(firstRow, "PATIENTCOUNTER") &&
-                    doesColumnExist(firstRow, "PATHOGEN") &&
-                    doesColumnExist(firstRow, "ANTIBIOTIC") &&
-                    doesColumnExist(firstRow, "SIR") &&
-                    doesColumnExist(firstRow, "REFERENCEGUIDELINESSIR") &&
-                    doesColumnExist(firstRow, "DISKLOAD") &&
+                    doesColumnExist(headerRow, "COUNTRY") &&
+                    doesColumnExist(headerRow, "YEAR") &&
+                    doesColumnExist(headerRow, "HCF_ID") &&
+                    doesColumnExist(headerRow, "HOSPITALUNITTYPE") &&
+                    doesColumnExist(headerRow, "PATIENT_ID") &&
+                    doesColumnExist(headerRow, "AGE") &&
+                    doesColumnExist(headerRow, "GENDER") &&
+                    doesColumnExist(headerRow, "PATIENTTYPE") &&
+                    doesColumnExist(headerRow, "DATEOFHOSPITALISATION_VISIT") &&
+                    doesColumnExist(headerRow, "LABORATORYCODE") &&
+                    doesColumnExist(headerRow, "SAMPLE_DATE") &&
+                    doesColumnExist(headerRow, "ISOLATE_ID") &&
+                    doesColumnExist(headerRow, "SPECIMEN") &&
+                    doesColumnExist(headerRow, "PATIENTCOUNTER") &&
+                    doesColumnExist(headerRow, "PATHOGEN") &&
+                    doesColumnExist(headerRow, "ANTIBIOTIC") &&
+                    doesColumnExist(headerRow, "SIR") &&
+                    doesColumnExist(headerRow, "REFERENCEGUIDELINESSIR") &&
+                    doesColumnExist(headerRow, "DISKLOAD") &&
                     moduleName === "AMR - Individual"
-                        ? doesColumnExist(firstRow, "ABCLASS")
-                        : !doesColumnExist(firstRow, "ABCLASS");
+                        ? doesColumnExist(headerRow, "ABCLASS")
+                        : !doesColumnExist(headerRow, "ABCLASS");
 
                 const uniqSpecimens = _(sheet.rows)
                     .uniqBy("SPECIMEN")
