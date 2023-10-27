@@ -12,5 +12,6 @@ export type Row<Header extends string> = Record<Header, string>;
 
 export interface Sheet<Header extends string = string> {
     name: string;
+    headers: string[];
     rows: Row<Header>[];
 }
