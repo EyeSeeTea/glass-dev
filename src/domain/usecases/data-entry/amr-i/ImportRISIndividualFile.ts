@@ -16,6 +16,9 @@ import { D2TrackerEvent } from "@eyeseetea/d2-api/api/trackerEvents";
 const AMRIProgramID = "mMAj6Gofe49";
 const AMR_GLASS_AMR_TET_PATIENT = "CcgnfemKr5U";
 const AMRDataProgramStageId = "KCmWZD8qoAk";
+const PATIENT_COUNTER_ID = "uSGcLbT5gJJ";
+const PATIENT_ID = "qKWPfeSgTnc";
+
 export class ImportRISIndividualFile {
     constructor(
         private risIndividualRepository: RISIndividualDataRepository,
@@ -264,6 +267,17 @@ export class ImportRISIndividualFile {
                         trackedEntity: "",
                         trackedEntityType: AMR_GLASS_AMR_TET_PATIENT,
                         enrollments: enrollments,
+                        attributes: [
+                            {
+                                attribute: PATIENT_COUNTER_ID,
+                                value:
+                                    attributes.find(at => at.attribute === PATIENT_COUNTER_ID)?.value.toString() ?? "",
+                            },
+                            {
+                                attribute: PATIENT_ID,
+                                value: attributes.find(at => at.attribute === PATIENT_ID)?.value.toString() ?? "",
+                            },
+                        ],
                     };
                     return entity;
                 });
