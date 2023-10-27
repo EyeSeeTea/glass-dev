@@ -1,14 +1,14 @@
 import { Future, FutureData } from "../../domain/entities/Future";
-import { RISIndividualData } from "../../domain/entities/data-entry/amr-i-external/RISIndividualData";
+import { RISIndividualFunghiData } from "../../domain/entities/data-entry/amr-individual-funghi-external/RISIndividualFunghiData";
+import { RISIndividualFunghiDataRepository } from "../../domain/repositories/data-entry/RISIndividualFunghiDataRepository";
 
-import { RISIndividualDataRepository } from "../../domain/repositories/data-entry/RISIndividualDataRepository";
 import { SpreadsheetXlsxDataSource } from "./SpreadsheetXlsxDefaultRepository";
 import { doesColumnExist, getNumberValue, getTextValue } from "./utils/CSVUtils";
 
-export class RISIndividualDataCSVDefaultRepository implements RISIndividualDataRepository {
-    get(file: File): FutureData<RISIndividualData[]> {
+export class RISIndividualFunghiDataCSVDefaultRepository implements RISIndividualFunghiDataRepository {
+    get(moduleName: string, file: File): FutureData<RISIndividualFunghiData[]> {
         return Future.fromPromise(new SpreadsheetXlsxDataSource().read(file)).map(spreadsheet => {
-            const sheet = spreadsheet.sheets[0]; //Only one sheet for AMR Individual
+            const sheet = spreadsheet.sheets[0]; //Only one sheet for AMR Individual & Funghi
 
             return (
                 sheet?.rows.map(row => {
@@ -42,20 +42,23 @@ export class RISIndividualDataCSVDefaultRepository implements RISIndividualDataR
                         RESULTMICSIGN: getTextValue(row, "RESULTMICSIGN"),
                         RESULTMICVALUE: getNumberValue(row, "RESULTMICVALUE"),
                         RESULTMICSIR: getTextValue(row, "RESULTMICSIR"),
+                        ...(moduleName === "AMR - Individual" && {
+                            ABCLASS: getTextValue(row, "ABCLASS"),
+                        }),
                     };
                 }) || []
             );
         });
     }
 
-    validate(file: File): FutureData<{ isValid: boolean; records: number; specimens: string[] }> {
+    validate(moduleName: string, file: File): FutureData<{ isValid: boolean; records: number; specimens: string[] }> {
         return Future.fromPromise(new SpreadsheetXlsxDataSource().read(file)).map(spreadsheet => {
             const sheet = spreadsheet.sheets[0]; //Only one sheet for AMR RIS
 
             const headerRow = sheet?.headers;
 
             if (headerRow) {
-                const allRISIndividualColsPresent =
+                const allRISIndividualFunghiColsPresent =
                     doesColumnExist(headerRow, "COUNTRY") &&
                     doesColumnExist(headerRow, "YEAR") &&
                     doesColumnExist(headerRow, "HCF_ID") &&
@@ -74,7 +77,10 @@ export class RISIndividualDataCSVDefaultRepository implements RISIndividualDataR
                     doesColumnExist(headerRow, "ANTIBIOTIC") &&
                     doesColumnExist(headerRow, "SIR") &&
                     doesColumnExist(headerRow, "REFERENCEGUIDELINESSIR") &&
-                    doesColumnExist(headerRow, "DISKLOAD");
+                    doesColumnExist(headerRow, "DISKLOAD") &&
+                    moduleName === "AMR - Individual"
+                        ? doesColumnExist(headerRow, "ABCLASS")
+                        : !doesColumnExist(headerRow, "ABCLASS");
 
                 const uniqSpecimens = _(sheet.rows)
                     .uniqBy("SPECIMEN")
@@ -82,7 +88,7 @@ export class RISIndividualDataCSVDefaultRepository implements RISIndividualDataR
                     .map(row => (row["SPECIMEN"] ? row["SPECIMEN"] : ""));
 
                 return {
-                    isValid: allRISIndividualColsPresent ? true : false,
+                    isValid: allRISIndividualFunghiColsPresent ? true : false,
                     records: sheet.rows.length,
                     specimens: uniqSpecimens,
                 };
