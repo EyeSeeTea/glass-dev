@@ -3,12 +3,12 @@ import { GlassModuleDefaultRepository } from "../../../data/repositories/GlassMo
 import { FutureData, Future } from "../../entities/Future";
 import { EGASPDataRepository } from "../../repositories/data-entry/EGASPDataRepository";
 import { RISDataRepository } from "../../repositories/data-entry/RISDataRepository";
-import { RISIndividualDataRepository } from "../../repositories/data-entry/RISIndividualDataRepository";
+import { RISIndividualFunghiDataRepository } from "../../repositories/data-entry/RISIndividualFunghiDataRepository";
 
 export class ValidatePrimaryFileUseCase implements UseCase {
     constructor(
         private risDataRepository: RISDataRepository,
-        private risIndividualRepository: RISIndividualDataRepository,
+        private risIndividualFunghiRepository: RISIndividualFunghiDataRepository,
         private egaspDataRepository: EGASPDataRepository,
         private glassModuleDefaultRepository: GlassModuleDefaultRepository
     ) {}
@@ -27,8 +27,9 @@ export class ValidatePrimaryFileUseCase implements UseCase {
                     return this.egaspDataRepository.validate(inputFile, module.dataColumns);
                 });
             }
-            case "AMR - Individual": {
-                return this.risIndividualRepository.validate(inputFile);
+            case "AMR - Individual":
+            case "AMR - Funghi": {
+                return this.risIndividualFunghiRepository.validate(moduleName, inputFile);
             }
 
             default: {
