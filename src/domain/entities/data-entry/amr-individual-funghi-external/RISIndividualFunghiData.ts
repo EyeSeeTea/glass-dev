@@ -1,4 +1,4 @@
-export interface RISIndividualData {
+export interface RISIndividualFunghiData {
     COUNTRY: string;
     YEAR: number;
     HCF_ID: string;
