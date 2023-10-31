@@ -14,15 +14,15 @@ import { ExcelRepository } from "../../repositories/ExcelRepository";
 import { GlassDocumentsRepository } from "../../repositories/GlassDocumentsRepository";
 import { GlassUploadsDefaultRepository } from "../../../data/repositories/GlassUploadsDefaultRepository";
 import { ProgramRulesMetadataRepository } from "../../repositories/program-rules/ProgramRulesMetadataRepository";
-import { ImportRISIndividualFile } from "./amr-i/ImportRISIndividualFile";
-import { RISIndividualDataRepository } from "../../repositories/data-entry/RISIndividualDataRepository";
+import { ImportRISIndividualFunghiFile } from "./amr-individual-funghi/ImportRISIndividualFunghiFile";
+import { RISIndividualFunghiDataRepository } from "../../repositories/data-entry/RISIndividualFunghiDataRepository";
 import { TrackerRepository } from "../../repositories/TrackerRepository";
 import { GlassModuleDefaultRepository } from "../../../data/repositories/GlassModuleDefaultRepository";
 
 export class ImportPrimaryFileUseCase implements UseCase {
     constructor(
         private risDataRepository: RISDataRepository,
-        private risIndividualRepository: RISIndividualDataRepository,
+        private risIndividualFunghiRepository: RISIndividualFunghiDataRepository,
         private metadataRepository: MetadataRepository,
         private dataValuesRepository: DataValuesRepository,
         private moduleRepository: GlassModuleRepository,
@@ -73,22 +73,24 @@ export class ImportPrimaryFileUseCase implements UseCase {
                 return importEGASPFile.importEGASPFile(inputFile, action, eventListId, orgUnitId, orgUnitName, period);
             }
 
-            case "AMR - Individual": {
-                const importRISIndividualFile = new ImportRISIndividualFile(
-                    this.risIndividualRepository,
+            case "AMR - Individual":
+            case "AMR - Funghi": {
+                const importRISIndividualFunghiFile = new ImportRISIndividualFunghiFile(
+                    this.risIndividualFunghiRepository,
                     this.trackerRepository,
                     this.glassDocumentsRepository,
                     this.glassUploadsRepository
                 );
                 return this.glassModuleDefaultRepository.getByName(moduleName).flatMap(module => {
-                    return importRISIndividualFile.importRISIndividualFile(
+                    return importRISIndividualFunghiFile.importRISIndividualFunghiFile(
                         inputFile,
                         action,
                         orgUnitId,
                         countryCode,
                         period,
                         eventListId,
-                        module.programs !== undefined ? module.programs.at(0) : undefined
+                        module.programs !== undefined ? module.programs.at(0) : undefined,
+                        module.name
                     );
                 });
             }

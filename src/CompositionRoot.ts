@@ -66,7 +66,7 @@ import { SavePasswordUseCase } from "./domain/usecases/SavePasswordUseCase";
 import { SaveKeyDbLocaleUseCase } from "./domain/usecases/SaveKeyDbLocaleUseCase";
 import { SaveKeyUiLocaleUseCase } from "./domain/usecases/SaveKeyUiLocaleUseCase";
 import { ProgramRulesMetadataDefaultRepository } from "./data/repositories/program-rule/ProgramRulesMetadataDefaultRepository";
-import { RISIndividualDataCSVDefaultRepository } from "./data/repositories/RISIndividualDataCSVDefaultRepository";
+import { RISIndividualFunghiDataCSVDefaultRepository } from "./data/repositories/RISIndividualFunghiDataCSVDefaultRepository";
 import { TrackerDefaultRepository } from "./data/repositories/TrackerDefaultRepository";
 import { GetCaptureFormQuestionsUseCase } from "./domain/usecases/GetCaptureFormQuestionsUseCase";
 import { CaptureFormDefaultRepository } from "./data/repositories/CaptureFormDefaultRepository";
@@ -90,7 +90,7 @@ export function getCompositionRoot(instance: Instance) {
     const glassUploadsRepository = new GlassUploadsDefaultRepository(dataStoreClient);
     const glassDocumentsRepository = new GlassDocumentsDefaultRepository(dataStoreClient, instance);
     const risDataRepository = new RISDataCSVDefaultRepository();
-    const risIndividualRepository = new RISIndividualDataCSVDefaultRepository();
+    const risIndividualFunghiRepository = new RISIndividualFunghiDataCSVDefaultRepository();
     const sampleDataRepository = new SampleDataCSVDeafultRepository();
     const dataValuesRepository = new DataValuesDefaultRepository(instance);
     const metadataRepository = new MetadataDefaultRepository(instance);
@@ -151,7 +151,7 @@ export function getCompositionRoot(instance: Instance) {
         fileSubmission: getExecute({
             primaryFile: new ImportPrimaryFileUseCase(
                 risDataRepository,
-                risIndividualRepository,
+                risIndividualFunghiRepository,
                 metadataRepository,
                 dataValuesRepository,
                 glassModuleRepository,
@@ -166,7 +166,7 @@ export function getCompositionRoot(instance: Instance) {
             ),
             validatePrimaryFile: new ValidatePrimaryFileUseCase(
                 risDataRepository,
-                risIndividualRepository,
+                risIndividualFunghiRepository,
                 egaspDataRepository,
                 glassModuleRepository
             ),
