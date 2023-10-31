@@ -37,25 +37,25 @@ export class RISDataCSVDefaultRepository implements RISDataRepository {
     validate(file: File): FutureData<{ isValid: boolean; records: number; specimens: string[] }> {
         return Future.fromPromise(new SpreadsheetXlsxDataSource().read(file)).map(spreadsheet => {
             const sheet = spreadsheet.sheets[0]; //Only one sheet for AMR RIS
-            const firstRow = sheet?.rows[0];
+            const headerRow = sheet?.headers;
 
-            if (firstRow) {
+            if (headerRow) {
                 const allRISColsPresent =
-                    doesColumnExist(firstRow, "COUNTRY") &&
-                    doesColumnExist(firstRow, "YEAR") &&
-                    doesColumnExist(firstRow, "SPECIMEN") &&
-                    doesColumnExist(firstRow, "PATHOGEN") &&
-                    doesColumnExist(firstRow, "GENDER") &&
-                    doesColumnExist(firstRow, "ORIGIN") &&
-                    doesColumnExist(firstRow, "AGEGROUP") &&
-                    doesColumnExist(firstRow, "ANTIBIOTIC") &&
-                    doesColumnExist(firstRow, "RESISTANT") &&
-                    doesColumnExist(firstRow, "INTERMEDIATE") &&
-                    doesColumnExist(firstRow, "NONSUSCEPTIBLE") &&
-                    doesColumnExist(firstRow, "SUSCEPTIBLE") &&
-                    doesColumnExist(firstRow, "UNKNOWN_NO_AST") &&
-                    doesColumnExist(firstRow, "UNKNOWN_NO_BREAKPOINTS") &&
-                    doesColumnExist(firstRow, "BATCHID");
+                    doesColumnExist(headerRow, "COUNTRY") &&
+                    doesColumnExist(headerRow, "YEAR") &&
+                    doesColumnExist(headerRow, "SPECIMEN") &&
+                    doesColumnExist(headerRow, "PATHOGEN") &&
+                    doesColumnExist(headerRow, "GENDER") &&
+                    doesColumnExist(headerRow, "ORIGIN") &&
+                    doesColumnExist(headerRow, "AGEGROUP") &&
+                    doesColumnExist(headerRow, "ANTIBIOTIC") &&
+                    doesColumnExist(headerRow, "RESISTANT") &&
+                    doesColumnExist(headerRow, "INTERMEDIATE") &&
+                    doesColumnExist(headerRow, "NONSUSCEPTIBLE") &&
+                    doesColumnExist(headerRow, "SUSCEPTIBLE") &&
+                    doesColumnExist(headerRow, "UNKNOWN_NO_AST") &&
+                    doesColumnExist(headerRow, "UNKNOWN_NO_BREAKPOINTS") &&
+                    doesColumnExist(headerRow, "BATCHID");
 
                 const uniqSpecimens = _(sheet.rows)
                     .uniqBy("SPECIMEN")
