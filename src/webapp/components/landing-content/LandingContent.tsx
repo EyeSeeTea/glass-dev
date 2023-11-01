@@ -4,23 +4,21 @@ import { LandingNews } from "./LandingNews";
 import styled from "styled-components";
 import { OpenDataSubmissions } from "./OpenDataSubmissions";
 import { YourNotifications } from "./notifications/YourNotifications";
-import { useAppContext } from "../../contexts/app-context";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
 import { CustomCard } from "../custom-card/CustomCard";
 import { CircularProgress } from "material-ui";
-import { useGlassModules } from "../../hooks/useGlassModules";
+import { useSideBarModulesContext } from "../../contexts/sidebar-modules-context";
 
 export const LandingContent: React.FC = () => {
-    const { compositionRoot } = useAppContext();
-    const modules = useGlassModules(compositionRoot);
+    const { accessibleModules, isLoading } = useSideBarModulesContext();
 
     return (
         <StyledGrid container spacing={4} alignItems="flex-start">
-            {modules.kind === "loading" && <CircularProgress />}
+            {isLoading && <CircularProgress />}
 
-            {modules.kind === "loaded" && (
+            {!isLoading && (
                 <>
-                    {modules.data.length === 0 ? (
+                    {accessibleModules.length === 0 ? (
                         <Grid item xs={6}>
                             <CustomCard>
                                 <TitleContainer />
