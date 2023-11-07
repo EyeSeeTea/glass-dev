@@ -27,6 +27,40 @@ export function mapModuleToMenu(module: GlassModule): Menu {
                 },
             ],
         };
+    } else if (module.name === "EGASP") {
+        return {
+            kind: "MenuGroup",
+            level: 0,
+            title: module.name,
+            moduleColor: module.color,
+            icon: "folder",
+            children: [
+                {
+                    kind: "MenuLeaf",
+                    level: 0,
+                    title: "Reports",
+                    path: `/reports`,
+                },
+                {
+                    kind: "MenuLeaf",
+                    level: 0,
+                    title: "Data File History",
+                    path: `/data-file-history`,
+                },
+                {
+                    kind: "MenuLeaf",
+                    level: 0,
+                    title: "Data Submissions History",
+                    path: `/data-submissions-history`,
+                },
+                {
+                    kind: "MenuLeaf",
+                    level: 0,
+                    title: "Country Information",
+                    path: `/country-information`,
+                },
+            ],
+        };
     } else {
         return {
             kind: "MenuGroup",
@@ -41,7 +75,6 @@ export function mapModuleToMenu(module: GlassModule): Menu {
                     title: "Current Data Submission",
                     path: `/current-data-submission`,
                 },
-
                 {
                     kind: "MenuLeaf",
                     level: 0,
