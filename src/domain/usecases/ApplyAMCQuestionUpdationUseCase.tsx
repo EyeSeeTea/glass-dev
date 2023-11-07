@@ -35,7 +35,7 @@ export const amcQuestionMap: AMCQuestionDisableMap[] = [
     {
         id: sl_glo_com,
         name: "Community level & Global sector",
-        questionsToDisable: [sl_pub_com, sl_pri_com, sl_glo_tot],
+        questionsToDisable: [sl_pub_com, sl_pri_com, sl_glo_tot, sl_glo_pub, sl_glo_pri],
     },
     //Hospital sector levels
     {
@@ -51,7 +51,7 @@ export const amcQuestionMap: AMCQuestionDisableMap[] = [
     {
         id: sl_glo_hos,
         name: "Hospital level & Global sector",
-        questionsToDisable: [sl_pub_hos, sl_pri_hos, sl_glo_tot],
+        questionsToDisable: [sl_pub_hos, sl_pri_hos, sl_glo_tot, sl_glo_pub, sl_glo_pri],
     },
     //Total sector levels
     {
