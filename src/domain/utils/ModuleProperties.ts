@@ -141,6 +141,7 @@ export const moduleProperties = new Map<string, ModuleDetails>([
             unit: "enrollment",
             isSpecimenReq: true,
             isDownloadEmptyTemplateReq: false,
+            applyQuestionnaireValidation: false,
         },
     ],
 ]);
