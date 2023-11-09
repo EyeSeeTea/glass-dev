@@ -14,6 +14,7 @@ import { useCurrentModuleContext } from "../../contexts/current-module-context";
 import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context";
 import { useCallbackEffect } from "../../hooks/use-callback-effect";
 import { useCurrentPeriodContext } from "../../contexts/current-period-context";
+import { moduleProperties } from "../../../domain/utils/ModuleProperties";
 
 interface UploadSampleProps {
     sampleFile: File | null;
@@ -140,12 +141,15 @@ export const UploadSample: React.FC<UploadSampleProps> = ({ batchId, sampleFile,
     );
 
     const sampleFileUploadEffect = useCallbackEffect(sampleFileUpload);
+    const uploadLabel = moduleProperties.get(moduleName)?.secondaryUploadLabel?.split(",");
 
     return (
         <ContentWrapper className="ris-file">
-            <span className="label">
-                {i18n.t("SAMPLE File")} <small>({i18n.t("not required")})</small>
-            </span>
+            {uploadLabel && (
+                <span className="label">
+                    {i18n.t(uploadLabel.at(0) ?? "")} <small>{i18n.t(uploadLabel.at(1) ?? "")}</small>
+                </span>
+            )}
             {/* Allow only one file upload per dataset */}
             <Dropzone ref={sampleFileUploadRef} onDrop={sampleFileUploadEffect} maxFiles={1}>
                 <Button
