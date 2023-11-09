@@ -12,6 +12,7 @@ type ModuleDetails = {
         description: string;
     };
     primaryFileType: string;
+    secondaryUploadLabel?: string;
     secondaryFileType: string;
     primaryUploadLabel: string;
     unit: string;
@@ -19,6 +20,7 @@ type ModuleDetails = {
     isDownloadEmptyTemplateReq: boolean;
     applyQuestionnaireValidation: boolean;
     datasetString?: string;
+    isSingleFileTypePerSubmission?: boolean; //For AMC, you cans choose either product or substance file , never both
 };
 
 export const moduleProperties = new Map<string, ModuleDetails>([
@@ -41,6 +43,7 @@ export const moduleProperties = new Map<string, ModuleDetails>([
             primaryFileType: "RIS",
             secondaryFileType: "SAMPLE",
             primaryUploadLabel: "Choose RIS File",
+            secondaryUploadLabel: "SAMPLE File,(not required)",
             unit: "data value",
             isSpecimenReq: true,
             isDownloadEmptyTemplateReq: false,
@@ -101,7 +104,7 @@ export const moduleProperties = new Map<string, ModuleDetails>([
         {
             isbatchReq: false,
             isQuestionnaireReq: true,
-            isSecondaryFileApplicable: false,
+            isSecondaryFileApplicable: true,
             isDryRunReq: false,
             importLoadingMsg: {
                 line1: "Importing data,",
@@ -113,11 +116,13 @@ export const moduleProperties = new Map<string, ModuleDetails>([
             },
             primaryFileType: "Product Level Data",
             secondaryFileType: "Substance Level Data",
-            primaryUploadLabel: "Choose File Type",
+            primaryUploadLabel: "Choose File",
+            secondaryUploadLabel: "Choose File",
             unit: "",
             isSpecimenReq: false,
-            isDownloadEmptyTemplateReq: false,
+            isDownloadEmptyTemplateReq: true,
             applyQuestionnaireValidation: true,
+            isSingleFileTypePerSubmission: true,
         },
     ],
     [
