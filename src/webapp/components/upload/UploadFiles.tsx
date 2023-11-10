@@ -302,6 +302,7 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
                             label={i18n.t("Choose file type")}
                             labelId="file-type-label"
                             MenuProps={{ disableScrollLock: true }}
+                            disabled={primaryFile !== null || secondaryFile !== null}
                         >
                             <MenuItem key={"PRODUCT"} value={"PRODUCT"}>
                                 {i18n.t("Product level data")}

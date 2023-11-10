@@ -2,6 +2,7 @@ type ModuleDetails = {
     isbatchReq: boolean;
     isQuestionnaireReq: boolean;
     isSecondaryFileApplicable: boolean;
+    isSecondaryRelated?: boolean;
     isDryRunReq: boolean;
     importLoadingMsg: {
         line1: string;
@@ -30,6 +31,7 @@ export const moduleProperties = new Map<string, ModuleDetails>([
             isbatchReq: true,
             isQuestionnaireReq: true,
             isSecondaryFileApplicable: true,
+            isSecondaryRelated: true,
             isDryRunReq: true,
             importLoadingMsg: {
                 line1: "Performing a dry run of the import to ensure that there are no errors.",

@@ -1,8 +1,8 @@
-import { RISData } from "../../domain/entities/data-entry/amr-external/RISData";
-import { Future, FutureData } from "../../domain/entities/Future";
-import { RISDataRepository } from "../../domain/repositories/data-entry/RISDataRepository";
-import { SpreadsheetXlsxDataSource } from "./SpreadsheetXlsxDefaultRepository";
-import { doesColumnExist, getNumberValue, getTextValue } from "./utils/CSVUtils";
+import { RISData } from "../../../domain/entities/data-entry/amr-external/RISData";
+import { Future, FutureData } from "../../../domain/entities/Future";
+import { RISDataRepository } from "../../../domain/repositories/data-entry/RISDataRepository";
+import { SpreadsheetXlsxDataSource } from "../SpreadsheetXlsxDefaultRepository";
+import { doesColumnExist, getNumberValue, getTextValue } from "../utils/CSVUtils";
 
 export class RISDataCSVDefaultRepository implements RISDataRepository {
     get(file: File): FutureData<RISData[]> {
