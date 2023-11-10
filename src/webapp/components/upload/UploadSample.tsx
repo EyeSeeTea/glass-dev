@@ -82,7 +82,7 @@ export const UploadSample: React.FC<UploadSampleProps> = ({ batchId, sampleFile,
                 if (uploadedSample) {
                     setIsLoading(true);
 
-                    return compositionRoot.fileSubmission.validateSecondaryFile(uploadedSample).run(
+                    return compositionRoot.fileSubmission.validateSecondaryFile(uploadedSample, moduleName).run(
                         sampleData => {
                             if (sampleData.isValid) {
                                 setSampleFile(uploadedSample);
@@ -110,7 +110,7 @@ export const UploadSample: React.FC<UploadSampleProps> = ({ batchId, sampleFile,
                                     }
                                 );
                             } else {
-                                snackbar.error(i18n.t("Incorrect File Format. Please retry with a valid Sample file"));
+                                snackbar.error(i18n.t("Incorrect File Format. Please retry with a valid file"));
                                 setIsLoading(false);
                             }
                         },

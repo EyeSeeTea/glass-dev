@@ -28,6 +28,8 @@ export interface GlassModule {
     };
     dataSubmissionPeriod: DataSubmissionPeriodTypes;
     dataColumns: string[];
+    teiColumns?: string[];
+    rawSubstanceDataColumns?: string[];
     programs?: {
         id: string;
         programStageId: string;
