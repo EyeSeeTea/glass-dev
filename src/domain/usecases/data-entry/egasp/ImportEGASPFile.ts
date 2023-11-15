@@ -2,7 +2,7 @@ import { Dhis2EventsDefaultRepository } from "../../../../data/repositories/Dhis
 import { D2TrackerEvent as Event } from "@eyeseetea/d2-api/api/trackerEvents";
 import { Future, FutureData } from "../../../entities/Future";
 import { ConsistencyError, ImportSummary } from "../../../entities/data-entry/ImportSummary";
-import * as templates from "../../../entities/data-entry/egasp-templates";
+import * as templates from "../../../entities/data-entry/program-templates";
 import { EGASPProgramDefaultRepository } from "../../../../data/repositories/download-empty-template/EGASPProgramDefaultRepository";
 import { Template } from "../../../entities/Template";
 import { DataForm } from "../../../entities/DataForm";
@@ -20,6 +20,8 @@ import { getStringFromFile } from "../utils/fileToString";
 import { TrackerPostResponse } from "@eyeseetea/d2-api/api/tracker";
 import { MetadataRepository } from "../../../repositories/MetadataRepository";
 import { generateId } from "../../../entities/Ref";
+import { EGASP_PROGRAM_ID } from "../../../../data/repositories/program-rule/ProgramRulesMetadataDefaultRepository";
+import { InstanceDefaultRepository } from "../../../../data/repositories/InstanceDefaultRepository";
 
 export class ImportEGASPFile {
     constructor(
@@ -29,7 +31,8 @@ export class ImportEGASPFile {
         private glassDocumentsRepository: GlassDocumentsRepository,
         private glassUploadsRepository: GlassUploadsRepository,
         private eGASPValidationRepository: ProgramRulesMetadataRepository,
-        private metadataRepository: MetadataRepository
+        private metadataRepository: MetadataRepository,
+        private instanceReporsitory: InstanceDefaultRepository
     ) {}
 
     public importEGASPFile(
@@ -40,7 +43,7 @@ export class ImportEGASPFile {
         orgUnitName: string,
         period: string
     ): FutureData<ImportSummary> {
-        return this.excelRepository.loadTemplate(file).flatMap(_templateId => {
+        return this.excelRepository.loadTemplate(file, EGASP_PROGRAM_ID).flatMap(_templateId => {
             const egaspTemplate = _.values(templates).map(TemplateClass => new TemplateClass())[0];
 
             return this.egaspProgramDefaultRepository.getProgramEGASP().flatMap(egaspProgram => {
@@ -297,8 +300,8 @@ export class ImportEGASPFile {
     }
 
     private readTemplate(template: Template, dataForm: DataForm): FutureData<DataPackage | undefined> {
-        const reader = new ExcelReader(this.excelRepository);
-        return Future.fromPromise(reader.readTemplate(template)).map(excelDataValues => {
+        const reader = new ExcelReader(this.excelRepository, this.instanceReporsitory);
+        return Future.fromPromise(reader.readTemplate(template, EGASP_PROGRAM_ID)).map(excelDataValues => {
             if (!excelDataValues) return undefined;
 
             return {

@@ -167,7 +167,8 @@ export function getCompositionRoot(instance: Instance) {
                 glassUploadsRepository,
                 eGASPValidationDefaultRepository,
                 trackerRepository,
-                glassModuleRepository
+                glassModuleRepository,
+                instanceRepository
             ),
             validatePrimaryFile: new ValidatePrimaryFileUseCase(
                 risDataRepository,
