@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2023-11-09T15:32:04.080Z\n"
-"PO-Revision-Date: 2023-11-09T15:32:04.080Z\n"
+"POT-Creation-Date: 2023-11-10T15:56:04.331Z\n"
+"PO-Revision-Date: 2023-11-10T15:56:04.331Z\n"
 
 msgid "Template {{id}} not loaded"
 msgstr ""
@@ -565,9 +565,6 @@ msgid "Incorrect File Format. Please retry with a valid file"
 msgstr ""
 
 msgid "Select file"
-msgstr ""
-
-msgid "Incorrect File Format. Please retry with a valid Sample file"
 msgstr ""
 
 msgid "The password and confirm password fields don't match"

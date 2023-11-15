@@ -11,15 +11,19 @@ import XLSX, {
 import { CellRef, Range, SheetRef, ValueRef } from "../../domain/entities/Template";
 import moment from "moment";
 import { Future, FutureData } from "../../domain/entities/Future";
+import { Id } from "../../domain/entities/Ref";
+import { AMC_PRODUCT_REGISTER_PROGRAM_ID } from "../../domain/usecases/data-entry/amc/ImportAMCProductLevelData";
 
 type RowWithCells = XLSX.Row & { _cells: XLSX.Cell[] };
 
 export class ExcelPopulateDefaultRepository extends ExcelRepository {
     private workbooks: Record<string, ExcelWorkbook> = {};
 
-    public loadTemplate(file: Blob): FutureData<string> {
+    public loadTemplate(file: Blob, programId: Id): FutureData<string> {
+        const templateId =
+            programId === AMC_PRODUCT_REGISTER_PROGRAM_ID ? "TRACKER_PROGRAM_GENERATED_v3" : "PROGRAM_GENERATED_v4";
         return Future.fromPromise(this.parseFile(file)).map(workbook => {
-            const id = "PROGRAM_GENERATED_v4";
+            const id = templateId;
             this.workbooks[id] = workbook;
             return id;
         });

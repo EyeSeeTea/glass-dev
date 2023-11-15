@@ -6,33 +6,8 @@ import { Future, FutureData } from "../../../domain/entities/Future";
 import { apiToFuture } from "../../../utils/futures";
 import { EGASP_PROGRAM_ID } from "../program-rule/ProgramRulesMetadataDefaultRepository";
 import { BulkLoadDataStoreClient } from "../../data-store/BulkLoadDataStoreClient";
+import { DataElementType } from "../../../domain/entities/DataForm";
 
-export type DataElementType =
-    | "TEXT"
-    | "LONG_TEXT"
-    | "LETTER"
-    | "PHONE_NUMBER"
-    | "EMAIL"
-    | "BOOLEAN"
-    | "TRUE_ONLY"
-    | "DATE"
-    | "DATETIME"
-    | "TIME"
-    | "NUMBER"
-    | "UNIT_INTERVAL"
-    | "PERCENTAGE"
-    | "INTEGER"
-    | "INTEGER_POSITIVE"
-    | "INTEGER_NEGATIVE"
-    | "INTEGER_ZERO_OR_POSITIVE"
-    | "TRACKER_ASSOCIATE"
-    | "USERNAME"
-    | "COORDINATE"
-    | "ORGANISATION_UNIT"
-    | "AGE"
-    | "URL"
-    | "FILE_RESOURCE"
-    | "IMAGE";
 type TrackedEntityTypeApi = Pick<D2TrackedEntityType, "id" | "featureType">;
 export interface DataElement {
     id: Id;

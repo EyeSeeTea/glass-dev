@@ -17,6 +17,8 @@ import { ImportRISIndividualFunghiFile } from "./amr-individual-funghi/ImportRIS
 import { RISIndividualFunghiDataRepository } from "../../repositories/data-entry/RISIndividualFunghiDataRepository";
 import { TrackerRepository } from "../../repositories/TrackerRepository";
 import { GlassModuleDefaultRepository } from "../../../data/repositories/GlassModuleDefaultRepository";
+import { ImportAMCProductLevelData } from "./amc/ImportAMCProductLevelData";
+import { InstanceDefaultRepository } from "../../../data/repositories/InstanceDefaultRepository";
 
 export class ImportPrimaryFileUseCase {
     constructor(
@@ -32,7 +34,8 @@ export class ImportPrimaryFileUseCase {
         private glassUploadsRepository: GlassUploadsDefaultRepository,
         private eGASPValidationRepository: ProgramRulesMetadataRepository,
         private trackerRepository: TrackerRepository,
-        private glassModuleDefaultRepository: GlassModuleDefaultRepository
+        private glassModuleDefaultRepository: GlassModuleDefaultRepository,
+        private instanceRepository: InstanceDefaultRepository
     ) {}
 
     public execute(
@@ -66,7 +69,8 @@ export class ImportPrimaryFileUseCase {
                     this.glassDocumentsRepository,
                     this.glassUploadsRepository,
                     this.eGASPValidationRepository,
-                    this.metadataRepository
+                    this.metadataRepository,
+                    this.instanceRepository
                 );
 
                 return importEGASPFile.importEGASPFile(inputFile, action, eventListId, orgUnitId, orgUnitName, period);
@@ -92,6 +96,25 @@ export class ImportPrimaryFileUseCase {
                         module.name
                     );
                 });
+            }
+
+            case "AMC": {
+                const importAMCProductFile = new ImportAMCProductLevelData(
+                    this.excelRepository,
+                    this.instanceRepository,
+                    this.trackerRepository,
+                    this.glassDocumentsRepository,
+                    this.glassUploadsRepository
+                );
+
+                return importAMCProductFile.importAMCProductFile(
+                    inputFile,
+                    action,
+                    eventListId,
+                    orgUnitId,
+                    orgUnitName,
+                    period
+                );
             }
             default: {
                 return Future.error("Unknown module type");
