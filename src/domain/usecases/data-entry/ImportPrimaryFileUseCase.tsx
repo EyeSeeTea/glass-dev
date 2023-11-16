@@ -112,8 +112,7 @@ export class ImportPrimaryFileUseCase {
                     action,
                     eventListId,
                     orgUnitId,
-                    orgUnitName,
-                    period
+                    orgUnitName
                 );
             }
             default: {
