@@ -16,6 +16,7 @@ import { D2TrackerTrackedEntity } from "@eyeseetea/d2-api/api/trackerTrackedEnti
 import { D2TrackerEnrollment, D2TrackerEnrollmentAttribute } from "@eyeseetea/d2-api/api/trackerEnrollments";
 import { D2TrackerEvent } from "@eyeseetea/d2-api/api/trackerEvents";
 import { mapResponseToImportSummary } from "../amr-individual-funghi/ImportRISIndividualFunghiFile";
+import { getStringFromFile } from "../utils/fileToString";
 
 export const AMC_PRODUCT_REGISTER_PROGRAM_ID = "G6ChA5zMW9n";
 const AMR_RAW_PRODUCT_CONSUMPTION_STAGE_ID = "GmElQHKXLIE";
@@ -34,8 +35,7 @@ export class ImportAMCProductLevelData {
         action: ImportStrategy,
         eventListId: string | undefined,
         orgUnitId: string,
-        orgUnitName: string,
-        period: string
+        orgUnitName: string
     ): FutureData<ImportSummary> {
         return this.excelRepository.loadTemplate(file, AMC_PRODUCT_REGISTER_PROGRAM_ID).flatMap(_templateId => {
             const amcTemplate = _.values(templates)
@@ -87,21 +87,44 @@ export class ImportAMCProductLevelData {
                                         });
                                 });
                             } else {
-                                //TO DO: Handle AMC file deletiom
-                            }
+                                if (eventListId) {
+                                    return this.glassDocumentsRepository.download(eventListId).flatMap(file => {
+                                        return Future.fromPromise(getStringFromFile(file)).flatMap(_enrollments => {
+                                            const enrollmemtIdList: [] = JSON.parse(_enrollments);
+                                            const trackedEntities = enrollmemtIdList.map(id => {
+                                                const trackedEntity: D2TrackerTrackedEntity = {
+                                                    orgUnit: orgUnitId,
+                                                    trackedEntity: id,
+                                                    trackedEntityType: AMR_GLASS_AMC_TET_PRODUCT_REGISTER,
+                                                };
 
-                            const testSummary: ImportSummary = {
-                                status: "SUCCESS",
-                                importCount: {
-                                    ignored: 0,
-                                    imported: 0,
-                                    deleted: 0,
-                                    updated: 0,
-                                },
-                                nonBlockingErrors: [],
-                                blockingErrors: [],
-                            };
-                            return Future.success(testSummary);
+                                                return trackedEntity;
+                                            });
+
+                                            return this.trackerRepository
+                                                .import({ trackedEntities: trackedEntities }, action)
+                                                .flatMap(response => {
+                                                    const { summary } = mapResponseToImportSummary(response);
+                                                    return Future.success(summary);
+                                                });
+                                        });
+                                    });
+                                } else {
+                                    //No enrollments were created during import, so no events to delete.
+                                    const summary: ImportSummary = {
+                                        status: "SUCCESS",
+                                        importCount: {
+                                            ignored: 0,
+                                            imported: 0,
+                                            deleted: 0,
+                                            updated: 0,
+                                        },
+                                        nonBlockingErrors: [],
+                                        blockingErrors: [],
+                                    };
+                                    return Future.success(summary);
+                                }
+                            }
                         } else {
                             return Future.error("Cannot find data package");
                         }
@@ -180,17 +203,7 @@ export class ImportAMCProductLevelData {
                         trackedEntity: "",
                         trackedEntityType: AMR_GLASS_AMC_TET_PRODUCT_REGISTER,
                         enrollments: enrollments,
-                        attributes: [
-                            // {
-                            //     attribute: PATIENT_COUNTER_ID,
-                            //     value:
-                            //         attributes.find(at => at.attribute === PATIENT_COUNTER_ID)?.value.toString() ?? "",
-                            // },
-                            // {
-                            //     attribute: PATIENT_ID,
-                            //     value: attributes.find(at => at.attribute === PATIENT_ID)?.value.toString() ?? "",
-                            // },
-                        ],
+                        attributes: [],
                     };
                     return entity;
                 });

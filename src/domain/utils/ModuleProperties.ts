@@ -120,7 +120,7 @@ export const moduleProperties = new Map<string, ModuleDetails>([
             secondaryFileType: "Substance Level Data",
             primaryUploadLabel: "Choose File",
             secondaryUploadLabel: "Choose File",
-            unit: "",
+            unit: "events",
             isSpecimenReq: false,
             isDownloadEmptyTemplateReq: true,
             applyQuestionnaireValidation: true,
