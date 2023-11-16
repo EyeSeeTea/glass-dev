@@ -5,7 +5,7 @@ import { Questionnaire } from "../../../entities/Questionnaire";
 import { Id } from "../../../entities/Ref";
 import { AMC_PROGRAM_ID } from "../../GetProgramQuestionnaireUseCase";
 
-export const AMR_GLASS_AMC_DET_DS_PERIOD = "HeeDWGJrFcV";
+export const AMR_GLASS_AMC_DET_DS_PERIOD = "W4D5kpe1il2";
 export class ImportAMCQuestionnaireData {
     constructor(private dhis2EventsDefaultRepository: Dhis2EventsDefaultRepository) {}
 
