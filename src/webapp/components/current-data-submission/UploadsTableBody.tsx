@@ -26,6 +26,7 @@ export interface UploadsTableBodyProps {
 export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refreshUploads }) => {
     const { compositionRoot } = useAppContext();
     const snackbar = useSnackbar();
+
     const [loading, setLoading] = useState<boolean>(false);
     const {
         currentOrgUnitAccess: { orgUnitId, orgUnitName },
@@ -262,7 +263,7 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                         <TableRow key={row.id}>
                             <TableCell>{dayjs(row.uploadDate).format("DD-MM-YYYY")}</TableCell>
                             <TableCell>{row.period}</TableCell>
-                            <TableCell>{row.records}</TableCell>
+                            <TableCell>{row?.records || row?.rows}</TableCell>
                             <TableCell>{row.fileType}</TableCell>
                             {moduleProperties.get(currentModuleAccess.moduleName)?.isbatchReq && (
                                 <TableCell style={{ opacity: 0.5 }}>{row.batchId}</TableCell>

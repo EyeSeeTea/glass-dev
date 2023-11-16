@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2023-10-06T08:14:40.002Z\n"
-"PO-Revision-Date: 2023-10-06T08:14:40.002Z\n"
+"POT-Creation-Date: 2023-11-16T08:53:14.509Z\n"
+"PO-Revision-Date: 2023-11-16T08:53:14.509Z\n"
 
 msgid "Template {{id}} not loaded"
 msgstr ""
@@ -294,7 +294,10 @@ msgstr ""
 msgid "Period"
 msgstr ""
 
-msgid "Records"
+msgid "Rows"
+msgstr ""
+
+msgid "Values"
 msgstr ""
 
 msgid "Batch ID"
