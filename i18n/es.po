@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: i18next-conv\n"
-"POT-Creation-Date: 2023-10-06T08:14:40.002Z\n"
+"POT-Creation-Date: 2023-11-16T08:53:14.509Z\n"
 "PO-Revision-Date: 2018-10-25T09:02:35.143Z\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -295,7 +295,10 @@ msgstr ""
 msgid "Period"
 msgstr ""
 
-msgid "Records"
+msgid "Rows"
+msgstr ""
+
+msgid "Values"
 msgstr ""
 
 msgid "Batch ID"

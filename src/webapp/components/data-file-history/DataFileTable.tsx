@@ -22,7 +22,8 @@ export interface DataFileHistoryItemProps {
     uploadDate: string;
     dataSubmission: string;
     module: string;
-    records: number;
+    records?: number; // TODO: Delete when no items in DataStore with records (this becomes rows)
+    rows?: number;
 }
 export type SortDirection = "asc" | "desc";
 export interface DataFileTableProps {
@@ -37,7 +38,7 @@ export const DataFileTable: React.FC<DataFileTableProps> = ({ title, items, clas
     const [batchIdSortDirection, setBatchIdSortDirection] = useState<SortDirection>("asc");
     const [dateSortDirection, setDateSortDirection] = useState<SortDirection>("asc");
     const [fileNameSortDirection, setFileNameSortDirection] = useState<SortDirection>("asc");
-    const [recordsSortDirection, setRecordsSortDirection] = useState<SortDirection>("asc");
+    const [rowsSortDirection, setRowsSortDirection] = useState<SortDirection>("asc");
 
     const { currentModuleAccess } = useCurrentModuleContext();
 
@@ -140,15 +141,15 @@ export const DataFileTable: React.FC<DataFileTableProps> = ({ title, items, clas
 
                             <TableCell
                                 onClick={() => {
-                                    recordsSortDirection === "asc"
-                                        ? setRecordsSortDirection("desc")
-                                        : setRecordsSortDirection("asc");
-                                    sortByColumn("records", recordsSortDirection);
+                                    rowsSortDirection === "asc"
+                                        ? setRowsSortDirection("desc")
+                                        : setRowsSortDirection("asc");
+                                    sortByColumn("rows", rowsSortDirection);
                                 }}
                             >
                                 <span>
-                                    <Typography variant="caption">{i18n.t("Records")}</Typography>
-                                    {recordsSortDirection === "asc" ? (
+                                    <Typography variant="caption">{i18n.t("Rows")}</Typography>
+                                    {rowsSortDirection === "asc" ? (
                                         <ArrowUpward fontSize="small" />
                                     ) : (
                                         <ArrowDownward fontSize="small" />

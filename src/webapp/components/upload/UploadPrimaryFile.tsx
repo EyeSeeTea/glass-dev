@@ -108,7 +108,7 @@ export const UploadPrimaryFile: React.FC<UploadPrimaryFileProps> = ({
                                     period: currentPeriod.toString(),
                                     orgUnitId: orgUnitId,
                                     orgUnitCode: orgUnitCode,
-                                    records: primaryFileData.records,
+                                    rows: primaryFileData.rows,
                                     specimens: primaryFileData.specimens,
                                 };
                                 return compositionRoot.glassDocuments.upload({ file: uploadedPrimaryFile, data }).run(
