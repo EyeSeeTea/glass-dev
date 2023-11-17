@@ -18,6 +18,9 @@ type GeneralInfoType = {
     regionLevel: number;
 };
 
+const KOSOVO = "NEPywTBN52g";
+const allowedNaOrgUnits = [KOSOVO];
+
 export class InstanceDefaultRepository implements InstanceRepository {
     private api: D2Api;
 
@@ -157,11 +160,6 @@ export class InstanceDefaultRepository implements InstanceRepository {
         ).flatMap(user => {
             const { organisationUnits, dataViewOrganisationUnits } = user;
 
-            const filteredOrgUnits = organisationUnits.filter(ou => ou.code !== "NA" && ou.parent?.code !== "NA");
-            const filteredDataViewOrgUnits = dataViewOrganisationUnits.filter(
-                ou => ou.code !== "NA" && ou.parent?.code !== "NA"
-            );
-
             const countryOrgUnits: { name: string; id: string; shortName: string; code: string; path: string }[] = [];
             const dataViewCountryOrgUnits: {
                 name: string;
@@ -174,8 +172,11 @@ export class InstanceDefaultRepository implements InstanceRepository {
             return this.dataStoreClient.getObject(DataStoreKeys.GENERAL).flatMap(generalInfo => {
                 const countryLevel = (generalInfo as GeneralInfoType).countryLevel;
 
-                filteredOrgUnits.forEach(orgUnit => {
-                    if (orgUnit.level === countryLevel && orgUnit.parent.code !== "NA") {
+                organisationUnits.forEach(orgUnit => {
+                    if (
+                        orgUnit.level === countryLevel &&
+                        (orgUnit.parent.code !== "NA" || allowedNaOrgUnits.includes(orgUnit.id))
+                    ) {
                         countryOrgUnits.push({
                             name: orgUnit.name,
                             id: orgUnit.id,
@@ -186,8 +187,11 @@ export class InstanceDefaultRepository implements InstanceRepository {
                     }
                 });
 
-                filteredDataViewOrgUnits.forEach(dataViewOrgUnit => {
-                    if (dataViewOrgUnit.level === countryLevel && dataViewOrgUnit.parent.code !== "NA") {
+                dataViewOrganisationUnits.forEach(dataViewOrgUnit => {
+                    if (
+                        dataViewOrgUnit.level === countryLevel &&
+                        (dataViewOrgUnit.parent.code !== "NA" || allowedNaOrgUnits.includes(dataViewOrgUnit.id))
+                    ) {
                         dataViewCountryOrgUnits.push({
                             name: dataViewOrgUnit.name,
                             id: dataViewOrgUnit.id,
@@ -198,8 +202,8 @@ export class InstanceDefaultRepository implements InstanceRepository {
                     }
                 });
 
-                return this.getAllCountryOrgUnits(filteredOrgUnits, countryLevel).flatMap(childrenOrgUnits => {
-                    return this.getAllCountryOrgUnits(filteredDataViewOrgUnits, countryLevel).flatMap(
+                return this.getAllCountryOrgUnits(organisationUnits, countryLevel).flatMap(childrenOrgUnits => {
+                    return this.getAllCountryOrgUnits(dataViewOrganisationUnits, countryLevel).flatMap(
                         childrenDataViewOrgUnits => {
                             const uniqueOrgUnits = _.uniqBy([...countryOrgUnits, ...childrenOrgUnits], "id");
                             const uniqueDataViewOrgUnits = _.uniqBy(
@@ -276,6 +280,7 @@ export class InstanceDefaultRepository implements InstanceRepository {
                         level: true,
                         parent: {
                             id: true,
+                            code: true,
                         },
                     },
                     paging: false,
@@ -296,21 +301,21 @@ export class InstanceDefaultRepository implements InstanceRepository {
                     );
                 } else {
                     childrenOrgUnits.forEach(el => {
-                        result.push({
-                            name: el.name,
-                            id: el.id,
-                            shortName: el.shortName,
-                            code: el.code,
-                            path: el.path,
-                        });
+                        if (el.parent.code !== "NA" || allowedNaOrgUnits.includes(el.id))
+                            result.push({
+                                name: el.name,
+                                id: el.id,
+                                shortName: el.shortName,
+                                code: el.code,
+                                path: el.path,
+                            });
                     });
                     return Future.success(result);
                 }
             });
         };
 
-        const filteredOrgUnits = orgUnits.filter(ou => ou.code !== "NA");
-        return recursiveGetOrgUnits(filteredOrgUnits, countryLevel).flatMap(orgUnits => {
+        return recursiveGetOrgUnits(orgUnits, countryLevel).flatMap(orgUnits => {
             return Future.success(orgUnits);
         });
     }

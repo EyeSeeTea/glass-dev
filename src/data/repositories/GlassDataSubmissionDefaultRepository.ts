@@ -1,8 +1,11 @@
 import { Future, FutureData } from "../../domain/entities/Future";
 import { DataSubmissionStatusTypes, GlassDataSubmission } from "../../domain/entities/GlassDataSubmission";
+import { GlassModule } from "../../domain/entities/GlassModule";
 import { GlassDataSubmissionsRepository } from "../../domain/repositories/GlassDataSubmissionRepository";
 import { DataStoreClient } from "../data-store/DataStoreClient";
 import { DataStoreKeys } from "../data-store/DataStoreKeys";
+
+const DISALLOWED_OPEN_DATA_SUBMISSIONS_MODULES = ["EGASP"];
 
 export class GlassDataSubmissionsDefaultRepository implements GlassDataSubmissionsRepository {
     constructor(private dataStoreClient: DataStoreClient) {}
@@ -29,13 +32,25 @@ export class GlassDataSubmissionsDefaultRepository implements GlassDataSubmissio
     }
 
     getOpenDataSubmissionsByOU(orgUnit: string, period: string): FutureData<GlassDataSubmission[]> {
-        return this.dataStoreClient.getObjectsFilteredByProps<GlassDataSubmission>(
-            DataStoreKeys.DATA_SUBMISSIONS,
-            new Map<keyof GlassDataSubmission, unknown>([
-                ["period", period],
-                ["orgUnit", orgUnit],
-            ])
-        );
+        return Future.joinObj({
+            dataSubmissions: this.dataStoreClient.getObjectsFilteredByProps<GlassDataSubmission>(
+                DataStoreKeys.DATA_SUBMISSIONS,
+                new Map<keyof GlassDataSubmission, unknown>([
+                    ["period", period],
+                    ["orgUnit", orgUnit],
+                ])
+            ),
+            modules: this.dataStoreClient.listCollection<GlassModule>(DataStoreKeys.MODULES),
+        }).flatMap(({ dataSubmissions, modules }) => {
+            const disallowedModulesIds = modules
+                .filter(module => DISALLOWED_OPEN_DATA_SUBMISSIONS_MODULES.includes(module.name))
+                .map(module => module.id);
+            const filteredDataSubmissions = dataSubmissions.filter(
+                ({ module }) => !disallowedModulesIds.includes(module)
+            );
+
+            return Future.success(filteredDataSubmissions);
+        });
     }
 
     save(dataSubmission: GlassDataSubmission): FutureData<void> {
