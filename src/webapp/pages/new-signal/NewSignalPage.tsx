@@ -7,7 +7,8 @@ import i18n from "@eyeseetea/d2-ui-components/locales";
 import styled from "styled-components";
 import { glassColors, palette } from "../app/themes/dhis2.theme";
 
-import { NewSignalForm } from "../../components/new-signal/NewSignalForm";
+import { ProgramQuestionnaireForm } from "../../components/new-signal/ProgramQuestionnaireForm";
+import { EAR_PROGRAM_ID } from "../../../domain/usecases/GetProgramQuestionnaireUseCase";
 
 export const NewSignalPage: React.FC = () => {
     const { currentModuleAccess } = useCurrentModuleContext();
@@ -42,7 +43,14 @@ export const NewSignalPage: React.FC = () => {
                     </Button>
                 </CenteredDiv>
             )}
-            {formVisibility && <NewSignalForm hideForm={hideForm} readonly={false} />}
+            {formVisibility && (
+                <ProgramQuestionnaireForm
+                    hideForm={hideForm}
+                    readonly={false}
+                    questionnaireId={EAR_PROGRAM_ID}
+                    hidePublish={false}
+                />
+            )}
         </ContentWrapper>
     );
 };

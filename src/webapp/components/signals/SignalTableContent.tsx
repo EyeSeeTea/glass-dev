@@ -71,7 +71,7 @@ export const SignalTableContent: React.FC = () => {
         hideConfirmationDialog();
         if (signalToDelete) {
             setLoading(true);
-            compositionRoot.signals
+            compositionRoot.programQuestionnaires
                 .delete(
                     signalToDelete.id,
                     signalToDelete.eventId,

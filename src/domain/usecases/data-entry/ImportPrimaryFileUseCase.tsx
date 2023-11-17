@@ -1,4 +1,3 @@
-import { UseCase } from "../../../CompositionRoot";
 import { Future, FutureData } from "../../entities/Future";
 import { MetadataRepository } from "../../repositories/MetadataRepository";
 import { DataValuesRepository } from "../../repositories/data-entry/DataValuesRepository";
@@ -19,7 +18,7 @@ import { RISIndividualFunghiDataRepository } from "../../repositories/data-entry
 import { TrackerRepository } from "../../repositories/TrackerRepository";
 import { GlassModuleDefaultRepository } from "../../../data/repositories/GlassModuleDefaultRepository";
 
-export class ImportPrimaryFileUseCase implements UseCase {
+export class ImportPrimaryFileUseCase {
     constructor(
         private risDataRepository: RISDataRepository,
         private risIndividualFunghiRepository: RISIndividualFunghiDataRepository,
