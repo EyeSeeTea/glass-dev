@@ -144,18 +144,18 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                             }).run(
                                 ({ deletePrimaryFileSummary, deleteSecondaryFileSummary }) => {
                                     if (deletePrimaryFileSummary) {
-                                        let message = `${deletePrimaryFileSummary.importCount.deleted} ${
-                                            moduleProperties.get(currentModuleAccess.moduleName)?.unit
-                                        }s deleted for ${
+                                        let message = `${
+                                            primaryFileToDelete?.rows || primaryFileToDelete?.records
+                                        } rows deleted for ${
                                             moduleProperties.get(currentModuleAccess.moduleName)?.primaryFileType
                                         } file`;
 
                                         if (secondaryFileToDelete && deleteSecondaryFileSummary) {
                                             message =
                                                 message +
-                                                ` and ${deleteSecondaryFileSummary.importCount.deleted} ${
-                                                    moduleProperties.get(currentModuleAccess.moduleName)?.unit
-                                                }s deleted for ${
+                                                ` and ${
+                                                    secondaryFileToDelete.rows || secondaryFileToDelete.records
+                                                } rows deleted for ${
                                                     moduleProperties.get(currentModuleAccess.moduleName)
                                                         ?.secondaryFileType
                                                 } file.`;
