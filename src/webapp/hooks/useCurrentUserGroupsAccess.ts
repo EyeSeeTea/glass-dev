@@ -27,13 +27,16 @@ export function useCurrentUserGroupsAccess() {
                 if (glassModule.userGroups.approveAccess) {
                     setApproveAccessGroup({ kind: "loaded", data: glassModule.userGroups.approveAccess });
                 }
-                if (glassModule.userGroups.confidentialAccess) {
+
+                if (currentModuleAccess.moduleName !== "EAR") {
+                    setConfidentialAccessGroup({ kind: "loaded", data: [] });
+                } else if (glassModule.userGroups.confidentialAccess) {
                     setConfidentialAccessGroup({ kind: "loaded", data: glassModule.userGroups.confidentialAccess });
                 }
             },
             () => {}
         );
-    }, [compositionRoot, currentModuleAccess.moduleId]);
+    }, [compositionRoot, currentModuleAccess]);
 
     return { approveAccessGroup, captureAccessGroup, readAccessGroup, confidentialAccessGroup };
 }

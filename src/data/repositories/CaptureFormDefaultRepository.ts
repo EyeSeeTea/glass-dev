@@ -4,13 +4,16 @@ import { FutureData, Future } from "../../domain/entities/Future";
 import {
     BooleanQuestion,
     DateQuestion,
+    NumberQuestion,
     Question,
     Questionnaire,
     SelectQuestion,
+    SingleCheckQuestion,
     TextQuestion,
 } from "../../domain/entities/Questionnaire";
 import { apiToFuture } from "../../utils/futures";
 import { D2TrackerEvent } from "@eyeseetea/d2-api/api/trackerEvents";
+import { Id } from "../../domain/entities/Ref";
 
 interface EARProgram {
     code: string;
@@ -50,15 +53,15 @@ export interface ProgramMetadata {
     optionSets: OptionSet[];
     options: Option[];
 }
-export const EAR_PROGRAM_ID = "SQe26z0smFP";
+
 export class CaptureFormDefaultRepository implements CaptureFormRepository {
     constructor(private api: D2Api) {}
 
-    getForm(): FutureData<Questionnaire> {
+    getForm(programId: Id): FutureData<Questionnaire> {
         return apiToFuture(
             this.api.request<ProgramMetadata>({
                 method: "get",
-                url: `/programs/${EAR_PROGRAM_ID}/metadata.json?fields=programs,dataElements,programStageSections`,
+                url: `/programs/${programId}/metadata.json?fields=programs,dataElements,programStageSections`,
             })
         ).flatMap(resp => {
             if (resp.programs[0]) {
@@ -94,11 +97,11 @@ export class CaptureFormDefaultRepository implements CaptureFormRepository {
         });
     }
 
-    getPopulatedForm(event: D2TrackerEvent): FutureData<Questionnaire> {
+    getPopulatedForm(event: D2TrackerEvent, programId: string): FutureData<Questionnaire> {
         return apiToFuture(
             this.api.request<ProgramMetadata>({
                 method: "get",
-                url: `/programs/${EAR_PROGRAM_ID}/metadata.json?fields=programs,dataElements,programStageSections`,
+                url: `/programs/${programId}/metadata.json?fields=programs,dataElements,programStageSections`,
             })
         ).flatMap(resp => {
             if (resp.programs[0]) {
@@ -143,19 +146,17 @@ export class CaptureFormDefaultRepository implements CaptureFormRepository {
     ): Question[] {
         const questions: Question[] = _.compact(
             section.dataElements.map(dataElement => {
-                const curDataEleemnt = dataElements.filter(de => de.id === dataElement.id);
+                const curDataElement = dataElements.filter(de => de.id === dataElement.id);
 
-                if (curDataEleemnt[0]) {
-                    const dataElement = curDataEleemnt[0];
-                    const dataValue = event
-                        ? event.dataValues.find(dv => dv.dataElement === dataElement.id)
-                        : undefined;
-                    switch (dataElement.valueType) {
+                if (curDataElement[0]) {
+                    const curDE = curDataElement[0];
+                    const dataValue = event ? event.dataValues.find(dv => dv.dataElement === curDE.id) : undefined;
+                    switch (curDE.valueType) {
                         case "BOOLEAN": {
                             const boolQ: BooleanQuestion = {
-                                id: dataElement.id,
-                                code: dataElement.code, //code
-                                text: dataElement.formName, //formName
+                                id: curDE.id,
+                                code: curDE.code, //code
+                                text: curDE.formName, //formName
                                 type: "boolean",
                                 storeFalse: true,
                                 value: dataValue ? (dataValue.value === "true" ? true : false) : true,
@@ -164,20 +165,44 @@ export class CaptureFormDefaultRepository implements CaptureFormRepository {
                             return boolQ;
                         }
 
+                        case "NUMBER": {
+                            const intQ: NumberQuestion = {
+                                id: curDE.id,
+                                code: curDE.code, //code
+                                text: curDE.formName, //formName
+                                type: "number",
+                                numberType: "INTEGER",
+                                value: dataValue ? dataValue.value : "",
+                            };
+
+                            return intQ;
+                        }
+
+                        case "TRUE_ONLY": {
+                            const singleCheckQ: SingleCheckQuestion = {
+                                id: curDE.id,
+                                code: curDE.code, //code
+                                text: curDE.formName, //formName
+                                type: "singleCheck",
+                                storeFalse: true,
+                                value: dataValue ? (dataValue.value === "true" ? true : false) : false,
+                            };
+
+                            return singleCheckQ;
+                        }
+
                         case "TEXT": {
-                            if (dataElement.optionSet) {
-                                const selectOptions = options.filter(
-                                    op => op.optionSet.id === dataElement.optionSet?.id
-                                );
+                            if (curDE.optionSet) {
+                                const selectOptions = options.filter(op => op.optionSet.id === curDE.optionSet?.id);
 
                                 const selectedOption = dataValue
                                     ? selectOptions.find(o => o.code === dataValue.value)
                                     : undefined;
 
                                 const selectQ: SelectQuestion = {
-                                    id: dataElement.id || "",
-                                    code: dataElement.code || "",
-                                    text: dataElement.formName || "",
+                                    id: curDE.id || "",
+                                    code: curDE.code || "",
+                                    text: curDE.formName || "",
                                     type: "select",
                                     options: selectOptions,
                                     value: selectedOption ? selectedOption : { name: "", id: "", code: "" },
@@ -185,9 +210,9 @@ export class CaptureFormDefaultRepository implements CaptureFormRepository {
                                 return selectQ;
                             } else {
                                 const singleLineText: TextQuestion = {
-                                    id: dataElement.id,
-                                    code: dataElement.code,
-                                    text: dataElement.formName,
+                                    id: curDE.id,
+                                    code: curDE.code,
+                                    text: curDE.formName,
                                     type: "text",
                                     value: dataValue ? (dataValue.value as string) : "",
                                     multiline: false,
@@ -199,9 +224,9 @@ export class CaptureFormDefaultRepository implements CaptureFormRepository {
 
                         case "LONG_TEXT": {
                             const singleLineTextQ: TextQuestion = {
-                                id: dataElement.id,
-                                code: dataElement.code,
-                                text: dataElement.formName,
+                                id: curDE.id,
+                                code: curDE.code,
+                                text: curDE.formName,
                                 type: "text",
                                 value: dataValue ? (dataValue.value as string) : "",
                                 multiline: true,
@@ -212,9 +237,9 @@ export class CaptureFormDefaultRepository implements CaptureFormRepository {
 
                         case "DATE": {
                             const dateQ: DateQuestion = {
-                                id: dataElement.id,
-                                code: dataElement.code,
-                                text: dataElement.formName,
+                                id: curDE.id,
+                                code: curDE.code,
+                                text: curDE.formName,
                                 type: "date",
                                 value: dataValue ? new Date(dataValue.value as string) : new Date(),
                             };

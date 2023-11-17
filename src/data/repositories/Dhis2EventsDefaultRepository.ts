@@ -7,6 +7,8 @@ import { D2TrackerEvent, TrackerEventsResponse } from "@eyeseetea/d2-api/api/tra
 import { TrackerPostResponse } from "@eyeseetea/d2-api/api/tracker";
 import { D2Api, Id } from "@eyeseetea/d2-api/2.34";
 import { apiToFuture } from "../../utils/futures";
+import { AMCDataQuestionnaire } from "../../domain/entities/Questionnaire";
+import { AMR_GLASS_AMC_DET_DS_PERIOD } from "../../domain/usecases/data-entry/amc/ImportAMCQuestionnaireData";
 import { trackerPostResponseDefaultError } from "./utils/TrackerPostResponseDefaultError";
 
 export declare type EventStatus = "ACTIVE" | "COMPLETED" | "VISITED" | "SCHEDULED" | "OVERDUE" | "SKIPPED";
@@ -74,5 +76,23 @@ export class Dhis2EventsDefaultRepository {
                 },
             })
         );
+    }
+
+    //The AMC-Data Questionnaire is implemented as a Event Program
+    //There could be a maximum of 6 events for this Program - no need of paging.
+    getAMCDataQuestionnaireEvtsByOUAndPeriod(orgUnitId: Id, year: string): FutureData<D2TrackerEvent[]> {
+        return apiToFuture(
+            this.api.tracker.events.get({
+                fields: { $owner: true, event: true, dataValues: true, orgUnit: true, scheduledAt: true },
+                program: AMCDataQuestionnaire,
+                orgUnit: orgUnitId,
+            })
+        ).flatMap(res => {
+            //Filter by year
+            const amcQuestionnaireEvents = res.instances.filter(
+                e => e.dataValues.find(dv => dv.dataElement === AMR_GLASS_AMC_DET_DS_PERIOD)?.value === year
+            );
+            return Future.success(amcQuestionnaireEvents);
+        });
     }
 }

@@ -68,16 +68,17 @@ import { SaveKeyUiLocaleUseCase } from "./domain/usecases/SaveKeyUiLocaleUseCase
 import { ProgramRulesMetadataDefaultRepository } from "./data/repositories/program-rule/ProgramRulesMetadataDefaultRepository";
 import { RISIndividualFunghiDataCSVDefaultRepository } from "./data/repositories/RISIndividualFunghiDataCSVDefaultRepository";
 import { TrackerDefaultRepository } from "./data/repositories/TrackerDefaultRepository";
-import { GetCaptureFormQuestionsUseCase } from "./domain/usecases/GetCaptureFormQuestionsUseCase";
+import { GetProgramQuestionnaireUseCase } from "./domain/usecases/GetProgramQuestionnaireUseCase";
 import { CaptureFormDefaultRepository } from "./data/repositories/CaptureFormDefaultRepository";
-import { ImportCaptureDataUseCase } from "./domain/usecases/data-entry/ear/ImportCaptureDataUseCase";
+import { ImportProgramQuestionnaireDataUseCase } from "./domain/usecases/data-entry/ImportProgramQuestionnaireDataUseCase";
 import { SignalDefaultRepository } from "./data/repositories/SignalDefaultRepository";
-import { GetSignalsUseCase } from "./domain/usecases/GetSignalsUseCase";
-import { GetSignalEventUseCase } from "./domain/usecases/GetSignalEventUseCase";
+import { GetProgramQuestionnairesUseCase } from "./domain/usecases/GetProgramQuestionnairesUseCase";
+import { GetPopulatedProgramQuestionnaireUseCase } from "./domain/usecases/GetPopulatedProgramQuestionnaireUseCase";
 import { DeleteSignalUseCase } from "./domain/usecases/DeleteSignalUseCase";
 import { GetEGASPEmptyTemplateUseCase } from "./domain/usecases/data-entry/egasp/GetEGASPEmptyTemplateUseCase";
 import { EGASPDownloadEmptyTemplate } from "./data/repositories/download-empty-template/EGASPDownloadEmptyTemplate";
 import { BulkLoadDataStoreClient } from "./data/data-store/BulkLoadDataStoreClient";
+import { ApplyAMCQuestionUpdationUseCase } from "./domain/usecases/ApplyAMCQuestionUpdationUseCase";
 
 export function getCompositionRoot(instance: Instance) {
     const api = getD2APiFromInstance(instance);
@@ -181,7 +182,7 @@ export function getCompositionRoot(instance: Instance) {
         }),
         questionnaires: getExecute({
             get: new GetQuestionnaireUseCase(questionnaireD2Repository),
-            getList: new GetQuestionnaireListUseCase(questionnaireD2Repository),
+            getList: new GetQuestionnaireListUseCase(questionnaireD2Repository, dhis2EventsDefaultRepository),
             saveResponse: new SaveQuestionnaireResponseUseCase(questionnaireD2Repository),
             setAsCompleted: new SetAsQuestionnaireCompletionUseCase(questionnaireD2Repository),
         }),
@@ -209,17 +210,18 @@ export function getCompositionRoot(instance: Instance) {
             saveKeyUiLocale: new SaveKeyUiLocaleUseCase(usersRepository),
             saveKeyDbLocale: new SaveKeyDbLocaleUseCase(usersRepository),
         }),
-        signals: getExecute({
-            getForm: new GetCaptureFormQuestionsUseCase(captureFormRepository),
-            importData: new ImportCaptureDataUseCase(
+        programQuestionnaires: getExecute({
+            getForm: new GetProgramQuestionnaireUseCase(captureFormRepository),
+            importData: new ImportProgramQuestionnaireDataUseCase(
                 dhis2EventsDefaultRepository,
                 signalRepository,
                 notificationRepository,
                 usersRepository
             ),
-            getSignals: new GetSignalsUseCase(signalRepository),
-            getSignal: new GetSignalEventUseCase(captureFormRepository),
+            getList: new GetProgramQuestionnairesUseCase(signalRepository),
+            getPopulatedForm: new GetPopulatedProgramQuestionnaireUseCase(captureFormRepository),
             delete: new DeleteSignalUseCase(dhis2EventsDefaultRepository, signalRepository),
+            applyValidations: new ApplyAMCQuestionUpdationUseCase(),
         }),
     };
 }

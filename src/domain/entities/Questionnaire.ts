@@ -1,6 +1,8 @@
 import { assertUnreachable, Maybe } from "../../types/utils";
 import { Code, Id, NamedRef, Ref, updateCollection } from "./Base";
 
+export const AMCDataQuestionnaire = "qGG6BjULAaf";
+export type QuestionnairesType = "Program" | "Dataset";
 export interface QuestionnaireBase {
     id: Id;
     name: string;
@@ -10,6 +12,9 @@ export interface QuestionnaireBase {
     isCompleted: boolean;
     isMandatory: boolean;
     rules: QuestionnaireRule[];
+    subQuestionnaires?: NamedRef[];
+    aggSubQuestionnaires?: NamedRef[];
+    eventId?: Id;
 }
 
 export interface QuestionnaireSelector {
@@ -29,12 +34,20 @@ export interface QuestionnaireSection {
     isVisible: boolean;
 }
 
-export type Question = SelectQuestion | NumberQuestion | TextQuestion | BooleanQuestion | DateQuestion;
+export type Question =
+    | SelectQuestion
+    | NumberQuestion
+    | TextQuestion
+    | BooleanQuestion
+    | DateQuestion
+    | SingleCheckQuestion;
 
 export interface QuestionBase {
     id: Id;
     code: Code;
     text: string;
+    disabled?: boolean;
+    infoText?: string;
 }
 
 export interface SelectQuestion extends QuestionBase {
@@ -70,6 +83,12 @@ export interface BooleanQuestion extends QuestionBase {
 export interface DateQuestion extends QuestionBase {
     type: "date";
     value: Maybe<Date>;
+}
+
+export interface SingleCheckQuestion extends QuestionBase {
+    type: "singleCheck";
+    storeFalse: boolean;
+    value: Maybe<boolean>;
 }
 
 export interface QuestionOption extends NamedRef {
