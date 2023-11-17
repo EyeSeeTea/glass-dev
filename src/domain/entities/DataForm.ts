@@ -1,6 +1,6 @@
 import { Id, NamedRef } from "./Ref";
 
-export const dataFormTypes = ["programs", "trackerPrograms"] as const;
+export const dataFormTypes = ["dataSets", "programs", "trackerPrograms"] as const;
 export type DataFormType = typeof dataFormTypes[number];
 export type DataFormPeriod = "Daily" | "Monthly" | "Yearly" | "Weekly";
 

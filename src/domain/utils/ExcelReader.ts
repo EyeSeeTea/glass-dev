@@ -13,6 +13,7 @@ import {
     GenericSheetRef,
     TrackerEventRowDataSource,
     setSheet,
+    CellDataSource,
 } from "../entities/Template";
 import { ExcelRepository, ExcelValue, ReadCellOptions } from "../repositories/ExcelRepository";
 
@@ -38,21 +39,28 @@ export class ExcelReader {
 
     public async readTemplate(template: Template, programId: Id): Promise<DataPackage | undefined> {
         const { dataSources = [] } = template;
+
+        const dataFormType = await this.readCellValue(template, template.dataFormType);
         const dataSourceValues = await this.getDataSourceValues(template, dataSources);
-        const data: DataPackageData[] = [];
+
+        if (dataFormType !== "dataSets" && dataFormType !== "programs" && dataFormType !== "trackerPrograms") {
+            return undefined;
+        }
 
         const [dataForm] = await this.instanceRepository.getProgramAsync(programId);
 
         if (!dataForm) return;
 
+        const data: DataPackageData[] = [];
         const teis: TrackedEntityInstance[] = [];
         const relationships: Relationship[] = [];
 
         // This should be refactored but need to validate with @tokland about TEIs
         for (const dataSource of dataSourceValues) {
-            // const row = await this.readByRow(template, dataSource);
-            // row.map(item => data.push(item));
             switch (dataSource.type) {
+                case "cell":
+                    (await this.readByCell(template, dataSource)).map(item => data.push(item));
+                    break;
                 case "row":
                     (await this.readByRow(template, dataSource)).map(item => data.push(item));
                     break;
@@ -101,7 +109,13 @@ export class ExcelReader {
             })
             .compact()
             .value();
-        return { type: "programs", dataEntries };
+
+        if (dataFormType === "trackerPrograms") {
+            const trackedEntityInstances = this.addTeiRelationships(teis, relationships);
+            return { type: "trackerPrograms", dataEntries, trackedEntityInstances };
+        }
+
+        return { type: dataFormType, dataEntries };
     }
 
     private async getDataSourceValues(template: Template, dataSources: DataSource[]): Promise<DataSourceValue[]> {
@@ -285,6 +299,46 @@ export class ExcelReader {
         const rowsCount = await this.excelRepository.getSheetRowsCount(template.id, ref.sheet);
         return rowsCount ? _.range(rowStart, rowsCount + 1, 1) : [];
     }
+    private async readByCell(template: Template, dataSource: CellDataSource): Promise<DataPackageData[]> {
+        const cell = await this.excelRepository.findRelativeCell(template.id, dataSource.ref);
+        const value = cell ? await this.readCellValue(template, cell) : undefined;
+        const optionId = await this.excelRepository.readCell(template.id, cell, { formula: true });
+        if (!isDefined(value)) return [];
+
+        const orgUnit = await this.readCellValue(template, dataSource.orgUnit);
+
+        const period = await this.readCellValue(template, dataSource.period);
+        if (!period) return [];
+
+        const dataElement = await this.readCellValue(template, dataSource.dataElement);
+        if (!dataElement) return [];
+
+        const dataFormId = await this.readCellValue(template, template.dataFormId);
+        if (!dataFormId) return [];
+
+        const category = await this.readCellValue(template, dataSource.categoryOption);
+        const attribute = await this.readCellValue(template, dataSource.attribute);
+        const eventId = await this.readCellValue(template, dataSource.eventId);
+
+        return [
+            {
+                group: undefined, // TODO: Add a way for custom templates to group by event
+                dataForm: String(dataFormId),
+                id: eventId ? String(eventId) : undefined,
+                orgUnit: String(orgUnit),
+                period: String(period),
+                attribute: attribute ? String(attribute) : undefined,
+                dataValues: [
+                    {
+                        dataElement: String(dataElement),
+                        category: category ? String(category) : undefined,
+                        value: this.formatValue(value),
+                        optionId: optionId ? removeCharacters(optionId) : undefined,
+                    },
+                ],
+            },
+        ];
+    }
 
     private async getFormulaCell(template: Template, ref: CellRef | ValueRef): Promise<ExcelValue> {
         return removeCharacters(await this.excelRepository.readCell(template.id, ref, { formula: true }));
@@ -343,6 +397,17 @@ export class ExcelReader {
 
         return String(value ?? "");
     }
+
+    private addTeiRelationships(teis: TrackedEntityInstance[], relationships: Relationship[]): TrackedEntityInstance[] {
+        const relationshipsByFromId = _.groupBy(relationships, relationship => relationship.fromId);
+        const relationshipsByToId = _.groupBy(relationships, relationship => relationship.toId);
+
+        return teis.map(tei => ({
+            ...tei,
+            relationships: _.concat(relationshipsByFromId[tei.id] || [], relationshipsByToId[tei.id] || []),
+        }));
+    }
+
     private async readTeiEvents(
         template: Template,
         dataSource: TrackerEventRowDataSource,
