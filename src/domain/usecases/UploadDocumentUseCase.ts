@@ -15,7 +15,7 @@ type UploadType = {
         period: string;
         orgUnitId: string;
         orgUnitCode: string;
-        rows?: number;
+        rows: number;
         specimens: string[];
     };
 };
