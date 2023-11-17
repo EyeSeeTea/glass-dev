@@ -45,8 +45,23 @@ export interface TrackerRelationship {
     from: ColumnRef;
     to: ColumnRef;
 }
+export interface CellDataSource extends BaseDataSource {
+    type: "cell";
+    ref: CellRef;
+    orgUnit: CellRef | ValueRef;
+    period: CellRef | ValueRef;
+    dataElement: CellRef | ValueRef;
+    categoryOption?: CellRef | ValueRef;
+    attribute?: CellRef | ValueRef;
+    eventId?: CellRef | ValueRef;
+}
 
-export type DataSourceValue = RowDataSource | TeiRowDataSource | TrackerEventRowDataSource | TrackerRelationship;
+export type DataSourceValue =
+    | RowDataSource
+    | TeiRowDataSource
+    | TrackerEventRowDataSource
+    | TrackerRelationship
+    | CellDataSource;
 
 // Use to reference data sources for dynamic sheets
 type DataSourceValueGetter = (sheet: string) => DataSourceValue | DataSourceValue[] | false;
