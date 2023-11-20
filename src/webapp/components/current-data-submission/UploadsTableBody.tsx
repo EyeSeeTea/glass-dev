@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import { Backdrop, TableBody, TableCell, TableRow, Button, DialogContent, Typography } from "@material-ui/core";
 import styled from "styled-components";
 import i18n from "@eyeseetea/d2-ui-components/locales";
@@ -17,6 +17,8 @@ import { useGlassCaptureAccess } from "../../hooks/useGlassCaptureAccess";
 import { StyledLoaderContainer } from "../upload/ConsistencyChecks";
 import { useCurrentPeriodContext } from "../../contexts/current-period-context";
 import { moduleProperties } from "../../../domain/utils/ModuleProperties";
+import { ImportSummaryErrors } from "../../../domain/entities/data-entry/ImportSummary";
+import { ImportSummaryErrorsDialog } from "../import-summary-errors-dialog/ImportSummaryErrorsDialog";
 
 export interface UploadsTableBodyProps {
     rows?: UploadsDataItem[];
@@ -31,6 +33,7 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
         currentOrgUnitAccess: { orgUnitId, orgUnitName },
     } = useCurrentOrgUnitContext();
     const [open, setOpen] = React.useState(false);
+    const [importSummaryErrorsToShow, setImportSummaryErrorsToShow] = React.useState<ImportSummaryErrors | null>(null);
     const [rowToDelete, setRowToDelete] = useState<UploadsDataItem>();
 
     const { currentPeriod } = useCurrentPeriodContext();
@@ -216,6 +219,13 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
             }
         }
     };
+
+    const handleShowImportSummaryErrors = useCallback((row: UploadsDataItem) => {
+        if (row.importSummary?.blockingErrors?.length || row.importSummary?.nonBlockingErrors?.length) {
+            setImportSummaryErrorsToShow(row.importSummary);
+        }
+    }, []);
+
     return (
         <>
             {rows && (
@@ -255,11 +265,15 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                                         </Typography>
                                     </DialogContent>
                                 </ConfirmationDialog>
+                                <ImportSummaryErrorsDialog
+                                    importSummaryErrorsToShow={importSummaryErrorsToShow}
+                                    onClose={() => setImportSummaryErrorsToShow(null)}
+                                />
                             </>
                         </TableCell>
                     </TableRow>
                     {rows.map((row: UploadsDataItem) => (
-                        <TableRow key={row.id}>
+                        <TableRow key={row.id} onClick={() => handleShowImportSummaryErrors(row)}>
                             <TableCell>{dayjs(row.uploadDate).format("DD-MM-YYYY")}</TableCell>
                             <TableCell>{row.period}</TableCell>
                             <TableCell>{row.records}</TableCell>
@@ -269,14 +283,22 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                             )}
                             <TableCell>{i18n.t(row.status).toUpperCase()}</TableCell>
                             <TableCell style={{ opacity: 0.5 }}>
-                                <Button onClick={() => downloadFile(row.fileId, row.fileName)}>
+                                <Button
+                                    onClick={event => {
+                                        event.stopPropagation();
+                                        downloadFile(row.fileId, row.fileName);
+                                    }}
+                                >
                                     <CloudDownloadOutlined />
                                 </Button>
                             </TableCell>
                             <TableCell style={{ opacity: 0.5 }}>
                                 {currentDataSubmissionStatus.kind === "loaded" ? (
                                     <Button
-                                        onClick={() => showConfirmationDialog(row)}
+                                        onClick={e => {
+                                            e.stopPropagation();
+                                            showConfirmationDialog(row);
+                                        }}
                                         disabled={
                                             !hasCurrentUserCaptureAccess ||
                                             !isEditModeStatus(currentDataSubmissionStatus.data.title)
