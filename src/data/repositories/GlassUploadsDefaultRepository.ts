@@ -1,5 +1,7 @@
 import { Future, FutureData } from "../../domain/entities/Future";
 import { GlassUploads } from "../../domain/entities/GlassUploads";
+import { Id } from "../../domain/entities/Ref";
+import { ImportSummaryErrors } from "../../domain/entities/data-entry/ImportSummary";
 import { GlassUploadsRepository } from "../../domain/repositories/GlassUploadsRepository";
 import { cache } from "../../utils/cache";
 import { DataStoreClient } from "../data-store/DataStoreClient";
@@ -96,6 +98,23 @@ export class GlassUploadsDefaultRepository implements GlassUploadsRepository {
             if (upload) {
                 upload.eventListFileId = eventListFileId;
                 return this.dataStoreClient.saveObject(DataStoreKeys.UPLOADS, uploads);
+            } else {
+                return Future.error("Upload does not exist");
+            }
+        });
+    }
+
+    saveImportSummaryErrorsInUpload(uploadId: Id, importSummaryErrors: ImportSummaryErrors): FutureData<void> {
+        return this.dataStoreClient.listCollection<GlassUploads>(DataStoreKeys.UPLOADS).flatMap(uploads => {
+            const upload = uploads?.find(upload => upload.id === uploadId);
+            if (upload) {
+                const updatedUpload = {
+                    ...upload,
+                    importSummary: importSummaryErrors,
+                };
+                const restUploads = uploads.filter(upload => upload.id !== uploadId);
+
+                return this.dataStoreClient.saveObject(DataStoreKeys.UPLOADS, [...restUploads, updatedUpload]);
             } else {
                 return Future.error("Upload does not exist");
             }
