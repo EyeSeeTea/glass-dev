@@ -81,27 +81,52 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
                     console.log({ importPrimaryFileSummary });
                     console.log({ importSecondaryFileSummary });
 
+                    const primaryUploadId = localStorage.getItem("primaryUploadId");
+
                     setPrimaryFileImportSummary(importPrimaryFileSummary);
+
+                    if (primaryUploadId) {
+                        const importSummaryErrors = {
+                            nonBlockingErrors: importPrimaryFileSummary.nonBlockingErrors,
+                            blockingErrors: importPrimaryFileSummary.blockingErrors,
+                        };
+
+                        compositionRoot.glassUploads.saveImportSummaryErrors(primaryUploadId, importSummaryErrors).run(
+                            () => {},
+                            () => {}
+                        );
+                    }
 
                     if (importSecondaryFileSummary) {
                         setSecondaryFileImportSummary(importSecondaryFileSummary);
+
+                        const secondaryUploadId = localStorage.getItem("secondaryUploadId");
+                        if (secondaryUploadId) {
+                            const importSummaryErrors = {
+                                nonBlockingErrors: importSecondaryFileSummary.nonBlockingErrors,
+                                blockingErrors: importSecondaryFileSummary.blockingErrors,
+                            };
+
+                            compositionRoot.glassUploads
+                                .saveImportSummaryErrors(secondaryUploadId, importSummaryErrors)
+                                .run(
+                                    () => {},
+                                    () => {}
+                                );
+                        }
                     }
 
-                    if (importPrimaryFileSummary.blockingErrors.length === 0) {
-                        const primaryUploadId = localStorage.getItem("primaryUploadId");
-                        if (primaryUploadId) {
-                            compositionRoot.glassUploads.setStatus({ id: primaryUploadId, status: "VALIDATED" }).run(
-                                () => {
-                                    changeStep(3);
-                                    setImportLoading(false);
-                                },
-                                () => {
-                                    setImportLoading(false);
-                                }
-                            );
-                        }
+                    if (importPrimaryFileSummary.blockingErrors.length === 0 && primaryUploadId) {
+                        compositionRoot.glassUploads.setStatus({ id: primaryUploadId, status: "VALIDATED" }).run(
+                            () => {
+                                changeStep(3);
+                                setImportLoading(false);
+                            },
+                            () => {
+                                setImportLoading(false);
+                            }
+                        );
                     } else {
-                        const primaryUploadId = localStorage.getItem("primaryUploadId");
                         if (primaryUploadId) {
                             compositionRoot.glassUploads.setStatus({ id: primaryUploadId, status: "IMPORTED" }).run(
                                 () => {
@@ -251,7 +276,7 @@ const ContentWrapper = styled.div`
             border-radius: 0;
             border: none;
             flex: 1;
-            border-: 2px solid ${glassColors.greyLight};
+            border: 2px solid ${glassColors.greyLight};
             &.current {
                 color: ${glassColors.mainPrimary};
                 border-bottom: 4px solid ${glassColors.mainPrimary};

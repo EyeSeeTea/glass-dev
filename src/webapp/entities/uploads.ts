@@ -1,3 +1,5 @@
+import { ImportSummaryErrors } from "../../domain/entities/data-entry/ImportSummary";
+
 export interface UploadsDataItem {
     id: string;
     batchId: string;
@@ -16,4 +18,5 @@ export interface UploadsDataItem {
     records: number;
     correspondingRisUploadId: string;
     eventListFileId?: string;
+    importSummary?: ImportSummaryErrors;
 }

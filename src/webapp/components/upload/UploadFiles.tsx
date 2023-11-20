@@ -185,8 +185,36 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
                 ({ importPrimaryFileSummary, importSecondaryFileSummary }) => {
                     setPrimaryFileImportSummary(importPrimaryFileSummary);
 
+                    const primaryUploadId = localStorage.getItem("primaryUploadId");
+                    if (primaryUploadId) {
+                        const importSummaryErrors = {
+                            nonBlockingErrors: importPrimaryFileSummary.nonBlockingErrors,
+                            blockingErrors: importPrimaryFileSummary.blockingErrors,
+                        };
+
+                        compositionRoot.glassUploads.saveImportSummaryErrors(primaryUploadId, importSummaryErrors).run(
+                            () => {},
+                            () => {}
+                        );
+                    }
+
                     if (importSecondaryFileSummary) {
                         setSecondaryFileImportSummary(importSecondaryFileSummary);
+
+                        const secondaryUploadId = localStorage.getItem("secondaryUploadId");
+                        if (secondaryUploadId) {
+                            const importSummaryErrors = {
+                                nonBlockingErrors: importSecondaryFileSummary.nonBlockingErrors,
+                                blockingErrors: importSecondaryFileSummary.blockingErrors,
+                            };
+
+                            compositionRoot.glassUploads
+                                .saveImportSummaryErrors(secondaryUploadId, importSummaryErrors)
+                                .run(
+                                    () => {},
+                                    () => {}
+                                );
+                        }
                     }
                     setImportLoading(false);
                     changeStep(2);
@@ -204,18 +232,19 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
             );
         }
     }, [
-        batchId,
+        primaryFile,
         compositionRoot.fileSubmission,
+        compositionRoot.glassUploads,
         moduleName,
-        orgUnitCode,
+        batchId,
+        currentPeriod,
         orgUnitId,
         orgUnitName,
-        currentPeriod,
-        primaryFile,
+        orgUnitCode,
         secondaryFile,
         setPrimaryFileImportSummary,
-        setSecondaryFileImportSummary,
         changeStep,
+        setSecondaryFileImportSummary,
     ]);
 
     const continueClick = () => {
