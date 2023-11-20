@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback } from "react";
 import { Button, TableBody, TableCell, TableRow } from "@material-ui/core";
 import styled from "styled-components";
 import { DataFileHistoryItemProps } from "./DataFileTable";
@@ -8,12 +8,16 @@ import dayjs from "dayjs";
 import { useAppContext } from "../../contexts/app-context";
 import { moduleProperties } from "../../../domain/utils/ModuleProperties";
 import { useCurrentModuleContext } from "../../contexts/current-module-context";
+import { ImportSummaryErrors } from "../../../domain/entities/data-entry/ImportSummary";
+import { ImportSummaryErrorsDialog } from "../import-summary-errors-dialog/ImportSummaryErrorsDialog";
 
 export interface DataFileTableBodyProps {
     rows?: DataFileHistoryItemProps[];
 }
 
 export const DataFileTableBody: React.FC<DataFileTableBodyProps> = ({ rows }) => {
+    const [importSummaryErrorsToShow, setImportSummaryErrorsToShow] = React.useState<ImportSummaryErrors | null>(null);
+
     const { compositionRoot } = useAppContext();
     const { currentModuleAccess } = useCurrentModuleContext();
 
@@ -32,12 +36,18 @@ export const DataFileTableBody: React.FC<DataFileTableBodyProps> = ({ rows }) =>
         );
     };
 
+    const handleShowImportSummaryErrors = useCallback((row: DataFileHistoryItemProps) => {
+        if (row.importSummary?.blockingErrors?.length || row.importSummary?.nonBlockingErrors?.length) {
+            setImportSummaryErrorsToShow(row.importSummary);
+        }
+    }, []);
+
     return (
         <>
             {rows && rows.length ? (
                 <StyledTableBody>
                     {rows.map((row: DataFileHistoryItemProps) => (
-                        <TableRow key={row.id}>
+                        <TableRow key={row.id} onClick={() => handleShowImportSummaryErrors(row)}>
                             <TableCell>{row.fileType}</TableCell>
                             <TableCell>{row.countryCode.toUpperCase()}</TableCell>
                             {moduleProperties.get(currentModuleAccess.moduleName)?.isbatchReq && (
@@ -53,7 +63,12 @@ export const DataFileTableBody: React.FC<DataFileTableBodyProps> = ({ rows }) =>
                             <TableCell>{dayjs(row.uploadDate).format("YYYY-MM-DD HH:mm:ss")}</TableCell>
                             <TableCell>{row.fileName}</TableCell>
                             <TableCell>
-                                <Button onClick={() => download(row.fileId, row.fileName)}>
+                                <Button
+                                    onClick={event => {
+                                        event.stopPropagation();
+                                        download(row.fileId, row.fileName);
+                                    }}
+                                >
                                     <CloudDownloadIcon color="error" />
                                 </Button>
                             </TableCell>
@@ -68,6 +83,10 @@ export const DataFileTableBody: React.FC<DataFileTableBodyProps> = ({ rows }) =>
                     </TableRow>
                 </StyledTableBody>
             )}
+            <ImportSummaryErrorsDialog
+                importSummaryErrorsToShow={importSummaryErrorsToShow}
+                onClose={() => setImportSummaryErrorsToShow(null)}
+            />
         </>
     );
 };

@@ -7,6 +7,7 @@ import { glassColors, palette } from "../../pages/app/themes/dhis2.theme";
 import { ArrowUpward, ArrowDownward } from "@material-ui/icons";
 import { moduleProperties } from "../../../domain/utils/ModuleProperties";
 import { useCurrentModuleContext } from "../../contexts/current-module-context";
+import { ImportSummaryErrors } from "../../../domain/entities/data-entry/ImportSummary";
 export interface DataFileHistoryItemProps {
     id: string;
     batchId: string;
@@ -23,6 +24,7 @@ export interface DataFileHistoryItemProps {
     dataSubmission: string;
     module: string;
     records: number;
+    importSummary?: ImportSummaryErrors;
 }
 export type SortDirection = "asc" | "desc";
 export interface DataFileTableProps {
