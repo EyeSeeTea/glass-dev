@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: i18next-conv\n"
-"POT-Creation-Date: 2023-10-06T08:14:40.002Z\n"
+"POT-Creation-Date: 2023-11-20T15:36:31.530Z\n"
 "PO-Revision-Date: 2018-10-25T09:02:35.143Z\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -391,13 +391,16 @@ msgstr ""
 msgid "status"
 msgstr ""
 
+msgid "Import summary errors"
+msgstr ""
+
+msgid "Close"
+msgstr ""
+
 msgid "News from GLASS"
 msgstr ""
 
 msgid "Notification"
-msgstr ""
-
-msgid "Close"
 msgstr ""
 
 msgid "Participants"
