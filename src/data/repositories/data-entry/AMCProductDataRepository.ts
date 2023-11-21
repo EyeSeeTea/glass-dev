@@ -7,7 +7,7 @@ export class AMCProductDataRepository implements AMCDataRepository {
         file: File,
         rawProductDataColumns: string[],
         teiDataColumns: string[]
-    ): FutureData<{ isValid: boolean; records: number; specimens: string[] }> {
+    ): FutureData<{ isValid: boolean; rows: number; specimens: string[] }> {
         return Future.fromPromise(new SpreadsheetXlsxDataSource().read(file)).map(spreadsheet => {
             const teiSheet = spreadsheet.sheets[0]; //First sheet is tracked entity instance data
             const teiHeaderRow = teiSheet?.rows[0]; //The second row has header details for AMC template.
@@ -28,13 +28,13 @@ export class AMCProductDataRepository implements AMCDataRepository {
 
                 return {
                     isValid: allRawProductColsPresent && allTEIColsPresent ? true : false,
-                    records: rawProductSheet.rows.length - 2, //two rows for header
+                    rows: rawProductSheet.rows.length - 2, //two rows for header
                     specimens: [],
                 };
             } else
                 return {
                     isValid: false,
-                    records: 0,
+                    rows: 0,
                     specimens: [],
                 };
         });

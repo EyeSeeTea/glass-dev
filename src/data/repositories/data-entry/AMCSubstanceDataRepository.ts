@@ -6,7 +6,7 @@ export class AMCSubstanceDataRepository implements AMCDataRepository {
     validate(
         file: File,
         rawSubstanceDataColumns: string[]
-    ): FutureData<{ isValid: boolean; records: number; specimens: string[] }> {
+    ): FutureData<{ isValid: boolean; rows: number; specimens: string[] }> {
         return Future.fromPromise(new SpreadsheetXlsxDataSource().read(file)).map(spreadsheet => {
             const rawSubstanceSheet = spreadsheet.sheets[0];
             const rawSubstanceHeaderRow = rawSubstanceSheet?.rows[1];
@@ -22,13 +22,13 @@ export class AMCSubstanceDataRepository implements AMCDataRepository {
 
                 return {
                     isValid: allRawSubstanceColsPresent ? true : false,
-                    records: rawSubstanceSheet.rows.length - 2, //two rows for header
+                    rows: rawSubstanceSheet.rows.length - 2, //two rows for header
                     specimens: [],
                 };
             } else
                 return {
                     isValid: false,
-                    records: 0,
+                    rows: 0,
                     specimens: [],
                 };
         });
