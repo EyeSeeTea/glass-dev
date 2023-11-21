@@ -18,7 +18,7 @@ export class ValidatePrimaryFileUseCase implements UseCase {
     public execute(
         inputFile: File,
         moduleName: string
-    ): FutureData<{ isValid: boolean; records: number; specimens: string[] }> {
+    ): FutureData<{ isValid: boolean; rows: number; specimens: string[] }> {
         switch (moduleName) {
             case "AMR": {
                 return this.risDataRepository.validate(inputFile);

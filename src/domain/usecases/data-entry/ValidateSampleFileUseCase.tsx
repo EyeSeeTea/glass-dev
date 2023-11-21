@@ -11,7 +11,7 @@ export class ValidateSampleFileUseCase implements UseCase {
         private glassModuleDefaultRepository: GlassModuleDefaultRepository
     ) {}
 
-    public execute(inputFile: File, moduleName: string): FutureData<{ isValid: boolean; records: number }> {
+    public execute(inputFile: File, moduleName: string): FutureData<{ isValid: boolean; rows: number }> {
         switch (moduleName) {
             case "AMR":
                 return this.sampleDataRepository.validate(inputFile);
