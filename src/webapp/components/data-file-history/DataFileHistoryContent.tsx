@@ -22,9 +22,18 @@ export const DataFileHistoryContent: React.FC = () => {
 
     useEffect(() => {
         if (uploads.kind === "loaded") {
-            const filtered = uploads.data.filter(
-                u => u.period === year.toString() && u.status.toLowerCase() === status.toLowerCase()
-            );
+            const filtered = uploads.data
+                .filter(u => u.period === year.toString() && u.status.toLowerCase() === status.toLowerCase())
+                .map(uploadData => {
+                    // TODO: This is used allow to sort by rows column. Delete mapping when no items in DataStore with records (because becomes rows)
+                    const { records, ...restData } = uploadData;
+                    return records !== undefined && records !== null
+                        ? {
+                              rows: records,
+                              ...restData,
+                          }
+                        : uploadData;
+                });
             setFilteredUploads(filtered);
         }
     }, [status, year, uploads]);

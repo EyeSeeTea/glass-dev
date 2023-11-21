@@ -294,7 +294,7 @@ msgstr ""
 msgid "Period"
 msgstr ""
 
-msgid "Records"
+msgid "Rows"
 msgstr ""
 
 msgid "Batch ID"
