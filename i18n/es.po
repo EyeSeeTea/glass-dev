@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: i18next-conv\n"
-"POT-Creation-Date: 2023-11-16T14:29:33.771Z\n"
+"POT-Creation-Date: 2023-10-24T18:22:28.308Z\n"
 "PO-Revision-Date: 2018-10-25T09:02:35.143Z\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -424,7 +424,7 @@ msgstr ""
 msgid "GO"
 msgstr ""
 
-msgid "Importing data and applying validation rules"
+msgid "Save"
 msgstr ""
 
 msgid "Save Draft"
@@ -479,6 +479,9 @@ msgid "Go to Validation Report"
 msgstr ""
 
 msgid "Thank you! your data for now is uploaded in our system"
+msgstr ""
+
+msgid "Importing data and applying validation rules"
 msgstr ""
 
 msgid "These Consistency Checks ensure that incorrect data is not imported."

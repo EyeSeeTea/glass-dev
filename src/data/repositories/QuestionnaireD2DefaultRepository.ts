@@ -20,7 +20,7 @@ import { DataFormD2Source } from "../dhis2/DataFormD2Source";
 export class QuestionnaireD2DefaultRepository implements QuestionnaireRepository {
     constructor(private api: D2Api) {}
 
-    getList(
+    getDatasetList(
         module: GlassModule,
         options: { orgUnitId: Id; year: string },
         captureAccess: boolean
@@ -58,6 +58,37 @@ export class QuestionnaireD2DefaultRepository implements QuestionnaireRepository
                     rules: config?.rules || [],
                 };
             });
+        });
+    }
+
+    getProgramList(module: GlassModule, options: { orgUnitId: Id; year: string }): FutureData<QuestionnaireBase[]> {
+        const ProgramIds = module.questionnaires.map(getId);
+        const configByProgramId = _.keyBy(module.questionnaires, getId);
+
+        return apiToFuture(
+            this.api.metadata.get({
+                programs: {
+                    fields: { id: true, displayName: true, displayDescription: true },
+                    filter: { id: { in: ProgramIds } },
+                },
+            })
+        ).map(res => {
+            const Qs = res.programs.map(program => {
+                const config = configByProgramId[program.id];
+
+                return {
+                    id: program.id,
+                    name: program.displayName,
+                    orgUnit: { id: options.orgUnitId },
+                    year: options.year,
+                    description: program.displayDescription,
+                    isCompleted: false,
+                    isMandatory: config?.mandatory || false,
+                    rules: [],
+                };
+            });
+
+            return Qs;
         });
     }
 
@@ -305,7 +336,16 @@ export class QuestionnaireD2DefaultRepository implements QuestionnaireRepository
                         ...deleted(!question.value),
                     },
                 ];
-
+            case "singleCheck": {
+                const strValue = question.value ? "true" : question.storeFalse ? "false" : "";
+                return [
+                    {
+                        ...base,
+                        value: strValue,
+                        ...deleted(!strValue),
+                    },
+                ];
+            }
             default:
                 assertUnreachable(type);
         }

@@ -1,5 +1,6 @@
+import { EventStatus } from "@eyeseetea/d2-api";
 import { D2TrackerEvent, DataValue } from "@eyeseetea/d2-api/api/trackerEvents";
-import { Dhis2EventsDefaultRepository, EventStatus } from "../../../../data/repositories/Dhis2EventsDefaultRepository";
+import { Dhis2EventsDefaultRepository } from "../../../../data/repositories/Dhis2EventsDefaultRepository";
 import { SignalDefaultRepository } from "../../../../data/repositories/SignalDefaultRepository";
 import { UsersDefaultRepository } from "../../../../data/repositories/UsersDefaultRepository";
 import { Future, FutureData } from "../../../entities/Future";
@@ -10,9 +11,9 @@ import { NotificationRepository } from "../../../repositories/NotificationReposi
 
 export const EAR_PROGRAM_ID = "SQe26z0smFP";
 const EAR_CONFIDENTIAL_DATAELEMENT = "KycX5z7NLqU";
-type SignalAction = "Save" | "Publish";
+export type SignalAction = "Save" | "Publish";
 
-export class ImportCaptureDataUseCase {
+export class ImportSignalsUseCase {
     constructor(
         private dhis2EventsDefaultRepository: Dhis2EventsDefaultRepository,
         private signalRepository: SignalDefaultRepository,
@@ -20,7 +21,7 @@ export class ImportCaptureDataUseCase {
         private usersDefaultRepository: UsersDefaultRepository
     ) {}
 
-    execute(
+    importSignals(
         signalId: string | undefined,
         signalEventId: string | undefined,
         questionnaire: Questionnaire,

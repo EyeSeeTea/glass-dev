@@ -28,6 +28,7 @@ const glassModules: GlassModule[] = [
             confidentialAccess: [],
         },
         questionnaires: [],
+        questionnairesType: "Dataset",
         consistencyChecks: {
             specimenPathogen: {
                 BLOOD: ["ACISPP", "ESCCOL", "KLEPNE", "PSEAER", "STAAUR", "STRPNE", "SALSPP", "SALTYP", "SALPAR"],
@@ -178,6 +179,7 @@ const glassModules: GlassModule[] = [
             confidentialAccess: [],
         },
         questionnaires: [],
+
         dashboards: {
             reportsMenu: "",
             validationReport: "",
