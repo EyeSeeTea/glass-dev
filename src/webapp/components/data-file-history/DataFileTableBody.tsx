@@ -72,7 +72,7 @@ export const DataFileTableBody: React.FC<DataFileTableBodyProps> = ({ rows }) =>
                                     <CloudDownloadIcon color="error" />
                                 </Button>
                             </TableCell>
-                            <TableCell>{row.records}</TableCell>
+                            <TableCell>{row?.records || row?.rows}</TableCell>
                         </TableRow>
                     ))}
                 </StyledTableBody>

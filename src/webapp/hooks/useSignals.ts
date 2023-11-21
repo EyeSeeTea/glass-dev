@@ -52,7 +52,7 @@ export function useSignals() {
     );
 
     React.useEffect(() => {
-        compositionRoot.signals.getSignals(orgUnitId).run(
+        compositionRoot.programQuestionnaires.getList(orgUnitId).run(
             signals => {
                 if (confidentialAccessGroup.kind === "loaded" && readAccessGroup.kind === "loaded") {
                     //1. If the user has confidential user group access show:

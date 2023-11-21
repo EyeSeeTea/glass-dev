@@ -17,6 +17,7 @@ type ModuleDetails = {
     unit: string;
     isSpecimenReq: boolean;
     isDownloadEmptyTemplateReq: boolean;
+    applyQuestionnaireValidation: boolean;
     datasetString?: string;
 };
 
@@ -43,6 +44,7 @@ export const moduleProperties = new Map<string, ModuleDetails>([
             unit: "data value",
             isSpecimenReq: true,
             isDownloadEmptyTemplateReq: false,
+            applyQuestionnaireValidation: false,
             datasetString: "Upto 6 datasets",
         },
     ],
@@ -67,6 +69,7 @@ export const moduleProperties = new Map<string, ModuleDetails>([
             unit: "event",
             isSpecimenReq: false,
             isDownloadEmptyTemplateReq: true,
+            applyQuestionnaireValidation: false,
         },
     ],
     [
@@ -90,6 +93,31 @@ export const moduleProperties = new Map<string, ModuleDetails>([
             unit: "enrollment",
             isSpecimenReq: true,
             isDownloadEmptyTemplateReq: false,
+            applyQuestionnaireValidation: false,
+        },
+    ],
+    [
+        "AMC",
+        {
+            isbatchReq: false,
+            isQuestionnaireReq: true,
+            isSecondaryFileApplicable: false,
+            isDryRunReq: false,
+            importLoadingMsg: {
+                line1: "Importing data,",
+                line2: "This might take several minutes, do not refresh the page or press back.",
+            },
+            deleteConfirmation: {
+                title: "Confirm Delete",
+                description: "Are you sure you want to delete this file",
+            },
+            primaryFileType: "Product Level Data",
+            secondaryFileType: "Substance Level Data",
+            primaryUploadLabel: "Choose File Type",
+            unit: "",
+            isSpecimenReq: false,
+            isDownloadEmptyTemplateReq: false,
+            applyQuestionnaireValidation: true,
         },
     ],
     [
@@ -113,6 +141,7 @@ export const moduleProperties = new Map<string, ModuleDetails>([
             unit: "enrollment",
             isSpecimenReq: true,
             isDownloadEmptyTemplateReq: false,
+            applyQuestionnaireValidation: false,
         },
     ],
 ]);

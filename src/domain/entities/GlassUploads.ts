@@ -16,7 +16,8 @@ export interface GlassUploads {
     dataSubmission: string;
     module: string;
     orgUnit: string;
-    records: number;
+    records?: number;
+    rows?: number;
     correspondingRisUploadId: string;
     eventListFileId?: string;
     importSummary?: ImportSummaryErrors;

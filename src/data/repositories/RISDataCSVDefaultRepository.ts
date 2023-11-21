@@ -34,7 +34,7 @@ export class RISDataCSVDefaultRepository implements RISDataRepository {
         });
     }
 
-    validate(file: File): FutureData<{ isValid: boolean; records: number; specimens: string[] }> {
+    validate(file: File): FutureData<{ isValid: boolean; specimens: string[]; rows: number }> {
         return Future.fromPromise(new SpreadsheetXlsxDataSource().read(file)).map(spreadsheet => {
             const sheet = spreadsheet.sheets[0]; //Only one sheet for AMR RIS
             const headerRow = sheet?.headers;
@@ -64,13 +64,13 @@ export class RISDataCSVDefaultRepository implements RISDataRepository {
 
                 return {
                     isValid: allRISColsPresent ? true : false,
-                    records: sheet.rows.length,
+                    rows: sheet.rows.length,
                     specimens: uniqSpecimens,
                 };
             } else
                 return {
                     isValid: false,
-                    records: 0,
+                    rows: 0,
                     specimens: [],
                 };
         });
