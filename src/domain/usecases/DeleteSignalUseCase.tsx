@@ -3,7 +3,7 @@ import { Dhis2EventsDefaultRepository } from "../../data/repositories/Dhis2Event
 import { SignalDefaultRepository } from "../../data/repositories/SignalDefaultRepository";
 import { Future, FutureData } from "../entities/Future";
 import { SignalStatusTypes } from "../entities/Signal";
-import { EAR_PROGRAM_ID } from "./data-entry/ear/ImportCaptureDataUseCase";
+import { EAR_PROGRAM_ID } from "./GetProgramQuestionnaireUseCase";
 
 export class DeleteSignalUseCase {
     constructor(
