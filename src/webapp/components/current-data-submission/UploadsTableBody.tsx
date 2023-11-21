@@ -28,6 +28,7 @@ export interface UploadsTableBodyProps {
 export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refreshUploads }) => {
     const { compositionRoot } = useAppContext();
     const snackbar = useSnackbar();
+
     const [loading, setLoading] = useState<boolean>(false);
     const {
         currentOrgUnitAccess: { orgUnitId, orgUnitName },
@@ -146,18 +147,18 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                             }).run(
                                 ({ deletePrimaryFileSummary, deleteSecondaryFileSummary }) => {
                                     if (deletePrimaryFileSummary) {
-                                        let message = `${deletePrimaryFileSummary.importCount.deleted} ${
-                                            moduleProperties.get(currentModuleAccess.moduleName)?.unit
-                                        }s deleted for ${
+                                        let message = `${
+                                            primaryFileToDelete?.rows || primaryFileToDelete?.records
+                                        } rows deleted for ${
                                             moduleProperties.get(currentModuleAccess.moduleName)?.primaryFileType
                                         } file`;
 
                                         if (secondaryFileToDelete && deleteSecondaryFileSummary) {
                                             message =
                                                 message +
-                                                ` and ${deleteSecondaryFileSummary.importCount.deleted} ${
-                                                    moduleProperties.get(currentModuleAccess.moduleName)?.unit
-                                                }s deleted for ${
+                                                ` and ${
+                                                    secondaryFileToDelete.rows || secondaryFileToDelete.records
+                                                } rows deleted for ${
                                                     moduleProperties.get(currentModuleAccess.moduleName)
                                                         ?.secondaryFileType
                                                 } file.`;
@@ -276,7 +277,7 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                         <TableRow key={row.id} onClick={() => handleShowImportSummaryErrors(row)}>
                             <TableCell>{dayjs(row.uploadDate).format("DD-MM-YYYY")}</TableCell>
                             <TableCell>{row.period}</TableCell>
-                            <TableCell>{row.records}</TableCell>
+                            <TableCell>{row?.records || row?.rows}</TableCell>
                             <TableCell>{row.fileType}</TableCell>
                             {moduleProperties.get(currentModuleAccess.moduleName)?.isbatchReq && (
                                 <TableCell style={{ opacity: 0.5 }}>{row.batchId}</TableCell>

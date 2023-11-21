@@ -15,7 +15,7 @@ type UploadType = {
         period: string;
         orgUnitId: string;
         orgUnitCode: string;
-        records: number;
+        rows: number;
         specimens: string[];
     };
 };
@@ -44,7 +44,7 @@ export class UploadDocumentUseCase implements UseCase {
                 status: "UPLOADED",
                 uploadDate: new Date().toISOString(),
                 orgUnit: data.orgUnitId,
-                records: data.records,
+                rows: data.rows,
                 correspondingRisUploadId: "",
             };
             return this.glassUploadsRepository.save(upload).flatMap(() => Future.success(upload.id));
