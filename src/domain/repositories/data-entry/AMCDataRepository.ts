@@ -5,5 +5,5 @@ export interface AMCDataRepository {
         file: File,
         teiDataColumns: string[],
         rawProductDataColumns: string[]
-    ): FutureData<{ isValid: boolean; records: number; specimens: string[] }>;
+    ): FutureData<{ isValid: boolean; rows: number; specimens: string[] }>;
 }
