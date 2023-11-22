@@ -1,4 +1,4 @@
-import { assertUnreachable, Maybe } from "../../types/utils";
+import { assertUnreachable, Dictionary, Maybe } from "../../types/utils";
 import { Code, Id, NamedRef, Ref, updateCollection } from "./Base";
 
 export const AMCDataQuestionnaire = "qGG6BjULAaf";
@@ -42,12 +42,15 @@ export type Question =
     | DateQuestion
     | SingleCheckQuestion;
 
+export type ValidationErrorMessage = "This value cannot be higher than the value provided in question 5.";
+
 export interface QuestionBase {
     id: Id;
     code: Code;
     text: string;
     disabled?: boolean;
     infoText?: string;
+    validationError?: ValidationErrorMessage;
 }
 
 export interface SelectQuestion extends QuestionBase {
@@ -95,12 +98,17 @@ export interface QuestionOption extends NamedRef {
     code?: string;
 }
 
-export type QuestionnaireRule = RuleToggleSectionsVisibility;
+export type QuestionnaireRule = RuleToggleSectionsVisibility | RuleSectionValuesHigherThan;
 
 interface RuleToggleSectionsVisibility {
     type: "setSectionsVisibility";
     dataElementCode: Code;
     sectionCodes: Code[];
+}
+
+interface RuleSectionValuesHigherThan {
+    type: "sectionValuesHigherThan";
+    dataElementCodesLowerToHigher: Dictionary<Code>;
 }
 
 export class QuestionnarieM {
@@ -125,7 +133,8 @@ export class QuestionnarieM {
             .value();
 
         return _(questionnaire.rules).reduce((questionnaireAcc, rule) => {
-            switch (rule.type) {
+            const ruleType = rule.type;
+            switch (ruleType) {
                 case "setSectionsVisibility": {
                     const toggleQuestion = questionsByCode[rule.dataElementCode];
                     const areRuleSectionsVisible = Boolean(toggleQuestion?.value);
@@ -139,10 +148,49 @@ export class QuestionnarieM {
                         }),
                     };
                 }
+                case "sectionValuesHigherThan": {
+                    return {
+                        ...questionnaireAcc,
+                        sections: questionnaireAcc.sections.map((section): QuestionnaireSection => {
+                            return {
+                                ...section,
+                                questions: this.applyRuleSectionValuesHigherThan(
+                                    questionsByCode,
+                                    rule,
+                                    section.questions
+                                ),
+                            };
+                        }),
+                    };
+                }
                 default:
-                    assertUnreachable(rule.type);
+                    assertUnreachable(ruleType);
             }
         }, questionnaire);
+    }
+
+    private static applyRuleSectionValuesHigherThan(
+        questionsByCode: Dictionary<Question>,
+        rule: RuleSectionValuesHigherThan,
+        questions: Question[]
+    ): Question[] {
+        return questions.map((question): Question => {
+            const questionWithHigherValueCode = rule.dataElementCodesLowerToHigher[question.code];
+
+            if (questionWithHigherValueCode) {
+                const questionWithHigherValue = questionsByCode[questionWithHigherValueCode];
+                if (parseFloat(questionWithHigherValue?.value as string) < parseFloat(question?.value as string)) {
+                    return {
+                        ...question,
+                        validationError: "This value cannot be higher than the value provided in question 5.",
+                    };
+                }
+            }
+            return {
+                ...question,
+                validationError: undefined,
+            };
+        });
     }
 }
 
