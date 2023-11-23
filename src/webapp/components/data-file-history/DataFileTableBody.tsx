@@ -3,6 +3,7 @@ import { Button, TableBody, TableCell, TableRow } from "@material-ui/core";
 import styled from "styled-components";
 import { DataFileHistoryItemProps } from "./DataFileTable";
 import CloudDownloadIcon from "@material-ui/icons/CloudDownload";
+import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
 import dayjs from "dayjs";
 import { useAppContext } from "../../contexts/app-context";
@@ -37,7 +38,7 @@ export const DataFileTableBody: React.FC<DataFileTableBodyProps> = ({ rows }) =>
     };
 
     const handleShowImportSummaryErrors = useCallback((row: DataFileHistoryItemProps) => {
-        if (row.importSummary?.blockingErrors?.length || row.importSummary?.nonBlockingErrors?.length) {
+        if (row.importSummary) {
             setImportSummaryErrorsToShow(row.importSummary);
         }
     }, []);
@@ -73,6 +74,7 @@ export const DataFileTableBody: React.FC<DataFileTableBodyProps> = ({ rows }) =>
                                 </Button>
                             </TableCell>
                             <TableCell>{row?.records || row?.rows}</TableCell>
+                            <StyledCTACell className="cta">{row.importSummary && <ChevronRightIcon />}</StyledCTACell>
                         </TableRow>
                     ))}
                 </StyledTableBody>
@@ -101,6 +103,18 @@ export const StyledTableBody = styled(TableBody)`
             svg {
                 color: ${glassColors.greyBlack};
             }
+        }
+    }
+`;
+
+const StyledCTACell = styled(TableCell)`
+    text-align: center;
+    svg {
+        color: ${glassColors.grey};
+    }
+    &:hover {
+        svg {
+            color: ${glassColors.greyBlack};
         }
     }
 `;

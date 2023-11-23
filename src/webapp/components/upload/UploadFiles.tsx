@@ -185,37 +185,42 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
                 ({ importPrimaryFileSummary, importSecondaryFileSummary }) => {
                     setPrimaryFileImportSummary(importPrimaryFileSummary);
 
-                    const primaryUploadId = localStorage.getItem("primaryUploadId");
-                    if (primaryUploadId) {
-                        const importSummaryErrors = {
-                            nonBlockingErrors: importPrimaryFileSummary.nonBlockingErrors,
-                            blockingErrors: importPrimaryFileSummary.blockingErrors,
-                        };
+                    if (importSecondaryFileSummary) {
+                        setSecondaryFileImportSummary(importSecondaryFileSummary);
+                    }
 
-                        compositionRoot.glassUploads.saveImportSummaryErrors(primaryUploadId, importSummaryErrors).run(
+                    const primaryUploadId = localStorage.getItem("primaryUploadId");
+
+                    if (primaryUploadId) {
+                        const secondaryUploadId = localStorage.getItem("secondaryUploadId");
+
+                        const params = secondaryUploadId
+                            ? {
+                                  primaryUploadId,
+                                  primaryImportSummaryErrors: {
+                                      nonBlockingErrors: importPrimaryFileSummary?.nonBlockingErrors || [],
+                                      blockingErrors: importPrimaryFileSummary?.blockingErrors || [],
+                                  },
+                                  secondaryUploadId,
+                                  secondaryImportSummaryErrors: {
+                                      nonBlockingErrors: importSecondaryFileSummary?.nonBlockingErrors || [],
+                                      blockingErrors: importSecondaryFileSummary?.blockingErrors || [],
+                                  },
+                              }
+                            : {
+                                  primaryUploadId,
+                                  primaryImportSummaryErrors: {
+                                      nonBlockingErrors: importPrimaryFileSummary?.nonBlockingErrors || [],
+                                      blockingErrors: importPrimaryFileSummary?.blockingErrors || [],
+                                  },
+                              };
+
+                        compositionRoot.glassUploads.saveImportSummaryErrorsOfFiles(params).run(
                             () => {},
                             () => {}
                         );
                     }
 
-                    if (importSecondaryFileSummary) {
-                        setSecondaryFileImportSummary(importSecondaryFileSummary);
-
-                        const secondaryUploadId = localStorage.getItem("secondaryUploadId");
-                        if (secondaryUploadId) {
-                            const importSummaryErrors = {
-                                nonBlockingErrors: importSecondaryFileSummary.nonBlockingErrors,
-                                blockingErrors: importSecondaryFileSummary.blockingErrors,
-                            };
-
-                            compositionRoot.glassUploads
-                                .saveImportSummaryErrors(secondaryUploadId, importSummaryErrors)
-                                .run(
-                                    () => {},
-                                    () => {}
-                                );
-                        }
-                    }
                     setImportLoading(false);
                     changeStep(2);
                 },

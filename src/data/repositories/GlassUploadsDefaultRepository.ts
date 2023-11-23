@@ -104,17 +104,37 @@ export class GlassUploadsDefaultRepository implements GlassUploadsRepository {
         });
     }
 
-    saveImportSummaryErrorsInUpload(uploadId: Id, importSummaryErrors: ImportSummaryErrors): FutureData<void> {
+    saveImportSummaryErrorsOfFilesInUploads(params: {
+        primaryUploadId: Id;
+        primaryImportSummaryErrors: ImportSummaryErrors;
+        secondaryUploadId?: Id;
+        secondaryImportSummaryErrors?: ImportSummaryErrors;
+    }): FutureData<void> {
+        const { primaryUploadId, primaryImportSummaryErrors, secondaryUploadId, secondaryImportSummaryErrors } = params;
         return this.dataStoreClient.listCollection<GlassUploads>(DataStoreKeys.UPLOADS).flatMap(uploads => {
-            const upload = uploads?.find(upload => upload.id === uploadId);
-            if (upload) {
-                const updatedUpload = {
-                    ...upload,
-                    importSummary: importSummaryErrors,
-                };
-                const restUploads = uploads.filter(upload => upload.id !== uploadId);
+            const primaryUpload = uploads?.find(upload => upload.id === primaryUploadId);
+            const secondaryUpload = uploads?.find(upload => upload.id === secondaryUploadId);
 
-                return this.dataStoreClient.saveObject(DataStoreKeys.UPLOADS, [...restUploads, updatedUpload]);
+            if (primaryUpload) {
+                const primaryUpdatedUpload = {
+                    ...primaryUpload,
+                    importSummary: primaryImportSummaryErrors,
+                };
+
+                const secondaryUpdatedUpload = {
+                    ...secondaryUpload,
+                    importSummary: secondaryImportSummaryErrors,
+                };
+
+                const restUploads = uploads.filter(
+                    upload => upload.id !== primaryUploadId && upload.id !== secondaryUploadId
+                );
+
+                const newUploads = secondaryUpload
+                    ? [...restUploads, primaryUpdatedUpload, secondaryUpdatedUpload]
+                    : [...restUploads, primaryUpdatedUpload];
+
+                return this.dataStoreClient.saveObject(DataStoreKeys.UPLOADS, newUploads);
             } else {
                 return Future.error("Upload does not exist");
             }

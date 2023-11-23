@@ -8,6 +8,8 @@ import { CloudDownloadOutlined, DeleteOutline } from "@material-ui/icons";
 import { useAppContext } from "../../contexts/app-context";
 import { ConfirmationDialog, useSnackbar } from "@eyeseetea/d2-ui-components";
 import { CircularProgress } from "material-ui";
+import ChevronRightIcon from "@material-ui/icons/ChevronRight";
+
 import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context";
 import { Future } from "../../../domain/entities/Future";
 import { isEditModeStatus } from "../../../utils/editModeStatus";
@@ -19,6 +21,7 @@ import { useCurrentPeriodContext } from "../../contexts/current-period-context";
 import { moduleProperties } from "../../../domain/utils/ModuleProperties";
 import { ImportSummaryErrors } from "../../../domain/entities/data-entry/ImportSummary";
 import { ImportSummaryErrorsDialog } from "../import-summary-errors-dialog/ImportSummaryErrorsDialog";
+import { glassColors } from "../../pages/app/themes/dhis2.theme";
 
 export interface UploadsTableBodyProps {
     rows?: UploadsDataItem[];
@@ -222,7 +225,7 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
     };
 
     const handleShowImportSummaryErrors = useCallback((row: UploadsDataItem) => {
-        if (row.importSummary?.blockingErrors?.length || row.importSummary?.nonBlockingErrors?.length) {
+        if (row.importSummary) {
             setImportSummaryErrorsToShow(row.importSummary);
         }
     }, []);
@@ -311,6 +314,7 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                                     <CircularProgress size={20} />
                                 )}
                             </TableCell>
+                            <StyledCTACell className="cta">{row.importSummary && <ChevronRightIcon />}</StyledCTACell>
                         </TableRow>
                     ))}
                 </StyledTableBody>
@@ -320,3 +324,15 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
 };
 
 const StyledTableBody = styled(TableBody)``;
+
+const StyledCTACell = styled(TableCell)`
+    text-align: center;
+    svg {
+        color: ${glassColors.grey};
+    }
+    &:hover {
+        svg {
+            color: ${glassColors.greyBlack};
+        }
+    }
+`;
