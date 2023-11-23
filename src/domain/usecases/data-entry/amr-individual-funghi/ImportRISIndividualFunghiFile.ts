@@ -219,84 +219,82 @@ export class ImportRISIndividualFunghiFile {
         AMRDataProgramStageIdl: string,
         countryCode: string
     ): FutureData<TrackedEntity[]> {
-        return this.trackerRepository
-            .getAMRIProgramMetadata(AMRIProgramIDl, AMRDataProgramStageIdl)
-            .flatMap(metadata => {
-                const trackedEntities = individualFunghiDataItems.map(dataItem => {
-                    const attributes: D2TrackerEnrollmentAttribute[] = metadata.programAttributes.map(
-                        (attr: { id: string; name: string; code: string }) => {
-                            return {
-                                attribute: attr.id,
-                                // @ts-ignore
-                                value: Object.keys(dataItem).includes(attr.code) ? dataItem[attr.code] : "",
-                            };
-                        }
-                    );
-                    const AMRDataStage: { dataElement: string; value: string }[] =
-                        metadata.programStageDataElements.map((de: { id: string; name: string; code: string }) => {
-                            return {
-                                dataElement: de.id,
-                                // @ts-ignore
-                                value: Object.keys(dataItem).includes(de.code) ? dataItem[de.code] : "",
-                            };
-                        });
+        return this.trackerRepository.getProgramMetadata(AMRIProgramIDl, AMRDataProgramStageIdl).flatMap(metadata => {
+            const trackedEntities = individualFunghiDataItems.map(dataItem => {
+                const attributes: D2TrackerEnrollmentAttribute[] = metadata.programAttributes.map(
+                    (attr: { id: string; name: string; code: string }) => {
+                        return {
+                            attribute: attr.id,
+                            // @ts-ignore
+                            value: Object.keys(dataItem).includes(attr.code) ? dataItem[attr.code] : "",
+                        };
+                    }
+                );
+                const AMRDataStage: { dataElement: string; value: string }[] = metadata.programStageDataElements.map(
+                    (de: { id: string; name: string; code: string }) => {
+                        return {
+                            dataElement: de.id,
+                            // @ts-ignore
+                            value: Object.keys(dataItem).includes(de.code) ? dataItem[de.code] : "",
+                        };
+                    }
+                );
 
-                    const events: D2TrackerEvent[] = [
-                        {
-                            program: AMRIProgramIDl,
-                            event: "",
-                            programStage: AMRDataProgramStageIdl,
-                            orgUnit,
-                            dataValues: AMRDataStage,
-                            occurredAt: new Date().getTime().toString(),
-                            status: "ACTIVE",
-                        },
-                    ];
-                    const enrollments: D2TrackerEnrollment[] = [
-                        {
-                            orgUnit,
-                            program: AMRIProgramIDl,
-                            enrollment: "",
-                            trackedEntityType: AMR_GLASS_AMR_TET_PATIENT,
-                            notes: [],
-                            relationships: [],
-                            attributes: attributes,
-                            events: events,
-                            enrolledAt: new Date().getTime().toString(),
-                            occurredAt: new Date().getTime().toString(),
-                            createdAt: new Date().getTime().toString(),
-                            createdAtClient: new Date().getTime().toString(),
-                            updatedAt: new Date().getTime().toString(),
-                            updatedAtClient: new Date().getTime().toString(),
-                            status: "ACTIVE",
-                            orgUnitName: countryCode,
-                            followUp: false,
-                            deleted: false,
-                            storedBy: "",
-                        },
-                    ];
-
-                    const entity: TrackedEntity = {
+                const events: D2TrackerEvent[] = [
+                    {
+                        program: AMRIProgramIDl,
+                        event: "",
+                        programStage: AMRDataProgramStageIdl,
                         orgUnit,
-                        trackedEntity: "",
+                        dataValues: AMRDataStage,
+                        occurredAt: new Date().getTime().toString(),
+                        status: "ACTIVE",
+                    },
+                ];
+                const enrollments: D2TrackerEnrollment[] = [
+                    {
+                        orgUnit,
+                        program: AMRIProgramIDl,
+                        enrollment: "",
                         trackedEntityType: AMR_GLASS_AMR_TET_PATIENT,
-                        enrollments: enrollments,
-                        attributes: [
-                            {
-                                attribute: PATIENT_COUNTER_ID,
-                                value:
-                                    attributes.find(at => at.attribute === PATIENT_COUNTER_ID)?.value.toString() ?? "",
-                            },
-                            {
-                                attribute: PATIENT_ID,
-                                value: attributes.find(at => at.attribute === PATIENT_ID)?.value.toString() ?? "",
-                            },
-                        ],
-                    };
-                    return entity;
-                });
-                return Future.success(trackedEntities);
+                        notes: [],
+                        relationships: [],
+                        attributes: attributes,
+                        events: events,
+                        enrolledAt: new Date().getTime().toString(),
+                        occurredAt: new Date().getTime().toString(),
+                        createdAt: new Date().getTime().toString(),
+                        createdAtClient: new Date().getTime().toString(),
+                        updatedAt: new Date().getTime().toString(),
+                        updatedAtClient: new Date().getTime().toString(),
+                        status: "ACTIVE",
+                        orgUnitName: countryCode,
+                        followUp: false,
+                        deleted: false,
+                        storedBy: "",
+                    },
+                ];
+
+                const entity: TrackedEntity = {
+                    orgUnit,
+                    trackedEntity: "",
+                    trackedEntityType: AMR_GLASS_AMR_TET_PATIENT,
+                    enrollments: enrollments,
+                    attributes: [
+                        {
+                            attribute: PATIENT_COUNTER_ID,
+                            value: attributes.find(at => at.attribute === PATIENT_COUNTER_ID)?.value.toString() ?? "",
+                        },
+                        {
+                            attribute: PATIENT_ID,
+                            value: attributes.find(at => at.attribute === PATIENT_ID)?.value.toString() ?? "",
+                        },
+                    ],
+                };
+                return entity;
             });
+            return Future.success(trackedEntities);
+        });
     }
 }
 export const mapResponseToImportSummary = (

@@ -142,20 +142,34 @@ export class ImportAMCProductLevelData {
         orgUnitName: string
     ): FutureData<D2TrackerTrackedEntity[]> {
         return this.trackerRepository
-            .getAMRIProgramMetadata(AMC_PRODUCT_REGISTER_PROGRAM_ID, AMR_RAW_PRODUCT_CONSUMPTION_STAGE_ID)
+            .getProgramMetadata(AMC_PRODUCT_REGISTER_PROGRAM_ID, AMR_RAW_PRODUCT_CONSUMPTION_STAGE_ID)
             .flatMap(metadata => {
                 if (amcProductData.type === "trackerPrograms") {
                     const trackedEntities = amcProductData.trackedEntityInstances.map(tei => {
                         const attributes: D2TrackerEnrollmentAttribute[] = metadata.programAttributes.map(
-                            (attr: { id: string; name: string; code: string }) => {
-                                const currentAttribute = tei.attributeValues.find(
-                                    at => at.attribute.id === attr.id
-                                )?.value;
+                            (attr: {
+                                id: string;
+                                name: string;
+                                code: string;
+                                valueType: string;
+                                optionSetValue: boolean;
+                                optionSet: { options: { name: string; code: string }[] };
+                            }) => {
+                                const currentAttribute = tei.attributeValues.find(at => at.attribute.id === attr.id);
+                                let currentAttrVal = attr.optionSetValue
+                                    ? attr.optionSet.options.find(option => option.name === currentAttribute?.value)
+                                          ?.code
+                                    : currentAttribute?.value;
 
+                                if (attr.valueType === "BOOLEAN") {
+                                    currentAttrVal = currentAttrVal?.toLowerCase() === "yes" ? "true" : "false";
+                                } else if (attr.valueType === "ORGANISATION_UNIT") {
+                                    currentAttrVal = currentAttribute?.optionId;
+                                }
                                 return {
                                     attribute: attr.id,
                                     // @ts-ignore
-                                    value: currentAttribute ? currentAttribute : "",
+                                    value: currentAttrVal ? currentAttrVal : "",
                                 };
                             }
                         );
