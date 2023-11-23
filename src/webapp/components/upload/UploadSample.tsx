@@ -95,7 +95,7 @@ export const UploadSample: React.FC<UploadSampleProps> = ({ batchId, sampleFile,
                                     period: currentPeriod.toString(),
                                     orgUnitId: orgUnitId,
                                     orgUnitCode: orgUnitCode,
-                                    records: sampleData.records,
+                                    rows: sampleData.rows,
                                     specimens: [],
                                 };
                                 return compositionRoot.glassDocuments.upload({ file: uploadedSample, data }).run(

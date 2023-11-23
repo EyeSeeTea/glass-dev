@@ -50,7 +50,7 @@ export class RISIndividualFunghiDataCSVDefaultRepository implements RISIndividua
         });
     }
 
-    validate(moduleName: string, file: File): FutureData<{ isValid: boolean; records: number; specimens: string[] }> {
+    validate(moduleName: string, file: File): FutureData<{ isValid: boolean; specimens: string[]; rows: number }> {
         return Future.fromPromise(new SpreadsheetXlsxDataSource().read(file)).map(spreadsheet => {
             const sheet = spreadsheet.sheets[0]; //Only one sheet for AMR RIS
 
@@ -88,13 +88,13 @@ export class RISIndividualFunghiDataCSVDefaultRepository implements RISIndividua
 
                 return {
                     isValid: allRISIndividualFunghiColsPresent ? true : false,
-                    records: sheet.rows.length,
+                    rows: sheet.rows.length,
                     specimens: uniqSpecimens,
                 };
             } else
                 return {
                     isValid: false,
-                    records: 0,
+                    rows: 0,
                     specimens: [],
                 };
         });
