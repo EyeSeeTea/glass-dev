@@ -13,7 +13,8 @@ export interface UploadsDataItem {
     uploadDate: string;
     dataSubmission: string;
     module: string;
-    records: number;
+    records?: number; // TODO: Delete when no items in DataStore with records (because becomes rows)
+    rows?: number;
     correspondingRisUploadId: string;
     eventListFileId?: string;
 }
