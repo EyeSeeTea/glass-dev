@@ -1,6 +1,6 @@
 import React from "react";
 import styled from "styled-components";
-import { DialogContent } from "@material-ui/core";
+import { DialogContent, Typography } from "@material-ui/core";
 import { ConfirmationDialog } from "@eyeseetea/d2-ui-components";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 
@@ -24,10 +24,20 @@ export const ImportSummaryErrorsDialog: React.FC<ImportSummaryErrorsDialogProps>
             title={i18n.t("Import summary errors")}
             onCancel={onClose}
             cancelText={i18n.t("Close")}
+            maxWidth={
+                !importSummaryErrorsToShow?.blockingErrors?.length &&
+                !importSummaryErrorsToShow?.nonBlockingErrors?.length
+                    ? "xs"
+                    : "lg"
+            }
             fullWidth={true}
             disableEnforceFocus
         >
             <StyledDialogContent>
+                {!importSummaryErrorsToShow?.blockingErrors?.length &&
+                !importSummaryErrorsToShow?.nonBlockingErrors?.length ? (
+                    <Typography>{i18n.t("Data imported without errors")}</Typography>
+                ) : null}
                 {importSummaryErrorsToShow?.blockingErrors?.length ? (
                     <BlockingErrors rows={importSummaryErrorsToShow.blockingErrors} showAllLines />
                 ) : null}

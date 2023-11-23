@@ -79,7 +79,7 @@ import { GetEGASPEmptyTemplateUseCase } from "./domain/usecases/data-entry/egasp
 import { EGASPDownloadEmptyTemplate } from "./data/repositories/download-empty-template/EGASPDownloadEmptyTemplate";
 import { BulkLoadDataStoreClient } from "./data/data-store/BulkLoadDataStoreClient";
 import { ApplyAMCQuestionUpdationUseCase } from "./domain/usecases/ApplyAMCQuestionUpdationUseCase";
-import { SaveImportSummaryErrorsInUpload } from "./domain/usecases/SaveImportSummaryErrorsInUpload";
+import { SaveImportSummaryErrorsOfFilesInUploadsUseCase } from "./domain/usecases/SaveImportSummaryErrorsOfFilesInUploadsUseCase";
 
 export function getCompositionRoot(instance: Instance) {
     const api = getD2APiFromInstance(instance);
@@ -142,7 +142,7 @@ export function getCompositionRoot(instance: Instance) {
             getByModuleOU: new GetGlassUploadsByModuleOUUseCase(glassUploadsRepository),
             getByModuleOUPeriod: new GetGlassUploadsByModuleOUPeriodUseCase(glassUploadsRepository),
             setBatchId: new SetUploadBatchIdUseCase(glassUploadsRepository),
-            saveImportSummaryErrors: new SaveImportSummaryErrorsInUpload(glassUploadsRepository),
+            saveImportSummaryErrorsOfFiles: new SaveImportSummaryErrorsOfFilesInUploadsUseCase(glassUploadsRepository),
         }),
         glassDocuments: getExecute({
             getAll: new GetGlassDocumentsUseCase(glassDocumentsRepository),

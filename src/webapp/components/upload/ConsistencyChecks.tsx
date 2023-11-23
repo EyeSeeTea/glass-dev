@@ -85,35 +85,38 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
 
                     setPrimaryFileImportSummary(importPrimaryFileSummary);
 
-                    if (primaryUploadId) {
-                        const importSummaryErrors = {
-                            nonBlockingErrors: importPrimaryFileSummary.nonBlockingErrors,
-                            blockingErrors: importPrimaryFileSummary.blockingErrors,
-                        };
+                    if (importSecondaryFileSummary) {
+                        setSecondaryFileImportSummary(importSecondaryFileSummary);
+                    }
 
-                        compositionRoot.glassUploads.saveImportSummaryErrors(primaryUploadId, importSummaryErrors).run(
+                    if (primaryUploadId) {
+                        const secondaryUploadId = localStorage.getItem("secondaryUploadId");
+
+                        const params = secondaryUploadId
+                            ? {
+                                  primaryUploadId,
+                                  primaryImportSummaryErrors: {
+                                      nonBlockingErrors: importPrimaryFileSummary?.nonBlockingErrors || [],
+                                      blockingErrors: importPrimaryFileSummary?.blockingErrors || [],
+                                  },
+                                  secondaryUploadId,
+                                  secondaryImportSummaryErrors: {
+                                      nonBlockingErrors: importSecondaryFileSummary?.nonBlockingErrors || [],
+                                      blockingErrors: importSecondaryFileSummary?.blockingErrors || [],
+                                  },
+                              }
+                            : {
+                                  primaryUploadId,
+                                  primaryImportSummaryErrors: {
+                                      nonBlockingErrors: importPrimaryFileSummary?.nonBlockingErrors || [],
+                                      blockingErrors: importPrimaryFileSummary?.blockingErrors || [],
+                                  },
+                              };
+
+                        compositionRoot.glassUploads.saveImportSummaryErrorsOfFiles(params).run(
                             () => {},
                             () => {}
                         );
-                    }
-
-                    if (importSecondaryFileSummary) {
-                        setSecondaryFileImportSummary(importSecondaryFileSummary);
-
-                        const secondaryUploadId = localStorage.getItem("secondaryUploadId");
-                        if (secondaryUploadId) {
-                            const importSummaryErrors = {
-                                nonBlockingErrors: importSecondaryFileSummary.nonBlockingErrors,
-                                blockingErrors: importSecondaryFileSummary.blockingErrors,
-                            };
-
-                            compositionRoot.glassUploads
-                                .saveImportSummaryErrors(secondaryUploadId, importSummaryErrors)
-                                .run(
-                                    () => {},
-                                    () => {}
-                                );
-                        }
                     }
 
                     if (importPrimaryFileSummary.blockingErrors.length === 0 && primaryUploadId) {
