@@ -81,27 +81,55 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
                     console.log({ importPrimaryFileSummary });
                     console.log({ importSecondaryFileSummary });
 
+                    const primaryUploadId = localStorage.getItem("primaryUploadId");
+
                     setPrimaryFileImportSummary(importPrimaryFileSummary);
 
                     if (importSecondaryFileSummary) {
                         setSecondaryFileImportSummary(importSecondaryFileSummary);
                     }
 
-                    if (importPrimaryFileSummary.blockingErrors.length === 0) {
-                        const primaryUploadId = localStorage.getItem("primaryUploadId");
-                        if (primaryUploadId) {
-                            compositionRoot.glassUploads.setStatus({ id: primaryUploadId, status: "VALIDATED" }).run(
-                                () => {
-                                    changeStep(3);
-                                    setImportLoading(false);
-                                },
-                                () => {
-                                    setImportLoading(false);
-                                }
-                            );
-                        }
+                    if (primaryUploadId) {
+                        const secondaryUploadId = localStorage.getItem("secondaryUploadId");
+
+                        const params = secondaryUploadId
+                            ? {
+                                  primaryUploadId,
+                                  primaryImportSummaryErrors: {
+                                      nonBlockingErrors: importPrimaryFileSummary?.nonBlockingErrors || [],
+                                      blockingErrors: importPrimaryFileSummary?.blockingErrors || [],
+                                  },
+                                  secondaryUploadId,
+                                  secondaryImportSummaryErrors: {
+                                      nonBlockingErrors: importSecondaryFileSummary?.nonBlockingErrors || [],
+                                      blockingErrors: importSecondaryFileSummary?.blockingErrors || [],
+                                  },
+                              }
+                            : {
+                                  primaryUploadId,
+                                  primaryImportSummaryErrors: {
+                                      nonBlockingErrors: importPrimaryFileSummary?.nonBlockingErrors || [],
+                                      blockingErrors: importPrimaryFileSummary?.blockingErrors || [],
+                                  },
+                              };
+
+                        compositionRoot.glassUploads.saveImportSummaryErrorsOfFiles(params).run(
+                            () => {},
+                            () => {}
+                        );
+                    }
+
+                    if (importPrimaryFileSummary.blockingErrors.length === 0 && primaryUploadId) {
+                        compositionRoot.glassUploads.setStatus({ id: primaryUploadId, status: "VALIDATED" }).run(
+                            () => {
+                                changeStep(3);
+                                setImportLoading(false);
+                            },
+                            () => {
+                                setImportLoading(false);
+                            }
+                        );
                     } else {
-                        const primaryUploadId = localStorage.getItem("primaryUploadId");
                         if (primaryUploadId) {
                             compositionRoot.glassUploads.setStatus({ id: primaryUploadId, status: "IMPORTED" }).run(
                                 () => {
@@ -251,7 +279,7 @@ const ContentWrapper = styled.div`
             border-radius: 0;
             border: none;
             flex: 1;
-            border-: 2px solid ${glassColors.greyLight};
+            border: 2px solid ${glassColors.greyLight};
             &.current {
                 color: ${glassColors.mainPrimary};
                 border-bottom: 4px solid ${glassColors.mainPrimary};
