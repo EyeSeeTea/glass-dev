@@ -47,6 +47,7 @@ export const QuestionWidget: React.FC<QuestionWidgetProps> = React.memo(props =>
                     onChange={value => onChange(update(question, value))}
                     disabled={disabled}
                     numberType={question.numberType}
+                    validationError={question.validationError}
                 />
             );
         case "text":
