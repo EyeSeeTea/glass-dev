@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import { Backdrop, TableBody, TableCell, TableRow, Button, DialogContent, Typography } from "@material-ui/core";
 import styled from "styled-components";
 import i18n from "@eyeseetea/d2-ui-components/locales";
@@ -8,6 +8,8 @@ import { CloudDownloadOutlined, DeleteOutline } from "@material-ui/icons";
 import { useAppContext } from "../../contexts/app-context";
 import { ConfirmationDialog, useSnackbar } from "@eyeseetea/d2-ui-components";
 import { CircularProgress } from "material-ui";
+import ChevronRightIcon from "@material-ui/icons/ChevronRight";
+
 import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context";
 import { Future } from "../../../domain/entities/Future";
 import { isEditModeStatus } from "../../../utils/editModeStatus";
@@ -17,6 +19,9 @@ import { useGlassCaptureAccess } from "../../hooks/useGlassCaptureAccess";
 import { StyledLoaderContainer } from "../upload/ConsistencyChecks";
 import { useCurrentPeriodContext } from "../../contexts/current-period-context";
 import { moduleProperties } from "../../../domain/utils/ModuleProperties";
+import { ImportSummaryErrors } from "../../../domain/entities/data-entry/ImportSummary";
+import { ImportSummaryErrorsDialog } from "../import-summary-errors-dialog/ImportSummaryErrorsDialog";
+import { glassColors } from "../../pages/app/themes/dhis2.theme";
 
 export interface UploadsTableBodyProps {
     rows?: UploadsDataItem[];
@@ -32,6 +37,7 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
         currentOrgUnitAccess: { orgUnitId, orgUnitName },
     } = useCurrentOrgUnitContext();
     const [open, setOpen] = React.useState(false);
+    const [importSummaryErrorsToShow, setImportSummaryErrorsToShow] = React.useState<ImportSummaryErrors | null>(null);
     const [rowToDelete, setRowToDelete] = useState<UploadsDataItem>();
 
     const { currentPeriod } = useCurrentPeriodContext();
@@ -220,6 +226,13 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
             }
         }
     };
+
+    const handleShowImportSummaryErrors = useCallback((row: UploadsDataItem) => {
+        if (row.importSummary) {
+            setImportSummaryErrorsToShow(row.importSummary);
+        }
+    }, []);
+
     return (
         <>
             {rows && (
@@ -259,11 +272,15 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                                         </Typography>
                                     </DialogContent>
                                 </ConfirmationDialog>
+                                <ImportSummaryErrorsDialog
+                                    importSummaryErrorsToShow={importSummaryErrorsToShow}
+                                    onClose={() => setImportSummaryErrorsToShow(null)}
+                                />
                             </>
                         </TableCell>
                     </TableRow>
                     {rows.map((row: UploadsDataItem) => (
-                        <TableRow key={row.id}>
+                        <TableRow key={row.id} onClick={() => handleShowImportSummaryErrors(row)}>
                             <TableCell>{dayjs(row.uploadDate).format("DD-MM-YYYY")}</TableCell>
                             <TableCell>{row.period}</TableCell>
                             <TableCell>{row?.records || row?.rows}</TableCell>
@@ -273,14 +290,22 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                             )}
                             <TableCell>{i18n.t(row.status).toUpperCase()}</TableCell>
                             <TableCell style={{ opacity: 0.5 }}>
-                                <Button onClick={() => downloadFile(row.fileId, row.fileName)}>
+                                <Button
+                                    onClick={event => {
+                                        event.stopPropagation();
+                                        downloadFile(row.fileId, row.fileName);
+                                    }}
+                                >
                                     <CloudDownloadOutlined />
                                 </Button>
                             </TableCell>
                             <TableCell style={{ opacity: 0.5 }}>
                                 {currentDataSubmissionStatus.kind === "loaded" ? (
                                     <Button
-                                        onClick={() => showConfirmationDialog(row)}
+                                        onClick={e => {
+                                            e.stopPropagation();
+                                            showConfirmationDialog(row);
+                                        }}
                                         disabled={
                                             !hasCurrentUserCaptureAccess ||
                                             !isEditModeStatus(currentDataSubmissionStatus.data.title)
@@ -292,6 +317,7 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                                     <CircularProgress size={20} />
                                 )}
                             </TableCell>
+                            <StyledCTACell className="cta">{row.importSummary && <ChevronRightIcon />}</StyledCTACell>
                         </TableRow>
                     ))}
                 </StyledTableBody>
@@ -301,3 +327,15 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
 };
 
 const StyledTableBody = styled(TableBody)``;
+
+const StyledCTACell = styled(TableCell)`
+    text-align: center;
+    svg {
+        color: ${glassColors.grey};
+    }
+    &:hover {
+        svg {
+            color: ${glassColors.greyBlack};
+        }
+    }
+`;

@@ -11,6 +11,11 @@ export type ImportSummary = {
     importTime?: Date;
 };
 
+export type ImportSummaryErrors = {
+    nonBlockingErrors: ConsistencyError[];
+    blockingErrors: ConsistencyError[];
+};
+
 export type ConsistencyError = {
     error: string;
     count: number;
