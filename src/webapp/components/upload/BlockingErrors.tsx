@@ -18,19 +18,22 @@ import { ConfirmationDialog } from "@eyeseetea/d2-ui-components";
 
 interface BlockingErrorsProps {
     rows: ConsistencyError[];
+    showAllLines?: boolean;
 }
 
 const RowLines = ({
     row,
     setIsOpen,
     setCurrentRowLines,
+    showAllLines = false,
 }: {
     row: ConsistencyError;
     setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
     setCurrentRowLines: React.Dispatch<React.SetStateAction<number[]>>;
+    showAllLines?: boolean;
 }): JSX.Element => {
     if (row.lines) {
-        if (row.lines.length > 5) {
+        if (row.lines.length > 5 && !showAllLines) {
             return (
                 <Typography>
                     {row.lines?.slice(0, 5).join(", ")}
@@ -54,7 +57,7 @@ const RowLines = ({
     } else return <Typography>-</Typography>;
 };
 
-export const BlockingErrors: React.FC<BlockingErrorsProps> = ({ rows }) => {
+export const BlockingErrors: React.FC<BlockingErrorsProps> = ({ rows, showAllLines = false }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [currentRowLines, setCurrentRowLines] = useState<number[]>([]);
     return (
@@ -81,6 +84,7 @@ export const BlockingErrors: React.FC<BlockingErrorsProps> = ({ rows }) => {
                                             row={row}
                                             setIsOpen={setIsOpen}
                                             setCurrentRowLines={setCurrentRowLines}
+                                            showAllLines={showAllLines}
                                         />
                                     </TableCell>
                                 </TableRow>

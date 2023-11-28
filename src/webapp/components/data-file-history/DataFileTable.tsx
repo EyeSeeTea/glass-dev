@@ -7,6 +7,7 @@ import { glassColors, palette } from "../../pages/app/themes/dhis2.theme";
 import { ArrowUpward, ArrowDownward } from "@material-ui/icons";
 import { moduleProperties } from "../../../domain/utils/ModuleProperties";
 import { useCurrentModuleContext } from "../../contexts/current-module-context";
+import { ImportSummaryErrors } from "../../../domain/entities/data-entry/ImportSummary";
 export interface DataFileHistoryItemProps {
     id: string;
     batchId: string;
@@ -24,6 +25,7 @@ export interface DataFileHistoryItemProps {
     module: string;
     records?: number; // TODO: Delete when no items in DataStore with records (because becomes rows)
     rows?: number;
+    importSummary?: ImportSummaryErrors;
 }
 export type SortDirection = "asc" | "desc";
 export interface DataFileTableProps {

@@ -195,6 +195,39 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
                     if (importSecondaryFileSummary) {
                         setSecondaryFileImportSummary(importSecondaryFileSummary);
                     }
+
+                    const primaryUploadId = localStorage.getItem("primaryUploadId");
+
+                    if (primaryUploadId) {
+                        const secondaryUploadId = localStorage.getItem("secondaryUploadId");
+
+                        const params = secondaryUploadId
+                            ? {
+                                  primaryUploadId,
+                                  primaryImportSummaryErrors: {
+                                      nonBlockingErrors: importPrimaryFileSummary?.nonBlockingErrors || [],
+                                      blockingErrors: importPrimaryFileSummary?.blockingErrors || [],
+                                  },
+                                  secondaryUploadId,
+                                  secondaryImportSummaryErrors: {
+                                      nonBlockingErrors: importSecondaryFileSummary?.nonBlockingErrors || [],
+                                      blockingErrors: importSecondaryFileSummary?.blockingErrors || [],
+                                  },
+                              }
+                            : {
+                                  primaryUploadId,
+                                  primaryImportSummaryErrors: {
+                                      nonBlockingErrors: importPrimaryFileSummary?.nonBlockingErrors || [],
+                                      blockingErrors: importPrimaryFileSummary?.blockingErrors || [],
+                                  },
+                              };
+
+                        compositionRoot.glassUploads.saveImportSummaryErrorsOfFiles(params).run(
+                            () => {},
+                            () => {}
+                        );
+                    }
+
                     setImportLoading(false);
                     changeStep(2);
                 },
@@ -211,18 +244,19 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
             );
         }
     }, [
-        batchId,
+        primaryFile,
         compositionRoot.fileSubmission,
+        compositionRoot.glassUploads,
         moduleName,
-        orgUnitCode,
+        batchId,
+        currentPeriod,
         orgUnitId,
         orgUnitName,
-        currentPeriod,
-        primaryFile,
+        orgUnitCode,
         secondaryFile,
         setPrimaryFileImportSummary,
-        setSecondaryFileImportSummary,
         changeStep,
+        setSecondaryFileImportSummary,
     ]);
 
     const continueClick = () => {
