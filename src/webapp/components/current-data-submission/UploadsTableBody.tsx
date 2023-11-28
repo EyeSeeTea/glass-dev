@@ -84,7 +84,10 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
             let primaryFileToDelete: UploadsDataItem | undefined, secondaryFileToDelete: UploadsDataItem | undefined;
             //For AMR, Ris file is mandatory, so there will be a ris file with given batch id.
             //Sample file is optional and could be absent
-            if (moduleProperties.get(currentModuleAccess.moduleName)?.isSecondaryFileApplicable) {
+            if (
+                moduleProperties.get(currentModuleAccess.moduleName)?.isSecondaryFileApplicable &&
+                moduleProperties.get(currentModuleAccess.moduleName)?.isSecondaryRelated
+            ) {
                 if (
                     rowToDelete.fileType.toLowerCase() ===
                     moduleProperties.get(currentModuleAccess.moduleName)?.primaryFileType.toLowerCase()

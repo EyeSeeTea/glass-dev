@@ -1,8 +1,8 @@
-import { SampleData } from "../../domain/entities/data-entry/amr-external/SampleData";
-import { Future, FutureData } from "../../domain/entities/Future";
-import { SampleDataRepository } from "../../domain/repositories/data-entry/SampleDataRepository";
-import { SpreadsheetXlsxDataSource } from "./SpreadsheetXlsxDefaultRepository";
-import { doesColumnExist, getNumberValue, getTextValue } from "./utils/CSVUtils";
+import { SampleData } from "../../../domain/entities/data-entry/amr-external/SampleData";
+import { Future, FutureData } from "../../../domain/entities/Future";
+import { SampleDataRepository } from "../../../domain/repositories/data-entry/SampleDataRepository";
+import { SpreadsheetXlsxDataSource } from "../SpreadsheetXlsxDefaultRepository";
+import { doesColumnExist, getNumberValue, getTextValue } from "../utils/CSVUtils";
 
 export class SampleDataCSVDeafultRepository implements SampleDataRepository {
     get(file: File): FutureData<SampleData[]> {

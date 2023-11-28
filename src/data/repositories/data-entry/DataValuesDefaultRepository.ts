@@ -1,11 +1,11 @@
 import { D2Api } from "@eyeseetea/d2-api/2.34";
-import { FutureData } from "../../domain/entities/Future";
-import { getD2APiFromInstance } from "../../utils/d2-api";
-import { apiToFuture } from "../../utils/futures";
-import { Instance } from "../entities/Instance";
-import { DataValue } from "../../domain/entities/data-entry/DataValue";
-import { DataValuesSaveSummary, ImportStrategy } from "../../domain/entities/data-entry/DataValuesSaveSummary";
-import { DataValuesRepository } from "../../domain/repositories/data-entry/DataValuesRepository";
+import { FutureData } from "../../../domain/entities/Future";
+import { getD2APiFromInstance } from "../../../utils/d2-api";
+import { apiToFuture } from "../../../utils/futures";
+import { Instance } from "../../entities/Instance";
+import { DataValue } from "../../../domain/entities/data-entry/DataValue";
+import { DataValuesSaveSummary, ImportStrategy } from "../../../domain/entities/data-entry/DataValuesSaveSummary";
+import { DataValuesRepository } from "../../../domain/repositories/data-entry/DataValuesRepository";
 
 export class DataValuesDefaultRepository implements DataValuesRepository {
     private api: D2Api;

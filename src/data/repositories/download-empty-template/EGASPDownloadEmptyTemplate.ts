@@ -2,7 +2,7 @@ import { D2Api } from "@eyeseetea/d2-api/2.34";
 import { DownloadEmptyTemplateRepository } from "../../../domain/repositories/DownloadEmptyTemplateRepository";
 import { Instance } from "../../entities/Instance";
 import { getD2APiFromInstance } from "../../../utils/d2-api";
-import * as templates from "../../../domain/entities/data-entry/egasp-templates";
+import * as templates from "../../../domain/entities/data-entry/program-templates";
 import { SheetBuilder } from "./sheetBuilder";
 import { promiseMap } from "../../../utils/promises";
 import { GeneratedTemplate } from "../../../domain/entities/Template";
@@ -44,7 +44,7 @@ export class EGASPDownloadEmptyTemplate implements DownloadEmptyTemplateReposito
             useCodesForMetadata: true,
         });
 
-        const workbook = await sheetBuilder.generate();
+        const workbook = await sheetBuilder.generate(AMR_GLASS_EGASP_PRE_INPUT_FILES_ID);
 
         const file = await workbook.writeToBuffer();
 

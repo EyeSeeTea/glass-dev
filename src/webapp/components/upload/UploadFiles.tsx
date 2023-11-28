@@ -87,6 +87,7 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
     const [importLoading, setImportLoading] = useState<boolean>(false);
     const [previousBatchIdsLoading, setPreviousBatchIdsLoading] = useState<boolean>(true);
     const [loading, setLoading] = useState<boolean>(false);
+    const [uploadFileType, setUploadFileType] = useState<"PRODUCT" | "SUBSTANCE">("PRODUCT");
 
     const {
         currentModuleAccess: { moduleId, moduleName },
@@ -154,6 +155,12 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
             await compositionRoot.glassUploads.setBatchId({ id: secondaryUploadId, batchId }).toPromise();
         }
     };
+
+    const changeFileType = (event: React.ChangeEvent<{ value: unknown }>) => {
+        const fileType = event.target.value as "PRODUCT" | "SUBSTANCE";
+        setUploadFileType(fileType);
+    };
+
     const uploadFileSubmissions = useCallback(() => {
         if (primaryFile) {
             setImportLoading(true);
@@ -319,80 +326,121 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
                     </Typography>
                 </StyledLoaderContainer>
             </Backdrop>
-            {previousBatchIdsLoading ? (
-                <CircularProgress size={25} />
-            ) : (
-                <>
-                    <div className="file-fields">
+            {moduleProperties.get(moduleName)?.isSingleFileTypePerSubmission ? (
+                <StyledSingleFileSelectContainer>
+                    <FormControl variant="outlined" style={{ minWidth: 180 }}>
+                        <InputLabel>{i18n.t("Choose file type")}</InputLabel>
+                        <Select
+                            value={uploadFileType}
+                            onChange={changeFileType}
+                            label={i18n.t("Choose file type")}
+                            labelId="file-type-label"
+                            MenuProps={{ disableScrollLock: true }}
+                            disabled={primaryFile !== null || secondaryFile !== null}
+                        >
+                            <MenuItem key={"PRODUCT"} value={"PRODUCT"}>
+                                {i18n.t("Product level data")}
+                            </MenuItem>
+                            <MenuItem key={"SUBSTANCE"} value={"SUBSTANCE"}>
+                                {i18n.t("Substance level data")}
+                            </MenuItem>
+                        </Select>
+                    </FormControl>
+                    {uploadFileType === "PRODUCT" ? (
                         <UploadPrimaryFile
                             validate={setIsFileValid}
                             batchId={batchId}
                             primaryFile={primaryFile}
                             setPrimaryFile={setPrimaryFile}
                         />
-                        {moduleProperties.get(moduleName)?.isbatchReq && (
-                            <UploadSample
-                                batchId={batchId}
-                                sampleFile={secondaryFile}
-                                setSampleFile={setSecondaryFile}
-                                setHasSampleFile={setHasSecondaryFile}
-                            />
-                        )}
-                    </div>
-                    {moduleProperties.get(moduleName)?.isbatchReq && (
-                        <div className="batch-id">
-                            <h3>{i18n.t("Batch ID")}</h3>
-                            <FormControl variant="outlined" style={{ minWidth: 180 }}>
-                                <InputLabel id="dataset-label">{i18n.t("Choose a Dataset")}</InputLabel>
-                                <Select
-                                    value={batchId}
-                                    onChange={changeBatchId}
-                                    label={i18n.t("Choose a Dataset")}
-                                    labelId="dataset-label"
-                                    MenuProps={{ disableScrollLock: true }}
-                                >
-                                    {datasetOptions.map(({ label, value }) => (
-                                        <MenuItem
-                                            key={value}
-                                            value={value}
-                                            disabled={previousUploadsBatchIds.includes(value)}
-                                        >
-                                            {i18n.t(label)}
-                                        </MenuItem>
-                                    ))}
-                                </Select>
-                            </FormControl>
-                        </div>
+                    ) : (
+                        <UploadSample
+                            batchId={batchId}
+                            sampleFile={secondaryFile}
+                            setSampleFile={setSecondaryFile}
+                            setHasSampleFile={setHasSecondaryFile}
+                        />
                     )}
-                    <BottomContainer>
-                        {previousUploadsBatchIds.length > 0 && moduleProperties.get(moduleName)?.isbatchReq ? (
-                            <div>
-                                <h4>{i18n.t("You Previously Submitted:")} </h4>
-                                <ul>
-                                    {previousUploadsBatchIds.map(batchId => (
-                                        <li key={batchId}>{`Batch Id ${batchId}`}</li>
-                                    ))}
-                                </ul>
+                </StyledSingleFileSelectContainer>
+            ) : (
+                <>
+                    {previousBatchIdsLoading ? (
+                        <CircularProgress size={25} />
+                    ) : (
+                        <>
+                            <div className="file-fields">
+                                <UploadPrimaryFile
+                                    validate={setIsFileValid}
+                                    batchId={batchId}
+                                    primaryFile={primaryFile}
+                                    setPrimaryFile={setPrimaryFile}
+                                />
+                                {moduleProperties.get(moduleName)?.isSecondaryFileApplicable && (
+                                    <UploadSample
+                                        batchId={batchId}
+                                        sampleFile={secondaryFile}
+                                        setSampleFile={setSecondaryFile}
+                                        setHasSampleFile={setHasSecondaryFile}
+                                    />
+                                )}
                             </div>
-                        ) : null}
-                        {moduleProperties.get(moduleName)?.isDownloadEmptyTemplateReq && (
-                            <Button variant="outlined" color="primary" disableElevation onClick={downloadEmptyTemplate}>
-                                {i18n.t("Download empty template")}
-                            </Button>
-                        )}
-                        <Button
-                            variant="contained"
-                            color={isValidated ? "primary" : "default"}
-                            disabled={isValidated ? false : true}
-                            endIcon={<ChevronRightIcon />}
-                            disableElevation
-                            onClick={continueClick}
-                        >
-                            {i18n.t("Continue")}
-                        </Button>
-                    </BottomContainer>
+                            {moduleProperties.get(moduleName)?.isbatchReq && (
+                                <div className="batch-id">
+                                    <h3>{i18n.t("Batch ID")}</h3>
+                                    <FormControl variant="outlined" style={{ minWidth: 180 }}>
+                                        <InputLabel id="dataset-label">{i18n.t("Choose a Dataset")}</InputLabel>
+                                        <Select
+                                            value={batchId}
+                                            onChange={changeBatchId}
+                                            label={i18n.t("Choose a Dataset")}
+                                            labelId="dataset-label"
+                                            MenuProps={{ disableScrollLock: true }}
+                                        >
+                                            {datasetOptions.map(({ label, value }) => (
+                                                <MenuItem
+                                                    key={value}
+                                                    value={value}
+                                                    disabled={previousUploadsBatchIds.includes(value)}
+                                                >
+                                                    {i18n.t(label)}
+                                                </MenuItem>
+                                            ))}
+                                        </Select>
+                                    </FormControl>
+                                </div>
+                            )}
+                        </>
+                    )}
                 </>
             )}
+
+            <BottomContainer>
+                {previousUploadsBatchIds.length > 0 && moduleProperties.get(moduleName)?.isbatchReq ? (
+                    <div>
+                        <h4>{i18n.t("You Previously Submitted:")} </h4>
+                        <ul>
+                            {previousUploadsBatchIds.map(batchId => (
+                                <li key={batchId}>{`Batch Id ${batchId}`}</li>
+                            ))}
+                        </ul>
+                    </div>
+                ) : null}
+                {moduleProperties.get(moduleName)?.isDownloadEmptyTemplateReq && (
+                    <Button variant="outlined" color="primary" disableElevation onClick={downloadEmptyTemplate}>
+                        {i18n.t("Download empty template")}
+                    </Button>
+                )}
+                <Button
+                    variant="contained"
+                    color={isValidated ? "primary" : "default"}
+                    disabled={isValidated ? false : true}
+                    endIcon={<ChevronRightIcon />}
+                    disableElevation
+                    onClick={continueClick}
+                >
+                    {i18n.t("Continue")}
+                </Button>
+            </BottomContainer>
         </ContentWrapper>
     );
 };
@@ -490,4 +538,11 @@ export const BottomContainer = styled.div`
     margin: 0 auto 30px auto;
     align-items: flex-end;
     width: 100%;
+`;
+
+export const StyledSingleFileSelectContainer = styled.div`
+    display: flex;
+    width: 100%;
+    height: 100%;
+    justify-content: space-evenly;
 `;

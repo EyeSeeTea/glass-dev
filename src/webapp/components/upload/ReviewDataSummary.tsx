@@ -160,19 +160,23 @@ export const ReviewDataSummary: React.FC<ReviewDataSummaryProps> = ({
 
     return (
         <ContentWrapper>
-            {moduleProperties.get(currentModuleAccess.moduleName)?.isSecondaryFileApplicable && (
-                <div className="toggles">
-                    <Button onClick={() => changeType("primary")} className={fileType === "primary" ? "current" : ""}>
-                        {i18n.t(`${moduleProperties.get(currentModuleAccess.moduleName)?.primaryFileType} File`)}
-                    </Button>
-                    <Button
-                        onClick={() => changeType("secondary")}
-                        className={fileType === "secondary" ? "current" : ""}
-                    >
-                        {i18n.t(`${moduleProperties.get(currentModuleAccess.moduleName)?.secondaryFileType} File`)}
-                    </Button>
-                </div>
-            )}
+            {moduleProperties.get(currentModuleAccess.moduleName)?.isSecondaryFileApplicable &&
+                !moduleProperties.get(currentModuleAccess.moduleName)?.isSingleFileTypePerSubmission && (
+                    <div className="toggles">
+                        <Button
+                            onClick={() => changeType("primary")}
+                            className={fileType === "primary" ? "current" : ""}
+                        >
+                            {i18n.t(`${moduleProperties.get(currentModuleAccess.moduleName)?.primaryFileType} File`)}
+                        </Button>
+                        <Button
+                            onClick={() => changeType("secondary")}
+                            className={fileType === "secondary" ? "current" : ""}
+                        >
+                            {i18n.t(`${moduleProperties.get(currentModuleAccess.moduleName)?.secondaryFileType} File`)}
+                        </Button>
+                    </div>
+                )}
             <Section className="summary">
                 <h3>{i18n.t("Summary")}</h3>
                 <SectionCard className="wrong">

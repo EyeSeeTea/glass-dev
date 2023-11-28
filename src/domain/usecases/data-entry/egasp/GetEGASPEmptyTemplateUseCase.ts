@@ -1,5 +1,6 @@
 import { UseCase } from "../../../../CompositionRoot";
 import { EGASPProgramDefaultRepository } from "../../../../data/repositories/download-empty-template/EGASPProgramDefaultRepository";
+import { EGASP_PROGRAM_ID } from "../../../../data/repositories/program-rule/ProgramRulesMetadataDefaultRepository";
 import { Future, FutureData } from "../../../entities/Future";
 import { DownloadEmptyTemplateRepository } from "../../../repositories/DownloadEmptyTemplateRepository";
 import { ExcelRepository } from "../../../repositories/ExcelRepository";
@@ -20,7 +21,7 @@ export class GetEGASPEmptyTemplateUseCase implements UseCase {
                     this.downloadEmptyTemplateRepository.getEmptyTemplate(orgUnits, settings)
                 ).flatMap(template => {
                     console.debug(template);
-                    return this.excelRepository.loadTemplate(template).flatMap(templateId => {
+                    return this.excelRepository.loadTemplate(template, EGASP_PROGRAM_ID).flatMap(templateId => {
                         console.debug(templateId);
                         return this.excelRepository.toBlob(templateId).flatMap(data => {
                             console.debug(data);
