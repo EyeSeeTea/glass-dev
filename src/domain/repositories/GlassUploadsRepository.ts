@@ -1,5 +1,7 @@
 import { FutureData } from "../entities/Future";
 import { GlassUploads } from "../entities/GlassUploads";
+import { Id } from "../entities/Ref";
+import { ImportSummaryErrors } from "../entities/data-entry/ImportSummary";
 
 export interface GlassUploadsRepository {
     getAll(): FutureData<GlassUploads[]>;
@@ -11,4 +13,10 @@ export interface GlassUploadsRepository {
     getUploadsByModuleOUPeriod(module: string, orgUnit: string, period: string): FutureData<GlassUploads[]>;
     updateSampleUploadWithRisId(sampleUploadId: string, risUploadId: string): FutureData<void>;
     setEventListFileId(id: string, eventListFileId: string): FutureData<void>;
+    saveImportSummaryErrorsOfFilesInUploads(params: {
+        primaryUploadId: Id;
+        primaryImportSummaryErrors: ImportSummaryErrors;
+        secondaryUploadId?: Id;
+        secondaryImportSummaryErrors?: ImportSummaryErrors;
+    }): FutureData<void>;
 }

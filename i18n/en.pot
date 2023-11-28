@@ -390,13 +390,16 @@ msgstr ""
 msgid "status"
 msgstr ""
 
+msgid "Import summary errors"
+msgstr ""
+
+msgid "Close"
+msgstr ""
+
 msgid "News from GLASS"
 msgstr ""
 
 msgid "Notification"
-msgstr ""
-
-msgid "Close"
 msgstr ""
 
 msgid "Participants"
