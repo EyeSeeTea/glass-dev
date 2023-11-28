@@ -5,6 +5,8 @@ import _ from "lodash";
 import "lodash.product";
 import { defaultColorScale } from "./utils/colors";
 import { GeneratedTemplate } from "../../../domain/entities/Template";
+import { Id } from "../../../domain/entities/Ref";
+import { AMC_PRODUCT_REGISTER_PROGRAM_ID } from "../../../domain/usecases/data-entry/amc/ImportAMCProductLevelData";
 
 const maxRow = 1048576;
 
@@ -47,7 +49,7 @@ export class SheetBuilder {
         this.validations = new Map();
     }
 
-    public generate() {
+    public generate(programId: Id) {
         const dataEntrySheetsInfo: Array<{ sheet: any }> = [];
 
         const dataEntrySheet = this.workbook.addWorksheet("Data Entry");
@@ -62,7 +64,7 @@ export class SheetBuilder {
         this.fillLegendSheet();
 
         dataEntrySheetsInfo.forEach(({ sheet }) => {
-            this.fillDataEntrySheet(sheet);
+            this.fillDataEntrySheet(sheet, programId);
         });
 
         return this.workbook;
@@ -335,13 +337,14 @@ export class SheetBuilder {
         return isProgramStageDataElementCompulsory || isTeiAttributeCompulsory || isCategoryComboForProgram;
     }
 
-    private getVersion() {
+    private getVersion(programId: Id) {
         const { element } = this.builder;
-        const templateId = "PROGRAM_GENERATED_v4";
+        const templateId =
+            programId === AMC_PRODUCT_REGISTER_PROGRAM_ID ? "TRACKER_PROGRAM_GENERATED_v3" : "PROGRAM_GENERATED_v4";
         return getObjectVersion(element) ?? templateId;
     }
 
-    private fillDataEntrySheet(dataEntrySheet: any) {
+    private fillDataEntrySheet(dataEntrySheet: any, programId: Id) {
         const { element, elementMetadata: metadata, settings } = this.builder;
         const { rowOffset = 0 } = this.builder.template;
 
@@ -360,7 +363,10 @@ export class SheetBuilder {
         dataEntrySheet.row(itemRow).setHeight(50);
 
         // Add template version
-        dataEntrySheet.cell(1, 1).string(`Version: ${this.getVersion()}`).style(baseStyle);
+        dataEntrySheet
+            .cell(1, 1)
+            .string(`Version: ${this.getVersion(programId)}`)
+            .style(baseStyle);
 
         // Add column titles
         let columnId = 1;

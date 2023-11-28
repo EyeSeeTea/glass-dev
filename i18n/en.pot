@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2023-10-24T18:22:28.308Z\n"
-"PO-Revision-Date: 2023-10-24T18:22:28.308Z\n"
+"POT-Creation-Date: 2023-11-28T14:36:23.032Z\n"
+"PO-Revision-Date: 2023-11-28T14:36:23.032Z\n"
 
 msgid "Template {{id}} not loaded"
 msgstr ""
@@ -396,6 +396,9 @@ msgstr ""
 msgid "Close"
 msgstr ""
 
+msgid "Data imported without errors"
+msgstr ""
+
 msgid "News from GLASS"
 msgstr ""
 
@@ -543,6 +546,15 @@ msgstr ""
 msgid "Downloading"
 msgstr ""
 
+msgid "Choose file type"
+msgstr ""
+
+msgid "Product level data"
+msgstr ""
+
+msgid "Substance level data"
+msgstr ""
+
 msgid "Choose a Dataset"
 msgstr ""
 
@@ -559,15 +571,6 @@ msgid "Incorrect File Format. Please retry with a valid file"
 msgstr ""
 
 msgid "Select file"
-msgstr ""
-
-msgid "Incorrect File Format. Please retry with a valid Sample file"
-msgstr ""
-
-msgid "SAMPLE File"
-msgstr ""
-
-msgid "not required"
 msgstr ""
 
 msgid "The password and confirm password fields don't match"

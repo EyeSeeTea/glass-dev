@@ -1,10 +1,11 @@
-import { DataElementType } from "../../data/repositories/download-empty-template/EGASPProgramDefaultRepository";
 import { Id, NamedRef } from "./Ref";
 
+export const dataFormTypes = ["dataSets", "programs", "trackerPrograms"] as const;
+export type DataFormType = typeof dataFormTypes[number];
 export type DataFormPeriod = "Daily" | "Monthly" | "Yearly" | "Weekly";
 
 export interface DataForm {
-    type: "programs";
+    type: DataFormType;
     id: Id;
     name: string;
     periodType?: DataFormPeriod;
@@ -19,10 +20,13 @@ export interface DataForm {
         attribute: { code: string };
         value: string;
     }[]; // Only used for versioning, is really being used by any client?
-    teiAttributes?: NamedRef[];
+    teiAttributes?: TrackedEntityAttributeType[];
     trackedEntityType?: TrackedEntityType;
     readAccess: boolean;
     writeAccess: boolean;
+}
+export interface TrackedEntityAttributeType extends NamedRef {
+    valueType: DataElementType | undefined;
 }
 
 export interface TrackedEntityType {
@@ -39,3 +43,30 @@ export interface DataElement {
     categoryOptionCombos?: Array<{ id: Id; name: string }>;
     options: Array<{ id: Id; code: string }>;
 }
+
+export type DataElementType =
+    | "TEXT"
+    | "LONG_TEXT"
+    | "LETTER"
+    | "PHONE_NUMBER"
+    | "EMAIL"
+    | "BOOLEAN"
+    | "TRUE_ONLY"
+    | "DATE"
+    | "DATETIME"
+    | "TIME"
+    | "NUMBER"
+    | "UNIT_INTERVAL"
+    | "PERCENTAGE"
+    | "INTEGER"
+    | "INTEGER_POSITIVE"
+    | "INTEGER_NEGATIVE"
+    | "INTEGER_ZERO_OR_POSITIVE"
+    | "TRACKER_ASSOCIATE"
+    | "USERNAME"
+    | "COORDINATE"
+    | "ORGANISATION_UNIT"
+    | "AGE"
+    | "URL"
+    | "FILE_RESOURCE"
+    | "IMAGE";
