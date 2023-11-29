@@ -39,7 +39,7 @@ import { MetadataDefaultRepository } from "./data/repositories/MetadataDefaultRe
 import { GetCountryInformationUseCase } from "./domain/usecases/GetCountryInformationUseCase";
 import { CountryInformationDefaultRepository } from "./data/repositories/CountryInformationDefaultRepository";
 import { GetNotificationByIdUseCase } from "./domain/usecases/GetNotificationByIdUseCase";
-import { ImportSampleFileUseCase } from "./domain/usecases/data-entry/ImportSampleFileUseCase";
+import { ImportSecondaryFileUseCase } from "./domain/usecases/data-entry/ImportSecondaryFileUseCase";
 import { RISDataCSVDefaultRepository } from "./data/repositories/data-entry/RISDataCSVDefaultRepository";
 import { SampleDataCSVDeafultRepository } from "./data/repositories/data-entry/SampleDataCSVDeafultRepository";
 import { GetGlassUploadsByModuleOUPeriodUseCase } from "./domain/usecases/GetGlassUploadsByModuleOUPeriodUseCase";
@@ -177,7 +177,16 @@ export function getCompositionRoot(instance: Instance) {
                 glassModuleRepository,
                 amcProductDataRepository
             ),
-            secondaryFile: new ImportSampleFileUseCase(sampleDataRepository, metadataRepository, dataValuesRepository),
+            secondaryFile: new ImportSecondaryFileUseCase(
+                sampleDataRepository,
+                metadataRepository,
+                dataValuesRepository,
+                excelRepository,
+                instanceRepository,
+                glassDocumentsRepository,
+                glassUploadsRepository,
+                dhis2EventsDefaultRepository
+            ),
             validateSecondaryFile: new ValidateSampleFileUseCase(
                 sampleDataRepository,
                 amcSubstanceDataRepository,

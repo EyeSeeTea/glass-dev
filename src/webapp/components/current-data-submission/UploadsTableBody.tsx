@@ -137,11 +137,13 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                                         ? compositionRoot.fileSubmission.secondaryFile(
                                               new File([secondaryFileDownload], secondaryFileToDelete.fileName),
                                               secondaryFileToDelete.batchId,
+                                              currentModuleAccess.moduleName,
                                               secondaryFileToDelete.period,
                                               "DELETE",
                                               orgUnitId,
                                               secondaryFileToDelete.countryCode,
-                                              false
+                                              false,
+                                              secondaryFileToDelete.eventListFileId
                                           )
                                         : Future.success(undefined),
                             }).run(

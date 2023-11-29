@@ -1,68 +1,61 @@
-import { Dhis2EventsDefaultRepository } from "../../../../data/repositories/Dhis2EventsDefaultRepository";
-import { D2TrackerEvent as Event } from "@eyeseetea/d2-api/api/trackerEvents";
-import { Future, FutureData } from "../../../entities/Future";
-import { ConsistencyError, ImportSummary } from "../../../entities/data-entry/ImportSummary";
-import * as templates from "../../../entities/data-entry/program-templates";
-import { EGASPProgramDefaultRepository } from "../../../../data/repositories/download-empty-template/EGASPProgramDefaultRepository";
-import { Template } from "../../../entities/Template";
-import { DataForm } from "../../../entities/DataForm";
-import { ExcelReader } from "../../../utils/ExcelReader";
-import { ExcelRepository } from "../../../repositories/ExcelRepository";
-import { DataPackage, DataPackageDataValue } from "../../../entities/data-entry/DataPackage";
 import { ImportStrategy } from "../../../entities/data-entry/DataValuesSaveSummary";
+import { ConsistencyError, ImportSummary } from "../../../entities/data-entry/ImportSummary";
+import { Future, FutureData } from "../../../entities/Future";
+import { ExcelRepository } from "../../../repositories/ExcelRepository";
+import * as templates from "../../../entities/data-entry/program-templates";
+import { InstanceDefaultRepository } from "../../../../data/repositories/InstanceDefaultRepository";
+import { DataPackage } from "../../../entities/data-entry/DataPackage";
 import { GlassDocumentsRepository } from "../../../repositories/GlassDocumentsRepository";
 import { GlassUploadsRepository } from "../../../repositories/GlassUploadsRepository";
-import { ProgramRuleValidationForEGASP } from "../../program-rules-processing/ProgramRuleValidationForEGASP";
-import { ProgramRulesMetadataRepository } from "../../../repositories/program-rules/ProgramRulesMetadataRepository";
-import { EventResult } from "../../../entities/program-rules/EventEffectTypes";
-import { CustomValidationForEGASP } from "./CustomValidationForEGASP";
+import { D2TrackerEvent } from "@eyeseetea/d2-api/api/trackerEvents";
 import { getStringFromFile } from "../utils/fileToString";
-import { TrackerPostResponse } from "@eyeseetea/d2-api/api/tracker";
-import { MetadataRepository } from "../../../repositories/MetadataRepository";
+import { readTemplate } from "../egasp/ImportEGASPFile";
+import { EventResult } from "../../../entities/program-rules/EventEffectTypes";
 import { generateId } from "../../../entities/Ref";
-import { EGASP_PROGRAM_ID } from "../../../../data/repositories/program-rule/ProgramRulesMetadataDefaultRepository";
-import { InstanceDefaultRepository } from "../../../../data/repositories/InstanceDefaultRepository";
+import { Dhis2EventsDefaultRepository } from "../../../../data/repositories/Dhis2EventsDefaultRepository";
+import { MetadataRepository } from "../../../repositories/MetadataRepository";
+import { TrackerPostResponse } from "@eyeseetea/d2-api/api/tracker";
 
-export class ImportEGASPFile {
+export const AMC_RAW_SUBSTANCE_CONSUMPTION_PROGRAM_ID = "q8aSKr17J5S";
+
+export class ImportAMCSubstanceLevelData {
     constructor(
-        private dhis2EventsDefaultRepository: Dhis2EventsDefaultRepository,
-        private egaspProgramDefaultRepository: EGASPProgramDefaultRepository,
         private excelRepository: ExcelRepository,
+        private instanceRepository: InstanceDefaultRepository,
         private glassDocumentsRepository: GlassDocumentsRepository,
         private glassUploadsRepository: GlassUploadsRepository,
-        private eGASPValidationRepository: ProgramRulesMetadataRepository,
-        private metadataRepository: MetadataRepository,
-        private instanceReporsitory: InstanceDefaultRepository
+        private dhis2EventsDefaultRepository: Dhis2EventsDefaultRepository,
+        private metadataRepository: MetadataRepository
     ) {}
 
-    public importEGASPFile(
-        file: File,
-        action: ImportStrategy,
-        eventListId: string | undefined,
-        orgUnitId: string,
-        orgUnitName: string,
-        period: string
-    ): FutureData<ImportSummary> {
-        return this.excelRepository.loadTemplate(file, EGASP_PROGRAM_ID).flatMap(_templateId => {
-            const egaspTemplate = _.values(templates).map(TemplateClass => new TemplateClass())[0];
-            // const egaspTemplate = _.values(templates)
-            //     .map(TemplateClass => new TemplateClass())
-            //     .filter(t => t.id === "PROGRAM_GENERATED_v4")[0];
-            return this.egaspProgramDefaultRepository.getProgramEGASP().flatMap(egaspProgram => {
-                if (egaspTemplate) {
-                    return readTemplate(
-                        egaspTemplate,
-                        egaspProgram,
-                        this.excelRepository,
-                        this.instanceReporsitory
-                    ).flatMap(dataPackage => {
-                        if (dataPackage) {
-                            return this.buildEventsPayload(dataPackage, action, eventListId).flatMap(events => {
-                                if (events) {
-                                    if (action === "CREATE_AND_UPDATE") {
-                                        //Run validations only on import
-                                        return this.validateEGASPEvents(events, orgUnitId, orgUnitName, period).flatMap(
-                                            validatedEventResults => {
+    public import(file: File, action: ImportStrategy, eventListId: string | undefined): FutureData<ImportSummary> {
+        return this.excelRepository
+            .loadTemplate(file, AMC_RAW_SUBSTANCE_CONSUMPTION_PROGRAM_ID)
+            .flatMap(_templateId => {
+                const amcSubstanceTemplate = _.values(templates)
+                    .map(TemplateClass => new TemplateClass())
+                    .filter(t => t.id === "PROGRAM_GENERATED_v4")[0];
+                return this.instanceRepository
+                    .getProgram(AMC_RAW_SUBSTANCE_CONSUMPTION_PROGRAM_ID)
+                    .flatMap(amcSubstanceProgram => {
+                        if (amcSubstanceTemplate) {
+                            return readTemplate(
+                                amcSubstanceTemplate,
+                                amcSubstanceProgram,
+                                this.excelRepository,
+                                this.instanceRepository
+                            ).flatMap(dataPackage => {
+                                if (dataPackage) {
+                                    return this.buildEventsPayload(dataPackage, action, eventListId).flatMap(events => {
+                                        if (events) {
+                                            if (action === "CREATE_AND_UPDATE") {
+                                                //TO DO : Run validations
+                                                const validatedEventResults: EventResult = {
+                                                    events: events, //TO DO : only validated events
+                                                    blockingErrors: [],
+                                                    nonBlockingErrors: [],
+                                                };
+
                                                 if (validatedEventResults.blockingErrors.length > 0) {
                                                     const errorSummary: ImportSummary = {
                                                         status: "ERROR",
@@ -78,7 +71,7 @@ export class ImportEGASPFile {
                                                     return Future.success(errorSummary);
                                                 } else {
                                                     const eventIdLineNoMap: { id: string; lineNo: number }[] = [];
-                                                    const eventsWithoutId = validatedEventResults.events.map(e => {
+                                                    const eventsWithId = validatedEventResults.events.map(e => {
                                                         const generatedId = generateId();
                                                         eventIdLineNoMap.push({
                                                             id: generatedId,
@@ -88,7 +81,7 @@ export class ImportEGASPFile {
                                                         return e;
                                                     });
                                                     return this.dhis2EventsDefaultRepository
-                                                        .import({ events: eventsWithoutId }, action)
+                                                        .import({ events: eventsWithId }, action)
                                                         .flatMap(result => {
                                                             return this.mapToImportSummary(
                                                                 result,
@@ -132,79 +125,89 @@ export class ImportEGASPFile {
                                                             });
                                                         });
                                                 }
+                                            } //action === "DELETE"
+                                            else {
+                                                return this.dhis2EventsDefaultRepository
+                                                    .import({ events }, action)
+                                                    .flatMap(result => {
+                                                        return this.mapToImportSummary(result, [], []).flatMap(
+                                                            ({ importSummary }) => {
+                                                                return Future.success(importSummary);
+                                                            }
+                                                        );
+                                                    });
                                             }
-                                        );
-                                    } //action === "DELETE"
-                                    else {
-                                        return this.dhis2EventsDefaultRepository
-                                            .import({ events }, action)
-                                            .flatMap(result => {
-                                                return this.mapToImportSummary(result, [], []).flatMap(
-                                                    ({ importSummary }) => {
-                                                        return Future.success(importSummary);
-                                                    }
-                                                );
-                                            });
-                                    }
+                                        } else {
+                                            //NO events were created on import, so no events to delete.
+                                            const noEventsToDelete: ImportSummary = {
+                                                status: "SUCCESS",
+                                                importCount: { updated: 0, ignored: 0, imported: 0, deleted: 0 },
+                                                nonBlockingErrors: [],
+                                                blockingErrors: [],
+                                            };
+                                            return Future.success(noEventsToDelete);
+                                        }
+                                    });
                                 } else {
-                                    //NO events were created on import, so no events to delete.
-                                    const noEventsToDelete: ImportSummary = {
-                                        status: "SUCCESS",
-                                        importCount: { updated: 0, ignored: 0, imported: 0, deleted: 0 },
-                                        nonBlockingErrors: [],
-                                        blockingErrors: [],
-                                    };
-                                    return Future.success(noEventsToDelete);
+                                    return Future.error("Unknow template");
                                 }
                             });
                         } else {
                             return Future.error("Unknow template");
                         }
                     });
-                } else {
-                    return Future.error("Unknow template");
-                }
             });
-        });
     }
 
-    private validateEGASPEvents(
-        events: Event[],
-        orgUnitId: string,
-        orgUnitName: string,
-        period: string
-    ): FutureData<EventResult> {
-        //1. Run Program Rule Validations
-        const programRuleValidationForEGASP = new ProgramRuleValidationForEGASP(this.eGASPValidationRepository);
+    private buildEventsPayload(
+        dataPackage: DataPackage,
+        action: ImportStrategy,
+        eventListId: string | undefined
+    ): FutureData<D2TrackerEvent[] | undefined> {
+        if (action === "CREATE_AND_UPDATE") {
+            return Future.success(
+                dataPackage.dataEntries.map(
+                    ({ id, orgUnit, period, attribute, dataValues, dataForm, coordinate }, index) => {
+                        return {
+                            event: id || (index + 6).toString(),
+                            program: dataForm,
+                            status: "COMPLETED",
+                            orgUnit,
+                            occurredAt: period,
+                            attributeOptionCombo: attribute,
+                            dataValues: dataValues.map(el => {
+                                return { ...el, value: el.value.toString() };
+                            }),
+                            coordinate,
+                        };
+                    }
+                )
+            );
+        } else {
+            if (eventListId)
+                return this.glassDocumentsRepository.download(eventListId).flatMap(file => {
+                    return Future.fromPromise(getStringFromFile(file)).flatMap(_events => {
+                        const eventIdList: [] = JSON.parse(_events);
+                        const events: D2TrackerEvent[] = eventIdList.map(eventId => {
+                            return {
+                                event: eventId,
+                                program: "",
+                                status: "COMPLETED",
+                                orgUnit: "",
+                                occurredAt: "",
+                                attributeOptionCombo: "",
+                                dataValues: [],
+                            };
+                        });
 
-        //2. Run Custom EGASP Validations
-        const customEGASPValidations = new CustomValidationForEGASP(
-            this.dhis2EventsDefaultRepository,
-            this.metadataRepository
-        );
-
-        return Future.joinObj({
-            programRuleValidationResults: programRuleValidationForEGASP.getValidatedEvents(events),
-            customRuleValidationsResults: customEGASPValidations.getValidatedEvents(
-                events,
-                orgUnitId,
-                orgUnitName,
-                period
-            ),
-        }).flatMap(({ programRuleValidationResults, customRuleValidationsResults }) => {
-            const consolidatedValidationResults: EventResult = {
-                events: programRuleValidationResults.events,
-                blockingErrors: [
-                    ...programRuleValidationResults.blockingErrors,
-                    ...customRuleValidationsResults.blockingErrors,
-                ],
-                nonBlockingErrors: [
-                    ...programRuleValidationResults.nonBlockingErrors,
-                    ...customRuleValidationsResults.nonBlockingErrors,
-                ],
-            };
-            return Future.success(consolidatedValidationResults);
-        });
+                        return Future.success(events);
+                    });
+                });
+            else {
+                //No events were created during import, so no events to delete.
+                return Future.success(undefined);
+            }
+        }
     }
 
     private mapToImportSummary(
@@ -305,94 +308,4 @@ export class ImportEGASPFile {
             });
         }
     }
-
-    private buildEventsPayload(
-        dataPackage: DataPackage,
-        action: ImportStrategy,
-        eventListId: string | undefined
-    ): FutureData<Event[] | undefined> {
-        if (action === "CREATE_AND_UPDATE") {
-            return Future.success(
-                dataPackage.dataEntries.map(
-                    ({ id, orgUnit, period, attribute, dataValues, dataForm, coordinate }, index) => {
-                        return {
-                            event: id || (index + 6).toString(),
-                            program: dataForm,
-                            status: "COMPLETED",
-                            orgUnit,
-                            occurredAt: period,
-                            attributeOptionCombo: attribute,
-                            dataValues: dataValues.map(el => {
-                                return { ...el, value: el.value.toString() };
-                            }),
-                            coordinate,
-                        };
-                    }
-                )
-            );
-        } else {
-            if (eventListId)
-                return this.glassDocumentsRepository.download(eventListId).flatMap(file => {
-                    return Future.fromPromise(getStringFromFile(file)).flatMap(_events => {
-                        const eventIdList: [] = JSON.parse(_events);
-                        const events: Event[] = eventIdList.map(eventId => {
-                            return {
-                                event: eventId,
-                                program: "",
-                                status: "COMPLETED",
-                                orgUnit: "",
-                                occurredAt: "",
-                                attributeOptionCombo: "",
-                                dataValues: [],
-                            };
-                        });
-
-                        return Future.success(events);
-                    });
-                });
-            else {
-                //No events were created during import, so no events to delete.
-                return Future.success(undefined);
-            }
-        }
-    }
 }
-
-export const readTemplate = (
-    template: Template,
-    dataForm: DataForm,
-    excelRepository: ExcelRepository,
-    instanceReporsitory: InstanceDefaultRepository
-): FutureData<DataPackage | undefined> => {
-    const reader = new ExcelReader(excelRepository, instanceReporsitory);
-    return Future.fromPromise(reader.readTemplate(template, EGASP_PROGRAM_ID)).map(excelDataValues => {
-        if (!excelDataValues) return undefined;
-
-        return {
-            ...excelDataValues,
-            dataEntries: excelDataValues.dataEntries.map(({ dataValues, ...dataEntry }) => {
-                return {
-                    ...dataEntry,
-                    dataValues: _.compact(dataValues.map(value => formatDhis2Value(value, dataForm))),
-                };
-            }),
-        };
-    });
-};
-
-export const formatDhis2Value = (item: DataPackageDataValue, dataForm: DataForm): DataPackageDataValue | undefined => {
-    const dataElement = dataForm.dataElements.find(({ id }) => item.dataElement === id);
-    const booleanValue = String(item.value) === "true" || item.value === "true";
-
-    if (dataElement?.valueType === "BOOLEAN") {
-        return { ...item, value: booleanValue };
-    }
-
-    if (dataElement?.valueType === "TRUE_ONLY") {
-        return booleanValue ? { ...item, value: true } : undefined;
-    }
-
-    const selectedOption = dataElement?.options?.find(({ id }) => item.value === id);
-    const value = selectedOption?.code ?? item.value;
-    return { ...item, value };
-};
