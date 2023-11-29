@@ -28,7 +28,12 @@ export class ImportAMCSubstanceLevelData {
         private metadataRepository: MetadataRepository
     ) {}
 
-    public import(file: File, action: ImportStrategy, eventListId: string | undefined): FutureData<ImportSummary> {
+    public import(
+        file: File,
+        action: ImportStrategy,
+        eventListId: string | undefined,
+        moduleName: string
+    ): FutureData<ImportSummary> {
         return this.excelRepository
             .loadTemplate(file, AMC_RAW_SUBSTANCE_CONSUMPTION_PROGRAM_ID)
             .flatMap(_templateId => {
@@ -88,9 +93,9 @@ export class ImportAMCSubstanceLevelData {
                                                                 validatedEventResults.nonBlockingErrors,
                                                                 eventIdLineNoMap
                                                             ).flatMap(({ importSummary, eventIdList }) => {
-                                                                const primaryUploadId =
-                                                                    localStorage.getItem("primaryUploadId");
-                                                                if (eventIdList.length > 0 && primaryUploadId) {
+                                                                const secondaryUploadId =
+                                                                    localStorage.getItem("secondaryUploadId");
+                                                                if (eventIdList.length > 0 && secondaryUploadId) {
                                                                     //Events were imported successfully, so create and uplaod a file with event ids
                                                                     // and associate it with the upload datastore object
                                                                     const eventListBlob = new Blob(
@@ -102,15 +107,15 @@ export class ImportAMCSubstanceLevelData {
 
                                                                     const eventIdListFile = new File(
                                                                         [eventListBlob],
-                                                                        `${primaryUploadId}_eventIdsFile`
+                                                                        `${secondaryUploadId}_eventIdsFile`
                                                                     );
 
                                                                     return this.glassDocumentsRepository
-                                                                        .save(eventIdListFile, "EGASP")
+                                                                        .save(eventIdListFile, moduleName)
                                                                         .flatMap(fileId => {
                                                                             return this.glassUploadsRepository
                                                                                 .setEventListFileId(
-                                                                                    primaryUploadId,
+                                                                                    secondaryUploadId,
                                                                                     fileId
                                                                                 )
                                                                                 .flatMap(() => {

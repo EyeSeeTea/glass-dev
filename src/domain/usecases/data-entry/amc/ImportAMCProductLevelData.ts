@@ -33,7 +33,8 @@ export class ImportAMCProductLevelData {
         action: ImportStrategy,
         eventListId: string | undefined,
         orgUnitId: string,
-        orgUnitName: string
+        orgUnitName: string,
+        moduleName: string
     ): FutureData<ImportSummary> {
         return this.excelRepository.loadTemplate(file, AMC_PRODUCT_REGISTER_PROGRAM_ID).flatMap(_templateId => {
             const amcTemplate = _.values(templates)
@@ -75,7 +76,7 @@ export class ImportAMCProductLevelData {
                                                     );
 
                                                     return this.glassDocumentsRepository
-                                                        .save(enrollmentIdsListFile, "AMR")
+                                                        .save(enrollmentIdsListFile, moduleName)
                                                         .flatMap(fileId => {
                                                             return this.glassUploadsRepository
                                                                 .setEventListFileId(primaryUploadId, fileId)

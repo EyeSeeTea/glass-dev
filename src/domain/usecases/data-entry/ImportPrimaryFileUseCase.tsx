@@ -112,7 +112,8 @@ export class ImportPrimaryFileUseCase {
                     action,
                     eventListId,
                     orgUnitId,
-                    orgUnitName
+                    orgUnitName,
+                    moduleName
                 );
             }
             default: {
