@@ -55,7 +55,7 @@ export class ImportSecondaryFileUseCase implements UseCase {
                     this.dhis2EventsDefaultRepository,
                     this.metadataRepository
                 );
-                return importRawSubstanceData.import(inputFile, action, eventListId);
+                return importRawSubstanceData.import(inputFile, action, eventListId, moduleName);
             }
 
             default:
