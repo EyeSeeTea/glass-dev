@@ -14,7 +14,7 @@ import i18n from "@eyeseetea/d2-ui-components/locales";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import { UploadPrimaryFile } from "./UploadPrimaryFile";
-import { UploadSample } from "./UploadSample";
+import { UploadSecondary } from "./UploadSecondary";
 import { useAppContext } from "../../contexts/app-context";
 import { useCurrentDataSubmissionId } from "../../hooks/useCurrentDataSubmissionId";
 import { useCurrentModuleContext } from "../../contexts/current-module-context";
@@ -87,7 +87,9 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
     const [importLoading, setImportLoading] = useState<boolean>(false);
     const [previousBatchIdsLoading, setPreviousBatchIdsLoading] = useState<boolean>(true);
     const [loading, setLoading] = useState<boolean>(false);
-    const [uploadFileType, setUploadFileType] = useState<"PRODUCT" | "SUBSTANCE">("PRODUCT");
+    const [uploadFileType, setUploadFileType] = useState<"PRODUCT" | "SUBSTANCE">(
+        secondaryFile ? "SUBSTANCE" : "PRODUCT"
+    );
 
     const {
         currentModuleAccess: { moduleId, moduleName },
@@ -181,11 +183,13 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
                     ? compositionRoot.fileSubmission.secondaryFile(
                           secondaryFile,
                           batchId,
+                          moduleName,
                           currentPeriod,
                           "CREATE_AND_UPDATE",
                           orgUnitId,
                           orgUnitCode,
-                          true
+                          true,
+                          ""
                       )
                     : Future.success(undefined),
             }).run(
@@ -209,6 +213,40 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
                     changeStep(2);
                 }
             );
+        } //secondary file upload only
+        else if (secondaryFile) {
+            setImportLoading(true);
+            compositionRoot.fileSubmission
+                .secondaryFile(
+                    secondaryFile,
+                    batchId,
+                    moduleName,
+                    currentPeriod,
+                    "CREATE_AND_UPDATE",
+                    orgUnitId,
+                    orgUnitCode,
+                    true,
+                    ""
+                )
+                .run(
+                    importSubstanceFileSummary => {
+                        if (importSubstanceFileSummary) {
+                            setPrimaryFileImportSummary(importSubstanceFileSummary);
+                        }
+                        setImportLoading(false);
+                        changeStep(2);
+                    },
+                    error => {
+                        setPrimaryFileImportSummary({
+                            status: "ERROR",
+                            importCount: { ignored: 0, imported: 0, deleted: 0, updated: 0 },
+                            nonBlockingErrors: [],
+                            blockingErrors: [{ error: error, count: 1 }],
+                        });
+                        setImportLoading(false);
+                        changeStep(2);
+                    }
+                );
         }
     }, [
         batchId,
@@ -228,6 +266,8 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
     const continueClick = () => {
         if (!hasSecondaryFile) {
             localStorage.removeItem("secondaryUploadId");
+            uploadFileSubmissions();
+        } else if (moduleName === "AMC") {
             uploadFileSubmissions();
         }
         //update the secondary file with primary file upload id.
@@ -320,11 +360,12 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
                             setPrimaryFile={setPrimaryFile}
                         />
                     ) : (
-                        <UploadSample
+                        <UploadSecondary
+                            validate={setIsFileValid}
                             batchId={batchId}
-                            sampleFile={secondaryFile}
-                            setSampleFile={setSecondaryFile}
-                            setHasSampleFile={setHasSecondaryFile}
+                            secondaryFile={secondaryFile}
+                            setSecondaryFile={setSecondaryFile}
+                            setHasSecondaryFile={setHasSecondaryFile}
                         />
                     )}
                 </StyledSingleFileSelectContainer>
@@ -342,11 +383,12 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
                                     setPrimaryFile={setPrimaryFile}
                                 />
                                 {moduleProperties.get(moduleName)?.isSecondaryFileApplicable && (
-                                    <UploadSample
+                                    <UploadSecondary
+                                        validate={setIsFileValid}
                                         batchId={batchId}
-                                        sampleFile={secondaryFile}
-                                        setSampleFile={setSecondaryFile}
-                                        setHasSampleFile={setHasSecondaryFile}
+                                        secondaryFile={secondaryFile}
+                                        setSecondaryFile={setSecondaryFile}
+                                        setHasSecondaryFile={setHasSecondaryFile}
                                     />
                                 )}
                             </div>

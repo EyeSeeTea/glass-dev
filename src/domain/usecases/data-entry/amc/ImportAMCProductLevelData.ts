@@ -4,10 +4,7 @@ import { Future, FutureData } from "../../../entities/Future";
 import { ExcelRepository } from "../../../repositories/ExcelRepository";
 import * as templates from "../../../entities/data-entry/program-templates";
 import { InstanceDefaultRepository } from "../../../../data/repositories/InstanceDefaultRepository";
-import { ExcelReader } from "../../../utils/ExcelReader";
-import { Template } from "../../../entities/Template";
-import { DataForm } from "../../../entities/DataForm";
-import { DataPackage, DataPackageDataValue } from "../../../entities/data-entry/DataPackage";
+import { DataPackage } from "../../../entities/data-entry/DataPackage";
 import { TrackerRepository } from "../../../repositories/TrackerRepository";
 import { GlassDocumentsRepository } from "../../../repositories/GlassDocumentsRepository";
 import { GlassUploadsRepository } from "../../../repositories/GlassUploadsRepository";
@@ -17,6 +14,7 @@ import { D2TrackerEnrollment, D2TrackerEnrollmentAttribute } from "@eyeseetea/d2
 import { D2TrackerEvent } from "@eyeseetea/d2-api/api/trackerEvents";
 import { mapResponseToImportSummary } from "../amr-individual-funghi/ImportRISIndividualFunghiFile";
 import { getStringFromFile } from "../utils/fileToString";
+import { readTemplate } from "../egasp/ImportEGASPFile";
 
 export const AMC_PRODUCT_REGISTER_PROGRAM_ID = "G6ChA5zMW9n";
 const AMR_RAW_PRODUCT_CONSUMPTION_STAGE_ID = "GmElQHKXLIE";
@@ -44,91 +42,96 @@ export class ImportAMCProductLevelData {
 
             return this.instanceRepository.getProgram(AMC_PRODUCT_REGISTER_PROGRAM_ID).flatMap(amcProgram => {
                 if (amcTemplate) {
-                    return this.readTemplate(amcTemplate, amcProgram).flatMap(dataPackage => {
-                        if (dataPackage) {
-                            if (action === "CREATE_AND_UPDATE") {
-                                //TO DO : Validate data  - Org unit, period , any other ?
+                    return readTemplate(amcTemplate, amcProgram, this.excelRepository, this.instanceRepository).flatMap(
+                        dataPackage => {
+                            if (dataPackage) {
+                                if (action === "CREATE_AND_UPDATE") {
+                                    //TO DO : Validate data  - Org unit, period , any other ?
 
-                                return this.mapAMCProductDataToTrackedEntities(
-                                    dataPackage,
-                                    orgUnitId,
-                                    orgUnitName
-                                ).flatMap(entities => {
-                                    return this.trackerRepository
-                                        .import({ trackedEntities: entities }, action)
-                                        .flatMap(response => {
-                                            const { summary, entityIdsList } = mapResponseToImportSummary(response);
+                                    return this.mapAMCProductDataToTrackedEntities(
+                                        dataPackage,
+                                        orgUnitId,
+                                        orgUnitName
+                                    ).flatMap(entities => {
+                                        return this.trackerRepository
+                                            .import({ trackedEntities: entities }, action)
+                                            .flatMap(response => {
+                                                const { summary, entityIdsList } = mapResponseToImportSummary(response);
 
-                                            const primaryUploadId = localStorage.getItem("primaryUploadId");
-                                            if (entityIdsList.length > 0 && primaryUploadId) {
-                                                //Enrollments were imported successfully, so create and uplaod a file with enrollments ids
-                                                // and associate it with the upload datastore object
-                                                const enrollmentIdListBlob = new Blob([JSON.stringify(entityIdsList)], {
-                                                    type: "text/plain",
-                                                });
+                                                const primaryUploadId = localStorage.getItem("primaryUploadId");
+                                                if (entityIdsList.length > 0 && primaryUploadId) {
+                                                    //Enrollments were imported successfully, so create and uplaod a file with enrollments ids
+                                                    // and associate it with the upload datastore object
+                                                    const enrollmentIdListBlob = new Blob(
+                                                        [JSON.stringify(entityIdsList)],
+                                                        {
+                                                            type: "text/plain",
+                                                        }
+                                                    );
 
-                                                const enrollmentIdsListFile = new File(
-                                                    [enrollmentIdListBlob],
-                                                    `${primaryUploadId}_enrollmentIdsFile`
-                                                );
+                                                    const enrollmentIdsListFile = new File(
+                                                        [enrollmentIdListBlob],
+                                                        `${primaryUploadId}_enrollmentIdsFile`
+                                                    );
 
-                                                return this.glassDocumentsRepository
-                                                    .save(enrollmentIdsListFile, "AMR")
-                                                    .flatMap(fileId => {
-                                                        return this.glassUploadsRepository
-                                                            .setEventListFileId(primaryUploadId, fileId)
-                                                            .flatMap(() => {
-                                                                return Future.success(summary);
-                                                            });
-                                                    });
-                                            } else {
-                                                return Future.success(summary);
-                                            }
-                                        });
-                                });
-                            } else {
-                                if (eventListId) {
-                                    return this.glassDocumentsRepository.download(eventListId).flatMap(file => {
-                                        return Future.fromPromise(getStringFromFile(file)).flatMap(_enrollments => {
-                                            const enrollmemtIdList: [] = JSON.parse(_enrollments);
-                                            const trackedEntities = enrollmemtIdList.map(id => {
-                                                const trackedEntity: D2TrackerTrackedEntity = {
-                                                    orgUnit: orgUnitId,
-                                                    trackedEntity: id,
-                                                    trackedEntityType: AMR_GLASS_AMC_TET_PRODUCT_REGISTER,
-                                                };
-
-                                                return trackedEntity;
-                                            });
-
-                                            return this.trackerRepository
-                                                .import({ trackedEntities: trackedEntities }, action)
-                                                .flatMap(response => {
-                                                    const { summary } = mapResponseToImportSummary(response);
+                                                    return this.glassDocumentsRepository
+                                                        .save(enrollmentIdsListFile, "AMR")
+                                                        .flatMap(fileId => {
+                                                            return this.glassUploadsRepository
+                                                                .setEventListFileId(primaryUploadId, fileId)
+                                                                .flatMap(() => {
+                                                                    return Future.success(summary);
+                                                                });
+                                                        });
+                                                } else {
                                                     return Future.success(summary);
-                                                });
-                                        });
+                                                }
+                                            });
                                     });
                                 } else {
-                                    //No enrollments were created during import, so no events to delete.
-                                    const summary: ImportSummary = {
-                                        status: "SUCCESS",
-                                        importCount: {
-                                            ignored: 0,
-                                            imported: 0,
-                                            deleted: 0,
-                                            updated: 0,
-                                        },
-                                        nonBlockingErrors: [],
-                                        blockingErrors: [],
-                                    };
-                                    return Future.success(summary);
+                                    if (eventListId) {
+                                        return this.glassDocumentsRepository.download(eventListId).flatMap(file => {
+                                            return Future.fromPromise(getStringFromFile(file)).flatMap(_enrollments => {
+                                                const enrollmemtIdList: [] = JSON.parse(_enrollments);
+                                                const trackedEntities = enrollmemtIdList.map(id => {
+                                                    const trackedEntity: D2TrackerTrackedEntity = {
+                                                        orgUnit: orgUnitId,
+                                                        trackedEntity: id,
+                                                        trackedEntityType: AMR_GLASS_AMC_TET_PRODUCT_REGISTER,
+                                                    };
+
+                                                    return trackedEntity;
+                                                });
+
+                                                return this.trackerRepository
+                                                    .import({ trackedEntities: trackedEntities }, action)
+                                                    .flatMap(response => {
+                                                        const { summary } = mapResponseToImportSummary(response);
+                                                        return Future.success(summary);
+                                                    });
+                                            });
+                                        });
+                                    } else {
+                                        //No enrollments were created during import, so no events to delete.
+                                        const summary: ImportSummary = {
+                                            status: "SUCCESS",
+                                            importCount: {
+                                                ignored: 0,
+                                                imported: 0,
+                                                deleted: 0,
+                                                updated: 0,
+                                            },
+                                            nonBlockingErrors: [],
+                                            blockingErrors: [],
+                                        };
+                                        return Future.success(summary);
+                                    }
                                 }
+                            } else {
+                                return Future.error("Cannot find data package");
                             }
-                        } else {
-                            return Future.error("Cannot find data package");
                         }
-                    });
+                    );
                 } else {
                     return Future.error("Cannot find template");
                 }
@@ -241,41 +244,5 @@ export class ImportAMCProductLevelData {
                     return Future.success(trackedEntities);
                 } else return Future.error("Incorrect data package");
             });
-    }
-
-    private readTemplate(template: Template, dataForm: DataForm): FutureData<DataPackage | undefined> {
-        const reader = new ExcelReader(this.excelRepository, this.instanceRepository);
-        return Future.fromPromise(reader.readTemplate(template, AMC_PRODUCT_REGISTER_PROGRAM_ID)).map(
-            excelDataValues => {
-                if (!excelDataValues) return undefined;
-
-                return {
-                    ...excelDataValues,
-                    dataEntries: excelDataValues.dataEntries.map(({ dataValues, ...dataEntry }) => {
-                        return {
-                            ...dataEntry,
-                            dataValues: _.compact(dataValues.map(value => this.formatDhis2Value(value, dataForm))),
-                        };
-                    }),
-                };
-            }
-        );
-    }
-
-    private formatDhis2Value(item: DataPackageDataValue, dataForm: DataForm): DataPackageDataValue | undefined {
-        const dataElement = dataForm.dataElements.find(({ id }) => item.dataElement === id);
-        const booleanValue = String(item.value) === "true" || item.value === "true";
-
-        if (dataElement?.valueType === "BOOLEAN") {
-            return { ...item, value: booleanValue };
-        }
-
-        if (dataElement?.valueType === "TRUE_ONLY") {
-            return booleanValue ? { ...item, value: true } : undefined;
-        }
-
-        const selectedOption = dataElement?.options?.find(({ id }) => item.value === id);
-        const value = selectedOption?.code ?? item.value;
-        return { ...item, value };
     }
 }
