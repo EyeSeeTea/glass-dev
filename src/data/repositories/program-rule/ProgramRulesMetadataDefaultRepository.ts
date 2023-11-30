@@ -4,7 +4,7 @@ import { ProgramRulesMetadataRepository } from "../../../domain/repositories/pro
 import { apiToFuture } from "../../../utils/futures";
 import { Instance } from "../../entities/Instance";
 import { getD2APiFromInstance } from "../../../utils/d2-api";
-import { EGASPProgramMetadata, metadataQuery } from "../../../domain/entities/program-rules/EventEffectTypes";
+import { EventProgramBLMetadata, metadataQuery } from "../../../domain/entities/program-rules/EventEffectTypes";
 
 export const EGASP_PROGRAM_ID = "SOjanrinfuG";
 
@@ -15,14 +15,14 @@ export class ProgramRulesMetadataDefaultRepository implements ProgramRulesMetada
         this.api = getD2APiFromInstance(instance);
     }
 
-    getMetadata(): FutureData<EGASPProgramMetadata> {
+    getMetadata(programId: string): FutureData<EventProgramBLMetadata> {
         return apiToFuture(
             this.api.metadata.get({
                 ...metadataQuery,
-                programs: { ...metadataQuery.programs, filter: { id: { eq: EGASP_PROGRAM_ID } } },
+                programs: { ...metadataQuery.programs, filter: { id: { eq: programId } } },
                 programRules: {
                     ...metadataQuery.programRules,
-                    filter: { "program.id": { eq: EGASP_PROGRAM_ID } },
+                    filter: { "program.id": { eq: programId } },
                 },
             })
         ).map(baseMetadata => {

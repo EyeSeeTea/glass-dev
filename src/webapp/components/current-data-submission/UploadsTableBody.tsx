@@ -153,6 +153,7 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                                               secondaryFileToDelete.period,
                                               "DELETE",
                                               orgUnitId,
+                                              orgUnitName,
                                               secondaryFileToDelete.countryCode,
                                               false,
                                               secondaryFileToDelete.eventListFileId
@@ -242,6 +243,7 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                                     secondaryFileToDelete.period,
                                     "DELETE",
                                     orgUnitId,
+                                    orgUnitName,
                                     secondaryFileToDelete.countryCode,
                                     false,
                                     secondaryFileToDelete.eventListFileId
