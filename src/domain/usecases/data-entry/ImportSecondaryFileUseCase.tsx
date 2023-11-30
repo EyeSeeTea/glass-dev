@@ -12,6 +12,7 @@ import { InstanceDefaultRepository } from "../../../data/repositories/InstanceDe
 import { GlassDocumentsDefaultRepository } from "../../../data/repositories/GlassDocumentsDefaultRepository";
 import { GlassUploadsRepository } from "../../repositories/GlassUploadsRepository";
 import { Dhis2EventsDefaultRepository } from "../../../data/repositories/Dhis2EventsDefaultRepository";
+import { ProgramRulesMetadataRepository } from "../../repositories/program-rules/ProgramRulesMetadataRepository";
 
 export class ImportSecondaryFileUseCase implements UseCase {
     constructor(
@@ -22,7 +23,8 @@ export class ImportSecondaryFileUseCase implements UseCase {
         private instanceRepository: InstanceDefaultRepository,
         private glassDocumentsRepository: GlassDocumentsDefaultRepository,
         private glassUploadsRepository: GlassUploadsRepository,
-        private dhis2EventsDefaultRepository: Dhis2EventsDefaultRepository
+        private dhis2EventsDefaultRepository: Dhis2EventsDefaultRepository,
+        private programRulesMetadataRepository: ProgramRulesMetadataRepository
     ) {}
 
     public execute(
@@ -31,7 +33,8 @@ export class ImportSecondaryFileUseCase implements UseCase {
         moduleName: string,
         year: string,
         action: ImportStrategy,
-        orgUnit: string,
+        orgUnitId: string,
+        orgUnitName: string,
         countryCode: string,
         dryRun: boolean,
         eventListId: string | undefined
@@ -44,7 +47,7 @@ export class ImportSecondaryFileUseCase implements UseCase {
                     this.dataValuesRepository
                 );
 
-                return importSampleFile.import(inputFile, batchId, year, action, orgUnit, countryCode, dryRun);
+                return importSampleFile.import(inputFile, batchId, year, action, orgUnitId, countryCode, dryRun);
             }
             case "AMC": {
                 const importRawSubstanceData = new ImportAMCSubstanceLevelData(
@@ -53,9 +56,18 @@ export class ImportSecondaryFileUseCase implements UseCase {
                     this.glassDocumentsRepository,
                     this.glassUploadsRepository,
                     this.dhis2EventsDefaultRepository,
-                    this.metadataRepository
+                    this.metadataRepository,
+                    this.programRulesMetadataRepository
                 );
-                return importRawSubstanceData.import(inputFile, action, eventListId, moduleName);
+                return importRawSubstanceData.import(
+                    inputFile,
+                    action,
+                    eventListId,
+                    moduleName,
+                    orgUnitId,
+                    orgUnitName,
+                    year
+                );
             }
 
             default:

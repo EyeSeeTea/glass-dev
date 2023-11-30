@@ -72,6 +72,7 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
                           currentPeriod,
                           "CREATE_AND_UPDATE",
                           currentOrgUnitAccess.orgUnitId,
+                          currentOrgUnitAccess.orgUnitName,
                           currentOrgUnitAccess.orgUnitCode,
                           false,
                           ""

@@ -187,6 +187,7 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
                           currentPeriod,
                           "CREATE_AND_UPDATE",
                           orgUnitId,
+                          orgUnitName,
                           orgUnitCode,
                           true,
                           ""
@@ -257,6 +258,7 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
                     currentPeriod,
                     "CREATE_AND_UPDATE",
                     orgUnitId,
+                    orgUnitName,
                     orgUnitCode,
                     true,
                     ""
@@ -301,7 +303,7 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
         if (!hasSecondaryFile) {
             localStorage.removeItem("secondaryUploadId");
             uploadFileSubmissions();
-        } else if (moduleName === "AMC") {
+        } else if (!moduleProperties.get(moduleName)?.isSecondaryRelated) {
             uploadFileSubmissions();
         }
         //update the secondary file with primary file upload id.

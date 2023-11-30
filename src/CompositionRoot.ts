@@ -108,7 +108,7 @@ export function getCompositionRoot(instance: Instance) {
     const dhis2EventsDefaultRepository = new Dhis2EventsDefaultRepository(instance);
     const egaspProgramRepository = new EGASPProgramDefaultRepository(instance, bulkLoadDatastoreClient);
     const excelRepository = new ExcelPopulateDefaultRepository();
-    const eGASPValidationDefaultRepository = new ProgramRulesMetadataDefaultRepository(instance);
+    const programRulesMetadataDefaultRepository = new ProgramRulesMetadataDefaultRepository(instance);
     const trackerRepository = new TrackerDefaultRepository(instance);
     const captureFormRepository = new CaptureFormDefaultRepository(api);
     const signalRepository = new SignalDefaultRepository(dataStoreClient, api);
@@ -163,14 +163,13 @@ export function getCompositionRoot(instance: Instance) {
                 dataValuesRepository,
                 glassModuleRepository,
                 dhis2EventsDefaultRepository,
-                egaspProgramRepository,
                 excelRepository,
                 glassDocumentsRepository,
                 glassUploadsRepository,
-                eGASPValidationDefaultRepository,
                 trackerRepository,
                 glassModuleRepository,
-                instanceRepository
+                instanceRepository,
+                programRulesMetadataDefaultRepository
             ),
             validatePrimaryFile: new ValidatePrimaryFileUseCase(
                 risDataRepository,
@@ -187,7 +186,8 @@ export function getCompositionRoot(instance: Instance) {
                 instanceRepository,
                 glassDocumentsRepository,
                 glassUploadsRepository,
-                dhis2EventsDefaultRepository
+                dhis2EventsDefaultRepository,
+                programRulesMetadataDefaultRepository
             ),
             validateSecondaryFile: new ValidateSampleFileUseCase(
                 sampleDataRepository,
