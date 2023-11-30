@@ -81,7 +81,8 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
     const { compositionRoot } = useAppContext();
     const snackbar = useSnackbar();
     const [isValidated, setIsValidated] = useState(false);
-    const [isFileValid, setIsFileValid] = useState(false);
+    const [isPrimaryFileValid, setIsPrimaryFileValid] = useState(false);
+    const [isSecondaryFileValid, setIsSecondaryFileValid] = useState(false);
     const [previousUploadsBatchIds, setPreviousUploadsBatchIds] = useState<string[]>([]);
     const [hasSecondaryFile, setHasSecondaryFile] = useState<boolean>(false);
     const [importLoading, setImportLoading] = useState<boolean>(false);
@@ -134,15 +135,18 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
 
     useEffect(() => {
         if (moduleProperties.get(moduleName)?.isbatchReq) {
-            if (batchId && isFileValid) {
+            if (batchId && isPrimaryFileValid) {
                 setIsValidated(true);
             } else {
                 setIsValidated(false);
             }
+        } else if (moduleProperties.get(moduleName)?.isSingleFileTypePerSubmission) {
+            if (isPrimaryFileValid || isSecondaryFileValid) setIsValidated(true);
+            else setIsValidated(false);
         } else {
-            if (isFileValid) setIsValidated(true);
+            if (isPrimaryFileValid) setIsValidated(true);
         }
-    }, [batchId, isFileValid, moduleName]);
+    }, [batchId, isPrimaryFileValid, isSecondaryFileValid, moduleName]);
 
     const changeBatchId = async (event: React.ChangeEvent<{ value: unknown }>) => {
         const batchId = event.target.value as string;
@@ -390,14 +394,14 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
                     </FormControl>
                     {uploadFileType === "PRODUCT" ? (
                         <UploadPrimaryFile
-                            validate={setIsFileValid}
+                            validate={setIsPrimaryFileValid}
                             batchId={batchId}
                             primaryFile={primaryFile}
                             setPrimaryFile={setPrimaryFile}
                         />
                     ) : (
                         <UploadSecondary
-                            validate={setIsFileValid}
+                            validate={setIsSecondaryFileValid}
                             batchId={batchId}
                             secondaryFile={secondaryFile}
                             setSecondaryFile={setSecondaryFile}
@@ -413,14 +417,14 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
                         <>
                             <div className="file-fields">
                                 <UploadPrimaryFile
-                                    validate={setIsFileValid}
+                                    validate={setIsPrimaryFileValid}
                                     batchId={batchId}
                                     primaryFile={primaryFile}
                                     setPrimaryFile={setPrimaryFile}
                                 />
                                 {moduleProperties.get(moduleName)?.isSecondaryFileApplicable && (
                                     <UploadSecondary
-                                        validate={setIsFileValid}
+                                        validate={setIsSecondaryFileValid}
                                         batchId={batchId}
                                         secondaryFile={secondaryFile}
                                         setSecondaryFile={setSecondaryFile}
