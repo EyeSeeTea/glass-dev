@@ -79,6 +79,7 @@ import { GetEGASPEmptyTemplateUseCase } from "./domain/usecases/data-entry/egasp
 import { EGASPDownloadEmptyTemplate } from "./data/repositories/download-empty-template/EGASPDownloadEmptyTemplate";
 import { BulkLoadDataStoreClient } from "./data/data-store/BulkLoadDataStoreClient";
 import { ApplyAMCQuestionUpdationUseCase } from "./domain/usecases/ApplyAMCQuestionUpdationUseCase";
+import { SaveImportSummaryErrorsOfFilesInUploadsUseCase } from "./domain/usecases/SaveImportSummaryErrorsOfFilesInUploadsUseCase";
 import { AMCProductDataRepository } from "./data/repositories/data-entry/AMCProductDataRepository";
 import { AMCSubstanceDataRepository } from "./data/repositories/data-entry/AMCSubstanceDataRepository";
 
@@ -145,6 +146,7 @@ export function getCompositionRoot(instance: Instance) {
             getByModuleOU: new GetGlassUploadsByModuleOUUseCase(glassUploadsRepository),
             getByModuleOUPeriod: new GetGlassUploadsByModuleOUPeriodUseCase(glassUploadsRepository),
             setBatchId: new SetUploadBatchIdUseCase(glassUploadsRepository),
+            saveImportSummaryErrorsOfFiles: new SaveImportSummaryErrorsOfFilesInUploadsUseCase(glassUploadsRepository),
         }),
         glassDocuments: getExecute({
             getAll: new GetGlassDocumentsUseCase(glassDocumentsRepository),

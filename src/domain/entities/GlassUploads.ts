@@ -1,3 +1,5 @@
+import { ImportSummaryErrors } from "./data-entry/ImportSummary";
+
 export interface GlassUploads {
     id: string;
     batchId: string;
@@ -18,4 +20,5 @@ export interface GlassUploads {
     rows?: number;
     correspondingRisUploadId: string;
     eventListFileId?: string;
+    importSummary?: ImportSummaryErrors;
 }
