@@ -329,14 +329,15 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
 
     const downloadEmptyTemplate = useCallback(() => {
         setLoading(true);
-        compositionRoot.fileSubmission.downloadEmptyTemplate(orgUnitId).run(
+        compositionRoot.fileSubmission.downloadEmptyTemplate(moduleName, uploadFileType as string, orgUnitId).run(
             file => {
-                const fileName = "AMR_GLASS_EGASP_PRE_INPUT_FILES.xlsx";
-
                 //download file automatically
                 const downloadSimulateAnchor = document.createElement("a");
                 downloadSimulateAnchor.href = URL.createObjectURL(file);
-                downloadSimulateAnchor.download = fileName;
+                const fileType = moduleProperties.get(moduleName)?.isSingleFileTypePerSubmission
+                    ? `${uploadFileType}-LEVEL-DATA`
+                    : "";
+                downloadSimulateAnchor.download = `${moduleName}-${fileType}-${orgUnitCode}-TEMPLATE`;
                 // simulate link click
                 document.body.appendChild(downloadSimulateAnchor);
                 downloadSimulateAnchor.click();
@@ -348,7 +349,7 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
                 setLoading(false);
             }
         );
-    }, [compositionRoot.fileSubmission, snackbar, orgUnitId]);
+    }, [compositionRoot.fileSubmission, snackbar, orgUnitId, moduleName, orgUnitCode, uploadFileType]);
 
     return (
         <ContentWrapper>
@@ -474,7 +475,7 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
                     </div>
                 ) : null}
                 {moduleProperties.get(moduleName)?.isDownloadEmptyTemplateReq && (
-                    <Button variant="outlined" color="primary" disableElevation onClick={downloadEmptyTemplate}>
+                    <Button variant="outlined" color="primary" onClick={downloadEmptyTemplate}>
                         {i18n.t("Download empty template")}
                     </Button>
                 )}

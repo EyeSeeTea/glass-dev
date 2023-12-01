@@ -18,23 +18,23 @@ import { AMC_RAW_SUBSTANCE_CONSUMPTION_PROGRAM_ID } from "../../domain/usecases/
 
 type RowWithCells = XLSX.Row & { _cells: XLSX.Cell[] };
 
+export const getTemplateId = (programId: Id): string => {
+    switch (programId) {
+        case AMC_PRODUCT_REGISTER_PROGRAM_ID:
+            return "TRACKER_PROGRAM_GENERATED_v3";
+        case EGASP_PROGRAM_ID:
+        case AMC_RAW_SUBSTANCE_CONSUMPTION_PROGRAM_ID:
+            return "PROGRAM_GENERATED_v4";
+        default:
+            return "";
+    }
+};
+
 export class ExcelPopulateDefaultRepository extends ExcelRepository {
     private workbooks: Record<string, ExcelWorkbook> = {};
 
-    private getTemplateId(programId: Id): string {
-        switch (programId) {
-            case AMC_PRODUCT_REGISTER_PROGRAM_ID:
-                return "TRACKER_PROGRAM_GENERATED_v3";
-            case EGASP_PROGRAM_ID:
-            case AMC_RAW_SUBSTANCE_CONSUMPTION_PROGRAM_ID:
-                return "PROGRAM_GENERATED_v4";
-            default:
-                return "";
-        }
-    }
-
     public loadTemplate(file: Blob, programId: Id): FutureData<string> {
-        const templateId = this.getTemplateId(programId);
+        const templateId = getTemplateId(programId);
         return Future.fromPromise(this.parseFile(file)).map(workbook => {
             const id = templateId;
             this.workbooks[id] = workbook;
