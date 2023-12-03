@@ -58,110 +58,79 @@ export class ImportBLTemplateEventProgram {
                     ).flatMap(dataPackage => {
                         if (dataPackage) {
                             return this.buildEventsPayload(dataPackage, action, eventListId).flatMap(events => {
-                                if (events) {
-                                    if (action === "CREATE_AND_UPDATE") {
-                                        //Run validations on import only
-                                        return this.validateEvents(
-                                            events,
-                                            orgUnitId,
-                                            orgUnitName,
-                                            period,
-                                            programId
-                                        ).flatMap(validatedEventResults => {
-                                            if (validatedEventResults.blockingErrors.length > 0) {
-                                                const errorSummary: ImportSummary = {
-                                                    status: "ERROR",
-                                                    importCount: {
-                                                        ignored: 0,
-                                                        imported: 0,
-                                                        deleted: 0,
-                                                        updated: 0,
-                                                    },
-                                                    nonBlockingErrors: validatedEventResults.nonBlockingErrors,
-                                                    blockingErrors: validatedEventResults.blockingErrors,
-                                                };
-                                                return Future.success(errorSummary);
-                                            } else {
-                                                const eventIdLineNoMap: { id: string; lineNo: number }[] = [];
-                                                const eventsWithId = validatedEventResults.events.map(e => {
-                                                    const generatedId = generateId();
-                                                    eventIdLineNoMap.push({
-                                                        id: generatedId,
-                                                        lineNo: isNaN(parseInt(e.event)) ? 0 : parseInt(e.event),
-                                                    });
-                                                    e.event = generatedId;
-                                                    return e;
+                                if (action === "CREATE_AND_UPDATE") {
+                                    //Run validations on import only
+                                    return this.validateEvents(
+                                        events,
+                                        orgUnitId,
+                                        orgUnitName,
+                                        period,
+                                        programId
+                                    ).flatMap(validatedEventResults => {
+                                        if (validatedEventResults.blockingErrors.length > 0) {
+                                            const errorSummary: ImportSummary = {
+                                                status: "ERROR",
+                                                importCount: {
+                                                    ignored: 0,
+                                                    imported: 0,
+                                                    deleted: 0,
+                                                    updated: 0,
+                                                },
+                                                nonBlockingErrors: validatedEventResults.nonBlockingErrors,
+                                                blockingErrors: validatedEventResults.blockingErrors,
+                                            };
+                                            return Future.success(errorSummary);
+                                        } else {
+                                            const eventIdLineNoMap: { id: string; lineNo: number }[] = [];
+                                            const eventsWithId = validatedEventResults.events.map(e => {
+                                                const generatedId = generateId();
+                                                eventIdLineNoMap.push({
+                                                    id: generatedId,
+                                                    lineNo: isNaN(parseInt(e.event)) ? 0 : parseInt(e.event),
                                                 });
-                                                return this.dhis2EventsDefaultRepository
-                                                    .import({ events: eventsWithId }, action)
-                                                    .flatMap(result => {
-                                                        return this.mapToImportSummary(
-                                                            result,
-                                                            validatedEventResults.nonBlockingErrors,
-                                                            eventIdLineNoMap
-                                                        ).flatMap(({ importSummary, eventIdList }) => {
-                                                            const uploadId =
-                                                                localStorage.getItem(uploadIdLocalStorageName);
-                                                            if (eventIdList.length > 0 && uploadId) {
-                                                                //Events were imported successfully, so create and uplaod a file with event ids
-                                                                // and associate it with the upload datastore object
-                                                                const eventListBlob = new Blob(
-                                                                    [JSON.stringify(eventIdList)],
-                                                                    {
-                                                                        type: "text/plain",
-                                                                    }
-                                                                );
-
-                                                                const eventIdListFile = new File(
-                                                                    [eventListBlob],
-                                                                    `${uploadId}_eventIdsFile`
-                                                                );
-
-                                                                return this.glassDocumentsRepository
-                                                                    .save(eventIdListFile, moduleName)
-                                                                    .flatMap(fileId => {
-                                                                        return this.glassUploadsRepository
-                                                                            .setEventListFileId(uploadId, fileId)
-                                                                            .flatMap(() => {
-                                                                                return Future.success(importSummary);
-                                                                            });
-                                                                    });
-                                                            } else {
-                                                                return Future.success(importSummary);
-                                                            }
-                                                        });
-                                                    });
-                                            }
-                                        });
-                                    } //action === "DELETE"
-                                    else {
-                                        return this.dhis2EventsDefaultRepository
-                                            .import({ events }, action)
-                                            .flatMap(result => {
-                                                return this.mapToImportSummary(result, [], []).flatMap(
-                                                    ({ importSummary }) => {
-                                                        return Future.success(importSummary);
-                                                    }
-                                                );
+                                                e.event = generatedId;
+                                                return e;
                                             });
-                                    }
-                                } else {
-                                    //NO events were created on import, so no events to delete.
-                                    const noEventsToDelete: ImportSummary = {
-                                        status: "SUCCESS",
-                                        importCount: { updated: 0, ignored: 0, imported: 0, deleted: 0 },
-                                        nonBlockingErrors: [],
-                                        blockingErrors: [],
-                                    };
-                                    return Future.success(noEventsToDelete);
+                                            return this.dhis2EventsDefaultRepository
+                                                .import({ events: eventsWithId }, action)
+                                                .flatMap(result => {
+                                                    return mapToImportSummary(
+                                                        result,
+                                                        "event",
+                                                        this.metadataRepository,
+                                                        validatedEventResults.nonBlockingErrors,
+                                                        eventIdLineNoMap
+                                                    ).flatMap(summary => {
+                                                        return uploadIdListFileAndSave(
+                                                            uploadIdLocalStorageName,
+                                                            summary,
+                                                            moduleName,
+                                                            this.glassDocumentsRepository,
+                                                            this.glassUploadsRepository
+                                                        );
+                                                    });
+                                                });
+                                        }
+                                    });
+                                } //action === "DELETE"
+                                else {
+                                    return this.dhis2EventsDefaultRepository
+                                        .import({ events }, action)
+                                        .flatMap(result => {
+                                            return mapToImportSummary(result, "event", this.metadataRepository).flatMap(
+                                                ({ importSummary }) => {
+                                                    return Future.success(importSummary);
+                                                }
+                                            );
+                                        });
                                 }
                             });
                         } else {
-                            return Future.error("Unknow template");
+                            return Future.error("Unknown template");
                         }
                     });
                 } else {
-                    return Future.error("Unknow template");
+                    return Future.error("Unknown template");
                 }
             });
         });
@@ -171,7 +140,7 @@ export class ImportBLTemplateEventProgram {
         dataPackage: DataPackage,
         action: ImportStrategy,
         eventListId: string | undefined
-    ): FutureData<D2TrackerEvent[] | undefined> {
+    ): FutureData<D2TrackerEvent[]> {
         if (action === "CREATE_AND_UPDATE") {
             return Future.success(
                 dataPackage.dataEntries.map(
@@ -213,7 +182,7 @@ export class ImportBLTemplateEventProgram {
                 });
             else {
                 //No events were created during import, so no events to delete.
-                return Future.success(undefined);
+                return Future.success([]);
             }
         }
     }
@@ -258,106 +227,136 @@ export class ImportBLTemplateEventProgram {
             return Future.success(consolidatedValidationResults);
         });
     }
-
-    private mapToImportSummary(
-        result: TrackerPostResponse,
-        nonBlockingErrors: ConsistencyError[],
-        eventIdLineNoMap: { id: string; lineNo: number }[]
-    ): FutureData<{
-        importSummary: ImportSummary;
-        eventIdList: string[];
-    }> {
-        if (result && result.validationReport && result.stats) {
-            const blockingErrorList = _.compact(
-                result.validationReport.errorReports.map(summary => {
-                    if (summary.message) return { error: summary.message, eventId: summary.uid };
-                })
-            );
-
-            const blockingErrorsByGroup = _(blockingErrorList).groupBy("error").value();
-
-            //Get list of DataElement Ids in error messages.
-            const dataElementIds = _.compact(
-                Object.entries(blockingErrorsByGroup).map(err => {
-                    const errMsg = err[0];
-
-                    //Error message type 1 contains regex in format : DataElement `{dataElementId}`
-                    const pattern1 = /(?<=DataElement )`([A-Za-z0-9]{11})`/g;
-                    const dataelementIds1 = pattern1.exec(errMsg);
-
-                    //Error message type 2 contains  regex in format : {dataElementId} DataElement
-                    const pattern2 = /([A-Za-z0-9]{11}) DataElement/g;
-                    const dataelementsIds2 = pattern2.exec(errMsg);
-
-                    //Error message type 3 contains  regex in format : `DataElement``{dataElementId}`
-                    const pattern3 = /`(DataElement)` `([A-Za-z0-9]{11})`/g;
-                    const dataelementsIds3 = pattern3.exec(errMsg);
-
-                    if (dataelementIds1 && dataelementIds1[1]) return dataelementIds1[1];
-                    else if (dataelementsIds2 && dataelementsIds2[1]) return dataelementsIds2[1];
-                    else if (dataelementsIds3 && dataelementsIds3[1]) return dataelementsIds3[2];
-                })
-            );
-
-            //Get list of DataElement Names in error messages.
-            return this.metadataRepository.getDataElementNames(dataElementIds).flatMap(dataElementMap => {
-                const importSummary: ImportSummary = {
-                    status: result.status === "OK" ? "SUCCESS" : result.status,
-                    importCount: {
-                        imported: result.stats.created,
-                        updated: result.stats.updated,
-                        ignored: result.stats.ignored,
-                        deleted: result.stats.deleted,
-                    },
-                    blockingErrors: Object.entries(blockingErrorsByGroup).map(err => {
-                        const dataElementInErrMsg = dataElementIds.filter(de => err[0].includes(de));
-
-                        if (dataElementInErrMsg && dataElementInErrMsg[0] && dataElementInErrMsg.length === 1) {
-                            //There should be only one dataelement id in each errMsg
-
-                            const dataElementName = dataElementMap.find(de => de.id === dataElementInErrMsg[0]);
-                            //Replace DataElement Ids with DataElement Names in error messages.
-                            const parsedErrMsg = err[0].replace(
-                                dataElementInErrMsg[0],
-                                dataElementName?.name ?? dataElementInErrMsg[0]
-                            );
-
-                            const lines = err[1].flatMap(a => eventIdLineNoMap.find(e => e.id === a.eventId)?.lineNo);
-                            console.debug(lines);
-                            return {
-                                error: parsedErrMsg,
-                                count: err[1].length,
-                                lines: _.compact(lines),
-                            };
-                        } else {
-                            const lines = err[1].flatMap(a => eventIdLineNoMap.find(e => e.id === a.eventId)?.lineNo);
-                            return { error: err[0], count: err[1].length, lines: _.compact(lines) };
-                        }
-                    }),
-                    nonBlockingErrors: nonBlockingErrors,
-                    importTime: new Date(),
-                };
-
-                const eventIdList =
-                    result.status === "OK"
-                        ? result.bundleReport.typeReportMap.EVENT.objectReports.map(report => report.uid)
-                        : [];
-
-                return Future.success({ importSummary, eventIdList: _.compact(eventIdList) });
-            });
-        } else {
-            return Future.success({
-                importSummary: {
-                    status: "ERROR",
-                    importCount: { ignored: 0, imported: 0, deleted: 0, updated: 0 },
-                    nonBlockingErrors: [],
-                    blockingErrors: [{ error: result?.message ?? "An error occurred during EGASP import. ", count: 1 }],
-                },
-                eventIdList: [],
-            });
-        }
-    }
 }
+
+export const uploadIdListFileAndSave = (
+    uploadIdLocalStorageName: string,
+    summary: { importSummary: ImportSummary; eventIdList: string[] },
+    moduleName: string,
+    glassDocumentsRepository: GlassDocumentsRepository,
+    glassUploadsRepository: GlassUploadsRepository
+): FutureData<ImportSummary> => {
+    const uploadId = localStorage.getItem(uploadIdLocalStorageName);
+    if (summary.eventIdList.length > 0 && uploadId) {
+        //Events were imported successfully, so create and uplaod a file with event ids
+        // and associate it with the upload datastore object
+        const eventListBlob = new Blob([JSON.stringify(summary.eventIdList)], {
+            type: "text/plain",
+        });
+        const eventIdListFile = new File([eventListBlob], `${uploadId}_eventIdsFile`);
+        return glassDocumentsRepository.save(eventIdListFile, moduleName).flatMap(fileId => {
+            return glassUploadsRepository.setEventListFileId(uploadId, fileId).flatMap(() => {
+                return Future.success(summary.importSummary);
+            });
+        });
+    } else {
+        return Future.success(summary.importSummary);
+    }
+};
+
+export const mapToImportSummary = (
+    result: TrackerPostResponse,
+    type: "event" | "trackedEntity",
+    metadataRepository: MetadataRepository,
+    nonBlockingErrors?: ConsistencyError[],
+    eventIdLineNoMap?: { id: string; lineNo: number }[]
+): FutureData<{
+    importSummary: ImportSummary;
+    eventIdList: string[];
+}> => {
+    if (result && result.validationReport && result.stats) {
+        const blockingErrorList = _.compact(
+            result.validationReport.errorReports.map(summary => {
+                if (summary.message) return { error: summary.message, eventId: summary.uid };
+            })
+        );
+
+        const blockingErrorsByGroup = _(blockingErrorList).groupBy("error").value();
+
+        //Get list of DataElement Ids in error messages.
+        const dataElementIds = _.compact(
+            Object.entries(blockingErrorsByGroup).map(err => {
+                const errMsg = err[0];
+
+                //Error message type 1 contains regex in format : DataElement `{dataElementId}`
+                const pattern1 = /(?<=DataElement )`([A-Za-z0-9]{11})`/g;
+                const dataelementIds1 = pattern1.exec(errMsg);
+
+                //Error message type 2 contains  regex in format : {dataElementId} DataElement
+                const pattern2 = /([A-Za-z0-9]{11}) DataElement/g;
+                const dataelementsIds2 = pattern2.exec(errMsg);
+
+                //Error message type 3 contains  regex in format : `DataElement``{dataElementId}`
+                const pattern3 = /`(DataElement)` `([A-Za-z0-9]{11})`/g;
+                const dataelementsIds3 = pattern3.exec(errMsg);
+
+                if (dataelementIds1 && dataelementIds1[1]) return dataelementIds1[1];
+                else if (dataelementsIds2 && dataelementsIds2[1]) return dataelementsIds2[1];
+                else if (dataelementsIds3 && dataelementsIds3[1]) return dataelementsIds3[2];
+            })
+        );
+
+        //Get list of DataElement Names in error messages.
+        return metadataRepository.getDataElementNames(dataElementIds).flatMap(dataElementMap => {
+            const importSummary: ImportSummary = {
+                status: result.status === "OK" ? "SUCCESS" : result.status,
+                importCount: {
+                    imported: result.stats.created,
+                    updated: result.stats.updated,
+                    ignored: result.stats.ignored,
+                    deleted: result.stats.deleted,
+                },
+                blockingErrors: Object.entries(blockingErrorsByGroup).map(err => {
+                    const dataElementInErrMsg = dataElementIds.filter(de => err[0].includes(de));
+
+                    if (dataElementInErrMsg && dataElementInErrMsg[0] && dataElementInErrMsg.length === 1) {
+                        //There should be only one dataelement id in each errMsg
+
+                        const dataElementName = dataElementMap.find(de => de.id === dataElementInErrMsg[0]);
+                        //Replace DataElement Ids with DataElement Names in error messages.
+                        const parsedErrMsg = err[0].replace(
+                            dataElementInErrMsg[0],
+                            dataElementName?.name ?? dataElementInErrMsg[0]
+                        );
+
+                        const lines = err[1].flatMap(a => eventIdLineNoMap?.find(e => e.id === a.eventId)?.lineNo);
+                        console.debug(lines);
+                        return {
+                            error: parsedErrMsg,
+                            count: err[1].length,
+                            lines: _.compact(lines),
+                        };
+                    } else {
+                        const lines = err[1].flatMap(a => eventIdLineNoMap?.find(e => e.id === a.eventId)?.lineNo);
+                        return { error: err[0], count: err[1].length, lines: _.compact(lines) };
+                    }
+                }),
+                nonBlockingErrors: nonBlockingErrors ? nonBlockingErrors : [],
+                importTime: new Date(),
+            };
+
+            const eventIdList =
+                result.status === "OK"
+                    ? type === "event"
+                        ? result.bundleReport.typeReportMap.EVENT.objectReports.map(report => report.uid)
+                        : result.bundleReport.typeReportMap.TRACKED_ENTITY.objectReports.map(report => report.uid)
+                    : [];
+
+            return Future.success({ importSummary, eventIdList: _.compact(eventIdList) });
+        });
+    } else {
+        return Future.success({
+            importSummary: {
+                status: "ERROR",
+                importCount: { ignored: 0, imported: 0, deleted: 0, updated: 0 },
+                nonBlockingErrors: [],
+                blockingErrors: [{ error: result?.message ?? "An error occurred during import. ", count: 1 }],
+            },
+            eventIdList: [],
+        });
+    }
+};
+
 export const readTemplate = (
     template: Template,
     dataForm: DataForm,

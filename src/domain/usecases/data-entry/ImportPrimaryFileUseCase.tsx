@@ -87,7 +87,8 @@ export class ImportPrimaryFileUseCase {
                     this.risIndividualFunghiRepository,
                     this.trackerRepository,
                     this.glassDocumentsRepository,
-                    this.glassUploadsRepository
+                    this.glassUploadsRepository,
+                    this.metadataRepository
                 );
                 return this.glassModuleDefaultRepository.getByName(moduleName).flatMap(module => {
                     return importRISIndividualFunghiFile.importRISIndividualFunghiFile(
@@ -109,7 +110,8 @@ export class ImportPrimaryFileUseCase {
                     this.instanceRepository,
                     this.trackerRepository,
                     this.glassDocumentsRepository,
-                    this.glassUploadsRepository
+                    this.glassUploadsRepository,
+                    this.metadataRepository
                 );
 
                 return importAMCProductFile.importAMCProductFile(
