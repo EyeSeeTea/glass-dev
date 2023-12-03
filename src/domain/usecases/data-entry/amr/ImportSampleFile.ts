@@ -14,7 +14,7 @@ import {
     getCategoryOptionComboByOptionCodes,
 } from "../utils/getCategoryOptionCombo";
 import { includeBlokingErrors } from "../utils/includeBlockingErrors";
-import { mapToImportSummary } from "../utils/mapDhis2Summary";
+import { mapDataValuesToImportSummary } from "../utils/mapDhis2Summary";
 import { SampleDataRepository } from "../../../repositories/data-entry/SampleDataRepository";
 import { SampleData } from "../../../entities/data-entry/amr-external/SampleData";
 
@@ -112,7 +112,7 @@ export class ImportSampleFile {
                                 .map(rulesInstructions => {
                                     const dhis2ValidationErrors = checkDhis2Validations(validations, rulesInstructions);
 
-                                    const importSummary = mapToImportSummary(saveSummary);
+                                    const importSummary = mapDataValuesToImportSummary(saveSummary);
 
                                     const summaryWithConsistencyBlokingErrors = includeBlokingErrors(importSummary, [
                                         ...batchIdErrors,
