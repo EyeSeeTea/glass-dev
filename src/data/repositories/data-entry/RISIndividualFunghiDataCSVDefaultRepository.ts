@@ -14,20 +14,16 @@ export class RISIndividualFunghiDataCSVDefaultRepository implements RISIndividua
                     return {
                         COUNTRY: getTextValue(row, "COUNTRY"),
                         YEAR: getNumberValue(row, "YEAR"),
-                        HCF_ID: getTextValue(row, "HCF_ID"),
-                        HCF_TYPE: getTextValue(row, "HCF_TYPE"),
+                        HEALTHCAREFACILITYTYPE: getTextValue(row, "HEALTHCAREFACILITYTYPE"),
                         HOSPITALUNITTYPE: getTextValue(row, "HOSPITALUNITTYPE"),
                         PATIENT_ID: getTextValue(row, "PATIENT_ID"),
                         AGE: getTextValue(row, "AGE"),
                         GENDER: getTextValue(row, "GENDER"),
                         PATIENTTYPE: getTextValue(row, "PATIENTTYPE"),
-                        DATEOFHOSPITALISATION_VISIT: getTextValue(row, "DATEOFHOSPITALISATION_VISIT"),
-                        LABORATORYCODE: getNumberValue(row, "LABORATORYCODE"),
-                        SAMPLE_DATE: getTextValue(row, "SAMPLE_DATE"),
-                        ISOLATE_ID: getNumberValue(row, "ISOLATE_ID"),
+                        DATEOFADMISSION: getTextValue(row, "DATEOFADMISSION"),
+                        DATEUSEDFORSTATISTICS: getTextValue(row, "DATEUSEDFORSTATISTICS"),
                         SPECIMEN: getTextValue(row, "SPECIMEN"),
                         PATIENTCOUNTER: getNumberValue(row, "PATIENTCOUNTER"),
-                        PATHOGEN: getTextValue(row, "PATHOGEN"),
                         ANTIBIOTIC: getTextValue(row, "ANTIBIOTIC"),
                         SIR: getTextValue(row, "SIR"),
                         REFERENCEGUIDELINESSIR: getTextValue(row, "REFERENCEGUIDELINESSIR"),
@@ -41,9 +37,9 @@ export class RISIndividualFunghiDataCSVDefaultRepository implements RISIndividua
                         RESULTMICSIGN: getTextValue(row, "RESULTMICSIGN"),
                         RESULTMICVALUE: getNumberValue(row, "RESULTMICVALUE"),
                         RESULTMICSIR: getTextValue(row, "RESULTMICSIR"),
-                        ...(moduleName === "AMR - Individual" && {
-                            ABCLASS: getTextValue(row, "ABCLASS"),
-                        }),
+                        AB_CLASS: moduleName === "AMR - Individual" ? getTextValue(row, "AB_CLASS") : "",
+                        ISOLATEID: moduleName === "AMR - Funghi" ? getTextValue(row, "ISOLATEID") : "",
+                        PATHOGEN_DET: moduleName === "AMR - Funghi" ? getTextValue(row, "PATHOGEN_DET") : "",
                     };
                 }) || []
             );
@@ -60,26 +56,38 @@ export class RISIndividualFunghiDataCSVDefaultRepository implements RISIndividua
                 const allRISIndividualFunghiColsPresent =
                     doesColumnExist(headerRow, "COUNTRY") &&
                     doesColumnExist(headerRow, "YEAR") &&
-                    doesColumnExist(headerRow, "HCF_ID") &&
+                    doesColumnExist(headerRow, "HEALTHCAREFACILITYTYPE") &&
                     doesColumnExist(headerRow, "HOSPITALUNITTYPE") &&
                     doesColumnExist(headerRow, "PATIENT_ID") &&
                     doesColumnExist(headerRow, "AGE") &&
                     doesColumnExist(headerRow, "GENDER") &&
                     doesColumnExist(headerRow, "PATIENTTYPE") &&
-                    doesColumnExist(headerRow, "DATEOFHOSPITALISATION_VISIT") &&
-                    doesColumnExist(headerRow, "LABORATORYCODE") &&
-                    doesColumnExist(headerRow, "SAMPLE_DATE") &&
-                    doesColumnExist(headerRow, "ISOLATE_ID") &&
+                    doesColumnExist(headerRow, "DATEOFADMISSION") &&
+                    doesColumnExist(headerRow, "DATEUSEDFORSTATISTICS") &&
                     doesColumnExist(headerRow, "SPECIMEN") &&
                     doesColumnExist(headerRow, "PATIENTCOUNTER") &&
-                    doesColumnExist(headerRow, "PATHOGEN") &&
                     doesColumnExist(headerRow, "ANTIBIOTIC") &&
                     doesColumnExist(headerRow, "SIR") &&
                     doesColumnExist(headerRow, "REFERENCEGUIDELINESSIR") &&
                     doesColumnExist(headerRow, "DISKLOAD") &&
-                    moduleName === "AMR - Individual"
-                        ? doesColumnExist(headerRow, "ABCLASS")
-                        : !doesColumnExist(headerRow, "ABCLASS");
+                    doesColumnExist(headerRow, "RESULTETESTSIGN") &&
+                    doesColumnExist(headerRow, "RESULTETESTVALUE") &&
+                    doesColumnExist(headerRow, "RESULTETESTSIR") &&
+                    doesColumnExist(headerRow, "RESULTZONESIGN") &&
+                    doesColumnExist(headerRow, "RESULTZONEVALUE") &&
+                    doesColumnExist(headerRow, "RESULTZONESIR") &&
+                    doesColumnExist(headerRow, "RESULTMICSIGN") &&
+                    doesColumnExist(headerRow, "RESULTMICVALUE") &&
+                    doesColumnExist(headerRow, "RESULTMICSIR") &&
+                    (moduleName === "AMR - Individual"
+                        ? doesColumnExist(headerRow, "AB_CLASS")
+                        : !doesColumnExist(headerRow, "AB_CLASS")) &&
+                    (moduleName === "AMR - Funghi"
+                        ? doesColumnExist(headerRow, "ISOLATEID")
+                        : !doesColumnExist(headerRow, "ISOLATEID")) &&
+                    (moduleName === "AMR - Funghi"
+                        ? doesColumnExist(headerRow, "PATHOGEN_DET")
+                        : !doesColumnExist(headerRow, "PATHOGEN_DET"));
 
                 const uniqSpecimens = _(sheet.rows)
                     .uniqBy("SPECIMEN")
