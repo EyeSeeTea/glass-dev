@@ -46,7 +46,7 @@ export const UploadSecondary: React.FC<UploadSecondaryProps> = ({
     const [isLoading, setIsLoading] = useState(false);
     const secondaryFileUploadRef = useRef<DropzoneRef>(null);
 
-    const dataSubmissionId = useCurrentDataSubmissionId(compositionRoot, moduleId, orgUnitId, currentPeriod);
+    const dataSubmissionId = useCurrentDataSubmissionId(moduleId, moduleName, orgUnitId, currentPeriod);
 
     useEffect(() => {
         if (secondaryFile) {

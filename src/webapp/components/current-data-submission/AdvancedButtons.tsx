@@ -23,8 +23,8 @@ export const AdvancedButtons: React.FC<AdvancedButtonsProps> = ({ setRefetchStat
     const { currentPeriod } = useCurrentPeriodContext();
 
     const dataSubmissionId = useCurrentDataSubmissionId(
-        compositionRoot,
         currentModuleAccess.moduleId,
+        currentModuleAccess.moduleName,
         currentOrgUnitAccess.orgUnitId,
         currentPeriod
     );
