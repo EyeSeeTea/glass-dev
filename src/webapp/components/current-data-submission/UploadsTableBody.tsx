@@ -45,7 +45,7 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
     const { currentModuleAccess } = useCurrentModuleContext();
     const { currentOrgUnitAccess } = useCurrentOrgUnitContext();
     const currentDataSubmissionStatus = useStatusDataSubmission(
-        currentModuleAccess.moduleId,
+        { id: currentModuleAccess.moduleId, name: currentModuleAccess.moduleName },
         currentOrgUnitAccess.orgUnitId,
         currentPeriod
     );

@@ -42,7 +42,7 @@ export const ListOfDatasets: React.FC<ListOfDatasetsProps> = ({ setRefetchStatus
     const { currentModuleAccess } = useCurrentModuleContext();
     const { currentOrgUnitAccess } = useCurrentOrgUnitContext();
     const currentDataSubmissionStatus = useStatusDataSubmission(
-        currentModuleAccess.moduleId,
+        { id: currentModuleAccess.moduleId, name: currentModuleAccess.moduleName },
         currentOrgUnitAccess.orgUnitId,
         currentPeriod
     );
@@ -53,8 +53,8 @@ export const ListOfDatasets: React.FC<ListOfDatasetsProps> = ({ setRefetchStatus
     const incompleteUploads = getNotCompletedUploads(uploads);
 
     const dataSubmissionId = useCurrentDataSubmissionId(
-        compositionRoot,
         currentModuleAccess.moduleId,
+        currentModuleAccess.moduleName,
         currentOrgUnitAccess.orgUnitId,
         currentPeriod
     );

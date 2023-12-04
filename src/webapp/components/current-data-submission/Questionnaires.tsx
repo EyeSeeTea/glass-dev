@@ -35,14 +35,18 @@ export const Questionnaires: React.FC<QuestionnairesProps> = ({ setRefetchStatus
     const { currentModuleAccess } = useCurrentModuleContext();
 
     const dataSubmissionId = useCurrentDataSubmissionId(
-        compositionRoot,
         currentModuleAccess.moduleId,
+        currentModuleAccess.moduleName,
         orgUnit.id,
         year
     );
     const { captureAccessGroup } = useCurrentUserGroupsAccess();
 
-    const currentDataSubmissionStatus = useStatusDataSubmission(currentModuleAccess.moduleId, orgUnit.id, year);
+    const currentDataSubmissionStatus = useStatusDataSubmission(
+        { id: currentModuleAccess.moduleId, name: currentModuleAccess.moduleName },
+        orgUnit.id,
+        year
+    );
 
     const validateAndUpdateStatus = (complete: boolean, questionnaireId: string) => {
         //If Questionnaire has been set to complete/not complete, check if data submission status needs to be updated

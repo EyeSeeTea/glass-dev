@@ -39,8 +39,8 @@ export const ReviewDataSummary: React.FC<ReviewDataSummaryProps> = ({
     const [fileType, setFileType] = useState<string>("primary");
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const dataSubmissionId = useCurrentDataSubmissionId(
-        compositionRoot,
         currentModuleAccess.moduleId,
+        currentModuleAccess.moduleName,
         currentOrgUnitAccess.orgUnitId,
         currentPeriod
     );
