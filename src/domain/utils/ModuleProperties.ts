@@ -84,7 +84,7 @@ export const moduleProperties = new Map<string, ModuleDetails>([
         "AMR - Individual",
         {
             isbatchReq: false,
-            isQuestionnaireReq: false,
+            isQuestionnaireReq: true,
             isSecondaryFileApplicable: false,
             isDryRunReq: false,
             importLoadingMsg: {
@@ -136,7 +136,7 @@ export const moduleProperties = new Map<string, ModuleDetails>([
         "AMR - Funghi",
         {
             isbatchReq: false,
-            isQuestionnaireReq: false,
+            isQuestionnaireReq: true,
             isSecondaryFileApplicable: false,
             isDryRunReq: false,
             importLoadingMsg: {
