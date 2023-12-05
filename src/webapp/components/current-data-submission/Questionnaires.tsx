@@ -114,7 +114,8 @@ export const Questionnaires: React.FC<QuestionnairesProps> = ({ setRefetchStatus
                     questionnaireId={formState.id}
                     readonly={formState.mode === "show" ? true : false}
                     hidePublish={true}
-                    signalEventId={formState.eventId}
+                    eventId={formState.eventId}
+                    parentEventId={formState.parentEventId}
                     subQuestionnaires={formState.subQuestionnaires}
                     aggsubQuestionnaires={formState.aggSubQuestionnaires}
                     refreshGrid={setRefresh}
@@ -287,6 +288,7 @@ type QuestionnaireFormState =
           mode: "show";
           id: Id;
           eventId?: Id;
+          parentEventId?: Id;
           subQuestionnaires?: NamedRef[];
           aggSubQuestionnaires?: NamedRef[];
       }
@@ -294,6 +296,7 @@ type QuestionnaireFormState =
           mode: "edit";
           id: Id;
           eventId?: Id;
+          parentEventId?: Id;
           subQuestionnaires?: NamedRef[];
           aggSubQuestionnaires?: NamedRef[];
       };
@@ -307,6 +310,7 @@ function useFormState() {
                 mode: options.mode,
                 id: questionnaire.id,
                 eventId: questionnaire.eventId,
+                parentEventId: questionnaire.parentEventId,
                 subQuestionnaires: questionnaire.subQuestionnaires,
                 aggSubQuestionnaires: questionnaire.aggSubQuestionnaires,
             });

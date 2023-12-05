@@ -25,7 +25,8 @@ export interface ProgramQuestionnaireFormProps {
     hideForm?: () => void;
     readonly: boolean;
     signalId?: string;
-    signalEventId?: string;
+    eventId?: string;
+    parentEventId?: string;
     questionnaireId: string;
     hidePublish: boolean;
     subQuestionnaires?: NamedRef[];
@@ -60,7 +61,8 @@ export const ProgramQuestionnaireForm: React.FC<ProgramQuestionnaireFormProps> =
 
     const { questionnaire, setQuestionnaire, loading, setLoading } = useProgramQuestionnaireForm(
         props.questionnaireId,
-        props.signalEventId,
+        props.eventId,
+        props.parentEventId,
         props.aggsubQuestionnaires
     );
 
@@ -78,7 +80,7 @@ export const ProgramQuestionnaireForm: React.FC<ProgramQuestionnaireFormProps> =
             compositionRoot.programQuestionnaires
                 .importData(
                     props.signalId,
-                    props.signalEventId,
+                    props.eventId,
                     questionnaire,
                     {
                         id: currentOrgUnitAccess.orgUnitId,
@@ -122,7 +124,7 @@ export const ProgramQuestionnaireForm: React.FC<ProgramQuestionnaireFormProps> =
             compositionRoot.programQuestionnaires
                 .importData(
                     props.signalId,
-                    props.signalEventId,
+                    props.eventId,
                     questionnaire,
                     {
                         id: currentOrgUnitAccess.orgUnitId,

@@ -15,6 +15,7 @@ export interface QuestionnaireBase {
     subQuestionnaires?: NamedRef[];
     aggSubQuestionnaires?: NamedRef[];
     eventId?: Id;
+    parentEventId?: Id;
 }
 
 export interface QuestionnaireSelector {
