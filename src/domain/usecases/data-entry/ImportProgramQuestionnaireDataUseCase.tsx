@@ -17,7 +17,7 @@ export class ImportProgramQuestionnaireDataUseCase {
 
     execute(
         signalId: string | undefined,
-        signalEventId: string | undefined,
+        eventId: string | undefined,
         questionnaire: Questionnaire,
         orgUnit: { id: string; name: string; path: string },
         period: string,
@@ -36,7 +36,7 @@ export class ImportProgramQuestionnaireDataUseCase {
                 );
                 return importEARData.importSignals(
                     signalId,
-                    signalEventId,
+                    eventId,
                     questionnaire,
                     orgUnit,
                     module,
@@ -47,7 +47,7 @@ export class ImportProgramQuestionnaireDataUseCase {
             }
             case "AMC": {
                 const importAMCData = new ImportAMCQuestionnaireData(this.dhis2EventsDefaultRepository);
-                return importAMCData.importAMCQuestionnaireData(questionnaire, orgUnit.id, period, signalEventId);
+                return importAMCData.importAMCQuestionnaireData(questionnaire, orgUnit.id, period, eventId);
             }
             default: {
                 return Future.error("Unkown module");

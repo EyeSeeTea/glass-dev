@@ -26,7 +26,7 @@ export const SignalPage: React.FC = () => {
             <ProgramQuestionnaireForm
                 readonly={readOnly}
                 signalId={signalId}
-                signalEventId={signalEvtId}
+                eventId={signalEvtId}
                 hideForm={hideForm}
                 questionnaireId={EAR_PROGRAM_ID}
                 hidePublish={false}
