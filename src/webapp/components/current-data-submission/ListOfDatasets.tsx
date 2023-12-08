@@ -115,22 +115,30 @@ export const ListOfDatasets: React.FC<ListOfDatasetsProps> = ({ setRefetchStatus
                         >
                             {i18n.t("No datasets uploaded to this submission.")}
                         </StyledEmptyMessage>
-                        <Button
-                            variant="contained"
-                            color="primary"
-                            component={NavLink}
-                            to={`/upload`}
-                            exact={true}
-                            disabled={
-                                !(
-                                    hasCurrentUserCaptureAccess &&
-                                    currentDataSubmissionStatus.kind === "loaded" &&
-                                    isEditModeStatus(currentDataSubmissionStatus.data.title)
-                                )
-                            }
-                        >
-                            {i18n.t("Add New Datasets")}
-                        </Button>
+                        {moduleProperties.get(moduleName)?.isSingleFileTypePerSubmission &&
+                        completeUploads &&
+                        completeUploads.length > 0 ? (
+                            <Typography>
+                                {i18n.t(`You can upload only one successful file for ${moduleName}.`)}
+                            </Typography>
+                        ) : (
+                            <Button
+                                variant="contained"
+                                color="primary"
+                                component={NavLink}
+                                to={`/upload`}
+                                exact={true}
+                                disabled={
+                                    !(
+                                        hasCurrentUserCaptureAccess &&
+                                        currentDataSubmissionStatus.kind === "loaded" &&
+                                        isEditModeStatus(currentDataSubmissionStatus.data.title)
+                                    )
+                                }
+                            >
+                                {i18n.t("Add New Datasets")}
+                            </Button>
+                        )}
                         {moduleProperties.get(moduleName)?.isbatchReq && (
                             <StyledTypography>
                                 {i18n.t("You can add up to 6 datasets to this submission with different BATCH IDS.")}
