@@ -44,7 +44,14 @@ export function useProgramQuestionnaireForm(questionnaireId: string, eventId?: s
                     }
                 );
         }
-    }, [compositionRoot, snackbar, eventId, questionnaireId, currentModuleAccess.moduleName, subQuestionnaires]);
+    }, [
+        compositionRoot.programQuestionnaires,
+        snackbar,
+        eventId,
+        questionnaireId,
+        currentModuleAccess.moduleName,
+        subQuestionnaires,
+    ]);
 
     return { questionnaire, setQuestionnaire, loading, setLoading };
 }

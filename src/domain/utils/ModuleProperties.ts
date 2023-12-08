@@ -1,6 +1,7 @@
 type ModuleDetails = {
     isbatchReq: boolean;
     isQuestionnaireReq: boolean;
+    completeStatusChange: "QUESTIONNAIRE" | "DATASET" | "QUESTIONNAIRE_AND_DATASET";
     isSecondaryFileApplicable: boolean;
     isSecondaryRelated?: boolean;
     isDryRunReq: boolean;
@@ -21,6 +22,7 @@ type ModuleDetails = {
     isDownloadEmptyTemplateReq: boolean;
     applyQuestionnaireValidation: boolean;
     datasetString?: string;
+    isDatasetMandatory: boolean;
     isSingleFileTypePerSubmission?: boolean; //For AMC, you cans choose either product or substance file , never both
 };
 
@@ -30,6 +32,7 @@ export const moduleProperties = new Map<string, ModuleDetails>([
         {
             isbatchReq: true,
             isQuestionnaireReq: true,
+            completeStatusChange: "QUESTIONNAIRE",
             isSecondaryFileApplicable: true,
             isSecondaryRelated: true,
             isDryRunReq: true,
@@ -51,6 +54,7 @@ export const moduleProperties = new Map<string, ModuleDetails>([
             isDownloadEmptyTemplateReq: false,
             applyQuestionnaireValidation: false,
             datasetString: "Upto 6 datasets",
+            isDatasetMandatory: false,
         },
     ],
     [
@@ -58,6 +62,7 @@ export const moduleProperties = new Map<string, ModuleDetails>([
         {
             isbatchReq: false,
             isQuestionnaireReq: false,
+            completeStatusChange: "DATASET",
             isSecondaryFileApplicable: false,
             isDryRunReq: false,
             importLoadingMsg: {
@@ -75,13 +80,15 @@ export const moduleProperties = new Map<string, ModuleDetails>([
             isSpecimenReq: false,
             isDownloadEmptyTemplateReq: true,
             applyQuestionnaireValidation: false,
+            isDatasetMandatory: true,
         },
     ],
     [
         "AMR - Individual",
         {
             isbatchReq: false,
-            isQuestionnaireReq: false,
+            isQuestionnaireReq: true,
+            completeStatusChange: "DATASET",
             isSecondaryFileApplicable: false,
             isDryRunReq: false,
             importLoadingMsg: {
@@ -99,6 +106,7 @@ export const moduleProperties = new Map<string, ModuleDetails>([
             isSpecimenReq: true,
             isDownloadEmptyTemplateReq: false,
             applyQuestionnaireValidation: false,
+            isDatasetMandatory: true,
         },
     ],
     [
@@ -106,6 +114,7 @@ export const moduleProperties = new Map<string, ModuleDetails>([
         {
             isbatchReq: false,
             isQuestionnaireReq: true,
+            completeStatusChange: "QUESTIONNAIRE_AND_DATASET",
             isSecondaryFileApplicable: true,
             isDryRunReq: false,
             importLoadingMsg: {
@@ -125,13 +134,15 @@ export const moduleProperties = new Map<string, ModuleDetails>([
             isDownloadEmptyTemplateReq: true,
             applyQuestionnaireValidation: true,
             isSingleFileTypePerSubmission: true,
+            isDatasetMandatory: true,
         },
     ],
     [
         "AMR - Funghi",
         {
             isbatchReq: false,
-            isQuestionnaireReq: false,
+            isQuestionnaireReq: true,
+            completeStatusChange: "DATASET",
             isSecondaryFileApplicable: false,
             isDryRunReq: false,
             importLoadingMsg: {
@@ -149,6 +160,7 @@ export const moduleProperties = new Map<string, ModuleDetails>([
             isSpecimenReq: true,
             isDownloadEmptyTemplateReq: false,
             applyQuestionnaireValidation: false,
+            isDatasetMandatory: true,
         },
     ],
 ]);
