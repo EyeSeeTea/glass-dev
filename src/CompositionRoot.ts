@@ -39,7 +39,7 @@ import { MetadataDefaultRepository } from "./data/repositories/MetadataDefaultRe
 import { GetCountryInformationUseCase } from "./domain/usecases/GetCountryInformationUseCase";
 import { CountryInformationDefaultRepository } from "./data/repositories/CountryInformationDefaultRepository";
 import { GetNotificationByIdUseCase } from "./domain/usecases/GetNotificationByIdUseCase";
-import { ImportSampleFileUseCase } from "./domain/usecases/data-entry/ImportSampleFileUseCase";
+import { ImportSecondaryFileUseCase } from "./domain/usecases/data-entry/ImportSecondaryFileUseCase";
 import { RISDataCSVDefaultRepository } from "./data/repositories/data-entry/RISDataCSVDefaultRepository";
 import { SampleDataCSVDeafultRepository } from "./data/repositories/data-entry/SampleDataCSVDeafultRepository";
 import { GetGlassUploadsByModuleOUPeriodUseCase } from "./domain/usecases/GetGlassUploadsByModuleOUPeriodUseCase";
@@ -75,8 +75,8 @@ import { SignalDefaultRepository } from "./data/repositories/SignalDefaultReposi
 import { GetProgramQuestionnairesUseCase } from "./domain/usecases/GetProgramQuestionnairesUseCase";
 import { GetPopulatedProgramQuestionnaireUseCase } from "./domain/usecases/GetPopulatedProgramQuestionnaireUseCase";
 import { DeleteSignalUseCase } from "./domain/usecases/DeleteSignalUseCase";
-import { GetEGASPEmptyTemplateUseCase } from "./domain/usecases/data-entry/egasp/GetEGASPEmptyTemplateUseCase";
-import { EGASPDownloadEmptyTemplate } from "./data/repositories/download-empty-template/EGASPDownloadEmptyTemplate";
+import { GetEventProgramEmptyTemplateUseCase } from "./domain/usecases/data-entry/egasp/GetEventProgramEmptyTemplateUseCase";
+import { DownloadEmptyTemplateDefautlRepository } from "./data/repositories/download-empty-template/DownloadEmptyTemplateDefautlRepository";
 import { BulkLoadDataStoreClient } from "./data/data-store/BulkLoadDataStoreClient";
 import { ApplyAMCQuestionUpdationUseCase } from "./domain/usecases/ApplyAMCQuestionUpdationUseCase";
 import { SaveImportSummaryErrorsOfFilesInUploadsUseCase } from "./domain/usecases/SaveImportSummaryErrorsOfFilesInUploadsUseCase";
@@ -108,11 +108,11 @@ export function getCompositionRoot(instance: Instance) {
     const dhis2EventsDefaultRepository = new Dhis2EventsDefaultRepository(instance);
     const egaspProgramRepository = new EGASPProgramDefaultRepository(instance, bulkLoadDatastoreClient);
     const excelRepository = new ExcelPopulateDefaultRepository();
-    const eGASPValidationDefaultRepository = new ProgramRulesMetadataDefaultRepository(instance);
+    const programRulesMetadataDefaultRepository = new ProgramRulesMetadataDefaultRepository(instance);
     const trackerRepository = new TrackerDefaultRepository(instance);
     const captureFormRepository = new CaptureFormDefaultRepository(api);
     const signalRepository = new SignalDefaultRepository(dataStoreClient, api);
-    const downloadEmptyTemplateRepository = new EGASPDownloadEmptyTemplate(instance);
+    const downloadEmptyTemplateRepository = new DownloadEmptyTemplateDefautlRepository(instance);
     const amcProductDataRepository = new AMCProductDataRepository();
     const amcSubstanceDataRepository = new AMCSubstanceDataRepository();
 
@@ -163,14 +163,13 @@ export function getCompositionRoot(instance: Instance) {
                 dataValuesRepository,
                 glassModuleRepository,
                 dhis2EventsDefaultRepository,
-                egaspProgramRepository,
                 excelRepository,
                 glassDocumentsRepository,
                 glassUploadsRepository,
-                eGASPValidationDefaultRepository,
                 trackerRepository,
                 glassModuleRepository,
-                instanceRepository
+                instanceRepository,
+                programRulesMetadataDefaultRepository
             ),
             validatePrimaryFile: new ValidatePrimaryFileUseCase(
                 risDataRepository,
@@ -179,13 +178,23 @@ export function getCompositionRoot(instance: Instance) {
                 glassModuleRepository,
                 amcProductDataRepository
             ),
-            secondaryFile: new ImportSampleFileUseCase(sampleDataRepository, metadataRepository, dataValuesRepository),
+            secondaryFile: new ImportSecondaryFileUseCase(
+                sampleDataRepository,
+                metadataRepository,
+                dataValuesRepository,
+                excelRepository,
+                instanceRepository,
+                glassDocumentsRepository,
+                glassUploadsRepository,
+                dhis2EventsDefaultRepository,
+                programRulesMetadataDefaultRepository
+            ),
             validateSecondaryFile: new ValidateSampleFileUseCase(
                 sampleDataRepository,
                 amcSubstanceDataRepository,
                 glassModuleRepository
             ),
-            downloadEmptyTemplate: new GetEGASPEmptyTemplateUseCase(
+            downloadEmptyTemplate: new GetEventProgramEmptyTemplateUseCase(
                 metadataRepository,
                 downloadEmptyTemplateRepository,
                 excelRepository,

@@ -100,6 +100,12 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                     secondaryFileToDelete = rowToDelete;
                     primaryFileToDelete = rows?.filter(ris => ris.id === rowToDelete.correspondingRisUploadId)?.at(0);
                 }
+            } else if (!moduleProperties.get(currentModuleAccess.moduleName)?.isSecondaryRelated) {
+                if (rowToDelete.fileType === moduleProperties.get(currentModuleAccess.moduleName)?.primaryFileType) {
+                    primaryFileToDelete = rowToDelete;
+                } else {
+                    secondaryFileToDelete = rowToDelete;
+                }
             } else {
                 primaryFileToDelete = rowToDelete;
                 secondaryFileToDelete = undefined;
@@ -143,11 +149,14 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                                         ? compositionRoot.fileSubmission.secondaryFile(
                                               new File([secondaryFileDownload], secondaryFileToDelete.fileName),
                                               secondaryFileToDelete.batchId,
+                                              currentModuleAccess.moduleName,
                                               secondaryFileToDelete.period,
                                               "DELETE",
                                               orgUnitId,
+                                              orgUnitName,
                                               secondaryFileToDelete.countryCode,
-                                              false
+                                              false,
+                                              secondaryFileToDelete.eventListFileId
                                           )
                                         : Future.success(undefined),
                             }).run(
@@ -205,6 +214,7 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                                 error => {
                                     snackbar.error("Error deleting file");
                                     console.error(error);
+                                    setLoading(false);
                                 }
                             );
                         }
@@ -212,6 +222,67 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                     error => {
                         console.debug(
                             `Unable to download primary fileid : ${primaryFileToDelete?.fileId} OR secondary fileid : ${secondaryFileToDelete?.fileId}, error: ${error} `
+                        );
+                        setLoading(false);
+                    }
+                );
+            } else if (secondaryFileToDelete) {
+                setLoading(true);
+                compositionRoot.glassDocuments.download(secondaryFileToDelete.fileId).run(
+                    secondaryFileDownload => {
+                        if (
+                            secondaryFileToDelete &&
+                            secondaryFileToDelete.status.toLowerCase() !== "uploaded" &&
+                            secondaryFileDownload
+                        ) {
+                            compositionRoot.fileSubmission
+                                .secondaryFile(
+                                    new File([secondaryFileDownload], secondaryFileToDelete.fileName),
+                                    secondaryFileToDelete.batchId,
+                                    currentModuleAccess.moduleName,
+                                    secondaryFileToDelete.period,
+                                    "DELETE",
+                                    orgUnitId,
+                                    orgUnitName,
+                                    secondaryFileToDelete.countryCode,
+                                    false,
+                                    secondaryFileToDelete.eventListFileId
+                                )
+                                .run(
+                                    deleteSecondaryFileSummary => {
+                                        if (secondaryFileToDelete && deleteSecondaryFileSummary) {
+                                            const message = ` ${
+                                                secondaryFileToDelete.rows || secondaryFileToDelete.records
+                                            } rows deleted for ${
+                                                moduleProperties.get(currentModuleAccess.moduleName)?.secondaryFileType
+                                            } file.`;
+                                            compositionRoot.glassDocuments
+                                                .deleteByUploadId(secondaryFileToDelete.id)
+                                                .run(
+                                                    () => {
+                                                        refreshUploads({}); //Trigger re-render of parent
+                                                        setLoading(false);
+                                                        hideConfirmationDialog();
+                                                        snackbar.info(message);
+                                                    },
+                                                    error => {
+                                                        snackbar.error("Error deleting file");
+                                                        console.error(error);
+                                                    }
+                                                );
+                                        }
+                                    },
+                                    error => {
+                                        snackbar.error("Error deleting file");
+                                        console.error(error);
+                                        setLoading(false);
+                                    }
+                                );
+                        }
+                    },
+                    error => {
+                        console.debug(
+                            `Unable to download secondary fileid : ${secondaryFileToDelete?.fileId}, error: ${error} `
                         );
                         setLoading(false);
                     }

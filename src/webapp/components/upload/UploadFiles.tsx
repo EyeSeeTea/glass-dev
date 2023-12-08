@@ -14,7 +14,7 @@ import i18n from "@eyeseetea/d2-ui-components/locales";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import { UploadPrimaryFile } from "./UploadPrimaryFile";
-import { UploadSample } from "./UploadSample";
+import { UploadSecondary } from "./UploadSecondary";
 import { useAppContext } from "../../contexts/app-context";
 import { useCurrentDataSubmissionId } from "../../hooks/useCurrentDataSubmissionId";
 import { useCurrentModuleContext } from "../../contexts/current-module-context";
@@ -81,13 +81,16 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
     const { compositionRoot } = useAppContext();
     const snackbar = useSnackbar();
     const [isValidated, setIsValidated] = useState(false);
-    const [isFileValid, setIsFileValid] = useState(false);
+    const [isPrimaryFileValid, setIsPrimaryFileValid] = useState(false);
+    const [isSecondaryFileValid, setIsSecondaryFileValid] = useState(false);
     const [previousUploadsBatchIds, setPreviousUploadsBatchIds] = useState<string[]>([]);
     const [hasSecondaryFile, setHasSecondaryFile] = useState<boolean>(false);
     const [importLoading, setImportLoading] = useState<boolean>(false);
     const [previousBatchIdsLoading, setPreviousBatchIdsLoading] = useState<boolean>(true);
     const [loading, setLoading] = useState<boolean>(false);
-    const [uploadFileType, setUploadFileType] = useState<"PRODUCT" | "SUBSTANCE">("PRODUCT");
+    const [uploadFileType, setUploadFileType] = useState<"PRODUCT" | "SUBSTANCE">(
+        secondaryFile ? "SUBSTANCE" : "PRODUCT"
+    );
 
     const {
         currentModuleAccess: { moduleId, moduleName },
@@ -132,15 +135,18 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
 
     useEffect(() => {
         if (moduleProperties.get(moduleName)?.isbatchReq) {
-            if (batchId && isFileValid) {
+            if (batchId && isPrimaryFileValid) {
                 setIsValidated(true);
             } else {
                 setIsValidated(false);
             }
+        } else if (moduleProperties.get(moduleName)?.isSingleFileTypePerSubmission) {
+            if (isPrimaryFileValid || isSecondaryFileValid) setIsValidated(true);
+            else setIsValidated(false);
         } else {
-            if (isFileValid) setIsValidated(true);
+            if (isPrimaryFileValid) setIsValidated(true);
         }
-    }, [batchId, isFileValid, moduleName]);
+    }, [batchId, isPrimaryFileValid, isSecondaryFileValid, moduleName]);
 
     const changeBatchId = async (event: React.ChangeEvent<{ value: unknown }>) => {
         const batchId = event.target.value as string;
@@ -181,11 +187,14 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
                     ? compositionRoot.fileSubmission.secondaryFile(
                           secondaryFile,
                           batchId,
+                          moduleName,
                           currentPeriod,
                           "CREATE_AND_UPDATE",
                           orgUnitId,
+                          orgUnitName,
                           orgUnitCode,
-                          true
+                          true,
+                          ""
                       )
                     : Future.success(undefined),
             }).run(
@@ -242,6 +251,41 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
                     changeStep(2);
                 }
             );
+        } //secondary file upload only
+        else if (secondaryFile) {
+            setImportLoading(true);
+            compositionRoot.fileSubmission
+                .secondaryFile(
+                    secondaryFile,
+                    batchId,
+                    moduleName,
+                    currentPeriod,
+                    "CREATE_AND_UPDATE",
+                    orgUnitId,
+                    orgUnitName,
+                    orgUnitCode,
+                    true,
+                    ""
+                )
+                .run(
+                    importSubstanceFileSummary => {
+                        if (importSubstanceFileSummary) {
+                            setPrimaryFileImportSummary(importSubstanceFileSummary);
+                        }
+                        setImportLoading(false);
+                        changeStep(2);
+                    },
+                    error => {
+                        setPrimaryFileImportSummary({
+                            status: "ERROR",
+                            importCount: { ignored: 0, imported: 0, deleted: 0, updated: 0 },
+                            nonBlockingErrors: [],
+                            blockingErrors: [{ error: error, count: 1 }],
+                        });
+                        setImportLoading(false);
+                        changeStep(2);
+                    }
+                );
         }
     }, [
         primaryFile,
@@ -263,6 +307,8 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
         if (!hasSecondaryFile) {
             localStorage.removeItem("secondaryUploadId");
             uploadFileSubmissions();
+        } else if (!moduleProperties.get(moduleName)?.isSecondaryRelated) {
+            uploadFileSubmissions();
         }
         //update the secondary file with primary file upload id.
         else {
@@ -283,14 +329,15 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
 
     const downloadEmptyTemplate = useCallback(() => {
         setLoading(true);
-        compositionRoot.fileSubmission.downloadEmptyTemplate(orgUnitId).run(
+        compositionRoot.fileSubmission.downloadEmptyTemplate(moduleName, uploadFileType as string, orgUnitId).run(
             file => {
-                const fileName = "AMR_GLASS_EGASP_PRE_INPUT_FILES.xlsx";
-
                 //download file automatically
                 const downloadSimulateAnchor = document.createElement("a");
                 downloadSimulateAnchor.href = URL.createObjectURL(file);
-                downloadSimulateAnchor.download = fileName;
+                const fileType = moduleProperties.get(moduleName)?.isSingleFileTypePerSubmission
+                    ? `${uploadFileType}-LEVEL-DATA`
+                    : "";
+                downloadSimulateAnchor.download = `${moduleName}-${fileType}-${orgUnitCode}-TEMPLATE`;
                 // simulate link click
                 document.body.appendChild(downloadSimulateAnchor);
                 downloadSimulateAnchor.click();
@@ -302,7 +349,7 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
                 setLoading(false);
             }
         );
-    }, [compositionRoot.fileSubmission, snackbar, orgUnitId]);
+    }, [compositionRoot.fileSubmission, snackbar, orgUnitId, moduleName, orgUnitCode, uploadFileType]);
 
     return (
         <ContentWrapper>
@@ -348,17 +395,18 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
                     </FormControl>
                     {uploadFileType === "PRODUCT" ? (
                         <UploadPrimaryFile
-                            validate={setIsFileValid}
+                            validate={setIsPrimaryFileValid}
                             batchId={batchId}
                             primaryFile={primaryFile}
                             setPrimaryFile={setPrimaryFile}
                         />
                     ) : (
-                        <UploadSample
+                        <UploadSecondary
+                            validate={setIsSecondaryFileValid}
                             batchId={batchId}
-                            sampleFile={secondaryFile}
-                            setSampleFile={setSecondaryFile}
-                            setHasSampleFile={setHasSecondaryFile}
+                            secondaryFile={secondaryFile}
+                            setSecondaryFile={setSecondaryFile}
+                            setHasSecondaryFile={setHasSecondaryFile}
                         />
                     )}
                 </StyledSingleFileSelectContainer>
@@ -370,17 +418,18 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
                         <>
                             <div className="file-fields">
                                 <UploadPrimaryFile
-                                    validate={setIsFileValid}
+                                    validate={setIsPrimaryFileValid}
                                     batchId={batchId}
                                     primaryFile={primaryFile}
                                     setPrimaryFile={setPrimaryFile}
                                 />
                                 {moduleProperties.get(moduleName)?.isSecondaryFileApplicable && (
-                                    <UploadSample
+                                    <UploadSecondary
+                                        validate={setIsSecondaryFileValid}
                                         batchId={batchId}
-                                        sampleFile={secondaryFile}
-                                        setSampleFile={setSecondaryFile}
-                                        setHasSampleFile={setHasSecondaryFile}
+                                        secondaryFile={secondaryFile}
+                                        setSecondaryFile={setSecondaryFile}
+                                        setHasSecondaryFile={setHasSecondaryFile}
                                     />
                                 )}
                             </div>
@@ -426,7 +475,7 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
                     </div>
                 ) : null}
                 {moduleProperties.get(moduleName)?.isDownloadEmptyTemplateReq && (
-                    <Button variant="outlined" color="primary" disableElevation onClick={downloadEmptyTemplate}>
+                    <Button variant="outlined" color="primary" onClick={downloadEmptyTemplate}>
                         {i18n.t("Download empty template")}
                     </Button>
                 )}

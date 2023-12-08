@@ -142,6 +142,17 @@ export const ReviewDataSummary: React.FC<ReviewDataSummaryProps> = ({
                     setIsLoading(false);
                 }
             );
+        } else if (secondaryUploadId) {
+            return compositionRoot.glassUploads.setStatus({ id: secondaryUploadId, status: COMPLETED_STATUS }).run(
+                () => {
+                    changeStep(4);
+                    setIsLoading(false);
+                },
+                errorMessage => {
+                    snackbar.error(i18n.t(errorMessage));
+                    setIsLoading(false);
+                }
+            );
         }
     }, [
         changeStep,

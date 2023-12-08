@@ -1,29 +1,29 @@
-import { Dhis2EventsDefaultRepository } from "../../../../data/repositories/Dhis2EventsDefaultRepository";
-import { FutureData } from "../../../entities/Future";
-import { ImportSummary } from "../../../entities/data-entry/ImportSummary";
-import { ExcelRepository } from "../../../repositories/ExcelRepository";
 import { ImportStrategy } from "../../../entities/data-entry/DataValuesSaveSummary";
+import { ImportSummary } from "../../../entities/data-entry/ImportSummary";
+import { FutureData } from "../../../entities/Future";
+import { ExcelRepository } from "../../../repositories/ExcelRepository";
+import { InstanceDefaultRepository } from "../../../../data/repositories/InstanceDefaultRepository";
 import { GlassDocumentsRepository } from "../../../repositories/GlassDocumentsRepository";
 import { GlassUploadsRepository } from "../../../repositories/GlassUploadsRepository";
-import { ProgramRulesMetadataRepository } from "../../../repositories/program-rules/ProgramRulesMetadataRepository";
+import { Dhis2EventsDefaultRepository } from "../../../../data/repositories/Dhis2EventsDefaultRepository";
 import { MetadataRepository } from "../../../repositories/MetadataRepository";
-import { EGASP_PROGRAM_ID } from "../../../../data/repositories/program-rule/ProgramRulesMetadataDefaultRepository";
-import { InstanceDefaultRepository } from "../../../../data/repositories/InstanceDefaultRepository";
 import { ImportBLTemplateEventProgram } from "../ImportBLTemplateEventProgram";
+import { ProgramRulesMetadataRepository } from "../../../repositories/program-rules/ProgramRulesMetadataRepository";
 
-export class ImportEGASPFile {
+export const AMC_RAW_SUBSTANCE_CONSUMPTION_PROGRAM_ID = "q8aSKr17J5S";
+
+export class ImportAMCSubstanceLevelData {
     constructor(
-        private dhis2EventsDefaultRepository: Dhis2EventsDefaultRepository,
-        // private egaspProgramDefaultRepository: EGASPProgramDefaultRepository, TO DO : Delete?
         private excelRepository: ExcelRepository,
+        private instanceRepository: InstanceDefaultRepository,
         private glassDocumentsRepository: GlassDocumentsRepository,
         private glassUploadsRepository: GlassUploadsRepository,
-        private programRulesMetadataRepository: ProgramRulesMetadataRepository,
+        private dhis2EventsDefaultRepository: Dhis2EventsDefaultRepository,
         private metadataRepository: MetadataRepository,
-        private instanceRepository: InstanceDefaultRepository
+        private programRulesMetadataRepository: ProgramRulesMetadataRepository
     ) {}
 
-    public importEGASPFile(
+    public import(
         file: File,
         action: ImportStrategy,
         eventListId: string | undefined,
@@ -50,8 +50,8 @@ export class ImportEGASPFile {
             orgUnitId,
             orgUnitName,
             period,
-            EGASP_PROGRAM_ID,
-            "primaryUploadId"
+            AMC_RAW_SUBSTANCE_CONSUMPTION_PROGRAM_ID,
+            "secondaryUploadId"
         );
     }
 }

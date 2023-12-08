@@ -68,18 +68,12 @@ interface D2ProgramRuleVariableWithValueType extends D2ProgramRuleVariableBase {
     valueType?: string;
 }
 
-export interface EGASPProgramMetadata extends MetadataPick<MetadataQuery> {
+export interface EventProgramBLMetadata extends MetadataPick<MetadataQuery> {
     programRuleVariables: D2ProgramRuleVariableWithValueType[];
     dataElementsById: Record<Id, D2DataElement>;
 }
 
-// interface D2Event extends Event {
-//     trackedEntityInstance: Id | undefined;
-//     enrollment?: Id;
-//     enrollmentStatus: "ACTIVE" | "COMPLETED" | "CANCELLED";
-// }
-
-export type Program = EGASPProgramMetadata["programs"][number];
+export type Program = EventProgramBLMetadata["programs"][number];
 export type RuleEffect = RuleEffectAssign | RuleEffectShowError | RuleEffectShowWarn | RuleEffectOther;
 
 export interface RuleEffectAssign {

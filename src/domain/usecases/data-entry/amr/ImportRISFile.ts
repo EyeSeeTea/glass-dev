@@ -21,7 +21,7 @@ import {
     getCategoryOptionComboByOptionCodes,
 } from "../utils/getCategoryOptionCombo";
 import { includeBlokingErrors } from "../utils/includeBlockingErrors";
-import { mapToImportSummary } from "../utils/mapDhis2Summary";
+import { mapDataValuesToImportSummary } from "../utils/mapDhis2Summary";
 import { RISData } from "../../../entities/data-entry/amr-external/RISData";
 
 const AMR_AMR_DS_INPUT_FILES_RIS_DS_ID = "CeQPmXgrhHF";
@@ -146,7 +146,7 @@ export class ImportRISFile {
                                             rulesInstructions
                                         );
 
-                                        const importSummary = mapToImportSummary(saveSummary);
+                                        const importSummary = mapDataValuesToImportSummary(saveSummary);
 
                                         const summaryWithConsistencyBlokingErrors = includeBlokingErrors(
                                             importSummary,
@@ -175,7 +175,7 @@ export class ImportRISFile {
                     }
                     //If dry-run, do not run validations
                     else {
-                        const importSummary = mapToImportSummary(saveSummary);
+                        const importSummary = mapDataValuesToImportSummary(saveSummary);
 
                         const summaryWithConsistencyBlokingErrors = includeBlokingErrors(importSummary, [
                             ...pathogenAntibioticErrors,

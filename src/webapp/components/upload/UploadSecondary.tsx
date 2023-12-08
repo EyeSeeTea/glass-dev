@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Button, CircularProgress } from "@material-ui/core";
 import styled from "styled-components";
 import i18n from "@eyeseetea/d2-ui-components/locales";
@@ -16,16 +16,21 @@ import { useCallbackEffect } from "../../hooks/use-callback-effect";
 import { useCurrentPeriodContext } from "../../contexts/current-period-context";
 import { moduleProperties } from "../../../domain/utils/ModuleProperties";
 
-interface UploadSampleProps {
-    sampleFile: File | null;
-    setSampleFile: React.Dispatch<React.SetStateAction<File | null>>;
-    setHasSampleFile: React.Dispatch<React.SetStateAction<boolean>>;
+interface UploadSecondaryProps {
+    secondaryFile: File | null;
+    setSecondaryFile: React.Dispatch<React.SetStateAction<File | null>>;
+    setHasSecondaryFile: React.Dispatch<React.SetStateAction<boolean>>;
     batchId: string;
+    validate: (val: boolean) => void;
 }
 
-const SAMPLE_FILE_TYPE = "SAMPLE";
-
-export const UploadSample: React.FC<UploadSampleProps> = ({ batchId, sampleFile, setSampleFile, setHasSampleFile }) => {
+export const UploadSecondary: React.FC<UploadSecondaryProps> = ({
+    batchId,
+    secondaryFile,
+    setSecondaryFile,
+    setHasSecondaryFile,
+    validate,
+}) => {
     const { compositionRoot } = useAppContext();
 
     const {
@@ -39,13 +44,21 @@ export const UploadSample: React.FC<UploadSampleProps> = ({ batchId, sampleFile,
     const snackbar = useSnackbar();
 
     const [isLoading, setIsLoading] = useState(false);
-    const sampleFileUploadRef = useRef<DropzoneRef>(null);
+    const secondaryFileUploadRef = useRef<DropzoneRef>(null);
 
     const dataSubmissionId = useCurrentDataSubmissionId(compositionRoot, moduleId, orgUnitId, currentPeriod);
 
+    useEffect(() => {
+        if (secondaryFile) {
+            validate(true);
+        } else {
+            validate(false);
+        }
+    }, [secondaryFile, validate]);
+
     const openFileUploadDialog = useCallback(async () => {
-        sampleFileUploadRef.current?.openDialog();
-    }, [sampleFileUploadRef]);
+        secondaryFileUploadRef.current?.openDialog();
+    }, [secondaryFileUploadRef]);
 
     const removeFiles = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         event.preventDefault();
@@ -55,25 +68,25 @@ export const UploadSample: React.FC<UploadSampleProps> = ({ batchId, sampleFile,
             return compositionRoot.glassDocuments.deleteByUploadId(sampleUploadId).run(
                 () => {
                     localStorage.removeItem("secondaryUploadId");
-                    setSampleFile(null);
-                    setHasSampleFile(false);
+                    setSecondaryFile(null);
+                    setHasSecondaryFile(false);
                     setIsLoading(false);
                 },
                 errorMessage => {
                     snackbar.error(errorMessage);
-                    setSampleFile(null);
+                    setSecondaryFile(null);
                     setIsLoading(false);
                 }
             );
         } else {
-            setSampleFile(null);
+            setSecondaryFile(null);
             setIsLoading(false);
         }
     };
 
     const removeFilesEffect = useCallbackEffect(removeFiles);
 
-    const sampleFileUpload = useCallback(
+    const secondaryFileUpload = useCallback(
         (files: File[], rejections: FileRejection[]) => {
             if (rejections.length > 0) {
                 snackbar.error(i18n.t("Multiple uploads not allowed, please select one file"));
@@ -85,10 +98,10 @@ export const UploadSample: React.FC<UploadSampleProps> = ({ batchId, sampleFile,
                     return compositionRoot.fileSubmission.validateSecondaryFile(uploadedSample, moduleName).run(
                         sampleData => {
                             if (sampleData.isValid) {
-                                setSampleFile(uploadedSample);
+                                setSecondaryFile(uploadedSample);
                                 const data = {
                                     batchId,
-                                    fileType: SAMPLE_FILE_TYPE,
+                                    fileType: moduleProperties.get(moduleName)?.secondaryFileType ?? "",
                                     dataSubmission: dataSubmissionId,
                                     moduleId,
                                     moduleName,
@@ -102,7 +115,7 @@ export const UploadSample: React.FC<UploadSampleProps> = ({ batchId, sampleFile,
                                     uploadId => {
                                         localStorage.setItem("secondaryUploadId", uploadId);
                                         setIsLoading(false);
-                                        setHasSampleFile(true);
+                                        setHasSecondaryFile(true);
                                     },
                                     () => {
                                         snackbar.error(i18n.t("Error in file upload"));
@@ -134,13 +147,13 @@ export const UploadSample: React.FC<UploadSampleProps> = ({ batchId, sampleFile,
             moduleName,
             orgUnitCode,
             orgUnitId,
-            setHasSampleFile,
-            setSampleFile,
+            setHasSecondaryFile,
+            setSecondaryFile,
             snackbar,
         ]
     );
 
-    const sampleFileUploadEffect = useCallbackEffect(sampleFileUpload);
+    const secondaryFileUploadEffect = useCallbackEffect(secondaryFileUpload);
     const uploadLabel = moduleProperties.get(moduleName)?.secondaryUploadLabel?.split(",");
 
     return (
@@ -151,22 +164,22 @@ export const UploadSample: React.FC<UploadSampleProps> = ({ batchId, sampleFile,
                 </span>
             )}
             {/* Allow only one file upload per dataset */}
-            <Dropzone ref={sampleFileUploadRef} onDrop={sampleFileUploadEffect} maxFiles={1}>
+            <Dropzone ref={secondaryFileUploadRef} onDrop={secondaryFileUploadEffect} maxFiles={1}>
                 <Button
                     variant="contained"
                     color="primary"
                     className="choose-file-button"
                     endIcon={<BackupIcon />}
                     onClick={openFileUploadDialog}
-                    disabled={sampleFile === null ? false : true}
+                    disabled={secondaryFile === null ? false : true}
                 >
                     {i18n.t("Select file")}
                 </Button>
                 {isLoading && <CircularProgress size={25} />}
             </Dropzone>
-            {sampleFile && (
+            {secondaryFile && (
                 <RemoveContainer>
-                    {sampleFile?.name} - {sampleFile?.type}
+                    {secondaryFile?.name} - {secondaryFile?.type}
                     <StyledRemoveButton onClick={removeFilesEffect}>
                         <CloseIcon />
                     </StyledRemoveButton>

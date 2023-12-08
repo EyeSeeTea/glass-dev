@@ -1,35 +1,34 @@
-import { UseCase } from "../../../CompositionRoot";
-import { Future, FutureData } from "../../entities/Future";
-import { MetadataRepository } from "../../repositories/MetadataRepository";
-import { DataValuesRepository } from "../../repositories/data-entry/DataValuesRepository";
+import { D2ValidationResponse } from "../../../../data/repositories/MetadataDefaultRepository";
+import { Future, FutureData } from "../../../entities/Future";
+import { ImportStrategy } from "../../../entities/data-entry/DataValuesSaveSummary";
+import { ImportSummary } from "../../../entities/data-entry/ImportSummary";
+import { MetadataRepository } from "../../../repositories/MetadataRepository";
+import { DataValuesRepository } from "../../../repositories/data-entry/DataValuesRepository";
+import { checkBatchId } from "../utils/checkBatchId";
+import { checkCountry } from "../utils/checkCountry";
+import { checkDhis2Validations } from "../utils/checkDhis2Validations";
+import { checkYear } from "../utils/checkYear";
 import {
     AMR_SPECIMEN_GENDER_AGE_ORIGIN_CC_ID,
     getCategoryOptionComboByDataElement,
     getCategoryOptionComboByOptionCodes,
-} from "./utils/getCategoryOptionCombo";
-import { SampleData } from "../../entities/data-entry/amr-external/SampleData";
-import { SampleDataRepository } from "../../repositories/data-entry/SampleDataRepository";
-import { ImportSummary } from "../../entities/data-entry/ImportSummary";
-import { mapToImportSummary } from "./utils/mapDhis2Summary";
-import { checkBatchId } from "./utils/checkBatchId";
-import { includeBlokingErrors } from "./utils/includeBlockingErrors";
-import { checkYear } from "./utils/checkYear";
-import { ImportStrategy } from "../../entities/data-entry/DataValuesSaveSummary";
-import { D2ValidationResponse } from "../../../data/repositories/MetadataDefaultRepository";
-import { checkDhis2Validations } from "./utils/checkDhis2Validations";
-import { checkCountry } from "./utils/checkCountry";
+} from "../utils/getCategoryOptionCombo";
+import { includeBlokingErrors } from "../utils/includeBlockingErrors";
+import { mapDataValuesToImportSummary } from "../utils/mapDhis2Summary";
+import { SampleDataRepository } from "../../../repositories/data-entry/SampleDataRepository";
+import { SampleData } from "../../../entities/data-entry/amr-external/SampleData";
 
 const AMR_AMR_DS_Input_files_Sample_DS_ID = "OcAB7oaC072";
 const AMR_BATCHID_CC_ID = "rEMx3WFeLcU";
 
-export class ImportSampleFileUseCase implements UseCase {
+export class ImportSampleFile {
     constructor(
         private sampleDataRepository: SampleDataRepository,
         private metadataRepository: MetadataRepository,
         private dataValuesRepository: DataValuesRepository
     ) {}
 
-    public execute(
+    public import(
         inputFile: File,
         batchId: string,
         year: string,
@@ -113,7 +112,7 @@ export class ImportSampleFileUseCase implements UseCase {
                                 .map(rulesInstructions => {
                                     const dhis2ValidationErrors = checkDhis2Validations(validations, rulesInstructions);
 
-                                    const importSummary = mapToImportSummary(saveSummary);
+                                    const importSummary = mapDataValuesToImportSummary(saveSummary);
 
                                     const summaryWithConsistencyBlokingErrors = includeBlokingErrors(importSummary, [
                                         ...batchIdErrors,

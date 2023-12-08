@@ -8,7 +8,6 @@ import { ImportStrategy } from "../../entities/data-entry/DataValuesSaveSummary"
 import { ImportRISFile } from "./amr/ImportRISFile";
 import { ImportEGASPFile } from "./egasp/ImportEGASPFile";
 import { Dhis2EventsDefaultRepository } from "../../../data/repositories/Dhis2EventsDefaultRepository";
-import { EGASPProgramDefaultRepository } from "../../../data/repositories/download-empty-template/EGASPProgramDefaultRepository";
 import { ExcelRepository } from "../../repositories/ExcelRepository";
 import { GlassDocumentsRepository } from "../../repositories/GlassDocumentsRepository";
 import { GlassUploadsDefaultRepository } from "../../../data/repositories/GlassUploadsDefaultRepository";
@@ -28,14 +27,13 @@ export class ImportPrimaryFileUseCase {
         private dataValuesRepository: DataValuesRepository,
         private moduleRepository: GlassModuleRepository,
         private dhis2EventsDefaultRepository: Dhis2EventsDefaultRepository,
-        private egaspProgramDefaultRepository: EGASPProgramDefaultRepository,
         private excelRepository: ExcelRepository,
         private glassDocumentsRepository: GlassDocumentsRepository,
         private glassUploadsRepository: GlassUploadsDefaultRepository,
-        private eGASPValidationRepository: ProgramRulesMetadataRepository,
         private trackerRepository: TrackerRepository,
         private glassModuleDefaultRepository: GlassModuleDefaultRepository,
-        private instanceRepository: InstanceDefaultRepository
+        private instanceRepository: InstanceDefaultRepository,
+        private programRulesMetadataRepository: ProgramRulesMetadataRepository
     ) {}
 
     public execute(
@@ -64,16 +62,23 @@ export class ImportPrimaryFileUseCase {
             case "EGASP": {
                 const importEGASPFile = new ImportEGASPFile(
                     this.dhis2EventsDefaultRepository,
-                    this.egaspProgramDefaultRepository,
                     this.excelRepository,
                     this.glassDocumentsRepository,
                     this.glassUploadsRepository,
-                    this.eGASPValidationRepository,
+                    this.programRulesMetadataRepository,
                     this.metadataRepository,
                     this.instanceRepository
                 );
 
-                return importEGASPFile.importEGASPFile(inputFile, action, eventListId, orgUnitId, orgUnitName, period);
+                return importEGASPFile.importEGASPFile(
+                    inputFile,
+                    action,
+                    eventListId,
+                    moduleName,
+                    orgUnitId,
+                    orgUnitName,
+                    period
+                );
             }
 
             case "AMR - Individual":
@@ -82,7 +87,8 @@ export class ImportPrimaryFileUseCase {
                     this.risIndividualFunghiRepository,
                     this.trackerRepository,
                     this.glassDocumentsRepository,
-                    this.glassUploadsRepository
+                    this.glassUploadsRepository,
+                    this.metadataRepository
                 );
                 return this.glassModuleDefaultRepository.getByName(moduleName).flatMap(module => {
                     return importRISIndividualFunghiFile.importRISIndividualFunghiFile(
@@ -104,7 +110,8 @@ export class ImportPrimaryFileUseCase {
                     this.instanceRepository,
                     this.trackerRepository,
                     this.glassDocumentsRepository,
-                    this.glassUploadsRepository
+                    this.glassUploadsRepository,
+                    this.metadataRepository
                 );
 
                 return importAMCProductFile.importAMCProductFile(
@@ -112,7 +119,8 @@ export class ImportPrimaryFileUseCase {
                     action,
                     eventListId,
                     orgUnitId,
-                    orgUnitName
+                    orgUnitName,
+                    moduleName
                 );
             }
             default: {
