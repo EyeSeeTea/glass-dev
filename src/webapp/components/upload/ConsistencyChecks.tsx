@@ -68,11 +68,14 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
                     ? compositionRoot.fileSubmission.secondaryFile(
                           secondaryFile,
                           batchId,
+                          currentModuleAccess.moduleName,
                           currentPeriod,
                           "CREATE_AND_UPDATE",
                           currentOrgUnitAccess.orgUnitId,
+                          currentOrgUnitAccess.orgUnitName,
                           currentOrgUnitAccess.orgUnitCode,
-                          false
+                          false,
+                          ""
                       )
                     : Future.success(undefined),
             }).run(

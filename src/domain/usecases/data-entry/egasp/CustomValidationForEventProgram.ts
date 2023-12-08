@@ -5,10 +5,12 @@ import { ConsistencyError } from "../../../entities/data-entry/ImportSummary";
 import { EventResult } from "../../../entities/program-rules/EventEffectTypes";
 import { D2TrackerEvent as Event } from "@eyeseetea/d2-api/api/trackerEvents";
 import { MetadataRepository } from "../../../repositories/MetadataRepository";
+import { AMC_RAW_SUBSTANCE_CONSUMPTION_PROGRAM_ID } from "../amc/ImportAMCSubstanceLevelData";
+import { EGASP_PROGRAM_ID } from "../../../../data/repositories/program-rule/ProgramRulesMetadataDefaultRepository";
 
 const EGASP_DATAELEMENT_ID = "KaS2YBRN8eH";
 const PATIENT_DATAELEMENT_ID = "aocFHBxcQa0";
-export class CustomValidationForEGASP {
+export class CustomValidationForEventProgram {
     constructor(
         private dhis2EventsDefaultRepository: Dhis2EventsDefaultRepository,
         private metadataRepository: MetadataRepository
@@ -17,53 +19,94 @@ export class CustomValidationForEGASP {
         events: Event[],
         orgUnitId: string,
         orgUnitName: string,
-        period: string
+        period: string,
+        programId: string
     ): FutureData<any> {
+        const checkClinics = programId === EGASP_PROGRAM_ID ? true : false;
         //1. Org unit validation
-        return this.checkCountry(events, orgUnitId, orgUnitName).flatMap(orgUnitErrors => {
+        return this.checkCountry(events, orgUnitId, orgUnitName, checkClinics).flatMap(orgUnitErrors => {
             //2. Period validation
             const periodErrors = this.checkPeriod(events, period);
 
-            //Fetch all existing EGASP events for the given org unit
-            return this.dhis2EventsDefaultRepository.getEGASPEventsByOrgUnit(orgUnitId).flatMap(existingEvents => {
-                //3. Duplicate EGASP ID within org unit validation
-                const duplicateEGASPIdErrors = this.checkUniqueEgaspId(events, existingEvents);
-
-                //4. Duplicate Patient ID and Event date combo within org unit validation
-                const duplicatePatientIdErrors = this.checkUniquePatientIdAndDate(events, existingEvents);
-
+            if (programId === AMC_RAW_SUBSTANCE_CONSUMPTION_PROGRAM_ID) {
                 const results: EventResult = {
                     events: events,
-                    blockingErrors: [
-                        ...orgUnitErrors,
-                        ...periodErrors,
-                        ...duplicateEGASPIdErrors,
-                        ...duplicatePatientIdErrors,
-                    ],
+                    blockingErrors: [...orgUnitErrors, ...periodErrors],
                     nonBlockingErrors: [],
                 };
 
                 return Future.success(results);
-            });
+            } else if (programId === EGASP_PROGRAM_ID) {
+                //Fetch all existing EGASP events for the given org unit
+                return this.dhis2EventsDefaultRepository.getEGASPEventsByOrgUnit(orgUnitId).flatMap(existingEvents => {
+                    //3. Duplicate EGASP ID within org unit validation
+                    const duplicateEGASPIdErrors = this.checkUniqueEgaspId(events, existingEvents);
+
+                    //4. Duplicate Patient ID and Event date combo within org unit validation
+                    const duplicatePatientIdErrors = this.checkUniquePatientIdAndDate(events, existingEvents);
+
+                    const results: EventResult = {
+                        events: events,
+                        blockingErrors: [
+                            ...orgUnitErrors,
+                            ...periodErrors,
+                            ...duplicateEGASPIdErrors,
+                            ...duplicatePatientIdErrors,
+                        ],
+                        nonBlockingErrors: [],
+                    };
+
+                    return Future.success(results);
+                });
+            } //unkown program id, return success
+            else {
+                const results: EventResult = {
+                    events: events,
+                    blockingErrors: [],
+                    nonBlockingErrors: [],
+                };
+                return Future.success(results);
+            }
         });
     }
 
-    private checkCountry(events: Event[], countryId: string, countryName: string): FutureData<ConsistencyError[]> {
+    private checkCountry(
+        events: Event[],
+        countryId: string,
+        countryName: string,
+        checkClinics: boolean
+    ): FutureData<ConsistencyError[]> {
         const clinicsInEvents = events.map(e => e.orgUnit);
         return Future.joinObj({
-            clinicsInCountry: this.metadataRepository.getClinicsAndLabsInOrgUnitId(countryId),
-            clinicNamesInEvents: this.metadataRepository.getClinicOrLabNames(clinicsInEvents),
+            clinicsInCountry: checkClinics
+                ? this.metadataRepository.getClinicsAndLabsInOrgUnitId(countryId)
+                : Future.success(undefined),
+            clinicNamesInEvents: checkClinics
+                ? this.metadataRepository.getClinicOrLabNames(clinicsInEvents)
+                : Future.success(undefined),
         }).map(({ clinicsInCountry, clinicNamesInEvents }) => {
             const errors = _(
                 events.map(event => {
-                    if (!clinicsInCountry?.includes(event.orgUnit)) {
-                        const clinicName = clinicNamesInEvents.find(c => c.id === event.orgUnit)?.name ?? event.orgUnit;
-                        return {
-                            error: i18n.t(
-                                `Clinics in file, are not part of the selected country: Selected Country : ${countryName}, Clinic in file: ${clinicName}`
-                            ),
-                            line: parseInt(event.event),
-                        };
+                    if (checkClinics) {
+                        if (!clinicsInCountry?.includes(event.orgUnit)) {
+                            const clinicName =
+                                clinicNamesInEvents?.find(c => c.id === event.orgUnit)?.name ?? event.orgUnit;
+                            return {
+                                error: i18n.t(
+                                    `Clinics in file, are not part of the selected country: Selected Country : ${countryName}, Clinic in file: ${clinicName}`
+                                ),
+                                line: parseInt(event.event),
+                            };
+                        }
+                    } else {
+                        if (event.orgUnit !== countryId) {
+                            return {
+                                error: i18n.t(
+                                    `Selected Country is incorrect: Selected country : ${countryName}, country in file: ${event.orgUnit}`
+                                ),
+                                line: parseInt(event.event),
+                            };
+                        }
                     }
                 })
             )

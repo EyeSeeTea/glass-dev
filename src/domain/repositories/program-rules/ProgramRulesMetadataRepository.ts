@@ -1,6 +1,6 @@
 import { FutureData } from "../../entities/Future";
-import { EGASPProgramMetadata } from "../../entities/program-rules/EventEffectTypes";
+import { EventProgramBLMetadata } from "../../entities/program-rules/EventEffectTypes";
 
 export interface ProgramRulesMetadataRepository {
-    getMetadata(): FutureData<EGASPProgramMetadata>;
+    getMetadata(programId: string): FutureData<EventProgramBLMetadata>;
 }
