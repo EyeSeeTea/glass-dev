@@ -8,10 +8,10 @@ import { GlassState } from "./State";
 type GlassDataSubmissionState = GlassState<StatusDetails>;
 
 export function useStatusDataSubmission(
-    moduleId: string,
+    module: { id: string; name: string },
     orgUnit: string,
     period: string,
-    moduleName?: string,
+
     refetch: DataSubmissionStatusTypes | undefined = undefined
 ) {
     const { compositionRoot, currentUser } = useAppContext();
@@ -20,27 +20,29 @@ export function useStatusDataSubmission(
     });
 
     useEffect(() => {
-        const isQuarterlyModule = currentUser.quarterlyPeriodModules.find(m => m.id === moduleId) ? true : false;
-        compositionRoot.glassDataSubmission.getSpecificDataSubmission(moduleId, orgUnit, period, isQuarterlyModule).run(
-            currentDataSubmission => {
-                const dataSubmissionStatusDetails = statusMap(moduleName).get(currentDataSubmission.status);
+        const isQuarterlyModule = currentUser.quarterlyPeriodModules.find(m => m.id === module.id) ? true : false;
+        compositionRoot.glassDataSubmission
+            .getSpecificDataSubmission(module.id, module.name, orgUnit, period, isQuarterlyModule)
+            .run(
+                currentDataSubmission => {
+                    const dataSubmissionStatusDetails = statusMap(module.name).get(currentDataSubmission.status);
 
-                if (dataSubmissionStatusDetails)
-                    setDataSubmissionStatus({ kind: "loaded", data: dataSubmissionStatusDetails });
-            },
-            error => {
-                setDataSubmissionStatus({ kind: "error", message: error });
-            }
-        );
+                    if (dataSubmissionStatusDetails)
+                        setDataSubmissionStatus({ kind: "loaded", data: dataSubmissionStatusDetails });
+                },
+                error => {
+                    setDataSubmissionStatus({ kind: "error", message: error });
+                }
+            );
     }, [
         setDataSubmissionStatus,
         compositionRoot.glassDataSubmission,
-        moduleId,
+        module.id,
+        module.name,
         orgUnit,
         period,
         refetch,
         currentUser.quarterlyPeriodModules,
-        moduleName,
     ]);
 
     return dataSubmissionStatus;

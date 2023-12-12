@@ -100,7 +100,7 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
     } = useCurrentOrgUnitContext();
 
     const { currentPeriod } = useCurrentPeriodContext();
-    const dataSubmissionId = useCurrentDataSubmissionId(compositionRoot, moduleId, orgUnitId, currentPeriod);
+    const dataSubmissionId = useCurrentDataSubmissionId(moduleId, moduleName, orgUnitId, currentPeriod);
 
     useEffect(() => {
         if (moduleProperties.get(moduleName)?.isbatchReq) {
