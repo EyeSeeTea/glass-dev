@@ -83,7 +83,12 @@ export class GetAMCQuestionnaireListUseCase {
                     //Check If there is already an empty Questionnaire
                     let emptyQuestionnaireExists = false;
 
-                    updatedSplitAMCQuestionnaires.forEach(q => {
+                    updatedSplitAMCQuestionnaires.forEach((q, index) => {
+                        //Save the first questionnaire's event id as parent id,
+                        //to populate general section of AMC Data Questionnaire.
+                        if (index !== 0) {
+                            q.parentEventId = updatedSplitAMCQuestionnaires[0]?.eventId;
+                        }
                         if (!q.subQuestionnaires || q.subQuestionnaires.length === 0) {
                             emptyQuestionnaireExists = true;
                         }
@@ -97,7 +102,9 @@ export class GetAMCQuestionnaireListUseCase {
                             questionnaire.aggSubQuestionnaires = allSelectedQuestiosMap.map(sq => {
                                 return { id: sq.id, name: sq.name };
                             });
-
+                            //Save the first questionnaire's event id as parent id,
+                            //to populate general section of AMC Data Questionnaire.
+                            questionnaire.parentEventId = updatedSplitAMCQuestionnaires[0]?.eventId;
                             updatedSplitAMCQuestionnaires.push(questionnaire);
                         }
                     } else {
