@@ -31,4 +31,6 @@ export interface RISIndividualFunghiData {
     //AMR - Funghi
     ISOLATEID: string;
     PATHOGEN_DET: string;
+    AST_HFC_ID: string;
+    AMR_LABORATORY_CODE: string;
 }
