@@ -34,8 +34,8 @@ export const Submission: React.FC<SubmissionProps> = ({ setRefetchStatus, setCur
     const { currentPeriod } = useCurrentPeriodContext();
 
     const dataSubmissionId = useCurrentDataSubmissionId(
-        compositionRoot,
         currentModuleAccess.moduleId,
+        currentModuleAccess.moduleName,
         currentOrgUnitAccess.orgUnitId,
         currentPeriod
     );

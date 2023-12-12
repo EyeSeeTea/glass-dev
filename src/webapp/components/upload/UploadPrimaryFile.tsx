@@ -43,7 +43,7 @@ export const UploadPrimaryFile: React.FC<UploadPrimaryFileProps> = ({
     const [isLoading, setIsLoading] = useState(false);
     const primaryFileUploadRef = useRef<DropzoneRef>(null);
 
-    const dataSubmissionId = useCurrentDataSubmissionId(compositionRoot, moduleId, orgUnitId, currentPeriod);
+    const dataSubmissionId = useCurrentDataSubmissionId(moduleId, moduleName, orgUnitId, currentPeriod);
 
     const openFileUploadDialog = useCallback(async () => {
         primaryFileUploadRef.current?.openDialog();

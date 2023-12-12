@@ -26,6 +26,7 @@ import { useGlassUploadsByModuleOUPeriod } from "../../hooks/useGlassUploadsByMo
 import { getCompletedUploads } from "./ListOfDatasets";
 
 const AMR_MODULE_ID = "AVnpk4xiXGG";
+const AMR_MODULE_NAME = "AMR";
 interface QuestionnairesProps {
     setRefetchStatus: Dispatch<SetStateAction<DataSubmissionStatusTypes | undefined>>;
 }
@@ -41,14 +42,18 @@ export const Questionnaires: React.FC<QuestionnairesProps> = ({ setRefetchStatus
     const { uploads } = useGlassUploadsByModuleOUPeriod(currentPeriod.toString());
 
     const dataSubmissionId = useCurrentDataSubmissionId(
-        compositionRoot,
         currentModuleAccess.moduleId,
+        currentModuleAccess.moduleName,
         orgUnit.id,
         year
     );
     const { captureAccessGroup } = useCurrentUserGroupsAccess();
-    const currentDataSubmissionStatus = useStatusDataSubmission(currentModuleAccess.moduleId, orgUnit.id, year);
-    const amrDataSubmissionId = useCurrentDataSubmissionId(compositionRoot, AMR_MODULE_ID, orgUnit.id, currentPeriod);
+    const currentDataSubmissionStatus = useStatusDataSubmission(
+        { id: currentModuleAccess.moduleId, name: currentModuleAccess.moduleName },
+        orgUnit.id,
+        year
+    );
+    const amrDataSubmissionId = useCurrentDataSubmissionId(AMR_MODULE_ID, AMR_MODULE_NAME, orgUnit.id, currentPeriod);
 
     const setCompleteStatus = useCallback(() => {
         compositionRoot.glassDataSubmission.setStatus(dataSubmissionId, "COMPLETE").run(
@@ -182,7 +187,8 @@ export const Questionnaires: React.FC<QuestionnairesProps> = ({ setRefetchStatus
                     questionnaireId={formState.id}
                     readonly={formState.mode === "show" ? true : false}
                     hidePublish={true}
-                    signalEventId={formState.eventId}
+                    eventId={formState.eventId}
+                    parentEventId={formState.parentEventId}
                     subQuestionnaires={formState.subQuestionnaires}
                     aggsubQuestionnaires={formState.aggSubQuestionnaires}
                     refreshGrid={setRefresh}
@@ -355,6 +361,7 @@ type QuestionnaireFormState =
           mode: "show";
           id: Id;
           eventId?: Id;
+          parentEventId?: Id;
           subQuestionnaires?: NamedRef[];
           aggSubQuestionnaires?: NamedRef[];
       }
@@ -362,6 +369,7 @@ type QuestionnaireFormState =
           mode: "edit";
           id: Id;
           eventId?: Id;
+          parentEventId?: Id;
           subQuestionnaires?: NamedRef[];
           aggSubQuestionnaires?: NamedRef[];
       };
@@ -375,6 +383,7 @@ function useFormState() {
                 mode: options.mode,
                 id: questionnaire.id,
                 eventId: questionnaire.eventId,
+                parentEventId: questionnaire.parentEventId,
                 subQuestionnaires: questionnaire.subQuestionnaires,
                 aggSubQuestionnaires: questionnaire.aggSubQuestionnaires,
             });
