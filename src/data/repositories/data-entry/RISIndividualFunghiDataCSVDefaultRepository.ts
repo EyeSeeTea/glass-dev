@@ -40,6 +40,9 @@ export class RISIndividualFunghiDataCSVDefaultRepository implements RISIndividua
                         AB_CLASS: moduleName === "AMR - Individual" ? getTextValue(row, "AB_CLASS") : "",
                         ISOLATEID: moduleName === "AMR - Funghi" ? getTextValue(row, "ISOLATEID") : "",
                         PATHOGEN_DET: moduleName === "AMR - Funghi" ? getTextValue(row, "PATHOGEN_DET") : "",
+                        AST_HFC_ID: moduleName === "AMR - Funghi" ? getTextValue(row, "AST_HFC_ID") : "",
+                        AMR_LABORATORY_CODE:
+                            moduleName === "AMR - Funghi" ? getTextValue(row, "AMR_LABORATORY_CODE") : "",
                     };
                 }) || []
             );
@@ -87,7 +90,13 @@ export class RISIndividualFunghiDataCSVDefaultRepository implements RISIndividua
                         : !doesColumnExist(headerRow, "ISOLATEID")) &&
                     (moduleName === "AMR - Funghi"
                         ? doesColumnExist(headerRow, "PATHOGEN_DET")
-                        : !doesColumnExist(headerRow, "PATHOGEN_DET"));
+                        : !doesColumnExist(headerRow, "PATHOGEN_DET")) &&
+                    (moduleName === "AMR - Funghi"
+                        ? doesColumnExist(headerRow, "AST_HFC_ID")
+                        : !doesColumnExist(headerRow, "AST_HFC_ID")) &&
+                    (moduleName === "AMR - Funghi"
+                        ? doesColumnExist(headerRow, "AMR_LABORATORY_CODE")
+                        : !doesColumnExist(headerRow, "AMR_LABORATORY_CODE"));
 
                 const uniqSpecimens = _(sheet.rows)
                     .uniqBy("SPECIMEN")
