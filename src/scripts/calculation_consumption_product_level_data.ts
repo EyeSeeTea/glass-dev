@@ -255,6 +255,9 @@ function writeToFile(dataToWrite: Record<string, any>, fileName: string): void {
     fs.writeFileSync(`src/scripts/${fileName}.json`, JSON.stringify(dataToWrite, null, 2), "utf-8");
 }
 
+// Around 5 minutes
+const NUMBER_OF_ITERATIONS = 10000;
+
 function main() {
     const cmd = command({
         name: path.basename(__filename),
@@ -274,90 +277,9 @@ function main() {
                 process.exit(1);
             }
 
-            const workbook = XLSX.readFile(excelFilePath, { cellDates: true });
-            const tab1TEIInstancesSheetName = workbook.SheetNames[0];
-            const tab2RawProductConsumptionSheetName = workbook.SheetNames[1];
-
-            if (tab1TEIInstancesSheetName && tab2RawProductConsumptionSheetName) {
-                // TEI Instances tab
-                const jsonDataTEIInstancesNotClean = getJsonDataFromSheet(workbook, tab1TEIInstancesSheetName);
-                const jsonDataTEIInstances = getCleanJsonData(jsonDataTEIInstancesNotClean, 5);
-                // console.log("jsonDataTEIInstances", jsonDataTEIInstances);
-
-                const contentDDDPerProductAndDDDPerPackage: ContentDDDPerProductAndDDDPerPackage[] =
-                    jsonDataTEIInstances.map((product): any => {
-                        const positionTeiId = Object.values(TEI_INSTANCES_HEADERS).indexOf(
-                            TEI_INSTANCES_HEADERS.TEI_ID
-                        );
-                        const teiId: string = (product as any[])[positionTeiId].toString();
-
-                        // 1 - Calculate the content per product = content
-                        const contentPerProduct = calculateContentPerProduct(product as any[]);
-                        // 2 - Identify corresponding DDD per product = ddd
-                        const dddPerProduct = calculateDDDPerProduct(product as any[]);
-                        // 3 - Calculate DDD per package = ddd_per_pack
-                        const dddPerPackage = getDDDPerPackage(product as any[], contentPerProduct, dddPerProduct);
-
-                        return {
-                            teiId,
-                            contentPerProduct,
-                            dddPerProduct,
-                            dddPerPackage,
-                        };
-                    });
-
-                writeToFile({ contentDDDPerProductAndDDDPerPackage }, "1&2&3 - contentDDDPerProductAndDDDPerPackage");
-
-                // AMC - Raw Product Consumption tab
-                const jsonDataRawProductConsumptionNotClean = getJsonDataFromSheet(
-                    workbook,
-                    tab2RawProductConsumptionSheetName
-                );
-                const jsonDataRawProductConsumption = getCleanJsonData(jsonDataRawProductConsumptionNotClean, 2);
-                // console.log("jsonDataRawProductConsumption", jsonDataRawProductConsumption);
-
-                // 4 - Calculate DDD per product consumption packages = ddd_cons_product
-                const dddPerProductConsumptionPackages: DDDPerProductConsumptionPackages[] =
-                    jsonDataRawProductConsumption.map((productConsumption): any => {
-                        return getDDDPerProductConsumptionPackages(
-                            productConsumption as any[],
-                            contentDDDPerProductAndDDDPerPackage
-                        );
-                    });
-
-                writeToFile({ dddPerProductConsumptionPackages }, "4 - dddPerProductConsumptionPackages");
-
-                // 5 - Calculate tonnes per ATC5 (using content from step 1) = content_tonnes
-                const contentTonnesPerATCUsingContent = aggregateContentTonnesUsingContent(
-                    jsonDataTEIInstances,
-                    jsonDataRawProductConsumption,
-                    contentDDDPerProductAndDDDPerPackage
-                );
-                writeToFile({ contentTonnesPerATCUsingContent }, "5 - contentTonnesPerATCUsingContent");
-
-                // 5 - Calculate tonnes per ATC5 (using DDD per product consumption packages from step 4) = content_tonnes
-                const contentTonnesPerATCUsingDDDPerConsuptionPackages =
-                    aggregateContentTonnesUsingDDDPerConsuptionPackages(
-                        jsonDataTEIInstances,
-                        jsonDataRawProductConsumption,
-                        dddPerProductConsumptionPackages
-                    );
-                writeToFile(
-                    { contentTonnesPerATCUsingDDDPerConsuptionPackages },
-                    "5 - contentTonnesPerATCUsingDDDPerConsuptionPackages"
-                );
-
-                // 5c, 6a, 7a, 8a
-                const dataByAtcRouteAdminYearHealthSectorAndHealthLevel =
-                    aggregateDataByAtcRouteAdminYearHealthSectorAndHealthLevel(
-                        jsonDataTEIInstances,
-                        jsonDataRawProductConsumption,
-                        contentDDDPerProductAndDDDPerPackage
-                    );
-                writeToFile(
-                    { dataByAtcRouteAdminYearHealthSectorAndHealthLevel },
-                    "LAST - aggregateDataByAtcRouteAdminYearHealthSectorAndHealthLevel"
-                );
+            for (let i = 1; i <= NUMBER_OF_ITERATIONS; i++) {
+                calculationConsumptionProductLevelData(excelFilePath);
+                console.log("Iteration: ", i);
             }
         },
     });
@@ -366,6 +288,93 @@ function main() {
 }
 
 main();
+
+function calculationConsumptionProductLevelData(excelFilePath: string): void {
+    const workbook = XLSX.readFile(excelFilePath, { cellDates: true });
+    const tab1TEIInstancesSheetName = workbook.SheetNames[0];
+    const tab2RawProductConsumptionSheetName = workbook.SheetNames[1];
+
+    if (tab1TEIInstancesSheetName && tab2RawProductConsumptionSheetName) {
+        // TEI Instances tab
+        const jsonDataTEIInstancesNotClean = getJsonDataFromSheet(workbook, tab1TEIInstancesSheetName);
+        const jsonDataTEIInstances = getCleanJsonData(jsonDataTEIInstancesNotClean, 5);
+        // console.log("jsonDataTEIInstances", jsonDataTEIInstances);
+
+        const contentDDDPerProductAndDDDPerPackage: ContentDDDPerProductAndDDDPerPackage[] = jsonDataTEIInstances.map(
+            (product): any => {
+                const positionTeiId = Object.values(TEI_INSTANCES_HEADERS).indexOf(TEI_INSTANCES_HEADERS.TEI_ID);
+                const teiId: string = (product as any[])[positionTeiId].toString();
+
+                // 1 - Calculate the content per product = content
+                const contentPerProduct = calculateContentPerProduct(product as any[]);
+                // 2 - Identify corresponding DDD per product = ddd
+                const dddPerProduct = calculateDDDPerProduct(product as any[]);
+                // 3 - Calculate DDD per package = ddd_per_pack
+                const dddPerPackage = getDDDPerPackage(product as any[], contentPerProduct, dddPerProduct);
+
+                return {
+                    teiId,
+                    contentPerProduct,
+                    dddPerProduct,
+                    dddPerPackage,
+                };
+            }
+        );
+
+        writeToFile({ contentDDDPerProductAndDDDPerPackage }, "1&2&3 - contentDDDPerProductAndDDDPerPackage");
+
+        // AMC - Raw Product Consumption tab
+        const jsonDataRawProductConsumptionNotClean = getJsonDataFromSheet(
+            workbook,
+            tab2RawProductConsumptionSheetName
+        );
+        const jsonDataRawProductConsumption = getCleanJsonData(jsonDataRawProductConsumptionNotClean, 2);
+        // console.log("jsonDataRawProductConsumption", jsonDataRawProductConsumption);
+
+        // 4 - Calculate DDD per product consumption packages = ddd_cons_product
+        const dddPerProductConsumptionPackages: DDDPerProductConsumptionPackages[] = jsonDataRawProductConsumption.map(
+            (productConsumption): any => {
+                return getDDDPerProductConsumptionPackages(
+                    productConsumption as any[],
+                    contentDDDPerProductAndDDDPerPackage
+                );
+            }
+        );
+
+        writeToFile({ dddPerProductConsumptionPackages }, "4 - dddPerProductConsumptionPackages");
+
+        // 5 - Calculate tonnes per ATC5 (using content from step 1) = content_tonnes
+        const contentTonnesPerATCUsingContent = aggregateContentTonnesUsingContent(
+            jsonDataTEIInstances,
+            jsonDataRawProductConsumption,
+            contentDDDPerProductAndDDDPerPackage
+        );
+        writeToFile({ contentTonnesPerATCUsingContent }, "5 - contentTonnesPerATCUsingContent");
+
+        // 5 - Calculate tonnes per ATC5 (using DDD per product consumption packages from step 4) = content_tonnes
+        const contentTonnesPerATCUsingDDDPerConsuptionPackages = aggregateContentTonnesUsingDDDPerConsuptionPackages(
+            jsonDataTEIInstances,
+            jsonDataRawProductConsumption,
+            dddPerProductConsumptionPackages
+        );
+        writeToFile(
+            { contentTonnesPerATCUsingDDDPerConsuptionPackages },
+            "5 - contentTonnesPerATCUsingDDDPerConsuptionPackages"
+        );
+
+        // 5c, 6a, 7a, 8a
+        const dataByAtcRouteAdminYearHealthSectorAndHealthLevel =
+            aggregateDataByAtcRouteAdminYearHealthSectorAndHealthLevel(
+                jsonDataTEIInstances,
+                jsonDataRawProductConsumption,
+                contentDDDPerProductAndDDDPerPackage
+            );
+        writeToFile(
+            { dataByAtcRouteAdminYearHealthSectorAndHealthLevel },
+            "LAST - aggregateDataByAtcRouteAdminYearHealthSectorAndHealthLevel"
+        );
+    }
+}
 
 // 1 - Calculate the content per product
 function calculateContentPerProduct(product: any[]): Content {
