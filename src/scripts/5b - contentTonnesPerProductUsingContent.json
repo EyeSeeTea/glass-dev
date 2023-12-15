@@ -1,0 +1,48 @@
+{
+  "contentTonnesPerProductUsingContent": [
+    {
+      "teiId": "1",
+      "contentTonnes": 0.000016
+    },
+    {
+      "teiId": "PROD2",
+      "contentTonnes": 0.000005
+    },
+    {
+      "teiId": "200713147",
+      "contentTonnes": 0.00000875
+    },
+    {
+      "teiId": "PROD3",
+      "contentTonnes": 0.000001
+    },
+    {
+      "teiId": "#4",
+      "contentTonnes": 6e-7
+    },
+    {
+      "teiId": "ZWE_5",
+      "contentTonnes": 0.000028
+    },
+    {
+      "teiId": "P6",
+      "contentTonnes": 0.000005
+    },
+    {
+      "teiId": "A",
+      "contentTonnes": 0.000005
+    },
+    {
+      "teiId": "B",
+      "contentTonnes": 0.000001
+    },
+    {
+      "teiId": "BACTOR##4",
+      "contentTonnes": 0.00002
+    },
+    {
+      "teiId": "BACT##5",
+      "contentTonnes": 0.00001
+    }
+  ]
+}
