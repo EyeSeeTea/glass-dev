@@ -1,0 +1,4673 @@
+[
+    {
+        "name": "ddd_combinations",
+        "data": [
+            {
+                "COMB_CODE": "J01AA20_1",
+                "ARS": "J01AA20_O",
+                "ATC5": "J01AA20",
+                "FORM": "Tab",
+                "ROUTE": "O",
+                "SUBSTANCES": "tetracycline 115.4 mg/\nchlortetracycline 115.4 mg/\ndemeclocycline 69.2 mg",
+                "DDD": 2,
+                "DDD_UNIT": "UD",
+                "DDD_INFO": "2 UD (=2 tab)",
+                "EXAMPLE": "Deteclo"
+            },
+            {
+                "COMB_CODE": "J01CA20_1",
+                "ARS": "J01CA20_O",
+                "ATC5": "J01CA20",
+                "FORM": "Tab",
+                "ROUTE": "O",
+                "SUBSTANCES": "pivampicillin 0.25 g/\npivmecillinam 0.2 g",
+                "DDD": 3,
+                "DDD_UNIT": "UD",
+                "DDD_INFO": "3 UD (=3 tab)",
+                "EXAMPLE": "Miraxid"
+            },
+            {
+                "COMB_CODE": "J01CA20_2",
+                "ARS": "J01CA20_O",
+                "ATC5": "J01CA20",
+                "FORM": "Tab",
+                "ROUTE": "O",
+                "SUBSTANCES": "pivampicillin 0.125 g/\npivmecillinam 0.1 g",
+                "DDD": 6,
+                "DDD_UNIT": "UD",
+                "DDD_INFO": "6 UD (=6 tab)",
+                "EXAMPLE": "Miraxid mite"
+            },
+            {
+                "COMB_CODE": "J01CE30_1",
+                "ARS": "J01CE30_P",
+                "ATC5": "J01CE30",
+                "FORM": "Powder for inj",
+                "ROUTE": "P",
+                "SUBSTANCES": "comb. of benzylpenicillin/\nprocain-benzylpenicillin/\nbenzathine benzylpenicillin",
+                "DDD": 3.6,
+                "DDD_UNIT": "G",
+                "DDD_INFO": "3.6 g expressed as benzylpenicillin",
+                "EXAMPLE": "Bicillin C-R, Bicillin A-P, Bicillin"
+            },
+            {
+                "COMB_CODE": "J01CR50_1",
+                "ARS": "J01CR50_O",
+                "ATC5": "J01CR50",
+                "FORM": "Tab",
+                "ROUTE": "O",
+                "SUBSTANCES": "ampicillin 0.25 g/\ncloxacillin 0.25 g",
+                "DDD": 4,
+                "DDD_UNIT": "UD",
+                "DDD_INFO": "4 UD (=4 tab)",
+                "EXAMPLE": "Ampiclox"
+            },
+            {
+                "COMB_CODE": "J01CR50_2",
+                "ARS": "J01CR50_P",
+                "ATC5": "J01CR50",
+                "FORM": "Powder for inj",
+                "ROUTE": "P",
+                "SUBSTANCES": "ampicillin 0.66 g/\noxacillin 0.33 g",
+                "DDD": 2,
+                "DDD_UNIT": "UD",
+                "DDD_INFO": "2 UD (= 2 g)",
+                "EXAMPLE": "Ampoxium"
+            },
+            {
+                "COMB_CODE": "J01CR50_3",
+                "ARS": "J01CR50_O",
+                "ATC5": "J01CR50",
+                "FORM": "Caps",
+                "ROUTE": "O",
+                "SUBSTANCES": "ampicillin 0.125g/\noxacillin 0.125 g",
+                "DDD": 8,
+                "DDD_UNIT": "UD",
+                "DDD_INFO": "8 UD (= 8 caps)",
+                "EXAMPLE": "Ampoxium"
+            },
+            {
+                "COMB_CODE": "J01CR50_4",
+                "ARS": "J01CR50_O",
+                "ATC5": "J01CR50",
+                "FORM": "Tab",
+                "ROUTE": "O",
+                "SUBSTANCES": "ampicillin 0.25 g/\nflucloxacillin 0.25 g",
+                "DDD": 4,
+                "DDD_UNIT": "UD",
+                "DDD_INFO": "4 UD (=4 tab)",
+                "EXAMPLE": "Co-fluampicil"
+            },
+            {
+                "COMB_CODE": "J01CR50_5",
+                "ARS": "J01CR50_P",
+                "ATC5": "J01CR50",
+                "FORM": "Powder for inj",
+                "ROUTE": "P",
+                "SUBSTANCES": "ampicillin 250 mg/\ncloxacillin 250 mg",
+                "DDD": 2,
+                "DDD_UNIT": "UD",
+                "DDD_INFO": "2 UD (=2 grams of powder for injection)",
+                "EXAMPLE": "Viccillin-S"
+            },
+            {
+                "COMB_CODE": "J01CR50_6",
+                "ARS": "J01CR50_P",
+                "ATC5": "J01CR50",
+                "FORM": "Powder for inj",
+                "ROUTE": "P",
+                "SUBSTANCES": "ampicillin 500 mg/\ncloxacillin 500 mg",
+                "DDD": 2,
+                "DDD_UNIT": "UD",
+                "DDD_INFO": "2 UD (=2 grams of powder for injection)",
+                "EXAMPLE": "Viccillin-S"
+            },
+            {
+                "COMB_CODE": "J01CR50_7",
+                "ARS": "J01CR50_O",
+                "ATC5": "J01CR50",
+                "FORM": "Tab",
+                "ROUTE": "O",
+                "SUBSTANCES": "ampicillin 125 mg/\ncloxacillin 125 mg",
+                "DDD": 8,
+                "DDD_UNIT": "UD",
+                "DDD_INFO": "8 UD (=8 tab)",
+                "EXAMPLE": "Viccillin-S"
+            },
+            {
+                "COMB_CODE": "J01CR50_8",
+                "ARS": "J01CR50_O",
+                "ATC5": "J01CR50",
+                "FORM": "tab",
+                "ROUTE": "O",
+                "SUBSTANCES": "amoxicillin 250 mg/\ncloxacillin 250 mg",
+                "DDD": 4,
+                "DDD_UNIT": "UD",
+                "DDD_INFO": "4 UD (=4 tab)",
+                "EXAMPLE": "Betaclox"
+            },
+            {
+                "COMB_CODE": "J01EC20_1",
+                "ARS": "J01EC20_O",
+                "ATC5": "J01EC20",
+                "FORM": "Tab",
+                "ROUTE": "O",
+                "SUBSTANCES": "sulfacarbamide 0.167 g/\nsulfadiazine 0.167 g/\nsulfadimidine 0.167 g",
+                "DDD": 4,
+                "DDD_UNIT": "UD",
+                "DDD_INFO": "4 UD (=4 tab)",
+                "EXAMPLE": "Trisulfamid"
+            },
+            {
+                "COMB_CODE": "J01EE01_1",
+                "ARS": "J01EE01_P",
+                "ATC5": "J01EE01",
+                "FORM": "Inf conc",
+                "ROUTE": "P",
+                "SUBSTANCES": "sulfamethoxazole 80 mg/\ntrimethoprim 16 mg",
+                "DDD": 20,
+                "DDD_UNIT": "UD",
+                "DDD_INFO": "20 UD (=20 ml)",
+                "EXAMPLE": "Bactrim, Eusaprim, Trimetoprim-sulfa"
+            },
+            {
+                "COMB_CODE": "J01EE01_2",
+                "ARS": "J01EE01_O",
+                "ATC5": "J01EE01",
+                "FORM": "Mixt",
+                "ROUTE": "O",
+                "SUBSTANCES": "sulfamethoxazole 0.2 g/\ntrimethoprim 40 mg",
+                "DDD": 8,
+                "DDD_UNIT": "UD",
+                "DDD_INFO": "8 UD (= 40 ml)",
+                "EXAMPLE": "Bactrim, Eusaprim, Trimetoprim-sulfa"
+            },
+            {
+                "COMB_CODE": "J01EE01_3",
+                "ARS": "J01EE01_O",
+                "ATC5": "J01EE01",
+                "FORM": "Tab",
+                "ROUTE": "O",
+                "SUBSTANCES": "sulfamethoxazole 0.4 g/\ntrimethoprim 80 mg",
+                "DDD": 4,
+                "DDD_UNIT": "UD",
+                "DDD_INFO": "4 UD (=4 tab)",
+                "EXAMPLE": "Bactrim, Eusaprim Trimetoprim-sulfa"
+            },
+            {
+                "COMB_CODE": "J01EE02_1",
+                "ARS": "J01EE02_O",
+                "ATC5": "J01EE02",
+                "FORM": "Mixt",
+                "ROUTE": "O",
+                "SUBSTANCES": "sulfadiazine 0.205 g/\ntrimethoprim 45 mg",
+                "DDD": 4,
+                "DDD_UNIT": "UD",
+                "DDD_INFO": "4 UD (=20 ml)",
+                "EXAMPLE": "Triglobe, Trimin Sulfa"
+            },
+            {
+                "COMB_CODE": "J01EE02_2",
+                "ARS": "J01EE02_O",
+                "ATC5": "J01EE02",
+                "FORM": "Tab",
+                "ROUTE": "O",
+                "SUBSTANCES": "sulfadiazine 0.41 g/\ntrimethoprim 90 mg",
+                "DDD": 2,
+                "DDD_UNIT": "UD",
+                "DDD_INFO": "2 UD (=2 tab)",
+                "EXAMPLE": "Triglobe, Trimin Sulfa"
+            },
+            {
+                "COMB_CODE": "J01EE03_1",
+                "ARS": "J01EE03_O",
+                "ATC5": "J01EE03",
+                "FORM": "Tab",
+                "ROUTE": "O",
+                "SUBSTANCES": "sulfametrole 0.8 g/\ntrimethoprim 0.16 g",
+                "DDD": 2,
+                "DDD_UNIT": "UD",
+                "DDD_INFO": "2 UD (=2 tab)",
+                "EXAMPLE": "Lidaprim"
+            },
+            {
+                "COMB_CODE": "J01EE03_2",
+                "ARS": "J01EE03_P",
+                "ATC5": "J01EE03",
+                "FORM": "Powder for inj",
+                "ROUTE": "P",
+                "SUBSTANCES": "sulfametrole 0.8 g/\ntrimethoprim 0.16 g per vial",
+                "DDD": 2,
+                "DDD_UNIT": "UD",
+                "DDD_INFO": "2 UD (defined as 2 vials)",
+                "EXAMPLE": "Lidaprim"
+            },
+            {
+                "COMB_CODE": "J01EE06_1",
+                "ARS": "J01EE06_O",
+                "ATC5": "J01EE06",
+                "FORM": "Tab",
+                "ROUTE": "O",
+                "SUBSTANCES": "sulfadiazin 0.25 g/\ntetroxoprim 0.1 g",
+                "DDD": 2,
+                "DDD_UNIT": "UD",
+                "DDD_INFO": "2 UD (=2 tab)",
+                "EXAMPLE": "Sterinor"
+            },
+            {
+                "COMB_CODE": "J01EE07_1",
+                "ARS": "J01EE07_O",
+                "ATC5": "J01EE07",
+                "FORM": "Tab",
+                "ROUTE": "O",
+                "SUBSTANCES": "sulfamerazin 0.12 g/\ntrimethoprim 80 mg",
+                "DDD": 4,
+                "DDD_UNIT": "UD",
+                "DDD_INFO": "4 UD (=4 tab)",
+                "EXAMPLE": "Berlocombin"
+            },
+            {
+                "COMB_CODE": "J01RA04_1",
+                "ARS": "J01RA04_O",
+                "ATC5": "J01RA04",
+                "FORM": "Tab",
+                "ROUTE": "O",
+                "SUBSTANCES": "spiramycin 1.5 MU/\nmetronidazole 250 mg",
+                "DDD": 3,
+                "DDD_UNIT": "UD",
+                "DDD_INFO": "3 UD (=3 tab)",
+                "EXAMPLE": "Bidontogyl"
+            },
+            {
+                "COMB_CODE": "J01RA04_2",
+                "ARS": "J01RA04_O",
+                "ATC5": "J01RA04",
+                "FORM": "Tab",
+                "ROUTE": "O",
+                "SUBSTANCES": "spiramycin 0.75 MU/\nmetronidazole 125 mg",
+                "DDD": 6,
+                "DDD_UNIT": "UD",
+                "DDD_INFO": "6 UD (=6 tab)",
+                "EXAMPLE": "Orogyl"
+            },
+            {
+                "COMB_CODE": "J01RA05_1",
+                "ARS": "J01RA05_O",
+                "ATC5": "J01RA05",
+                "FORM": "Tab",
+                "ROUTE": "O",
+                "SUBSTANCES": "levofloxacin 250 mg/\nornidazole 500 mg",
+                "DDD": 2,
+                "DDD_UNIT": "UD",
+                "DDD_INFO": "2 UD (=2 tab)",
+                "EXAMPLE": "Duobact"
+            },
+            {
+                "COMB_CODE": "J01RA07_1",
+                "ARS": "J01RA07_O",
+                "ATC5": "J01RA07",
+                "FORM": "Tab",
+                "ROUTE": "O",
+                "SUBSTANCES": "azithromycin 1000 mg (1 tab)/\nfluconazole 150 mg (1 tab)/\nsecnidazole 1000 mg (2 tab)",
+                "DDD": 4,
+                "DDD_UNIT": "UD",
+                "DDD_INFO": "4 UD (=4 tab)",
+                "EXAMPLE": "Safocid"
+            },
+            {
+                "COMB_CODE": "J01RA09_1",
+                "ARS": "J01RA09_O",
+                "ATC5": "J01RA09",
+                "FORM": "Tab",
+                "ROUTE": "O",
+                "SUBSTANCES": "ofloxacin 200 mg/\nornidazole 500 mg",
+                "DDD": 2,
+                "DDD_UNIT": "UD",
+                "DDD_INFO": "2 UD (=2 tab)",
+                "EXAMPLE": "Oflox Oz"
+            },
+            {
+                "COMB_CODE": "J01RA10_1",
+                "ARS": "J01RA10_O",
+                "ATC5": "J01RA10",
+                "FORM": "Tab",
+                "ROUTE": "O",
+                "SUBSTANCES": "ciprofloxacin 500 mg/\nmetronidazole 200 mg",
+                "DDD": 2,
+                "DDD_UNIT": "UD",
+                "DDD_INFO": "2 UD (=2 tab)",
+                "EXAMPLE": "Cipramed"
+            },
+            {
+                "COMB_CODE": "J01RA11_1",
+                "ARS": "J01RA11_O",
+                "ATC5": "J01RA11",
+                "FORM": "Tab",
+                "ROUTE": "O",
+                "SUBSTANCES": "ciprofloxacin 500 mg/\ntinidazole 600 mg",
+                "DDD": 2,
+                "DDD_UNIT": "UD",
+                "DDD_INFO": "2 UD (=2 tab)",
+                "EXAMPLE": "Ciprotini"
+            },
+            {
+                "COMB_CODE": "J01RA11_2",
+                "ARS": "J01RA11_O",
+                "ATC5": "J01RA11",
+                "FORM": "Tab",
+                "ROUTE": "O",
+                "SUBSTANCES": "ciprofloxacin 250 mg/\ntinidazole 300 mg",
+                "DDD": 4,
+                "DDD_UNIT": "UD",
+                "DDD_INFO": "4 UD (=4 tab)",
+                "EXAMPLE": "Ciptin"
+            },
+            {
+                "COMB_CODE": "J01RA12_1",
+                "ARS": "J01RA12_O",
+                "ATC5": "J01RA12",
+                "FORM": "Tab",
+                "ROUTE": "O",
+                "SUBSTANCES": "ciprofloxacin 500 mg/\nornidazole 500 mg",
+                "DDD": 2,
+                "DDD_UNIT": "UD",
+                "DDD_INFO": "2 UD (=2 tab)",
+                "EXAMPLE": "Simprasole"
+            },
+            {
+                "COMB_CODE": "J01RA13_1",
+                "ARS": "J01RA13_O",
+                "ATC5": "J01RA13",
+                "FORM": "Tab",
+                "ROUTE": "O",
+                "SUBSTANCES": "norfloxacin 400 mg/\ntinidazole 600 mg",
+                "DDD": 2,
+                "DDD_UNIT": "UD",
+                "DDD_INFO": "2 UD (=2 tab)",
+                "EXAMPLE": "Actiflox-T"
+            },
+            {
+                "COMB_CODE": "J01RA13_2",
+                "ARS": "J01RA13_O",
+                "ATC5": "J01RA13",
+                "FORM": "tab",
+                "ROUTE": "O",
+                "SUBSTANCES": "norfloxacin 0.4 g/\ntinidazole 0.6 g",
+                "DDD": 2,
+                "DDD_UNIT": "UD",
+                "DDD_INFO": "2 UD (=2 tab)",
+                "EXAMPLE": "Tricogyn - N/ Norzol"
+            },
+            {
+                "COMB_CODE": "J04AM02_1",
+                "ARS": "J04AM02_O",
+                "ATC5": "J04AM02",
+                "FORM": "Tab",
+                "ROUTE": "O",
+                "SUBSTANCES": "rifampicin 0.3 g/\nisoniazid 0.15 g",
+                "DDD": 2,
+                "DDD_UNIT": "UD",
+                "DDD_INFO": "2 UD (=2 tab)",
+                "EXAMPLE": "Rifinah"
+            },
+            {
+                "COMB_CODE": "J04AM02_2",
+                "ARS": "J04AM02_O",
+                "ATC5": "J04AM02",
+                "FORM": "Tab",
+                "ROUTE": "O",
+                "SUBSTANCES": "rifampicin 0.15 g/\nisoniazid 0.1 g",
+                "DDD": 4,
+                "DDD_UNIT": "UD",
+                "DDD_INFO": "4 UD (=4 tab)",
+                "EXAMPLE": "Rifinah"
+            },
+            {
+                "COMB_CODE": "J04AM02_3",
+                "ARS": "J04AM02_O",
+                "ATC5": "J04AM02",
+                "FORM": "Tab",
+                "ROUTE": "O",
+                "SUBSTANCES": "rifampicin 0.15 g/\nisoniazid 75 mg",
+                "DDD": 4,
+                "DDD_UNIT": "UD",
+                "DDD_INFO": "4 UD (=4 tab)",
+                "EXAMPLE": "Rimactazid"
+            },
+            {
+                "COMB_CODE": "J04AM05_1",
+                "ARS": "J04AM05_O",
+                "ATC5": "J04AM05",
+                "FORM": "Tab",
+                "ROUTE": "O",
+                "SUBSTANCES": "rifampicin 0.12 g/\npyrazinamide 0.3 g/\nisoniazid 50 mg",
+                "DDD": 6,
+                "DDD_UNIT": "UD",
+                "DDD_INFO": "6 UD (=6 tab)",
+                "EXAMPLE": "Rifater"
+            },
+            {
+                "COMB_CODE": "J04AM05_2",
+                "ARS": "J04AM05_O",
+                "ATC5": "J04AM05",
+                "FORM": "Tab",
+                "ROUTE": "O",
+                "SUBSTANCES": "rifampicin 0.15 g/\npyrazinamide 0.4 g/\nisoniazid 75 mg",
+                "DDD": 4,
+                "DDD_UNIT": "UD",
+                "DDD_INFO": "4 UD (=4 tab)",
+                "EXAMPLE": "Rimcure"
+            },
+            {
+                "COMB_CODE": "J04AM05_3",
+                "ARS": "J04AM05_O",
+                "ATC5": "J04AM05",
+                "FORM": "Tab",
+                "ROUTE": "O",
+                "SUBSTANCES": "rifampicin 225 mg (1 tab)/\npyrazinamide 750 mg (1 tab)/\nisoniazid 150 mg (1 tab)",
+                "DDD": 6,
+                "DDD_UNIT": "UD",
+                "DDD_INFO": "6 UD (=6 tab)",
+                "EXAMPLE": "R-cinex"
+            },
+            {
+                "COMB_CODE": "J04AM05_4",
+                "ARS": "J04AM05_O",
+                "ATC5": "J04AM05",
+                "FORM": "Tab",
+                "ROUTE": "O",
+                "SUBSTANCES": "rifampicin 60 mg/\npyrazinamide 150 mg/\nisoniazid 30 mg",
+                "DDD": 10,
+                "DDD_UNIT": "UD",
+                "DDD_INFO": "10 UD (=10 tab)",
+                "EXAMPLE": "RHZ 60"
+            },
+            {
+                "COMB_CODE": "J04AM06_1",
+                "ARS": "J04AM06_O",
+                "ATC5": "J04AM06",
+                "FORM": "Tab",
+                "ROUTE": "O",
+                "SUBSTANCES": "rifampicin 0.15 g/\npyrazinamide 0.4 g/\nethambutol 0.275 g/\nisoniazid 75 mg",
+                "DDD": 4,
+                "DDD_UNIT": "UD",
+                "DDD_INFO": "4 UD (=4 tab)",
+                "EXAMPLE": "Rimstar"
+            },
+            {
+                "COMB_CODE": "J04AM06_2",
+                "ARS": "J04AM06_O",
+                "ATC5": "J04AM06",
+                "FORM": "Tab",
+                "ROUTE": "O",
+                "SUBSTANCES": "rifampicin 450 mg (1 tab)/\npyrazinamide 750 mg (2 tab)/\nethambutol 800 mg+isoniazid 300 mg (1 tab)",
+                "DDD": 4,
+                "DDD_UNIT": "UD",
+                "DDD_INFO": "4 UD (=4 tab)",
+                "EXAMPLE": "AK-4"
+            },
+            {
+                "COMB_CODE": "J04AM07_1",
+                "ARS": "J04AM07_O",
+                "ATC5": "J04AM07",
+                "FORM": "Tab",
+                "ROUTE": "O",
+                "SUBSTANCES": "rifampicin 150 mg/\nethambutol 275 mg/\nisoniazid 75 mg",
+                "DDD": 4,
+                "DDD_UNIT": "UD",
+                "DDD_INFO": "4 UD (=4 tab)",
+                "EXAMPLE": "3-FDC"
+            },
+            {
+                "COMB_CODE": "J05AP51_1",
+                "ARS": "J05AP51_O",
+                "ATC5": "J05AP51",
+                "FORM": "Tab",
+                "ROUTE": "O",
+                "SUBSTANCES": "sofosbuvir 400 mg/\nledipasvir 90 mg",
+                "DDD": 1,
+                "DDD_UNIT": "UD",
+                "DDD_INFO": "1 UD (=1 tab)",
+                "EXAMPLE": "Harvoni"
+            },
+            {
+                "COMB_CODE": "J05AP53_1",
+                "ARS": "J05AP53_O",
+                "ATC5": "J05AP53",
+                "FORM": "Tab",
+                "ROUTE": "O",
+                "SUBSTANCES": "ombitasvir 12.5 mg/\nparitaprevir 75 mg/\nritonavir 50 mg",
+                "DDD": 2,
+                "DDD_UNIT": "UD",
+                "DDD_INFO": "2 UD (=2 tab)",
+                "EXAMPLE": "Technivie / Viekirax"
+            },
+            {
+                "COMB_CODE": "J05AP54_1",
+                "ARS": "J05AP54_O",
+                "ATC5": "J05AP54",
+                "FORM": "Tab",
+                "ROUTE": "O",
+                "SUBSTANCES": "elbasvir 50 mg/\ngrazoprevir 100 mg",
+                "DDD": 1,
+                "DDD_UNIT": "UD",
+                "DDD_INFO": "1 UD (=1 tab)",
+                "EXAMPLE": "Zepatier"
+            },
+            {
+                "COMB_CODE": "J05AP55_1",
+                "ARS": "J05AP55_O",
+                "ATC5": "J05AP55",
+                "FORM": "Tab",
+                "ROUTE": "O",
+                "SUBSTANCES": "sofosbuvir 400 mg/\nvelpatasvir 100 mg",
+                "DDD": 1,
+                "DDD_UNIT": "UD",
+                "DDD_INFO": "1 UD (=1 tab)",
+                "EXAMPLE": "Epclusa"
+            },
+            {
+                "COMB_CODE": "J05AP56_1",
+                "ARS": "J05AP56_O",
+                "ATC5": "J05AP56",
+                "FORM": "Tab",
+                "ROUTE": "O",
+                "SUBSTANCES": "sofosbuvir 400 mg/\nvelpatasvir 100 mg/\nvoxilaprevir 100 mg",
+                "DDD": 1,
+                "DDD_UNIT": "UD",
+                "DDD_INFO": "1 UD (=1 tab)",
+                "EXAMPLE": "Vosevi"
+            },
+            {
+                "COMB_CODE": "J05AP57_1",
+                "ARS": "J05AP57_O",
+                "ATC5": "J05AP57",
+                "FORM": "Tab",
+                "ROUTE": "O",
+                "SUBSTANCES": "glecaprevir 100 mg/\npibrentasvir 40 mg",
+                "DDD": 3,
+                "DDD_UNIT": "UD",
+                "DDD_INFO": "3 UD (=3 tab)",
+                "EXAMPLE": "Maviret"
+            },
+            {
+                "COMB_CODE": "J05AR01_1",
+                "ARS": "J05AR01_O",
+                "ATC5": "J05AR01",
+                "FORM": "Tab",
+                "ROUTE": "O",
+                "SUBSTANCES": "lamivudine 0.15 g/\nzidovudine 0.3 g",
+                "DDD": 2,
+                "DDD_UNIT": "UD",
+                "DDD_INFO": "2 UD (=2 tab)",
+                "EXAMPLE": "Combivir"
+            },
+            {
+                "COMB_CODE": "J05AR02_1",
+                "ARS": "J05AR02_O",
+                "ATC5": "J05AR02",
+                "FORM": "Tab",
+                "ROUTE": "O",
+                "SUBSTANCES": "abacavir 0.6 g/\nlamivudine 0.3 g",
+                "DDD": 1,
+                "DDD_UNIT": "UD",
+                "DDD_INFO": "1 UD (=1 tab)",
+                "EXAMPLE": "Kivexa"
+            },
+            {
+                "COMB_CODE": "J05AR03_1",
+                "ARS": "J05AR03_O",
+                "ATC5": "J05AR03",
+                "FORM": "Tab",
+                "ROUTE": "O",
+                "SUBSTANCES": "emtricitabine 0.2 g/\ntenofovir disoproxil 0.245 g",
+                "DDD": 1,
+                "DDD_UNIT": "UD",
+                "DDD_INFO": "1 UD (=1 tab)",
+                "EXAMPLE": "Truvada"
+            },
+            {
+                "COMB_CODE": "J05AR04_1",
+                "ARS": "J05AR04_O",
+                "ATC5": "J05AR04",
+                "FORM": "Tab",
+                "ROUTE": "O",
+                "SUBSTANCES": "zidovudine 0.3 g/\nlamivudine 0.15 g/\nabacavir 0.3 g",
+                "DDD": 2,
+                "DDD_UNIT": "UD",
+                "DDD_INFO": "2 UD (=2 tab)",
+                "EXAMPLE": "Trizivir"
+            },
+            {
+                "COMB_CODE": "J05AR05_1",
+                "ARS": "J05AR05_O",
+                "ATC5": "J05AR05",
+                "FORM": "Tab",
+                "ROUTE": "O",
+                "SUBSTANCES": "lamivudine 150 mg/\nnevirapine 200 mg/\nzidovudine 300 mg",
+                "DDD": 2,
+                "DDD_UNIT": "UD",
+                "DDD_INFO": "2 UD (=2 tab)",
+                "EXAMPLE": "Lamivudine/Nevirapine/ Zidovudine"
+            },
+            {
+                "COMB_CODE": "J05AR06_1",
+                "ARS": "J05AR06_O",
+                "ATC5": "J05AR06",
+                "FORM": "Tab",
+                "ROUTE": "O",
+                "SUBSTANCES": "emtricitabine 0.2 g/\ntenofovir disoproxil 0.245 g/\nefavirenz 0.6 g",
+                "DDD": 1,
+                "DDD_UNIT": "UD",
+                "DDD_INFO": "1 UD (=1 tab)",
+                "EXAMPLE": "Atripla"
+            },
+            {
+                "COMB_CODE": "J05AR08_1",
+                "ARS": "J05AR08_O",
+                "ATC5": "J05AR08",
+                "FORM": "Tab",
+                "ROUTE": "O",
+                "SUBSTANCES": "emtricitabine 0.2 g/\ntenofovir disoproxil 0.245 g/\nrilpivirine 0.025 g",
+                "DDD": 1,
+                "DDD_UNIT": "UD",
+                "DDD_INFO": "1 UD (=1 tab)",
+                "EXAMPLE": "Eviplera, Complera"
+            },
+            {
+                "COMB_CODE": "J05AR09_1",
+                "ARS": "J05AR09_O",
+                "ATC5": "J05AR09",
+                "FORM": "Tab",
+                "ROUTE": "O",
+                "SUBSTANCES": "emtricitabine 200 mg/\ntenofovir disoproxil 245 mg/\nelvitegravir 150 mg/\ncobicistat 150 mg",
+                "DDD": 1,
+                "DDD_UNIT": "UD",
+                "DDD_INFO": "1 UD (=1 tab)",
+                "EXAMPLE": "Stribild"
+            },
+            {
+                "COMB_CODE": "J05AR11_1",
+                "ARS": "J05AR11_O",
+                "ATC5": "J05AR11",
+                "FORM": "Tab",
+                "ROUTE": "O",
+                "SUBSTANCES": "lamivudine 300 mg/\ntenofovir disoproxil (fumarate) 300 mg/\nefavirenz 600 mg",
+                "DDD": 1,
+                "DDD_UNIT": "UD",
+                "DDD_INFO": "1 UD (=1 tab)",
+                "EXAMPLE": "Efavirenz/lamivudine/tenofovir"
+            },
+            {
+                "COMB_CODE": "J05AR12_1",
+                "ARS": "J05AR12_O",
+                "ATC5": "J05AR12",
+                "FORM": "Tab",
+                "ROUTE": "O",
+                "SUBSTANCES": "lamivudine 300 mg/\ntenofovir disoproxil (fumarate) 300 mg",
+                "DDD": 1,
+                "DDD_UNIT": "UD",
+                "DDD_INFO": "1 UD (=1 tab)",
+                "EXAMPLE": "Lamivudine and Tenofovir"
+            },
+            {
+                "COMB_CODE": "J05AR13_1",
+                "ARS": "J05AR13_O",
+                "ATC5": "J05AR13",
+                "FORM": "Tab",
+                "ROUTE": "O",
+                "SUBSTANCES": "lamivudine 300 mg/\nabacavir 600 mg/\ndolutegravir 50 mg",
+                "DDD": 1,
+                "DDD_UNIT": "UD",
+                "DDD_INFO": "1 UD (=1 tab)",
+                "EXAMPLE": "Triumeq"
+            },
+            {
+                "COMB_CODE": "J05AR14_1",
+                "ARS": "J05AR14_O",
+                "ATC5": "J05AR14",
+                "FORM": "Tab",
+                "ROUTE": "O",
+                "SUBSTANCES": "darunavir 800 mg/\ncobicistat 150",
+                "DDD": 1,
+                "DDD_UNIT": "UD",
+                "DDD_INFO": "1 UD (=1 tab)",
+                "EXAMPLE": "Rezolsta/Prezcobix"
+            },
+            {
+                "COMB_CODE": "J05AR15_1",
+                "ARS": "J05AR15_O",
+                "ATC5": "J05AR15",
+                "FORM": "Tab",
+                "ROUTE": "O",
+                "SUBSTANCES": "atazanavir 0.3 g/\ncobicistat 0.15 g",
+                "DDD": 1,
+                "DDD_UNIT": "UD",
+                "DDD_INFO": "1 UD (=1 tab)",
+                "EXAMPLE": "Evotaz"
+            },
+            {
+                "COMB_CODE": "J05AR17_1",
+                "ARS": "J05AR17_O",
+                "ATC5": "J05AR17",
+                "FORM": "Tab",
+                "ROUTE": "O",
+                "SUBSTANCES": "emtricitabine 200 mg/\ntenofovir alafenamide 10 mg",
+                "DDD": 1,
+                "DDD_UNIT": "UD",
+                "DDD_INFO": "1 UD (=1 tab)",
+                "EXAMPLE": "Descovy"
+            },
+            {
+                "COMB_CODE": "J05AR17_2",
+                "ARS": "J05AR17_O",
+                "ATC5": "J05AR17",
+                "FORM": "Tab",
+                "ROUTE": "O",
+                "SUBSTANCES": "emtricitabine 200 mg/\ntenofovir alafenamide 25 mg",
+                "DDD": 1,
+                "DDD_UNIT": "UD",
+                "DDD_INFO": "1 UD (=1 tab)",
+                "EXAMPLE": "Descovy"
+            },
+            {
+                "COMB_CODE": "J05AR18_1",
+                "ARS": "J05AR18_O",
+                "ATC5": "J05AR18",
+                "FORM": "Tab",
+                "ROUTE": "O",
+                "SUBSTANCES": "emtricitabine 200 mg/\ntenofovir alafenamide 10 mg/\nelvitegravir 150 mg/\ncobicistat 150 mg",
+                "DDD": 1,
+                "DDD_UNIT": "UD",
+                "DDD_INFO": "1 UD (=1 tab)",
+                "EXAMPLE": "Genvoya"
+            },
+            {
+                "COMB_CODE": "J05AR19_1",
+                "ARS": "J05AR19_O",
+                "ATC5": "J05AR19",
+                "FORM": "Tab",
+                "ROUTE": "O",
+                "SUBSTANCES": "emtricitabine 200 mg/\ntenofovir alafenamide 25 mg/\nrilpivirine 25 mg",
+                "DDD": 1,
+                "DDD_UNIT": "UD",
+                "DDD_INFO": "1 UD (=1 tab)",
+                "EXAMPLE": "Odefsey"
+            },
+            {
+                "COMB_CODE": "J05AR20_1",
+                "ARS": "J05AR20_O",
+                "ATC5": "J05AR20",
+                "FORM": "Tab",
+                "ROUTE": "O",
+                "SUBSTANCES": "emtricitabine 200 mg/\ntenofovir alafenamide 25 mg/\nbictegravir 50 mg",
+                "DDD": 1,
+                "DDD_UNIT": "UD",
+                "DDD_INFO": "1 UD (=1 tab)",
+                "EXAMPLE": "Biktarvy"
+            },
+            {
+                "COMB_CODE": "J05AR21_1",
+                "ARS": "J05AR21_O",
+                "ATC5": "J05AR21",
+                "FORM": "Tab",
+                "ROUTE": "O",
+                "SUBSTANCES": "dolutegravir 50 mg/\nrilpivirine 25 mg",
+                "DDD": 1,
+                "DDD_UNIT": "UD",
+                "DDD_INFO": "1 UD (=1 tab)",
+                "EXAMPLE": "Juluca"
+            },
+            {
+                "COMB_CODE": "J05AR22_1",
+                "ARS": "J05AR22_O",
+                "ATC5": "J05AR22",
+                "FORM": "Tab",
+                "ROUTE": "O",
+                "SUBSTANCES": "emtricitabine 200 mg/\ntenofovir alafenamide 10 mg/\ndarunavir 800 mg/\ncobicistat 150 mg",
+                "DDD": 1,
+                "DDD_UNIT": "UD",
+                "DDD_INFO": "1 UD (=1 tab)",
+                "EXAMPLE": "Symtuza"
+            },
+            {
+                "COMB_CODE": "J05AR24_1",
+                "ARS": "J05AR24_O",
+                "ATC5": "J05AR24",
+                "FORM": "Tab",
+                "ROUTE": "O",
+                "SUBSTANCES": "lamivudine 300 mg/\ntenofovir disoproxil 245 mg/\ndoravirine 100 mg",
+                "DDD": 1,
+                "DDD_UNIT": "UD",
+                "DDD_INFO": "1 UD (=1 tab)",
+                "EXAMPLE": "Delstrigo"
+            },
+            {
+                "COMB_CODE": "J05AR25_1",
+                "ARS": "J05AR25_O",
+                "ATC5": "J05AR25",
+                "FORM": "Tab",
+                "ROUTE": "O",
+                "SUBSTANCES": "lamivudine 300 mg/\ndolutegravir 50 mg",
+                "DDD": 1,
+                "DDD_UNIT": "UD",
+                "DDD_INFO": "1 UD (=1 tab)",
+                "EXAMPLE": "Dovato"
+            },
+            {
+                "COMB_CODE": "P01AB51_1",
+                "ARS": "P01AB51_O",
+                "ATC5": "P01AB51",
+                "FORM": "tab",
+                "ROUTE": "O",
+                "SUBSTANCES": "metronidazole 0.4 g/\nfurazolidone 0.1 g",
+                "DDD": 5,
+                "DDD_UNIT": "UD",
+                "DDD_INFO": "5 UD (=5 tab)",
+                "EXAMPLE": "Metrolex-F"
+            },
+            {
+                "COMB_CODE": "P01AB52_1",
+                "ARS": "P01AB52_O",
+                "ATC5": "P01AB52",
+                "FORM": "tab",
+                "ROUTE": "O",
+                "SUBSTANCES": "metronidazole 0.4 g/\ndiloxanide 0.5 g",
+                "DDD": 3,
+                "DDD_UNIT": "UD",
+                "DDD_INFO": "3 UD (=3 tab)",
+                "EXAMPLE": "Entamizole DS"
+            },
+            {
+                "COMB_CODE": "P01AB52_2",
+                "ARS": "P01AB52_O",
+                "ATC5": "P01AB52",
+                "FORM": "tab",
+                "ROUTE": "O",
+                "SUBSTANCES": "metronidazole 0.2 g/\ndiloxanide 0.25 g",
+                "DDD": 6,
+                "DDD_UNIT": "UD",
+                "DDD_INFO": "6 UD (=6 tab)",
+                "EXAMPLE": "Entamizole"
+            },
+            {
+                "COMB_CODE": "P01AB52_3",
+                "ARS": "P01AB52_O",
+                "ATC5": "P01AB52",
+                "FORM": "oral sol",
+                "ROUTE": "O",
+                "SUBSTANCES": "metronidazole 0.1 g/\ndiloxanide 0.125 g",
+                "DDD": 12,
+                "DDD_UNIT": "UD",
+                "DDD_INFO": "12 UD (=60 ml) (one UD =5 ml)",
+                "EXAMPLE": "Entamizole"
+            },
+            {
+                "COMB_CODE": "P01BB51_1",
+                "ARS": "P01BB51_O",
+                "ATC5": "P01BB51",
+                "FORM": "Tab",
+                "ROUTE": "O",
+                "SUBSTANCES": "atovaquone 0.25 g/\nproguanil hydrochloride 0.1 g",
+                "DDD": 4,
+                "DDD_UNIT": "UD",
+                "DDD_INFO": "4 UD (=4 tab)",
+                "EXAMPLE": "Malarone"
+            },
+            {
+                "COMB_CODE": "P01BB51_2",
+                "ARS": "P01BB51_O",
+                "ATC5": "P01BB51",
+                "FORM": "Tab",
+                "ROUTE": "O",
+                "SUBSTANCES": "atovaquone 62.5 mg/\nproguanil hydrochloride 25 mg",
+                "DDD": 16,
+                "DDD_UNIT": "UD",
+                "DDD_INFO": "16 UD (=16 tab)",
+                "EXAMPLE": "Malarone junior"
+            },
+            {
+                "COMB_CODE": "P01BB52_1",
+                "ARS": "P01BB52_O",
+                "ATC5": "P01BB52",
+                "FORM": "caps",
+                "ROUTE": "O",
+                "SUBSTANCES": "proguanil 0.2 g/\nchloroquine 0.1 g",
+                "DDD": 1,
+                "DDD_UNIT": "UD",
+                "DDD_INFO": "1 UD (=1 caps)",
+                "EXAMPLE": "Savarine"
+            },
+            {
+                "COMB_CODE": "P01BF02_1",
+                "ARS": "P01BF02_O",
+                "ATC5": "P01BF02",
+                "FORM": "tab",
+                "ROUTE": "O",
+                "SUBSTANCES": "artesunate 0.6 g/\nmefloquine 0.75 g",
+                "DDD": 1,
+                "DDD_UNIT": "UD",
+                "DDD_INFO": "1 UD (=1 tab)",
+                "EXAMPLE": "Artequin"
+            },
+            {
+                "COMB_CODE": "P01BF02_2",
+                "ARS": "P01BF02_O",
+                "ATC5": "P01BF02",
+                "FORM": "tab",
+                "ROUTE": "O",
+                "SUBSTANCES": "artesunate 0.3 g/\nmefloquine 0.375 g",
+                "DDD": 2,
+                "DDD_UNIT": "UD",
+                "DDD_INFO": "2 UD (=2 tab)",
+                "EXAMPLE": "Artequin"
+            },
+            {
+                "COMB_CODE": "P01BF02_3",
+                "ARS": "P01BF02_O",
+                "ATC5": "P01BF02",
+                "FORM": "tab",
+                "ROUTE": "O",
+                "SUBSTANCES": "artesunate 50 mg/\nmefloquine 0.125 g",
+                "DDD": 6,
+                "DDD_UNIT": "UD",
+                "DDD_INFO": "6 UD (=6 tab)",
+                "EXAMPLE": "Artequin pediatrique"
+            },
+            {
+                "COMB_CODE": "P01BF03_1",
+                "ARS": "P01BF03_O",
+                "ATC5": "P01BF03",
+                "FORM": "Tab",
+                "ROUTE": "O",
+                "SUBSTANCES": "artesunate 25 mg/\namodiaquine 67.5 mg",
+                "DDD": 8,
+                "DDD_UNIT": "UD",
+                "DDD_INFO": "8 UD (=8 tab)",
+                "EXAMPLE": "Coarsucam"
+            },
+            {
+                "COMB_CODE": "P01BF03_2",
+                "ARS": "P01BF03_O",
+                "ATC5": "P01BF03",
+                "FORM": "Tab",
+                "ROUTE": "O",
+                "SUBSTANCES": "artesunate 50 mg/\namodiaquine 0.135 g",
+                "DDD": 4,
+                "DDD_UNIT": "UD",
+                "DDD_INFO": "4 UD (=4 tab)",
+                "EXAMPLE": "Coarsucam"
+            },
+            {
+                "COMB_CODE": "P01BF03_3",
+                "ARS": "P01BF03_O",
+                "ATC5": "P01BF03",
+                "FORM": "Tab",
+                "ROUTE": "O",
+                "SUBSTANCES": "artesunate 0.1 g/\namodiaquine 0.27 g",
+                "DDD": 2,
+                "DDD_UNIT": "UD",
+                "DDD_INFO": "2 UD (=2 tab)",
+                "EXAMPLE": "Coarsucam"
+            },
+            {
+                "COMB_CODE": "P01BF04_1",
+                "ARS": "P01BF04_O",
+                "ATC5": "P01BF04",
+                "FORM": "tab",
+                "ROUTE": "O",
+                "SUBSTANCES": "artesunate 0.2 g/\nsulfalene 0.5 g/\npyrimethamine 25 mg",
+                "DDD": 1,
+                "DDD_UNIT": "UD",
+                "DDD_INFO": "1 UD (=1 tab)",
+                "EXAMPLE": "Asu-Denk fixed dose / Co-Arinate Adulte"
+            },
+            {
+                "COMB_CODE": "P01BF04_2",
+                "ARS": "P01BF04_O",
+                "ATC5": "P01BF04",
+                "FORM": "tab",
+                "ROUTE": "O",
+                "SUBSTANCES": "artesunate 0.1 g/\nsulfalene 0.25 g/\npyrimethamine 12.5 mg",
+                "DDD": 2,
+                "DDD_UNIT": "UD",
+                "DDD_INFO": "2 UD (=2 tab)",
+                "EXAMPLE": "Co-Arinate Enfant"
+            },
+            {
+                "COMB_CODE": "P01BF05_1",
+                "ARS": "P01BF05_O",
+                "ATC5": "P01BF05",
+                "FORM": "Tab",
+                "ROUTE": "O",
+                "SUBSTANCES": "artenimol (dihydroartemisinin) 20 mg/\npiperaquine 160 mg",
+                "DDD": 6,
+                "DDD_UNIT": "UD",
+                "DDD_INFO": "6 UD (=6 tab)",
+                "EXAMPLE": "Eurartesim"
+            },
+            {
+                "COMB_CODE": "P01BF05_2",
+                "ARS": "P01BF05_O",
+                "ATC5": "P01BF05",
+                "FORM": "Tab",
+                "ROUTE": "O",
+                "SUBSTANCES": "artenimol (dihydroartemisinin) 40 mg/\npiperaquine 320 mg",
+                "DDD": 3,
+                "DDD_UNIT": "UD",
+                "DDD_INFO": "3 UD (=3 tab)",
+                "EXAMPLE": "Eurartesim"
+            },
+            {
+                "COMB_CODE": "P01BF07_1",
+                "ARS": "P01BF07_O",
+                "ATC5": "P01BF07",
+                "FORM": "tab",
+                "ROUTE": "O",
+                "SUBSTANCES": "artemisinin 62.5 mg/\npiperaquine 0.375 g",
+                "DDD": 3,
+                "DDD_UNIT": "UD",
+                "DDD_INFO": "3 UD (=3 tab)",
+                "EXAMPLE": "Artequick"
+            },
+            {
+                "COMB_CODE": "P01BF08_1",
+                "ARS": "P01BF08_O",
+                "ATC5": "P01BF08",
+                "FORM": "tab",
+                "ROUTE": "O",
+                "SUBSTANCES": "artemisinin 0.125 g/\nnaphthoquine 50 mg",
+                "DDD": 8,
+                "DDD_UNIT": "UD",
+                "DDD_INFO": "8 UD (=8 tab)",
+                "EXAMPLE": "Arco"
+            },
+            {
+                "COMB_CODE": "P01BF09_1",
+                "ARS": "P01BF09_O",
+                "ATC5": "P01BF09",
+                "FORM": "tab",
+                "ROUTE": "O",
+                "SUBSTANCES": "artesunate 60 mg/\nsulfadoxine 0.5 g/\npyrimethamine 25 mg",
+                "DDD": 3,
+                "DDD_UNIT": "UD",
+                "DDD_INFO": "3 UD (=3 tab)",
+                "EXAMPLE": "Alaxin plus"
+            }
+        ]
+    },
+    {
+        "name": "conversion",
+        "data": [
+            {
+                "ARS": "J01CE01_P",
+                "ATC5": "J01CE01",
+                "ROA": "P",
+                "UNIT_FROM": "MU",
+                "UNIT_TO": "G",
+                "FACTOR": 0.6
+            },
+            {
+                "ARS": "J01CE02_O",
+                "ATC5": "J01CE02",
+                "ROA": "O",
+                "UNIT_FROM": "MU",
+                "UNIT_TO": "G",
+                "FACTOR": 0.625
+            },
+            {
+                "ARS": "J01FA02_O",
+                "ATC5": "J01FA02",
+                "ROA": "O",
+                "UNIT_FROM": "MU",
+                "UNIT_TO": "G",
+                "FACTOR": 0.3125
+            },
+            {
+                "ARS": "J01CE08_P",
+                "ATC5": "J01CE08",
+                "ROA": "P",
+                "UNIT_FROM": "MU",
+                "UNIT_TO": "G",
+                "FACTOR": 0.6
+            },
+            {
+                "ARS": "J01CE09_P",
+                "ATC5": "J01CE09",
+                "ROA": "P",
+                "UNIT_FROM": "MU",
+                "UNIT_TO": "G",
+                "FACTOR": 1
+            }
+        ]
+    },
+    {
+        "name": "ddd",
+        "data": [
+            {
+                "ARS": "A07AA01_O",
+                "ATC5": "A07AA01",
+                "ROA": "O",
+                "DDD": 5,
+                "DDD_UNIT": "G",
+                "DDD_STD": 5
+            },
+            {
+                "ARS": "A07AA02_O",
+                "ATC5": "A07AA02",
+                "ROA": "O",
+                "DDD": 1.5,
+                "DDD_UNIT": "MU",
+                "DDD_STD": 1.5
+            },
+            {
+                "ARS": "A07AA03_O",
+                "ATC5": "A07AA03",
+                "ROA": "O",
+                "DDD": 0.3,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.3
+            },
+            {
+                "ARS": "A07AA05_O",
+                "ATC5": "A07AA05",
+                "ROA": "O",
+                "DDD": 3,
+                "DDD_UNIT": "MU",
+                "DDD_STD": 3
+            },
+            {
+                "ARS": "A07AA06_O",
+                "ATC5": "A07AA06",
+                "ROA": "O",
+                "DDD": 3,
+                "DDD_UNIT": "G",
+                "DDD_STD": 3
+            },
+            {
+                "ARS": "A07AA07_O",
+                "ATC5": "A07AA07",
+                "ROA": "O",
+                "DDD": 0.4,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.4
+            },
+            {
+                "ARS": "A07AA08_O",
+                "ATC5": "A07AA08",
+                "ROA": "O",
+                "DDD": 3,
+                "DDD_UNIT": "G",
+                "DDD_STD": 3
+            },
+            {
+                "ARS": "A07AA09_O",
+                "ATC5": "A07AA09",
+                "ROA": "O",
+                "DDD": 2,
+                "DDD_UNIT": "G",
+                "DDD_STD": 2
+            },
+            {
+                "ARS": "A07AA10_O",
+                "ATC5": "A07AA10",
+                "ROA": "O",
+                "DDD": 9,
+                "DDD_UNIT": "MU",
+                "DDD_STD": 9
+            },
+            {
+                "ARS": "A07AA11_O",
+                "ATC5": "A07AA11",
+                "ROA": "O",
+                "DDD": 0.6,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.6
+            },
+            {
+                "ARS": "A07AA12_O",
+                "ATC5": "A07AA12",
+                "ROA": "O",
+                "DDD": 0.4,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.4
+            },
+            {
+                "ARS": "D01BA01_O",
+                "ATC5": "D01BA01",
+                "ROA": "O",
+                "DDD": 0.5,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.5
+            },
+            {
+                "ARS": "D01BA02_O",
+                "ATC5": "D01BA02",
+                "ROA": "O",
+                "DDD": 0.25,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.25
+            },
+            {
+                "ARS": "D01BA03_O",
+                "ATC5": "D01BA03",
+                "ROA": "O",
+                "DDD": 0.1,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.1,
+                "NOTES": "expressed as ravuconazole"
+            },
+            {
+                "ARS": "J01AA01_O",
+                "ATC5": "J01AA01",
+                "ROA": "O",
+                "DDD": 0.6,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.6
+            },
+            {
+                "ARS": "J01AA02_O",
+                "ATC5": "J01AA02",
+                "ROA": "O",
+                "DDD": 0.1,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.1
+            },
+            {
+                "ARS": "J01AA02_P",
+                "ATC5": "J01AA02",
+                "ROA": "P",
+                "DDD": 0.1,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.1
+            },
+            {
+                "ARS": "J01AA03_O",
+                "ATC5": "J01AA03",
+                "ROA": "O",
+                "DDD": 1,
+                "DDD_UNIT": "G",
+                "DDD_STD": 1
+            },
+            {
+                "ARS": "J01AA04_O",
+                "ATC5": "J01AA04",
+                "ROA": "O",
+                "DDD": 0.6,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.6
+            },
+            {
+                "ARS": "J01AA04_P",
+                "ATC5": "J01AA04",
+                "ROA": "P",
+                "DDD": 0.6,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.6
+            },
+            {
+                "ARS": "J01AA05_O",
+                "ATC5": "J01AA05",
+                "ROA": "O",
+                "DDD": 0.6,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.6
+            },
+            {
+                "ARS": "J01AA06_O",
+                "ATC5": "J01AA06",
+                "ROA": "O",
+                "DDD": 1,
+                "DDD_UNIT": "G",
+                "DDD_STD": 1
+            },
+            {
+                "ARS": "J01AA06_P",
+                "ATC5": "J01AA06",
+                "ROA": "P",
+                "DDD": 1,
+                "DDD_UNIT": "G",
+                "DDD_STD": 1
+            },
+            {
+                "ARS": "J01AA07_O",
+                "ATC5": "J01AA07",
+                "ROA": "O",
+                "DDD": 1,
+                "DDD_UNIT": "G",
+                "DDD_STD": 1
+            },
+            {
+                "ARS": "J01AA07_P",
+                "ATC5": "J01AA07",
+                "ROA": "P",
+                "DDD": 1,
+                "DDD_UNIT": "G",
+                "DDD_STD": 1
+            },
+            {
+                "ARS": "J01AA08_O",
+                "ATC5": "J01AA08",
+                "ROA": "O",
+                "DDD": 0.2,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.2
+            },
+            {
+                "ARS": "J01AA08_P",
+                "ATC5": "J01AA08",
+                "ROA": "P",
+                "DDD": 0.2,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.2
+            },
+            {
+                "ARS": "J01AA09_P",
+                "ATC5": "J01AA09",
+                "ROA": "P",
+                "DDD": 0.35,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.35
+            },
+            {
+                "ARS": "J01AA11_O",
+                "ATC5": "J01AA11",
+                "ROA": "O",
+                "DDD": 1,
+                "DDD_UNIT": "G",
+                "DDD_STD": 1
+            },
+            {
+                "ARS": "J01AA12_P",
+                "ATC5": "J01AA12",
+                "ROA": "P",
+                "DDD": 0.1,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.1
+            },
+            {
+                "ARS": "J01AA14_O",
+                "ATC5": "J01AA14",
+                "ROA": "O",
+                "DDD": 0.1,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.1
+            },
+            {
+                "ARS": "J01AA15_O",
+                "ATC5": "J01AA15",
+                "ROA": "O",
+                "DDD": 0.3,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.3
+            },
+            {
+                "ARS": "J01AA15_P",
+                "ATC5": "J01AA15",
+                "ROA": "P",
+                "DDD": 0.1,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.1
+            },
+            {
+                "ARS": "J01BA01_O",
+                "ATC5": "J01BA01",
+                "ROA": "O",
+                "DDD": 3,
+                "DDD_UNIT": "G",
+                "DDD_STD": 3
+            },
+            {
+                "ARS": "J01BA01_P",
+                "ATC5": "J01BA01",
+                "ROA": "P",
+                "DDD": 3,
+                "DDD_UNIT": "G",
+                "DDD_STD": 3
+            },
+            {
+                "ARS": "J01BA02_O",
+                "ATC5": "J01BA02",
+                "ROA": "O",
+                "DDD": 1.5,
+                "DDD_UNIT": "G",
+                "DDD_STD": 1.5
+            },
+            {
+                "ARS": "J01BA02_P",
+                "ATC5": "J01BA02",
+                "ROA": "P",
+                "DDD": 1.5,
+                "DDD_UNIT": "G",
+                "DDD_STD": 1.5
+            },
+            {
+                "ARS": "J01CA01_O",
+                "ATC5": "J01CA01",
+                "ROA": "O",
+                "DDD": 2,
+                "DDD_UNIT": "G",
+                "DDD_STD": 2
+            },
+            {
+                "ARS": "J01CA01_P",
+                "ATC5": "J01CA01",
+                "ROA": "P",
+                "DDD": 6,
+                "DDD_UNIT": "G",
+                "DDD_STD": 6
+            },
+            {
+                "ARS": "J01CA01_R",
+                "ATC5": "J01CA01",
+                "ROA": "R",
+                "DDD": 2,
+                "DDD_UNIT": "G",
+                "DDD_STD": 2
+            },
+            {
+                "ARS": "J01CA02_O",
+                "ATC5": "J01CA02",
+                "ROA": "O",
+                "DDD": 1.05,
+                "DDD_UNIT": "G",
+                "DDD_STD": 1.05
+            },
+            {
+                "ARS": "J01CA03_P",
+                "ATC5": "J01CA03",
+                "ROA": "P",
+                "DDD": 12,
+                "DDD_UNIT": "G",
+                "DDD_STD": 12
+            },
+            {
+                "ARS": "J01CA04_O",
+                "ATC5": "J01CA04",
+                "ROA": "O",
+                "DDD": 1.5,
+                "DDD_UNIT": "G",
+                "DDD_STD": 1.5
+            },
+            {
+                "ARS": "J01CA04_P",
+                "ATC5": "J01CA04",
+                "ROA": "P",
+                "DDD": 3,
+                "DDD_UNIT": "G",
+                "DDD_STD": 3
+            },
+            {
+                "ARS": "J01CA05_O",
+                "ATC5": "J01CA05",
+                "ROA": "O",
+                "DDD": 4,
+                "DDD_UNIT": "G",
+                "DDD_STD": 4
+            },
+            {
+                "ARS": "J01CA06_O",
+                "ATC5": "J01CA06",
+                "ROA": "O",
+                "DDD": 1.2,
+                "DDD_UNIT": "G",
+                "DDD_STD": 1.2
+            },
+            {
+                "ARS": "J01CA07_O",
+                "ATC5": "J01CA07",
+                "ROA": "O",
+                "DDD": 2,
+                "DDD_UNIT": "G",
+                "DDD_STD": 2
+            },
+            {
+                "ARS": "J01CA07_P",
+                "ATC5": "J01CA07",
+                "ROA": "P",
+                "DDD": 2,
+                "DDD_UNIT": "G",
+                "DDD_STD": 2
+            },
+            {
+                "ARS": "J01CA08_O",
+                "ATC5": "J01CA08",
+                "ROA": "O",
+                "DDD": 0.6,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.6
+            },
+            {
+                "ARS": "J01CA09_P",
+                "ATC5": "J01CA09",
+                "ROA": "P",
+                "DDD": 12,
+                "DDD_UNIT": "G",
+                "DDD_STD": 12
+            },
+            {
+                "ARS": "J01CA10_P",
+                "ATC5": "J01CA10",
+                "ROA": "P",
+                "DDD": 6,
+                "DDD_UNIT": "G",
+                "DDD_STD": 6
+            },
+            {
+                "ARS": "J01CA11_P",
+                "ATC5": "J01CA11",
+                "ROA": "P",
+                "DDD": 1.2,
+                "DDD_UNIT": "G",
+                "DDD_STD": 1.2
+            },
+            {
+                "ARS": "J01CA12_P",
+                "ATC5": "J01CA12",
+                "ROA": "P",
+                "DDD": 14,
+                "DDD_UNIT": "G",
+                "DDD_STD": 14
+            },
+            {
+                "ARS": "J01CA13_P",
+                "ATC5": "J01CA13",
+                "ROA": "P",
+                "DDD": 15,
+                "DDD_UNIT": "G",
+                "DDD_STD": 15
+            },
+            {
+                "ARS": "J01CA14_O",
+                "ATC5": "J01CA14",
+                "ROA": "O",
+                "DDD": 1.5,
+                "DDD_UNIT": "G",
+                "DDD_STD": 1.5
+            },
+            {
+                "ARS": "J01CA14_P",
+                "ATC5": "J01CA14",
+                "ROA": "P",
+                "DDD": 1.5,
+                "DDD_UNIT": "G",
+                "DDD_STD": 1.5
+            },
+            {
+                "ARS": "J01CA15_O",
+                "ATC5": "J01CA15",
+                "ROA": "O",
+                "DDD": 2,
+                "DDD_UNIT": "G",
+                "DDD_STD": 2
+            },
+            {
+                "ARS": "J01CA16_P",
+                "ATC5": "J01CA16",
+                "ROA": "P",
+                "DDD": 15,
+                "DDD_UNIT": "G",
+                "DDD_STD": 15
+            },
+            {
+                "ARS": "J01CA17_P",
+                "ATC5": "J01CA17",
+                "ROA": "P",
+                "DDD": 4,
+                "DDD_UNIT": "G",
+                "DDD_STD": 4
+            },
+            {
+                "ARS": "J01CA18_O",
+                "ATC5": "J01CA18",
+                "ROA": "O",
+                "DDD": 2,
+                "DDD_UNIT": "G",
+                "DDD_STD": 2
+            },
+            {
+                "ARS": "J01CA19_P",
+                "ATC5": "J01CA19",
+                "ROA": "P",
+                "DDD": 4,
+                "DDD_UNIT": "G",
+                "DDD_STD": 4
+            },
+            {
+                "ARS": "J01CE01_P",
+                "ATC5": "J01CE01",
+                "ROA": "P",
+                "DDD": 3.6,
+                "DDD_UNIT": "G",
+                "DDD_STD": 3.6
+            },
+            {
+                "ARS": "J01CE02_O",
+                "ATC5": "J01CE02",
+                "ROA": "O",
+                "DDD": 2,
+                "DDD_UNIT": "G",
+                "DDD_STD": 2
+            },
+            {
+                "ARS": "J01CE03_O",
+                "ATC5": "J01CE03",
+                "ROA": "O",
+                "DDD": 0.9,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.9
+            },
+            {
+                "ARS": "J01CE04_O",
+                "ATC5": "J01CE04",
+                "ROA": "O",
+                "DDD": 1.5,
+                "DDD_UNIT": "G",
+                "DDD_STD": 1.5
+            },
+            {
+                "ARS": "J01CE05_O",
+                "ATC5": "J01CE05",
+                "ROA": "O",
+                "DDD": 1,
+                "DDD_UNIT": "G",
+                "DDD_STD": 1
+            },
+            {
+                "ARS": "J01CE06_O",
+                "ATC5": "J01CE06",
+                "ROA": "O",
+                "DDD": 1.05,
+                "DDD_UNIT": "G",
+                "DDD_STD": 1.05
+            },
+            {
+                "ARS": "J01CE07_O",
+                "ATC5": "J01CE07",
+                "ROA": "O",
+                "DDD": 1,
+                "DDD_UNIT": "G",
+                "DDD_STD": 1
+            },
+            {
+                "ARS": "J01CE08_P",
+                "ATC5": "J01CE08",
+                "ROA": "P",
+                "DDD": 3.6,
+                "DDD_UNIT": "G",
+                "DDD_STD": 3.6,
+                "NOTES": "Expressed as benzylpenicillin"
+            },
+            {
+                "ARS": "J01CE09_P",
+                "ATC5": "J01CE09",
+                "ROA": "P",
+                "DDD": 0.6,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.6
+            },
+            {
+                "ARS": "J01CE10_O",
+                "ATC5": "J01CE10",
+                "ROA": "O",
+                "DDD": 2,
+                "DDD_UNIT": "G",
+                "DDD_STD": 2
+            },
+            {
+                "ARS": "J01CF01_O",
+                "ATC5": "J01CF01",
+                "ROA": "O",
+                "DDD": 2,
+                "DDD_UNIT": "G",
+                "DDD_STD": 2
+            },
+            {
+                "ARS": "J01CF01_P",
+                "ATC5": "J01CF01",
+                "ROA": "P",
+                "DDD": 2,
+                "DDD_UNIT": "G",
+                "DDD_STD": 2
+            },
+            {
+                "ARS": "J01CF02_O",
+                "ATC5": "J01CF02",
+                "ROA": "O",
+                "DDD": 2,
+                "DDD_UNIT": "G",
+                "DDD_STD": 2
+            },
+            {
+                "ARS": "J01CF02_P",
+                "ATC5": "J01CF02",
+                "ROA": "P",
+                "DDD": 2,
+                "DDD_UNIT": "G",
+                "DDD_STD": 2
+            },
+            {
+                "ARS": "J01CF03_P",
+                "ATC5": "J01CF03",
+                "ROA": "P",
+                "DDD": 4,
+                "DDD_UNIT": "G",
+                "DDD_STD": 4
+            },
+            {
+                "ARS": "J01CF04_O",
+                "ATC5": "J01CF04",
+                "ROA": "O",
+                "DDD": 2,
+                "DDD_UNIT": "G",
+                "DDD_STD": 2
+            },
+            {
+                "ARS": "J01CF04_P",
+                "ATC5": "J01CF04",
+                "ROA": "P",
+                "DDD": 2,
+                "DDD_UNIT": "G",
+                "DDD_STD": 2
+            },
+            {
+                "ARS": "J01CF05_O",
+                "ATC5": "J01CF05",
+                "ROA": "O",
+                "DDD": 2,
+                "DDD_UNIT": "G",
+                "DDD_STD": 2
+            },
+            {
+                "ARS": "J01CF05_P",
+                "ATC5": "J01CF05",
+                "ROA": "P",
+                "DDD": 2,
+                "DDD_UNIT": "G",
+                "DDD_STD": 2
+            },
+            {
+                "ARS": "J01CF06_P",
+                "ATC5": "J01CF06",
+                "ROA": "P",
+                "DDD": 3,
+                "DDD_UNIT": "G",
+                "DDD_STD": 3
+            },
+            {
+                "ARS": "J01CG01_P",
+                "ATC5": "J01CG01",
+                "ROA": "P",
+                "DDD": 1,
+                "DDD_UNIT": "G",
+                "DDD_STD": 1
+            },
+            {
+                "ARS": "J01CR01_P",
+                "ATC5": "J01CR01",
+                "ROA": "P",
+                "DDD": 6,
+                "DDD_UNIT": "G",
+                "DDD_STD": 6,
+                "NOTES": "Refers to ampicillin"
+            },
+            {
+                "ARS": "J01CR02_O",
+                "ATC5": "J01CR02",
+                "ROA": "O",
+                "DDD": 1.5,
+                "DDD_UNIT": "G",
+                "DDD_STD": 1.5,
+                "NOTES": "Refers to amoxicillin"
+            },
+            {
+                "ARS": "J01CR02_P",
+                "ATC5": "J01CR02",
+                "ROA": "P",
+                "DDD": 3,
+                "DDD_UNIT": "G",
+                "DDD_STD": 3,
+                "NOTES": "Refers to amoxicillin"
+            },
+            {
+                "ARS": "J01CR03_P",
+                "ATC5": "J01CR03",
+                "ROA": "P",
+                "DDD": 15,
+                "DDD_UNIT": "G",
+                "DDD_STD": 15,
+                "NOTES": "Refers to ticarcillin"
+            },
+            {
+                "ARS": "J01CR04_O",
+                "ATC5": "J01CR04",
+                "ROA": "O",
+                "DDD": 1.5,
+                "DDD_UNIT": "G",
+                "DDD_STD": 1.5
+            },
+            {
+                "ARS": "J01CR05_P",
+                "ATC5": "J01CR05",
+                "ROA": "P",
+                "DDD": 14,
+                "DDD_UNIT": "G",
+                "DDD_STD": 14,
+                "NOTES": "Refers to piperacillin"
+            },
+            {
+                "ARS": "J01DB01_O",
+                "ATC5": "J01DB01",
+                "ROA": "O",
+                "DDD": 2,
+                "DDD_UNIT": "G",
+                "DDD_STD": 2
+            },
+            {
+                "ARS": "J01DB02_P",
+                "ATC5": "J01DB02",
+                "ROA": "P",
+                "DDD": 3,
+                "DDD_UNIT": "G",
+                "DDD_STD": 3
+            },
+            {
+                "ARS": "J01DB03_P",
+                "ATC5": "J01DB03",
+                "ROA": "P",
+                "DDD": 4,
+                "DDD_UNIT": "G",
+                "DDD_STD": 4
+            },
+            {
+                "ARS": "J01DB04_P",
+                "ATC5": "J01DB04",
+                "ROA": "P",
+                "DDD": 3,
+                "DDD_UNIT": "G",
+                "DDD_STD": 3
+            },
+            {
+                "ARS": "J01DB05_O",
+                "ATC5": "J01DB05",
+                "ROA": "O",
+                "DDD": 2,
+                "DDD_UNIT": "G",
+                "DDD_STD": 2
+            },
+            {
+                "ARS": "J01DB06_P",
+                "ATC5": "J01DB06",
+                "ROA": "P",
+                "DDD": 3,
+                "DDD_UNIT": "G",
+                "DDD_STD": 3
+            },
+            {
+                "ARS": "J01DB07_O",
+                "ATC5": "J01DB07",
+                "ROA": "O",
+                "DDD": 1,
+                "DDD_UNIT": "G",
+                "DDD_STD": 1
+            },
+            {
+                "ARS": "J01DB08_P",
+                "ATC5": "J01DB08",
+                "ROA": "P",
+                "DDD": 4,
+                "DDD_UNIT": "G",
+                "DDD_STD": 4
+            },
+            {
+                "ARS": "J01DB09_O",
+                "ATC5": "J01DB09",
+                "ROA": "O",
+                "DDD": 2,
+                "DDD_UNIT": "G",
+                "DDD_STD": 2
+            },
+            {
+                "ARS": "J01DB09_P",
+                "ATC5": "J01DB09",
+                "ROA": "P",
+                "DDD": 2,
+                "DDD_UNIT": "G",
+                "DDD_STD": 2
+            },
+            {
+                "ARS": "J01DB11_O",
+                "ATC5": "J01DB11",
+                "ROA": "O",
+                "DDD": 2.1,
+                "DDD_UNIT": "G",
+                "DDD_STD": 2.1
+            },
+            {
+                "ARS": "J01DB12_P",
+                "ATC5": "J01DB12",
+                "ROA": "P",
+                "DDD": 3,
+                "DDD_UNIT": "G",
+                "DDD_STD": 3
+            },
+            {
+                "ARS": "J01DC01_P",
+                "ATC5": "J01DC01",
+                "ROA": "P",
+                "DDD": 6,
+                "DDD_UNIT": "G",
+                "DDD_STD": 6
+            },
+            {
+                "ARS": "J01DC02_O",
+                "ATC5": "J01DC02",
+                "ROA": "O",
+                "DDD": 0.5,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.5
+            },
+            {
+                "ARS": "J01DC02_P",
+                "ATC5": "J01DC02",
+                "ROA": "P",
+                "DDD": 3,
+                "DDD_UNIT": "G",
+                "DDD_STD": 3
+            },
+            {
+                "ARS": "J01DC03_P",
+                "ATC5": "J01DC03",
+                "ROA": "P",
+                "DDD": 6,
+                "DDD_UNIT": "G",
+                "DDD_STD": 6
+            },
+            {
+                "ARS": "J01DC04_O",
+                "ATC5": "J01DC04",
+                "ROA": "O",
+                "DDD": 1,
+                "DDD_UNIT": "G",
+                "DDD_STD": 1
+            },
+            {
+                "ARS": "J01DC05_P",
+                "ATC5": "J01DC05",
+                "ROA": "P",
+                "DDD": 4,
+                "DDD_UNIT": "G",
+                "DDD_STD": 4
+            },
+            {
+                "ARS": "J01DC06_P",
+                "ATC5": "J01DC06",
+                "ROA": "P",
+                "DDD": 1,
+                "DDD_UNIT": "G",
+                "DDD_STD": 1
+            },
+            {
+                "ARS": "J01DC07_O",
+                "ATC5": "J01DC07",
+                "ROA": "O",
+                "DDD": 1.2,
+                "DDD_UNIT": "G",
+                "DDD_STD": 1.2
+            },
+            {
+                "ARS": "J01DC07_P",
+                "ATC5": "J01DC07",
+                "ROA": "P",
+                "DDD": 4,
+                "DDD_UNIT": "G",
+                "DDD_STD": 4
+            },
+            {
+                "ARS": "J01DC08_O",
+                "ATC5": "J01DC08",
+                "ROA": "O",
+                "DDD": 0.6,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.6
+            },
+            {
+                "ARS": "J01DC09_P",
+                "ATC5": "J01DC09",
+                "ROA": "P",
+                "DDD": 4,
+                "DDD_UNIT": "G",
+                "DDD_STD": 4
+            },
+            {
+                "ARS": "J01DC10_O",
+                "ATC5": "J01DC10",
+                "ROA": "O",
+                "DDD": 1,
+                "DDD_UNIT": "G",
+                "DDD_STD": 1
+            },
+            {
+                "ARS": "J01DC11_P",
+                "ATC5": "J01DC11",
+                "ROA": "P",
+                "DDD": 4,
+                "DDD_UNIT": "G",
+                "DDD_STD": 4
+            },
+            {
+                "ARS": "J01DC12_P",
+                "ATC5": "J01DC12",
+                "ROA": "P",
+                "DDD": 4,
+                "DDD_UNIT": "G",
+                "DDD_STD": 4
+            },
+            {
+                "ARS": "J01DC13_P",
+                "ATC5": "J01DC13",
+                "ROA": "P",
+                "DDD": 2,
+                "DDD_UNIT": "G",
+                "DDD_STD": 2
+            },
+            {
+                "ARS": "J01DC14_P",
+                "ATC5": "J01DC14",
+                "ROA": "P",
+                "DDD": 2,
+                "DDD_UNIT": "G",
+                "DDD_STD": 2
+            },
+            {
+                "ARS": "J01DD01_P",
+                "ATC5": "J01DD01",
+                "ROA": "P",
+                "DDD": 4,
+                "DDD_UNIT": "G",
+                "DDD_STD": 4
+            },
+            {
+                "ARS": "J01DD02_P",
+                "ATC5": "J01DD02",
+                "ROA": "P",
+                "DDD": 4,
+                "DDD_UNIT": "G",
+                "DDD_STD": 4
+            },
+            {
+                "ARS": "J01DD03_P",
+                "ATC5": "J01DD03",
+                "ROA": "P",
+                "DDD": 4,
+                "DDD_UNIT": "G",
+                "DDD_STD": 4
+            },
+            {
+                "ARS": "J01DD04_P",
+                "ATC5": "J01DD04",
+                "ROA": "P",
+                "DDD": 2,
+                "DDD_UNIT": "G",
+                "DDD_STD": 2
+            },
+            {
+                "ARS": "J01DD05_P",
+                "ATC5": "J01DD05",
+                "ROA": "P",
+                "DDD": 2,
+                "DDD_UNIT": "G",
+                "DDD_STD": 2
+            },
+            {
+                "ARS": "J01DD06_P",
+                "ATC5": "J01DD06",
+                "ROA": "P",
+                "DDD": 4,
+                "DDD_UNIT": "G",
+                "DDD_STD": 4
+            },
+            {
+                "ARS": "J01DD07_P",
+                "ATC5": "J01DD07",
+                "ROA": "P",
+                "DDD": 4,
+                "DDD_UNIT": "G",
+                "DDD_STD": 4
+            },
+            {
+                "ARS": "J01DD08_O",
+                "ATC5": "J01DD08",
+                "ROA": "O",
+                "DDD": 0.4,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.4
+            },
+            {
+                "ARS": "J01DD09_P",
+                "ATC5": "J01DD09",
+                "ROA": "P",
+                "DDD": 2,
+                "DDD_UNIT": "G",
+                "DDD_STD": 2
+            },
+            {
+                "ARS": "J01DD10_O",
+                "ATC5": "J01DD10",
+                "ROA": "O",
+                "DDD": 1,
+                "DDD_UNIT": "G",
+                "DDD_STD": 1
+            },
+            {
+                "ARS": "J01DD11_P",
+                "ATC5": "J01DD11",
+                "ROA": "P",
+                "DDD": 2,
+                "DDD_UNIT": "G",
+                "DDD_STD": 2
+            },
+            {
+                "ARS": "J01DD12_P",
+                "ATC5": "J01DD12",
+                "ROA": "P",
+                "DDD": 4,
+                "DDD_UNIT": "G",
+                "DDD_STD": 4
+            },
+            {
+                "ARS": "J01DD13_O",
+                "ATC5": "J01DD13",
+                "ROA": "O",
+                "DDD": 0.4,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.4
+            },
+            {
+                "ARS": "J01DD14_O",
+                "ATC5": "J01DD14",
+                "ROA": "O",
+                "DDD": 0.4,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.4
+            },
+            {
+                "ARS": "J01DD15_O",
+                "ATC5": "J01DD15",
+                "ROA": "O",
+                "DDD": 0.6,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.6
+            },
+            {
+                "ARS": "J01DD16_O",
+                "ATC5": "J01DD16",
+                "ROA": "O",
+                "DDD": 0.4,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.4
+            },
+            {
+                "ARS": "J01DD17_O",
+                "ATC5": "J01DD17",
+                "ROA": "O",
+                "DDD": 0.45,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.45
+            },
+            {
+                "ARS": "J01DD18_O",
+                "ATC5": "J01DD18",
+                "ROA": "O",
+                "DDD": 0.4,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.4
+            },
+            {
+                "ARS": "J01DD52_P",
+                "ATC5": "J01DD52",
+                "ROA": "P",
+                "DDD": 6,
+                "DDD_UNIT": "G",
+                "DDD_STD": 6,
+                "NOTES": "Refers to ceftazidime"
+            },
+            {
+                "ARS": "J01DD62_P",
+                "ATC5": "J01DD62",
+                "ROA": "P",
+                "DDD": 4,
+                "DDD_UNIT": "G",
+                "DDD_STD": 4,
+                "NOTES": "Refers to cefoperazone"
+            },
+            {
+                "ARS": "J01DD63_P",
+                "ATC5": "J01DD63",
+                "ROA": "P",
+                "DDD": 2,
+                "DDD_UNIT": "G",
+                "DDD_STD": 2,
+                "NOTES": "Refers to ceftriaxone"
+            },
+            {
+                "ARS": "J01DD64_O",
+                "ATC5": "J01DD64",
+                "ROA": "O",
+                "DDD": 0.4,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.4,
+                "NOTES": "Refers to cefpodoxime"
+            },
+            {
+                "ARS": "J01DE01_P",
+                "ATC5": "J01DE01",
+                "ROA": "P",
+                "DDD": 4,
+                "DDD_UNIT": "G",
+                "DDD_STD": 4
+            },
+            {
+                "ARS": "J01DE02_P",
+                "ATC5": "J01DE02",
+                "ROA": "P",
+                "DDD": 4,
+                "DDD_UNIT": "G",
+                "DDD_STD": 4
+            },
+            {
+                "ARS": "J01DE03_P",
+                "ATC5": "J01DE03",
+                "ROA": "P",
+                "DDD": 4,
+                "DDD_UNIT": "G",
+                "DDD_STD": 4
+            },
+            {
+                "ARS": "J01DF01_IS",
+                "ATC5": "J01DF01",
+                "ROA": "IS",
+                "DDD": 225,
+                "DDD_UNIT": "G",
+                "DDD_STD": 225
+            },
+            {
+                "ARS": "J01DF01_P",
+                "ATC5": "J01DF01",
+                "ROA": "P",
+                "DDD": 4,
+                "DDD_UNIT": "G",
+                "DDD_STD": 4
+            },
+            {
+                "ARS": "J01DF02_P",
+                "ATC5": "J01DF02",
+                "ROA": "P",
+                "DDD": 2,
+                "DDD_UNIT": "G",
+                "DDD_STD": 2
+            },
+            {
+                "ARS": "J01DH02_P",
+                "ATC5": "J01DH02",
+                "ROA": "P",
+                "DDD": 3,
+                "DDD_UNIT": "G",
+                "DDD_STD": 3
+            },
+            {
+                "ARS": "J01DH03_P",
+                "ATC5": "J01DH03",
+                "ROA": "P",
+                "DDD": 1,
+                "DDD_UNIT": "G",
+                "DDD_STD": 1
+            },
+            {
+                "ARS": "J01DH04_P",
+                "ATC5": "J01DH04",
+                "ROA": "P",
+                "DDD": 1.5,
+                "DDD_UNIT": "G",
+                "DDD_STD": 1.5
+            },
+            {
+                "ARS": "J01DH05_P",
+                "ATC5": "J01DH05",
+                "ROA": "P",
+                "DDD": 1.2,
+                "DDD_UNIT": "G",
+                "DDD_STD": 1.2
+            },
+            {
+                "ARS": "J01DH06_O",
+                "ATC5": "J01DH06",
+                "ROA": "O",
+                "DDD": 0.56,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.56
+            },
+            {
+                "ARS": "J01DH51_P",
+                "ATC5": "J01DH51",
+                "ROA": "P",
+                "DDD": 2,
+                "DDD_UNIT": "G",
+                "DDD_STD": 2,
+                "NOTES": "Refers to imipenem"
+            },
+            {
+                "ARS": "J01DH52_P",
+                "ATC5": "J01DH52",
+                "ROA": "P",
+                "DDD": 3,
+                "DDD_UNIT": "G",
+                "DDD_STD": 3,
+                "NOTES": "Refers to meropenem"
+            },
+            {
+                "ARS": "J01DH55_P",
+                "ATC5": "J01DH55",
+                "ROA": "P",
+                "DDD": 2,
+                "DDD_UNIT": "G",
+                "DDD_STD": 2,
+                "NOTES": "Refers to panipenem"
+            },
+            {
+                "ARS": "J01DH56_P",
+                "ATC5": "J01DH56",
+                "ROA": "P",
+                "DDD": 2,
+                "DDD_UNIT": "G",
+                "DDD_STD": 2,
+                "NOTES": "Refers to imipenem"
+            },
+            {
+                "ARS": "J01DI01_P",
+                "ATC5": "J01DI01",
+                "ROA": "P",
+                "DDD": 1.5,
+                "DDD_UNIT": "G",
+                "DDD_STD": 1.5
+            },
+            {
+                "ARS": "J01DI02_P",
+                "ATC5": "J01DI02",
+                "ROA": "P",
+                "DDD": 1.2,
+                "DDD_UNIT": "G",
+                "DDD_STD": 1.2
+            },
+            {
+                "ARS": "J01DI03_O",
+                "ATC5": "J01DI03",
+                "ROA": "O",
+                "DDD": 0.75,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.75
+            },
+            {
+                "ARS": "J01DI54_P",
+                "ATC5": "J01DI54",
+                "ROA": "P",
+                "DDD": 3,
+                "DDD_UNIT": "G",
+                "DDD_STD": 3,
+                "NOTES": "Refers to ceftolozane"
+            },
+            {
+                "ARS": "J01EA01_O",
+                "ATC5": "J01EA01",
+                "ROA": "O",
+                "DDD": 0.4,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.4
+            },
+            {
+                "ARS": "J01EA01_P",
+                "ATC5": "J01EA01",
+                "ROA": "P",
+                "DDD": 0.4,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.4
+            },
+            {
+                "ARS": "J01EA02_O",
+                "ATC5": "J01EA02",
+                "ROA": "O",
+                "DDD": 0.2,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.2
+            },
+            {
+                "ARS": "J01EB01_O",
+                "ATC5": "J01EB01",
+                "ROA": "O",
+                "DDD": 4,
+                "DDD_UNIT": "G",
+                "DDD_STD": 4
+            },
+            {
+                "ARS": "J01EB01_P",
+                "ATC5": "J01EB01",
+                "ROA": "P",
+                "DDD": 4,
+                "DDD_UNIT": "G",
+                "DDD_STD": 4
+            },
+            {
+                "ARS": "J01EB02_O",
+                "ATC5": "J01EB02",
+                "ROA": "O",
+                "DDD": 4,
+                "DDD_UNIT": "G",
+                "DDD_STD": 4
+            },
+            {
+                "ARS": "J01EB03_O",
+                "ATC5": "J01EB03",
+                "ROA": "O",
+                "DDD": 4,
+                "DDD_UNIT": "G",
+                "DDD_STD": 4
+            },
+            {
+                "ARS": "J01EB04_O",
+                "ATC5": "J01EB04",
+                "ROA": "O",
+                "DDD": 1,
+                "DDD_UNIT": "G",
+                "DDD_STD": 1
+            },
+            {
+                "ARS": "J01EB05_O",
+                "ATC5": "J01EB05",
+                "ROA": "O",
+                "DDD": 4,
+                "DDD_UNIT": "G",
+                "DDD_STD": 4
+            },
+            {
+                "ARS": "J01EB05_P",
+                "ATC5": "J01EB05",
+                "ROA": "P",
+                "DDD": 4,
+                "DDD_UNIT": "G",
+                "DDD_STD": 4
+            },
+            {
+                "ARS": "J01EB08_O",
+                "ATC5": "J01EB08",
+                "ROA": "O",
+                "DDD": 6,
+                "DDD_UNIT": "G",
+                "DDD_STD": 6
+            },
+            {
+                "ARS": "J01EC01_O",
+                "ATC5": "J01EC01",
+                "ROA": "O",
+                "DDD": 2,
+                "DDD_UNIT": "G",
+                "DDD_STD": 2
+            },
+            {
+                "ARS": "J01EC02_O",
+                "ATC5": "J01EC02",
+                "ROA": "O",
+                "DDD": 0.6,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.6
+            },
+            {
+                "ARS": "J01EC03_O",
+                "ATC5": "J01EC03",
+                "ROA": "O",
+                "DDD": 1,
+                "DDD_UNIT": "G",
+                "DDD_STD": 1
+            },
+            {
+                "ARS": "J01EC03_P",
+                "ATC5": "J01EC03",
+                "ROA": "P",
+                "DDD": 1,
+                "DDD_UNIT": "G",
+                "DDD_STD": 1
+            },
+            {
+                "ARS": "J01ED01_O",
+                "ATC5": "J01ED01",
+                "ROA": "O",
+                "DDD": 0.5,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.5
+            },
+            {
+                "ARS": "J01ED02_O",
+                "ATC5": "J01ED02",
+                "ROA": "O",
+                "DDD": 0.1,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.1
+            },
+            {
+                "ARS": "J01ED04_O",
+                "ATC5": "J01ED04",
+                "ROA": "O",
+                "DDD": 0.5,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.5
+            },
+            {
+                "ARS": "J01ED05_O",
+                "ATC5": "J01ED05",
+                "ROA": "O",
+                "DDD": 0.5,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.5
+            },
+            {
+                "ARS": "J01ED06_O",
+                "ATC5": "J01ED06",
+                "ROA": "O",
+                "DDD": 0.5,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.5
+            },
+            {
+                "ARS": "J01ED07_O",
+                "ATC5": "J01ED07",
+                "ROA": "O",
+                "DDD": 3,
+                "DDD_UNIT": "G",
+                "DDD_STD": 3
+            },
+            {
+                "ARS": "J01ED08_O",
+                "ATC5": "J01ED08",
+                "ROA": "O",
+                "DDD": 1,
+                "DDD_UNIT": "G",
+                "DDD_STD": 1
+            },
+            {
+                "ARS": "J01ED09_O",
+                "ATC5": "J01ED09",
+                "ROA": "O",
+                "DDD": 1.5,
+                "DDD_UNIT": "G",
+                "DDD_STD": 1.5
+            },
+            {
+                "ARS": "J01ED09_R",
+                "ATC5": "J01ED09",
+                "ROA": "R",
+                "DDD": 1.5,
+                "DDD_UNIT": "G",
+                "DDD_STD": 1.5
+            },
+            {
+                "ARS": "J01FA01_O",
+                "ATC5": "J01FA01",
+                "ROA": "O",
+                "DDD": 1,
+                "DDD_UNIT": "G",
+                "DDD_STD": 1
+            },
+            {
+                "ARS": "J01FA01_OESUC",
+                "ATC5": "J01FA01",
+                "ROA": "O",
+                "SALT": "ESUC",
+                "DDD": 2,
+                "DDD_UNIT": "G",
+                "DDD_STD": 2,
+                "NOTES": "erythromycin ethylsuccinate tablets"
+            },
+            {
+                "ARS": "J01FA01_P",
+                "ATC5": "J01FA01",
+                "ROA": "P",
+                "DDD": 1,
+                "DDD_UNIT": "G",
+                "DDD_STD": 1
+            },
+            {
+                "ARS": "J01FA02_O",
+                "ATC5": "J01FA02",
+                "ROA": "O",
+                "DDD": 3,
+                "DDD_UNIT": "G",
+                "DDD_STD": 3
+            },
+            {
+                "ARS": "J01FA03_O",
+                "ATC5": "J01FA03",
+                "ROA": "O",
+                "DDD": 1.2,
+                "DDD_UNIT": "G",
+                "DDD_STD": 1.2
+            },
+            {
+                "ARS": "J01FA03_P",
+                "ATC5": "J01FA03",
+                "ROA": "P",
+                "DDD": 1,
+                "DDD_UNIT": "G",
+                "DDD_STD": 1
+            },
+            {
+                "ARS": "J01FA05_O",
+                "ATC5": "J01FA05",
+                "ROA": "O",
+                "DDD": 1,
+                "DDD_UNIT": "G",
+                "DDD_STD": 1
+            },
+            {
+                "ARS": "J01FA06_O",
+                "ATC5": "J01FA06",
+                "ROA": "O",
+                "DDD": 0.3,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.3
+            },
+            {
+                "ARS": "J01FA07_O",
+                "ATC5": "J01FA07",
+                "ROA": "O",
+                "DDD": 2,
+                "DDD_UNIT": "G",
+                "DDD_STD": 2
+            },
+            {
+                "ARS": "J01FA08_O",
+                "ATC5": "J01FA08",
+                "ROA": "O",
+                "DDD": 1,
+                "DDD_UNIT": "G",
+                "DDD_STD": 1
+            },
+            {
+                "ARS": "J01FA09_O",
+                "ATC5": "J01FA09",
+                "ROA": "O",
+                "DDD": 0.5,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.5
+            },
+            {
+                "ARS": "J01FA09_P",
+                "ATC5": "J01FA09",
+                "ROA": "P",
+                "DDD": 1,
+                "DDD_UNIT": "G",
+                "DDD_STD": 1
+            },
+            {
+                "ARS": "J01FA10_O",
+                "ATC5": "J01FA10",
+                "ROA": "O",
+                "DDD": 0.3,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.3
+            },
+            {
+                "ARS": "J01FA10_P",
+                "ATC5": "J01FA10",
+                "ROA": "P",
+                "DDD": 0.5,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.5
+            },
+            {
+                "ARS": "J01FA11_O",
+                "ATC5": "J01FA11",
+                "ROA": "O",
+                "DDD": 1.2,
+                "DDD_UNIT": "G",
+                "DDD_STD": 1.2
+            },
+            {
+                "ARS": "J01FA12_O",
+                "ATC5": "J01FA12",
+                "ROA": "O",
+                "DDD": 0.8,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.8
+            },
+            {
+                "ARS": "J01FA13_O",
+                "ATC5": "J01FA13",
+                "ROA": "O",
+                "DDD": 0.5,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.5
+            },
+            {
+                "ARS": "J01FA14_O",
+                "ATC5": "J01FA14",
+                "ROA": "O",
+                "DDD": 0.75,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.75
+            },
+            {
+                "ARS": "J01FA15_O",
+                "ATC5": "J01FA15",
+                "ROA": "O",
+                "DDD": 0.8,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.8
+            },
+            {
+                "ARS": "J01FF01_O",
+                "ATC5": "J01FF01",
+                "ROA": "O",
+                "DDD": 1.2,
+                "DDD_UNIT": "G",
+                "DDD_STD": 1.2
+            },
+            {
+                "ARS": "J01FF01_P",
+                "ATC5": "J01FF01",
+                "ROA": "P",
+                "DDD": 1.8,
+                "DDD_UNIT": "G",
+                "DDD_STD": 1.8
+            },
+            {
+                "ARS": "J01FF02_O",
+                "ATC5": "J01FF02",
+                "ROA": "O",
+                "DDD": 1.8,
+                "DDD_UNIT": "G",
+                "DDD_STD": 1.8
+            },
+            {
+                "ARS": "J01FF02_P",
+                "ATC5": "J01FF02",
+                "ROA": "P",
+                "DDD": 1.8,
+                "DDD_UNIT": "G",
+                "DDD_STD": 1.8
+            },
+            {
+                "ARS": "J01FG01_O",
+                "ATC5": "J01FG01",
+                "ROA": "O",
+                "DDD": 2,
+                "DDD_UNIT": "G",
+                "DDD_STD": 2
+            },
+            {
+                "ARS": "J01FG02_P",
+                "ATC5": "J01FG02",
+                "ROA": "P",
+                "DDD": 1.5,
+                "DDD_UNIT": "G",
+                "DDD_STD": 1.5
+            },
+            {
+                "ARS": "J01GA01_P",
+                "ATC5": "J01GA01",
+                "ROA": "P",
+                "DDD": 1,
+                "DDD_UNIT": "G",
+                "DDD_STD": 1
+            },
+            {
+                "ARS": "J01GA02_P",
+                "ATC5": "J01GA02",
+                "ROA": "P",
+                "DDD": 1,
+                "DDD_UNIT": "G",
+                "DDD_STD": 1
+            },
+            {
+                "ARS": "J01GB01_IP",
+                "ATC5": "J01GB01",
+                "ROA": "IP",
+                "DDD": 112,
+                "DDD_UNIT": "G",
+                "DDD_STD": 112
+            },
+            {
+                "ARS": "J01GB01_IS",
+                "ATC5": "J01GB01",
+                "ROA": "IS",
+                "DDD": 0.3,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.3
+            },
+            {
+                "ARS": "J01GB01_P",
+                "ATC5": "J01GB01",
+                "ROA": "P",
+                "DDD": 0.24,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.24
+            },
+            {
+                "ARS": "J01GB03_P",
+                "ATC5": "J01GB03",
+                "ROA": "P",
+                "DDD": 0.24,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.24
+            },
+            {
+                "ARS": "J01GB04_P",
+                "ATC5": "J01GB04",
+                "ROA": "P",
+                "DDD": 1,
+                "DDD_UNIT": "G",
+                "DDD_STD": 1
+            },
+            {
+                "ARS": "J01GB05_O",
+                "ATC5": "J01GB05",
+                "ROA": "O",
+                "DDD": 1,
+                "DDD_UNIT": "G",
+                "DDD_STD": 1
+            },
+            {
+                "ARS": "J01GB06_P",
+                "ATC5": "J01GB06",
+                "ROA": "P",
+                "DDD": 1,
+                "DDD_UNIT": "G",
+                "DDD_STD": 1
+            },
+            {
+                "ARS": "J01GB07_O",
+                "ATC5": "J01GB07",
+                "ROA": "O",
+                "DDD": 0.35,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.35
+            },
+            {
+                "ARS": "J01GB07_P",
+                "ATC5": "J01GB07",
+                "ROA": "P",
+                "DDD": 0.35,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.35
+            },
+            {
+                "ARS": "J01GB08_P",
+                "ATC5": "J01GB08",
+                "ROA": "P",
+                "DDD": 0.24,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.24
+            },
+            {
+                "ARS": "J01GB09_P",
+                "ATC5": "J01GB09",
+                "ROA": "P",
+                "DDD": 0.14,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.14
+            },
+            {
+                "ARS": "J01GB10_P",
+                "ATC5": "J01GB10",
+                "ROA": "P",
+                "DDD": 1,
+                "DDD_UNIT": "G",
+                "DDD_STD": 1
+            },
+            {
+                "ARS": "J01GB11_P",
+                "ATC5": "J01GB11",
+                "ROA": "P",
+                "DDD": 0.4,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.4
+            },
+            {
+                "ARS": "J01GB12_P",
+                "ATC5": "J01GB12",
+                "ROA": "P",
+                "DDD": 0.2,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.2
+            },
+            {
+                "ARS": "J01GB13_P",
+                "ATC5": "J01GB13",
+                "ROA": "P",
+                "DDD": 0.6,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.6
+            },
+            {
+                "ARS": "J01MA01_O",
+                "ATC5": "J01MA01",
+                "ROA": "O",
+                "DDD": 0.4,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.4
+            },
+            {
+                "ARS": "J01MA01_P",
+                "ATC5": "J01MA01",
+                "ROA": "P",
+                "DDD": 0.4,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.4
+            },
+            {
+                "ARS": "J01MA02_O",
+                "ATC5": "J01MA02",
+                "ROA": "O",
+                "DDD": 1,
+                "DDD_UNIT": "G",
+                "DDD_STD": 1
+            },
+            {
+                "ARS": "J01MA02_P",
+                "ATC5": "J01MA02",
+                "ROA": "P",
+                "DDD": 0.8,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.8
+            },
+            {
+                "ARS": "J01MA03_O",
+                "ATC5": "J01MA03",
+                "ROA": "O",
+                "DDD": 0.8,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.8
+            },
+            {
+                "ARS": "J01MA03_P",
+                "ATC5": "J01MA03",
+                "ROA": "P",
+                "DDD": 0.8,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.8
+            },
+            {
+                "ARS": "J01MA04_O",
+                "ATC5": "J01MA04",
+                "ROA": "O",
+                "DDD": 0.8,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.8
+            },
+            {
+                "ARS": "J01MA05_O",
+                "ATC5": "J01MA05",
+                "ROA": "O",
+                "DDD": 0.8,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.8
+            },
+            {
+                "ARS": "J01MA06_O",
+                "ATC5": "J01MA06",
+                "ROA": "O",
+                "DDD": 0.8,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.8
+            },
+            {
+                "ARS": "J01MA07_O",
+                "ATC5": "J01MA07",
+                "ROA": "O",
+                "DDD": 0.4,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.4
+            },
+            {
+                "ARS": "J01MA08_O",
+                "ATC5": "J01MA08",
+                "ROA": "O",
+                "DDD": 0.4,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.4
+            },
+            {
+                "ARS": "J01MA08_P",
+                "ATC5": "J01MA08",
+                "ROA": "P",
+                "DDD": 0.4,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.4
+            },
+            {
+                "ARS": "J01MA09_O",
+                "ATC5": "J01MA09",
+                "ROA": "O",
+                "DDD": 0.2,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.2
+            },
+            {
+                "ARS": "J01MA10_O",
+                "ATC5": "J01MA10",
+                "ROA": "O",
+                "DDD": 0.2,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.2
+            },
+            {
+                "ARS": "J01MA11_O",
+                "ATC5": "J01MA11",
+                "ROA": "O",
+                "DDD": 0.4,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.4
+            },
+            {
+                "ARS": "J01MA12_IS",
+                "ATC5": "J01MA12",
+                "ROA": "IS",
+                "DDD": 0.24,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.24
+            },
+            {
+                "ARS": "J01MA12_O",
+                "ATC5": "J01MA12",
+                "ROA": "O",
+                "DDD": 0.5,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.5
+            },
+            {
+                "ARS": "J01MA12_P",
+                "ATC5": "J01MA12",
+                "ROA": "P",
+                "DDD": 0.5,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.5
+            },
+            {
+                "ARS": "J01MA13_O",
+                "ATC5": "J01MA13",
+                "ROA": "O",
+                "DDD": 0.2,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.2
+            },
+            {
+                "ARS": "J01MA13_P",
+                "ATC5": "J01MA13",
+                "ROA": "P",
+                "DDD": 0.2,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.2
+            },
+            {
+                "ARS": "J01MA14_O",
+                "ATC5": "J01MA14",
+                "ROA": "O",
+                "DDD": 0.4,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.4
+            },
+            {
+                "ARS": "J01MA14_P",
+                "ATC5": "J01MA14",
+                "ROA": "P",
+                "DDD": 0.4,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.4
+            },
+            {
+                "ARS": "J01MA15_O",
+                "ATC5": "J01MA15",
+                "ROA": "O",
+                "DDD": 0.32,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.32
+            },
+            {
+                "ARS": "J01MA16_O",
+                "ATC5": "J01MA16",
+                "ROA": "O",
+                "DDD": 0.4,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.4
+            },
+            {
+                "ARS": "J01MA16_P",
+                "ATC5": "J01MA16",
+                "ROA": "P",
+                "DDD": 0.4,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.4
+            },
+            {
+                "ARS": "J01MA17_O",
+                "ATC5": "J01MA17",
+                "ROA": "O",
+                "DDD": 0.6,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.6
+            },
+            {
+                "ARS": "J01MA18_P",
+                "ATC5": "J01MA18",
+                "ROA": "P",
+                "DDD": 1,
+                "DDD_UNIT": "G",
+                "DDD_STD": 1
+            },
+            {
+                "ARS": "J01MA19_O",
+                "ATC5": "J01MA19",
+                "ROA": "O",
+                "DDD": 0.4,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.4
+            },
+            {
+                "ARS": "J01MA21_O",
+                "ATC5": "J01MA21",
+                "ROA": "O",
+                "DDD": 0.1,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.1
+            },
+            {
+                "ARS": "J01MA22_O",
+                "ATC5": "J01MA22",
+                "ROA": "O",
+                "DDD": 0.45,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.45
+            },
+            {
+                "ARS": "J01MA23_O",
+                "ATC5": "J01MA23",
+                "ROA": "O",
+                "DDD": 0.9,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.9
+            },
+            {
+                "ARS": "J01MA23_P",
+                "ATC5": "J01MA23",
+                "ROA": "P",
+                "DDD": 0.6,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.6
+            },
+            {
+                "ARS": "J01MA25_O",
+                "ATC5": "J01MA25",
+                "ROA": "O",
+                "DDD": 75,
+                "DDD_UNIT": "MG",
+                "DDD_STD": 75
+            },
+            {
+                "ARS": "J01MB01_O",
+                "ATC5": "J01MB01",
+                "ROA": "O",
+                "DDD": 0.3,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.3
+            },
+            {
+                "ARS": "J01MB02_O",
+                "ATC5": "J01MB02",
+                "ROA": "O",
+                "DDD": 4,
+                "DDD_UNIT": "G",
+                "DDD_STD": 4
+            },
+            {
+                "ARS": "J01MB03_O",
+                "ATC5": "J01MB03",
+                "ROA": "O",
+                "DDD": 2,
+                "DDD_UNIT": "G",
+                "DDD_STD": 2
+            },
+            {
+                "ARS": "J01MB04_O",
+                "ATC5": "J01MB04",
+                "ROA": "O",
+                "DDD": 0.8,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.8
+            },
+            {
+                "ARS": "J01MB05_O",
+                "ATC5": "J01MB05",
+                "ROA": "O",
+                "DDD": 1,
+                "DDD_UNIT": "G",
+                "DDD_STD": 1
+            },
+            {
+                "ARS": "J01MB06_O",
+                "ATC5": "J01MB06",
+                "ROA": "O",
+                "DDD": 1,
+                "DDD_UNIT": "G",
+                "DDD_STD": 1
+            },
+            {
+                "ARS": "J01MB07_O",
+                "ATC5": "J01MB07",
+                "ROA": "O",
+                "DDD": 1.2,
+                "DDD_UNIT": "G",
+                "DDD_STD": 1.2
+            },
+            {
+                "ARS": "J01XA01_P",
+                "ATC5": "J01XA01",
+                "ROA": "P",
+                "DDD": 2,
+                "DDD_UNIT": "G",
+                "DDD_STD": 2
+            },
+            {
+                "ARS": "J01XA02_P",
+                "ATC5": "J01XA02",
+                "ROA": "P",
+                "DDD": 0.4,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.4
+            },
+            {
+                "ARS": "J01XA04_P",
+                "ATC5": "J01XA04",
+                "ROA": "P",
+                "DDD": 1.5,
+                "DDD_UNIT": "G",
+                "DDD_STD": 1.5,
+                "NOTES": "course dose"
+            },
+            {
+                "ARS": "J01XB01_IP",
+                "ATC5": "J01XB01",
+                "ROA": "IP",
+                "DDD": 3,
+                "DDD_UNIT": "MU",
+                "DDD_STD": 3
+            },
+            {
+                "ARS": "J01XB01_IS",
+                "ATC5": "J01XB01",
+                "ROA": "IS",
+                "DDD": 3,
+                "DDD_UNIT": "MU",
+                "DDD_STD": 3
+            },
+            {
+                "ARS": "J01XB01_P",
+                "ATC5": "J01XB01",
+                "ROA": "P",
+                "DDD": 9,
+                "DDD_UNIT": "MU",
+                "DDD_STD": 9
+            },
+            {
+                "ARS": "J01XB02_P",
+                "ATC5": "J01XB02",
+                "ROA": "P",
+                "DDD": 0.15,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.15
+            },
+            {
+                "ARS": "J01XC01_O",
+                "ATC5": "J01XC01",
+                "ROA": "O",
+                "DDD": 1.5,
+                "DDD_UNIT": "G",
+                "DDD_STD": 1.5
+            },
+            {
+                "ARS": "J01XC01_P",
+                "ATC5": "J01XC01",
+                "ROA": "P",
+                "DDD": 1.5,
+                "DDD_UNIT": "G",
+                "DDD_STD": 1.5
+            },
+            {
+                "ARS": "J01XD01_P",
+                "ATC5": "J01XD01",
+                "ROA": "P",
+                "DDD": 1.5,
+                "DDD_UNIT": "G",
+                "DDD_STD": 1.5
+            },
+            {
+                "ARS": "J01XD02_P",
+                "ATC5": "J01XD02",
+                "ROA": "P",
+                "DDD": 1.5,
+                "DDD_UNIT": "G",
+                "DDD_STD": 1.5
+            },
+            {
+                "ARS": "J01XD03_P",
+                "ATC5": "J01XD03",
+                "ROA": "P",
+                "DDD": 1,
+                "DDD_UNIT": "G",
+                "DDD_STD": 1
+            },
+            {
+                "ARS": "J01XE01_O",
+                "ATC5": "J01XE01",
+                "ROA": "O",
+                "DDD": 0.2,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.2
+            },
+            {
+                "ARS": "J01XE02_O",
+                "ATC5": "J01XE02",
+                "ROA": "O",
+                "DDD": 0.16,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.16
+            },
+            {
+                "ARS": "J01XE03_O",
+                "ATC5": "J01XE03",
+                "ROA": "O",
+                "DDD": 0.3,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.3
+            },
+            {
+                "ARS": "J01XX01_O",
+                "ATC5": "J01XX01",
+                "ROA": "O",
+                "DDD": 3,
+                "DDD_UNIT": "G",
+                "DDD_STD": 3
+            },
+            {
+                "ARS": "J01XX01_P",
+                "ATC5": "J01XX01",
+                "ROA": "P",
+                "DDD": 8,
+                "DDD_UNIT": "G",
+                "DDD_STD": 8
+            },
+            {
+                "ARS": "J01XX03_R",
+                "ATC5": "J01XX03",
+                "ROA": "R",
+                "DDD": 1.5,
+                "DDD_UNIT": "G",
+                "DDD_STD": 1.5
+            },
+            {
+                "ARS": "J01XX04_P",
+                "ATC5": "J01XX04",
+                "ROA": "P",
+                "DDD": 3,
+                "DDD_UNIT": "G",
+                "DDD_STD": 3
+            },
+            {
+                "ARS": "J01XX05_OHIPP",
+                "ATC5": "J01XX05",
+                "ROA": "O",
+                "SALT": "HIPP",
+                "DDD": 2,
+                "DDD_UNIT": "G",
+                "DDD_STD": 2,
+                "NOTES": "hippurate"
+            },
+            {
+                "ARS": "J01XX05_OMAND",
+                "ATC5": "J01XX05",
+                "ROA": "O",
+                "SALT": "MAND",
+                "DDD": 3,
+                "DDD_UNIT": "G",
+                "DDD_STD": 3,
+                "NOTES": "mandelate"
+            },
+            {
+                "ARS": "J01XX06_O",
+                "ATC5": "J01XX06",
+                "ROA": "O",
+                "DDD": 12,
+                "DDD_UNIT": "G",
+                "DDD_STD": 12
+            },
+            {
+                "ARS": "J01XX07_O",
+                "ATC5": "J01XX07",
+                "ROA": "O",
+                "DDD": 1,
+                "DDD_UNIT": "G",
+                "DDD_STD": 1
+            },
+            {
+                "ARS": "J01XX08_O",
+                "ATC5": "J01XX08",
+                "ROA": "O",
+                "DDD": 1.2,
+                "DDD_UNIT": "G",
+                "DDD_STD": 1.2
+            },
+            {
+                "ARS": "J01XX08_P",
+                "ATC5": "J01XX08",
+                "ROA": "P",
+                "DDD": 1.2,
+                "DDD_UNIT": "G",
+                "DDD_STD": 1.2
+            },
+            {
+                "ARS": "J01XX09_P",
+                "ATC5": "J01XX09",
+                "ROA": "P",
+                "DDD": 0.28,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.28
+            },
+            {
+                "ARS": "J01XX11_O",
+                "ATC5": "J01XX11",
+                "ROA": "O",
+                "DDD": 0.2,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.2
+            },
+            {
+                "ARS": "J01XX11_P",
+                "ATC5": "J01XX11",
+                "ROA": "P",
+                "DDD": 0.2,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.2
+            },
+            {
+                "ARS": "J02AA01_P",
+                "ATC5": "J02AA01",
+                "ROA": "P",
+                "DDD": 35,
+                "DDD_UNIT": "MG",
+                "DDD_STD": 35
+            },
+            {
+                "ARS": "J02AB01_P",
+                "ATC5": "J02AB01",
+                "ROA": "P",
+                "DDD": 1,
+                "DDD_UNIT": "G",
+                "DDD_STD": 1
+            },
+            {
+                "ARS": "J02AB02_O",
+                "ATC5": "J02AB02",
+                "ROA": "O",
+                "DDD": 0.2,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.2
+            },
+            {
+                "ARS": "J02AC01_O",
+                "ATC5": "J02AC01",
+                "ROA": "O",
+                "DDD": 0.2,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.2
+            },
+            {
+                "ARS": "J02AC01_P",
+                "ATC5": "J02AC01",
+                "ROA": "P",
+                "DDD": 0.2,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.2
+            },
+            {
+                "ARS": "J02AC02_O",
+                "ATC5": "J02AC02",
+                "ROA": "O",
+                "DDD": 0.2,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.2
+            },
+            {
+                "ARS": "J02AC02_P",
+                "ATC5": "J02AC02",
+                "ROA": "P",
+                "DDD": 0.2,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.2
+            },
+            {
+                "ARS": "J02AC03_O",
+                "ATC5": "J02AC03",
+                "ROA": "O",
+                "DDD": 0.4,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.4
+            },
+            {
+                "ARS": "J02AC03_P",
+                "ATC5": "J02AC03",
+                "ROA": "P",
+                "DDD": 0.4,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.4
+            },
+            {
+                "ARS": "J02AC04_O",
+                "ATC5": "J02AC04",
+                "ROA": "O",
+                "DDD": 0.3,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.3
+            },
+            {
+                "ARS": "J02AC04_P",
+                "ATC5": "J02AC04",
+                "ROA": "P",
+                "DDD": 0.3,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.3
+            },
+            {
+                "ARS": "J02AC05_O",
+                "ATC5": "J02AC05",
+                "ROA": "O",
+                "DDD": 0.2,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.2
+            },
+            {
+                "ARS": "J02AC05_P",
+                "ATC5": "J02AC05",
+                "ROA": "P",
+                "DDD": 0.2,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.2
+            },
+            {
+                "ARS": "J02AX01_O",
+                "ATC5": "J02AX01",
+                "ROA": "O",
+                "DDD": 10,
+                "DDD_UNIT": "G",
+                "DDD_STD": 10
+            },
+            {
+                "ARS": "J02AX01_P",
+                "ATC5": "J02AX01",
+                "ROA": "P",
+                "DDD": 10,
+                "DDD_UNIT": "G",
+                "DDD_STD": 10
+            },
+            {
+                "ARS": "J02AX04_P",
+                "ATC5": "J02AX04",
+                "ROA": "P",
+                "DDD": 50,
+                "DDD_UNIT": "MG",
+                "DDD_STD": 0.05
+            },
+            {
+                "ARS": "J02AX05_P",
+                "ATC5": "J02AX05",
+                "ROA": "P",
+                "DDD": 0.1,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.1
+            },
+            {
+                "ARS": "J02AX06_P",
+                "ATC5": "J02AX06",
+                "ROA": "P",
+                "DDD": 0.1,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.1
+            },
+            {
+                "ARS": "J04AA01_O",
+                "ATC5": "J04AA01",
+                "ROA": "O",
+                "DDD": 12,
+                "DDD_UNIT": "G",
+                "DDD_STD": 12
+            },
+            {
+                "ARS": "J04AA02_O",
+                "ATC5": "J04AA02",
+                "ROA": "O",
+                "DDD": 14,
+                "DDD_UNIT": "G",
+                "DDD_STD": 14
+            },
+            {
+                "ARS": "J04AA02_P",
+                "ATC5": "J04AA02",
+                "ROA": "P",
+                "DDD": 14,
+                "DDD_UNIT": "G",
+                "DDD_STD": 14
+            },
+            {
+                "ARS": "J04AA03_O",
+                "ATC5": "J04AA03",
+                "ROA": "O",
+                "DDD": 15,
+                "DDD_UNIT": "G",
+                "DDD_STD": 15
+            },
+            {
+                "ARS": "J04AB01_O",
+                "ATC5": "J04AB01",
+                "ROA": "O",
+                "DDD": 0.75,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.75
+            },
+            {
+                "ARS": "J04AB02_O",
+                "ATC5": "J04AB02",
+                "ROA": "O",
+                "DDD": 0.6,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.6
+            },
+            {
+                "ARS": "J04AB02_P",
+                "ATC5": "J04AB02",
+                "ROA": "P",
+                "DDD": 0.6,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.6
+            },
+            {
+                "ARS": "J04AB03_P",
+                "ATC5": "J04AB03",
+                "ROA": "P",
+                "DDD": 0.6,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.6
+            },
+            {
+                "ARS": "J04AB04_O",
+                "ATC5": "J04AB04",
+                "ROA": "O",
+                "DDD": 0.15,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.15
+            },
+            {
+                "ARS": "J04AB05_O",
+                "ATC5": "J04AB05",
+                "ROA": "O",
+                "DDD": 0.11,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.11
+            },
+            {
+                "ARS": "J04AB06_P",
+                "ATC5": "J04AB06",
+                "ROA": "P",
+                "DDD": 1,
+                "DDD_UNIT": "G",
+                "DDD_STD": 1
+            },
+            {
+                "ARS": "J04AB30_P",
+                "ATC5": "J04AB30",
+                "ROA": "P",
+                "DDD": 1,
+                "DDD_UNIT": "G",
+                "DDD_STD": 1
+            },
+            {
+                "ARS": "J04AC01_O",
+                "ATC5": "J04AC01",
+                "ROA": "O",
+                "DDD": 0.3,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.3
+            },
+            {
+                "ARS": "J04AC01_P",
+                "ATC5": "J04AC01",
+                "ROA": "P",
+                "DDD": 0.3,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.3
+            },
+            {
+                "ARS": "J04AD01_O",
+                "ATC5": "J04AD01",
+                "ROA": "O",
+                "DDD": 0.75,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.75
+            },
+            {
+                "ARS": "J04AD02_O",
+                "ATC5": "J04AD02",
+                "ROA": "O",
+                "DDD": 7,
+                "DDD_UNIT": "G",
+                "DDD_STD": 7
+            },
+            {
+                "ARS": "J04AD03_O",
+                "ATC5": "J04AD03",
+                "ROA": "O",
+                "DDD": 0.75,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.75
+            },
+            {
+                "ARS": "J04AK01_O",
+                "ATC5": "J04AK01",
+                "ROA": "O",
+                "DDD": 1.5,
+                "DDD_UNIT": "G",
+                "DDD_STD": 1.5
+            },
+            {
+                "ARS": "J04AK02_O",
+                "ATC5": "J04AK02",
+                "ROA": "O",
+                "DDD": 1.2,
+                "DDD_UNIT": "G",
+                "DDD_STD": 1.2
+            },
+            {
+                "ARS": "J04AK02_P",
+                "ATC5": "J04AK02",
+                "ROA": "P",
+                "DDD": 1.2,
+                "DDD_UNIT": "G",
+                "DDD_STD": 1.2
+            },
+            {
+                "ARS": "J04AK05_O",
+                "ATC5": "J04AK05",
+                "ROA": "O",
+                "DDD": 86,
+                "DDD_UNIT": "MG",
+                "DDD_STD": 86
+            },
+            {
+                "ARS": "J04AK06_O",
+                "ATC5": "J04AK06",
+                "ROA": "O",
+                "DDD": 0.2,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.2
+            },
+            {
+                "ARS": "J04BA01_O",
+                "ATC5": "J04BA01",
+                "ROA": "O",
+                "DDD": 0.1,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.1
+            },
+            {
+                "ARS": "J04BA02_O",
+                "ATC5": "J04BA02",
+                "ROA": "O",
+                "DDD": 50,
+                "DDD_UNIT": "MG",
+                "DDD_STD": 0.05
+            },
+            {
+                "ARS": "J04BA03_O",
+                "ATC5": "J04BA03",
+                "ROA": "O",
+                "DDD": 0.33,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.33
+            },
+            {
+                "ARS": "J05AB01_O",
+                "ATC5": "J05AB01",
+                "ROA": "O",
+                "DDD": 4,
+                "DDD_UNIT": "G",
+                "DDD_STD": 4
+            },
+            {
+                "ARS": "J05AB01_P",
+                "ATC5": "J05AB01",
+                "ROA": "P",
+                "DDD": 4,
+                "DDD_UNIT": "G",
+                "DDD_STD": 4
+            },
+            {
+                "ARS": "J05AB03_P",
+                "ATC5": "J05AB03",
+                "ROA": "P",
+                "DDD": 0.7,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.7
+            },
+            {
+                "ARS": "J05AB06_O",
+                "ATC5": "J05AB06",
+                "ROA": "O",
+                "DDD": 3,
+                "DDD_UNIT": "G",
+                "DDD_STD": 3
+            },
+            {
+                "ARS": "J05AB06_P",
+                "ATC5": "J05AB06",
+                "ROA": "P",
+                "DDD": 0.5,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.5
+            },
+            {
+                "ARS": "J05AB09_O",
+                "ATC5": "J05AB09",
+                "ROA": "O",
+                "DDD": 0.75,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.75
+            },
+            {
+                "ARS": "J05AB11_O",
+                "ATC5": "J05AB11",
+                "ROA": "O",
+                "DDD": 3,
+                "DDD_UNIT": "G",
+                "DDD_STD": 3
+            },
+            {
+                "ARS": "J05AB12_P",
+                "ATC5": "J05AB12",
+                "ROA": "P",
+                "DDD": 25,
+                "DDD_UNIT": "MG",
+                "DDD_STD": 25
+            },
+            {
+                "ARS": "J05AB14_O",
+                "ATC5": "J05AB14",
+                "ROA": "O",
+                "DDD": 0.9,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.9
+            },
+            {
+                "ARS": "J05AB15_O",
+                "ATC5": "J05AB15",
+                "ROA": "O",
+                "DDD": 125,
+                "DDD_UNIT": "G",
+                "DDD_STD": 125
+            },
+            {
+                "ARS": "J05AC02_O",
+                "ATC5": "J05AC02",
+                "ROA": "O",
+                "DDD": 0.2,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.2
+            },
+            {
+                "ARS": "J05AD01_P",
+                "ATC5": "J05AD01",
+                "ROA": "P",
+                "DDD": 6.5,
+                "DDD_UNIT": "G",
+                "DDD_STD": 6.5
+            },
+            {
+                "ARS": "J05AE01_O",
+                "ATC5": "J05AE01",
+                "ROA": "O",
+                "DDD": 1.8,
+                "DDD_UNIT": "G",
+                "DDD_STD": 1.8
+            },
+            {
+                "ARS": "J05AE02_O",
+                "ATC5": "J05AE02",
+                "ROA": "O",
+                "DDD": 2.4,
+                "DDD_UNIT": "G",
+                "DDD_STD": 2.4
+            },
+            {
+                "ARS": "J05AE03_O",
+                "ATC5": "J05AE03",
+                "ROA": "O",
+                "DDD": 1.2,
+                "DDD_UNIT": "G",
+                "DDD_STD": 1.2
+            },
+            {
+                "ARS": "J05AE04_O",
+                "ATC5": "J05AE04",
+                "ROA": "O",
+                "DDD": 2.25,
+                "DDD_UNIT": "G",
+                "DDD_STD": 2.25
+            },
+            {
+                "ARS": "J05AE05_O",
+                "ATC5": "J05AE05",
+                "ROA": "O",
+                "DDD": 1.2,
+                "DDD_UNIT": "G",
+                "DDD_STD": 1.2
+            },
+            {
+                "ARS": "J05AE07_O",
+                "ATC5": "J05AE07",
+                "ROA": "O",
+                "DDD": 1.4,
+                "DDD_UNIT": "G",
+                "DDD_STD": 1.4
+            },
+            {
+                "ARS": "J05AE08_O",
+                "ATC5": "J05AE08",
+                "ROA": "O",
+                "DDD": 0.3,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.3
+            },
+            {
+                "ARS": "J05AE09_O",
+                "ATC5": "J05AE09",
+                "ROA": "O",
+                "DDD": 1,
+                "DDD_UNIT": "G",
+                "DDD_STD": 1
+            },
+            {
+                "ARS": "J05AE10_O",
+                "ATC5": "J05AE10",
+                "ROA": "O",
+                "DDD": 1.2,
+                "DDD_UNIT": "G",
+                "DDD_STD": 1.2
+            },
+            {
+                "ARS": "J05AF01_O",
+                "ATC5": "J05AF01",
+                "ROA": "O",
+                "DDD": 0.6,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.6
+            },
+            {
+                "ARS": "J05AF01_P",
+                "ATC5": "J05AF01",
+                "ROA": "P",
+                "DDD": 0.6,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.6
+            },
+            {
+                "ARS": "J05AF02_O",
+                "ATC5": "J05AF02",
+                "ROA": "O",
+                "DDD": 0.4,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.4
+            },
+            {
+                "ARS": "J05AF03_O",
+                "ATC5": "J05AF03",
+                "ROA": "O",
+                "DDD": 2.25,
+                "DDD_UNIT": "MG",
+                "DDD_STD": 0.00225
+            },
+            {
+                "ARS": "J05AF04_O",
+                "ATC5": "J05AF04",
+                "ROA": "O",
+                "DDD": 80,
+                "DDD_UNIT": "MG",
+                "DDD_STD": 0.08
+            },
+            {
+                "ARS": "J05AF05_O",
+                "ATC5": "J05AF05",
+                "ROA": "O",
+                "DDD": 0.3,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.3
+            },
+            {
+                "ARS": "J05AF06_O",
+                "ATC5": "J05AF06",
+                "ROA": "O",
+                "DDD": 0.6,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.6
+            },
+            {
+                "ARS": "J05AF07_O",
+                "ATC5": "J05AF07",
+                "ROA": "O",
+                "DDD": 245,
+                "DDD_UNIT": "G",
+                "DDD_STD": 245
+            },
+            {
+                "ARS": "J05AF08_O",
+                "ATC5": "J05AF08",
+                "ROA": "O",
+                "DDD": 10,
+                "DDD_UNIT": "MG",
+                "DDD_STD": 0.01
+            },
+            {
+                "ARS": "J05AF09_O",
+                "ATC5": "J05AF09",
+                "ROA": "O",
+                "DDD": 0.2,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.2
+            },
+            {
+                "ARS": "J05AF10_O",
+                "ATC5": "J05AF10",
+                "ROA": "O",
+                "DDD": 0.5,
+                "DDD_UNIT": "MG",
+                "DDD_STD": 0.0005
+            },
+            {
+                "ARS": "J05AF11_O",
+                "ATC5": "J05AF11",
+                "ROA": "O",
+                "DDD": 0.6,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.6
+            },
+            {
+                "ARS": "J05AF12_O",
+                "ATC5": "J05AF12",
+                "ROA": "O",
+                "DDD": 30,
+                "DDD_UNIT": "MG",
+                "DDD_STD": 0.03
+            },
+            {
+                "ARS": "J05AF13_O",
+                "ATC5": "J05AF13",
+                "ROA": "O",
+                "DDD": 25,
+                "DDD_UNIT": "MG",
+                "DDD_STD": 25
+            },
+            {
+                "ARS": "J05AG01_O",
+                "ATC5": "J05AG01",
+                "ROA": "O",
+                "DDD": 0.4,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.4
+            },
+            {
+                "ARS": "J05AG02_O",
+                "ATC5": "J05AG02",
+                "ROA": "O",
+                "DDD": 1.2,
+                "DDD_UNIT": "G",
+                "DDD_STD": 1.2
+            },
+            {
+                "ARS": "J05AG03_O",
+                "ATC5": "J05AG03",
+                "ROA": "O",
+                "DDD": 0.6,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.6
+            },
+            {
+                "ARS": "J05AG04_O",
+                "ATC5": "J05AG04",
+                "ROA": "O",
+                "DDD": 0.4,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.4
+            },
+            {
+                "ARS": "J05AG05_O",
+                "ATC5": "J05AG05",
+                "ROA": "O",
+                "DDD": 25,
+                "DDD_UNIT": "MG",
+                "DDD_STD": 25
+            },
+            {
+                "ARS": "J05AG06_O",
+                "ATC5": "J05AG06",
+                "ROA": "O",
+                "DDD": 0.1,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.1
+            },
+            {
+                "ARS": "J05AH01_IP",
+                "ATC5": "J05AH01",
+                "ROA": "IP",
+                "DDD": 20,
+                "DDD_UNIT": "MG",
+                "DDD_STD": 0.02
+            },
+            {
+                "ARS": "J05AH02_O",
+                "ATC5": "J05AH02",
+                "ROA": "O",
+                "DDD": 0.15,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.15
+            },
+            {
+                "ARS": "J05AH03_P",
+                "ATC5": "J05AH03",
+                "ROA": "P",
+                "DDD": 0.6,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.6
+            },
+            {
+                "ARS": "J05AH04_IP",
+                "ATC5": "J05AH04",
+                "ROA": "IP",
+                "DDD": 40,
+                "DDD_UNIT": "MG",
+                "DDD_STD": 0.04
+            },
+            {
+                "ARS": "J05AJ01_O",
+                "ATC5": "J05AJ01",
+                "ROA": "O",
+                "DDD": 0.8,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.8
+            },
+            {
+                "ARS": "J05AJ03_O",
+                "ATC5": "J05AJ03",
+                "ROA": "O",
+                "DDD": 50,
+                "DDD_UNIT": "MG",
+                "DDD_STD": 0.05
+            },
+            {
+                "ARS": "J05AP01_IS",
+                "ATC5": "J05AP01",
+                "ROA": "IS",
+                "DDD": 6,
+                "DDD_UNIT": "G",
+                "DDD_STD": 6
+            },
+            {
+                "ARS": "J05AP01_O",
+                "ATC5": "J05AP01",
+                "ROA": "O",
+                "DDD": 1,
+                "DDD_UNIT": "G",
+                "DDD_STD": 1
+            },
+            {
+                "ARS": "J05AP02_O",
+                "ATC5": "J05AP02",
+                "ROA": "O",
+                "DDD": 2.25,
+                "DDD_UNIT": "G",
+                "DDD_STD": 2.25
+            },
+            {
+                "ARS": "J05AP03_O",
+                "ATC5": "J05AP03",
+                "ROA": "O",
+                "DDD": 2.4,
+                "DDD_UNIT": "G",
+                "DDD_STD": 2.4
+            },
+            {
+                "ARS": "J05AP05_O",
+                "ATC5": "J05AP05",
+                "ROA": "O",
+                "DDD": 0.15,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.15
+            },
+            {
+                "ARS": "J05AP06_O",
+                "ATC5": "J05AP06",
+                "ROA": "O",
+                "DDD": 0.2,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.2
+            },
+            {
+                "ARS": "J05AP07_O",
+                "ATC5": "J05AP07",
+                "ROA": "O",
+                "DDD": 60,
+                "DDD_UNIT": "MG",
+                "DDD_STD": 0.06
+            },
+            {
+                "ARS": "J05AP08_O",
+                "ATC5": "J05AP08",
+                "ROA": "O",
+                "DDD": 0.4,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.4
+            },
+            {
+                "ARS": "J05AP09_O",
+                "ATC5": "J05AP09",
+                "ROA": "O",
+                "DDD": 0.5,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.5
+            },
+            {
+                "ARS": "J05AP10_O",
+                "ATC5": "J05AP10",
+                "ROA": "O",
+                "DDD": 50,
+                "DDD_UNIT": "MG",
+                "DDD_STD": 0.05
+            },
+            {
+                "ARS": "J05AP11_O",
+                "ATC5": "J05AP11",
+                "ROA": "O",
+                "DDD": 0.1,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.1
+            },
+            {
+                "ARS": "J05AR10_O",
+                "ATC5": "J05AR10",
+                "ROA": "O",
+                "DDD": 0.8,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.8,
+                "NOTES": "Refers to lopinavir"
+            },
+            {
+                "ARS": "J05AR23_O",
+                "ATC5": "J05AR23",
+                "ROA": "O",
+                "DDD": 0.3,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.3,
+                "NOTES": "Refers to atazanavir"
+            },
+            {
+                "ARS": "J05AX01_O",
+                "ATC5": "J05AX01",
+                "ROA": "O",
+                "DDD": 0.3,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.3
+            },
+            {
+                "ARS": "J05AX05_O",
+                "ATC5": "J05AX05",
+                "ROA": "O",
+                "DDD": 3,
+                "DDD_UNIT": "G",
+                "DDD_STD": 3
+            },
+            {
+                "ARS": "J05AX07_P",
+                "ATC5": "J05AX07",
+                "ROA": "P",
+                "DDD": 0.18,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.18
+            },
+            {
+                "ARS": "J05AX09_O",
+                "ATC5": "J05AX09",
+                "ROA": "O",
+                "DDD": 0.6,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.6
+            },
+            {
+                "ARS": "J05AX13_O",
+                "ATC5": "J05AX13",
+                "ROA": "O",
+                "DDD": 0.8,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.8
+            },
+            {
+                "ARS": "J05AX17_O",
+                "ATC5": "J05AX17",
+                "ROA": "O",
+                "DDD": 1.5,
+                "DDD_UNIT": "G",
+                "DDD_STD": 1.5
+            },
+            {
+                "ARS": "J05AX18_O",
+                "ATC5": "J05AX18",
+                "ROA": "O",
+                "DDD": 0.48,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.48
+            },
+            {
+                "ARS": "J05AX18_P",
+                "ATC5": "J05AX18",
+                "ROA": "P",
+                "DDD": 0.48,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.48
+            },
+            {
+                "ARS": "J05AX19_O",
+                "ATC5": "J05AX19",
+                "ROA": "O",
+                "DDD": 125,
+                "DDD_UNIT": "G",
+                "DDD_STD": 125
+            },
+            {
+                "ARS": "J05AX21_O",
+                "ATC5": "J05AX21",
+                "ROA": "O",
+                "DDD": 90,
+                "DDD_UNIT": "MG",
+                "DDD_STD": 0.09
+            },
+            {
+                "ARS": "J05AX25_O",
+                "ATC5": "J05AX25",
+                "ROA": "O",
+                "DDD": 40,
+                "DDD_UNIT": "MG",
+                "DDD_STD": 0.04
+            },
+            {
+                "ARS": "J05AX26_O",
+                "ATC5": "J05AX26",
+                "ROA": "O",
+                "DDD": 0.4,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.4
+            },
+            {
+                "ARS": "J05AX27_O",
+                "ATC5": "J05AX27",
+                "ROA": "O",
+                "DDD": 1.6,
+                "DDD_UNIT": "G",
+                "DDD_STD": 1.6
+            },
+            {
+                "ARS": "P01AB01_O",
+                "ATC5": "P01AB01",
+                "ROA": "O",
+                "DDD": 2,
+                "DDD_UNIT": "G",
+                "DDD_STD": 2
+            },
+            {
+                "ARS": "P01AB01_R",
+                "ATC5": "P01AB01",
+                "ROA": "R",
+                "DDD": 2,
+                "DDD_UNIT": "G",
+                "DDD_STD": 2
+            },
+            {
+                "ARS": "P01AB02_O",
+                "ATC5": "P01AB02",
+                "ROA": "O",
+                "DDD": 2,
+                "DDD_UNIT": "G",
+                "DDD_STD": 2
+            },
+            {
+                "ARS": "P01AB02_R",
+                "ATC5": "P01AB02",
+                "ROA": "R",
+                "DDD": 2,
+                "DDD_UNIT": "G",
+                "DDD_STD": 2
+            },
+            {
+                "ARS": "P01AB03_O",
+                "ATC5": "P01AB03",
+                "ROA": "O",
+                "DDD": 1.5,
+                "DDD_UNIT": "G",
+                "DDD_STD": 1.5
+            },
+            {
+                "ARS": "P01AB06_O",
+                "ATC5": "P01AB06",
+                "ROA": "O",
+                "DDD": 2,
+                "DDD_UNIT": "G",
+                "DDD_STD": 2
+            },
+            {
+                "ARS": "P01AB07_O",
+                "ATC5": "P01AB07",
+                "ROA": "O",
+                "DDD": 2,
+                "DDD_UNIT": "G",
+                "DDD_STD": 2
+            },
+            {
+                "ARS": "P01BA01_O",
+                "ATC5": "P01BA01",
+                "ROA": "O",
+                "DDD": 0.5,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.5,
+                "NOTES": "base"
+            },
+            {
+                "ARS": "P01BA01_P",
+                "ATC5": "P01BA01",
+                "ROA": "P",
+                "DDD": 0.5,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.5,
+                "NOTES": "base"
+            },
+            {
+                "ARS": "P01BA02_O",
+                "ATC5": "P01BA02",
+                "ROA": "O",
+                "DDD": 516,
+                "DDD_UNIT": "G",
+                "DDD_STD": 516,
+                "NOTES": "base"
+            },
+            {
+                "ARS": "P01BA03_O",
+                "ATC5": "P01BA03",
+                "ROA": "O",
+                "DDD": 15,
+                "DDD_UNIT": "MG",
+                "DDD_STD": 15,
+                "NOTES": "base"
+            },
+            {
+                "ARS": "P01BA06_O",
+                "ATC5": "P01BA06",
+                "ROA": "O",
+                "DDD": 0.5,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.5
+            },
+            {
+                "ARS": "P01BB01_O",
+                "ATC5": "P01BB01",
+                "ROA": "O",
+                "DDD": 0.2,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.2,
+                "NOTES": "hydrochloride, (prophylactic daily dose)"
+            },
+            {
+                "ARS": "P01BC01_O",
+                "ATC5": "P01BC01",
+                "ROA": "O",
+                "DDD": 1.5,
+                "DDD_UNIT": "G",
+                "DDD_STD": 1.5,
+                "NOTES": "base"
+            },
+            {
+                "ARS": "P01BC01_P",
+                "ATC5": "P01BC01",
+                "ROA": "P",
+                "DDD": 1.5,
+                "DDD_UNIT": "G",
+                "DDD_STD": 1.5,
+                "NOTES": "base"
+            },
+            {
+                "ARS": "P01BC02_O",
+                "ATC5": "P01BC02",
+                "ROA": "O",
+                "DDD": 1,
+                "DDD_UNIT": "G",
+                "DDD_STD": 1,
+                "NOTES": "base"
+            },
+            {
+                "ARS": "P01BD01_O",
+                "ATC5": "P01BD01",
+                "ROA": "O",
+                "DDD": 75,
+                "DDD_UNIT": "MG",
+                "DDD_STD": 75
+            },
+            {
+                "ARS": "P01BD51_O",
+                "ATC5": "P01BD51",
+                "ROA": "O",
+                "DDD": 75,
+                "DDD_UNIT": "MG",
+                "DDD_STD": 75,
+                "NOTES": "Refers to pyrimethamine"
+            },
+            {
+                "ARS": "P01BD51_P",
+                "ATC5": "P01BD51",
+                "ROA": "P",
+                "DDD": 75,
+                "DDD_UNIT": "MG",
+                "DDD_STD": 75,
+                "NOTES": "Refers to pyrimethamine"
+            },
+            {
+                "ARS": "P01BE01_O",
+                "ATC5": "P01BE01",
+                "ROA": "O",
+                "DDD": 1,
+                "DDD_UNIT": "G",
+                "DDD_STD": 1
+            },
+            {
+                "ARS": "P01BE02_O",
+                "ATC5": "P01BE02",
+                "ROA": "O",
+                "DDD": 0.28,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.28
+            },
+            {
+                "ARS": "P01BE02_P",
+                "ATC5": "P01BE02",
+                "ROA": "P",
+                "DDD": 0.12,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.12
+            },
+            {
+                "ARS": "P01BE02_R",
+                "ATC5": "P01BE02",
+                "ROA": "R",
+                "DDD": 0.28,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.28
+            },
+            {
+                "ARS": "P01BE03_O",
+                "ATC5": "P01BE03",
+                "ROA": "O",
+                "DDD": 0.28,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.28
+            },
+            {
+                "ARS": "P01BE03_P",
+                "ATC5": "P01BE03",
+                "ROA": "P",
+                "DDD": 0.28,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.28
+            },
+            {
+                "ARS": "P01BE03_R",
+                "ATC5": "P01BE03",
+                "ROA": "R",
+                "DDD": 0.28,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.28
+            },
+            {
+                "ARS": "P01BE05_O",
+                "ATC5": "P01BE05",
+                "ROA": "O",
+                "DDD": 0.28,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.28
+            },
+            {
+                "ARS": "P01BF01_O",
+                "ATC5": "P01BF01",
+                "ROA": "O",
+                "DDD": 0.28,
+                "DDD_UNIT": "G",
+                "DDD_STD": 0.28,
+                "NOTES": "Refers to arthemether"
+            },
+            {
+                "ARS": "P01BX01_O",
+                "ATC5": "P01BX01",
+                "ROA": "O",
+                "DDD": 1.5,
+                "DDD_UNIT": "G",
+                "DDD_STD": 1.5
+            }
+        ]
+    }
+]
