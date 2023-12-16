@@ -68,11 +68,14 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
                     ? compositionRoot.fileSubmission.secondaryFile(
                           secondaryFile,
                           batchId,
+                          currentModuleAccess.moduleName,
                           currentPeriod,
                           "CREATE_AND_UPDATE",
                           currentOrgUnitAccess.orgUnitId,
+                          currentOrgUnitAccess.orgUnitName,
                           currentOrgUnitAccess.orgUnitCode,
-                          false
+                          false,
+                          ""
                       )
                     : Future.success(undefined),
             }).run(
@@ -81,27 +84,55 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
                     console.log({ importPrimaryFileSummary });
                     console.log({ importSecondaryFileSummary });
 
+                    const primaryUploadId = localStorage.getItem("primaryUploadId");
+
                     setPrimaryFileImportSummary(importPrimaryFileSummary);
 
                     if (importSecondaryFileSummary) {
                         setSecondaryFileImportSummary(importSecondaryFileSummary);
                     }
 
-                    if (importPrimaryFileSummary.blockingErrors.length === 0) {
-                        const primaryUploadId = localStorage.getItem("primaryUploadId");
-                        if (primaryUploadId) {
-                            compositionRoot.glassUploads.setStatus({ id: primaryUploadId, status: "VALIDATED" }).run(
-                                () => {
-                                    changeStep(3);
-                                    setImportLoading(false);
-                                },
-                                () => {
-                                    setImportLoading(false);
-                                }
-                            );
-                        }
+                    if (primaryUploadId) {
+                        const secondaryUploadId = localStorage.getItem("secondaryUploadId");
+
+                        const params = secondaryUploadId
+                            ? {
+                                  primaryUploadId,
+                                  primaryImportSummaryErrors: {
+                                      nonBlockingErrors: importPrimaryFileSummary?.nonBlockingErrors || [],
+                                      blockingErrors: importPrimaryFileSummary?.blockingErrors || [],
+                                  },
+                                  secondaryUploadId,
+                                  secondaryImportSummaryErrors: {
+                                      nonBlockingErrors: importSecondaryFileSummary?.nonBlockingErrors || [],
+                                      blockingErrors: importSecondaryFileSummary?.blockingErrors || [],
+                                  },
+                              }
+                            : {
+                                  primaryUploadId,
+                                  primaryImportSummaryErrors: {
+                                      nonBlockingErrors: importPrimaryFileSummary?.nonBlockingErrors || [],
+                                      blockingErrors: importPrimaryFileSummary?.blockingErrors || [],
+                                  },
+                              };
+
+                        compositionRoot.glassUploads.saveImportSummaryErrorsOfFiles(params).run(
+                            () => {},
+                            () => {}
+                        );
+                    }
+
+                    if (importPrimaryFileSummary.blockingErrors.length === 0 && primaryUploadId) {
+                        compositionRoot.glassUploads.setStatus({ id: primaryUploadId, status: "VALIDATED" }).run(
+                            () => {
+                                changeStep(3);
+                                setImportLoading(false);
+                            },
+                            () => {
+                                setImportLoading(false);
+                            }
+                        );
                     } else {
-                        const primaryUploadId = localStorage.getItem("primaryUploadId");
                         if (primaryUploadId) {
                             compositionRoot.glassUploads.setStatus({ id: primaryUploadId, status: "IMPORTED" }).run(
                                 () => {
@@ -161,19 +192,23 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
                     )}
                 </Typography>
             </div>
-            {moduleProperties.get(currentModuleAccess.moduleName)?.isSecondaryFileApplicable && (
-                <div className="toggles">
-                    <Button onClick={() => changeType("primary")} className={fileType === "primary" ? "current" : ""}>
-                        {i18n.t(`${moduleProperties.get(currentModuleAccess.moduleName)?.primaryFileType} File`)}
-                    </Button>
-                    <Button
-                        onClick={() => changeType("secondary")}
-                        className={fileType === "secondary" ? "current" : ""}
-                    >
-                        {i18n.t(`${moduleProperties.get(currentModuleAccess.moduleName)?.secondaryFileType} File`)}
-                    </Button>
-                </div>
-            )}
+            {moduleProperties.get(currentModuleAccess.moduleName)?.isSecondaryFileApplicable &&
+                !moduleProperties.get(currentModuleAccess.moduleName)?.isSingleFileTypePerSubmission && (
+                    <div className="toggles">
+                        <Button
+                            onClick={() => changeType("primary")}
+                            className={fileType === "primary" ? "current" : ""}
+                        >
+                            {i18n.t(`${moduleProperties.get(currentModuleAccess.moduleName)?.primaryFileType} File`)}
+                        </Button>
+                        <Button
+                            onClick={() => changeType("secondary")}
+                            className={fileType === "secondary" ? "current" : ""}
+                        >
+                            {i18n.t(`${moduleProperties.get(currentModuleAccess.moduleName)?.secondaryFileType} File`)}
+                        </Button>
+                    </div>
+                )}
             {renderTypeContent(
                 fileType,
                 currentModuleAccess.moduleName,
@@ -251,7 +286,7 @@ const ContentWrapper = styled.div`
             border-radius: 0;
             border: none;
             flex: 1;
-            border-: 2px solid ${glassColors.greyLight};
+            border: 2px solid ${glassColors.greyLight};
             &.current {
                 color: ${glassColors.mainPrimary};
                 border-bottom: 4px solid ${glassColors.mainPrimary};

@@ -2,7 +2,7 @@ import {
     ActionResult,
     D2DataValueToPost,
     D2EventToPost,
-    EGASPProgramMetadata,
+    EventProgramBLMetadata,
     EventEffect,
     EventResult,
     GetProgramRuleEffectsOptions,
@@ -26,12 +26,12 @@ import { outputConverter } from "./converters/outputConverter";
 import { dateUtils } from "./converters/dateUtils";
 import { BlockingError, NonBlockingError } from "../../entities/data-entry/ImportSummary";
 
-export class ProgramRuleValidationForEGASP {
+export class ProgramRuleValidationForBLEventProgram {
     constructor(private programRulesMetadataRepository: ProgramRulesMetadataRepository) {}
 
-    public getValidatedEvents(events: Event[]): FutureData<EventResult> {
-        return this.programRulesMetadataRepository.getMetadata().flatMap(metadata => {
-            const eventEffects = this.getEventEffectsForEGASP(events, metadata);
+    public getValidatedEvents(events: Event[], programId: string): FutureData<EventResult> {
+        return this.programRulesMetadataRepository.getMetadata(programId).flatMap(metadata => {
+            const eventEffects = this.getEventEffectsForEventProgram(events, metadata);
             const actionsResult = this.getActions(eventEffects, metadata);
             if (actionsResult.blockingErrors.length > 0) {
                 //If there are blocking errors, do not process further. return the errors.
@@ -57,7 +57,7 @@ export class ProgramRuleValidationForEGASP {
         });
     }
 
-    private getActions(eventEffects: EventEffect[], metadata: EGASPProgramMetadata): ActionResult {
+    private getActions(eventEffects: EventEffect[], metadata: EventProgramBLMetadata): ActionResult {
         const updateActions: ActionResult = { actions: [], blockingErrors: [], nonBlockingErrors: [] };
 
         _(eventEffects)
@@ -95,7 +95,7 @@ export class ProgramRuleValidationForEGASP {
     private getUpdateAction(
         effect: RuleEffect,
         eventEffect: EventEffect,
-        metadata: EGASPProgramMetadata
+        metadata: EventProgramBLMetadata
     ): UpdateAction | BlockingError | NonBlockingError | undefined {
         const { program, event } = eventEffect;
 
@@ -139,7 +139,7 @@ export class ProgramRuleValidationForEGASP {
     }
 
     private getUpdateActionEvent(
-        metadata: EGASPProgramMetadata,
+        metadata: EventProgramBLMetadata,
         program: Program,
         event: Event,
         dataElementId: Id,
@@ -203,8 +203,8 @@ export class ProgramRuleValidationForEGASP {
         return { ...event, dataValues: dataValuesUpdated };
     }
 
-    public getEventEffectsForEGASP(events: Event[], metadata: EGASPProgramMetadata): EventEffect[] {
-        const program = metadata.programs[0]; //EGASP PROGRAM
+    public getEventEffectsForEventProgram(events: Event[], metadata: EventProgramBLMetadata): EventEffect[] {
+        const program = metadata.programs[0]; //EVENT PROGRAM
         const eventsGroups = _(events)
             .filter(ev => Boolean(ev.occurredAt))
             .groupBy(ev => [ev.orgUnit, ev.program, ev.attributeOptionCombo, ev.trackedEntity].join("."))
@@ -237,7 +237,7 @@ export class ProgramRuleValidationForEGASP {
         event: Event;
         program: Program;
         programRulesIds: Id[];
-        metadata: EGASPProgramMetadata;
+        metadata: EventProgramBLMetadata;
 
         events: Event[];
     }): EventEffect | undefined {
@@ -350,7 +350,7 @@ export class ProgramRuleValidationForEGASP {
         return [res, errors.length > 0 ? errors : undefined];
     }
 
-    private getProgramEvent(event: Event, metadata: EGASPProgramMetadata): ProgramRuleEvent {
+    private getProgramEvent(event: Event, metadata: EventProgramBLMetadata): ProgramRuleEvent {
         const trackedEntityId = event.trackedEntity;
 
         return {

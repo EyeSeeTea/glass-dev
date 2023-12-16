@@ -16,6 +16,8 @@ import { useCurrentDataSubmissionId } from "../../hooks/useCurrentDataSubmission
 import { useCurrentUserGroupsAccess } from "../../hooks/useCurrentUserGroupsAccess";
 import { useGetLastSuccessfulAnalyticsRunTime } from "../../hooks/useGetLastSuccessfulAnalyticsRunTime";
 import { Validations } from "../current-data-submission/Validations";
+import { useQuestionnaires } from "../current-data-submission/Questionnaires";
+import { QuestionnaireBase } from "../../../domain/entities/Questionnaire";
 
 interface ReviewDataSummaryProps {
     changeStep: (step: number) => void;
@@ -39,13 +41,17 @@ export const ReviewDataSummary: React.FC<ReviewDataSummaryProps> = ({
     const [fileType, setFileType] = useState<string>("primary");
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const dataSubmissionId = useCurrentDataSubmissionId(
-        compositionRoot,
         currentModuleAccess.moduleId,
+        currentModuleAccess.moduleName,
         currentOrgUnitAccess.orgUnitId,
         currentPeriod
     );
     const { captureAccessGroup } = useCurrentUserGroupsAccess();
     const [isReportReady, setIsReportReady] = useState<boolean>(false);
+    const [currentDataSubmissionId, setCurrentDataSubmissionId] = useState<string>("");
+    const [currentQuestionnaires, setCurrentQuestionnaires] = useState<QuestionnaireBase[]>();
+
+    const [questionnaires] = useQuestionnaires();
 
     const changeType = (fileType: string) => {
         setFileType(fileType);
@@ -54,6 +60,13 @@ export const ReviewDataSummary: React.FC<ReviewDataSummaryProps> = ({
     const { lastSuccessfulAnalyticsRunTime, setRefetch } = useGetLastSuccessfulAnalyticsRunTime();
 
     useEffect(() => {
+        if (dataSubmissionId !== "" && currentDataSubmissionId === "") {
+            setCurrentDataSubmissionId(dataSubmissionId);
+        }
+
+        if (questionnaires && !currentQuestionnaires) {
+            setCurrentQuestionnaires(questionnaires);
+        }
         if (lastSuccessfulAnalyticsRunTime.kind === "loaded") {
             const lastAnalyticsRunTime = new Date(lastSuccessfulAnalyticsRunTime.data);
 
@@ -66,7 +79,15 @@ export const ReviewDataSummary: React.FC<ReviewDataSummaryProps> = ({
                 }
             }
         }
-    }, [setIsReportReady, lastSuccessfulAnalyticsRunTime, primaryFileImportSummary?.importTime]);
+    }, [
+        setIsReportReady,
+        lastSuccessfulAnalyticsRunTime,
+        primaryFileImportSummary?.importTime,
+        dataSubmissionId,
+        currentDataSubmissionId,
+        currentQuestionnaires,
+        questionnaires,
+    ]);
 
     React.useEffect(() => {
         const timer = setInterval(() => {
@@ -89,12 +110,13 @@ export const ReviewDataSummary: React.FC<ReviewDataSummaryProps> = ({
                         setIsLoading(false);
                         //If Questionnaires are not applicable to a module, then set status as COMPLETE on
                         //completion of dataset.
-
                         if (
-                            !moduleProperties.get(currentModuleAccess.moduleName)?.isQuestionnaireReq &&
-                            dataSubmissionId !== ""
+                            moduleProperties.get(currentModuleAccess.moduleName)?.completeStatusChange === "DATASET" ||
+                            (moduleProperties.get(currentModuleAccess.moduleName)?.completeStatusChange ===
+                                "QUESTIONNAIRE_AND_DATASET" &&
+                                currentQuestionnaires?.every(q => q.isMandatory && q.isCompleted))
                         ) {
-                            compositionRoot.glassDataSubmission.setStatus(dataSubmissionId, "COMPLETE").run(
+                            compositionRoot.glassDataSubmission.setStatus(currentDataSubmissionId, "COMPLETE").run(
                                 () => {
                                     if (captureAccessGroup.kind === "loaded") {
                                         const userGroupsIds = captureAccessGroup.data.map(cag => {
@@ -142,6 +164,48 @@ export const ReviewDataSummary: React.FC<ReviewDataSummaryProps> = ({
                     setIsLoading(false);
                 }
             );
+        } else if (secondaryUploadId) {
+            return compositionRoot.glassUploads.setStatus({ id: secondaryUploadId, status: COMPLETED_STATUS }).run(
+                () => {
+                    if (
+                        moduleProperties.get(currentModuleAccess.moduleName)?.completeStatusChange ===
+                            "QUESTIONNAIRE_AND_DATASET" &&
+                        currentQuestionnaires?.every(q => q.isMandatory && q.isCompleted)
+                    ) {
+                        compositionRoot.glassDataSubmission.setStatus(currentDataSubmissionId, "COMPLETE").run(
+                            () => {
+                                if (captureAccessGroup.kind === "loaded") {
+                                    const userGroupsIds = captureAccessGroup.data.map(cag => {
+                                        return cag.id;
+                                    });
+                                    const notificationText = `The data submission for ${currentModuleAccess.moduleName} module for year ${currentPeriod} and country ${currentOrgUnitAccess.orgUnitName} has changed to DATA TO BE APPROVED BY COUNTRY`;
+
+                                    compositionRoot.notifications
+                                        .send(
+                                            notificationText,
+                                            notificationText,
+                                            userGroupsIds,
+                                            currentOrgUnitAccess.orgUnitPath
+                                        )
+                                        .run(
+                                            () => {},
+                                            () => {}
+                                        );
+                                }
+                            },
+                            error => {
+                                console.debug("Error occurred when setting data submission status, error: " + error);
+                            }
+                        );
+                    }
+                    changeStep(4);
+                    setIsLoading(false);
+                },
+                errorMessage => {
+                    snackbar.error(i18n.t(errorMessage));
+                    setIsLoading(false);
+                }
+            );
         }
     }, [
         changeStep,
@@ -153,26 +217,31 @@ export const ReviewDataSummary: React.FC<ReviewDataSummaryProps> = ({
         currentModuleAccess.moduleName,
         currentOrgUnitAccess,
         currentPeriod,
-        dataSubmissionId,
+        currentDataSubmissionId,
+        currentQuestionnaires,
     ]);
 
     const goToFinalStepEffect = useCallbackEffect(goToFinalStep);
 
     return (
         <ContentWrapper>
-            {moduleProperties.get(currentModuleAccess.moduleName)?.isSecondaryFileApplicable && (
-                <div className="toggles">
-                    <Button onClick={() => changeType("primary")} className={fileType === "primary" ? "current" : ""}>
-                        {i18n.t(`${moduleProperties.get(currentModuleAccess.moduleName)?.primaryFileType} File`)}
-                    </Button>
-                    <Button
-                        onClick={() => changeType("secondary")}
-                        className={fileType === "secondary" ? "current" : ""}
-                    >
-                        {i18n.t(`${moduleProperties.get(currentModuleAccess.moduleName)?.secondaryFileType} File`)}
-                    </Button>
-                </div>
-            )}
+            {moduleProperties.get(currentModuleAccess.moduleName)?.isSecondaryFileApplicable &&
+                !moduleProperties.get(currentModuleAccess.moduleName)?.isSingleFileTypePerSubmission && (
+                    <div className="toggles">
+                        <Button
+                            onClick={() => changeType("primary")}
+                            className={fileType === "primary" ? "current" : ""}
+                        >
+                            {i18n.t(`${moduleProperties.get(currentModuleAccess.moduleName)?.primaryFileType} File`)}
+                        </Button>
+                        <Button
+                            onClick={() => changeType("secondary")}
+                            className={fileType === "secondary" ? "current" : ""}
+                        >
+                            {i18n.t(`${moduleProperties.get(currentModuleAccess.moduleName)?.secondaryFileType} File`)}
+                        </Button>
+                    </div>
+                )}
             <Section className="summary">
                 <h3>{i18n.t("Summary")}</h3>
                 <SectionCard className="wrong">

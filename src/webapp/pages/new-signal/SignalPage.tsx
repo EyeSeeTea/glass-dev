@@ -1,7 +1,8 @@
 import React, { useEffect } from "react";
 import { useHistory, useLocation } from "react-router-dom";
 import styled from "styled-components";
-import { NewSignalForm } from "../../components/new-signal/NewSignalForm";
+import { EAR_PROGRAM_ID } from "../../../domain/usecases/GetProgramQuestionnaireUseCase";
+import { ProgramQuestionnaireForm } from "../../components/new-signal/ProgramQuestionnaireForm";
 
 export const SignalPage: React.FC = () => {
     const { state } = useLocation<{ readOnly: boolean; signalId: string; signalEvtId: string }>();
@@ -22,7 +23,14 @@ export const SignalPage: React.FC = () => {
 
     return (
         <ContentWrapper>
-            <NewSignalForm readonly={readOnly} signalId={signalId} signalEventId={signalEvtId} hideForm={hideForm} />
+            <ProgramQuestionnaireForm
+                readonly={readOnly}
+                signalId={signalId}
+                eventId={signalEvtId}
+                hideForm={hideForm}
+                questionnaireId={EAR_PROGRAM_ID}
+                hidePublish={false}
+            />
         </ContentWrapper>
     );
 };

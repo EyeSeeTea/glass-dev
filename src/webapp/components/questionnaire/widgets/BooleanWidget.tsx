@@ -7,10 +7,11 @@ import i18n from "@eyeseetea/d2-ui-components/locales";
 
 export interface BooleanWidgetProps extends BaseWidgetProps<boolean> {
     value: Maybe<boolean>;
+    infoText?: string;
 }
 
 const BooleanWidget: React.FC<BooleanWidgetProps> = props => {
-    const { onChange: onValueChange, value } = props;
+    const { onChange: onValueChange, value, disabled, infoText } = props;
 
     const [stateValue, setStateValue] = React.useState(value);
     React.useEffect(() => setStateValue(value), [value]);
@@ -24,12 +25,10 @@ const BooleanWidget: React.FC<BooleanWidgetProps> = props => {
     );
 
     return (
-        <Checkbox
-            label={i18n.t("Yes")}
-            checked={stateValue === true}
-            disabled={props.disabled}
-            onChange={notifyChange}
-        />
+        <>
+            <Checkbox label={i18n.t("Yes")} checked={stateValue === true} disabled={disabled} onChange={notifyChange} />
+            {infoText && <p>${infoText}</p>}
+        </>
     );
 };
 

@@ -1,8 +1,21 @@
+import { DataFormType } from "../DataForm";
 import { Id } from "../Ref";
+import { TrackedEntityInstance } from "../TrackedEntityInstance";
 
-export interface DataPackage {
-    type: "programs";
+export type DataPackage = GenericProgramPackage | TrackerProgramPackage;
+
+export interface BaseDataPackage {
+    type: DataFormType;
     dataEntries: DataPackageData[];
+}
+
+export interface GenericProgramPackage extends BaseDataPackage {
+    type: "dataSets" | "programs";
+}
+
+export interface TrackerProgramPackage extends BaseDataPackage {
+    type: "trackerPrograms";
+    trackedEntityInstances: TrackedEntityInstance[];
 }
 
 export interface DataPackageData {

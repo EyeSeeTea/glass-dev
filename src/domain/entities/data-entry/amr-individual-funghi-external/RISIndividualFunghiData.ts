@@ -1,20 +1,16 @@
 export interface RISIndividualFunghiData {
     COUNTRY: string;
     YEAR: number;
-    HCF_ID: string;
-    HCF_TYPE: string;
+    HEALTHCAREFACILITYTYPE: string;
     HOSPITALUNITTYPE: string;
     PATIENT_ID: string;
     AGE: string;
     GENDER: string;
     PATIENTTYPE: string;
-    DATEOFHOSPITALISATION_VISIT: string;
-    LABORATORYCODE: number;
-    SAMPLE_DATE: string;
-    ISOLATE_ID: number;
+    DATEOFADMISSION: string;
+    DATEUSEDFORSTATISTICS: string;
     SPECIMEN: string;
     PATIENTCOUNTER: number;
-    PATHOGEN: string;
     ANTIBIOTIC: string;
     SIR: string;
     REFERENCEGUIDELINESSIR: string;
@@ -28,4 +24,16 @@ export interface RISIndividualFunghiData {
     RESULTMICSIGN: string;
     RESULTMICVALUE: number;
     RESULTMICSIR: string;
+
+    //AMR - Individual
+    AB_CLASS: string;
+
+    //AMR - Funghi
+    ISOLATEID: string;
+    PATHOGEN_DET: string;
+    AST_HFC_ID: string;
+    AMR_LABORATORY_CODE: string;
+    AST_METHOD2: string;
+    IDENT_METHOD2: string;
+    PERFORMED_TEST2: string;
 }

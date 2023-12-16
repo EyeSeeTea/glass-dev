@@ -14,7 +14,7 @@ import i18n from "@eyeseetea/d2-ui-components/locales";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import { UploadPrimaryFile } from "./UploadPrimaryFile";
-import { UploadSample } from "./UploadSample";
+import { UploadSecondary } from "./UploadSecondary";
 import { useAppContext } from "../../contexts/app-context";
 import { useCurrentDataSubmissionId } from "../../hooks/useCurrentDataSubmissionId";
 import { useCurrentModuleContext } from "../../contexts/current-module-context";
@@ -81,12 +81,16 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
     const { compositionRoot } = useAppContext();
     const snackbar = useSnackbar();
     const [isValidated, setIsValidated] = useState(false);
-    const [isFileValid, setIsFileValid] = useState(false);
+    const [isPrimaryFileValid, setIsPrimaryFileValid] = useState(false);
+    const [isSecondaryFileValid, setIsSecondaryFileValid] = useState(false);
     const [previousUploadsBatchIds, setPreviousUploadsBatchIds] = useState<string[]>([]);
     const [hasSecondaryFile, setHasSecondaryFile] = useState<boolean>(false);
     const [importLoading, setImportLoading] = useState<boolean>(false);
     const [previousBatchIdsLoading, setPreviousBatchIdsLoading] = useState<boolean>(true);
     const [loading, setLoading] = useState<boolean>(false);
+    const [uploadFileType, setUploadFileType] = useState<"PRODUCT" | "SUBSTANCE">(
+        secondaryFile ? "SUBSTANCE" : "PRODUCT"
+    );
 
     const {
         currentModuleAccess: { moduleId, moduleName },
@@ -96,7 +100,7 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
     } = useCurrentOrgUnitContext();
 
     const { currentPeriod } = useCurrentPeriodContext();
-    const dataSubmissionId = useCurrentDataSubmissionId(compositionRoot, moduleId, orgUnitId, currentPeriod);
+    const dataSubmissionId = useCurrentDataSubmissionId(moduleId, moduleName, orgUnitId, currentPeriod);
 
     useEffect(() => {
         if (moduleProperties.get(moduleName)?.isbatchReq) {
@@ -131,15 +135,18 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
 
     useEffect(() => {
         if (moduleProperties.get(moduleName)?.isbatchReq) {
-            if (batchId && isFileValid) {
+            if (batchId && isPrimaryFileValid) {
                 setIsValidated(true);
             } else {
                 setIsValidated(false);
             }
+        } else if (moduleProperties.get(moduleName)?.isSingleFileTypePerSubmission) {
+            if (isPrimaryFileValid || isSecondaryFileValid) setIsValidated(true);
+            else setIsValidated(false);
         } else {
-            if (isFileValid) setIsValidated(true);
+            if (isPrimaryFileValid) setIsValidated(true);
         }
-    }, [batchId, isFileValid, moduleName]);
+    }, [batchId, isPrimaryFileValid, isSecondaryFileValid, moduleName]);
 
     const changeBatchId = async (event: React.ChangeEvent<{ value: unknown }>) => {
         const batchId = event.target.value as string;
@@ -154,6 +161,12 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
             await compositionRoot.glassUploads.setBatchId({ id: secondaryUploadId, batchId }).toPromise();
         }
     };
+
+    const changeFileType = (event: React.ChangeEvent<{ value: unknown }>) => {
+        const fileType = event.target.value as "PRODUCT" | "SUBSTANCE";
+        setUploadFileType(fileType);
+    };
+
     const uploadFileSubmissions = useCallback(() => {
         if (primaryFile) {
             setImportLoading(true);
@@ -174,11 +187,14 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
                     ? compositionRoot.fileSubmission.secondaryFile(
                           secondaryFile,
                           batchId,
+                          moduleName,
                           currentPeriod,
                           "CREATE_AND_UPDATE",
                           orgUnitId,
+                          orgUnitName,
                           orgUnitCode,
-                          true
+                          true,
+                          ""
                       )
                     : Future.success(undefined),
             }).run(
@@ -188,6 +204,39 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
                     if (importSecondaryFileSummary) {
                         setSecondaryFileImportSummary(importSecondaryFileSummary);
                     }
+
+                    const primaryUploadId = localStorage.getItem("primaryUploadId");
+
+                    if (primaryUploadId) {
+                        const secondaryUploadId = localStorage.getItem("secondaryUploadId");
+
+                        const params = secondaryUploadId
+                            ? {
+                                  primaryUploadId,
+                                  primaryImportSummaryErrors: {
+                                      nonBlockingErrors: importPrimaryFileSummary?.nonBlockingErrors || [],
+                                      blockingErrors: importPrimaryFileSummary?.blockingErrors || [],
+                                  },
+                                  secondaryUploadId,
+                                  secondaryImportSummaryErrors: {
+                                      nonBlockingErrors: importSecondaryFileSummary?.nonBlockingErrors || [],
+                                      blockingErrors: importSecondaryFileSummary?.blockingErrors || [],
+                                  },
+                              }
+                            : {
+                                  primaryUploadId,
+                                  primaryImportSummaryErrors: {
+                                      nonBlockingErrors: importPrimaryFileSummary?.nonBlockingErrors || [],
+                                      blockingErrors: importPrimaryFileSummary?.blockingErrors || [],
+                                  },
+                              };
+
+                        compositionRoot.glassUploads.saveImportSummaryErrorsOfFiles(params).run(
+                            () => {},
+                            () => {}
+                        );
+                    }
+
                     setImportLoading(false);
                     changeStep(2);
                 },
@@ -202,25 +251,63 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
                     changeStep(2);
                 }
             );
+        } //secondary file upload only
+        else if (secondaryFile) {
+            setImportLoading(true);
+            compositionRoot.fileSubmission
+                .secondaryFile(
+                    secondaryFile,
+                    batchId,
+                    moduleName,
+                    currentPeriod,
+                    "CREATE_AND_UPDATE",
+                    orgUnitId,
+                    orgUnitName,
+                    orgUnitCode,
+                    true,
+                    ""
+                )
+                .run(
+                    importSubstanceFileSummary => {
+                        if (importSubstanceFileSummary) {
+                            setPrimaryFileImportSummary(importSubstanceFileSummary);
+                        }
+                        setImportLoading(false);
+                        changeStep(2);
+                    },
+                    error => {
+                        setPrimaryFileImportSummary({
+                            status: "ERROR",
+                            importCount: { ignored: 0, imported: 0, deleted: 0, updated: 0 },
+                            nonBlockingErrors: [],
+                            blockingErrors: [{ error: error, count: 1 }],
+                        });
+                        setImportLoading(false);
+                        changeStep(2);
+                    }
+                );
         }
     }, [
-        batchId,
+        primaryFile,
         compositionRoot.fileSubmission,
+        compositionRoot.glassUploads,
         moduleName,
-        orgUnitCode,
+        batchId,
+        currentPeriod,
         orgUnitId,
         orgUnitName,
-        currentPeriod,
-        primaryFile,
+        orgUnitCode,
         secondaryFile,
         setPrimaryFileImportSummary,
-        setSecondaryFileImportSummary,
         changeStep,
+        setSecondaryFileImportSummary,
     ]);
 
     const continueClick = () => {
         if (!hasSecondaryFile) {
             localStorage.removeItem("secondaryUploadId");
+            uploadFileSubmissions();
+        } else if (!moduleProperties.get(moduleName)?.isSecondaryRelated) {
             uploadFileSubmissions();
         }
         //update the secondary file with primary file upload id.
@@ -242,14 +329,15 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
 
     const downloadEmptyTemplate = useCallback(() => {
         setLoading(true);
-        compositionRoot.fileSubmission.downloadEmptyTemplate(orgUnitId).run(
+        compositionRoot.fileSubmission.downloadEmptyTemplate(moduleName, uploadFileType as string, orgUnitId).run(
             file => {
-                const fileName = "AMR_GLASS_EGASP_PRE_INPUT_FILES.xlsx";
-
                 //download file automatically
                 const downloadSimulateAnchor = document.createElement("a");
                 downloadSimulateAnchor.href = URL.createObjectURL(file);
-                downloadSimulateAnchor.download = fileName;
+                const fileType = moduleProperties.get(moduleName)?.isSingleFileTypePerSubmission
+                    ? `${uploadFileType}-LEVEL-DATA`
+                    : "";
+                downloadSimulateAnchor.download = `${moduleName}-${fileType}-${orgUnitCode}-TEMPLATE`;
                 // simulate link click
                 document.body.appendChild(downloadSimulateAnchor);
                 downloadSimulateAnchor.click();
@@ -261,7 +349,7 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
                 setLoading(false);
             }
         );
-    }, [compositionRoot.fileSubmission, snackbar, orgUnitId]);
+    }, [compositionRoot.fileSubmission, snackbar, orgUnitId, moduleName, orgUnitCode, uploadFileType]);
 
     return (
         <ContentWrapper>
@@ -285,80 +373,123 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
                     </Typography>
                 </StyledLoaderContainer>
             </Backdrop>
-            {previousBatchIdsLoading ? (
-                <CircularProgress size={25} />
-            ) : (
-                <>
-                    <div className="file-fields">
+            {moduleProperties.get(moduleName)?.isSingleFileTypePerSubmission ? (
+                <StyledSingleFileSelectContainer>
+                    <FormControl variant="outlined" style={{ minWidth: 180 }}>
+                        <InputLabel>{i18n.t("Choose file type")}</InputLabel>
+                        <Select
+                            value={uploadFileType}
+                            onChange={changeFileType}
+                            label={i18n.t("Choose file type")}
+                            labelId="file-type-label"
+                            MenuProps={{ disableScrollLock: true }}
+                            disabled={primaryFile !== null || secondaryFile !== null}
+                        >
+                            <MenuItem key={"PRODUCT"} value={"PRODUCT"}>
+                                {i18n.t("Product level data")}
+                            </MenuItem>
+                            <MenuItem key={"SUBSTANCE"} value={"SUBSTANCE"}>
+                                {i18n.t("Substance level data")}
+                            </MenuItem>
+                        </Select>
+                    </FormControl>
+                    {uploadFileType === "PRODUCT" ? (
                         <UploadPrimaryFile
-                            validate={setIsFileValid}
+                            validate={setIsPrimaryFileValid}
                             batchId={batchId}
                             primaryFile={primaryFile}
                             setPrimaryFile={setPrimaryFile}
                         />
-                        {moduleProperties.get(moduleName)?.isbatchReq && (
-                            <UploadSample
-                                batchId={batchId}
-                                sampleFile={secondaryFile}
-                                setSampleFile={setSecondaryFile}
-                                setHasSampleFile={setHasSecondaryFile}
-                            />
-                        )}
-                    </div>
-                    {moduleProperties.get(moduleName)?.isbatchReq && (
-                        <div className="batch-id">
-                            <h3>{i18n.t("Batch ID")}</h3>
-                            <FormControl variant="outlined" style={{ minWidth: 180 }}>
-                                <InputLabel id="dataset-label">{i18n.t("Choose a Dataset")}</InputLabel>
-                                <Select
-                                    value={batchId}
-                                    onChange={changeBatchId}
-                                    label={i18n.t("Choose a Dataset")}
-                                    labelId="dataset-label"
-                                    MenuProps={{ disableScrollLock: true }}
-                                >
-                                    {datasetOptions.map(({ label, value }) => (
-                                        <MenuItem
-                                            key={value}
-                                            value={value}
-                                            disabled={previousUploadsBatchIds.includes(value)}
-                                        >
-                                            {i18n.t(label)}
-                                        </MenuItem>
-                                    ))}
-                                </Select>
-                            </FormControl>
-                        </div>
+                    ) : (
+                        <UploadSecondary
+                            validate={setIsSecondaryFileValid}
+                            batchId={batchId}
+                            secondaryFile={secondaryFile}
+                            setSecondaryFile={setSecondaryFile}
+                            setHasSecondaryFile={setHasSecondaryFile}
+                        />
                     )}
-                    <BottomContainer>
-                        {previousUploadsBatchIds.length > 0 && moduleProperties.get(moduleName)?.isbatchReq ? (
-                            <div>
-                                <h4>{i18n.t("You Previously Submitted:")} </h4>
-                                <ul>
-                                    {previousUploadsBatchIds.map(batchId => (
-                                        <li key={batchId}>{`Batch Id ${batchId}`}</li>
-                                    ))}
-                                </ul>
+                </StyledSingleFileSelectContainer>
+            ) : (
+                <>
+                    {previousBatchIdsLoading ? (
+                        <CircularProgress size={25} />
+                    ) : (
+                        <>
+                            <div className="file-fields">
+                                <UploadPrimaryFile
+                                    validate={setIsPrimaryFileValid}
+                                    batchId={batchId}
+                                    primaryFile={primaryFile}
+                                    setPrimaryFile={setPrimaryFile}
+                                />
+                                {moduleProperties.get(moduleName)?.isSecondaryFileApplicable && (
+                                    <UploadSecondary
+                                        validate={setIsSecondaryFileValid}
+                                        batchId={batchId}
+                                        secondaryFile={secondaryFile}
+                                        setSecondaryFile={setSecondaryFile}
+                                        setHasSecondaryFile={setHasSecondaryFile}
+                                    />
+                                )}
                             </div>
-                        ) : null}
-                        {moduleProperties.get(moduleName)?.isDownloadEmptyTemplateReq && (
-                            <Button variant="outlined" color="primary" disableElevation onClick={downloadEmptyTemplate}>
-                                {i18n.t("Download empty template")}
-                            </Button>
-                        )}
-                        <Button
-                            variant="contained"
-                            color={isValidated ? "primary" : "default"}
-                            disabled={isValidated ? false : true}
-                            endIcon={<ChevronRightIcon />}
-                            disableElevation
-                            onClick={continueClick}
-                        >
-                            {i18n.t("Continue")}
-                        </Button>
-                    </BottomContainer>
+                            {moduleProperties.get(moduleName)?.isbatchReq && (
+                                <div className="batch-id">
+                                    <h3>{i18n.t("Batch ID")}</h3>
+                                    <FormControl variant="outlined" style={{ minWidth: 180 }}>
+                                        <InputLabel id="dataset-label">{i18n.t("Choose a Dataset")}</InputLabel>
+                                        <Select
+                                            value={batchId}
+                                            onChange={changeBatchId}
+                                            label={i18n.t("Choose a Dataset")}
+                                            labelId="dataset-label"
+                                            MenuProps={{ disableScrollLock: true }}
+                                        >
+                                            {datasetOptions.map(({ label, value }) => (
+                                                <MenuItem
+                                                    key={value}
+                                                    value={value}
+                                                    disabled={previousUploadsBatchIds.includes(value)}
+                                                >
+                                                    {i18n.t(label)}
+                                                </MenuItem>
+                                            ))}
+                                        </Select>
+                                    </FormControl>
+                                </div>
+                            )}
+                        </>
+                    )}
                 </>
             )}
+
+            <BottomContainer>
+                {previousUploadsBatchIds.length > 0 && moduleProperties.get(moduleName)?.isbatchReq ? (
+                    <div>
+                        <h4>{i18n.t("You Previously Submitted:")} </h4>
+                        <ul>
+                            {previousUploadsBatchIds.map(batchId => (
+                                <li key={batchId}>{`Batch Id ${batchId}`}</li>
+                            ))}
+                        </ul>
+                    </div>
+                ) : null}
+                {moduleProperties.get(moduleName)?.isDownloadEmptyTemplateReq && (
+                    <Button variant="outlined" color="primary" onClick={downloadEmptyTemplate}>
+                        {i18n.t("Download empty template")}
+                    </Button>
+                )}
+                <Button
+                    variant="contained"
+                    color={isValidated ? "primary" : "default"}
+                    disabled={isValidated ? false : true}
+                    endIcon={<ChevronRightIcon />}
+                    disableElevation
+                    onClick={continueClick}
+                >
+                    {i18n.t("Continue")}
+                </Button>
+            </BottomContainer>
         </ContentWrapper>
     );
 };
@@ -456,4 +587,11 @@ export const BottomContainer = styled.div`
     margin: 0 auto 30px auto;
     align-items: flex-end;
     width: 100%;
+`;
+
+export const StyledSingleFileSelectContainer = styled.div`
+    display: flex;
+    width: 100%;
+    height: 100%;
+    justify-content: space-evenly;
 `;

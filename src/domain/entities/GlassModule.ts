@@ -1,5 +1,5 @@
 import { Id } from "./Base";
-import { QuestionnaireRule } from "./Questionnaire";
+import { QuestionnaireRule, QuestionnairesType } from "./Questionnaire";
 import { UserGroup } from "./User";
 
 interface ModuleUserGroups {
@@ -16,6 +16,7 @@ export interface GlassModule {
     color: string;
     id: string;
     userGroups: ModuleUserGroups;
+    questionnairesType?: QuestionnairesType;
     questionnaires: QuestionnaireConfig[];
     consistencyChecks?: {
         specimenPathogen: Record<string, string[]>;
@@ -27,6 +28,8 @@ export interface GlassModule {
     };
     dataSubmissionPeriod: DataSubmissionPeriodTypes;
     dataColumns: string[];
+    teiColumns?: string[];
+    rawSubstanceDataColumns?: string[];
     programs?: {
         id: string;
         programStageId: string;

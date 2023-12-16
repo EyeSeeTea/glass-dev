@@ -12,10 +12,11 @@ export interface QuestionWidgetProps {
     onChange: (question: Question) => void;
     question: Question;
     disabled: boolean;
+    infoText?: string;
 }
 
 export const QuestionWidget: React.FC<QuestionWidgetProps> = React.memo(props => {
-    const { question, disabled, onChange } = props;
+    const { question, disabled, onChange, infoText } = props;
     const { type } = question;
     const { update } = QuestionnaireQuestionM;
 
@@ -46,6 +47,7 @@ export const QuestionWidget: React.FC<QuestionWidgetProps> = React.memo(props =>
                     onChange={value => onChange(update(question, value))}
                     disabled={disabled}
                     numberType={question.numberType}
+                    validationError={question.validationError}
                 />
             );
         case "text":
@@ -64,6 +66,15 @@ export const QuestionWidget: React.FC<QuestionWidgetProps> = React.memo(props =>
                     value={question.value}
                     onChange={value => onChange(update(question, value))}
                     disabled={disabled}
+                />
+            );
+        case "singleCheck":
+            return (
+                <BooleanWidget
+                    value={question.value}
+                    onChange={value => onChange(update(question, value))}
+                    disabled={disabled}
+                    infoText={infoText}
                 />
             );
         default:

@@ -1,7 +1,7 @@
 import { DataValuesSaveSummary } from "../../../entities/data-entry/DataValuesSaveSummary";
 import { ImportSummary } from "../../../entities/data-entry/ImportSummary";
 
-export function mapToImportSummary(dhis2Summary: DataValuesSaveSummary): ImportSummary {
+export function mapDataValuesToImportSummary(dhis2Summary: DataValuesSaveSummary): ImportSummary {
     const nonBlockingErrors =
         dhis2Summary.status === "WARNING"
             ? dhis2Summary.conflicts?.map(status => {
