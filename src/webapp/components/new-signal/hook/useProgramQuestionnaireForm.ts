@@ -51,7 +51,7 @@ export function useProgramQuestionnaireForm(
                 );
         }
     }, [
-        compositionRoot,
+        compositionRoot.programQuestionnaires,
         snackbar,
         eventId,
         questionnaireId,
