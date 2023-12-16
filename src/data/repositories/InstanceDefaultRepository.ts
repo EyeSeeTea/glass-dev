@@ -1,8 +1,10 @@
-import { D2Api } from "@eyeseetea/d2-api/2.34";
+import { D2Api, D2DataElementSchema, D2TrackedEntityType, SelectedPick } from "@eyeseetea/d2-api/2.34";
+
 import _ from "lodash";
+import { DataElement, DataForm } from "../../domain/entities/DataForm";
 import { FutureData, Future } from "../../domain/entities/Future";
 import { GlassModule } from "../../domain/entities/GlassModule";
-import { NamedRef } from "../../domain/entities/Ref";
+import { Id, NamedRef } from "../../domain/entities/Ref";
 import { OrgUnitAccess, UserAccessInfo, ModuleAccess } from "../../domain/entities/User";
 import { InstanceRepository } from "../../domain/repositories/InstanceRepository";
 import { cache } from "../../utils/cache";
@@ -17,6 +19,9 @@ type GeneralInfoType = {
     enrolmentProgram: string;
     regionLevel: number;
 };
+
+const KOSOVO = "NEPywTBN52g";
+const allowedNaOrgUnits = [KOSOVO];
 
 export class InstanceDefaultRepository implements InstanceRepository {
     private api: D2Api;
@@ -157,11 +162,6 @@ export class InstanceDefaultRepository implements InstanceRepository {
         ).flatMap(user => {
             const { organisationUnits, dataViewOrganisationUnits } = user;
 
-            const filteredOrgUnits = organisationUnits.filter(ou => ou.code !== "NA" && ou.parent?.code !== "NA");
-            const filteredDataViewOrgUnits = dataViewOrganisationUnits.filter(
-                ou => ou.code !== "NA" && ou.parent?.code !== "NA"
-            );
-
             const countryOrgUnits: { name: string; id: string; shortName: string; code: string; path: string }[] = [];
             const dataViewCountryOrgUnits: {
                 name: string;
@@ -174,8 +174,11 @@ export class InstanceDefaultRepository implements InstanceRepository {
             return this.dataStoreClient.getObject(DataStoreKeys.GENERAL).flatMap(generalInfo => {
                 const countryLevel = (generalInfo as GeneralInfoType).countryLevel;
 
-                filteredOrgUnits.forEach(orgUnit => {
-                    if (orgUnit.level === countryLevel && orgUnit.parent.code !== "NA") {
+                organisationUnits.forEach(orgUnit => {
+                    if (
+                        orgUnit.level === countryLevel &&
+                        (orgUnit.parent.code !== "NA" || allowedNaOrgUnits.includes(orgUnit.id))
+                    ) {
                         countryOrgUnits.push({
                             name: orgUnit.name,
                             id: orgUnit.id,
@@ -186,8 +189,11 @@ export class InstanceDefaultRepository implements InstanceRepository {
                     }
                 });
 
-                filteredDataViewOrgUnits.forEach(dataViewOrgUnit => {
-                    if (dataViewOrgUnit.level === countryLevel && dataViewOrgUnit.parent.code !== "NA") {
+                dataViewOrganisationUnits.forEach(dataViewOrgUnit => {
+                    if (
+                        dataViewOrgUnit.level === countryLevel &&
+                        (dataViewOrgUnit.parent.code !== "NA" || allowedNaOrgUnits.includes(dataViewOrgUnit.id))
+                    ) {
                         dataViewCountryOrgUnits.push({
                             name: dataViewOrgUnit.name,
                             id: dataViewOrgUnit.id,
@@ -198,8 +204,8 @@ export class InstanceDefaultRepository implements InstanceRepository {
                     }
                 });
 
-                return this.getAllCountryOrgUnits(filteredOrgUnits, countryLevel).flatMap(childrenOrgUnits => {
-                    return this.getAllCountryOrgUnits(filteredDataViewOrgUnits, countryLevel).flatMap(
+                return this.getAllCountryOrgUnits(organisationUnits, countryLevel).flatMap(childrenOrgUnits => {
+                    return this.getAllCountryOrgUnits(dataViewOrganisationUnits, countryLevel).flatMap(
                         childrenDataViewOrgUnits => {
                             const uniqueOrgUnits = _.uniqBy([...countryOrgUnits, ...childrenOrgUnits], "id");
                             const uniqueDataViewOrgUnits = _.uniqBy(
@@ -276,6 +282,7 @@ export class InstanceDefaultRepository implements InstanceRepository {
                         level: true,
                         parent: {
                             id: true,
+                            code: true,
                         },
                     },
                     paging: false,
@@ -296,22 +303,181 @@ export class InstanceDefaultRepository implements InstanceRepository {
                     );
                 } else {
                     childrenOrgUnits.forEach(el => {
-                        result.push({
-                            name: el.name,
-                            id: el.id,
-                            shortName: el.shortName,
-                            code: el.code,
-                            path: el.path,
-                        });
+                        if (el.parent.code !== "NA" || allowedNaOrgUnits.includes(el.id))
+                            result.push({
+                                name: el.name,
+                                id: el.id,
+                                shortName: el.shortName,
+                                code: el.code,
+                                path: el.path,
+                            });
                     });
                     return Future.success(result);
                 }
             });
         };
 
-        const filteredOrgUnits = orgUnits.filter(ou => ou.code !== "NA");
-        return recursiveGetOrgUnits(filteredOrgUnits, countryLevel).flatMap(orgUnits => {
+        return recursiveGetOrgUnits(orgUnits, countryLevel).flatMap(orgUnits => {
             return Future.success(orgUnits);
         });
     }
+
+    @cache()
+    async getProgramAsync(id: Id): Promise<DataForm[]> {
+        const { objects } = await this.api.models.programs
+            .get({
+                paging: false,
+                fields: programFields,
+                filter: {
+                    id: { eq: id },
+                },
+            })
+            .getData();
+
+        return objects.map(
+            ({
+                id,
+                displayName,
+                name,
+                access,
+                programStages,
+                programType,
+                attributeValues,
+                programTrackedEntityAttributes,
+                trackedEntityType,
+            }) => ({
+                type: programType === "WITH_REGISTRATION" ? "trackerPrograms" : "programs",
+                id,
+                attributeValues,
+                name: displayName ?? name,
+                periodType: "Daily",
+                //@ts-ignore https://github.com/EyeSeeTea/d2-api/issues/43
+                readAccess: access.data?.read,
+                //@ts-ignore https://github.com/EyeSeeTea/d2-api/issues/43
+                writeAccess: access.data?.write,
+                dataElements: programStages.flatMap(({ programStageDataElements }) =>
+                    programStageDataElements.map(({ dataElement }) => formatDataElement(dataElement))
+                ),
+                sections: programStages.map(({ id, name, programStageDataElements, repeatable }) => ({
+                    id,
+                    name,
+                    dataElements: programStageDataElements.map(({ dataElement }) => formatDataElement(dataElement)),
+                    repeatable,
+                })),
+                teiAttributes: programTrackedEntityAttributes.map(({ trackedEntityAttribute }) => ({
+                    id: trackedEntityAttribute.id,
+                    name: trackedEntityAttribute.name,
+                    valueType: trackedEntityAttribute.valueType,
+                })),
+                trackedEntityType: getTrackedEntityTypeFromApi(trackedEntityType),
+            })
+        );
+    }
+
+    public getProgram(programId: Id): FutureData<any> {
+        const cacheKey = `program-${programId}`;
+
+        return this.getFromCacheOrRemote(
+            cacheKey,
+            apiToFuture(
+                this.api.models.programs.get({
+                    fields: programFields,
+                    includeAncestors: true,
+                    filter: { id: { eq: programId } },
+                })
+            ).map(response => {
+                if (response.objects[0])
+                    return {
+                        type: response.objects[0].programType === "WITH_REGISTRATION" ? "trackerPrograms" : "programs",
+                        id: response.objects[0].id,
+                        attributeValues: response.objects[0].attributeValues,
+                        name: response.objects[0].displayName,
+                        periodType: "Daily",
+
+                        readAccess: response.objects[0].access.read,
+
+                        writeAccess: response.objects[0].access.write,
+                        dataElements: response.objects[0].programStages.flatMap(({ programStageDataElements }) =>
+                            programStageDataElements.map(({ dataElement }) => formatDataElement(dataElement))
+                        ),
+                        sections: response.objects[0].programStages.map(
+                            ({ id, name, programStageDataElements, repeatable }) => ({
+                                id,
+                                name,
+                                dataElements: programStageDataElements.map(({ dataElement }) =>
+                                    formatDataElement(dataElement)
+                                ),
+                                repeatable,
+                            })
+                        ),
+                        teiAttributes: response.objects[0].programTrackedEntityAttributes.map(
+                            ({ trackedEntityAttribute }) => ({
+                                id: trackedEntityAttribute.id,
+                                name: trackedEntityAttribute.name,
+                            })
+                        ),
+                        trackedEntityType: getTrackedEntityTypeFromApi(response.objects[0].trackedEntityType),
+                    };
+                else return Future.error("unable to fetch program");
+            })
+        );
+    }
+
+    private inmemoryCache: Record<string, unknown> = {};
+    private getFromCacheOrRemote<T>(cacheKey: string, future: FutureData<T>): FutureData<T> {
+        if (this.inmemoryCache[cacheKey]) {
+            const responseInCache = this.inmemoryCache[cacheKey] as T;
+            return Future.success(responseInCache);
+        } else {
+            return future.map(response => {
+                this.inmemoryCache[cacheKey] = response;
+                return response;
+            });
+        }
+    }
 }
+
+const formatDataElement = (de: SelectedPick<D2DataElementSchema, typeof dataElementFields>): DataElement => ({
+    id: de.id,
+    name: de.formName ?? de.name ?? "",
+    valueType: de.valueType,
+    categoryOptionCombos: de.categoryCombo?.categoryOptionCombos ?? [],
+    options: de.optionSet?.options,
+});
+type TrackedEntityTypeApi = Pick<D2TrackedEntityType, "id" | "featureType">;
+
+function getTrackedEntityTypeFromApi(
+    trackedEntityType?: TrackedEntityTypeApi
+): DataForm["trackedEntityType"] | undefined {
+    // TODO: Review when adding other types
+    if (!trackedEntityType) return undefined;
+
+    const d2FeatureType = trackedEntityType.featureType;
+    const featureType = d2FeatureType === "POINT" ? "point" : d2FeatureType === "POLYGON" ? "polygon" : "none";
+    return { id: trackedEntityType.id, featureType };
+}
+const dataElementFields = {
+    id: true,
+    formName: true,
+    name: true,
+    valueType: true,
+    categoryCombo: { categoryOptionCombos: { id: true, name: true } },
+    optionSet: { id: true, options: { id: true, code: true } },
+} as const;
+
+const programFields = {
+    id: true,
+    displayName: true,
+    name: true,
+    attributeValues: { value: true, attribute: { code: true } },
+    programStages: {
+        id: true,
+        name: true,
+        programStageDataElements: { dataElement: dataElementFields },
+        repeatable: true,
+    },
+    programTrackedEntityAttributes: { trackedEntityAttribute: { id: true, name: true, valueType: true } },
+    access: true,
+    programType: true,
+    trackedEntityType: { id: true, featureType: true },
+} as const;

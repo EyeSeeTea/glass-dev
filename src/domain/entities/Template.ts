@@ -12,7 +12,56 @@ export type DataSourceType = "row" | "column" | "cell";
 export type RefType = "row" | "column" | "cell" | "range";
 export type SheetRef = RowRef | ColumnRef | CellRef | RangeRef;
 
-export type DataSourceValue = RowDataSource;
+export interface TeiRowDataSource {
+    type: "rowTei";
+    skipPopulate?: boolean;
+    teiId: ColumnRef;
+    orgUnit: ColumnRef;
+    geometry?: ColumnRef;
+    enrollmentDate: ColumnRef;
+    incidentDate: ColumnRef;
+    attributes: Range;
+    attributeId: RowRef;
+}
+export interface TrackerEventRowDataSource {
+    type: "rowTrackedEvent";
+    sheetsMatch: string;
+    skipPopulate?: boolean;
+    teiId: ColumnRef;
+    eventId: ColumnRef;
+    date: ColumnRef;
+    categoryOptionCombo: ColumnRef;
+    dataValues: Range;
+    programStage: CellRef;
+    dataElements: Range;
+}
+
+export interface TrackerRelationship {
+    type: "rowTeiRelationship";
+    sheetsMatch: string;
+    skipPopulate?: boolean;
+    range: Range;
+    relationshipType: CellRef;
+    from: ColumnRef;
+    to: ColumnRef;
+}
+export interface CellDataSource extends BaseDataSource {
+    type: "cell";
+    ref: CellRef;
+    orgUnit: CellRef | ValueRef;
+    period: CellRef | ValueRef;
+    dataElement: CellRef | ValueRef;
+    categoryOption?: CellRef | ValueRef;
+    attribute?: CellRef | ValueRef;
+    eventId?: CellRef | ValueRef;
+}
+
+export type DataSourceValue =
+    | RowDataSource
+    | TeiRowDataSource
+    | TrackerEventRowDataSource
+    | TrackerRelationship
+    | CellDataSource;
 
 // Use to reference data sources for dynamic sheets
 type DataSourceValueGetter = (sheet: string) => DataSourceValue | DataSourceValue[] | false;
@@ -26,6 +75,9 @@ export type StyleSource = {
 };
 export type Template = GeneratedTemplate;
 
+export const dataFormTypes = ["programs", "trackerPrograms"] as const;
+export type DataFormType = typeof dataFormTypes[number];
+
 interface BaseTemplate {
     type: TemplateType;
     id: Id;
@@ -33,7 +85,7 @@ interface BaseTemplate {
     dataSources?: DataSource[];
     styleSources: StyleSource[];
     dataFormId: CellRef | ValueRef;
-    dataFormType: CellRef | ValueRef<"programs">;
+    dataFormType: CellRef | ValueRef<DataFormType>;
 }
 
 export interface GeneratedTemplate extends BaseTemplate {
@@ -199,4 +251,32 @@ export function setDataEntrySheet(dataSource: RowDataSource, sheets: SheetE[]): 
             eventId: set(dataSource.eventId),
         };
     });
+}
+export function setSheet<DS extends TrackerRelationship | TrackerEventRowDataSource>(
+    dataSource: DS,
+    sheetName: string
+): DS {
+    const sheet = sheetName;
+
+    switch (dataSource.type) {
+        case "rowTeiRelationship":
+            return {
+                ...dataSource,
+                range: { ...dataSource.range, sheet },
+                relationshipType: { ...dataSource.relationshipType, sheet },
+                from: { ...dataSource.from, sheet },
+                to: { ...dataSource.to, sheet },
+            };
+        case "rowTrackedEvent":
+            return {
+                ...dataSource,
+                teiId: { ...dataSource.teiId, sheet },
+                eventId: { ...dataSource.eventId, sheet },
+                date: { ...dataSource.date, sheet },
+                categoryOptionCombo: { ...dataSource.categoryOptionCombo, sheet },
+                dataValues: { ...dataSource.dataValues, sheet },
+                programStage: { ...dataSource.programStage, sheet },
+                dataElements: { ...dataSource.dataElements, sheet },
+            };
+    }
 }

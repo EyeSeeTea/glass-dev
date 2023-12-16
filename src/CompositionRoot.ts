@@ -34,14 +34,14 @@ import { SetAsQuestionnaireCompletionUseCase } from "./domain/usecases/SetAsQues
 import { GetQuestionnaireListUseCase } from "./domain/usecases/GetQuestionnaireListUseCase";
 import { GetNotificationsUseCase } from "./domain/usecases/GetNotificationsUseCase";
 import { NotificationDefaultRepository } from "./data/repositories/NotificationDefaultRepository";
-import { DataValuesDefaultRepository } from "./data/repositories/DataValuesDefaultRepository";
+import { DataValuesDefaultRepository } from "./data/repositories/data-entry/DataValuesDefaultRepository";
 import { MetadataDefaultRepository } from "./data/repositories/MetadataDefaultRepository";
 import { GetCountryInformationUseCase } from "./domain/usecases/GetCountryInformationUseCase";
 import { CountryInformationDefaultRepository } from "./data/repositories/CountryInformationDefaultRepository";
 import { GetNotificationByIdUseCase } from "./domain/usecases/GetNotificationByIdUseCase";
-import { ImportSampleFileUseCase } from "./domain/usecases/data-entry/ImportSampleFileUseCase";
-import { RISDataCSVDefaultRepository } from "./data/repositories/RISDataCSVDefaultRepository";
-import { SampleDataCSVDeafultRepository } from "./data/repositories/SampleDataCSVDeafultRepository";
+import { ImportSecondaryFileUseCase } from "./domain/usecases/data-entry/ImportSecondaryFileUseCase";
+import { RISDataCSVDefaultRepository } from "./data/repositories/data-entry/RISDataCSVDefaultRepository";
+import { SampleDataCSVDeafultRepository } from "./data/repositories/data-entry/SampleDataCSVDeafultRepository";
 import { GetGlassUploadsByModuleOUPeriodUseCase } from "./domain/usecases/GetGlassUploadsByModuleOUPeriodUseCase";
 import { SetDataSubmissionStatusUseCase } from "./domain/usecases/SetDataSubmissionStatusUseCase";
 import { DownloadDocumentUseCase } from "./domain/usecases/DownloadDocumentUseCase";
@@ -58,7 +58,7 @@ import { UsersDefaultRepository } from "./data/repositories/UsersDefaultReposito
 import { GetUiLocalesUseCase } from "./domain/usecases/GetUiLocalesUseCase";
 import { GetDatabaseLocalesUseCase } from "./domain/usecases/GetDatabaseLocalesUseCase";
 import { LocalesDefaultRepository } from "./data/repositories/LocalesDefaultRepository";
-import { EGASPDataCSVDefaultRepository } from "./data/repositories/EGASPDataCSVDefaultRepository";
+import { EGASPDataCSVDefaultRepository } from "./data/repositories/data-entry/EGASPDataCSVDefaultRepository";
 import { Dhis2EventsDefaultRepository } from "./data/repositories/Dhis2EventsDefaultRepository";
 import { EGASPProgramDefaultRepository } from "./data/repositories/download-empty-template/EGASPProgramDefaultRepository";
 import { ExcelPopulateDefaultRepository } from "./data/repositories/ExcelPopulateDefaultRepository";
@@ -66,18 +66,22 @@ import { SavePasswordUseCase } from "./domain/usecases/SavePasswordUseCase";
 import { SaveKeyDbLocaleUseCase } from "./domain/usecases/SaveKeyDbLocaleUseCase";
 import { SaveKeyUiLocaleUseCase } from "./domain/usecases/SaveKeyUiLocaleUseCase";
 import { ProgramRulesMetadataDefaultRepository } from "./data/repositories/program-rule/ProgramRulesMetadataDefaultRepository";
-import { RISIndividualFunghiDataCSVDefaultRepository } from "./data/repositories/RISIndividualFunghiDataCSVDefaultRepository";
+import { RISIndividualFunghiDataCSVDefaultRepository } from "./data/repositories/data-entry/RISIndividualFunghiDataCSVDefaultRepository";
 import { TrackerDefaultRepository } from "./data/repositories/TrackerDefaultRepository";
-import { GetCaptureFormQuestionsUseCase } from "./domain/usecases/GetCaptureFormQuestionsUseCase";
+import { GetProgramQuestionnaireUseCase } from "./domain/usecases/GetProgramQuestionnaireUseCase";
 import { CaptureFormDefaultRepository } from "./data/repositories/CaptureFormDefaultRepository";
-import { ImportCaptureDataUseCase } from "./domain/usecases/data-entry/ear/ImportCaptureDataUseCase";
+import { ImportProgramQuestionnaireDataUseCase } from "./domain/usecases/data-entry/ImportProgramQuestionnaireDataUseCase";
 import { SignalDefaultRepository } from "./data/repositories/SignalDefaultRepository";
-import { GetSignalsUseCase } from "./domain/usecases/GetSignalsUseCase";
-import { GetSignalEventUseCase } from "./domain/usecases/GetSignalEventUseCase";
+import { GetProgramQuestionnairesUseCase } from "./domain/usecases/GetProgramQuestionnairesUseCase";
+import { GetPopulatedProgramQuestionnaireUseCase } from "./domain/usecases/GetPopulatedProgramQuestionnaireUseCase";
 import { DeleteSignalUseCase } from "./domain/usecases/DeleteSignalUseCase";
-import { GetEGASPEmptyTemplateUseCase } from "./domain/usecases/data-entry/egasp/GetEGASPEmptyTemplateUseCase";
-import { EGASPDownloadEmptyTemplate } from "./data/repositories/download-empty-template/EGASPDownloadEmptyTemplate";
+import { GetEventProgramEmptyTemplateUseCase } from "./domain/usecases/data-entry/egasp/GetEventProgramEmptyTemplateUseCase";
+import { DownloadEmptyTemplateDefautlRepository } from "./data/repositories/download-empty-template/DownloadEmptyTemplateDefautlRepository";
 import { BulkLoadDataStoreClient } from "./data/data-store/BulkLoadDataStoreClient";
+import { ApplyAMCQuestionUpdationUseCase } from "./domain/usecases/ApplyAMCQuestionUpdationUseCase";
+import { SaveImportSummaryErrorsOfFilesInUploadsUseCase } from "./domain/usecases/SaveImportSummaryErrorsOfFilesInUploadsUseCase";
+import { AMCProductDataRepository } from "./data/repositories/data-entry/AMCProductDataRepository";
+import { AMCSubstanceDataRepository } from "./data/repositories/data-entry/AMCSubstanceDataRepository";
 
 export function getCompositionRoot(instance: Instance) {
     const api = getD2APiFromInstance(instance);
@@ -104,11 +108,13 @@ export function getCompositionRoot(instance: Instance) {
     const dhis2EventsDefaultRepository = new Dhis2EventsDefaultRepository(instance);
     const egaspProgramRepository = new EGASPProgramDefaultRepository(instance, bulkLoadDatastoreClient);
     const excelRepository = new ExcelPopulateDefaultRepository();
-    const eGASPValidationDefaultRepository = new ProgramRulesMetadataDefaultRepository(instance);
+    const programRulesMetadataDefaultRepository = new ProgramRulesMetadataDefaultRepository(instance);
     const trackerRepository = new TrackerDefaultRepository(instance);
     const captureFormRepository = new CaptureFormDefaultRepository(api);
     const signalRepository = new SignalDefaultRepository(dataStoreClient, api);
-    const downloadEmptyTemplateRepository = new EGASPDownloadEmptyTemplate(instance);
+    const downloadEmptyTemplateRepository = new DownloadEmptyTemplateDefautlRepository(instance);
+    const amcProductDataRepository = new AMCProductDataRepository();
+    const amcSubstanceDataRepository = new AMCSubstanceDataRepository();
 
     return {
         instance: getExecute({
@@ -140,6 +146,7 @@ export function getCompositionRoot(instance: Instance) {
             getByModuleOU: new GetGlassUploadsByModuleOUUseCase(glassUploadsRepository),
             getByModuleOUPeriod: new GetGlassUploadsByModuleOUPeriodUseCase(glassUploadsRepository),
             setBatchId: new SetUploadBatchIdUseCase(glassUploadsRepository),
+            saveImportSummaryErrorsOfFiles: new SaveImportSummaryErrorsOfFilesInUploadsUseCase(glassUploadsRepository),
         }),
         glassDocuments: getExecute({
             getAll: new GetGlassDocumentsUseCase(glassDocumentsRepository),
@@ -156,23 +163,38 @@ export function getCompositionRoot(instance: Instance) {
                 dataValuesRepository,
                 glassModuleRepository,
                 dhis2EventsDefaultRepository,
-                egaspProgramRepository,
                 excelRepository,
                 glassDocumentsRepository,
                 glassUploadsRepository,
-                eGASPValidationDefaultRepository,
                 trackerRepository,
-                glassModuleRepository
+                glassModuleRepository,
+                instanceRepository,
+                programRulesMetadataDefaultRepository
             ),
             validatePrimaryFile: new ValidatePrimaryFileUseCase(
                 risDataRepository,
                 risIndividualFunghiRepository,
                 egaspDataRepository,
+                glassModuleRepository,
+                amcProductDataRepository
+            ),
+            secondaryFile: new ImportSecondaryFileUseCase(
+                sampleDataRepository,
+                metadataRepository,
+                dataValuesRepository,
+                excelRepository,
+                instanceRepository,
+                glassDocumentsRepository,
+                glassUploadsRepository,
+                dhis2EventsDefaultRepository,
+                programRulesMetadataDefaultRepository
+            ),
+            validateSecondaryFile: new ValidateSampleFileUseCase(
+                sampleDataRepository,
+                amcSubstanceDataRepository,
                 glassModuleRepository
             ),
-            secondaryFile: new ImportSampleFileUseCase(sampleDataRepository, metadataRepository, dataValuesRepository),
-            validateSecondaryFile: new ValidateSampleFileUseCase(sampleDataRepository),
-            downloadEmptyTemplate: new GetEGASPEmptyTemplateUseCase(
+            downloadEmptyTemplate: new GetEventProgramEmptyTemplateUseCase(
                 metadataRepository,
                 downloadEmptyTemplateRepository,
                 excelRepository,
@@ -181,7 +203,7 @@ export function getCompositionRoot(instance: Instance) {
         }),
         questionnaires: getExecute({
             get: new GetQuestionnaireUseCase(questionnaireD2Repository),
-            getList: new GetQuestionnaireListUseCase(questionnaireD2Repository),
+            getList: new GetQuestionnaireListUseCase(questionnaireD2Repository, dhis2EventsDefaultRepository),
             saveResponse: new SaveQuestionnaireResponseUseCase(questionnaireD2Repository),
             setAsCompleted: new SetAsQuestionnaireCompletionUseCase(questionnaireD2Repository),
         }),
@@ -209,17 +231,18 @@ export function getCompositionRoot(instance: Instance) {
             saveKeyUiLocale: new SaveKeyUiLocaleUseCase(usersRepository),
             saveKeyDbLocale: new SaveKeyDbLocaleUseCase(usersRepository),
         }),
-        signals: getExecute({
-            getForm: new GetCaptureFormQuestionsUseCase(captureFormRepository),
-            importData: new ImportCaptureDataUseCase(
+        programQuestionnaires: getExecute({
+            getForm: new GetProgramQuestionnaireUseCase(captureFormRepository),
+            importData: new ImportProgramQuestionnaireDataUseCase(
                 dhis2EventsDefaultRepository,
                 signalRepository,
                 notificationRepository,
                 usersRepository
             ),
-            getSignals: new GetSignalsUseCase(signalRepository),
-            getSignal: new GetSignalEventUseCase(captureFormRepository),
+            getList: new GetProgramQuestionnairesUseCase(signalRepository),
+            getPopulatedForm: new GetPopulatedProgramQuestionnaireUseCase(captureFormRepository),
             delete: new DeleteSignalUseCase(dhis2EventsDefaultRepository, signalRepository),
+            applyValidations: new ApplyAMCQuestionUpdationUseCase(),
         }),
     };
 }

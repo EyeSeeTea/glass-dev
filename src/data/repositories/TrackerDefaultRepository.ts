@@ -34,7 +34,7 @@ export class TrackerDefaultRepository implements TrackerRepository {
         });
     }
 
-    public getAMRIProgramMetadata(AMRIProgramID: string, AMRDataProgramStageId: string): FutureData<any> {
+    public getProgramMetadata(programID: string, programStageId: string): FutureData<any> {
         return apiToFuture(
             this.api.models.programs.get({
                 fields: {
@@ -50,12 +50,21 @@ export class TrackerDefaultRepository implements TrackerRepository {
                             },
                         },
                     },
-                    programTrackedEntityAttributes: { trackedEntityAttribute: { id: true, name: true, code: true } },
+                    programTrackedEntityAttributes: {
+                        trackedEntityAttribute: {
+                            id: true,
+                            name: true,
+                            code: true,
+                            valueType: true,
+                            optionSetValue: true,
+                            optionSet: { options: { name: true, code: true } },
+                        },
+                    },
                 },
-                filter: { id: { eq: AMRIProgramID } },
+                filter: { id: { eq: programID } },
             })
         ).map(response => {
-            const programStage = response.objects[0]?.programStages.find(ps => ps.id === AMRDataProgramStageId);
+            const programStage = response.objects[0]?.programStages.find(ps => ps.id === programStageId);
             return {
                 programAttributes: response.objects[0]?.programTrackedEntityAttributes.map(
                     atr => atr.trackedEntityAttribute

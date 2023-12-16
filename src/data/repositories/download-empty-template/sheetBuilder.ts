@@ -5,8 +5,12 @@ import _ from "lodash";
 import "lodash.product";
 import { defaultColorScale } from "./utils/colors";
 import { GeneratedTemplate } from "../../../domain/entities/Template";
+import { Id, NamedRef } from "../../../domain/entities/Ref";
+import { getTemplateId } from "../ExcelPopulateDefaultRepository";
 
 const maxRow = 1048576;
+// Excel shows all empty rows, limit the maximum number of TEIs
+const maxTeiRows = 1024;
 
 const dateFormats: Record<string, string> = {
     DATE: "YYYY-MM-DD",
@@ -33,25 +37,85 @@ export interface SheetBuilderParams {
     splitDataEntryTabsBySection: boolean;
     useCodesForMetadata: boolean;
 }
+const teiSheetName = "TEI Instances";
+function isTrackerProgram(element: any) {
+    return element.type === "trackerPrograms";
+}
+
+function getValidSheetName(name: string, maxLength = 31) {
+    // Invalid chars: \ / * ? : [ ]
+    // Maximum length: 31
+    return name.replace(/[\\/*?:[\]]/g, "").slice(0, maxLength);
+}
+
+function withSheetNames(objs: NamedRef[], options: any = {}) {
+    const { prefix } = options;
+
+    return objs.filter(Boolean).map((obj, idx: number) => {
+        const baseSheetName = _([prefix, `(${idx + 1}) ${obj.name}`])
+            .compact()
+            .join(" ");
+
+        return {
+            ...obj,
+            sheetName: getValidSheetName(baseSheetName),
+        };
+    });
+}
+
+function getRelationshipTypeKey(relationshipType: any, key: any) {
+    return ["relationshipType", relationshipType.id, key].join("-");
+}
 
 export class SheetBuilder {
     private workbook: any;
     private validations: any;
+    private instancesSheet: any;
+    private programStageSheets: any;
+    private relationshipsSheets: any;
 
     private legendSheet: any;
     private validationSheet: any;
     private metadataSheet: any;
+    private instancesSheetValuesRow = 0;
 
     constructor(private builder: SheetBuilderParams) {
         this.workbook = new Excel.Workbook();
         this.validations = new Map();
     }
 
-    public generate() {
+    public generate(programId: Id) {
+        const { builder } = this;
+        const { element } = builder;
         const dataEntrySheetsInfo: Array<{ sheet: any }> = [];
 
-        const dataEntrySheet = this.workbook.addWorksheet("Data Entry");
-        dataEntrySheetsInfo.push({ sheet: dataEntrySheet });
+        if (isTrackerProgram(element)) {
+            const { elementMetadata: metadata } = builder;
+            this.instancesSheet = this.workbook.addWorksheet(teiSheetName);
+            this.programStageSheets = {};
+            this.relationshipsSheets = [];
+
+            // ProgramStage sheets
+            const programStages = this.getProgramStages().map(programStageT => metadata.get(programStageT.id));
+
+            withSheetNames(programStages).forEach((programStage: any) => {
+                const sheet = this.workbook.addWorksheet(programStage.sheetName);
+                this.programStageSheets[programStage.id] = sheet;
+            });
+
+            if (builder.downloadRelationships) {
+                // RelationshipType sheets
+                withSheetNames(builder.metadata.relationshipTypes, { prefix: "Rel" }).forEach(
+                    (relationshipType: any) => {
+                        const sheet = this.workbook.addWorksheet(relationshipType.sheetName);
+                        this.relationshipsSheets.push([relationshipType, sheet]);
+                    }
+                );
+            }
+        } else {
+            const dataEntrySheet = this.workbook.addWorksheet("Data Entry");
+            dataEntrySheetsInfo.push({ sheet: dataEntrySheet });
+        }
 
         this.legendSheet = this.workbook.addWorksheet("Legend", protectedSheet);
         this.validationSheet = this.workbook.addWorksheet("Validation", protectedSheet);
@@ -61,11 +125,343 @@ export class SheetBuilder {
         this.fillMetadataSheet();
         this.fillLegendSheet();
 
-        dataEntrySheetsInfo.forEach(({ sheet }) => {
-            this.fillDataEntrySheet(sheet);
+        if (isTrackerProgram(element)) {
+            this.fillInstancesSheet(programId);
+            this.fillProgramStageSheets();
+            this.fillRelationshipSheets();
+        } else {
+            dataEntrySheetsInfo.forEach(({ sheet }) => {
+                this.fillDataEntrySheet(sheet, programId);
+            });
+        }
+
+        // Add template version
+        this.workbook.definedNameCollection.addDefinedName({
+            name: `Version_${this.getVersion(programId)}`, // Restrict to [a-zA-Z0-9_] characters
+            refFormula: "Metadata!A1", // Excel needs a formula, reference an always existing cell
         });
 
         return this.workbook;
+    }
+
+    private fillRelationshipSheets() {
+        const { element: program } = this.builder;
+
+        _.forEach(this.relationshipsSheets, ([relationshipType, sheet]) => {
+            sheet.cell(1, 1).formula(`=_${relationshipType.id}`).style(baseStyle);
+
+            ["from", "to"].forEach((key, idx) => {
+                const constraint = relationshipType.constraints[key];
+                const columnId = idx + 1;
+
+                const oppositeConstraint = relationshipType.constraints[key === "from" ? "to" : "from"];
+                const isFromEvent = oppositeConstraint.type === "eventInProgram";
+
+                switch (constraint.type) {
+                    case "tei": {
+                        const validation =
+                            isFromEvent || constraint.program?.id === program.id
+                                ? this.getTeiIdValidation()
+                                : this.validations.get(getRelationshipTypeKey(relationshipType, key));
+                        const columnName = `${_.startCase(key)} TEI (${constraint.name})`;
+                        this.createColumn(sheet, 2, columnId, columnName, null, validation);
+                        sheet.column(columnId).setWidth(columnName.length + 10);
+                        break;
+                    }
+                    case "eventInProgram": {
+                        const validation = this.validations.get(getRelationshipTypeKey(relationshipType, key));
+                        const columnName =
+                            `${_.startCase(key)} event in program ${constraint.program.name}` +
+                            (constraint.programStage ? ` (${constraint.programStage.name})` : "");
+                        this.createColumn(sheet, 2, columnId, columnName, null, validation);
+                        sheet.column(columnId).setWidth(columnName.length + 10);
+                        break;
+                    }
+                    default:
+                        throw new Error(`Unsupported constraint: ${constraint.type}`);
+                }
+            });
+        });
+    }
+
+    private getTeiIdValidation() {
+        return `='${teiSheetName}'!$A$${this.instancesSheetValuesRow}:$A$${maxTeiRows}`;
+    }
+
+    private fillProgramStageSheets() {
+        const { elementMetadata: metadata, element: program, settings } = this.builder;
+
+        const programStages = this.getProgramStages().map(programStageT => metadata.get(programStageT.id));
+        const programStageSheets = withSheetNames(programStages);
+
+        _.forEach(this.programStageSheets, (sheet, programStageId) => {
+            const programStageT = { id: programStageId };
+            const programStage = metadata.get(programStageId);
+            const settingsFilter = settings.programStageFilter[programStage.id];
+
+            const rowOffset = 0;
+            const sectionRow = rowOffset + 1;
+            const itemRow = rowOffset + 2;
+
+            // Freeze and format column titles
+            sheet.row(itemRow).freeze();
+            sheet.row(sectionRow).setHeight(30);
+            sheet.row(itemRow).setHeight(50);
+
+            sheet.cell(sectionRow, 1).formula(`=_${programStageId}`).style(baseStyle);
+
+            // Add column titles
+            let columnId = 1;
+            let groupId = 0;
+
+            this.createColumn(sheet, itemRow, columnId++, i18n.t("Event id", { lng: this.builder.language }));
+
+            this.createColumn(
+                sheet,
+                itemRow,
+                columnId++,
+                i18n.t("TEI Id", { lng: this.builder.language }),
+                null,
+                this.getTeiIdValidation()
+            );
+
+            const { code: attributeCode } = metadata.get(program.categoryCombo?.id);
+            const optionsTitle =
+                attributeCode !== "default"
+                    ? `_${program.categoryCombo.id}`
+                    : i18n.t("Options", { lng: this.builder.language });
+
+            this.createColumn(sheet, itemRow, columnId++, optionsTitle, null, this.validations.get("options"));
+
+            this.createColumn(
+                sheet,
+                itemRow,
+                columnId++,
+                `${
+                    programStage.executionDateLabel
+                        ? i18n.t(programStage.executionDateLabel, {
+                              lng: this.builder.language,
+                          })
+                        : i18n.t("Date", { lng: this.builder.language })
+                } *` + dateFormatInfo
+            );
+
+            // Include attribute look-up from TEI Instances sheet
+            _.forEach(settingsFilter?.attributesIncluded, ({ id: attributeId }) => {
+                const attribute = metadata.get(attributeId);
+                if (!attribute) return;
+
+                this.createColumn(sheet, itemRow, columnId, `_${attribute.id}`);
+
+                const colName = Excel.getExcelAlpha(columnId);
+                const lookupFormula = `IFERROR(INDEX('${teiSheetName}'!$A$5:$ZZ$${maxTeiRows},MATCH(INDIRECT("B" & ROW()),'${teiSheetName}'!$A$5:$A$${maxTeiRows},0),MATCH(${colName}$${itemRow},'${teiSheetName}'!$A$5:$ZZ$5,0)),"")`;
+
+                sheet.cell(itemRow + 1, columnId, maxTeiRows, columnId).formula(lookupFormula);
+
+                sheet.addDataValidation({
+                    type: "textLength",
+                    error: "This cell cannot be changed",
+                    sqref: `${colName}${itemRow + 1}:${colName}${maxRow}`,
+                    operator: "equal",
+                    formulas: [`${lookupFormula.length}`],
+                });
+
+                columnId++;
+            });
+
+            // Include external data element look-up from Other program stage sheets
+            _.forEach(settingsFilter?.externalDataElementsIncluded, ({ id }) => {
+                const [programStageId, dataElementId] = id.split(".");
+                const programStageSheet = programStageSheets.find(({ id }) => id === programStageId)?.sheetName;
+                const dataElement = metadata.get(dataElementId);
+                if (!programStageSheet || !dataElement) return;
+
+                this.createColumn(sheet, itemRow, columnId, `_${dataElement.id}`);
+
+                const colName = Excel.getExcelAlpha(columnId);
+                const lookupFormula = `IFERROR(INDEX('${programStageSheet}'!$B$2:$ZZ$${maxTeiRows},MATCH(INDIRECT("B" & ROW()),'${programStageSheet}'!$B$2:$B$${maxTeiRows},0),MATCH(${colName}$${itemRow},'${programStageSheet}'!$B$2:$ZZ$2,0)),"")`;
+
+                sheet.cell(itemRow + 1, columnId, maxTeiRows, columnId).formula(lookupFormula);
+
+                sheet.addDataValidation({
+                    type: "textLength",
+                    error: "This cell cannot be changed",
+                    sqref: `${colName}${itemRow + 1}:${colName}${maxRow}`,
+                    operator: "equal",
+                    formulas: [`${lookupFormula.length}`],
+                });
+
+                columnId++;
+            });
+
+            if (programStage.programStageSections.length === 0) {
+                programStage.programStageSections.push({
+                    dataElements: programStage.programStageDataElements.map((e: any) => e.dataElement),
+                    id: programStageT.id,
+                });
+            }
+
+            _.forEach(programStage.programStageSections, programStageSectionT => {
+                const programStageSection = programStageSectionT.dataElements
+                    ? programStageSectionT
+                    : metadata.get(programStageSectionT.id);
+                const firstColumnId = columnId;
+
+                _.forEach(programStageSection.dataElements, dataElementT => {
+                    const dataElement = metadata.get(dataElementT.id);
+                    if (!dataElement) {
+                        console.error(`Data element not found ${dataElementT.id}`);
+                        return;
+                    }
+
+                    const dataElementsExcluded = settingsFilter?.dataElementsExcluded ?? [];
+                    const isColumnExcluded = _.some(dataElementsExcluded, dataElementExcluded =>
+                        _.isEqual(dataElementExcluded, { id: dataElement.id })
+                    );
+                    if (isColumnExcluded) return;
+
+                    const { name, description } = this.translate(dataElement);
+
+                    const validation = dataElement.optionSet ? dataElement.optionSet.id : dataElement.valueType;
+                    this.createColumn(
+                        sheet,
+                        itemRow,
+                        columnId,
+                        `_${dataElement.id}`,
+                        groupId,
+                        this.validations.get(validation)
+                    );
+                    sheet.column(columnId).setWidth(name.length / 2.5 + 10);
+
+                    if (dataElement.url !== undefined) {
+                        sheet.cell(itemRow, columnId).link(dataElement.url).formula(`=_${dataElement.id}`);
+                    }
+
+                    if (description !== undefined) {
+                        sheet.cell(itemRow, columnId).comment(description, {
+                            height: "100pt",
+                            width: "160pt",
+                        });
+                    }
+
+                    columnId++;
+                });
+
+                const noColumnAdded = columnId === firstColumnId;
+                if (noColumnAdded) return;
+
+                if (firstColumnId < columnId)
+                    sheet
+                        .cell(sectionRow, firstColumnId, sectionRow, columnId - 1, true)
+                        .formula(`_${programStageSection.id}`)
+                        .style(this.groupStyle(groupId));
+
+                groupId++;
+            });
+        });
+    }
+
+    private fillInstancesSheet(programId: Id) {
+        const { element: program } = this.builder;
+        const { rowOffset = 0 } = this.builder.template;
+        const sheet = this.instancesSheet;
+
+        // Add cells for themes
+        const sectionRow = rowOffset + 1;
+        const itemRow = rowOffset + 2;
+
+        // Hide theme rows by default
+        for (let row = 1; row < sectionRow; row++) {
+            sheet.row(row).hide();
+        }
+
+        // Freeze and format column titles
+        sheet.row(itemRow).freeze();
+        sheet.row(sectionRow).setHeight(30);
+        sheet.row(itemRow).setHeight(50);
+
+        // Add template version
+        sheet
+            .cell(1, 1)
+            .string(`Version: ${this.getVersion(programId)}`)
+            .style(baseStyle);
+
+        this.createColumn(sheet, itemRow, 1, i18n.t("TEI id", { lng: this.builder.language }));
+
+        this.createColumn(
+            sheet,
+            itemRow,
+            2,
+            i18n.t("Org Unit *", { lng: this.builder.language }),
+            null,
+            this.validations.get("organisationUnits"),
+            i18n.t(
+                "This site does not exist in DHIS2, please talk to your administrator to create this site before uploading data",
+                { lng: this.builder.language }
+            )
+        );
+
+        this.createFeatureTypeColumn({ program, sheet, itemRow, columnId: 3 });
+
+        this.createColumn(
+            sheet,
+            itemRow,
+            4,
+            `${
+                program.enrollmentDateLabel
+                    ? i18n.t(program.enrollmentDateLabel, { lng: this.builder.language })
+                    : i18n.t("Enrollment Date", { lng: this.builder.language })
+            } *` + dateFormatInfo
+        );
+
+        this.createColumn(
+            sheet,
+            itemRow,
+            5,
+            (program.incidentDateLabel
+                ? i18n.t(program.incidentDateLabel, { lng: this.builder.language })
+                : i18n.t("Incident Date", { lng: this.builder.language })) + dateFormatInfo
+        );
+
+        const programAttributes = program.programTrackedEntityAttributes || [];
+        this.instancesSheetValuesRow = itemRow + 1;
+
+        let idx = 0;
+        programAttributes.forEach((attribute: any) => {
+            const tea = attribute.trackedEntityAttribute;
+            if (tea.confidential) return;
+            const validationId = tea.optionSet ? tea.optionSet.id : tea.valueType;
+            const validation = this.validations.get(validationId);
+            this.createColumn(sheet, itemRow, 6 + idx, `_${tea.id}`, 1, validation);
+            idx++;
+        });
+    }
+    private createFeatureTypeColumn(options: { program: any; sheet: any; itemRow: number; columnId: number }) {
+        const { program, sheet, itemRow, columnId } = options;
+        const header = this.getFeatureTypeHeader(program);
+        const defaultHeader = i18n.t("No geometry", { lng: this.builder.language });
+
+        this.createColumn(sheet, itemRow, 3, header || defaultHeader);
+        if (!header) sheet.column(columnId).hide();
+    }
+    private getFeatureTypeHeader(program: any): string | undefined {
+        const { featureType } = program.trackedEntityType;
+        const opts = { lng: this.builder.language };
+
+        switch (featureType) {
+            case "POINT":
+                return [i18n.t("Point in map", opts), "([LON, LAT])"].join("\n");
+            case "POLYGON":
+                return [i18n.t("Polygon in map", opts), "([[LON1, LAT1], [LON2, LAT2], ...])"].join("\n");
+            default:
+                return undefined;
+        }
+    }
+
+    private getVersion(programId: Id) {
+        const { element } = this.builder;
+        const defaultVersion = getTemplateId(programId);
+        return getObjectVersion(element) ?? defaultVersion;
     }
 
     private fillLegendSheet() {
@@ -335,13 +731,7 @@ export class SheetBuilder {
         return isProgramStageDataElementCompulsory || isTeiAttributeCompulsory || isCategoryComboForProgram;
     }
 
-    private getVersion() {
-        const { element } = this.builder;
-        const templateId = "PROGRAM_GENERATED_v4";
-        return getObjectVersion(element) ?? templateId;
-    }
-
-    private fillDataEntrySheet(dataEntrySheet: any) {
+    private fillDataEntrySheet(dataEntrySheet: any, programId: Id) {
         const { element, elementMetadata: metadata, settings } = this.builder;
         const { rowOffset = 0 } = this.builder.template;
 
@@ -360,7 +750,10 @@ export class SheetBuilder {
         dataEntrySheet.row(itemRow).setHeight(50);
 
         // Add template version
-        dataEntrySheet.cell(1, 1).string(`Version: ${this.getVersion()}`).style(baseStyle);
+        dataEntrySheet
+            .cell(1, 1)
+            .string(`Version: ${this.getVersion(programId)}`)
+            .style(baseStyle);
 
         // Add column titles
         let columnId = 1;

@@ -11,15 +11,32 @@ import XLSX, {
 import { CellRef, Range, SheetRef, ValueRef } from "../../domain/entities/Template";
 import moment from "moment";
 import { Future, FutureData } from "../../domain/entities/Future";
+import { Id } from "../../domain/entities/Ref";
+import { AMC_PRODUCT_REGISTER_PROGRAM_ID } from "../../domain/usecases/data-entry/amc/ImportAMCProductLevelData";
+import { EGASP_PROGRAM_ID } from "./program-rule/ProgramRulesMetadataDefaultRepository";
+import { AMC_RAW_SUBSTANCE_CONSUMPTION_PROGRAM_ID } from "../../domain/usecases/data-entry/amc/ImportAMCSubstanceLevelData";
 
 type RowWithCells = XLSX.Row & { _cells: XLSX.Cell[] };
+
+export const getTemplateId = (programId: Id): string => {
+    switch (programId) {
+        case AMC_PRODUCT_REGISTER_PROGRAM_ID:
+            return "TRACKER_PROGRAM_GENERATED_v3";
+        case EGASP_PROGRAM_ID:
+        case AMC_RAW_SUBSTANCE_CONSUMPTION_PROGRAM_ID:
+            return "PROGRAM_GENERATED_v4";
+        default:
+            return "";
+    }
+};
 
 export class ExcelPopulateDefaultRepository extends ExcelRepository {
     private workbooks: Record<string, ExcelWorkbook> = {};
 
-    public loadTemplate(file: Blob): FutureData<string> {
+    public loadTemplate(file: Blob, programId: Id): FutureData<string> {
+        const templateId = getTemplateId(programId);
         return Future.fromPromise(this.parseFile(file)).map(workbook => {
-            const id = "PROGRAM_GENERATED_v4";
+            const id = templateId;
             this.workbooks[id] = workbook;
             return id;
         });

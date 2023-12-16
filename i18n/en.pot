@@ -5,13 +5,51 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2023-10-06T08:14:40.002Z\n"
-"PO-Revision-Date: 2023-10-06T08:14:40.002Z\n"
+"POT-Creation-Date: 2023-12-01T11:57:23.836Z\n"
+"PO-Revision-Date: 2023-12-01T11:57:23.836Z\n"
 
 msgid "Template {{id}} not loaded"
 msgstr ""
 
 msgid "Error saving registration status"
+msgstr ""
+
+msgid "Event id"
+msgstr ""
+
+msgid "TEI Id"
+msgstr ""
+
+msgid "Options"
+msgstr ""
+
+msgid "Date"
+msgstr ""
+
+msgid "TEI id"
+msgstr ""
+
+msgid "Org Unit *"
+msgstr ""
+
+msgid ""
+"This site does not exist in DHIS2, please talk to your administrator to "
+"create this site before uploading data"
+msgstr ""
+
+msgid "Enrollment Date"
+msgstr ""
+
+msgid "Incident Date"
+msgstr ""
+
+msgid "No geometry"
+msgstr ""
+
+msgid "Point in map"
+msgstr ""
+
+msgid "Polygon in map"
 msgstr ""
 
 msgid "Name"
@@ -30,9 +68,6 @@ msgid "Possible Values"
 msgstr ""
 
 msgid "Organisation Units"
-msgstr ""
-
-msgid "Options"
 msgstr ""
 
 msgid "Boolean"
@@ -56,19 +91,10 @@ msgstr ""
 msgid "No"
 msgstr ""
 
-msgid "Event id"
-msgstr ""
-
-msgid "Org Unit *"
-msgstr ""
-
 msgid "Latitude"
 msgstr ""
 
 msgid "Longitude"
-msgstr ""
-
-msgid "Date"
 msgstr ""
 
 msgid "Invalid choice was chosen"
@@ -294,7 +320,7 @@ msgstr ""
 msgid "Period"
 msgstr ""
 
-msgid "Records"
+msgid "Rows"
 msgstr ""
 
 msgid "Batch ID"
@@ -390,13 +416,19 @@ msgstr ""
 msgid "status"
 msgstr ""
 
+msgid "Import summary errors"
+msgstr ""
+
+msgid "Close"
+msgstr ""
+
+msgid "Data imported without errors"
+msgstr ""
+
 msgid "News from GLASS"
 msgstr ""
 
 msgid "Notification"
-msgstr ""
-
-msgid "Close"
 msgstr ""
 
 msgid "Participants"
@@ -423,7 +455,7 @@ msgstr ""
 msgid "GO"
 msgstr ""
 
-msgid "Importing data and applying validation rules"
+msgid "Save"
 msgstr ""
 
 msgid "Save Draft"
@@ -478,6 +510,9 @@ msgid "Go to Validation Report"
 msgstr ""
 
 msgid "Thank you! your data for now is uploaded in our system"
+msgstr ""
+
+msgid "Importing data and applying validation rules"
 msgstr ""
 
 msgid "These Consistency Checks ensure that incorrect data is not imported."
@@ -537,6 +572,15 @@ msgstr ""
 msgid "Downloading"
 msgstr ""
 
+msgid "Choose file type"
+msgstr ""
+
+msgid "Product level data"
+msgstr ""
+
+msgid "Substance level data"
+msgstr ""
+
 msgid "Choose a Dataset"
 msgstr ""
 
@@ -553,15 +597,6 @@ msgid "Incorrect File Format. Please retry with a valid file"
 msgstr ""
 
 msgid "Select file"
-msgstr ""
-
-msgid "Incorrect File Format. Please retry with a valid Sample file"
-msgstr ""
-
-msgid "SAMPLE File"
-msgstr ""
-
-msgid "not required"
 msgstr ""
 
 msgid "The password and confirm password fields don't match"

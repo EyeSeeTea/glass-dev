@@ -54,6 +54,7 @@ export const CtaButtons: React.FC<CtaButtonsProps> = ({ ctas, position, setCurre
         compositionRoot.glassDataSubmission
             .getSpecificDataSubmission(
                 currentModuleAccess.moduleId,
+                currentModuleAccess.moduleName,
                 currentOrgUnitAccess.orgUnitId,
                 currentPeriod,
                 isQuarterlyModule
@@ -71,6 +72,7 @@ export const CtaButtons: React.FC<CtaButtonsProps> = ({ ctas, position, setCurre
     }, [
         compositionRoot.glassDataSubmission,
         currentModuleAccess.moduleId,
+        currentModuleAccess.moduleName,
         currentOrgUnitAccess.orgUnitId,
         currentPeriod,
         snackbar,

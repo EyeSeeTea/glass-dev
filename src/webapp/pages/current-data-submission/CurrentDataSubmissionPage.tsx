@@ -49,7 +49,7 @@ export const CurrentDataSubmissionPageContent: React.FC<CurrentDataSubmissionPag
 
         const [refetchStatus, setRefetchStatus] = useState<DataSubmissionStatusTypes>();
         const currentDataSubmissionStatus = useStatusDataSubmission(
-            moduleId,
+            { id: moduleId, name: moduleName },
             currentOrgUnitAccess.orgUnitId,
             currentPeriod,
             refetchStatus

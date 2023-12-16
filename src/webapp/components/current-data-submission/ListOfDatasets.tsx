@@ -19,12 +19,13 @@ import { useAppContext } from "../../contexts/app-context";
 import { useCurrentDataSubmissionId } from "../../hooks/useCurrentDataSubmissionId";
 import { useCurrentUserGroupsAccess } from "../../hooks/useCurrentUserGroupsAccess";
 import { DataSubmissionStatusTypes } from "../../../domain/entities/GlassDataSubmission";
+import { useQuestionnaires } from "./Questionnaires";
 
-function getCompletedUploads(upload: GlassUploadsState) {
+export const getCompletedUploads = (upload: GlassUploadsState) => {
     if (upload.kind === "loaded") {
         return upload.data.filter((row: UploadsDataItem) => row.status.toLowerCase() === "completed");
     }
-}
+};
 
 function getNotCompletedUploads(upload: GlassUploadsState) {
     if (upload.kind === "loaded") {
@@ -39,13 +40,16 @@ interface ListOfDatasetsProps {
 export const ListOfDatasets: React.FC<ListOfDatasetsProps> = ({ setRefetchStatus }) => {
     const { compositionRoot } = useAppContext();
     const { currentPeriod } = useCurrentPeriodContext();
-    const { currentModuleAccess } = useCurrentModuleContext();
+    const {
+        currentModuleAccess: { moduleId, moduleName },
+    } = useCurrentModuleContext();
     const { currentOrgUnitAccess } = useCurrentOrgUnitContext();
     const currentDataSubmissionStatus = useStatusDataSubmission(
-        currentModuleAccess.moduleId,
+        { id: moduleId, name: moduleName },
         currentOrgUnitAccess.orgUnitId,
         currentPeriod
     );
+    const [questionnaires] = useQuestionnaires();
     const { uploads, refreshUploads } = useGlassUploadsByModuleOUPeriod(currentPeriod.toString());
     const hasCurrentUserCaptureAccess = useGlassCaptureAccess();
 
@@ -53,8 +57,8 @@ export const ListOfDatasets: React.FC<ListOfDatasetsProps> = ({ setRefetchStatus
     const incompleteUploads = getNotCompletedUploads(uploads);
 
     const dataSubmissionId = useCurrentDataSubmissionId(
-        compositionRoot,
-        currentModuleAccess.moduleId,
+        moduleId,
+        moduleName,
         currentOrgUnitAccess.orgUnitId,
         currentPeriod
     );
@@ -62,26 +66,13 @@ export const ListOfDatasets: React.FC<ListOfDatasetsProps> = ({ setRefetchStatus
     useEffect(() => {
         if (
             completeUploads?.length === 0 &&
-            !moduleProperties.get(currentModuleAccess.moduleName)?.isQuestionnaireReq
+            (moduleProperties.get(moduleName)?.completeStatusChange === "DATASET" ||
+                moduleProperties.get(moduleName)?.completeStatusChange === "QUESTIONNAIRE_AND_DATASET")
         ) {
             compositionRoot.glassDataSubmission.setStatus(dataSubmissionId, "NOT_COMPLETED").run(
                 () => {
                     //Triggerring relaod of status in parent
                     setRefetchStatus("NOT_COMPLETED");
-
-                    if (captureAccessGroup.kind === "loaded") {
-                        const userGroupsIds = captureAccessGroup.data.map(cag => {
-                            return cag.id;
-                        });
-                        const notificationText = `The data submission for ${currentModuleAccess.moduleName} module for year ${currentPeriod} and country ${currentOrgUnitAccess.orgUnitName} has changed to DATA TO BE APPROVED BY COUNTRY`;
-
-                        compositionRoot.notifications
-                            .send(notificationText, notificationText, userGroupsIds, currentOrgUnitAccess.orgUnitPath)
-                            .run(
-                                () => {},
-                                () => {}
-                            );
-                    }
                 },
                 () => {}
             );
@@ -91,11 +82,12 @@ export const ListOfDatasets: React.FC<ListOfDatasetsProps> = ({ setRefetchStatus
         captureAccessGroup,
         compositionRoot.notifications,
         compositionRoot.glassDataSubmission,
-        currentModuleAccess,
+        moduleName,
         currentOrgUnitAccess,
         currentPeriod,
         dataSubmissionId,
         setRefetchStatus,
+        questionnaires,
     ]);
 
     return (
@@ -123,23 +115,31 @@ export const ListOfDatasets: React.FC<ListOfDatasetsProps> = ({ setRefetchStatus
                         >
                             {i18n.t("No datasets uploaded to this submission.")}
                         </StyledEmptyMessage>
-                        <Button
-                            variant="contained"
-                            color="primary"
-                            component={NavLink}
-                            to={`/upload`}
-                            exact={true}
-                            disabled={
-                                !(
-                                    hasCurrentUserCaptureAccess &&
-                                    currentDataSubmissionStatus.kind === "loaded" &&
-                                    isEditModeStatus(currentDataSubmissionStatus.data.title)
-                                )
-                            }
-                        >
-                            {i18n.t("Add New Datasets")}
-                        </Button>
-                        {moduleProperties.get(currentModuleAccess.moduleName)?.isbatchReq && (
+                        {moduleProperties.get(moduleName)?.isSingleFileTypePerSubmission &&
+                        completeUploads &&
+                        completeUploads.length > 0 ? (
+                            <Typography>
+                                {i18n.t(`You can upload only one successful file for ${moduleName}.`)}
+                            </Typography>
+                        ) : (
+                            <Button
+                                variant="contained"
+                                color="primary"
+                                component={NavLink}
+                                to={`/upload`}
+                                exact={true}
+                                disabled={
+                                    !(
+                                        hasCurrentUserCaptureAccess &&
+                                        currentDataSubmissionStatus.kind === "loaded" &&
+                                        isEditModeStatus(currentDataSubmissionStatus.data.title)
+                                    )
+                                }
+                            >
+                                {i18n.t("Add New Datasets")}
+                            </Button>
+                        )}
+                        {moduleProperties.get(moduleName)?.isbatchReq && (
                             <StyledTypography>
                                 {i18n.t("You can add up to 6 datasets to this submission with different BATCH IDS.")}
                             </StyledTypography>

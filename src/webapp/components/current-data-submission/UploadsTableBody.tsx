@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import { Backdrop, TableBody, TableCell, TableRow, Button, DialogContent, Typography } from "@material-ui/core";
 import styled from "styled-components";
 import i18n from "@eyeseetea/d2-ui-components/locales";
@@ -8,6 +8,8 @@ import { CloudDownloadOutlined, DeleteOutline } from "@material-ui/icons";
 import { useAppContext } from "../../contexts/app-context";
 import { ConfirmationDialog, useSnackbar } from "@eyeseetea/d2-ui-components";
 import { CircularProgress } from "material-ui";
+import ChevronRightIcon from "@material-ui/icons/ChevronRight";
+
 import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context";
 import { Future } from "../../../domain/entities/Future";
 import { isEditModeStatus } from "../../../utils/editModeStatus";
@@ -17,6 +19,9 @@ import { useGlassCaptureAccess } from "../../hooks/useGlassCaptureAccess";
 import { StyledLoaderContainer } from "../upload/ConsistencyChecks";
 import { useCurrentPeriodContext } from "../../contexts/current-period-context";
 import { moduleProperties } from "../../../domain/utils/ModuleProperties";
+import { ImportSummaryErrors } from "../../../domain/entities/data-entry/ImportSummary";
+import { ImportSummaryErrorsDialog } from "../import-summary-errors-dialog/ImportSummaryErrorsDialog";
+import { glassColors } from "../../pages/app/themes/dhis2.theme";
 
 export interface UploadsTableBodyProps {
     rows?: UploadsDataItem[];
@@ -26,11 +31,13 @@ export interface UploadsTableBodyProps {
 export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refreshUploads }) => {
     const { compositionRoot } = useAppContext();
     const snackbar = useSnackbar();
+
     const [loading, setLoading] = useState<boolean>(false);
     const {
         currentOrgUnitAccess: { orgUnitId, orgUnitName },
     } = useCurrentOrgUnitContext();
     const [open, setOpen] = React.useState(false);
+    const [importSummaryErrorsToShow, setImportSummaryErrorsToShow] = React.useState<ImportSummaryErrors | null>(null);
     const [rowToDelete, setRowToDelete] = useState<UploadsDataItem>();
 
     const { currentPeriod } = useCurrentPeriodContext();
@@ -38,7 +45,7 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
     const { currentModuleAccess } = useCurrentModuleContext();
     const { currentOrgUnitAccess } = useCurrentOrgUnitContext();
     const currentDataSubmissionStatus = useStatusDataSubmission(
-        currentModuleAccess.moduleId,
+        { id: currentModuleAccess.moduleId, name: currentModuleAccess.moduleName },
         currentOrgUnitAccess.orgUnitId,
         currentPeriod
     );
@@ -77,7 +84,10 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
             let primaryFileToDelete: UploadsDataItem | undefined, secondaryFileToDelete: UploadsDataItem | undefined;
             //For AMR, Ris file is mandatory, so there will be a ris file with given batch id.
             //Sample file is optional and could be absent
-            if (moduleProperties.get(currentModuleAccess.moduleName)?.isSecondaryFileApplicable) {
+            if (
+                moduleProperties.get(currentModuleAccess.moduleName)?.isSecondaryFileApplicable &&
+                moduleProperties.get(currentModuleAccess.moduleName)?.isSecondaryRelated
+            ) {
                 if (
                     rowToDelete.fileType.toLowerCase() ===
                     moduleProperties.get(currentModuleAccess.moduleName)?.primaryFileType.toLowerCase()
@@ -89,6 +99,12 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                 } else {
                     secondaryFileToDelete = rowToDelete;
                     primaryFileToDelete = rows?.filter(ris => ris.id === rowToDelete.correspondingRisUploadId)?.at(0);
+                }
+            } else if (!moduleProperties.get(currentModuleAccess.moduleName)?.isSecondaryRelated) {
+                if (rowToDelete.fileType === moduleProperties.get(currentModuleAccess.moduleName)?.primaryFileType) {
+                    primaryFileToDelete = rowToDelete;
+                } else {
+                    secondaryFileToDelete = rowToDelete;
                 }
             } else {
                 primaryFileToDelete = rowToDelete;
@@ -133,28 +149,31 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                                         ? compositionRoot.fileSubmission.secondaryFile(
                                               new File([secondaryFileDownload], secondaryFileToDelete.fileName),
                                               secondaryFileToDelete.batchId,
+                                              currentModuleAccess.moduleName,
                                               secondaryFileToDelete.period,
                                               "DELETE",
                                               orgUnitId,
+                                              orgUnitName,
                                               secondaryFileToDelete.countryCode,
-                                              false
+                                              false,
+                                              secondaryFileToDelete.eventListFileId
                                           )
                                         : Future.success(undefined),
                             }).run(
                                 ({ deletePrimaryFileSummary, deleteSecondaryFileSummary }) => {
                                     if (deletePrimaryFileSummary) {
-                                        let message = `${deletePrimaryFileSummary.importCount.deleted} ${
-                                            moduleProperties.get(currentModuleAccess.moduleName)?.unit
-                                        }s deleted for ${
+                                        let message = `${
+                                            primaryFileToDelete?.rows || primaryFileToDelete?.records
+                                        } rows deleted for ${
                                             moduleProperties.get(currentModuleAccess.moduleName)?.primaryFileType
                                         } file`;
 
                                         if (secondaryFileToDelete && deleteSecondaryFileSummary) {
                                             message =
                                                 message +
-                                                ` and ${deleteSecondaryFileSummary.importCount.deleted} ${
-                                                    moduleProperties.get(currentModuleAccess.moduleName)?.unit
-                                                }s deleted for ${
+                                                ` and ${
+                                                    secondaryFileToDelete.rows || secondaryFileToDelete.records
+                                                } rows deleted for ${
                                                     moduleProperties.get(currentModuleAccess.moduleName)
                                                         ?.secondaryFileType
                                                 } file.`;
@@ -195,6 +214,7 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                                 error => {
                                     snackbar.error("Error deleting file");
                                     console.error(error);
+                                    setLoading(false);
                                 }
                             );
                         }
@@ -202,6 +222,67 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                     error => {
                         console.debug(
                             `Unable to download primary fileid : ${primaryFileToDelete?.fileId} OR secondary fileid : ${secondaryFileToDelete?.fileId}, error: ${error} `
+                        );
+                        setLoading(false);
+                    }
+                );
+            } else if (secondaryFileToDelete) {
+                setLoading(true);
+                compositionRoot.glassDocuments.download(secondaryFileToDelete.fileId).run(
+                    secondaryFileDownload => {
+                        if (
+                            secondaryFileToDelete &&
+                            secondaryFileToDelete.status.toLowerCase() !== "uploaded" &&
+                            secondaryFileDownload
+                        ) {
+                            compositionRoot.fileSubmission
+                                .secondaryFile(
+                                    new File([secondaryFileDownload], secondaryFileToDelete.fileName),
+                                    secondaryFileToDelete.batchId,
+                                    currentModuleAccess.moduleName,
+                                    secondaryFileToDelete.period,
+                                    "DELETE",
+                                    orgUnitId,
+                                    orgUnitName,
+                                    secondaryFileToDelete.countryCode,
+                                    false,
+                                    secondaryFileToDelete.eventListFileId
+                                )
+                                .run(
+                                    deleteSecondaryFileSummary => {
+                                        if (secondaryFileToDelete && deleteSecondaryFileSummary) {
+                                            const message = ` ${
+                                                secondaryFileToDelete.rows || secondaryFileToDelete.records
+                                            } rows deleted for ${
+                                                moduleProperties.get(currentModuleAccess.moduleName)?.secondaryFileType
+                                            } file.`;
+                                            compositionRoot.glassDocuments
+                                                .deleteByUploadId(secondaryFileToDelete.id)
+                                                .run(
+                                                    () => {
+                                                        refreshUploads({}); //Trigger re-render of parent
+                                                        setLoading(false);
+                                                        hideConfirmationDialog();
+                                                        snackbar.info(message);
+                                                    },
+                                                    error => {
+                                                        snackbar.error("Error deleting file");
+                                                        console.error(error);
+                                                    }
+                                                );
+                                        }
+                                    },
+                                    error => {
+                                        snackbar.error("Error deleting file");
+                                        console.error(error);
+                                        setLoading(false);
+                                    }
+                                );
+                        }
+                    },
+                    error => {
+                        console.debug(
+                            `Unable to download secondary fileid : ${secondaryFileToDelete?.fileId}, error: ${error} `
                         );
                         setLoading(false);
                     }
@@ -216,6 +297,13 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
             }
         }
     };
+
+    const handleShowImportSummaryErrors = useCallback((row: UploadsDataItem) => {
+        if (row.importSummary) {
+            setImportSummaryErrorsToShow(row.importSummary);
+        }
+    }, []);
+
     return (
         <>
             {rows && (
@@ -255,28 +343,40 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                                         </Typography>
                                     </DialogContent>
                                 </ConfirmationDialog>
+                                <ImportSummaryErrorsDialog
+                                    importSummaryErrorsToShow={importSummaryErrorsToShow}
+                                    onClose={() => setImportSummaryErrorsToShow(null)}
+                                />
                             </>
                         </TableCell>
                     </TableRow>
                     {rows.map((row: UploadsDataItem) => (
-                        <TableRow key={row.id}>
+                        <TableRow key={row.id} onClick={() => handleShowImportSummaryErrors(row)}>
                             <TableCell>{dayjs(row.uploadDate).format("DD-MM-YYYY")}</TableCell>
                             <TableCell>{row.period}</TableCell>
-                            <TableCell>{row.records}</TableCell>
+                            <TableCell>{row?.records || row?.rows}</TableCell>
                             <TableCell>{row.fileType}</TableCell>
                             {moduleProperties.get(currentModuleAccess.moduleName)?.isbatchReq && (
                                 <TableCell style={{ opacity: 0.5 }}>{row.batchId}</TableCell>
                             )}
                             <TableCell>{i18n.t(row.status).toUpperCase()}</TableCell>
                             <TableCell style={{ opacity: 0.5 }}>
-                                <Button onClick={() => downloadFile(row.fileId, row.fileName)}>
+                                <Button
+                                    onClick={event => {
+                                        event.stopPropagation();
+                                        downloadFile(row.fileId, row.fileName);
+                                    }}
+                                >
                                     <CloudDownloadOutlined />
                                 </Button>
                             </TableCell>
                             <TableCell style={{ opacity: 0.5 }}>
                                 {currentDataSubmissionStatus.kind === "loaded" ? (
                                     <Button
-                                        onClick={() => showConfirmationDialog(row)}
+                                        onClick={e => {
+                                            e.stopPropagation();
+                                            showConfirmationDialog(row);
+                                        }}
                                         disabled={
                                             !hasCurrentUserCaptureAccess ||
                                             !isEditModeStatus(currentDataSubmissionStatus.data.title)
@@ -288,6 +388,7 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                                     <CircularProgress size={20} />
                                 )}
                             </TableCell>
+                            <StyledCTACell className="cta">{row.importSummary && <ChevronRightIcon />}</StyledCTACell>
                         </TableRow>
                     ))}
                 </StyledTableBody>
@@ -297,3 +398,15 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
 };
 
 const StyledTableBody = styled(TableBody)``;
+
+const StyledCTACell = styled(TableCell)`
+    text-align: center;
+    svg {
+        color: ${glassColors.grey};
+    }
+    &:hover {
+        svg {
+            color: ${glassColors.greyBlack};
+        }
+    }
+`;

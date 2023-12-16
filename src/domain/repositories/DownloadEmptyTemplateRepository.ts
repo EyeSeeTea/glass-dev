@@ -1,3 +1,12 @@
+import { Id } from "../entities/Ref";
+
 export interface DownloadEmptyTemplateRepository {
-    getEmptyTemplate(orgUnits: string[], settings: Record<string, any>): Promise<File>;
+    getEmptyTemplate(
+        programId: Id,
+        orgUnits: string[],
+        settings: Record<string, any>,
+        downloadRelationships: boolean,
+        useCodesForMetadata: boolean,
+        formType: string
+    ): Promise<File>;
 }
