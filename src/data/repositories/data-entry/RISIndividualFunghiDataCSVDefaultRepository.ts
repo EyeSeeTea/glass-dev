@@ -43,6 +43,9 @@ export class RISIndividualFunghiDataCSVDefaultRepository implements RISIndividua
                         AST_HFC_ID: moduleName === "AMR - Funghi" ? getTextValue(row, "AST_HFC_ID") : "",
                         AMR_LABORATORY_CODE:
                             moduleName === "AMR - Funghi" ? getTextValue(row, "AMR_LABORATORY_CODE") : "",
+                        AST_METHOD2: moduleName === "AMR - Funghi" ? getTextValue(row, "AST_METHOD2") : "",
+                        IDENT_METHOD2: moduleName === "AMR - Funghi" ? getTextValue(row, "IDENT_METHOD2") : "",
+                        PERFORMED_TEST2: moduleName === "AMR - Funghi" ? getTextValue(row, "PERFORMED_TEST2") : "",
                     };
                 }) || []
             );
@@ -96,7 +99,16 @@ export class RISIndividualFunghiDataCSVDefaultRepository implements RISIndividua
                         : !doesColumnExist(headerRow, "AST_HFC_ID")) &&
                     (moduleName === "AMR - Funghi"
                         ? doesColumnExist(headerRow, "AMR_LABORATORY_CODE")
-                        : !doesColumnExist(headerRow, "AMR_LABORATORY_CODE"));
+                        : !doesColumnExist(headerRow, "AMR_LABORATORY_CODE")) &&
+                    (moduleName === "AMR - Funghi"
+                        ? doesColumnExist(headerRow, "AST_METHOD2")
+                        : !doesColumnExist(headerRow, "AST_METHOD2")) &&
+                    (moduleName === "AMR - Funghi"
+                        ? doesColumnExist(headerRow, "IDENT_METHOD2")
+                        : !doesColumnExist(headerRow, "IDENT_METHOD2")) &&
+                    (moduleName === "AMR - Funghi"
+                        ? doesColumnExist(headerRow, "PERFORMED_TEST2")
+                        : !doesColumnExist(headerRow, "PERFORMED_TEST2"));
 
                 const uniqSpecimens = _(sheet.rows)
                     .uniqBy("SPECIMEN")
