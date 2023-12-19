@@ -52,19 +52,6 @@ const CONVERSION_FACTOR: ConversionFactor[] = ATC_2023_v1.find(({ name }) => nam
     ?.data as ConversionFactor[];
 
 // TYPES AND INTERFACES
-
-type Unit =
-    | "gram"
-    | "milligram"
-    | "international unit"
-    | "millions international unit"
-    | "unit dose"
-    | "milliliter"
-    | "liter";
-
-type RouteOfAdmin = "oral" | "parenteral" | "rectal" | "inhalation power" | "inhalation solution";
-type Salt = "hippurate" | "ethylsuccinate" | "mandelate" | "default";
-
 type Content = {
     content: number;
     standarizedStrengthUnit: Unit;
@@ -170,7 +157,7 @@ const RAW_PRODUCT_CONSUMPTION_HEADERS = {
     HEALTH_LEVEL_MANUAL: "Health Level manual *",
 };
 
-const UNITS: Record<string, Unit> = {
+const UNITS: Record<string, string> = {
     GRAM: "gram",
     MILLIGRAM: "milligram",
     INTERNATIONAL_UNIT: "international unit",
@@ -180,6 +167,8 @@ const UNITS: Record<string, Unit> = {
     LITER: "liter",
 };
 
+type Unit = typeof UNITS[keyof typeof UNITS];
+
 const GRAM_FAMILY = [UNITS.GRAM, UNITS.MILLIGRAM];
 const INTERNATIONAL_UNIT_FAMILY = [UNITS.INTERNATIONAL_UNIT, UNITS.MILLIONS_INTERNATIONAL_UNIT];
 const UNIT_DOSE_FAMILY = [UNITS.UNIT_DOSE];
@@ -187,37 +176,37 @@ const LITER_FAMILY = [UNITS.LITER, UNITS.MILLILITER];
 
 const VALID_STRENGTH_UNITS = [...GRAM_FAMILY, ...INTERNATIONAL_UNIT_FAMILY, ...UNIT_DOSE_FAMILY];
 
-const UNITS_TO_STANDARDIZED_MEASUREMENT_UNIT = {
-    [UNITS.MILLIGRAM]: UNITS.GRAM,
-    [UNITS.GRAM]: UNITS.GRAM,
-    [UNITS.INTERNATIONAL_UNIT]: UNITS.MILLIONS_INTERNATIONAL_UNIT,
-    [UNITS.MILLIONS_INTERNATIONAL_UNIT]: UNITS.MILLIONS_INTERNATIONAL_UNIT,
-    [UNITS.UNIT_DOSE]: UNITS.UNIT_DOSE,
-    [UNITS.MILLILITER]: UNITS.MILLILITER,
-    [UNITS.LITER]: UNITS.MILLILITER,
+const UNITS_TO_STANDARDIZED_MEASUREMENT_UNIT: Record<Unit, Unit> = {
+    [UNITS.MILLIGRAM as Unit]: UNITS.GRAM as Unit,
+    [UNITS.GRAM as Unit]: UNITS.GRAM as Unit,
+    [UNITS.INTERNATIONAL_UNIT as Unit]: UNITS.MILLIONS_INTERNATIONAL_UNIT as Unit,
+    [UNITS.MILLIONS_INTERNATIONAL_UNIT as Unit]: UNITS.MILLIONS_INTERNATIONAL_UNIT as Unit,
+    [UNITS.UNIT_DOSE as Unit]: UNITS.UNIT_DOSE as Unit,
+    [UNITS.MILLILITER as Unit]: UNITS.MILLILITER as Unit,
+    [UNITS.LITER as Unit]: UNITS.MILLILITER as Unit,
 };
 
-const CONVERSION_TO_STANDARDIZED_MEASUREMENT_UNIT = {
-    [UNITS.MILLIGRAM]: 0.001,
-    [UNITS.GRAM]: 1,
-    [UNITS.INTERNATIONAL_UNIT]: 0.000001,
-    [UNITS.MILLIONS_INTERNATIONAL_UNIT]: 1,
-    [UNITS.UNIT_DOSE]: 1,
-    [UNITS.MILLILITER]: 1,
-    [UNITS.LITER]: 1000,
+const CONVERSION_TO_STANDARDIZED_MEASUREMENT_UNIT: Record<Unit, number> = {
+    [UNITS.MILLIGRAM as Unit]: 0.001,
+    [UNITS.GRAM as Unit]: 1,
+    [UNITS.INTERNATIONAL_UNIT as Unit]: 0.000001,
+    [UNITS.MILLIONS_INTERNATIONAL_UNIT as Unit]: 1,
+    [UNITS.UNIT_DOSE as Unit]: 1,
+    [UNITS.MILLILITER as Unit]: 1,
+    [UNITS.LITER as Unit]: 1000,
 };
 
 const UNITS_MAPPING: Record<string, Unit> = {
-    G: UNITS.GRAM,
-    MG: UNITS.MILLIGRAM,
-    IU: UNITS.INTERNATIONAL_UNIT,
-    MU: UNITS.MILLIONS_INTERNATIONAL_UNIT,
-    UD: UNITS.UNIT_DOSE,
-    L: UNITS.LITER,
-    ML: UNITS.MILLILITER,
+    G: UNITS.GRAM as Unit,
+    MG: UNITS.MILLIGRAM as Unit,
+    IU: UNITS.INTERNATIONAL_UNIT as Unit,
+    MU: UNITS.MILLIONS_INTERNATIONAL_UNIT as Unit,
+    UD: UNITS.UNIT_DOSE as Unit,
+    L: UNITS.LITER as Unit,
+    ML: UNITS.MILLILITER as Unit,
 };
 
-const ROUTE_OF_ADMINISTRATION_MAPPING: Record<string, RouteOfAdmin> = {
+const ROUTE_OF_ADMINISTRATION_MAPPING: Record<string, string> = {
     O: "oral",
     P: "parenteral",
     R: "rectal",
@@ -225,12 +214,16 @@ const ROUTE_OF_ADMINISTRATION_MAPPING: Record<string, RouteOfAdmin> = {
     IS: "inhalation solution",
 };
 
-const SALT_MAPPING: Record<string, Salt> = {
+type RouteOfAdmin = typeof ROUTE_OF_ADMINISTRATION_MAPPING[keyof typeof ROUTE_OF_ADMINISTRATION_MAPPING];
+
+const SALT_MAPPING: Record<string, string> = {
     HIPP: "hippurate",
     ESUC: "ethylsuccinate",
     MAND: "mandelate",
     default: "default",
 };
+
+type Salt = typeof SALT_MAPPING[keyof typeof SALT_MAPPING];
 
 function getJsonDataFromSheet(workbook: XLSX.WorkBook, sheetName: string): any[][] {
     const sheet = workbook.Sheets[sheetName];
@@ -255,9 +248,6 @@ function writeToFile(dataToWrite: Record<string, any>, fileName: string): void {
     fs.writeFileSync(`src/scripts/${fileName}.json`, JSON.stringify(dataToWrite, null, 2), "utf-8");
 }
 
-// Around 5 minutes
-const NUMBER_OF_ITERATIONS = 10000;
-
 function main() {
     const cmd = command({
         name: path.basename(__filename),
@@ -277,10 +267,7 @@ function main() {
                 process.exit(1);
             }
 
-            for (let i = 1; i <= NUMBER_OF_ITERATIONS; i++) {
-                calculationConsumptionProductLevelData(excelFilePath);
-                console.log("Iteration: ", i);
-            }
+            calculationConsumptionProductLevelData(excelFilePath);
         },
     });
 
@@ -298,7 +285,6 @@ function calculationConsumptionProductLevelData(excelFilePath: string): void {
         // TEI Instances tab
         const jsonDataTEIInstancesNotClean = getJsonDataFromSheet(workbook, tab1TEIInstancesSheetName);
         const jsonDataTEIInstances = getCleanJsonData(jsonDataTEIInstancesNotClean, 5);
-        // console.log("jsonDataTEIInstances", jsonDataTEIInstances);
 
         const contentDDDPerProductAndDDDPerPackage: ContentDDDPerProductAndDDDPerPackage[] = jsonDataTEIInstances.map(
             (product): any => {
@@ -310,7 +296,7 @@ function calculationConsumptionProductLevelData(excelFilePath: string): void {
                 // 2 - Identify corresponding DDD per product = ddd
                 const dddPerProduct = calculateDDDPerProduct(product as any[]);
                 // 3 - Calculate DDD per package = ddd_per_pack
-                const dddPerPackage = getDDDPerPackage(product as any[], contentPerProduct, dddPerProduct);
+                const dddPerPackage = calculateDDDPerPackage(product as any[], contentPerProduct, dddPerProduct);
 
                 return {
                     teiId,
@@ -329,12 +315,11 @@ function calculationConsumptionProductLevelData(excelFilePath: string): void {
             tab2RawProductConsumptionSheetName
         );
         const jsonDataRawProductConsumption = getCleanJsonData(jsonDataRawProductConsumptionNotClean, 2);
-        // console.log("jsonDataRawProductConsumption", jsonDataRawProductConsumption);
 
         // 4 - Calculate DDD per product consumption packages = ddd_cons_product
         const dddPerProductConsumptionPackages: DDDPerProductConsumptionPackages[] = jsonDataRawProductConsumption.map(
             (productConsumption): any => {
-                return getDDDPerProductConsumptionPackages(
+                return calculateDDDPerProductConsumptionPackages(
                     productConsumption as any[],
                     contentDDDPerProductAndDDDPerPackage
                 );
@@ -405,7 +390,7 @@ function calculateContentPerProduct(product: any[]): Content {
             isConcVolumeUnitOrVolumeUnitValid(maybeVolumeUnit))
     ) {
         const standardizedStrength: number = strengthUnitToStandardizedMeasurementUnit(strength, strengthUnit);
-        const standarizedStrengthUnit: Unit = UNITS_TO_STANDARDIZED_MEASUREMENT_UNIT[strengthUnit];
+        const standarizedStrengthUnit: Unit = UNITS_TO_STANDARDIZED_MEASUREMENT_UNIT[strengthUnit] as Unit;
 
         const standardizedConcVolume: number = concVolumeOrVolumeUnitToStandardizedMeasurementUnit(
             maybeConcVolume,
@@ -447,7 +432,7 @@ function isConcVolumeUnitOrVolumeUnitValid(concVolumeUnit: Unit): boolean {
 
 // 1b
 function strengthUnitToStandardizedMeasurementUnit(strength: number, strength_unit: string): number {
-    return strength * CONVERSION_TO_STANDARDIZED_MEASUREMENT_UNIT[strength_unit];
+    return strength * (CONVERSION_TO_STANDARDIZED_MEASUREMENT_UNIT[strength_unit] as number);
 }
 
 // 1b
@@ -459,7 +444,7 @@ function concVolumeOrVolumeUnitToStandardizedMeasurementUnit(
     if (!concVolumeOrVolume || !concVolumeUnitOrVolumeUnit) {
         return 1;
     }
-    return concVolumeOrVolume * CONVERSION_TO_STANDARDIZED_MEASUREMENT_UNIT[concVolumeUnitOrVolumeUnit];
+    return concVolumeOrVolume * (CONVERSION_TO_STANDARDIZED_MEASUREMENT_UNIT[concVolumeUnitOrVolumeUnit] as number);
 }
 
 // 2 - Identify corresponding DDD per product
@@ -481,7 +466,7 @@ function getDDDOfProductFromDDDCombinationsTable(combinationCode: string): DDDPe
         const { DDD: DDD_VALUE, DDD_UNIT } = codeCombinationData;
         return {
             dddValue: DDD_VALUE,
-            dddUnit: UNITS_MAPPING[DDD_UNIT],
+            dddUnit: UNITS_MAPPING[DDD_UNIT] as Unit,
         };
     } else {
         throw new Error(`Combination code ${combinationCode} not valid.`);
@@ -511,8 +496,8 @@ function getDDDOfProductFromDDDTable(product: any[]): DDDPerProduct {
 
     if (dddData) {
         const { DDD_STD, DDD_UNIT } = dddData;
-        const dddUnit = UNITS_MAPPING[DDD_UNIT];
-        const dddStandardizedUnit = UNITS_TO_STANDARDIZED_MEASUREMENT_UNIT[dddUnit];
+        const dddUnit = UNITS_MAPPING[DDD_UNIT] as Unit;
+        const dddStandardizedUnit = UNITS_TO_STANDARDIZED_MEASUREMENT_UNIT[dddUnit] as Unit;
         return {
             dddValue: DDD_STD,
             dddUnit: dddStandardizedUnit,
@@ -525,7 +510,11 @@ function getDDDOfProductFromDDDTable(product: any[]): DDDPerProduct {
 }
 
 // 3 - Calculate DDD per package
-function getDDDPerPackage(product: any[], contentPerProduct: Content, dddPerProduct: DDDPerProduct): DDDPerPackage {
+function calculateDDDPerPackage(
+    product: any[],
+    contentPerProduct: Content,
+    dddPerProduct: DDDPerProduct
+): DDDPerPackage {
     const standarizedStrengthUnit: Unit = contentPerProduct.standarizedStrengthUnit;
 
     const positionAtcCode = Object.values(TEI_INSTANCES_HEADERS).indexOf(TEI_INSTANCES_HEADERS.ATC_CODE);
@@ -546,7 +535,7 @@ function getDDDPerPackage(product: any[], contentPerProduct: Content, dddPerProd
 }
 
 // 4 - Calculate DDD per product consumption packages
-function getDDDPerProductConsumptionPackages(
+function calculateDDDPerProductConsumptionPackages(
     productConsumption: any[],
     contentDDDPerProductAndDDDPerPackage: ContentDDDPerProductAndDDDPerPackage[]
 ): DDDPerProductConsumptionPackages {
@@ -685,21 +674,24 @@ function aggregateContentTonnesUsingContent(
                 );
 
                 if (contentTonnesOfProduct) {
-                    acc[id] = acc[id]
-                        ? {
-                              ...acc[id],
-                              contentTonnes: acc[id].contentTonnes + contentTonnesOfProduct.contentTonnes,
-                          }
-                        : {
-                              teiId,
-                              atcCode,
-                              routeAdmin,
-                              year,
-                              healthSector,
-                              healthLevel,
-                              contentTonnes: contentTonnesOfProduct.contentTonnes,
-                          };
-                    return acc;
+                    const aggregationContentTonnes: ContentTonnesPerATC =
+                        acc[id] && acc[id]?.contentTonnes
+                            ? {
+                                  ...(acc[id] as ContentTonnesPerATC),
+                                  contentTonnes:
+                                      (acc[id] as ContentTonnesPerATC).contentTonnes +
+                                      contentTonnesOfProduct.contentTonnes,
+                              }
+                            : {
+                                  teiId,
+                                  atcCode,
+                                  routeAdmin,
+                                  year,
+                                  healthSector,
+                                  healthLevel,
+                                  contentTonnes: contentTonnesOfProduct.contentTonnes,
+                              };
+                    return { ...acc, [id]: aggregationContentTonnes };
                 } else {
                     throw new Error(`Content tonnes of product ${teiId} not found.`);
                 }
@@ -804,22 +796,23 @@ function aggregateContentTonnesUsingDDDPerConsuptionPackages(
 
                 const id = `${teiId}-${atcCode}-${routeAdmin}-${year}-${healthSector}-${healthLevel}`;
 
-                acc[id] = acc[id]
-                    ? {
-                          ...acc[id],
-                          contentTonnes: acc[id].contentTonnes + contentTonnesOfProduct.contentTonnes,
-                      }
-                    : {
-                          teiId,
-                          atcCode,
-                          routeAdmin,
-                          year,
-                          healthSector,
-                          healthLevel,
-                          contentTonnes: contentTonnesOfProduct.contentTonnes,
-                      };
-
-                return acc;
+                const aggregationContentTonnes: ContentTonnesPerATC =
+                    acc[id] && acc[id]?.contentTonnes
+                        ? {
+                              ...(acc[id] as ContentTonnesPerATC),
+                              contentTonnes:
+                                  (acc[id] as ContentTonnesPerATC).contentTonnes + contentTonnesOfProduct.contentTonnes,
+                          }
+                        : {
+                              teiId,
+                              atcCode,
+                              routeAdmin,
+                              year,
+                              healthSector,
+                              healthLevel,
+                              contentTonnes: contentTonnesOfProduct.contentTonnes,
+                          };
+                return { ...acc, [id]: aggregationContentTonnes };
             } else {
                 throw new Error(`Product ${teiId} not found.`);
             }
@@ -882,7 +875,7 @@ function aggregateDataByAtcRouteAdminYearHealthSectorAndHealthLevel(
                 const { dddPerProduct, dddPerPackage } = contentDDDPerProductAndDDDPerPackageOfProduct;
 
                 // 4 - Calculate DDD per product consumption packages = ddd_cons_product
-                const dddPerProductConsumptionPackages = getDDDPerProductConsumptionPackages(
+                const dddPerProductConsumptionPackages = calculateDDDPerProductConsumptionPackages(
                     productConsumption as any[],
                     contentDDDPerProductAndDDDPerPackage
                 );
@@ -928,30 +921,32 @@ function aggregateDataByAtcRouteAdminYearHealthSectorAndHealthLevel(
 
                 // 5c, 6a, 7a, 8a
                 const id = `${teiId}-${atcCode}-${routeAdmin}-${year}-${healthSector}-${healthLevel}`;
-                acc[id] = acc[id]
-                    ? {
-                          ...acc[id],
-                          tonnes: acc[id].tonnes + contentTonnesOfProduct.contentTonnes,
-                          packages: acc[id].packages + packages,
-                          ddd_cons_product:
-                              acc[id].ddd_cons_product + dddPerProductConsumptionPackages.dddConsumptionPackages,
-                      }
-                    : {
-                          teiId,
-                          atcCode,
-                          routeAdmin,
-                          salt,
-                          year,
-                          healthSector,
-                          healthLevel,
-                          tonnes: contentTonnesOfProduct.contentTonnes,
-                          packages,
-                          ddd_cons_product: dddPerProductConsumptionPackages.dddConsumptionPackages,
-                          dddPerPackage,
-                          dddPerProduct,
-                      };
+                const aggregation: AggregatedCalculations =
+                    acc[id] && acc[id]?.tonnes && acc[id]?.packages && acc[id]?.ddd_cons_product
+                        ? {
+                              ...(acc[id] as AggregatedCalculations),
+                              tonnes: (acc[id] as AggregatedCalculations).tonnes + contentTonnesOfProduct.contentTonnes,
+                              packages: (acc[id] as AggregatedCalculations).packages + packages,
+                              ddd_cons_product:
+                                  (acc[id] as AggregatedCalculations).ddd_cons_product +
+                                  dddPerProductConsumptionPackages.dddConsumptionPackages,
+                          }
+                        : {
+                              teiId,
+                              atcCode,
+                              routeAdmin,
+                              salt,
+                              year,
+                              healthSector,
+                              healthLevel,
+                              tonnes: contentTonnesOfProduct.contentTonnes,
+                              packages,
+                              ddd_cons_product: dddPerProductConsumptionPackages.dddConsumptionPackages,
+                              dddPerPackage,
+                              dddPerProduct,
+                          };
 
-                return acc;
+                return { ...acc, [id]: aggregation };
             } else {
                 throw new Error(`Product ${teiId} or ddd per product and ddd per package calculations not found`);
             }
