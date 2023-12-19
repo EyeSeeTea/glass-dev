@@ -52,6 +52,19 @@ const CONVERSION_FACTOR: ConversionFactor[] = ATC_2023_v1.find(({ name }) => nam
     ?.data as ConversionFactor[];
 
 // TYPES AND INTERFACES
+type Unit =
+    | "gram"
+    | "milligram"
+    | "international unit"
+    | "millions international unit"
+    | "unit dose"
+    | "milliliter"
+    | "liter";
+
+type RouteOfAdmin = "oral" | "parenteral" | "rectal" | "inhalation power" | "inhalation solution";
+
+type Salt = "hippurate" | "ethylsuccinate" | "mandelate" | "default";
+
 type Content = {
     content: number;
     standarizedStrengthUnit: Unit;
@@ -64,7 +77,7 @@ type DDDPerProduct = {
 
 type DDDPerPackage = {
     value: number;
-    dddUnit: string;
+    dddUnit: Unit;
 };
 
 type ContentDDDPerProductAndDDDPerPackage = {
@@ -80,7 +93,7 @@ type DDDPerProductConsumptionPackages = {
     healthSector: string;
     healthLevel: string;
     dddConsumptionPackages: number;
-    dddUnit: string;
+    dddUnit: Unit;
 };
 
 type ContentTonnesPerProduct = {
@@ -157,56 +170,44 @@ const RAW_PRODUCT_CONSUMPTION_HEADERS = {
     HEALTH_LEVEL_MANUAL: "Health Level manual *",
 };
 
-const UNITS: Record<string, string> = {
-    GRAM: "gram",
-    MILLIGRAM: "milligram",
-    INTERNATIONAL_UNIT: "international unit",
-    MILLIONS_INTERNATIONAL_UNIT: "millions international unit",
-    UNIT_DOSE: "unit dose",
-    MILLILITER: "milliliter",
-    LITER: "liter",
-};
+const GRAM_FAMILY: Unit[] = ["gram", "milligram"];
+const INTERNATIONAL_UNIT_FAMILY: Unit[] = ["international unit", "millions international unit"];
+const UNIT_DOSE_FAMILY: Unit[] = ["unit dose"];
+const LITER_FAMILY: Unit[] = ["liter", "milliliter"];
 
-type Unit = typeof UNITS[keyof typeof UNITS];
-
-const GRAM_FAMILY = [UNITS.GRAM, UNITS.MILLIGRAM];
-const INTERNATIONAL_UNIT_FAMILY = [UNITS.INTERNATIONAL_UNIT, UNITS.MILLIONS_INTERNATIONAL_UNIT];
-const UNIT_DOSE_FAMILY = [UNITS.UNIT_DOSE];
-const LITER_FAMILY = [UNITS.LITER, UNITS.MILLILITER];
-
-const VALID_STRENGTH_UNITS = [...GRAM_FAMILY, ...INTERNATIONAL_UNIT_FAMILY, ...UNIT_DOSE_FAMILY];
+const VALID_STRENGTH_UNITS: Unit[] = [...GRAM_FAMILY, ...INTERNATIONAL_UNIT_FAMILY, ...UNIT_DOSE_FAMILY];
 
 const UNITS_TO_STANDARDIZED_MEASUREMENT_UNIT: Record<Unit, Unit> = {
-    [UNITS.MILLIGRAM as Unit]: UNITS.GRAM as Unit,
-    [UNITS.GRAM as Unit]: UNITS.GRAM as Unit,
-    [UNITS.INTERNATIONAL_UNIT as Unit]: UNITS.MILLIONS_INTERNATIONAL_UNIT as Unit,
-    [UNITS.MILLIONS_INTERNATIONAL_UNIT as Unit]: UNITS.MILLIONS_INTERNATIONAL_UNIT as Unit,
-    [UNITS.UNIT_DOSE as Unit]: UNITS.UNIT_DOSE as Unit,
-    [UNITS.MILLILITER as Unit]: UNITS.MILLILITER as Unit,
-    [UNITS.LITER as Unit]: UNITS.MILLILITER as Unit,
+    milligram: "gram",
+    gram: "gram",
+    "international unit": "millions international unit",
+    "millions international unit": "millions international unit",
+    "unit dose": "unit dose",
+    milliliter: "milliliter",
+    liter: "milliliter",
 };
 
 const CONVERSION_TO_STANDARDIZED_MEASUREMENT_UNIT: Record<Unit, number> = {
-    [UNITS.MILLIGRAM as Unit]: 0.001,
-    [UNITS.GRAM as Unit]: 1,
-    [UNITS.INTERNATIONAL_UNIT as Unit]: 0.000001,
-    [UNITS.MILLIONS_INTERNATIONAL_UNIT as Unit]: 1,
-    [UNITS.UNIT_DOSE as Unit]: 1,
-    [UNITS.MILLILITER as Unit]: 1,
-    [UNITS.LITER as Unit]: 1000,
+    milligram: 0.001,
+    gram: 1,
+    "international unit": 0.000001,
+    "millions international unit": 1,
+    "unit dose": 1,
+    milliliter: 1,
+    liter: 1000,
 };
 
 const UNITS_MAPPING: Record<string, Unit> = {
-    G: UNITS.GRAM as Unit,
-    MG: UNITS.MILLIGRAM as Unit,
-    IU: UNITS.INTERNATIONAL_UNIT as Unit,
-    MU: UNITS.MILLIONS_INTERNATIONAL_UNIT as Unit,
-    UD: UNITS.UNIT_DOSE as Unit,
-    L: UNITS.LITER as Unit,
-    ML: UNITS.MILLILITER as Unit,
+    G: "gram",
+    MG: "milligram",
+    IU: "international unit",
+    MU: "millions international unit",
+    UD: "unit dose",
+    L: "liter",
+    ML: "milliliter",
 };
 
-const ROUTE_OF_ADMINISTRATION_MAPPING: Record<string, string> = {
+const ROUTE_OF_ADMINISTRATION_MAPPING: Record<string, RouteOfAdmin> = {
     O: "oral",
     P: "parenteral",
     R: "rectal",
@@ -214,16 +215,12 @@ const ROUTE_OF_ADMINISTRATION_MAPPING: Record<string, string> = {
     IS: "inhalation solution",
 };
 
-type RouteOfAdmin = typeof ROUTE_OF_ADMINISTRATION_MAPPING[keyof typeof ROUTE_OF_ADMINISTRATION_MAPPING];
-
-const SALT_MAPPING: Record<string, string> = {
+const SALT_MAPPING: Record<string, Salt> = {
     HIPP: "hippurate",
     ESUC: "ethylsuccinate",
     MAND: "mandelate",
     default: "default",
 };
-
-type Salt = typeof SALT_MAPPING[keyof typeof SALT_MAPPING];
 
 function getJsonDataFromSheet(workbook: XLSX.WorkBook, sheetName: string): any[][] {
     const sheet = workbook.Sheets[sheetName];
@@ -390,7 +387,7 @@ function calculateContentPerProduct(product: any[]): Content {
             isConcVolumeUnitOrVolumeUnitValid(maybeVolumeUnit))
     ) {
         const standardizedStrength: number = strengthUnitToStandardizedMeasurementUnit(strength, strengthUnit);
-        const standarizedStrengthUnit: Unit = UNITS_TO_STANDARDIZED_MEASUREMENT_UNIT[strengthUnit] as Unit;
+        const standarizedStrengthUnit: Unit = UNITS_TO_STANDARDIZED_MEASUREMENT_UNIT[strengthUnit];
 
         const standardizedConcVolume: number = concVolumeOrVolumeUnitToStandardizedMeasurementUnit(
             maybeConcVolume,
@@ -431,20 +428,20 @@ function isConcVolumeUnitOrVolumeUnitValid(concVolumeUnit: Unit): boolean {
 }
 
 // 1b
-function strengthUnitToStandardizedMeasurementUnit(strength: number, strength_unit: string): number {
-    return strength * (CONVERSION_TO_STANDARDIZED_MEASUREMENT_UNIT[strength_unit] as number);
+function strengthUnitToStandardizedMeasurementUnit(strength: number, strengthUnit: Unit): number {
+    return strength * CONVERSION_TO_STANDARDIZED_MEASUREMENT_UNIT[strengthUnit];
 }
 
 // 1b
 function concVolumeOrVolumeUnitToStandardizedMeasurementUnit(
     concVolumeOrVolume?: number,
-    concVolumeUnitOrVolumeUnit?: string
+    concVolumeUnitOrVolumeUnit?: Unit
 ): number {
     // 1c
     if (!concVolumeOrVolume || !concVolumeUnitOrVolumeUnit) {
         return 1;
     }
-    return concVolumeOrVolume * (CONVERSION_TO_STANDARDIZED_MEASUREMENT_UNIT[concVolumeUnitOrVolumeUnit] as number);
+    return concVolumeOrVolume * CONVERSION_TO_STANDARDIZED_MEASUREMENT_UNIT[concVolumeUnitOrVolumeUnit];
 }
 
 // 2 - Identify corresponding DDD per product
@@ -603,8 +600,7 @@ function getTonnesPerProductUsingContent(
         // 5a
         const conversionFactorAtc = CONVERSION_FACTOR.find(({ ATC5 }) => ATC5 === atcCode);
         const contentUnit = standarizedStrengthUnit;
-        const conversionFactor =
-            contentUnit !== UNITS.GRAM && conversionFactorAtc?.FACTOR ? conversionFactorAtc.FACTOR : 1;
+        const conversionFactor = contentUnit !== "gram" && conversionFactorAtc?.FACTOR ? conversionFactorAtc.FACTOR : 1;
 
         // 5b - content_tonnes = content × conv_factor ÷ 1e6
         return {
@@ -730,7 +726,7 @@ function getTonnesPerProductUsingDDDPerConsuptionPackages(
         const { dddConsumptionPackages, dddUnit } = dddOfProductConsumptionPackages;
         // 5a
         const conversionFactorAtc = CONVERSION_FACTOR.find(({ ATC5 }) => ATC5 === atcCode);
-        const conversionFactor = dddUnit !== UNITS.GRAM && conversionFactorAtc?.FACTOR ? conversionFactorAtc.FACTOR : 1;
+        const conversionFactor = dddUnit !== "gram" && conversionFactorAtc?.FACTOR ? conversionFactorAtc.FACTOR : 1;
         // 5b - content_tonnes = ddd_cons_product × conv_factor ÷ 1e6
         return {
             teiId: teiIdProduct,
@@ -837,7 +833,7 @@ function getTonnesPerProduct(
         const { dddConsumptionPackages, dddUnit } = dddOfProductConsumptionPackages;
         // 5a
         const conversionFactorAtc = CONVERSION_FACTOR.find(({ ATC5 }) => ATC5 === atcCode);
-        const conversionFactor = dddUnit !== UNITS.GRAM && conversionFactorAtc?.FACTOR ? conversionFactorAtc.FACTOR : 1;
+        const conversionFactor = dddUnit !== "gram" && conversionFactorAtc?.FACTOR ? conversionFactorAtc.FACTOR : 1;
         // 5b - content_tonnes = ddd_cons_product × conv_factor ÷ 1e6
         return {
             teiId: teiIdProduct,
