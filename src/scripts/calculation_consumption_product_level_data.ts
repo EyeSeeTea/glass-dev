@@ -55,6 +55,7 @@ const CONVERSION_FACTOR: ConversionFactor[] = ATC_2023_v1.find(({ name }) => nam
 type Product = {
     teiId: string;
     orgUnit: string;
+    productId: string;
     packSize: number;
     strength: number;
     strengthUnit: Unit;
@@ -73,8 +74,8 @@ type ProductConsumption = {
     date: Date;
     packages: number;
     dataStatus: number;
-    healthSector: string;
-    healthLevel: string;
+    healthSector: number;
+    healthLevel: number;
 };
 
 type Unit =
@@ -115,8 +116,8 @@ type ContentDDDPerProductAndDDDPerPackage = {
 type DDDPerProductConsumptionPackages = {
     teiId: string;
     year: number;
-    healthSector: string;
-    healthLevel: string;
+    healthSector: number;
+    healthLevel: number;
     dddConsumptionPackages: number;
     dddUnit: Unit;
 };
@@ -124,20 +125,22 @@ type DDDPerProductConsumptionPackages = {
 type ContentTonnesPerProduct = {
     teiId: string;
     year: number;
-    healthSector: string;
-    healthLevel: string;
+    healthSector: number;
+    healthLevel: number;
     contentTonnes: number;
 };
 
 type AggregatedCalculations = {
     teiId: string;
+    orgUnit: string;
+    productId: string;
     atcCode: string;
     routeAdmin: string;
     salt: Salt;
     year: number;
     dataStatus: number;
-    healthSector: string;
-    healthLevel: string;
+    healthSector: number;
+    healthLevel: number;
     tonnes: number;
     packages: number;
     ddds: number;
@@ -151,7 +154,7 @@ const TEI_INSTANCES_HEADERS = {
     NO_GEOMETRY: "No geometry",
     ENROLLMENT_DATE: "Enrollment Date *\r\n(YYYY-MM-DD)",
     INCIDENT_DATE: "Incident Date\r\n(YYYY-MM-DD)",
-    // PRODUCT_ID: "Product id",
+    PRODUCT_ID: "Product id",
     PRODUCT_NAME: "Product name",
     LABEL: "Label",
     PACKAGE_SIZE: "Package size",
@@ -272,6 +275,9 @@ function getProductProperties(product: any[]): Product {
     const positionOrgUnit = Object.values(TEI_INSTANCES_HEADERS).indexOf(TEI_INSTANCES_HEADERS.ORG_UNIT);
     const orgUnit: string = product[positionOrgUnit];
 
+    const positionProductId: number = Object.values(TEI_INSTANCES_HEADERS).indexOf(TEI_INSTANCES_HEADERS.PRODUCT_ID);
+    const productId: string = product[positionProductId];
+
     const positionPackSize: number = Object.values(TEI_INSTANCES_HEADERS).indexOf(TEI_INSTANCES_HEADERS.PACKAGE_SIZE);
     const packSize: number = product[positionPackSize];
 
@@ -314,6 +320,7 @@ function getProductProperties(product: any[]): Product {
     return {
         teiId,
         orgUnit,
+        productId,
         packSize,
         strength,
         strengthUnit,
@@ -350,12 +357,12 @@ function getProductConsumptionProperties(productConsumption: any[]): ProductCons
     const positionHealthSector = Object.values(RAW_PRODUCT_CONSUMPTION_HEADERS).indexOf(
         RAW_PRODUCT_CONSUMPTION_HEADERS.HEALTH_SECTOR_MANUAL
     );
-    const healthSector: string = (productConsumption as any[])[positionHealthSector].toString();
+    const healthSector: number = (productConsumption as any[])[positionHealthSector];
 
     const positionHealthLevel = Object.values(RAW_PRODUCT_CONSUMPTION_HEADERS).indexOf(
         RAW_PRODUCT_CONSUMPTION_HEADERS.HEALTH_LEVEL_MANUAL
     );
-    const healthLevel: string = (productConsumption as any[])[positionHealthLevel].toString();
+    const healthLevel: number = (productConsumption as any[])[positionHealthLevel];
     return {
         teiId,
         date,
@@ -474,7 +481,7 @@ function calculateContentPerProduct(product: Product): Content {
     } = product;
 
     if (
-        (isStrengthUnitValid(strengthUnit) && !maybeConcVolumeUnit && !maybeVolumeUnit) ||
+        (isStrengthUnitValid(strengthUnit) && (!maybeConcVolumeUnit || !maybeVolumeUnit)) ||
         (isStrengthUnitValid(strengthUnit) &&
             isConcVolumeUnitOrVolumeUnitValid(maybeConcVolumeUnit) &&
             isConcVolumeUnitOrVolumeUnitValid(maybeVolumeUnit))
@@ -500,7 +507,7 @@ function calculateContentPerProduct(product: Product): Content {
         };
     } else {
         throw new Error(
-            `Unit of ${product} not valid. strengthUnit: ${strengthUnit}, concVolumeUnit: ${maybeConcVolumeUnit}, , concVolumeUnit: ${maybeVolumeUnit}`
+            `Unit of ${product.teiId} not valid. strengthUnit: ${strengthUnit}, concVolumeUnit: ${maybeConcVolumeUnit}, concVolumeUnit: ${maybeVolumeUnit}`
         );
     }
 }
@@ -675,7 +682,7 @@ function aggregateDataByAtcRouteAdminYearHealthSectorAndHealthLevel(
                     contentDDDPerProductAndDDDPerPackageOfProduct.content
                 );
 
-                const { teiId, salt, atcCode, routeAdmin } = product;
+                const { teiId, orgUnit, productId, salt, atcCode, routeAdmin } = product;
                 const { packages, date, dataStatus, healthSector, healthLevel } = productConsumption;
                 const year: number = date.getFullYear();
 
@@ -693,6 +700,8 @@ function aggregateDataByAtcRouteAdminYearHealthSectorAndHealthLevel(
                           }
                         : {
                               teiId,
+                              orgUnit,
+                              productId,
                               atcCode,
                               routeAdmin,
                               salt,
