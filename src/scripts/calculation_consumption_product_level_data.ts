@@ -52,6 +52,31 @@ const CONVERSION_FACTOR: ConversionFactor[] = ATC_2023_v1.find(({ name }) => nam
     ?.data as ConversionFactor[];
 
 // TYPES AND INTERFACES
+type Product = {
+    teiId: string;
+    orgUnit: string;
+    packSize: number;
+    strength: number;
+    strengthUnit: Unit;
+    concVolume: number;
+    concVolumeUnit: Unit;
+    atcCode: string;
+    combinationCode: string;
+    routeAdmin: RouteOfAdmin;
+    salt: Salt;
+    volume: number;
+    volumeUnit: Unit;
+};
+
+type ProductConsumption = {
+    teiId: string;
+    date: Date;
+    packages: number;
+    dataStatus: number;
+    healthSector: string;
+    healthLevel: string;
+};
+
 type Unit =
     | "gram"
     | "milligram"
@@ -66,7 +91,7 @@ type RouteOfAdmin = "oral" | "parenteral" | "rectal" | "inhalation power" | "inh
 type Salt = "hippurate" | "ethylsuccinate" | "mandelate" | "default";
 
 type Content = {
-    content: number;
+    value: number;
     standarizedStrengthUnit: Unit;
 };
 
@@ -82,7 +107,7 @@ type DDDPerPackage = {
 
 type ContentDDDPerProductAndDDDPerPackage = {
     teiId: string;
-    contentPerProduct: Content;
+    content: Content;
     dddPerProduct: DDDPerProduct;
     dddPerPackage: DDDPerPackage;
 };
@@ -98,13 +123,6 @@ type DDDPerProductConsumptionPackages = {
 
 type ContentTonnesPerProduct = {
     teiId: string;
-    contentTonnes: number;
-};
-
-type ContentTonnesPerATC = {
-    teiId: string;
-    atcCode: string;
-    routeAdmin: string;
     year: number;
     healthSector: string;
     healthLevel: string;
@@ -117,13 +135,12 @@ type AggregatedCalculations = {
     routeAdmin: string;
     salt: Salt;
     year: number;
+    dataStatus: number;
     healthSector: string;
     healthLevel: string;
     tonnes: number;
     packages: number;
-    ddd_cons_product: number;
-    dddPerProduct: DDDPerProduct;
-    dddPerPackage: DDDPerPackage;
+    ddds: number;
 };
 
 // DICTIONARIES AND MAPPINGS
@@ -134,6 +151,7 @@ const TEI_INSTANCES_HEADERS = {
     NO_GEOMETRY: "No geometry",
     ENROLLMENT_DATE: "Enrollment Date *\r\n(YYYY-MM-DD)",
     INCIDENT_DATE: "Incident Date\r\n(YYYY-MM-DD)",
+    // PRODUCT_ID: "Product id",
     PRODUCT_NAME: "Product name",
     LABEL: "Label",
     PACKAGE_SIZE: "Package size",
@@ -141,8 +159,6 @@ const TEI_INSTANCES_HEADERS = {
     STRENGTH_UNIT: "Strength unit",
     CONCENTRATION_VOLUME: "Concentration volume",
     CONCENTRATION_VOLUME_UNIT: "Concentration volume unit",
-    VOLUME: "Volume",
-    VOLUME_UNIT: "Volume unit",
     ATC_CODE: "ATC Code",
     COMBINATION_CODE: "Combination Code",
     ROUTE_OF_ADMINISTRATION: "Route of administration",
@@ -157,6 +173,8 @@ const TEI_INSTANCES_HEADERS = {
     AUTHORIZATION_YEAR: "Authorization year",
     WITHDRAWAL_YEAR: "Withdrawal year",
     DATA_STATUS: "Data status",
+    VOLUME: "Volume",
+    VOLUME_UNIT: "Volume unit",
 };
 
 const RAW_PRODUCT_CONSUMPTION_HEADERS = {
@@ -222,6 +240,8 @@ const SALT_MAPPING: Record<string, Salt> = {
     default: "default",
 };
 
+// HELPER FUNCTIONS
+
 function getJsonDataFromSheet(workbook: XLSX.WorkBook, sheetName: string): any[][] {
     const sheet = workbook.Sheets[sheetName];
     if (sheet) {
@@ -236,14 +256,117 @@ function getJsonDataFromSheet(workbook: XLSX.WorkBook, sheetName: string): any[]
     }
 }
 
-function getCleanJsonData(jsonDataNotClean: any[][], slice: number): any[][] {
-    const cleanJsonData = jsonDataNotClean.slice(slice);
+function getCleanJsonData(jsonDataNotClean: any[][], sliceStart: number, sliceEnd: number): any[][] {
+    const cleanJsonData = jsonDataNotClean.slice(sliceStart, sliceEnd);
     return cleanJsonData;
 }
 
 function writeToFile(dataToWrite: Record<string, any>, fileName: string): void {
     fs.writeFileSync(`src/scripts/${fileName}.json`, JSON.stringify(dataToWrite, null, 2), "utf-8");
 }
+
+function getProductProperties(product: any[]): Product {
+    const positionTeiId = Object.values(TEI_INSTANCES_HEADERS).indexOf(TEI_INSTANCES_HEADERS.TEI_ID);
+    const teiId: string = (product as any[])[positionTeiId].toString();
+
+    const positionOrgUnit = Object.values(TEI_INSTANCES_HEADERS).indexOf(TEI_INSTANCES_HEADERS.ORG_UNIT);
+    const orgUnit: string = product[positionOrgUnit];
+
+    const positionPackSize: number = Object.values(TEI_INSTANCES_HEADERS).indexOf(TEI_INSTANCES_HEADERS.PACKAGE_SIZE);
+    const packSize: number = product[positionPackSize];
+
+    const positionStrength = Object.values(TEI_INSTANCES_HEADERS).indexOf(TEI_INSTANCES_HEADERS.STRENGTH);
+    const strength: number = product[positionStrength];
+
+    const positionStrengthUnit = Object.values(TEI_INSTANCES_HEADERS).indexOf(TEI_INSTANCES_HEADERS.STRENGTH_UNIT);
+    const strengthUnit: Unit = product[positionStrengthUnit];
+
+    const positionConcVolume = Object.values(TEI_INSTANCES_HEADERS).indexOf(TEI_INSTANCES_HEADERS.CONCENTRATION_VOLUME);
+    const concVolume: number = product[positionConcVolume];
+
+    const positionConcVolumeUnit = Object.values(TEI_INSTANCES_HEADERS).indexOf(
+        TEI_INSTANCES_HEADERS.CONCENTRATION_VOLUME_UNIT
+    );
+    const concVolumeUnit: Unit = product[positionConcVolumeUnit];
+
+    const positionAtcCode = Object.values(TEI_INSTANCES_HEADERS).indexOf(TEI_INSTANCES_HEADERS.ATC_CODE);
+    const atcCode: string = product[positionAtcCode];
+
+    const positionCombinationCode = Object.values(TEI_INSTANCES_HEADERS).indexOf(
+        TEI_INSTANCES_HEADERS.COMBINATION_CODE
+    );
+    const combinationCode: string = product[positionCombinationCode];
+
+    const positionRouteAdmin = Object.values(TEI_INSTANCES_HEADERS).indexOf(
+        TEI_INSTANCES_HEADERS.ROUTE_OF_ADMINISTRATION
+    );
+    const routeAdmin: RouteOfAdmin = product[positionRouteAdmin];
+
+    const positionSalt = Object.values(TEI_INSTANCES_HEADERS).indexOf(TEI_INSTANCES_HEADERS.SALT);
+    const salt: Salt = product[positionSalt];
+
+    const positionVolume = Object.values(TEI_INSTANCES_HEADERS).indexOf(TEI_INSTANCES_HEADERS.VOLUME);
+    const volume: number = product[positionVolume];
+
+    const positionVolumeUnit = Object.values(TEI_INSTANCES_HEADERS).indexOf(TEI_INSTANCES_HEADERS.VOLUME_UNIT);
+    const volumeUnit: Unit = product[positionVolumeUnit];
+
+    return {
+        teiId,
+        orgUnit,
+        packSize,
+        strength,
+        strengthUnit,
+        concVolume,
+        concVolumeUnit,
+        atcCode,
+        combinationCode,
+        routeAdmin,
+        salt,
+        volume,
+        volumeUnit,
+    };
+}
+
+function getProductConsumptionProperties(productConsumption: any[]): ProductConsumption {
+    const positionTeiId = Object.values(RAW_PRODUCT_CONSUMPTION_HEADERS).indexOf(
+        RAW_PRODUCT_CONSUMPTION_HEADERS.TEI_ID
+    );
+    const teiId: string = (productConsumption as any[])[positionTeiId].toString();
+
+    const positionDate = Object.values(RAW_PRODUCT_CONSUMPTION_HEADERS).indexOf(RAW_PRODUCT_CONSUMPTION_HEADERS.DATE);
+    const date: Date = (productConsumption as any[])[positionDate];
+
+    const positionPackages = Object.values(RAW_PRODUCT_CONSUMPTION_HEADERS).indexOf(
+        RAW_PRODUCT_CONSUMPTION_HEADERS.PACKAGES
+    );
+    const packages: number = (productConsumption as any[])[positionPackages];
+
+    const positionDataStatus = Object.values(RAW_PRODUCT_CONSUMPTION_HEADERS).indexOf(
+        RAW_PRODUCT_CONSUMPTION_HEADERS.DATA_STATUS_MANUAL
+    );
+    const dataStatus: number = (productConsumption as any[])[positionDataStatus];
+
+    const positionHealthSector = Object.values(RAW_PRODUCT_CONSUMPTION_HEADERS).indexOf(
+        RAW_PRODUCT_CONSUMPTION_HEADERS.HEALTH_SECTOR_MANUAL
+    );
+    const healthSector: string = (productConsumption as any[])[positionHealthSector].toString();
+
+    const positionHealthLevel = Object.values(RAW_PRODUCT_CONSUMPTION_HEADERS).indexOf(
+        RAW_PRODUCT_CONSUMPTION_HEADERS.HEALTH_LEVEL_MANUAL
+    );
+    const healthLevel: string = (productConsumption as any[])[positionHealthLevel].toString();
+    return {
+        teiId,
+        date,
+        packages,
+        dataStatus,
+        healthSector,
+        healthLevel,
+    };
+}
+
+// MAIN:
 
 function main() {
     const cmd = command({
@@ -264,7 +387,34 @@ function main() {
                 process.exit(1);
             }
 
-            calculationConsumptionProductLevelData(excelFilePath);
+            const workbook = XLSX.readFile(excelFilePath, { cellDates: true });
+            const tab1TEIInstancesSheetName = workbook.SheetNames[0];
+            const tab2RawProductConsumptionSheetName = workbook.SheetNames[1];
+
+            if (tab1TEIInstancesSheetName && tab2RawProductConsumptionSheetName) {
+                // TEI Instances tab
+                const jsonDataTEIInstancesNotClean = getJsonDataFromSheet(workbook, tab1TEIInstancesSheetName);
+                const jsonDataTEIInstances = getCleanJsonData(jsonDataTEIInstancesNotClean, 5, 16);
+
+                const teiInstancesData: Product[] = jsonDataTEIInstances.map((productArray): Product => {
+                    return getProductProperties(productArray);
+                });
+
+                // AMC - Raw Product Consumption tab
+                const jsonDataRawProductConsumptionNotClean = getJsonDataFromSheet(
+                    workbook,
+                    tab2RawProductConsumptionSheetName
+                );
+                const jsonDataRawProductConsumption = getCleanJsonData(jsonDataRawProductConsumptionNotClean, 2, 46);
+
+                const rawProductConsumptionData: ProductConsumption[] = jsonDataRawProductConsumption.map(
+                    (productConsumptionArray): ProductConsumption => {
+                        return getProductConsumptionProperties(productConsumptionArray);
+                    }
+                );
+
+                calculationConsumptionProductLevelData(teiInstancesData, rawProductConsumptionData);
+            }
         },
     });
 
@@ -273,112 +423,55 @@ function main() {
 
 main();
 
-function calculationConsumptionProductLevelData(excelFilePath: string): void {
-    const workbook = XLSX.readFile(excelFilePath, { cellDates: true });
-    const tab1TEIInstancesSheetName = workbook.SheetNames[0];
-    const tab2RawProductConsumptionSheetName = workbook.SheetNames[1];
+function calculationConsumptionProductLevelData(
+    teiInstancesData: Product[],
+    rawProductConsumptionData: ProductConsumption[]
+): void {
+    const contentDDDPerProductAndDDDPerPackage: ContentDDDPerProductAndDDDPerPackage[] = teiInstancesData.map(
+        (product: Product): ContentDDDPerProductAndDDDPerPackage => {
+            // 1 - Calculate the content per product = content
+            const content = calculateContentPerProduct(product);
+            // 2 - Identify corresponding DDD per product = ddd
+            const dddPerProduct = calculateDDDPerProduct(product);
+            // 3 - Calculate DDD per package = ddd_per_pack
+            const dddPerPackage = calculateDDDPerPackage(product, content, dddPerProduct);
 
-    if (tab1TEIInstancesSheetName && tab2RawProductConsumptionSheetName) {
-        // TEI Instances tab
-        const jsonDataTEIInstancesNotClean = getJsonDataFromSheet(workbook, tab1TEIInstancesSheetName);
-        const jsonDataTEIInstances = getCleanJsonData(jsonDataTEIInstancesNotClean, 5);
+            return {
+                teiId: product.teiId,
+                content,
+                dddPerProduct,
+                dddPerPackage,
+            };
+        }
+    );
 
-        const contentDDDPerProductAndDDDPerPackage: ContentDDDPerProductAndDDDPerPackage[] = jsonDataTEIInstances.map(
-            (product): any => {
-                const positionTeiId = Object.values(TEI_INSTANCES_HEADERS).indexOf(TEI_INSTANCES_HEADERS.TEI_ID);
-                const teiId: string = (product as any[])[positionTeiId].toString();
+    writeToFile({ contentDDDPerProductAndDDDPerPackage }, "1&2&3 - contentDDDPerProductAndDDDPerPackage");
 
-                // 1 - Calculate the content per product = content
-                const contentPerProduct = calculateContentPerProduct(product as any[]);
-                // 2 - Identify corresponding DDD per product = ddd
-                const dddPerProduct = calculateDDDPerProduct(product as any[]);
-                // 3 - Calculate DDD per package = ddd_per_pack
-                const dddPerPackage = calculateDDDPerPackage(product as any[], contentPerProduct, dddPerProduct);
-
-                return {
-                    teiId,
-                    contentPerProduct,
-                    dddPerProduct,
-                    dddPerPackage,
-                };
-            }
-        );
-
-        writeToFile({ contentDDDPerProductAndDDDPerPackage }, "1&2&3 - contentDDDPerProductAndDDDPerPackage");
-
-        // AMC - Raw Product Consumption tab
-        const jsonDataRawProductConsumptionNotClean = getJsonDataFromSheet(
-            workbook,
-            tab2RawProductConsumptionSheetName
-        );
-        const jsonDataRawProductConsumption = getCleanJsonData(jsonDataRawProductConsumptionNotClean, 2);
-
-        // 4 - Calculate DDD per product consumption packages = ddd_cons_product
-        const dddPerProductConsumptionPackages: DDDPerProductConsumptionPackages[] = jsonDataRawProductConsumption.map(
-            (productConsumption): any => {
-                return calculateDDDPerProductConsumptionPackages(
-                    productConsumption as any[],
-                    contentDDDPerProductAndDDDPerPackage
-                );
-            }
-        );
-
-        writeToFile({ dddPerProductConsumptionPackages }, "4 - dddPerProductConsumptionPackages");
-
-        // 5 - Calculate tonnes per ATC5 (using content from step 1) = content_tonnes
-        const contentTonnesPerATCUsingContent = aggregateContentTonnesUsingContent(
-            jsonDataTEIInstances,
-            jsonDataRawProductConsumption,
+    // Given 1&2&3 calculates 4, 5, 6, 7, 8
+    const dataByAtcRouteAdminYearHealthSectorAndHealthLevel =
+        aggregateDataByAtcRouteAdminYearHealthSectorAndHealthLevel(
+            teiInstancesData,
+            rawProductConsumptionData,
             contentDDDPerProductAndDDDPerPackage
         );
-        writeToFile({ contentTonnesPerATCUsingContent }, "5 - contentTonnesPerATCUsingContent");
 
-        // 5 - Calculate tonnes per ATC5 (using DDD per product consumption packages from step 4) = content_tonnes
-        const contentTonnesPerATCUsingDDDPerConsuptionPackages = aggregateContentTonnesUsingDDDPerConsuptionPackages(
-            jsonDataTEIInstances,
-            jsonDataRawProductConsumption,
-            dddPerProductConsumptionPackages
-        );
-        writeToFile(
-            { contentTonnesPerATCUsingDDDPerConsuptionPackages },
-            "5 - contentTonnesPerATCUsingDDDPerConsuptionPackages"
-        );
-
-        // 5c, 6a, 7a, 8a
-        const dataByAtcRouteAdminYearHealthSectorAndHealthLevel =
-            aggregateDataByAtcRouteAdminYearHealthSectorAndHealthLevel(
-                jsonDataTEIInstances,
-                jsonDataRawProductConsumption,
-                contentDDDPerProductAndDDDPerPackage
-            );
-        writeToFile(
-            { dataByAtcRouteAdminYearHealthSectorAndHealthLevel },
-            "LAST - aggregateDataByAtcRouteAdminYearHealthSectorAndHealthLevel"
-        );
-    }
+    writeToFile(
+        { dataByAtcRouteAdminYearHealthSectorAndHealthLevel },
+        "LAST - aggregateDataByAtcRouteAdminYearHealthSectorAndHealthLevel"
+    );
 }
 
 // 1 - Calculate the content per product
-function calculateContentPerProduct(product: any[]): Content {
-    const positionStrength = Object.values(TEI_INSTANCES_HEADERS).indexOf(TEI_INSTANCES_HEADERS.STRENGTH);
-    const strength: number = product[positionStrength];
-
-    const positionStrengthUnit = Object.values(TEI_INSTANCES_HEADERS).indexOf(TEI_INSTANCES_HEADERS.STRENGTH_UNIT);
-    const strengthUnit: Unit = product[positionStrengthUnit];
-
-    const positionConcVolume = Object.values(TEI_INSTANCES_HEADERS).indexOf(TEI_INSTANCES_HEADERS.CONCENTRATION_VOLUME);
-    const maybeConcVolume: number = product[positionConcVolume];
-
-    const positionConcVolumeUnit = Object.values(TEI_INSTANCES_HEADERS).indexOf(
-        TEI_INSTANCES_HEADERS.CONCENTRATION_VOLUME_UNIT
-    );
-    const maybeConcVolumeUnit: Unit = product[positionConcVolumeUnit];
-
-    const positionVolume = Object.values(TEI_INSTANCES_HEADERS).indexOf(TEI_INSTANCES_HEADERS.VOLUME);
-    const maybeVolume: number = product[positionVolume];
-
-    const positionVolumeUnit = Object.values(TEI_INSTANCES_HEADERS).indexOf(TEI_INSTANCES_HEADERS.VOLUME_UNIT);
-    const maybeVolumeUnit: Unit = product[positionVolumeUnit];
+function calculateContentPerProduct(product: Product): Content {
+    const {
+        strength,
+        strengthUnit,
+        concVolume: maybeConcVolume,
+        concVolumeUnit: maybeConcVolumeUnit,
+        volume: maybeVolume,
+        volumeUnit: maybeVolumeUnit,
+        packSize,
+    } = product;
 
     if (
         (isStrengthUnitValid(strengthUnit) && !maybeConcVolumeUnit && !maybeVolumeUnit) ||
@@ -399,15 +492,10 @@ function calculateContentPerProduct(product: any[]): Content {
             maybeVolumeUnit
         );
 
-        const positionPackSize: number = Object.values(TEI_INSTANCES_HEADERS).indexOf(
-            TEI_INSTANCES_HEADERS.PACKAGE_SIZE
-        );
-        const packSize: number = product[positionPackSize];
-
         // 1d - content = standardized_strength × (standardized_volume ÷ standardized_conc_volume) × packsize
         const content = standardizedStrength * (standardizedVolume / standardizedConcVolume) * packSize;
         return {
-            content,
+            value: content,
             standarizedStrengthUnit,
         };
     } else {
@@ -445,11 +533,8 @@ function concVolumeOrVolumeUnitToStandardizedMeasurementUnit(
 }
 
 // 2 - Identify corresponding DDD per product
-function calculateDDDPerProduct(product: any[]): DDDPerProduct {
-    const positionCombinationCode = Object.values(TEI_INSTANCES_HEADERS).indexOf(
-        TEI_INSTANCES_HEADERS.COMBINATION_CODE
-    );
-    const combinationCode: string = product[positionCombinationCode];
+function calculateDDDPerProduct(product: Product): DDDPerProduct {
+    const { combinationCode } = product;
 
     return combinationCode
         ? getDDDOfProductFromDDDCombinationsTable(combinationCode)
@@ -471,16 +556,8 @@ function getDDDOfProductFromDDDCombinationsTable(combinationCode: string): DDDPe
 }
 
 // 2c
-function getDDDOfProductFromDDDTable(product: any[]): DDDPerProduct {
-    const positionAtcCode = Object.values(TEI_INSTANCES_HEADERS).indexOf(TEI_INSTANCES_HEADERS.ATC_CODE);
-    const positionRouteAdmin = Object.values(TEI_INSTANCES_HEADERS).indexOf(
-        TEI_INSTANCES_HEADERS.ROUTE_OF_ADMINISTRATION
-    );
-    const positionSalt = Object.values(TEI_INSTANCES_HEADERS).indexOf(TEI_INSTANCES_HEADERS.SALT);
-
-    const atcCode: string = product[positionAtcCode];
-    const routeAdmin: RouteOfAdmin = product[positionRouteAdmin];
-    const salt: Salt = product[positionSalt];
+function getDDDOfProductFromDDDTable(product: Product): DDDPerProduct {
+    const { atcCode, routeAdmin, salt } = product;
 
     const dddData = DDD.find(({ ATC5, SALT, ROA }) => {
         const isDefaultSalt = !SALT && salt === SALT_MAPPING.default;
@@ -507,15 +584,11 @@ function getDDDOfProductFromDDDTable(product: any[]): DDDPerProduct {
 }
 
 // 3 - Calculate DDD per package
-function calculateDDDPerPackage(
-    product: any[],
-    contentPerProduct: Content,
-    dddPerProduct: DDDPerProduct
-): DDDPerPackage {
-    const standarizedStrengthUnit: Unit = contentPerProduct.standarizedStrengthUnit;
+function calculateDDDPerPackage(product: Product, content: Content, dddPerProduct: DDDPerProduct): DDDPerPackage {
+    const { atcCode } = product;
 
-    const positionAtcCode = Object.values(TEI_INSTANCES_HEADERS).indexOf(TEI_INSTANCES_HEADERS.ATC_CODE);
-    const atcCode: string = (product as any[])[positionAtcCode];
+    const { standarizedStrengthUnit } = content;
+
     const conversionFactorAtc = CONVERSION_FACTOR.find(({ ATC5 }) => ATC5 === atcCode);
 
     // 3a
@@ -526,405 +599,96 @@ function calculateDDDPerPackage(
 
     // 3b - ddd_per_pack = content × conv_factor ÷ ddd_value
     return {
-        value: (contentPerProduct.content * conversionFactor) / dddPerProduct.dddValue,
+        value: (content.value * conversionFactor) / dddPerProduct.dddValue,
         dddUnit: dddPerProduct.dddUnit,
     };
 }
 
 // 4 - Calculate DDD per product consumption packages
 function calculateDDDPerProductConsumptionPackages(
-    productConsumption: any[],
-    contentDDDPerProductAndDDDPerPackage: ContentDDDPerProductAndDDDPerPackage[]
+    productConsumption: ProductConsumption,
+    dddPerPackage: DDDPerPackage
 ): DDDPerProductConsumptionPackages {
-    const positionTeiId = Object.values(RAW_PRODUCT_CONSUMPTION_HEADERS).indexOf(
-        RAW_PRODUCT_CONSUMPTION_HEADERS.TEI_ID
-    );
-    const teiId: string = (productConsumption as any[])[positionTeiId].toString();
+    const { teiId, date, packages, healthSector, healthLevel } = productConsumption;
 
-    const positionDate = Object.values(RAW_PRODUCT_CONSUMPTION_HEADERS).indexOf(RAW_PRODUCT_CONSUMPTION_HEADERS.DATE);
-    const date: Date = (productConsumption as any[])[positionDate];
-
-    const positionPackages = Object.values(RAW_PRODUCT_CONSUMPTION_HEADERS).indexOf(
-        RAW_PRODUCT_CONSUMPTION_HEADERS.PACKAGES
-    );
-    const packages: number = (productConsumption as any[])[positionPackages];
-
-    const positionHealthSector = Object.values(RAW_PRODUCT_CONSUMPTION_HEADERS).indexOf(
-        RAW_PRODUCT_CONSUMPTION_HEADERS.HEALTH_SECTOR_MANUAL
-    );
-    const healthSector: string = (productConsumption as any[])[positionHealthSector].toString();
-
-    const positionHealthLevel = Object.values(RAW_PRODUCT_CONSUMPTION_HEADERS).indexOf(
-        RAW_PRODUCT_CONSUMPTION_HEADERS.HEALTH_LEVEL_MANUAL
-    );
-    const healthLevel: string = (productConsumption as any[])[positionHealthLevel].toString();
-
-    const dddPerPackage = contentDDDPerProductAndDDDPerPackage.find(
-        productData => productData.teiId === teiId
-    )?.dddPerPackage;
-
-    if (dddPerPackage) {
-        // 4b - ddd_cons_product = ddd_per_pack × packages (per year, health_sector and health_level)
-        const dddConsumptionPackages = dddPerPackage.value * packages;
-        return {
-            teiId,
-            year: date.getFullYear(),
-            healthSector,
-            healthLevel,
-            dddConsumptionPackages,
-            dddUnit: dddPerPackage.dddUnit,
-        };
-    } else {
-        throw new Error(`DDD per package (${dddPerPackage}) for product ${teiId} not found.`);
-    }
+    // 4b - ddd_cons_product = ddd_per_pack × packages (per year, health_sector and health_level)
+    const dddConsumptionPackages = dddPerPackage.value * packages;
+    return {
+        teiId,
+        year: date.getFullYear(),
+        healthSector,
+        healthLevel,
+        dddConsumptionPackages,
+        dddUnit: dddPerPackage.dddUnit,
+    };
 }
 
-// --------------------------------------- Option 1: using content
-// 5b - Calculate tonnes per product
-function getTonnesPerProductUsingContent(
-    product: any[],
-    contentDDDPerProductAndDDDPerPackage: ContentDDDPerProductAndDDDPerPackage[]
-): ContentTonnesPerProduct {
-    const positionTeiId = Object.values(TEI_INSTANCES_HEADERS).indexOf(TEI_INSTANCES_HEADERS.TEI_ID);
-    const teiIdProduct: string = product[positionTeiId].toString();
-
-    const positionAtcCode = Object.values(TEI_INSTANCES_HEADERS).indexOf(TEI_INSTANCES_HEADERS.ATC_CODE);
-    const atcCode = product[positionAtcCode];
-
-    const contentDDDPerProductAndDDDPerPackageOfProduct = contentDDDPerProductAndDDDPerPackage.find(
-        ({ teiId }) => teiIdProduct === teiId
-    );
-
-    if (contentDDDPerProductAndDDDPerPackageOfProduct) {
-        const { content, standarizedStrengthUnit } = contentDDDPerProductAndDDDPerPackageOfProduct?.contentPerProduct;
-        // 5a
-        const conversionFactorAtc = CONVERSION_FACTOR.find(({ ATC5 }) => ATC5 === atcCode);
-        const contentUnit = standarizedStrengthUnit;
-        const conversionFactor = contentUnit !== "gram" && conversionFactorAtc?.FACTOR ? conversionFactorAtc.FACTOR : 1;
-
-        // 5b - content_tonnes = content × conv_factor ÷ 1e6
-        return {
-            teiId: teiIdProduct,
-            contentTonnes: (content * conversionFactor) / 1e6,
-        };
-    } else {
-        throw new Error(`Content of product ${teiIdProduct} not found.`);
-    }
-}
-
-// 5c
-function aggregateContentTonnesUsingContent(
-    jsonDataTEIInstances: any[][],
-    jsonDataRawProductConsumption: any[][],
-    contentDDDPerProductAndDDDPerPackage: ContentDDDPerProductAndDDDPerPackage[]
-): Record<string, ContentTonnesPerATC> {
-    // 5b - content_tonnes = content × conv_factor ÷ 1e6
-    const contentTonnesPerProductUsingContent: ContentTonnesPerProduct[] = jsonDataTEIInstances.map(
-        (product: any[]) => {
-            return getTonnesPerProductUsingContent(product, contentDDDPerProductAndDDDPerPackage);
-        }
-    );
-    writeToFile({ contentTonnesPerProductUsingContent }, "5b - contentTonnesPerProductUsingContent");
-
-    // 5c
-    return jsonDataRawProductConsumption.reduce(
-        (acc: Record<string, ContentTonnesPerATC>, productConsumption: any[]) => {
-            const positionTeiId = Object.values(RAW_PRODUCT_CONSUMPTION_HEADERS).indexOf(
-                RAW_PRODUCT_CONSUMPTION_HEADERS.TEI_ID
-            );
-            const teiId: string = (productConsumption as any[])[positionTeiId].toString();
-
-            const product = jsonDataTEIInstances.find(product => {
-                const positionTeiId = Object.values(TEI_INSTANCES_HEADERS).indexOf(TEI_INSTANCES_HEADERS.TEI_ID);
-                return teiId === product[positionTeiId].toString();
-            });
-
-            if (product) {
-                const positionAtc = Object.values(TEI_INSTANCES_HEADERS).indexOf(TEI_INSTANCES_HEADERS.ATC_CODE);
-                const positionRouteAdmin = Object.values(TEI_INSTANCES_HEADERS).indexOf(
-                    TEI_INSTANCES_HEADERS.ROUTE_OF_ADMINISTRATION
-                );
-                const atcCode: string = product[positionAtc];
-                const routeAdmin: string = product[positionRouteAdmin];
-
-                const positionDate = Object.values(RAW_PRODUCT_CONSUMPTION_HEADERS).indexOf(
-                    RAW_PRODUCT_CONSUMPTION_HEADERS.DATE
-                );
-                const date: Date = (productConsumption as any[])[positionDate];
-                const year: number = date.getFullYear();
-
-                const positionHealthSector = Object.values(RAW_PRODUCT_CONSUMPTION_HEADERS).indexOf(
-                    RAW_PRODUCT_CONSUMPTION_HEADERS.HEALTH_SECTOR_MANUAL
-                );
-                const healthSector: string = (productConsumption as any[])[positionHealthSector].toString();
-
-                const positionHealthLevel = Object.values(RAW_PRODUCT_CONSUMPTION_HEADERS).indexOf(
-                    RAW_PRODUCT_CONSUMPTION_HEADERS.HEALTH_LEVEL_MANUAL
-                );
-                const healthLevel: string = (productConsumption as any[])[positionHealthLevel].toString();
-
-                const id = `${teiId}-${atcCode}-${routeAdmin}-${year}-${healthSector}-${healthLevel}`;
-
-                const contentTonnesOfProduct = contentTonnesPerProductUsingContent.find(
-                    contentTonnesOfProduct => contentTonnesOfProduct.teiId === teiId
-                );
-
-                if (contentTonnesOfProduct) {
-                    const aggregationContentTonnes: ContentTonnesPerATC =
-                        acc[id] && acc[id]?.contentTonnes
-                            ? {
-                                  ...(acc[id] as ContentTonnesPerATC),
-                                  contentTonnes:
-                                      (acc[id] as ContentTonnesPerATC).contentTonnes +
-                                      contentTonnesOfProduct.contentTonnes,
-                              }
-                            : {
-                                  teiId,
-                                  atcCode,
-                                  routeAdmin,
-                                  year,
-                                  healthSector,
-                                  healthLevel,
-                                  contentTonnes: contentTonnesOfProduct.contentTonnes,
-                              };
-                    return { ...acc, [id]: aggregationContentTonnes };
-                } else {
-                    throw new Error(`Content tonnes of product ${teiId} not found.`);
-                }
-            } else {
-                throw new Error(`Product ${teiId} not found.`);
-            }
-        },
-        {} as Record<string, ContentTonnesPerATC>
-    );
-}
-
-// --------------------------------------- Option 2: usign ddd_cons_product
-// 5b - Calculate tonnes per product
-function getTonnesPerProductUsingDDDPerConsuptionPackages(
-    product: any[],
-    year: number,
-    healthSector: string,
-    healthLevel: string,
-    dddPerProductConsumptionPackages: DDDPerProductConsumptionPackages[]
-): ContentTonnesPerProduct {
-    const positionTeiId = Object.values(TEI_INSTANCES_HEADERS).indexOf(TEI_INSTANCES_HEADERS.TEI_ID);
-    const teiIdProduct: string = product[positionTeiId].toString();
-
-    const positionAtcCode = Object.values(TEI_INSTANCES_HEADERS).indexOf(TEI_INSTANCES_HEADERS.ATC_CODE);
-    const atcCode = product[positionAtcCode];
-
-    const dddOfProductConsumptionPackages = dddPerProductConsumptionPackages.find(
-        dddOfProductConsumptionPackages =>
-            teiIdProduct === dddOfProductConsumptionPackages.teiId &&
-            dddOfProductConsumptionPackages.year === year &&
-            dddOfProductConsumptionPackages.healthSector === healthSector &&
-            dddOfProductConsumptionPackages.healthLevel === healthLevel
-    );
-
-    if (dddOfProductConsumptionPackages) {
-        const { dddConsumptionPackages, dddUnit } = dddOfProductConsumptionPackages;
-        // 5a
-        const conversionFactorAtc = CONVERSION_FACTOR.find(({ ATC5 }) => ATC5 === atcCode);
-        const conversionFactor = dddUnit !== "gram" && conversionFactorAtc?.FACTOR ? conversionFactorAtc.FACTOR : 1;
-        // 5b - content_tonnes = ddd_cons_product × conv_factor ÷ 1e6
-        return {
-            teiId: teiIdProduct,
-            contentTonnes: (dddConsumptionPackages * conversionFactor) / 1e6,
-        };
-    } else {
-        throw new Error(`DDD of product consumption packages (${teiIdProduct}) not found.`);
-    }
-}
-
-// 5c
-function aggregateContentTonnesUsingDDDPerConsuptionPackages(
-    jsonDataTEIInstances: any[][],
-    jsonDataRawProductConsumption: any[][],
-    dddPerProductConsumptionPackages: DDDPerProductConsumptionPackages[]
-): Record<string, ContentTonnesPerATC> {
-    // 5c
-    return jsonDataRawProductConsumption.reduce(
-        (acc: Record<string, ContentTonnesPerATC>, productConsumption: any[]) => {
-            const positionTeiId = Object.values(RAW_PRODUCT_CONSUMPTION_HEADERS).indexOf(
-                RAW_PRODUCT_CONSUMPTION_HEADERS.TEI_ID
-            );
-            const teiId: string = (productConsumption as any[])[positionTeiId].toString();
-
-            const product = jsonDataTEIInstances.find(product => {
-                const positionTeiId = Object.values(TEI_INSTANCES_HEADERS).indexOf(TEI_INSTANCES_HEADERS.TEI_ID);
-                return teiId === product[positionTeiId].toString();
-            });
-
-            if (product) {
-                const positionAtc = Object.values(TEI_INSTANCES_HEADERS).indexOf(TEI_INSTANCES_HEADERS.ATC_CODE);
-                const positionRouteAdmin = Object.values(TEI_INSTANCES_HEADERS).indexOf(
-                    TEI_INSTANCES_HEADERS.ROUTE_OF_ADMINISTRATION
-                );
-                const atcCode: string = product[positionAtc];
-                const routeAdmin: string = product[positionRouteAdmin];
-
-                const positionDate = Object.values(RAW_PRODUCT_CONSUMPTION_HEADERS).indexOf(
-                    RAW_PRODUCT_CONSUMPTION_HEADERS.DATE
-                );
-                const date: Date = (productConsumption as any[])[positionDate];
-                const year: number = date.getFullYear();
-
-                const positionHealthSector = Object.values(RAW_PRODUCT_CONSUMPTION_HEADERS).indexOf(
-                    RAW_PRODUCT_CONSUMPTION_HEADERS.HEALTH_SECTOR_MANUAL
-                );
-                const healthSector: string = (productConsumption as any[])[positionHealthSector].toString();
-
-                const positionHealthLevel = Object.values(RAW_PRODUCT_CONSUMPTION_HEADERS).indexOf(
-                    RAW_PRODUCT_CONSUMPTION_HEADERS.HEALTH_LEVEL_MANUAL
-                );
-                const healthLevel: string = (productConsumption as any[])[positionHealthLevel].toString();
-
-                // 5b - content_tonnes = ddd_cons_product × conv_factor ÷ 1e6
-                const contentTonnesOfProduct: ContentTonnesPerProduct =
-                    getTonnesPerProductUsingDDDPerConsuptionPackages(
-                        product,
-                        year,
-                        healthSector,
-                        healthLevel,
-                        dddPerProductConsumptionPackages
-                    );
-
-                const id = `${teiId}-${atcCode}-${routeAdmin}-${year}-${healthSector}-${healthLevel}`;
-
-                const aggregationContentTonnes: ContentTonnesPerATC =
-                    acc[id] && acc[id]?.contentTonnes
-                        ? {
-                              ...(acc[id] as ContentTonnesPerATC),
-                              contentTonnes:
-                                  (acc[id] as ContentTonnesPerATC).contentTonnes + contentTonnesOfProduct.contentTonnes,
-                          }
-                        : {
-                              teiId,
-                              atcCode,
-                              routeAdmin,
-                              year,
-                              healthSector,
-                              healthLevel,
-                              contentTonnes: contentTonnesOfProduct.contentTonnes,
-                          };
-                return { ...acc, [id]: aggregationContentTonnes };
-            } else {
-                throw new Error(`Product ${teiId} not found.`);
-            }
-        },
-        {} as Record<string, ContentTonnesPerATC>
-    );
-}
-
-// LAST STEP:
 // 5b - Calculate tonnes per product
 function getTonnesPerProduct(
-    product: any[],
-    dddOfProductConsumptionPackages: DDDPerProductConsumptionPackages
+    product: Product,
+    productConsumption: ProductConsumption,
+    content: Content
 ): ContentTonnesPerProduct {
-    const positionTeiId = Object.values(TEI_INSTANCES_HEADERS).indexOf(TEI_INSTANCES_HEADERS.TEI_ID);
-    const teiIdProduct: string = product[positionTeiId].toString();
+    const { teiId: teiIdProduct, atcCode } = product;
+    const { date, packages, healthSector, healthLevel } = productConsumption;
 
-    const positionAtcCode = Object.values(TEI_INSTANCES_HEADERS).indexOf(TEI_INSTANCES_HEADERS.ATC_CODE);
-    const atcCode = product[positionAtcCode];
+    const { standarizedStrengthUnit: contentUnit } = content;
+    // 5a
+    const conversionFactorAtc = CONVERSION_FACTOR.find(({ ATC5 }) => ATC5 === atcCode);
+    const conversionFactor = contentUnit !== "gram" && conversionFactorAtc?.FACTOR ? conversionFactorAtc.FACTOR : 1;
 
-    if (dddOfProductConsumptionPackages) {
-        const { dddConsumptionPackages, dddUnit } = dddOfProductConsumptionPackages;
-        // 5a
-        const conversionFactorAtc = CONVERSION_FACTOR.find(({ ATC5 }) => ATC5 === atcCode);
-        const conversionFactor = dddUnit !== "gram" && conversionFactorAtc?.FACTOR ? conversionFactorAtc.FACTOR : 1;
-        // 5b - content_tonnes = ddd_cons_product × conv_factor ÷ 1e6
-        return {
-            teiId: teiIdProduct,
-            contentTonnes: (dddConsumptionPackages * conversionFactor) / 1e6,
-        };
-    } else {
-        throw new Error(`DDD of product consumption packages (${teiIdProduct}) not found.`);
-    }
+    // 5b - content_tonnes = (content × conv_factor × packages per year, health_sector and health_level) ÷ 1e6
+    return {
+        teiId: teiIdProduct,
+        year: date.getFullYear(),
+        healthSector,
+        healthLevel,
+        contentTonnes: (content.value * conversionFactor * packages) / 1e6,
+    };
 }
 
-// 5c, 6a, 7a, 8a
+// Given 1&2&3 calculates 4, 5, 6, 7, 8
 function aggregateDataByAtcRouteAdminYearHealthSectorAndHealthLevel(
-    jsonDataTEIInstances: any[][],
-    jsonDataRawProductConsumption: any[][],
+    teiInstancesData: Product[],
+    rawProductConsumptionData: ProductConsumption[],
     contentDDDPerProductAndDDDPerPackage: ContentDDDPerProductAndDDDPerPackage[]
 ): Record<string, AggregatedCalculations> {
-    return jsonDataRawProductConsumption.reduce(
-        (acc: Record<string, AggregatedCalculations>, productConsumption: any[]) => {
-            const positionTeiId = Object.values(RAW_PRODUCT_CONSUMPTION_HEADERS).indexOf(
-                RAW_PRODUCT_CONSUMPTION_HEADERS.TEI_ID
-            );
-            const teiId: string = (productConsumption as any[])[positionTeiId].toString();
-
-            const product = jsonDataTEIInstances.find(product => {
-                const positionTeiId = Object.values(TEI_INSTANCES_HEADERS).indexOf(TEI_INSTANCES_HEADERS.TEI_ID);
-                return teiId === product[positionTeiId].toString();
-            });
+    return rawProductConsumptionData.reduce(
+        (acc: Record<string, AggregatedCalculations>, productConsumption: ProductConsumption) => {
+            const product = teiInstancesData.find((product: Product) => productConsumption.teiId === product.teiId);
 
             const contentDDDPerProductAndDDDPerPackageOfProduct = contentDDDPerProductAndDDDPerPackage.find(
-                productData => productData.teiId === teiId
+                productData => productData.teiId === productConsumption.teiId
             );
 
             if (product && contentDDDPerProductAndDDDPerPackageOfProduct) {
-                // 2&3 - DDD per product and DDD per package
-                const { dddPerProduct, dddPerPackage } = contentDDDPerProductAndDDDPerPackageOfProduct;
-
                 // 4 - Calculate DDD per product consumption packages = ddd_cons_product
                 const dddPerProductConsumptionPackages = calculateDDDPerProductConsumptionPackages(
-                    productConsumption as any[],
-                    contentDDDPerProductAndDDDPerPackage
+                    productConsumption,
+                    contentDDDPerProductAndDDDPerPackageOfProduct.dddPerPackage
                 );
 
-                // 5b - content_tonnes = ddd_cons_product × conv_factor ÷ 1e6
+                // 5b - content_tonnes = (content × conv_factor × packages per year, health_sector and health_level) ÷ 1e6
                 const contentTonnesOfProduct: ContentTonnesPerProduct = getTonnesPerProduct(
                     product,
-                    dddPerProductConsumptionPackages
+                    productConsumption,
+                    contentDDDPerProductAndDDDPerPackageOfProduct.content
                 );
 
-                // From product:
-                const positionAtc = Object.values(TEI_INSTANCES_HEADERS).indexOf(TEI_INSTANCES_HEADERS.ATC_CODE);
-                const positionRouteAdmin = Object.values(TEI_INSTANCES_HEADERS).indexOf(
-                    TEI_INSTANCES_HEADERS.ROUTE_OF_ADMINISTRATION
-                );
-                const positionSalt = Object.values(TEI_INSTANCES_HEADERS).indexOf(TEI_INSTANCES_HEADERS.SALT);
-
-                const atcCode: string = product[positionAtc];
-                const routeAdmin: string = product[positionRouteAdmin];
-                const salt: Salt = product[positionSalt];
-
-                // From product consumption:
-                const positionPackages = Object.values(RAW_PRODUCT_CONSUMPTION_HEADERS).indexOf(
-                    RAW_PRODUCT_CONSUMPTION_HEADERS.PACKAGES
-                );
-                const packages: number = (productConsumption as any[])[positionPackages];
-
-                const positionDate = Object.values(RAW_PRODUCT_CONSUMPTION_HEADERS).indexOf(
-                    RAW_PRODUCT_CONSUMPTION_HEADERS.DATE
-                );
-                const date: Date = (productConsumption as any[])[positionDate];
+                const { teiId, salt, atcCode, routeAdmin } = product;
+                const { packages, date, dataStatus, healthSector, healthLevel } = productConsumption;
                 const year: number = date.getFullYear();
-
-                const positionHealthSector = Object.values(RAW_PRODUCT_CONSUMPTION_HEADERS).indexOf(
-                    RAW_PRODUCT_CONSUMPTION_HEADERS.HEALTH_SECTOR_MANUAL
-                );
-                const healthSector: string = (productConsumption as any[])[positionHealthSector].toString();
-
-                const positionHealthLevel = Object.values(RAW_PRODUCT_CONSUMPTION_HEADERS).indexOf(
-                    RAW_PRODUCT_CONSUMPTION_HEADERS.HEALTH_LEVEL_MANUAL
-                );
-                const healthLevel: string = (productConsumption as any[])[positionHealthLevel].toString();
 
                 // 5c, 6a, 7a, 8a
                 const id = `${teiId}-${atcCode}-${routeAdmin}-${year}-${healthSector}-${healthLevel}`;
                 const aggregation: AggregatedCalculations =
-                    acc[id] && acc[id]?.tonnes && acc[id]?.packages && acc[id]?.ddd_cons_product
+                    acc[id] && acc[id]?.tonnes && acc[id]?.packages && acc[id]?.ddds
                         ? {
                               ...(acc[id] as AggregatedCalculations),
                               tonnes: (acc[id] as AggregatedCalculations).tonnes + contentTonnesOfProduct.contentTonnes,
                               packages: (acc[id] as AggregatedCalculations).packages + packages,
-                              ddd_cons_product:
-                                  (acc[id] as AggregatedCalculations).ddd_cons_product +
+                              ddds:
+                                  (acc[id] as AggregatedCalculations).ddds +
                                   dddPerProductConsumptionPackages.dddConsumptionPackages,
                           }
                         : {
@@ -933,18 +697,19 @@ function aggregateDataByAtcRouteAdminYearHealthSectorAndHealthLevel(
                               routeAdmin,
                               salt,
                               year,
+                              packages,
+                              tonnes: contentTonnesOfProduct.contentTonnes,
+                              ddds: dddPerProductConsumptionPackages.dddConsumptionPackages,
+                              dataStatus,
                               healthSector,
                               healthLevel,
-                              tonnes: contentTonnesOfProduct.contentTonnes,
-                              packages,
-                              ddd_cons_product: dddPerProductConsumptionPackages.dddConsumptionPackages,
-                              dddPerPackage,
-                              dddPerProduct,
                           };
 
                 return { ...acc, [id]: aggregation };
             } else {
-                throw new Error(`Product ${teiId} or ddd per product and ddd per package calculations not found`);
+                throw new Error(
+                    `Product ${productConsumption.teiId} or ddd per product and ddd per package calculations not found`
+                );
             }
         },
         {} as Record<string, AggregatedCalculations>

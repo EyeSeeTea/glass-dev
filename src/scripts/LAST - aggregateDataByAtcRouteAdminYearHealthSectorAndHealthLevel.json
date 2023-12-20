@@ -6,19 +6,12 @@
       "routeAdmin": "oral",
       "salt": "default",
       "year": 2020,
-      "healthSector": "GLO",
-      "healthLevel": "T",
-      "tonnes": 3.9233066666666665,
       "packages": 367810,
-      "ddd_cons_product": 3923306.6666666665,
-      "dddPerPackage": {
-        "value": 10.666666666666666,
-        "dddUnit": "gram"
-      },
-      "dddPerProduct": {
-        "dddValue": 1.5,
-        "dddUnit": "gram"
-      }
+      "tonnes": 5.88496,
+      "ddds": 3923306.6666666665,
+      "dataStatus": null,
+      "healthSector": "GLO",
+      "healthLevel": "T"
     },
     "PROD2-J01CA04-oral-2020-GLO-T": {
       "teiId": "PROD2",
@@ -26,19 +19,12 @@
       "routeAdmin": "oral",
       "salt": "default",
       "year": 2020,
-      "healthSector": "GLO",
-      "healthLevel": "T",
-      "tonnes": 4.95805,
       "packages": 1487415,
-      "ddd_cons_product": 4958050,
-      "dddPerPackage": {
-        "value": 3.3333333333333335,
-        "dddUnit": "gram"
-      },
-      "dddPerProduct": {
-        "dddValue": 1.5,
-        "dddUnit": "gram"
-      }
+      "tonnes": 7.437075,
+      "ddds": 4958050,
+      "dataStatus": null,
+      "healthSector": "GLO",
+      "healthLevel": "T"
     },
     "200713147-J01CR02-oral-2020-GLO-T": {
       "teiId": "200713147",
@@ -46,19 +32,12 @@
       "routeAdmin": "oral",
       "salt": "default",
       "year": 2020,
-      "healthSector": "GLO",
-      "healthLevel": "T",
-      "tonnes": 0,
       "packages": 0,
-      "ddd_cons_product": 0,
-      "dddPerPackage": {
-        "value": 5.833333333333333,
-        "dddUnit": "gram"
-      },
-      "dddPerProduct": {
-        "dddValue": 1.5,
-        "dddUnit": "gram"
-      }
+      "tonnes": 0,
+      "ddds": 0,
+      "dataStatus": null,
+      "healthSector": "GLO",
+      "healthLevel": "T"
     },
     "PROD3-J01CR02-parenteral-2020-GLO-T": {
       "teiId": "PROD3",
@@ -66,19 +45,12 @@
       "routeAdmin": "parenteral",
       "salt": "default",
       "year": 2020,
-      "healthSector": "GLO",
-      "healthLevel": "T",
-      "tonnes": 0.07198366666666665,
       "packages": 215951,
-      "ddd_cons_product": 71983.66666666666,
-      "dddPerPackage": {
-        "value": 0.3333333333333333,
-        "dddUnit": "gram"
-      },
-      "dddPerProduct": {
-        "dddValue": 3,
-        "dddUnit": "gram"
-      }
+      "tonnes": 0.215951,
+      "ddds": 71983.66666666666,
+      "dataStatus": null,
+      "healthSector": "GLO",
+      "healthLevel": "T"
     },
     "#4-J01CE01-parenteral-2020-GLO-T": {
       "teiId": "#4",
@@ -86,19 +58,12 @@
       "routeAdmin": "parenteral",
       "salt": "default",
       "year": 2020,
-      "healthSector": "GLO",
-      "healthLevel": "T",
-      "tonnes": 1.9640901666666666,
       "packages": 11784541,
-      "ddd_cons_product": 1964090.1666666665,
-      "dddPerPackage": {
-        "value": 0.16666666666666666,
-        "dddUnit": "gram"
-      },
-      "dddPerProduct": {
-        "dddValue": 3.6,
-        "dddUnit": "gram"
-      }
+      "tonnes": 7.070724599999999,
+      "ddds": 1964090.1666666665,
+      "dataStatus": null,
+      "healthSector": "GLO",
+      "healthLevel": "T"
     },
     "ZWE_5-J01XX05-oral-2020-GLO-T": {
       "teiId": "ZWE_5",
@@ -106,19 +71,12 @@
       "routeAdmin": "oral",
       "salt": "hippurate",
       "year": 2020,
-      "healthSector": "GLO",
-      "healthLevel": "T",
-      "tonnes": 0.01561,
       "packages": 1115,
-      "ddd_cons_product": 15610,
-      "dddPerPackage": {
-        "value": 14,
-        "dddUnit": "gram"
-      },
-      "dddPerProduct": {
-        "dddValue": 2,
-        "dddUnit": "gram"
-      }
+      "tonnes": 0.03122,
+      "ddds": 15610,
+      "dataStatus": null,
+      "healthSector": "GLO",
+      "healthLevel": "T"
     },
     "P6-J01FA01-oral-2020-GLO-T": {
       "teiId": "P6",
@@ -126,19 +84,12 @@
       "routeAdmin": "oral",
       "salt": "default",
       "year": 2020,
-      "healthSector": "GLO",
-      "healthLevel": "T",
-      "tonnes": 0.000575,
       "packages": 115,
-      "ddd_cons_product": 575,
-      "dddPerPackage": {
-        "value": 5,
-        "dddUnit": "gram"
-      },
-      "dddPerProduct": {
-        "dddValue": 1,
-        "dddUnit": "gram"
-      }
+      "tonnes": 0.000575,
+      "ddds": 575,
+      "dataStatus": null,
+      "healthSector": "GLO",
+      "healthLevel": "T"
     },
     "A-A07AA09-oral-2020-GLO-T": {
       "teiId": "A",
@@ -146,19 +97,12 @@
       "routeAdmin": "oral",
       "salt": "default",
       "year": 2020,
-      "healthSector": "GLO",
-      "healthLevel": "T",
-      "tonnes": 0.0013275,
       "packages": 531,
-      "ddd_cons_product": 1327.5,
-      "dddPerPackage": {
-        "value": 2.5,
-        "dddUnit": "gram"
-      },
-      "dddPerProduct": {
-        "dddValue": 2,
-        "dddUnit": "gram"
-      }
+      "tonnes": 0.002655,
+      "ddds": 1327.5,
+      "dataStatus": null,
+      "healthSector": "GLO",
+      "healthLevel": "T"
     },
     "B-J01XA01-parenteral-2020-GLO-T": {
       "teiId": "B",
@@ -166,19 +110,12 @@
       "routeAdmin": "parenteral",
       "salt": "default",
       "year": 2020,
-      "healthSector": "GLO",
-      "healthLevel": "T",
-      "tonnes": 270.9317565,
       "packages": 541863513,
-      "ddd_cons_product": 270931756.5,
-      "dddPerPackage": {
-        "value": 0.5,
-        "dddUnit": "gram"
-      },
-      "dddPerProduct": {
-        "dddValue": 2,
-        "dddUnit": "gram"
-      }
+      "tonnes": 541.863513,
+      "ddds": 270931756.5,
+      "dataStatus": null,
+      "healthSector": "GLO",
+      "healthLevel": "T"
     },
     "BACTOR##4-J01EE01-oral-2020-GLO-T": {
       "teiId": "BACTOR##4",
@@ -186,19 +123,12 @@
       "routeAdmin": "oral",
       "salt": "default",
       "year": 2020,
-      "healthSector": "GLO",
-      "healthLevel": "T",
-      "tonnes": 0.07742,
       "packages": 15484,
-      "ddd_cons_product": 77420,
-      "dddPerPackage": {
-        "value": 5,
-        "dddUnit": "unit dose"
-      },
-      "dddPerProduct": {
-        "dddValue": 4,
-        "dddUnit": "unit dose"
-      }
+      "tonnes": 0.30968,
+      "ddds": 77420,
+      "dataStatus": null,
+      "healthSector": "GLO",
+      "healthLevel": "T"
     },
     "BACT##5-J01EE01-oral-2020-GLO-T": {
       "teiId": "BACT##5",
@@ -206,19 +136,12 @@
       "routeAdmin": "oral",
       "salt": "default",
       "year": 2020,
-      "healthSector": "GLO",
-      "healthLevel": "T",
-      "tonnes": 0.03871,
       "packages": 15484,
-      "ddd_cons_product": 38710,
-      "dddPerPackage": {
-        "value": 2.5,
-        "dddUnit": "unit dose"
-      },
-      "dddPerProduct": {
-        "dddValue": 4,
-        "dddUnit": "unit dose"
-      }
+      "tonnes": 0.15484,
+      "ddds": 38710,
+      "dataStatus": null,
+      "healthSector": "GLO",
+      "healthLevel": "T"
     },
     "1-J01CA04-oral-2021-GLO-T": {
       "teiId": "1",
@@ -226,19 +149,12 @@
       "routeAdmin": "oral",
       "salt": "default",
       "year": 2021,
-      "healthSector": "GLO",
-      "healthLevel": "T",
-      "tonnes": 9.369856,
       "packages": 878424,
-      "ddd_cons_product": 9369856,
-      "dddPerPackage": {
-        "value": 10.666666666666666,
-        "dddUnit": "gram"
-      },
-      "dddPerProduct": {
-        "dddValue": 1.5,
-        "dddUnit": "gram"
-      }
+      "tonnes": 14.054784,
+      "ddds": 9369856,
+      "dataStatus": null,
+      "healthSector": "GLO",
+      "healthLevel": "T"
     },
     "PROD2-J01CA04-oral-2021-GLO-T": {
       "teiId": "PROD2",
@@ -246,19 +162,12 @@
       "routeAdmin": "oral",
       "salt": "default",
       "year": 2021,
-      "healthSector": "GLO",
-      "healthLevel": "T",
-      "tonnes": 7.28117,
       "packages": 2184351,
-      "ddd_cons_product": 7281170,
-      "dddPerPackage": {
-        "value": 3.3333333333333335,
-        "dddUnit": "gram"
-      },
-      "dddPerProduct": {
-        "dddValue": 1.5,
-        "dddUnit": "gram"
-      }
+      "tonnes": 10.921755,
+      "ddds": 7281170,
+      "dataStatus": null,
+      "healthSector": "GLO",
+      "healthLevel": "T"
     },
     "200713147-J01CR02-oral-2021-GLO-T": {
       "teiId": "200713147",
@@ -266,19 +175,12 @@
       "routeAdmin": "oral",
       "salt": "default",
       "year": 2021,
-      "healthSector": "GLO",
-      "healthLevel": "T",
-      "tonnes": 0.0725725,
       "packages": 12441,
-      "ddd_cons_product": 72572.5,
-      "dddPerPackage": {
-        "value": 5.833333333333333,
-        "dddUnit": "gram"
-      },
-      "dddPerProduct": {
-        "dddValue": 1.5,
-        "dddUnit": "gram"
-      }
+      "tonnes": 0.10885875,
+      "ddds": 72572.5,
+      "dataStatus": null,
+      "healthSector": "GLO",
+      "healthLevel": "T"
     },
     "PROD3-J01CR02-parenteral-2021-GLO-T": {
       "teiId": "PROD3",
@@ -286,19 +188,12 @@
       "routeAdmin": "parenteral",
       "salt": "default",
       "year": 2021,
-      "healthSector": "GLO",
-      "healthLevel": "T",
-      "tonnes": 0.09375033333333332,
       "packages": 281251,
-      "ddd_cons_product": 93750.33333333333,
-      "dddPerPackage": {
-        "value": 0.3333333333333333,
-        "dddUnit": "gram"
-      },
-      "dddPerProduct": {
-        "dddValue": 3,
-        "dddUnit": "gram"
-      }
+      "tonnes": 0.281251,
+      "ddds": 93750.33333333333,
+      "dataStatus": null,
+      "healthSector": "GLO",
+      "healthLevel": "T"
     },
     "#4-J01CE01-parenteral-2021-GLO-T": {
       "teiId": "#4",
@@ -306,19 +201,12 @@
       "routeAdmin": "parenteral",
       "salt": "default",
       "year": 2021,
-      "healthSector": "GLO",
-      "healthLevel": "T",
-      "tonnes": 1.4647475,
       "packages": 8788485,
-      "ddd_cons_product": 1464747.5,
-      "dddPerPackage": {
-        "value": 0.16666666666666666,
-        "dddUnit": "gram"
-      },
-      "dddPerProduct": {
-        "dddValue": 3.6,
-        "dddUnit": "gram"
-      }
+      "tonnes": 5.273091,
+      "ddds": 1464747.5,
+      "dataStatus": null,
+      "healthSector": "GLO",
+      "healthLevel": "T"
     },
     "ZWE_5-J01XX05-oral-2021-GLO-T": {
       "teiId": "ZWE_5",
@@ -326,19 +214,12 @@
       "routeAdmin": "oral",
       "salt": "hippurate",
       "year": 2021,
-      "healthSector": "GLO",
-      "healthLevel": "T",
-      "tonnes": 5.769694,
       "packages": 412121,
-      "ddd_cons_product": 5769694,
-      "dddPerPackage": {
-        "value": 14,
-        "dddUnit": "gram"
-      },
-      "dddPerProduct": {
-        "dddValue": 2,
-        "dddUnit": "gram"
-      }
+      "tonnes": 11.539388,
+      "ddds": 5769694,
+      "dataStatus": null,
+      "healthSector": "GLO",
+      "healthLevel": "T"
     },
     "P6-J01FA01-oral-2021-GLO-T": {
       "teiId": "P6",
@@ -346,19 +227,12 @@
       "routeAdmin": "oral",
       "salt": "default",
       "year": 2021,
-      "healthSector": "GLO",
-      "healthLevel": "T",
-      "tonnes": 0.077425,
       "packages": 15485,
-      "ddd_cons_product": 77425,
-      "dddPerPackage": {
-        "value": 5,
-        "dddUnit": "gram"
-      },
-      "dddPerProduct": {
-        "dddValue": 1,
-        "dddUnit": "gram"
-      }
+      "tonnes": 0.077425,
+      "ddds": 77425,
+      "dataStatus": null,
+      "healthSector": "GLO",
+      "healthLevel": "T"
     },
     "A-A07AA09-oral-2021-GLO-T": {
       "teiId": "A",
@@ -366,19 +240,12 @@
       "routeAdmin": "oral",
       "salt": "default",
       "year": 2021,
-      "healthSector": "GLO",
-      "healthLevel": "T",
-      "tonnes": 0.0005375,
       "packages": 215,
-      "ddd_cons_product": 537.5,
-      "dddPerPackage": {
-        "value": 2.5,
-        "dddUnit": "gram"
-      },
-      "dddPerProduct": {
-        "dddValue": 2,
-        "dddUnit": "gram"
-      }
+      "tonnes": 0.001075,
+      "ddds": 537.5,
+      "dataStatus": null,
+      "healthSector": "GLO",
+      "healthLevel": "T"
     },
     "B-J01XA01-parenteral-2021-GLO-T": {
       "teiId": "B",
@@ -386,19 +253,12 @@
       "routeAdmin": "parenteral",
       "salt": "default",
       "year": 2021,
-      "healthSector": "GLO",
-      "healthLevel": "T",
-      "tonnes": 0.0270755,
       "packages": 54151,
-      "ddd_cons_product": 27075.5,
-      "dddPerPackage": {
-        "value": 0.5,
-        "dddUnit": "gram"
-      },
-      "dddPerProduct": {
-        "dddValue": 2,
-        "dddUnit": "gram"
-      }
+      "tonnes": 0.054151,
+      "ddds": 27075.5,
+      "dataStatus": null,
+      "healthSector": "GLO",
+      "healthLevel": "T"
     },
     "BACTOR##4-J01EE01-oral-2021-GLO-T": {
       "teiId": "BACTOR##4",
@@ -406,19 +266,12 @@
       "routeAdmin": "oral",
       "salt": "default",
       "year": 2021,
-      "healthSector": "GLO",
-      "healthLevel": "T",
-      "tonnes": 0.00078,
       "packages": 156,
-      "ddd_cons_product": 780,
-      "dddPerPackage": {
-        "value": 5,
-        "dddUnit": "unit dose"
-      },
-      "dddPerProduct": {
-        "dddValue": 4,
-        "dddUnit": "unit dose"
-      }
+      "tonnes": 0.00312,
+      "ddds": 780,
+      "dataStatus": null,
+      "healthSector": "GLO",
+      "healthLevel": "T"
     },
     "BACT##5-J01EE01-oral-2021-GLO-T": {
       "teiId": "BACT##5",
@@ -426,19 +279,12 @@
       "routeAdmin": "oral",
       "salt": "default",
       "year": 2021,
-      "healthSector": "GLO",
-      "healthLevel": "T",
-      "tonnes": 0.00039,
       "packages": 156,
-      "ddd_cons_product": 390,
-      "dddPerPackage": {
-        "value": 2.5,
-        "dddUnit": "unit dose"
-      },
-      "dddPerProduct": {
-        "dddValue": 4,
-        "dddUnit": "unit dose"
-      }
+      "tonnes": 0.00156,
+      "ddds": 390,
+      "dataStatus": null,
+      "healthSector": "GLO",
+      "healthLevel": "T"
     },
     "1-J01CA04-oral-2022-GLO-C": {
       "teiId": "1",
@@ -446,19 +292,12 @@
       "routeAdmin": "oral",
       "salt": "default",
       "year": 2022,
-      "healthSector": "GLO",
-      "healthLevel": "C",
-      "tonnes": 8.961685333333332,
       "packages": 840158,
-      "ddd_cons_product": 8961685.333333332,
-      "dddPerPackage": {
-        "value": 10.666666666666666,
-        "dddUnit": "gram"
-      },
-      "dddPerProduct": {
-        "dddValue": 1.5,
-        "dddUnit": "gram"
-      }
+      "tonnes": 13.442528,
+      "ddds": 8961685.333333332,
+      "dataStatus": null,
+      "healthSector": "GLO",
+      "healthLevel": "C"
     },
     "PROD2-J01CA04-oral-2022-GLO-C": {
       "teiId": "PROD2",
@@ -466,19 +305,12 @@
       "routeAdmin": "oral",
       "salt": "default",
       "year": 2022,
-      "healthSector": "GLO",
-      "healthLevel": "C",
-      "tonnes": 5.043736666666667,
       "packages": 1513121,
-      "ddd_cons_product": 5043736.666666667,
-      "dddPerPackage": {
-        "value": 3.3333333333333335,
-        "dddUnit": "gram"
-      },
-      "dddPerProduct": {
-        "dddValue": 1.5,
-        "dddUnit": "gram"
-      }
+      "tonnes": 7.565605,
+      "ddds": 5043736.666666667,
+      "dataStatus": null,
+      "healthSector": "GLO",
+      "healthLevel": "C"
     },
     "200713147-J01CR02-oral-2022-GLO-C": {
       "teiId": "200713147",
@@ -486,19 +318,12 @@
       "routeAdmin": "oral",
       "salt": "default",
       "year": 2022,
-      "healthSector": "GLO",
-      "healthLevel": "C",
-      "tonnes": 0.00028,
       "packages": 48,
-      "ddd_cons_product": 280,
-      "dddPerPackage": {
-        "value": 5.833333333333333,
-        "dddUnit": "gram"
-      },
-      "dddPerProduct": {
-        "dddValue": 1.5,
-        "dddUnit": "gram"
-      }
+      "tonnes": 0.00042,
+      "ddds": 280,
+      "dataStatus": null,
+      "healthSector": "GLO",
+      "healthLevel": "C"
     },
     "PROD3-J01CR02-parenteral-2022-GLO-C": {
       "teiId": "PROD3",
@@ -506,19 +331,12 @@
       "routeAdmin": "parenteral",
       "salt": "default",
       "year": 2022,
-      "healthSector": "GLO",
-      "healthLevel": "C",
-      "tonnes": 0.005050333333333333,
       "packages": 15151,
-      "ddd_cons_product": 5050.333333333333,
-      "dddPerPackage": {
-        "value": 0.3333333333333333,
-        "dddUnit": "gram"
-      },
-      "dddPerProduct": {
-        "dddValue": 3,
-        "dddUnit": "gram"
-      }
+      "tonnes": 0.015151,
+      "ddds": 5050.333333333333,
+      "dataStatus": null,
+      "healthSector": "GLO",
+      "healthLevel": "C"
     },
     "#4-J01CE01-parenteral-2022-GLO-C": {
       "teiId": "#4",
@@ -526,19 +344,12 @@
       "routeAdmin": "parenteral",
       "salt": "default",
       "year": 2022,
-      "healthSector": "GLO",
-      "healthLevel": "C",
-      "tonnes": 0.1743535,
       "packages": 1046121,
-      "ddd_cons_product": 174353.5,
-      "dddPerPackage": {
-        "value": 0.16666666666666666,
-        "dddUnit": "gram"
-      },
-      "dddPerProduct": {
-        "dddValue": 3.6,
-        "dddUnit": "gram"
-      }
+      "tonnes": 0.6276726,
+      "ddds": 174353.5,
+      "dataStatus": null,
+      "healthSector": "GLO",
+      "healthLevel": "C"
     },
     "ZWE_5-J01XX05-oral-2022-GLO-C": {
       "teiId": "ZWE_5",
@@ -546,19 +357,12 @@
       "routeAdmin": "oral",
       "salt": "hippurate",
       "year": 2022,
-      "healthSector": "GLO",
-      "healthLevel": "C",
-      "tonnes": 21.641774,
       "packages": 1545841,
-      "ddd_cons_product": 21641774,
-      "dddPerPackage": {
-        "value": 14,
-        "dddUnit": "gram"
-      },
-      "dddPerProduct": {
-        "dddValue": 2,
-        "dddUnit": "gram"
-      }
+      "tonnes": 43.283548,
+      "ddds": 21641774,
+      "dataStatus": null,
+      "healthSector": "GLO",
+      "healthLevel": "C"
     },
     "P6-J01FA01-oral-2022-GLO-C": {
       "teiId": "P6",
@@ -566,19 +370,12 @@
       "routeAdmin": "oral",
       "salt": "default",
       "year": 2022,
-      "healthSector": "GLO",
-      "healthLevel": "C",
-      "tonnes": 0.76078,
       "packages": 152156,
-      "ddd_cons_product": 760780,
-      "dddPerPackage": {
-        "value": 5,
-        "dddUnit": "gram"
-      },
-      "dddPerProduct": {
-        "dddValue": 1,
-        "dddUnit": "gram"
-      }
+      "tonnes": 0.76078,
+      "ddds": 760780,
+      "dataStatus": null,
+      "healthSector": "GLO",
+      "healthLevel": "C"
     },
     "A-A07AA09-oral-2022-GLO-C": {
       "teiId": "A",
@@ -586,19 +383,12 @@
       "routeAdmin": "oral",
       "salt": "default",
       "year": 2022,
-      "healthSector": "GLO",
-      "healthLevel": "C",
-      "tonnes": 0.00391,
       "packages": 1564,
-      "ddd_cons_product": 3910,
-      "dddPerPackage": {
-        "value": 2.5,
-        "dddUnit": "gram"
-      },
-      "dddPerProduct": {
-        "dddValue": 2,
-        "dddUnit": "gram"
-      }
+      "tonnes": 0.00782,
+      "ddds": 3910,
+      "dataStatus": null,
+      "healthSector": "GLO",
+      "healthLevel": "C"
     },
     "B-J01XA01-parenteral-2022-GLO-C": {
       "teiId": "B",
@@ -606,19 +396,12 @@
       "routeAdmin": "parenteral",
       "salt": "default",
       "year": 2022,
-      "healthSector": "GLO",
-      "healthLevel": "C",
-      "tonnes": 0.510780774,
       "packages": 1021561.548,
-      "ddd_cons_product": 510780.774,
-      "dddPerPackage": {
-        "value": 0.5,
-        "dddUnit": "gram"
-      },
-      "dddPerProduct": {
-        "dddValue": 2,
-        "dddUnit": "gram"
-      }
+      "tonnes": 1.021561548,
+      "ddds": 510780.774,
+      "dataStatus": null,
+      "healthSector": "GLO",
+      "healthLevel": "C"
     },
     "BACTOR##4-J01EE01-oral-2022-GLO-C": {
       "teiId": "BACTOR##4",
@@ -626,19 +409,12 @@
       "routeAdmin": "oral",
       "salt": "default",
       "year": 2022,
-      "healthSector": "GLO",
-      "healthLevel": "C",
-      "tonnes": 0.00007,
       "packages": 14,
-      "ddd_cons_product": 70,
-      "dddPerPackage": {
-        "value": 5,
-        "dddUnit": "unit dose"
-      },
-      "dddPerProduct": {
-        "dddValue": 4,
-        "dddUnit": "unit dose"
-      }
+      "tonnes": 0.00028,
+      "ddds": 70,
+      "dataStatus": null,
+      "healthSector": "GLO",
+      "healthLevel": "C"
     },
     "BACT##5-J01EE01-oral-2022-GLO-C": {
       "teiId": "BACT##5",
@@ -646,19 +422,12 @@
       "routeAdmin": "oral",
       "salt": "default",
       "year": 2022,
-      "healthSector": "GLO",
-      "healthLevel": "C",
-      "tonnes": 0.000035,
       "packages": 14,
-      "ddd_cons_product": 35,
-      "dddPerPackage": {
-        "value": 2.5,
-        "dddUnit": "unit dose"
-      },
-      "dddPerProduct": {
-        "dddValue": 4,
-        "dddUnit": "unit dose"
-      }
+      "tonnes": 0.00014,
+      "ddds": 35,
+      "dataStatus": null,
+      "healthSector": "GLO",
+      "healthLevel": "C"
     },
     "1-J01CA04-oral-2022-GLO-H": {
       "teiId": "1",
@@ -666,19 +435,12 @@
       "routeAdmin": "oral",
       "salt": "default",
       "year": 2022,
-      "healthSector": "GLO",
-      "healthLevel": "H",
-      "tonnes": 0.79408,
       "packages": 74445,
-      "ddd_cons_product": 794080,
-      "dddPerPackage": {
-        "value": 10.666666666666666,
-        "dddUnit": "gram"
-      },
-      "dddPerProduct": {
-        "dddValue": 1.5,
-        "dddUnit": "gram"
-      }
+      "tonnes": 1.19112,
+      "ddds": 794080,
+      "dataStatus": null,
+      "healthSector": "GLO",
+      "healthLevel": "H"
     },
     "PROD2-J01CA04-oral-2022-GLO-H": {
       "teiId": "PROD2",
@@ -686,19 +448,12 @@
       "routeAdmin": "oral",
       "salt": "default",
       "year": 2022,
-      "healthSector": "GLO",
-      "healthLevel": "H",
-      "tonnes": 0.05241333333333333,
       "packages": 15724,
-      "ddd_cons_product": 52413.333333333336,
-      "dddPerPackage": {
-        "value": 3.3333333333333335,
-        "dddUnit": "gram"
-      },
-      "dddPerProduct": {
-        "dddValue": 1.5,
-        "dddUnit": "gram"
-      }
+      "tonnes": 0.07862,
+      "ddds": 52413.333333333336,
+      "dataStatus": null,
+      "healthSector": "GLO",
+      "healthLevel": "H"
     },
     "200713147-J01CR02-oral-2022-GLO-H": {
       "teiId": "200713147",
@@ -706,19 +461,12 @@
       "routeAdmin": "oral",
       "salt": "default",
       "year": 2022,
-      "healthSector": "GLO",
-      "healthLevel": "H",
-      "tonnes": 0.08890583333333332,
       "packages": 15241,
-      "ddd_cons_product": 88905.83333333333,
-      "dddPerPackage": {
-        "value": 5.833333333333333,
-        "dddUnit": "gram"
-      },
-      "dddPerProduct": {
-        "dddValue": 1.5,
-        "dddUnit": "gram"
-      }
+      "tonnes": 0.13335875,
+      "ddds": 88905.83333333333,
+      "dataStatus": null,
+      "healthSector": "GLO",
+      "healthLevel": "H"
     },
     "PROD3-J01CR02-parenteral-2022-GLO-H": {
       "teiId": "PROD3",
@@ -726,19 +474,12 @@
       "routeAdmin": "parenteral",
       "salt": "default",
       "year": 2022,
-      "healthSector": "GLO",
-      "healthLevel": "H",
-      "tonnes": 0.05099466666666667,
       "packages": 152984,
-      "ddd_cons_product": 50994.666666666664,
-      "dddPerPackage": {
-        "value": 0.3333333333333333,
-        "dddUnit": "gram"
-      },
-      "dddPerProduct": {
-        "dddValue": 3,
-        "dddUnit": "gram"
-      }
+      "tonnes": 0.152984,
+      "ddds": 50994.666666666664,
+      "dataStatus": null,
+      "healthSector": "GLO",
+      "healthLevel": "H"
     },
     "#4-J01CE01-parenteral-2022-GLO-H": {
       "teiId": "#4",
@@ -746,19 +487,12 @@
       "routeAdmin": "parenteral",
       "salt": "default",
       "year": 2022,
-      "healthSector": "GLO",
-      "healthLevel": "H",
-      "tonnes": 0.017525166666666665,
       "packages": 105151,
-      "ddd_cons_product": 17525.166666666664,
-      "dddPerPackage": {
-        "value": 0.16666666666666666,
-        "dddUnit": "gram"
-      },
-      "dddPerProduct": {
-        "dddValue": 3.6,
-        "dddUnit": "gram"
-      }
+      "tonnes": 0.0630906,
+      "ddds": 17525.166666666664,
+      "dataStatus": null,
+      "healthSector": "GLO",
+      "healthLevel": "H"
     },
     "ZWE_5-J01XX05-oral-2022-GLO-H": {
       "teiId": "ZWE_5",
@@ -766,19 +500,12 @@
       "routeAdmin": "oral",
       "salt": "hippurate",
       "year": 2022,
-      "healthSector": "GLO",
-      "healthLevel": "H",
-      "tonnes": 1.467802,
       "packages": 104843,
-      "ddd_cons_product": 1467802,
-      "dddPerPackage": {
-        "value": 14,
-        "dddUnit": "gram"
-      },
-      "dddPerProduct": {
-        "dddValue": 2,
-        "dddUnit": "gram"
-      }
+      "tonnes": 2.935604,
+      "ddds": 1467802,
+      "dataStatus": null,
+      "healthSector": "GLO",
+      "healthLevel": "H"
     },
     "P6-J01FA01-oral-2022-GLO-H": {
       "teiId": "P6",
@@ -786,19 +513,12 @@
       "routeAdmin": "oral",
       "salt": "default",
       "year": 2022,
-      "healthSector": "GLO",
-      "healthLevel": "H",
-      "tonnes": 0.0051,
       "packages": 1020,
-      "ddd_cons_product": 5100,
-      "dddPerPackage": {
-        "value": 5,
-        "dddUnit": "gram"
-      },
-      "dddPerProduct": {
-        "dddValue": 1,
-        "dddUnit": "gram"
-      }
+      "tonnes": 0.0051,
+      "ddds": 5100,
+      "dataStatus": null,
+      "healthSector": "GLO",
+      "healthLevel": "H"
     },
     "A-A07AA09-oral-2022-GLO-H": {
       "teiId": "A",
@@ -806,19 +526,12 @@
       "routeAdmin": "oral",
       "salt": "default",
       "year": 2022,
-      "healthSector": "GLO",
-      "healthLevel": "H",
-      "tonnes": 0.2878625,
       "packages": 115145,
-      "ddd_cons_product": 287862.5,
-      "dddPerPackage": {
-        "value": 2.5,
-        "dddUnit": "gram"
-      },
-      "dddPerProduct": {
-        "dddValue": 2,
-        "dddUnit": "gram"
-      }
+      "tonnes": 0.575725,
+      "ddds": 287862.5,
+      "dataStatus": null,
+      "healthSector": "GLO",
+      "healthLevel": "H"
     },
     "B-J01XA01-parenteral-2022-GLO-H": {
       "teiId": "B",
@@ -826,19 +539,12 @@
       "routeAdmin": "parenteral",
       "salt": "default",
       "year": 2022,
-      "healthSector": "GLO",
-      "healthLevel": "H",
-      "tonnes": 0.0755025,
       "packages": 151005,
-      "ddd_cons_product": 75502.5,
-      "dddPerPackage": {
-        "value": 0.5,
-        "dddUnit": "gram"
-      },
-      "dddPerProduct": {
-        "dddValue": 2,
-        "dddUnit": "gram"
-      }
+      "tonnes": 0.151005,
+      "ddds": 75502.5,
+      "dataStatus": null,
+      "healthSector": "GLO",
+      "healthLevel": "H"
     },
     "BACTOR##4-J01EE01-oral-2022-GLO-H": {
       "teiId": "BACTOR##4",
@@ -846,19 +552,12 @@
       "routeAdmin": "oral",
       "salt": "default",
       "year": 2022,
-      "healthSector": "GLO",
-      "healthLevel": "H",
-      "tonnes": 0.00027,
       "packages": 54,
-      "ddd_cons_product": 270,
-      "dddPerPackage": {
-        "value": 5,
-        "dddUnit": "unit dose"
-      },
-      "dddPerProduct": {
-        "dddValue": 4,
-        "dddUnit": "unit dose"
-      }
+      "tonnes": 0.00108,
+      "ddds": 270,
+      "dataStatus": null,
+      "healthSector": "GLO",
+      "healthLevel": "H"
     },
     "BACT##5-J01EE01-oral-2022-GLO-H": {
       "teiId": "BACT##5",
@@ -866,19 +565,12 @@
       "routeAdmin": "oral",
       "salt": "default",
       "year": 2022,
-      "healthSector": "GLO",
-      "healthLevel": "H",
-      "tonnes": 0.000135,
       "packages": 54,
-      "ddd_cons_product": 135,
-      "dddPerPackage": {
-        "value": 2.5,
-        "dddUnit": "unit dose"
-      },
-      "dddPerProduct": {
-        "dddValue": 4,
-        "dddUnit": "unit dose"
-      }
+      "tonnes": 0.00054,
+      "ddds": 135,
+      "dataStatus": null,
+      "healthSector": "GLO",
+      "healthLevel": "H"
     }
   }
 }
