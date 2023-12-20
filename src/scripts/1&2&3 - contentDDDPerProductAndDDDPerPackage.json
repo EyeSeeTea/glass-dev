@@ -2,8 +2,8 @@
   "contentDDDPerProductAndDDDPerPackage": [
     {
       "teiId": "1",
-      "contentPerProduct": {
-        "content": 16,
+      "content": {
+        "value": 16,
         "standarizedStrengthUnit": "gram"
       },
       "dddPerProduct": {
@@ -17,8 +17,8 @@
     },
     {
       "teiId": "PROD2",
-      "contentPerProduct": {
-        "content": 5,
+      "content": {
+        "value": 5,
         "standarizedStrengthUnit": "gram"
       },
       "dddPerProduct": {
@@ -32,8 +32,8 @@
     },
     {
       "teiId": "200713147",
-      "contentPerProduct": {
-        "content": 8.75,
+      "content": {
+        "value": 8.75,
         "standarizedStrengthUnit": "gram"
       },
       "dddPerProduct": {
@@ -47,8 +47,8 @@
     },
     {
       "teiId": "PROD3",
-      "contentPerProduct": {
-        "content": 1,
+      "content": {
+        "value": 1,
         "standarizedStrengthUnit": "gram"
       },
       "dddPerProduct": {
@@ -62,8 +62,8 @@
     },
     {
       "teiId": "#4",
-      "contentPerProduct": {
-        "content": 1,
+      "content": {
+        "value": 1,
         "standarizedStrengthUnit": "millions international unit"
       },
       "dddPerProduct": {
@@ -77,8 +77,8 @@
     },
     {
       "teiId": "ZWE_5",
-      "contentPerProduct": {
-        "content": 28,
+      "content": {
+        "value": 28,
         "standarizedStrengthUnit": "gram"
       },
       "dddPerProduct": {
@@ -92,8 +92,8 @@
     },
     {
       "teiId": "P6",
-      "contentPerProduct": {
-        "content": 5,
+      "content": {
+        "value": 5,
         "standarizedStrengthUnit": "gram"
       },
       "dddPerProduct": {
@@ -107,8 +107,8 @@
     },
     {
       "teiId": "A",
-      "contentPerProduct": {
-        "content": 5,
+      "content": {
+        "value": 5,
         "standarizedStrengthUnit": "gram"
       },
       "dddPerProduct": {
@@ -122,8 +122,8 @@
     },
     {
       "teiId": "B",
-      "contentPerProduct": {
-        "content": 1,
+      "content": {
+        "value": 1,
         "standarizedStrengthUnit": "gram"
       },
       "dddPerProduct": {
@@ -137,8 +137,8 @@
     },
     {
       "teiId": "BACTOR##4",
-      "contentPerProduct": {
-        "content": 20,
+      "content": {
+        "value": 20,
         "standarizedStrengthUnit": "unit dose"
       },
       "dddPerProduct": {
@@ -152,8 +152,8 @@
     },
     {
       "teiId": "BACT##5",
-      "contentPerProduct": {
-        "content": 10,
+      "content": {
+        "value": 10,
         "standarizedStrengthUnit": "unit dose"
       },
       "dddPerProduct": {
