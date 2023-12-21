@@ -1,4 +1,5 @@
 import { Id } from "./Base";
+import { CustomDataColumns } from "./data-entry/amr-individual-funghi-external/RISIndividualFunghiData";
 import { QuestionnaireRule, QuestionnairesType } from "./Questionnaire";
 import { UserGroup } from "./User";
 
@@ -35,6 +36,7 @@ export interface GlassModule {
         programStageId: string;
     }[];
     populateCurrentYearInHistory?: boolean;
+    customDataColumns?: CustomDataColumns;
 }
 
 interface QuestionnaireConfig {
