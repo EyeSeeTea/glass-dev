@@ -44,11 +44,12 @@ export class ImportRISIndividualFunghiFile {
                   programStageId: string;
               }
             | undefined,
-        moduleName: string
+        moduleName: string,
+        dataColumns: CustomDataColumns
     ): FutureData<ImportSummary> {
         if (action === "CREATE_AND_UPDATE") {
             return this.risIndividualFunghiRepository
-                .get(moduleName, inputFile)
+                .get(dataColumns, inputFile)
                 .flatMap(risIndividualFunghiDataItems => {
                     return this.validateDataItems(risIndividualFunghiDataItems, countryCode, period).flatMap(
                         validationSummary => {

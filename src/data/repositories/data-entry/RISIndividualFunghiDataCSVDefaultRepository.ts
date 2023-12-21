@@ -1,7 +1,5 @@
 import { Future, FutureData } from "../../../domain/entities/Future";
 import {
-    amrFDataColumns,
-    amrIDataColumns,
     CustomDataColumns,
     CustomDataElementNumber,
     CustomDataElementString,
@@ -11,45 +9,27 @@ import { doesColumnExist, getNumberValue, getTextValue } from "../utils/CSVUtils
 import { RISIndividualFunghiDataRepository } from "../../../domain/repositories/data-entry/RISIndividualFunghiDataRepository";
 
 export class RISIndividualFunghiDataCSVDefaultRepository implements RISIndividualFunghiDataRepository {
-    get(moduleName: string, file: File): FutureData<CustomDataColumns[]> {
+    get(dataColumns: CustomDataColumns, file: File): FutureData<CustomDataColumns[]> {
         return Future.fromPromise(new SpreadsheetXlsxDataSource().read(file)).map(spreadsheet => {
             const sheet = spreadsheet.sheets[0]; //Only one sheet for AMR Individual & Funghi
 
             const rows: CustomDataColumns[] =
                 sheet?.rows.map(row => {
-                    if (moduleName === "AMR - Individual") {
-                        const amrIData: CustomDataColumns = amrIDataColumns.map(column => {
-                            if (column.type === "string")
-                                return {
-                                    key: column.key,
-                                    type: column.type,
-                                    value: getTextValue(row, column.key),
-                                } as CustomDataElementString;
-                            else
-                                return {
-                                    key: column.key,
-                                    type: column.type,
-                                    value: getNumberValue(row, column.key),
-                                } as CustomDataElementNumber;
-                        });
-                        return amrIData;
-                    } else {
-                        const amrFData = amrFDataColumns.map(column => {
-                            if (column.type === "string")
-                                return {
-                                    key: column.key,
-                                    type: column.type,
-                                    value: getTextValue(row, column.key),
-                                } as CustomDataElementString;
-                            else
-                                return {
-                                    key: column.key,
-                                    type: column.type,
-                                    value: getNumberValue(row, column.key),
-                                } as CustomDataElementNumber;
-                        });
-                        return amrFData;
-                    }
+                    const data: CustomDataColumns = dataColumns.map(column => {
+                        if (column.type === "string")
+                            return {
+                                key: column.key,
+                                type: column.type,
+                                value: getTextValue(row, column.key),
+                            } as CustomDataElementString;
+                        else
+                            return {
+                                key: column.key,
+                                type: column.type,
+                                value: getNumberValue(row, column.key),
+                            } as CustomDataElementNumber;
+                    });
+                    return data;
                 }) || [];
             return rows;
         });
