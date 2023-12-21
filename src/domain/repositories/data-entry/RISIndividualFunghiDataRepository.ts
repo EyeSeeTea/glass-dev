@@ -1,7 +1,7 @@
+import { CustomDataColumns } from "../../entities/data-entry/amr-individual-funghi-external/RISIndividualFunghiData";
 import { FutureData } from "../../entities/Future";
-import { RISIndividualFunghiData } from "../../entities/data-entry/amr-individual-funghi-external/RISIndividualFunghiData";
 
 export interface RISIndividualFunghiDataRepository {
-    get(moduleName: string, file: File): FutureData<RISIndividualFunghiData[]>;
+    get(moduleName: string, file: File): FutureData<CustomDataColumns[]>;
     validate(moduleName: string, file: File): FutureData<{ isValid: boolean; specimens: string[]; rows: number }>;
 }
