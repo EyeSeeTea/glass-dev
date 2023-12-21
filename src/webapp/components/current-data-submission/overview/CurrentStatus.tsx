@@ -122,7 +122,9 @@ export const CurrentStatus: React.FC<StatusProps> = ({
                         <tbody>
                             <TableRow>
                                 <TableCell>{moduleProperties.get(moduleName)?.datasetString ?? "Datasets"}</TableCell>
-                                <TableCell>{`No`}</TableCell>
+                                <TableCell>
+                                    {moduleProperties.get(moduleName)?.isDatasetMandatory ? "Yes" : "No"}
+                                </TableCell>
                                 <TableCell>
                                     <Box display={"flex"} alignItems="center">
                                         {`${uploadsCount} uploaded`}
