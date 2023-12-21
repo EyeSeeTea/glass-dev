@@ -33,4 +33,7 @@ export interface RISIndividualFunghiData {
     PATHOGEN_DET: string;
     AST_HFC_ID: string;
     AMR_LABORATORY_CODE: string;
+    AST_METHOD2: string;
+    IDENT_METHOD2: string;
+    PERFORMED_TEST2: string;
 }
