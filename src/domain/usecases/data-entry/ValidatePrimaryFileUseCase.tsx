@@ -31,7 +31,10 @@ export class ValidatePrimaryFileUseCase implements UseCase {
             }
             case "AMR - Individual":
             case "AMR - Funghi": {
-                return this.risIndividualFunghiRepository.validate(moduleName, inputFile);
+                return this.glassModuleDefaultRepository.getByName(moduleName).flatMap(module => {
+                    const customDataColumns = module.customDataColumns ? module.customDataColumns : [];
+                    return this.risIndividualFunghiRepository.validate(customDataColumns, inputFile);
+                });
             }
             case "AMC": //TO DO : Implement validation for AMC
                 return this.glassModuleDefaultRepository.getByName(moduleName).flatMap(module => {
