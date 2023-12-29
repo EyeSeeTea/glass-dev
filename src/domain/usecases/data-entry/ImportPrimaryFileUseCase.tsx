@@ -112,7 +112,8 @@ export class ImportPrimaryFileUseCase {
                     this.trackerRepository,
                     this.glassDocumentsRepository,
                     this.glassUploadsRepository,
-                    this.metadataRepository
+                    this.metadataRepository,
+                    this.programRulesMetadataRepository
                 );
 
                 return importAMCProductFile.importAMCProductFile(

@@ -15,6 +15,9 @@ import { D2TrackerEvent } from "@eyeseetea/d2-api/api/trackerEvents";
 import { getStringFromFile } from "../utils/fileToString";
 import { mapToImportSummary, readTemplate, uploadIdListFileAndSave } from "../ImportBLTemplateEventProgram";
 import { MetadataRepository } from "../../../repositories/MetadataRepository";
+import { ValidationResult } from "../../../entities/program-rules/EventEffectTypes";
+import { ProgramRuleValidationForBLEventProgram } from "../../program-rules-processing/ProgramRuleValidationForBLEventProgram";
+import { ProgramRulesMetadataRepository } from "../../../repositories/program-rules/ProgramRulesMetadataRepository";
 
 export const AMC_PRODUCT_REGISTER_PROGRAM_ID = "G6ChA5zMW9n";
 const AMR_RAW_PRODUCT_CONSUMPTION_STAGE_ID = "GmElQHKXLIE";
@@ -26,7 +29,8 @@ export class ImportAMCProductLevelData {
         private trackerRepository: TrackerRepository,
         private glassDocumentsRepository: GlassDocumentsRepository,
         private glassUploadsRepository: GlassUploadsRepository,
-        private metadataRepository: MetadataRepository
+        private metadataRepository: MetadataRepository,
+        private programRulesMetadataRepository: ProgramRulesMetadataRepository
     ) {}
 
     public importAMCProductFile(
@@ -56,25 +60,60 @@ export class ImportAMCProductLevelData {
                     if (action === "CREATE_AND_UPDATE") {
                         return this.mapAMCProductDataToTrackedEntities(dataPackage, orgUnitId, orgUnitName).flatMap(
                             entities => {
-                                //TO DO : Validate data  - Org unit, period , any other?
+                                const allEvents = entities.flatMap(e =>
+                                    _(e.enrollments?.flatMap(en => en.events))
+                                        .compact()
+                                        .value()
+                                );
+                                return this.validateTEIsAndEvents(
+                                    entities,
+                                    allEvents,
+                                    orgUnitId,
+                                    orgUnitName,
+                                    "2022",
+                                    AMC_PRODUCT_REGISTER_PROGRAM_ID
+                                ).flatMap(validationResults => {
+                                    if (validationResults.blockingErrors.length > 0) {
+                                        const errorSummary: ImportSummary = {
+                                            status: "ERROR",
+                                            importCount: {
+                                                ignored: 0,
+                                                imported: 0,
+                                                deleted: 0,
+                                                updated: 0,
+                                            },
+                                            nonBlockingErrors: validationResults.nonBlockingErrors,
+                                            blockingErrors: validationResults.blockingErrors,
+                                        };
+                                        return Future.success(errorSummary);
+                                    }
 
-                                return this.trackerRepository
-                                    .import({ trackedEntities: entities }, action)
-                                    .flatMap(response => {
-                                        return mapToImportSummary(
-                                            response,
-                                            "trackedEntity",
-                                            this.metadataRepository
-                                        ).flatMap(summary => {
-                                            return uploadIdListFileAndSave(
-                                                "primaryUploadId",
-                                                summary,
-                                                moduleName,
-                                                this.glassDocumentsRepository,
-                                                this.glassUploadsRepository
-                                            );
+                                    return this.trackerRepository
+                                        .import(
+                                            {
+                                                trackedEntities:
+                                                    validationResults.teis && validationResults.teis.length > 0
+                                                        ? validationResults.teis
+                                                        : entities,
+                                            },
+                                            action
+                                        )
+                                        .flatMap(response => {
+                                            return mapToImportSummary(
+                                                response,
+                                                "trackedEntity",
+                                                this.metadataRepository
+                                            ).flatMap(summary => {
+                                                return uploadIdListFileAndSave(
+                                                    "primaryUploadId",
+                                                    summary,
+                                                    moduleName,
+                                                    this.glassDocumentsRepository,
+                                                    this.glassUploadsRepository
+                                                );
+                                            });
                                         });
-                                    });
+                                });
                             }
                         );
                     } else {
@@ -154,7 +193,7 @@ export class ImportAMCProductLevelData {
                             orgUnit: orgUnitId,
                             dataValues: rawProductConsumptionStageDataValues,
                             occurredAt: new Date().getTime().toString(),
-                            status: "ACTIVE",
+                            status: "COMPLETED",
                         };
                     });
 
@@ -192,6 +231,42 @@ export class ImportAMCProductLevelData {
                 });
                 return Future.success(trackedEntities);
             });
+    }
+
+    private validateTEIsAndEvents(
+        teis: D2TrackerTrackedEntity[],
+        events: D2TrackerEvent[],
+        orgUnitId: string,
+        orgUnitName: string,
+        period: string,
+        programId: string
+    ): FutureData<ValidationResult> {
+        //1. Run Program Rule Validations
+        const programRuleValidations = new ProgramRuleValidationForBLEventProgram(this.programRulesMetadataRepository);
+
+        // //2. Run Custom EGASP Validations
+        // const customValidations = new CustomValidationForEventProgram(
+        //     this.dhis2EventsDefaultRepository,
+        //     this.metadataRepository
+        // );
+
+        return Future.joinObj({
+            programRuleValidationResults: programRuleValidations.getValidatedTeisAndEvents(
+                events,
+                programId,
+                orgUnitId,
+                teis
+            ),
+            customRuleValidationsResults: Future.success(undefined),
+        }).flatMap(({ programRuleValidationResults, customRuleValidationsResults }) => {
+            const consolidatedValidationResults: ValidationResult = {
+                teis: programRuleValidationResults.teis,
+                events: programRuleValidationResults.events,
+                blockingErrors: [...programRuleValidationResults.blockingErrors],
+                nonBlockingErrors: [...programRuleValidationResults.nonBlockingErrors],
+            };
+            return Future.success(consolidatedValidationResults);
+        });
     }
 }
 export const downloadIdsAndDeleteTrackedEntities = (
