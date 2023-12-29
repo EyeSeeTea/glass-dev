@@ -157,6 +157,27 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
                 }
             );
         } else {
+            if (moduleProperties.get(currentModuleAccess.moduleName)?.isCalculationRequired && primaryFile) {
+                compositionRoot.calculations
+                    .consumptionDataProductLevel(
+                        currentModuleAccess.moduleName,
+                        currentPeriod,
+                        currentOrgUnitAccess.orgUnitId,
+                        currentOrgUnitAccess.orgUnitName,
+                        primaryFile
+                    )
+                    .run(
+                        importSummary => {
+                            setImportLoading(false);
+                            changeStep(3);
+                        },
+                        error => {
+                            setImportLoading(false);
+                        }
+                    );
+            } else {
+                changeStep(3);
+            }
             changeStep(3);
         }
     };
