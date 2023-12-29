@@ -9,7 +9,7 @@ import { GlassUploadsRepository } from "../../repositories/GlassUploadsRepositor
 import { MetadataRepository } from "../../repositories/MetadataRepository";
 import * as templates from "../../entities/data-entry/program-templates";
 import { DataForm } from "../../entities/DataForm";
-import { EventResult } from "../../entities/program-rules/EventEffectTypes";
+import { ValidationResult } from "../../entities/program-rules/EventEffectTypes";
 import { generateId, Id } from "../../entities/Ref";
 import { DataPackage, DataPackageDataValue } from "../../entities/data-entry/DataPackage";
 import { D2TrackerEvent } from "@eyeseetea/d2-api/api/trackerEvents";
@@ -193,7 +193,7 @@ export class ImportBLTemplateEventProgram {
         orgUnitName: string,
         period: string,
         programId: string
-    ): FutureData<EventResult> {
+    ): FutureData<ValidationResult> {
         //1. Run Program Rule Validations
         const programRuleValidations = new ProgramRuleValidationForBLEventProgram(this.programRulesMetadataRepository);
 
@@ -204,7 +204,11 @@ export class ImportBLTemplateEventProgram {
         );
 
         return Future.joinObj({
-            programRuleValidationResults: programRuleValidations.getValidatedEvents(events, programId),
+            programRuleValidationResults: programRuleValidations.getValidatedTeisAndEvents(
+                events,
+                programId,
+                orgUnitId
+            ),
             customRuleValidationsResults: customValidations.getValidatedEvents(
                 events,
                 orgUnitId,
@@ -213,7 +217,7 @@ export class ImportBLTemplateEventProgram {
                 programId
             ),
         }).flatMap(({ programRuleValidationResults, customRuleValidationsResults }) => {
-            const consolidatedValidationResults: EventResult = {
+            const consolidatedValidationResults: ValidationResult = {
                 events: programRuleValidationResults.events,
                 blockingErrors: [
                     ...programRuleValidationResults.blockingErrors,
