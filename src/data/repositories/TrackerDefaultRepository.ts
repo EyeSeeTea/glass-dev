@@ -47,6 +47,7 @@ export class TrackerDefaultRepository implements TrackerRepository {
                                 id: true,
                                 name: true,
                                 code: true,
+                                valueType: true,
                             },
                         },
                     },
