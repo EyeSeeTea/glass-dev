@@ -12,12 +12,7 @@ import calculationSolutionNoCombCodeNoFoundDDD from "./data/calculationSolutionN
 import calculationSolutionNoCombCodeFoundDDDAlterations from "./data/calculationSolutionNoCombCodeFoundDDDAlterations.json";
 import atcCurrentVersionDataJson from "./data/atcCurrentVersionData.json";
 import rawProductConsumptionJson from "./data/rawProductConsumption.json";
-import {
-    ProductRegistryAttributes,
-    RawProductConsumption,
-    RawSubstanceConsumptionCalculated,
-    calculateConsumptionProductLevelData,
-} from "../calculationConsumptionProductLevelData";
+import { calculateConsumptionProductLevelData } from "../calculationConsumptionProductLevelData";
 import {
     ATCAlterationsData,
     ATCData,
@@ -27,6 +22,9 @@ import {
     DDDData,
     GlassATCVersion,
 } from "../../../../../entities/GlassATC";
+import { ProductRegistryAttributes } from "../../../../../entities/data-entry/amc/ProductRegistryAttributes";
+import { RawProductConsumption } from "../../../../../entities/data-entry/amc/RawProductConsumption";
+import { RawSubstanceConsumptionCalculated } from "../../../../../entities/data-entry/amc/RawSubstanceConsumptionCalculated";
 
 describe("Given calculate Consumption Product Level Data function", () => {
     describe("When product registry attributes has: strength unit from gram family (then content from gram family), no concentration volume and no volume, no combination codes, strength unit and ddd unit are the same", () => {
