@@ -99,7 +99,8 @@ export class ImportPrimaryFileUseCase {
                         period,
                         eventListId,
                         module.programs !== undefined ? module.programs.at(0) : undefined,
-                        module.name
+                        module.name,
+                        module.customDataColumns ? module.customDataColumns : []
                     );
                 });
             }

@@ -2,7 +2,6 @@ import i18n from "@eyeseetea/d2-ui-components/locales";
 import { Future, FutureData } from "../../../entities/Future";
 import { ImportStrategy } from "../../../entities/data-entry/DataValuesSaveSummary";
 import { ConsistencyError, ImportSummary } from "../../../entities/data-entry/ImportSummary";
-import { RISIndividualFunghiData } from "../../../entities/data-entry/amr-individual-funghi-external/RISIndividualFunghiData";
 import { GlassDocumentsRepository } from "../../../repositories/GlassDocumentsRepository";
 import { GlassUploadsRepository } from "../../../repositories/GlassUploadsRepository";
 import { TrackerRepository } from "../../../repositories/TrackerRepository";
@@ -13,6 +12,7 @@ import { D2TrackerEvent } from "@eyeseetea/d2-api/api/trackerEvents";
 import { mapToImportSummary, uploadIdListFileAndSave } from "../ImportBLTemplateEventProgram";
 import { MetadataRepository } from "../../../repositories/MetadataRepository";
 import { downloadIdsAndDeleteTrackedEntities } from "../amc/ImportAMCProductLevelData";
+import { CustomDataColumns } from "../../../entities/data-entry/amr-individual-funghi-external/RISIndividualFunghiData";
 
 const AMRIProgramID = "mMAj6Gofe49";
 const AMR_GLASS_AMR_TET_PATIENT = "CcgnfemKr5U";
@@ -44,11 +44,12 @@ export class ImportRISIndividualFunghiFile {
                   programStageId: string;
               }
             | undefined,
-        moduleName: string
+        moduleName: string,
+        dataColumns: CustomDataColumns
     ): FutureData<ImportSummary> {
         if (action === "CREATE_AND_UPDATE") {
             return this.risIndividualFunghiRepository
-                .get(moduleName, inputFile)
+                .get(dataColumns, inputFile)
                 .flatMap(risIndividualFunghiDataItems => {
                     return this.validateDataItems(risIndividualFunghiDataItems, countryCode, period).flatMap(
                         validationSummary => {
@@ -111,7 +112,7 @@ export class ImportRISIndividualFunghiFile {
     }
 
     private validateDataItems(
-        risIndividualFunghiDataItems: RISIndividualFunghiData[],
+        risIndividualFunghiDataItems: CustomDataColumns[],
         orgUnit: string,
         period: string
     ): FutureData<ImportSummary> {
@@ -126,13 +127,15 @@ export class ImportRISIndividualFunghiFile {
         return Future.success(summary);
     }
 
-    private checkCountry(risIndividualFunghiDataItems: RISIndividualFunghiData[], orgUnit: string): ConsistencyError[] {
+    private checkCountry(risIndividualFunghiDataItems: CustomDataColumns[], orgUnit: string): ConsistencyError[] {
         const errors = _(
             risIndividualFunghiDataItems.map((dataItem, index) => {
-                if (dataItem.COUNTRY !== orgUnit) {
+                if (dataItem.find(item => item.key === "COUNTRY")?.value !== orgUnit) {
                     return {
                         error: i18n.t(
-                            `Country is different: Selected Data Submission Country : ${orgUnit}, Country in file: ${dataItem.COUNTRY}`
+                            `Country is different: Selected Data Submission Country : ${orgUnit}, Country in file: ${
+                                dataItem.find(item => item.key === "COUNTRY")?.value
+                            }`
                         ),
                         line: index,
                     };
@@ -150,13 +153,15 @@ export class ImportRISIndividualFunghiFile {
             lines: errors[error] || [],
         }));
     }
-    private checkPeriod(risIndividualFunghiDataItems: RISIndividualFunghiData[], period: string): ConsistencyError[] {
+    private checkPeriod(risIndividualFunghiDataItems: CustomDataColumns[], period: string): ConsistencyError[] {
         const errors = _(
             risIndividualFunghiDataItems.map((dataItem, index) => {
-                if (dataItem.YEAR !== parseInt(period)) {
+                if (dataItem.find(item => item.key === "YEAR")?.value !== parseInt(period)) {
                     return {
                         error: i18n.t(
-                            `Year is different: Selected Data Submission Country : ${period}, Country in file: ${dataItem.YEAR}`
+                            `Year is different: Selected Data Submission Country : ${period}, Country in file: ${
+                                dataItem.find(item => item.key === "YEAR")?.value
+                            }`
                         ),
                         line: index,
                     };
@@ -176,7 +181,7 @@ export class ImportRISIndividualFunghiFile {
     }
 
     private mapIndividualFunghiDataItemsToEntities(
-        individualFunghiDataItems: RISIndividualFunghiData[],
+        individualFunghiDataItems: CustomDataColumns[],
         orgUnit: string,
         AMRIProgramIDl: string,
         AMRDataProgramStageIdl: string,
@@ -188,8 +193,7 @@ export class ImportRISIndividualFunghiFile {
                     (attr: { id: string; name: string; code: string }) => {
                         return {
                             attribute: attr.id,
-                            // @ts-ignore
-                            value: Object.keys(dataItem).includes(attr.code) ? dataItem[attr.code] : "",
+                            value: dataItem.find(item => item.key === attr.code)?.value ?? "",
                         };
                     }
                 );
@@ -197,8 +201,7 @@ export class ImportRISIndividualFunghiFile {
                     (de: { id: string; name: string; code: string }) => {
                         return {
                             dataElement: de.id,
-                            // @ts-ignore
-                            value: Object.keys(dataItem).includes(de.code) ? dataItem[de.code] : "",
+                            value: dataItem.find(item => item.key === de.code)?.value ?? "",
                         };
                     }
                 );
