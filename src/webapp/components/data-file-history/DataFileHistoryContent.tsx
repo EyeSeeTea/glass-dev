@@ -4,7 +4,7 @@ import { SortDirection, DataFileTable } from "./DataFileTable";
 import { useLocation } from "react-router-dom";
 import { useAppContext } from "../../contexts/app-context";
 import { useGlassUploads } from "../../hooks/useGlassUploads";
-import { Filter } from "./Filter";
+import { Filter, Status } from "./Filter";
 import { CustomCard } from "../custom-card/CustomCard";
 import { ContentLoader } from "../content-loader/ContentLoader";
 import { useCurrentPeriodContext } from "../../contexts/current-period-context";
@@ -17,13 +17,17 @@ export const DataFileHistoryContent: React.FC = () => {
     const uploads = useGlassUploads(compositionRoot);
     const params = new URLSearchParams(location.search);
     const [year, setYear] = useState(currentPeriod);
-    const [status, setStatus] = useState("Completed");
+    const [status, setStatus] = useState<Status>("All");
     const [filteredUploads, setFilteredUploads] = useState<GlassUploads[]>();
 
     useEffect(() => {
         if (uploads.kind === "loaded") {
             const filtered = uploads.data
-                .filter(u => u.period === year.toString() && u.status.toLowerCase() === status.toLowerCase())
+                .filter(
+                    u =>
+                        u.period === year.toString() &&
+                        (status === "All" || u.status.toLowerCase() === status.toLowerCase())
+                )
                 .map(uploadData => {
                     // TODO: This is used allow to sort by rows column. Delete mapping when no items in DataStore with records (because becomes rows)
                     const { records, ...restData } = uploadData;
