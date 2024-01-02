@@ -254,9 +254,7 @@ export function getCompositionRoot(instance: Instance) {
                 amcProductDataRepository,
                 glassAtcRepository,
                 trackerRepository,
-                metadataRepository,
-                glassDocumentsRepository,
-                glassUploadsRepository
+                metadataRepository
             ),
         }),
     };
