@@ -162,7 +162,6 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
             if (moduleProperties.get(currentModuleAccess.moduleName)?.isCalculationRequired && primaryFile) {
                 compositionRoot.calculations
                     .consumptionDataProductLevel(
-                        currentModuleAccess.moduleName,
                         currentPeriod,
                         currentOrgUnitAccess.orgUnitId,
                         currentOrgUnitAccess.orgUnitName,

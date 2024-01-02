@@ -1,6 +1,6 @@
 import { Future, FutureData } from "../../../entities/Future";
 import { Id } from "../../../entities/Ref";
-import { mapToImportSummary, readTemplate, uploadIdListFileAndSave } from "../ImportBLTemplateEventProgram";
+import { mapToImportSummary, readTemplate } from "../ImportBLTemplateEventProgram";
 import { ExcelRepository } from "../../../repositories/ExcelRepository";
 import { TrackerRepository } from "../../../repositories/TrackerRepository";
 import { GlassATCRepository } from "../../../repositories/GlassATCRepository";
@@ -29,8 +29,6 @@ import {
 } from "../../../entities/data-entry/amc/ProductRegisterProgram";
 import { D2TrackerEvent, DataValue } from "@eyeseetea/d2-api/api/trackerEvents";
 import { MetadataRepository } from "../../../repositories/MetadataRepository";
-import { GlassDocumentsRepository } from "../../../repositories/GlassDocumentsRepository";
-import { GlassUploadsRepository } from "../../../repositories/GlassUploadsRepository";
 import { ImportSummary } from "../../../entities/data-entry/ImportSummary";
 import {
     RawSubstanceConsumptionCalculated,
@@ -56,18 +54,10 @@ export class CalculateConsumptionDataProductLevelUseCase {
         private amcProductDataRepository: AMCProductDataRepository,
         private atcRepository: GlassATCRepository,
         private trackerRepository: TrackerRepository,
-        private metadataRepository: MetadataRepository,
-        private glassDocumentsRepository: GlassDocumentsRepository,
-        private glassUploadsRepository: GlassUploadsRepository
+        private metadataRepository: MetadataRepository
     ) {}
 
-    public execute(
-        moduleName: string,
-        period: string,
-        orgUnitId: Id,
-        orgUnitName: string,
-        file: File
-    ): FutureData<ImportSummary> {
+    public execute(period: string, orgUnitId: Id, orgUnitName: string, file: File): FutureData<ImportSummary> {
         return this.getProductIdsFromFile(file)
             .flatMap(productIds => {
                 return Future.joinObj({
@@ -140,25 +130,19 @@ export class CalculateConsumptionDataProductLevelUseCase {
                         orgUnitName
                     );
 
-                    return this.createEvents(d2TrackerEvents, moduleName);
+                    return this.createEvents(d2TrackerEvents);
                 });
             });
     }
 
-    private createEvents(d2TrackerEvents: D2TrackerEvent[], moduleName: string): FutureData<ImportSummary> {
+    private createEvents(d2TrackerEvents: D2TrackerEvent[]): FutureData<ImportSummary> {
         if (!_.isEmpty(d2TrackerEvents)) {
             return this.trackerRepository
                 .import({ events: d2TrackerEvents }, TRACKER_IMPORT_STRATEGY_CREATE_AND_UPDATE)
                 .flatMap(response => {
                     return mapToImportSummary(response, IMPORT_SUMMARY_EVENT_TYPE, this.metadataRepository).flatMap(
                         summary => {
-                            return uploadIdListFileAndSave(
-                                "primaryUploadId",
-                                summary,
-                                moduleName,
-                                this.glassDocumentsRepository,
-                                this.glassUploadsRepository
-                            );
+                            return Future.success(summary.importSummary);
                         }
                     );
                 });
