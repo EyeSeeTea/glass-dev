@@ -10,8 +10,8 @@ import { AMCProductDataRepository } from "../../../repositories/data-entry/AMCPr
 import {
     AMC_PRODUCT_REGISTER_PROGRAM_ID,
     AMR_GLASS_AMC_TEA_PRODUCT_ID,
-    AMR_RAW_PRODUCT_CONSUMPTION_STAGE_ID,
-    AMR_RAW_SUBSTANCE_CONSUMPTION_CALCULATED_STAGE_ID,
+    AMC_RAW_PRODUCT_CONSUMPTION_STAGE_ID,
+    AMC_RAW_SUBSTANCE_CONSUMPTION_CALCULATED_STAGE_ID,
 } from "../../../../data/repositories/data-entry/AMCProductDataDeafultRepository";
 import * as templates from "../../../entities/data-entry/program-templates";
 import { calculateConsumptionProductLevelData } from "./utils/calculationConsumptionProductLevelData";
@@ -92,7 +92,7 @@ export class CalculateConsumptionDataProductLevelUseCase {
                 }
 
                 const rawProductConsumptionStage = productRegisterProgramMetadata?.programStages.find(
-                    ({ id }) => id === AMR_RAW_PRODUCT_CONSUMPTION_STAGE_ID
+                    ({ id }) => id === AMC_RAW_PRODUCT_CONSUMPTION_STAGE_ID
                 );
 
                 if (!rawProductConsumptionStage) {
@@ -125,7 +125,7 @@ export class CalculateConsumptionDataProductLevelUseCase {
 
                     const rawSubstanceConsumptionCalculatedStageMetadata =
                         productRegisterProgramMetadata?.programStages.find(
-                            ({ id }) => id === AMR_RAW_SUBSTANCE_CONSUMPTION_CALCULATED_STAGE_ID
+                            ({ id }) => id === AMC_RAW_SUBSTANCE_CONSUMPTION_CALCULATED_STAGE_ID
                         );
 
                     if (!rawSubstanceConsumptionCalculatedStageMetadata) {
@@ -363,7 +363,7 @@ export function mapRawSubstanceConsumptionCalculatedToD2TrackerEvent(
                     enrollment: productDataTrackedEntity.enrollmentId,
                     enrollmentStatus: "ACTIVE",
                     program: AMC_PRODUCT_REGISTER_PROGRAM_ID,
-                    programStage: AMR_RAW_SUBSTANCE_CONSUMPTION_CALCULATED_STAGE_ID,
+                    programStage: AMC_RAW_SUBSTANCE_CONSUMPTION_CALCULATED_STAGE_ID,
                     orgUnit: orgUnitId,
                     orgUnitName,
                     dataValues,

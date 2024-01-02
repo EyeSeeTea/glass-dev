@@ -18,8 +18,8 @@ import { AMCProductDataRepository } from "../../../domain/repositories/data-entr
 
 export const AMC_PRODUCT_REGISTER_PROGRAM_ID = "G6ChA5zMW9n";
 
-export const AMR_RAW_PRODUCT_CONSUMPTION_STAGE_ID = "GmElQHKXLIE";
-export const AMR_RAW_SUBSTANCE_CONSUMPTION_CALCULATED_STAGE_ID = "q8cl5qllyjd";
+export const AMC_RAW_PRODUCT_CONSUMPTION_STAGE_ID = "GmElQHKXLIE";
+export const AMC_RAW_SUBSTANCE_CONSUMPTION_CALCULATED_STAGE_ID = "q8cl5qllyjd";
 
 export const AMR_GLASS_AMC_TEA_PRODUCT_ID = "iasfoeU8veF";
 
@@ -98,7 +98,7 @@ export class AMCProductDataDeafultRepository implements AMCProductDataRepository
                 orgUnit: orgUnitId,
                 fields: trackedEntitiesFields,
                 program: AMC_PRODUCT_REGISTER_PROGRAM_ID,
-                programStage: AMR_RAW_PRODUCT_CONSUMPTION_STAGE_ID,
+                programStage: AMC_RAW_PRODUCT_CONSUMPTION_STAGE_ID,
                 page,
                 pageSize,
                 filter: filterStr,
