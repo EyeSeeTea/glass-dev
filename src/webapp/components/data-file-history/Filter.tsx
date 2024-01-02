@@ -29,7 +29,14 @@ const StyledInputLabel = styled(InputLabel)`
     color: ${glassColors.black};
 `;
 
-const statusOptions = [
+export type Status = "All" | "Uploaded" | "Imported" | "Validated" | "Completed";
+
+type StatusOption = {
+    value: Status;
+    label: string;
+};
+
+const statusOptions: StatusOption[] = [
     {
         label: "Uploaded",
         value: "Uploaded",
@@ -46,13 +53,17 @@ const statusOptions = [
         label: "Completed",
         value: "Completed",
     },
+    {
+        label: "All",
+        value: "All",
+    },
 ];
 
 interface FilterProps {
     year: string;
     setYear: Dispatch<SetStateAction<string>>;
     status: string;
-    setStatus: Dispatch<SetStateAction<string>>;
+    setStatus: Dispatch<SetStateAction<Status>>;
 }
 
 export const Filter: React.FC<FilterProps> = ({ year, setYear, status, setStatus }) => {
@@ -96,7 +107,7 @@ export const Filter: React.FC<FilterProps> = ({ year, setYear, status, setStatus
                         labelId="status"
                         value={status}
                         label="Select Status"
-                        onChange={e => setStatus(e.target.value as string)}
+                        onChange={e => setStatus(e.target.value as Status)}
                         MenuProps={{ disableScrollLock: true }}
                     >
                         {statusOptions.map(statusItem => (
