@@ -1,10 +1,12 @@
 import productRegistryAttributesBasic from "./data/productRegistryAttributesBasic.json";
+import productRegistryAttributesWrongStrengthUnit from "./data/productRegistryAttributesWrongStrengthUnit.json";
 import productRegistryAttributesConcVolumeAndVolume from "./data/productRegistryAttributesConcVolumeAndVolume.json";
 import productRegistryAttributesUnitDoseCombCode from "./data/productRegistryAttributesUnitDoseCombCode.json";
 import productRegistryAttributesMillionInternationalUnitDifferentDDDUnit from "./data/productRegistryAttributesMillionInternationalUnitDifferentDDDUnit.json";
 import productRegistryAttributesNoCombCodeNoFoundDDD from "./data/productRegistryAttributesNoCombCodeNoFoundDDD.json";
 import productRegistryAttributesNoCombCodeFoundDDDAlterations from "./data/productRegistryAttributesNoCombCodeFoundDDDAlterations.json";
 import calculationSolutionBasic from "./data/calculationSolutionBasic.json";
+import calculationSolutionWrongStrengthUnit from "./data/calculationSolutionWrongStrengthUnit.json";
 import calculationSolutionConcVolumeAndVolume from "./data/calculationSolutionConcVolumeAndVolume.json";
 import calculationSolutionUnitDoseCombCode from "./data/calculationSolutionUnitDoseCombCode.json";
 import calculationMillionInternationalUnitDifferentDDDUnit from "./data/calculationMillionInternationalUnitDifferentDDDUnit.json";
@@ -144,6 +146,26 @@ describe("Given calculate Consumption Product Level Data function", () => {
             verifyCalculationResult(rawSubstanceConsumptionCalculatedData, type);
         });
     });
+    describe("When product registry attributes has strength unit NOT from gram family", () => {
+        it("Then should return correct solution and don't do calculations for that row", async () => {
+            const type = "wrong_strength_unit";
+            const period = "2020";
+            const productRegistryAttributes = givenProductRegistryAttributesByType(type);
+            const rawProductConsumption = givenRawProductConsumption();
+            const atcCurrentVersionData = givenAtcCurrentVersionData();
+            const atcVersionKey = "ATC-2023-v1";
+
+            const rawSubstanceConsumptionCalculatedData = calculateConsumptionProductLevelData(
+                period,
+                productRegistryAttributes,
+                rawProductConsumption,
+                atcCurrentVersionData,
+                atcVersionKey
+            );
+
+            verifyCalculationResult(rawSubstanceConsumptionCalculatedData, type);
+        });
+    });
 });
 
 function givenProductRegistryAttributesByType(type?: string): ProductRegistryAttributes[] {
@@ -155,6 +177,7 @@ function givenProductRegistryAttributesByType(type?: string): ProductRegistryAtt
             productRegistryAttributesMillionInternationalUnitDifferentDDDUnit,
         no_combination_code_no_found_ddd: productRegistryAttributesNoCombCodeNoFoundDDD,
         no_combination_code_found_ddd_alterations: productRegistryAttributesNoCombCodeFoundDDDAlterations,
+        wrong_strength_unit: productRegistryAttributesWrongStrengthUnit,
     } as Record<string, ProductRegistryAttributes[]>;
 
     const productRegistryAttributes = type
@@ -188,6 +211,7 @@ function getExpectedCalculationSolution(type?: string): RawSubstanceConsumptionC
         millions_international_unit_different_ddd_unit: calculationMillionInternationalUnitDifferentDDDUnit,
         no_combination_code_no_found_ddd: calculationSolutionNoCombCodeNoFoundDDD,
         no_combination_code_found_ddd_alterations: calculationSolutionNoCombCodeFoundDDDAlterations,
+        wrong_strength_unit: calculationSolutionWrongStrengthUnit,
     } as Record<string, RawSubstanceConsumptionCalculated[]>;
 
     const calculationSolution = type ? calculationSolutionTypes[type] : calculationSolutionTypes.basic;

@@ -53,23 +53,25 @@ export function calculateConsumptionProductLevelData(
     const conversionFactorData: ConversionFactorData[] = atcClassification.find(({ name }) => name === CONVERSION_NAME)
         ?.data as ConversionFactorData[];
 
-    const contentDDDPerProductAndDDDPerPackage: ContentDDDPerProductAndDDDPerPackage[] = teiInstancesData.map(
-        (product: ProductRegistryAttributes): ContentDDDPerProductAndDDDPerPackage => {
+    const contentDDDPerProductAndDDDPerPackage: ContentDDDPerProductAndDDDPerPackage[] = teiInstancesData
+        .map((product: ProductRegistryAttributes) => {
             // 1 - Calculate the content per product = content
             const content = calculateContentPerProduct(product);
-            // 2 - Identify corresponding DDD per product = ddd
-            const dddPerProduct = calculateDDDPerProduct(product, dddCombinations, dddData, dddAlterations);
-            // 3 - Calculate DDD per package = ddd_per_pack
-            const dddPerPackage = calculateDDDPerPackage(product, content, dddPerProduct, conversionFactorData);
+            if (content) {
+                // 2 - Identify corresponding DDD per product = ddd
+                const dddPerProduct = calculateDDDPerProduct(product, dddCombinations, dddData, dddAlterations);
+                // 3 - Calculate DDD per package = ddd_per_pack
+                const dddPerPackage = calculateDDDPerPackage(product, content, dddPerProduct, conversionFactorData);
 
-            return {
-                AMR_GLASS_AMC_TEA_PRODUCT_ID: product.AMR_GLASS_AMC_TEA_PRODUCT_ID,
-                content,
-                dddPerProduct,
-                dddPerPackage,
-            };
-        }
-    );
+                return {
+                    AMR_GLASS_AMC_TEA_PRODUCT_ID: product.AMR_GLASS_AMC_TEA_PRODUCT_ID,
+                    content,
+                    dddPerProduct,
+                    dddPerPackage,
+                };
+            }
+        })
+        .filter(Boolean) as ContentDDDPerProductAndDDDPerPackage[];
 
     // Given 1&2&3 calculates 4, 5, 6, 7, 8
     const rawSubstanceConsumptionCalculated: RawSubstanceConsumptionCalculated[] =
@@ -85,7 +87,7 @@ export function calculateConsumptionProductLevelData(
 }
 
 // 1 - Calculate the content per product
-function calculateContentPerProduct(product: ProductRegistryAttributes): Content {
+function calculateContentPerProduct(product: ProductRegistryAttributes): Content | undefined {
     const {
         AMR_GLASS_AMC_TEA_STRENGTH,
         AMR_GLASS_AMC_TEA_STRENGTH_UNIT,
@@ -125,10 +127,6 @@ function calculateContentPerProduct(product: ProductRegistryAttributes): Content
             value: content,
             standarizedStrengthUnit,
         };
-    } else {
-        throw new Error(
-            `Unit of ${product.AMR_GLASS_AMC_TEA_PRODUCT_ID} not valid. strengthUnit: ${AMR_GLASS_AMC_TEA_STRENGTH_UNIT}, concVolumeUnit: ${maybeConcVolumeUnit}, concVolumeUnit: ${maybeVolumeUnit}`
-        );
     }
 }
 
@@ -404,9 +402,7 @@ function aggregateDataByAtcRouteAdminYearHealthSectorAndHealthLevel(
                         : aggregation,
                 };
             } else {
-                throw new Error(
-                    `Product ${productConsumption.AMR_GLASS_AMC_TEA_PRODUCT_ID} or ddd per product and ddd per package calculations not found`
-                );
+                return acc;
             }
         },
         {} as Record<string, RawSubstanceConsumptionCalculated>
