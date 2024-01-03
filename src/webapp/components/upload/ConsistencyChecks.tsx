@@ -177,6 +177,7 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
                             snackbar.error(error);
                             setImportLoading(false);
                             console.error(error);
+                            changeStep(3);
                         }
                     );
             } else {
