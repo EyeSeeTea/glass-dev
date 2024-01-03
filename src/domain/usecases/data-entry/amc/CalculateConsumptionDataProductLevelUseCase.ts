@@ -12,7 +12,7 @@ import {
     AMR_GLASS_AMC_TEA_PRODUCT_ID,
     AMC_RAW_PRODUCT_CONSUMPTION_STAGE_ID,
     AMC_RAW_SUBSTANCE_CONSUMPTION_CALCULATED_STAGE_ID,
-} from "../../../../data/repositories/data-entry/AMCProductDataDeafultRepository";
+} from "../../../../data/repositories/data-entry/AMCProductDataDefaultRepository";
 import * as templates from "../../../entities/data-entry/program-templates";
 import { calculateConsumptionProductLevelData } from "./utils/calculationConsumptionProductLevelData";
 import {

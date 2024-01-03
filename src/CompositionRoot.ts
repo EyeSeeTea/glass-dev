@@ -80,7 +80,7 @@ import { DownloadEmptyTemplateDefautlRepository } from "./data/repositories/down
 import { BulkLoadDataStoreClient } from "./data/data-store/BulkLoadDataStoreClient";
 import { ApplyAMCQuestionUpdationUseCase } from "./domain/usecases/ApplyAMCQuestionUpdationUseCase";
 import { SaveImportSummaryErrorsOfFilesInUploadsUseCase } from "./domain/usecases/SaveImportSummaryErrorsOfFilesInUploadsUseCase";
-import { AMCProductDataDeafultRepository } from "./data/repositories/data-entry/AMCProductDataDeafultRepository";
+import { AMCProductDataDefaultRepository } from "./data/repositories/data-entry/AMCProductDataDefaultRepository";
 import { AMCSubstanceDataRepository } from "./data/repositories/data-entry/AMCSubstanceDataRepository";
 import { CalculateConsumptionDataProductLevelUseCase } from "./domain/usecases/data-entry/amc/CalculateConsumptionDataProductLevelUseCase";
 import { GlassATCDefaultRepository } from "./data/repositories/GlassATCDefaultRepository";
@@ -115,7 +115,7 @@ export function getCompositionRoot(instance: Instance) {
     const captureFormRepository = new CaptureFormDefaultRepository(api);
     const signalRepository = new SignalDefaultRepository(dataStoreClient, api);
     const downloadEmptyTemplateRepository = new DownloadEmptyTemplateDefautlRepository(instance);
-    const amcProductDataRepository = new AMCProductDataDeafultRepository(api);
+    const amcProductDataRepository = new AMCProductDataDefaultRepository(api);
     const amcSubstanceDataRepository = new AMCSubstanceDataRepository();
     const glassAtcRepository = new GlassATCDefaultRepository(dataStoreClient);
 

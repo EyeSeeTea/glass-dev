@@ -23,7 +23,7 @@ export const AMC_RAW_SUBSTANCE_CONSUMPTION_CALCULATED_STAGE_ID = "q8cl5qllyjd";
 
 export const AMR_GLASS_AMC_TEA_PRODUCT_ID = "iasfoeU8veF";
 
-export class AMCProductDataDeafultRepository implements AMCProductDataRepository {
+export class AMCProductDataDefaultRepository implements AMCProductDataRepository {
     constructor(private api: D2Api) {}
 
     validate(
