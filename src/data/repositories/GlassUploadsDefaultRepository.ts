@@ -140,4 +140,15 @@ export class GlassUploadsDefaultRepository implements GlassUploadsRepository {
             }
         });
     }
+
+    getEventListFileIdByUploadId(id: string): FutureData<string> {
+        return this.dataStoreClient.listCollection<GlassUploads>(DataStoreKeys.UPLOADS).flatMap(uploads => {
+            const upload = uploads?.find(upload => upload.id === id);
+            if (upload && upload.eventListFileId) {
+                return Future.success(upload.eventListFileId);
+            } else {
+                return Future.error("Upload does not exist or does not have eventListFileId");
+            }
+        });
+    }
 }
