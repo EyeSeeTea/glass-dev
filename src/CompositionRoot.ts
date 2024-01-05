@@ -81,9 +81,10 @@ import { BulkLoadDataStoreClient } from "./data/data-store/BulkLoadDataStoreClie
 import { ApplyAMCQuestionUpdationUseCase } from "./domain/usecases/ApplyAMCQuestionUpdationUseCase";
 import { SaveImportSummaryErrorsOfFilesInUploadsUseCase } from "./domain/usecases/SaveImportSummaryErrorsOfFilesInUploadsUseCase";
 import { AMCProductDataDefaultRepository } from "./data/repositories/data-entry/AMCProductDataDefaultRepository";
-import { AMCSubstanceDataRepository } from "./data/repositories/data-entry/AMCSubstanceDataRepository";
+import { AMCSubstanceDataDefaultRepository } from "./data/repositories/data-entry/AMCSubstanceDataDefaultRepository";
 import { CalculateConsumptionDataProductLevelUseCase } from "./domain/usecases/data-entry/amc/CalculateConsumptionDataProductLevelUseCase";
 import { GlassATCDefaultRepository } from "./data/repositories/GlassATCDefaultRepository";
+import { CalculateConsumptionDataSubstanceLevelUseCase } from "./domain/usecases/data-entry/amc/CalculateConsumptionDataSubstanceLevelUseCase";
 
 export function getCompositionRoot(instance: Instance) {
     const api = getD2APiFromInstance(instance);
@@ -116,7 +117,7 @@ export function getCompositionRoot(instance: Instance) {
     const signalRepository = new SignalDefaultRepository(dataStoreClient, api);
     const downloadEmptyTemplateRepository = new DownloadEmptyTemplateDefautlRepository(instance);
     const amcProductDataRepository = new AMCProductDataDefaultRepository(api);
-    const amcSubstanceDataRepository = new AMCSubstanceDataRepository();
+    const amcSubstanceDataRepository = new AMCSubstanceDataDefaultRepository(api);
     const glassAtcRepository = new GlassATCDefaultRepository(dataStoreClient);
 
     return {
@@ -255,6 +256,12 @@ export function getCompositionRoot(instance: Instance) {
                 glassAtcRepository,
                 trackerRepository,
                 metadataRepository
+            ),
+            consumptionDataSubstanceLevel: new CalculateConsumptionDataSubstanceLevelUseCase(
+                glassUploadsRepository,
+                glassDocumentsRepository,
+                amcSubstanceDataRepository,
+                glassAtcRepository
             ),
         }),
     };

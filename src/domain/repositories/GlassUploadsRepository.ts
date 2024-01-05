@@ -19,4 +19,5 @@ export interface GlassUploadsRepository {
         secondaryUploadId?: Id;
         secondaryImportSummaryErrors?: ImportSummaryErrors;
     }): FutureData<void>;
+    getEventListFileIdByUploadId(id: string): FutureData<string>;
 }
