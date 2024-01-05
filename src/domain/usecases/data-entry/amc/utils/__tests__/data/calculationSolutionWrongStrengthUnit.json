@@ -11,7 +11,8 @@
         "data_status_autocalculated": 1,
         "health_sector_autocalculated": 3,
         "atc_version_autocalculated": "ATC-2023-v1",
-        "health_level_autocalculated": 3
+        "health_level_autocalculated": 3,
+        "orgUnitId": "vboedbUs1As"
     },
     {
         "AMR_GLASS_AMC_TEA_PRODUCT_ID": "ANA37",
@@ -25,6 +26,7 @@
         "data_status_autocalculated": 3,
         "health_sector_autocalculated": 3,
         "atc_version_autocalculated": "ATC-2023-v1",
-        "health_level_autocalculated": 3
+        "health_level_autocalculated": 3,
+        "orgUnitId": "vboedbUs1As"
     }
 ]
