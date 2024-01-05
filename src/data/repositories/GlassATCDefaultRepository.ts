@@ -8,6 +8,7 @@ import {
     DDDData,
     GlassATCHistory,
     GlassATCVersion,
+    GlassATCVersionData,
     validateAtcVersion,
 } from "../../domain/entities/GlassATC";
 import { GlassATCRepository } from "../../domain/repositories/GlassATCRepository";
@@ -24,18 +25,10 @@ export class GlassATCDefaultRepository implements GlassATCRepository {
     }
 
     @cache()
-    getAtcVersion(
-        atcVersionKey: string
-    ): FutureData<
-        Array<
-            GlassATCVersion<
-                DDDCombinationsData | ConversionFactorData | DDDData | ATCData | DDDAlterationsData | ATCAlterationsData
-            >
-        >
-    > {
+    getAtcVersion(atcVersionKey: string): FutureData<GlassATCVersion> {
         if (validateAtcVersion(atcVersionKey)) {
             return this.dataStoreClient.listCollection<
-                GlassATCVersion<
+                GlassATCVersionData<
                     | DDDCombinationsData
                     | ConversionFactorData
                     | DDDData

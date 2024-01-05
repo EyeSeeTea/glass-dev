@@ -107,6 +107,7 @@ export class CalculateConsumptionDataProductLevelUseCase {
 
                     const rawSubstanceConsumptionCalculatedData = calculateConsumptionProductLevelData(
                         period,
+                        orgUnitId,
                         productRegistryAttributes,
                         rawProductConsumption,
                         atcCurrentVersionData,

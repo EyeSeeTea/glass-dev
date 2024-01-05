@@ -15,15 +15,7 @@ import calculationSolutionNoCombCodeFoundDDDAlterations from "./data/calculation
 import atcCurrentVersionDataJson from "./data/atcCurrentVersionData.json";
 import rawProductConsumptionJson from "./data/rawProductConsumption.json";
 import { calculateConsumptionProductLevelData } from "../calculationConsumptionProductLevelData";
-import {
-    ATCAlterationsData,
-    ATCData,
-    ConversionFactorData,
-    DDDAlterationsData,
-    DDDCombinationsData,
-    DDDData,
-    GlassATCVersion,
-} from "../../../../../entities/GlassATC";
+import { GlassATCVersion } from "../../../../../entities/GlassATC";
 import { ProductRegistryAttributes } from "../../../../../entities/data-entry/amc/ProductRegistryAttributes";
 import { RawProductConsumption } from "../../../../../entities/data-entry/amc/RawProductConsumption";
 import { RawSubstanceConsumptionCalculated } from "../../../../../entities/data-entry/amc/RawSubstanceConsumptionCalculated";
@@ -32,6 +24,7 @@ describe("Given calculate Consumption Product Level Data function", () => {
     describe("When product registry attributes has: strength unit from gram family (then content from gram family), no concentration volume and no volume, no combination codes, strength unit and ddd unit are the same", () => {
         it("Then should return correct solution", async () => {
             const period = "2020";
+            const orgUnitId = "vboedbUs1As";
             const productRegistryAttributes = givenProductRegistryAttributesByType();
             const rawProductConsumption = givenRawProductConsumption();
             const atcCurrentVersionData = givenAtcCurrentVersionData();
@@ -39,6 +32,7 @@ describe("Given calculate Consumption Product Level Data function", () => {
 
             const rawSubstanceConsumptionCalculatedData = calculateConsumptionProductLevelData(
                 period,
+                orgUnitId,
                 productRegistryAttributes,
                 rawProductConsumption,
                 atcCurrentVersionData,
@@ -51,6 +45,7 @@ describe("Given calculate Consumption Product Level Data function", () => {
         it("Then should return correct solution", async () => {
             const type = "conc_volume_and_volume";
             const period = "2020";
+            const orgUnitId = "vboedbUs1As";
             const productRegistryAttributes = givenProductRegistryAttributesByType(type);
             const rawProductConsumption = givenRawProductConsumption();
             const atcCurrentVersionData = givenAtcCurrentVersionData();
@@ -58,6 +53,7 @@ describe("Given calculate Consumption Product Level Data function", () => {
 
             const rawSubstanceConsumptionCalculatedData = calculateConsumptionProductLevelData(
                 period,
+                orgUnitId,
                 productRegistryAttributes,
                 rawProductConsumption,
                 atcCurrentVersionData,
@@ -71,6 +67,7 @@ describe("Given calculate Consumption Product Level Data function", () => {
         it("Then should return correct solution", async () => {
             const type = "unit_dose_combination_code";
             const period = "2020";
+            const orgUnitId = "vboedbUs1As";
             const productRegistryAttributes = givenProductRegistryAttributesByType(type);
             const rawProductConsumption = givenRawProductConsumption();
             const atcCurrentVersionData = givenAtcCurrentVersionData();
@@ -78,6 +75,7 @@ describe("Given calculate Consumption Product Level Data function", () => {
 
             const rawSubstanceConsumptionCalculatedData = calculateConsumptionProductLevelData(
                 period,
+                orgUnitId,
                 productRegistryAttributes,
                 rawProductConsumption,
                 atcCurrentVersionData,
@@ -91,6 +89,7 @@ describe("Given calculate Consumption Product Level Data function", () => {
         it("Then should return correct solution", async () => {
             const type = "millions_international_unit_different_ddd_unit";
             const period = "2020";
+            const orgUnitId = "vboedbUs1As";
             const productRegistryAttributes = givenProductRegistryAttributesByType(type);
             const rawProductConsumption = givenRawProductConsumption();
             const atcCurrentVersionData = givenAtcCurrentVersionData();
@@ -98,6 +97,7 @@ describe("Given calculate Consumption Product Level Data function", () => {
 
             const rawSubstanceConsumptionCalculatedData = calculateConsumptionProductLevelData(
                 period,
+                orgUnitId,
                 productRegistryAttributes,
                 rawProductConsumption,
                 atcCurrentVersionData,
@@ -111,6 +111,7 @@ describe("Given calculate Consumption Product Level Data function", () => {
         it("Then should return correct solution and no DDD will be calculated", async () => {
             const type = "no_combination_code_no_found_ddd";
             const period = "2020";
+            const orgUnitId = "vboedbUs1As";
             const productRegistryAttributes = givenProductRegistryAttributesByType(type);
             const rawProductConsumption = givenRawProductConsumption();
             const atcCurrentVersionData = givenAtcCurrentVersionData();
@@ -118,6 +119,7 @@ describe("Given calculate Consumption Product Level Data function", () => {
 
             const rawSubstanceConsumptionCalculatedData = calculateConsumptionProductLevelData(
                 period,
+                orgUnitId,
                 productRegistryAttributes,
                 rawProductConsumption,
                 atcCurrentVersionData,
@@ -131,6 +133,7 @@ describe("Given calculate Consumption Product Level Data function", () => {
         it("Then should return correct solution", async () => {
             const type = "no_combination_code_found_ddd_alterations";
             const period = "2020";
+            const orgUnitId = "vboedbUs1As";
             const productRegistryAttributes = givenProductRegistryAttributesByType(type);
             const rawProductConsumption = givenRawProductConsumption();
             const atcCurrentVersionData = givenAtcCurrentVersionData();
@@ -138,6 +141,7 @@ describe("Given calculate Consumption Product Level Data function", () => {
 
             const rawSubstanceConsumptionCalculatedData = calculateConsumptionProductLevelData(
                 period,
+                orgUnitId,
                 productRegistryAttributes,
                 rawProductConsumption,
                 atcCurrentVersionData,
@@ -150,6 +154,7 @@ describe("Given calculate Consumption Product Level Data function", () => {
         it("Then should return correct solution and don't do calculations for that row", async () => {
             const type = "wrong_strength_unit";
             const period = "2020";
+            const orgUnitId = "vboedbUs1As";
             const productRegistryAttributes = givenProductRegistryAttributesByType(type);
             const rawProductConsumption = givenRawProductConsumption();
             const atcCurrentVersionData = givenAtcCurrentVersionData();
@@ -157,6 +162,7 @@ describe("Given calculate Consumption Product Level Data function", () => {
 
             const rawSubstanceConsumptionCalculatedData = calculateConsumptionProductLevelData(
                 period,
+                orgUnitId,
                 productRegistryAttributes,
                 rawProductConsumption,
                 atcCurrentVersionData,
@@ -191,16 +197,8 @@ function givenRawProductConsumption(): RawProductConsumption[] {
     return rawProductConsumptionJson as RawProductConsumption[];
 }
 
-function givenAtcCurrentVersionData(): Array<
-    GlassATCVersion<
-        DDDCombinationsData | ConversionFactorData | DDDData | ATCData | DDDAlterationsData | ATCAlterationsData
-    >
-> {
-    return atcCurrentVersionDataJson as Array<
-        GlassATCVersion<
-            DDDCombinationsData | ConversionFactorData | DDDData | ATCData | DDDAlterationsData | ATCAlterationsData
-        >
-    >;
+function givenAtcCurrentVersionData(): GlassATCVersion {
+    return atcCurrentVersionDataJson as GlassATCVersion;
 }
 
 function getExpectedCalculationSolution(type?: string): RawSubstanceConsumptionCalculated[] {

@@ -9,10 +9,16 @@ export type GlassATCHistory = {
     uploadedDate: Date;
 };
 
-export type GlassATCVersion<T> = {
+export type GlassATCVersionData<T> = {
     name: "atc" | "ddd_combinations" | "ddd" | "conversion" | "ddd_alterations" | "atc_alterations";
     data: T[];
 };
+
+export type GlassATCVersion = Array<
+    GlassATCVersionData<
+        DDDCombinationsData | ConversionFactorData | DDDData | ATCData | DDDAlterationsData | ATCAlterationsData
+    >
+>;
 
 export type DDDCombinationsData = {
     COMB_CODE: string;

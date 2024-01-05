@@ -1,3 +1,4 @@
+import { Id } from "../../Ref";
 import { Salt } from "./Salt";
 import { Unit } from "./Unit";
 
@@ -53,6 +54,7 @@ export type RawSubstanceConsumptionCalculated = {
     packages_autocalculated: number;
     atc_version_autocalculated: string;
     ddds_autocalculated?: number;
+    orgUnitId: Id;
 };
 
 export type RawSubstanceConsumptionCalculatedKeys = keyof RawSubstanceConsumptionCalculated;

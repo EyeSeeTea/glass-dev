@@ -1,12 +1,11 @@
 import {
-    ATCAlterationsData,
-    ATCData,
     ConversionFactorData,
     DDDAlterationsData,
     DDDCombinationsData,
     DDDData,
     GlassATCVersion,
 } from "../../../../entities/GlassATC";
+import { Id } from "../../../../entities/Ref";
 import { ProductRegistryAttributes } from "../../../../entities/data-entry/amc/ProductRegistryAttributes";
 import { RawProductConsumption } from "../../../../entities/data-entry/amc/RawProductConsumption";
 import {
@@ -36,13 +35,10 @@ const DDD_ALTERATIONS_NAME = "ddd_alterations";
 
 export function calculateConsumptionProductLevelData(
     period: string,
+    orgUnitId: Id,
     teiInstancesData: ProductRegistryAttributes[],
     rawProductConsumptionData: RawProductConsumption[],
-    atcClassification: Array<
-        GlassATCVersion<
-            DDDCombinationsData | ConversionFactorData | DDDData | ATCData | DDDAlterationsData | ATCAlterationsData
-        >
-    >,
+    atcClassification: GlassATCVersion,
     atcVersion: string
 ): RawSubstanceConsumptionCalculated[] {
     const dddCombinations: DDDCombinationsData[] = atcClassification.find(({ name }) => name === DDD_COMBINATIONS_NAME)
@@ -77,6 +73,7 @@ export function calculateConsumptionProductLevelData(
     const rawSubstanceConsumptionCalculated: RawSubstanceConsumptionCalculated[] =
         aggregateDataByAtcRouteAdminYearHealthSectorAndHealthLevel(
             period,
+            orgUnitId,
             teiInstancesData,
             rawProductConsumptionData,
             contentDDDPerProductAndDDDPerPackage,
@@ -314,6 +311,7 @@ function getTonnesPerProduct(
 // Given 1&2&3 calculates 4, 5, 6, 7, 8
 function aggregateDataByAtcRouteAdminYearHealthSectorAndHealthLevel(
     period: string,
+    orgUnitId: Id,
     teiInstancesData: ProductRegistryAttributes[],
     rawProductConsumptionData: RawProductConsumption[],
     contentDDDPerProductAndDDDPerPackage: ContentDDDPerProductAndDDDPerPackage[],
@@ -384,6 +382,7 @@ function aggregateDataByAtcRouteAdminYearHealthSectorAndHealthLevel(
                               health_sector_autocalculated: health_sector_manual,
                               atc_version_autocalculated: atcVersion,
                               health_level_autocalculated: health_level_manual,
+                              orgUnitId,
                           };
 
                 const ddds_autocalculated =
