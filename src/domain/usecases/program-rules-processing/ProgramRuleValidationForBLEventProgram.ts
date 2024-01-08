@@ -34,29 +34,30 @@ export class ProgramRuleValidationForBLEventProgram {
     constructor(private programRulesMetadataRepository: ProgramRulesMetadataRepository) {}
 
     public getValidatedTeisAndEvents(
-        events: D2TrackerEvent[],
         programId: string,
-        orgunitId: string,
+        events?: D2TrackerEvent[],
         teis?: D2TrackerTrackedEntity[] //For tracker programs only
     ): FutureData<ValidationResult> {
         return this.programRulesMetadataRepository.getMetadata(programId).flatMap(metadata => {
             //Before proccessing, add ids to tei, enrollement and event so thier relationships can be processed.
-            const teisWithId = teis?.map((tei, index) => {
-                tei.trackedEntity = index.toString();
-                const enrollementsWithId = tei.enrollments?.map((enrollment, index) => {
-                    enrollment.enrollment = index.toString();
-                    const eventsWithIds = enrollment.events.map((ev, index) => {
-                        ev.event = index.toString();
+            const teisWithId = teis?.map((tei, teiIndex) => {
+                tei.trackedEntity = teiIndex.toString();
+                const enrollmentsWithId = tei.enrollments?.map((enrollment, enrollmentIndex) => {
+                    enrollment.enrollment = enrollmentIndex.toString();
+                    const eventsWithIds = enrollment.events.map((ev, eventIndex) => {
+                        ev.event = eventIndex.toString();
+                        ev.enrollment = enrollmentIndex.toString();
+                        ev.trackedEntity = teiIndex.toString();
                         return ev;
                     });
                     enrollment.events = eventsWithIds;
                     return enrollment;
                 });
-                tei.enrollments = enrollementsWithId;
+                tei.enrollments = enrollmentsWithId;
                 return tei;
             });
 
-            return this.getEventEffects(events, metadata, orgunitId, teisWithId).flatMap(eventEffects => {
+            return this.getEventEffects(metadata, events, teisWithId).flatMap(eventEffects => {
                 const actionsResult = this.getActions(eventEffects, metadata);
                 if (actionsResult.blockingErrors.length > 0) {
                     //If there are blocking errors, do not process further. return the errors.
@@ -71,10 +72,10 @@ export class ProgramRuleValidationForBLEventProgram {
                     const eventsToBeUpdated = _.flatMap(eventEffects, eventEffect => eventEffect.events);
                     const eventsById = _.keyBy(eventsToBeUpdated, "event");
                     const eventsUpdated = this.getUpdatedEvents(actionsResult.actions, eventsById);
-                    const unChangedEvents = events.filter(e => !eventsUpdated.some(ue => ue.event === e.event));
+                    const unChangedEvents = events?.filter(e => !eventsUpdated.some(ue => ue.event === e.event)) ?? [];
                     const consolidatedEvents = [...eventsUpdated, ...unChangedEvents];
 
-                    const teisCurrent = _.compact(eventEffects.map(eventEffect => eventEffect.tei));
+                    const teisCurrent = teisWithId ? teisWithId : [];
 
                     const teisUpdated: D2TrackerTrackedEntity[] = this.getUpdatedTeis(
                         teisCurrent,
@@ -338,21 +339,19 @@ export class ProgramRuleValidationForBLEventProgram {
     }
 
     public getEventEffects(
-        events: D2TrackerEvent[],
         metadata: BulkLoadMetadata,
-        orgUnitId: string,
+        events?: D2TrackerEvent[],
         teis?: D2TrackerTrackedEntity[]
     ): FutureData<EventEffect[]> {
         const program = metadata.programs[0];
         if (program) {
             switch (program.programType) {
                 case "WITHOUT_REGISTRATION":
-                    return Future.success(this.getEventEffectsForEventProgram(events, metadata));
+                    if (events) return Future.success(this.getEventEffectsForEventProgram(events, metadata));
+                    else return Future.error("No events");
 
                 case "WITH_REGISTRATION":
-                    return this.getEventEffectsForTrackerProgram(teis, { program, metadata }, orgUnitId).flatMap(ee =>
-                        Future.success(ee)
-                    );
+                    return this.getEventEffectsForTrackerProgram(teis, { program, metadata });
             }
         } else return Future.error("Unknown program");
     }
@@ -389,8 +388,7 @@ export class ProgramRuleValidationForBLEventProgram {
 
     private getEventEffectsForTrackerProgram(
         teis: D2TrackerTrackedEntity[] | undefined,
-        options: { program: Program; metadata: BulkLoadMetadata },
-        orgUnitId: string
+        options: { program: Program; metadata: BulkLoadMetadata }
     ): FutureData<EventEffect[]> {
         const { program, metadata } = options;
 
@@ -579,7 +577,7 @@ export class ProgramRuleValidationForBLEventProgram {
             programStageId: event.programStage,
             orgUnitId: event.orgUnit,
             orgUnitName: event.orgUnit,
-            enrollmentId: undefined,
+            enrollmentId: event.enrollment,
             enrollmentStatus: undefined,
             status: event.status,
             occurredAt: event.occurredAt,

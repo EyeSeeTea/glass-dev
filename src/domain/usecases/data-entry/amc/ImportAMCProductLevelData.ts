@@ -39,7 +39,8 @@ export class ImportAMCProductLevelData {
         eventListId: string | undefined,
         orgUnitId: string,
         orgUnitName: string,
-        moduleName: string
+        moduleName: string,
+        period: string
     ): FutureData<ImportSummary> {
         return this.excelRepository.loadTemplate(file, AMC_PRODUCT_REGISTER_PROGRAM_ID).flatMap(_templateId => {
             const amcTemplate = _.values(templates)
@@ -60,17 +61,11 @@ export class ImportAMCProductLevelData {
                     if (action === "CREATE_AND_UPDATE") {
                         return this.mapAMCProductDataToTrackedEntities(dataPackage, orgUnitId, orgUnitName).flatMap(
                             entities => {
-                                const allEvents = entities.flatMap(e =>
-                                    _(e.enrollments?.flatMap(en => en.events))
-                                        .compact()
-                                        .value()
-                                );
                                 return this.validateTEIsAndEvents(
                                     entities,
-                                    allEvents,
                                     orgUnitId,
                                     orgUnitName,
-                                    "2022",
+                                    period,
                                     AMC_PRODUCT_REGISTER_PROGRAM_ID
                                 ).flatMap(validationResults => {
                                     if (validationResults.blockingErrors.length > 0) {
@@ -102,7 +97,8 @@ export class ImportAMCProductLevelData {
                                             return mapToImportSummary(
                                                 response,
                                                 "trackedEntity",
-                                                this.metadataRepository
+                                                this.metadataRepository,
+                                                validationResults.nonBlockingErrors
                                             ).flatMap(summary => {
                                                 return uploadIdListFileAndSave(
                                                     "primaryUploadId",
@@ -225,8 +221,14 @@ export class ImportAMCProductLevelData {
                         trackedEntity: "",
                         trackedEntityType: AMR_GLASS_AMC_TET_PRODUCT_REGISTER,
                         enrollments: enrollments,
-                        attributes: [],
+                        attributes: attributes.map(attr => {
+                            return {
+                                attribute: attr.attribute,
+                                value: attr.value.toString(),
+                            };
+                        }),
                     };
+
                     return entity;
                 });
                 return Future.success(trackedEntities);
@@ -235,7 +237,6 @@ export class ImportAMCProductLevelData {
 
     private validateTEIsAndEvents(
         teis: D2TrackerTrackedEntity[],
-        events: D2TrackerEvent[],
         orgUnitId: string,
         orgUnitName: string,
         period: string,
@@ -251,12 +252,7 @@ export class ImportAMCProductLevelData {
         // );
 
         return Future.joinObj({
-            programRuleValidationResults: programRuleValidations.getValidatedTeisAndEvents(
-                events,
-                programId,
-                orgUnitId,
-                teis
-            ),
+            programRuleValidationResults: programRuleValidations.getValidatedTeisAndEvents(programId, [], teis),
             customRuleValidationsResults: Future.success(undefined),
         }).flatMap(({ programRuleValidationResults, customRuleValidationsResults }) => {
             const consolidatedValidationResults: ValidationResult = {
