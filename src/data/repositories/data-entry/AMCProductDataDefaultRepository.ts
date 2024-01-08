@@ -15,6 +15,13 @@ import {
 } from "../../../domain/entities/data-entry/amc/ProductRegisterProgram";
 import { apiToFuture } from "../../../utils/futures";
 import { AMCProductDataRepository } from "../../../domain/repositories/data-entry/AMCProductDataRepository";
+import { D2TrackerEvent, DataValue } from "@eyeseetea/d2-api/api/trackerEvents";
+import {
+    RawSubstanceConsumptionCalculated,
+    RawSubstanceConsumptionCalculatedKeys,
+} from "../../../domain/entities/data-entry/amc/RawSubstanceConsumptionCalculated";
+import { TrackerPostResponse } from "@eyeseetea/d2-api/api/tracker";
+import { importApiTracker } from "../utils/importApiTracker";
 
 export const AMC_PRODUCT_REGISTER_PROGRAM_ID = "G6ChA5zMW9n";
 
@@ -22,6 +29,7 @@ export const AMC_RAW_PRODUCT_CONSUMPTION_STAGE_ID = "GmElQHKXLIE";
 export const AMC_RAW_SUBSTANCE_CONSUMPTION_CALCULATED_STAGE_ID = "q8cl5qllyjd";
 
 export const AMR_GLASS_AMC_TEA_PRODUCT_ID = "iasfoeU8veF";
+const TRACKER_IMPORT_STRATEGY_CREATE_AND_UPDATE = "CREATE_AND_UPDATE";
 
 export class AMCProductDataDefaultRepository implements AMCProductDataRepository {
     constructor(private api: D2Api) {}
@@ -61,6 +69,34 @@ export class AMCProductDataDefaultRepository implements AMCProductDataRepository
                     specimens: [],
                 };
         });
+    }
+
+    // TODO: decouple TrackerPostResponse from DHIS2
+    importCalculations(
+        productDataTrackedEntities: ProductDataTrackedEntity[],
+        rawSubstanceConsumptionCalculatedStageMetadata: ProgramStage,
+        rawSubstanceConsumptionCalculatedData: RawSubstanceConsumptionCalculated[],
+        orgUnitId: Id,
+        orgUnitName: string
+    ): FutureData<TrackerPostResponse> {
+        const d2TrackerEvents = this.mapRawSubstanceConsumptionCalculatedToD2TrackerEvent(
+            productDataTrackedEntities,
+            rawSubstanceConsumptionCalculatedStageMetadata,
+            rawSubstanceConsumptionCalculatedData,
+            orgUnitId,
+            orgUnitName
+        );
+        if (!_.isEmpty(d2TrackerEvents)) {
+            return importApiTracker(
+                this.api,
+                { events: d2TrackerEvents },
+                TRACKER_IMPORT_STRATEGY_CREATE_AND_UPDATE
+            ).flatMap(response => {
+                return Future.success(response);
+            });
+        } else {
+            return Future.error("There are no events to be created");
+        }
     }
 
     getProductRegisterAndRawProductConsumptionByProductIds(
@@ -178,6 +214,54 @@ export class AMCProductDataDefaultRepository implements AMCProductDataRepository
                 }
             })
             .filter(Boolean) as ProductDataTrackedEntity[];
+    }
+
+    private mapRawSubstanceConsumptionCalculatedToD2TrackerEvent(
+        productDataTrackedEntities: ProductDataTrackedEntity[],
+        rawSubstanceConsumptionCalculatedStageMetadata: ProgramStage,
+        rawSubstanceConsumptionCalculatedData: RawSubstanceConsumptionCalculated[],
+        orgUnitId: Id,
+        orgUnitName: string
+    ): D2TrackerEvent[] {
+        return rawSubstanceConsumptionCalculatedData
+            .map(data => {
+                const productId = data.AMR_GLASS_AMC_TEA_PRODUCT_ID;
+                const productDataTrackedEntity = productDataTrackedEntities.find(productDataTrackedEntity =>
+                    productDataTrackedEntity.attributes.some(attribute => attribute.value === productId)
+                );
+                if (productDataTrackedEntity) {
+                    const dataValues: DataValue[] = rawSubstanceConsumptionCalculatedStageMetadata.dataElements.map(
+                        ({ id, code, valueType, optionSetValue, optionSet }) => {
+                            const value = data[code.trim() as RawSubstanceConsumptionCalculatedKeys];
+                            const dataValue = optionSetValue
+                                ? optionSet.options.find(option => option.name === value)?.code || ""
+                                : valueType === "NUMBER" && value === 0
+                                ? value
+                                : value || "";
+
+                            return {
+                                dataElement: id,
+                                value: dataValue.toString(),
+                            };
+                        }
+                    );
+
+                    return {
+                        event: "",
+                        occurredAt: new Date().getTime().toString(),
+                        status: "COMPLETED",
+                        trackedEntity: productDataTrackedEntity.trackedEntityId,
+                        enrollment: productDataTrackedEntity.enrollmentId,
+                        enrollmentStatus: "ACTIVE",
+                        program: AMC_PRODUCT_REGISTER_PROGRAM_ID,
+                        programStage: AMC_RAW_SUBSTANCE_CONSUMPTION_CALCULATED_STAGE_ID,
+                        orgUnit: orgUnitId,
+                        orgUnitName,
+                        dataValues,
+                    };
+                }
+            })
+            .filter(Boolean) as D2TrackerEvent[];
     }
 }
 
