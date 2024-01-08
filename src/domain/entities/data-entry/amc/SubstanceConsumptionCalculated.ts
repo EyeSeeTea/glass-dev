@@ -3,34 +3,31 @@ import { RouteOfAdministrationKey } from "./RouteOfAdministration";
 import { SaltKey } from "./Salt";
 
 export type SubstanceConsumptionCalculated = {
-    eventId: Id;
-    atc_manual: string;
-    route_admin_manual: RouteOfAdministrationKey;
-    salt_manual: SaltKey;
-    packages_manual: number;
-    ddds_manual: number;
-    atc_version_manual: string;
-    tons_manual: number;
-    data_status_manual: number;
-    health_sector_manual: number;
-    health_level_manual: number;
+    atc_autocalculated: string;
+    route_admin_autocalculated: RouteOfAdministrationKey;
+    salt_autocalculated: SaltKey;
+    packages_autocalculated: number;
+    ddds_autocalculated: number;
+    atc_version_autocalculated: string;
+    tons_autocalculated: number;
+    data_status_autocalculated: number;
+    health_sector_autocalculated: number;
+    health_level_autocalculated: number;
     period: string;
     orgUnitId: Id;
-    ddds_adjust: number;
 };
 
 export const SUBSTANCE_CONSUMPTION_CALCULATED_KEYS = [
-    "atc_manual",
-    "route_admin_manual",
-    "salt_manual",
-    "packages_manual",
-    "ddds_manual",
-    "atc_version_manual",
-    "tons_manual",
-    "data_status_manual",
-    "health_sector_manual",
-    "health_level_manual",
-    "period",
-    "orgUnitId",
-    "ddds_adjust",
+    "atc_autocalculated",
+    "route_admin_autocalculated",
+    "salt_autocalculated",
+    "packages_autocalculated",
+    "ddds_autocalculated",
+    "atc_version_autocalculated",
+    "tons_autocalculated",
+    "data_status_autocalculated",
+    "health_sector_autocalculated",
+    "health_level_autocalculated",
 ];
+
+export type SubstanceConsumptionCalculatedKeys = keyof SubstanceConsumptionCalculated;
