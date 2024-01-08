@@ -82,7 +82,7 @@ export class ImportBLTemplateEventProgram {
                                             return Future.success(errorSummary);
                                         } else {
                                             const eventIdLineNoMap: { id: string; lineNo: number }[] = [];
-                                            const eventsWithId = validatedEventResults.events.map(e => {
+                                            const eventsWithId = validatedEventResults.events?.map(e => {
                                                 const generatedId = generateId();
                                                 eventIdLineNoMap.push({
                                                     id: generatedId,
@@ -92,7 +92,7 @@ export class ImportBLTemplateEventProgram {
                                                 return e;
                                             });
                                             return this.dhis2EventsDefaultRepository
-                                                .import({ events: eventsWithId }, action)
+                                                .import({ events: eventsWithId ?? [] }, action)
                                                 .flatMap(result => {
                                                     return mapToImportSummary(
                                                         result,
@@ -204,11 +204,7 @@ export class ImportBLTemplateEventProgram {
         );
 
         return Future.joinObj({
-            programRuleValidationResults: programRuleValidations.getValidatedTeisAndEvents(
-                events,
-                programId,
-                orgUnitId
-            ),
+            programRuleValidationResults: programRuleValidations.getValidatedTeisAndEvents(programId, events),
             customRuleValidationsResults: customValidations.getValidatedEvents(
                 events,
                 orgUnitId,

@@ -139,7 +139,7 @@ export interface ActionResult {
 
 export interface ValidationResult {
     teis?: D2TrackerTrackedEntity[];
-    events: Event[];
+    events?: Event[];
     blockingErrors: ConsistencyError[];
     nonBlockingErrors: ConsistencyError[];
 }
