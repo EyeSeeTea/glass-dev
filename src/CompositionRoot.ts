@@ -254,7 +254,6 @@ export function getCompositionRoot(instance: Instance) {
                 instanceRepository,
                 amcProductDataRepository,
                 glassAtcRepository,
-                trackerRepository,
                 metadataRepository
             ),
             consumptionDataSubstanceLevel: new CalculateConsumptionDataSubstanceLevelUseCase(
