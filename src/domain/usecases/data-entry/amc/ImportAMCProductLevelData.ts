@@ -89,7 +89,7 @@ export class ImportAMCProductLevelData {
                                                 trackedEntities:
                                                     validationResults.teis && validationResults.teis.length > 0
                                                         ? validationResults.teis
-                                                        : entities,
+                                                        : [],
                                             },
                                             action
                                         )
@@ -254,7 +254,7 @@ export class ImportAMCProductLevelData {
         return Future.joinObj({
             programRuleValidationResults: programRuleValidations.getValidatedTeisAndEvents(programId, [], teis),
             customRuleValidationsResults: Future.success(undefined),
-        }).flatMap(({ programRuleValidationResults, customRuleValidationsResults }) => {
+        }).flatMap(({ programRuleValidationResults }) => {
             const consolidatedValidationResults: ValidationResult = {
                 teis: programRuleValidationResults.teis,
                 events: programRuleValidationResults.events,
