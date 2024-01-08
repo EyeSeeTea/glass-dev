@@ -2,7 +2,6 @@ import { Future, FutureData } from "../../../entities/Future";
 import { Id } from "../../../entities/Ref";
 import { mapToImportSummary, readTemplate } from "../ImportBLTemplateEventProgram";
 import { ExcelRepository } from "../../../repositories/ExcelRepository";
-import { TrackerRepository } from "../../../repositories/TrackerRepository";
 import { GlassATCRepository } from "../../../repositories/GlassATCRepository";
 import { InstanceRepository } from "../../../repositories/InstanceRepository";
 import { GlassATCHistory, createAtcVersionKey } from "../../../entities/GlassATC";
@@ -27,13 +26,8 @@ import {
     ProgramStageDataElement,
     ProgramTrackedEntityAttribute,
 } from "../../../entities/data-entry/amc/ProductRegisterProgram";
-import { D2TrackerEvent, DataValue } from "@eyeseetea/d2-api/api/trackerEvents";
 import { MetadataRepository } from "../../../repositories/MetadataRepository";
 import { ImportSummary } from "../../../entities/data-entry/ImportSummary";
-import {
-    RawSubstanceConsumptionCalculated,
-    RawSubstanceConsumptionCalculatedKeys,
-} from "../../../entities/data-entry/amc/RawSubstanceConsumptionCalculated";
 import {
     PRODUCT_REGISTRY_ATTRIBUTES_KEYS,
     ProductRegistryAttributes,
@@ -44,7 +38,6 @@ import {
 } from "../../../entities/data-entry/amc/RawProductConsumption";
 
 const TEMPLATE_ID = "TRACKER_PROGRAM_GENERATED_v3";
-const TRACKER_IMPORT_STRATEGY_CREATE_AND_UPDATE = "CREATE_AND_UPDATE";
 const IMPORT_SUMMARY_EVENT_TYPE = "event";
 
 export class CalculateConsumptionDataProductLevelUseCase {
@@ -53,7 +46,6 @@ export class CalculateConsumptionDataProductLevelUseCase {
         private instanceRepository: InstanceRepository,
         private amcProductDataRepository: AMCProductDataRepository,
         private atcRepository: GlassATCRepository,
-        private trackerRepository: TrackerRepository,
         private metadataRepository: MetadataRepository
     ) {}
 
@@ -123,33 +115,25 @@ export class CalculateConsumptionDataProductLevelUseCase {
                         return Future.error("Cannot find Raw Substance Consumption Calculated program stage metadata");
                     }
 
-                    const d2TrackerEvents = mapRawSubstanceConsumptionCalculatedToD2TrackerEvent(
-                        productDataTrackedEntities,
-                        rawSubstanceConsumptionCalculatedStageMetadata,
-                        rawSubstanceConsumptionCalculatedData,
-                        orgUnitId,
-                        orgUnitName
-                    );
-
-                    return this.createEvents(d2TrackerEvents);
+                    return this.amcProductDataRepository
+                        .importCalculations(
+                            productDataTrackedEntities,
+                            rawSubstanceConsumptionCalculatedStageMetadata,
+                            rawSubstanceConsumptionCalculatedData,
+                            orgUnitId,
+                            orgUnitName
+                        )
+                        .flatMap(response => {
+                            return mapToImportSummary(
+                                response,
+                                IMPORT_SUMMARY_EVENT_TYPE,
+                                this.metadataRepository
+                            ).flatMap(summary => {
+                                return Future.success(summary.importSummary);
+                            });
+                        });
                 });
             });
-    }
-
-    private createEvents(d2TrackerEvents: D2TrackerEvent[]): FutureData<ImportSummary> {
-        if (!_.isEmpty(d2TrackerEvents)) {
-            return this.trackerRepository
-                .import({ events: d2TrackerEvents }, TRACKER_IMPORT_STRATEGY_CREATE_AND_UPDATE)
-                .flatMap(response => {
-                    return mapToImportSummary(response, IMPORT_SUMMARY_EVENT_TYPE, this.metadataRepository).flatMap(
-                        summary => {
-                            return Future.success(summary.importSummary);
-                        }
-                    );
-                });
-        } else {
-            return Future.error("There are no events to be created");
-        }
     }
 
     private getProductIdsFromFile(file: File): FutureData<string[]> {
@@ -308,52 +292,4 @@ export function getRawProductConsumption(
             } as RawProductConsumption
         );
     });
-}
-
-export function mapRawSubstanceConsumptionCalculatedToD2TrackerEvent(
-    productDataTrackedEntities: ProductDataTrackedEntity[],
-    rawSubstanceConsumptionCalculatedStageMetadata: ProgramStage,
-    rawSubstanceConsumptionCalculatedData: RawSubstanceConsumptionCalculated[],
-    orgUnitId: Id,
-    orgUnitName: string
-): D2TrackerEvent[] {
-    return rawSubstanceConsumptionCalculatedData
-        .map(data => {
-            const productId = data.AMR_GLASS_AMC_TEA_PRODUCT_ID;
-            const productDataTrackedEntity = productDataTrackedEntities.find(productDataTrackedEntity =>
-                productDataTrackedEntity.attributes.some(attribute => attribute.value === productId)
-            );
-            if (productDataTrackedEntity) {
-                const dataValues: DataValue[] = rawSubstanceConsumptionCalculatedStageMetadata.dataElements.map(
-                    ({ id, code, valueType, optionSetValue, optionSet }) => {
-                        const value = data[code.trim() as RawSubstanceConsumptionCalculatedKeys];
-                        const dataValue = optionSetValue
-                            ? optionSet.options.find(option => option.name === value)?.code || ""
-                            : valueType === "NUMBER" && value === 0
-                            ? value
-                            : value || "";
-
-                        return {
-                            dataElement: id,
-                            value: dataValue.toString(),
-                        };
-                    }
-                );
-
-                return {
-                    event: "",
-                    occurredAt: new Date().getTime().toString(),
-                    status: "COMPLETED",
-                    trackedEntity: productDataTrackedEntity.trackedEntityId,
-                    enrollment: productDataTrackedEntity.enrollmentId,
-                    enrollmentStatus: "ACTIVE",
-                    program: AMC_PRODUCT_REGISTER_PROGRAM_ID,
-                    programStage: AMC_RAW_SUBSTANCE_CONSUMPTION_CALCULATED_STAGE_ID,
-                    orgUnit: orgUnitId,
-                    orgUnitName,
-                    dataValues,
-                };
-            }
-        })
-        .filter(Boolean) as D2TrackerEvent[];
 }
