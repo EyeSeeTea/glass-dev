@@ -42,10 +42,18 @@ export function calculateConsumptionSubstanceLevelData(
                         dddStandarizedInRawSubstanceConsumption
                     );
                     return {
-                        ...rawSubstanceConsumption,
                         period,
                         orgUnitId,
-                        ddds_adjust: dddsAdjust,
+                        atc_autocalculated: rawSubstanceConsumption.atc_manual,
+                        route_admin_autocalculated: rawSubstanceConsumption.route_admin_manual,
+                        salt_autocalculated: rawSubstanceConsumption.salt_manual,
+                        packages_autocalculated: rawSubstanceConsumption.packages_manual,
+                        ddds_autocalculated: dddsAdjust,
+                        atc_version_autocalculated: currentAtcVersionKey,
+                        tons_autocalculated: rawSubstanceConsumption.tons_manual,
+                        data_status_autocalculated: rawSubstanceConsumption.data_status_manual,
+                        health_sector_autocalculated: rawSubstanceConsumption.health_sector_manual,
+                        health_level_autocalculated: rawSubstanceConsumption.health_level_manual,
                     };
                 }
             }

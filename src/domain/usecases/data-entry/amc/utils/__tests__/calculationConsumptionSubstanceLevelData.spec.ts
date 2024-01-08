@@ -81,20 +81,17 @@ function verifyCalculationResult(result: any[], type?: string) {
 
     result.forEach((calculation, index) => {
         const expectedCalculation = expectedSolution[index];
-        expect(calculation.eventId).toBe(expectedCalculation?.eventId);
-        expect(calculation.atc_manual).toBe(expectedCalculation?.atc_manual);
-        expect(calculation.route_admin_manual).toBe(expectedCalculation?.route_admin_manual);
-        expect(calculation.salt_manual).toBe(expectedCalculation?.salt_manual);
-        expect(calculation.packages_manual).toBe(expectedCalculation?.packages_manual);
-        expect(calculation.ddds_manual).toBe(expectedCalculation?.ddds_manual);
-        expect(calculation.atc_version_manual).toBe(expectedCalculation?.atc_version_manual);
-        expect(calculation.tons_manual).toBe(expectedCalculation?.tons_manual);
+        expect(calculation.atc_autocalculated).toBe(expectedCalculation?.atc_autocalculated);
+        expect(calculation.route_admin_autocalculated).toBe(expectedCalculation?.route_admin_autocalculated);
+        expect(calculation.salt_autocalculated).toBe(expectedCalculation?.salt_autocalculated);
+        expect(calculation.packages_autocalculated).toBe(expectedCalculation?.packages_autocalculated);
+        expect(calculation.ddds_autocalculated).toBe(expectedCalculation?.ddds_autocalculated);
+        expect(calculation.atc_version_autocalculated).toBe(expectedCalculation?.atc_version_autocalculated);
+        expect(calculation.tons_autocalculated).toBe(expectedCalculation?.tons_autocalculated);
         expect(calculation.data_status_autocalculated).toBe(expectedCalculation?.data_status_autocalculated);
         expect(calculation.health_sector_autocalculated).toBe(expectedCalculation?.health_sector_autocalculated);
-        expect(calculation.atc_version_autocalculated).toBe(expectedCalculation?.atc_version_autocalculated);
         expect(calculation.health_level_autocalculated).toBe(expectedCalculation?.health_level_autocalculated);
         expect(calculation.period).toBe(expectedCalculation?.period);
         expect(calculation.orgUnitId).toBe(expectedCalculation?.orgUnitId);
-        expect(calculation.ddds_adjust).toBe(expectedCalculation?.ddds_adjust);
     });
 }

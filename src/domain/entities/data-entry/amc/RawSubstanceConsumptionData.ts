@@ -1,9 +1,7 @@
-import { Id } from "../../Ref";
 import { RouteOfAdministrationKey } from "./RouteOfAdministration";
 import { SaltKey } from "./Salt";
 
 export type RawSubstanceConsumptionData = {
-    eventId: Id;
     atc_manual: string;
     route_admin_manual: RouteOfAdministrationKey;
     salt_manual: SaltKey;

@@ -192,7 +192,8 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
                             secondaryUploadId,
                             currentPeriod,
                             currentOrgUnitAccess.orgUnitId,
-                            currentOrgUnitAccess.orgUnitName
+                            currentOrgUnitAccess.orgUnitName,
+                            currentModuleAccess.moduleName
                         )
                         .run(
                             importSummary => {
