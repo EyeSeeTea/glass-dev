@@ -1,5 +1,4 @@
 import { Dhis2EventsDefaultRepository } from "../../../data/repositories/Dhis2EventsDefaultRepository";
-import { InstanceDefaultRepository } from "../../../data/repositories/InstanceDefaultRepository";
 import { ImportStrategy } from "../../entities/data-entry/DataValuesSaveSummary";
 import { ConsistencyError, ImportSummary } from "../../entities/data-entry/ImportSummary";
 import { Future, FutureData } from "../../entities/Future";
@@ -20,11 +19,12 @@ import { ProgramRulesMetadataRepository } from "../../repositories/program-rules
 import { CustomValidationForEventProgram } from "./egasp/CustomValidationForEventProgram";
 import { Template } from "../../entities/Template";
 import { ExcelReader } from "../../utils/ExcelReader";
+import { InstanceRepository } from "../../repositories/InstanceRepository";
 
 export class ImportBLTemplateEventProgram {
     constructor(
         private excelRepository: ExcelRepository,
-        private instanceRepository: InstanceDefaultRepository,
+        private instanceRepository: InstanceRepository,
         private glassDocumentsRepository: GlassDocumentsRepository,
         private glassUploadsRepository: GlassUploadsRepository,
         private dhis2EventsDefaultRepository: Dhis2EventsDefaultRepository,
@@ -361,7 +361,7 @@ export const readTemplate = (
     template: Template,
     dataForm: DataForm,
     excelRepository: ExcelRepository,
-    instanceReporsitory: InstanceDefaultRepository,
+    instanceReporsitory: InstanceRepository,
     programId: Id
 ): FutureData<DataPackage | undefined> => {
     const reader = new ExcelReader(excelRepository, instanceReporsitory);

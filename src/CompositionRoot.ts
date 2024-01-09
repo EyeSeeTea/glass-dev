@@ -80,8 +80,10 @@ import { DownloadEmptyTemplateDefautlRepository } from "./data/repositories/down
 import { BulkLoadDataStoreClient } from "./data/data-store/BulkLoadDataStoreClient";
 import { ApplyAMCQuestionUpdationUseCase } from "./domain/usecases/ApplyAMCQuestionUpdationUseCase";
 import { SaveImportSummaryErrorsOfFilesInUploadsUseCase } from "./domain/usecases/SaveImportSummaryErrorsOfFilesInUploadsUseCase";
-import { AMCProductDataRepository } from "./data/repositories/data-entry/AMCProductDataRepository";
+import { AMCProductDataDefaultRepository } from "./data/repositories/data-entry/AMCProductDataDefaultRepository";
 import { AMCSubstanceDataRepository } from "./data/repositories/data-entry/AMCSubstanceDataRepository";
+import { CalculateConsumptionDataProductLevelUseCase } from "./domain/usecases/data-entry/amc/CalculateConsumptionDataProductLevelUseCase";
+import { GlassATCDefaultRepository } from "./data/repositories/GlassATCDefaultRepository";
 
 export function getCompositionRoot(instance: Instance) {
     const api = getD2APiFromInstance(instance);
@@ -113,8 +115,9 @@ export function getCompositionRoot(instance: Instance) {
     const captureFormRepository = new CaptureFormDefaultRepository(api);
     const signalRepository = new SignalDefaultRepository(dataStoreClient, api);
     const downloadEmptyTemplateRepository = new DownloadEmptyTemplateDefautlRepository(instance);
-    const amcProductDataRepository = new AMCProductDataRepository();
+    const amcProductDataRepository = new AMCProductDataDefaultRepository(api);
     const amcSubstanceDataRepository = new AMCSubstanceDataRepository();
+    const glassAtcRepository = new GlassATCDefaultRepository(dataStoreClient);
 
     return {
         instance: getExecute({
@@ -243,6 +246,15 @@ export function getCompositionRoot(instance: Instance) {
             getPopulatedForm: new GetPopulatedProgramQuestionnaireUseCase(captureFormRepository),
             delete: new DeleteSignalUseCase(dhis2EventsDefaultRepository, signalRepository),
             applyValidations: new ApplyAMCQuestionUpdationUseCase(),
+        }),
+        calculations: getExecute({
+            consumptionDataProductLevel: new CalculateConsumptionDataProductLevelUseCase(
+                excelRepository,
+                instanceRepository,
+                amcProductDataRepository,
+                glassAtcRepository,
+                metadataRepository
+            ),
         }),
     };
 }
