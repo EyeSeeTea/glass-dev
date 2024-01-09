@@ -17,7 +17,7 @@ import { mapToImportSummary, readTemplate, uploadIdListFileAndSave } from "../Im
 import { MetadataRepository } from "../../../repositories/MetadataRepository";
 
 export const AMC_PRODUCT_REGISTER_PROGRAM_ID = "G6ChA5zMW9n";
-const AMR_RAW_PRODUCT_CONSUMPTION_STAGE_ID = "GmElQHKXLIE";
+const AMC_RAW_PRODUCT_CONSUMPTION_STAGE_ID = "GmElQHKXLIE";
 const AMR_GLASS_AMC_TET_PRODUCT_REGISTER = "uE6bIKLsGYW";
 export class ImportAMCProductLevelData {
     constructor(
@@ -99,7 +99,7 @@ export class ImportAMCProductLevelData {
         orgUnitName: string
     ): FutureData<D2TrackerTrackedEntity[]> {
         return this.trackerRepository
-            .getProgramMetadata(AMC_PRODUCT_REGISTER_PROGRAM_ID, AMR_RAW_PRODUCT_CONSUMPTION_STAGE_ID)
+            .getProgramMetadata(AMC_PRODUCT_REGISTER_PROGRAM_ID, AMC_RAW_PRODUCT_CONSUMPTION_STAGE_ID)
             .flatMap(metadata => {
                 if (amcProductData.type !== "trackerPrograms") return Future.error("Incorrect data package");
                 const trackedEntities = amcProductData.trackedEntityInstances.map(tei => {
@@ -150,7 +150,7 @@ export class ImportAMCProductLevelData {
                         return {
                             program: AMC_PRODUCT_REGISTER_PROGRAM_ID,
                             event: "",
-                            programStage: AMR_RAW_PRODUCT_CONSUMPTION_STAGE_ID,
+                            programStage: AMC_RAW_PRODUCT_CONSUMPTION_STAGE_ID,
                             orgUnit: orgUnitId,
                             dataValues: rawProductConsumptionStageDataValues,
                             occurredAt: new Date().getTime().toString(),

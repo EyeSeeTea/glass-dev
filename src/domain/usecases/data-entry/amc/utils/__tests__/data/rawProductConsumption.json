@@ -1,0 +1,44 @@
+[
+    {
+        "AMR_GLASS_AMC_TEA_PRODUCT_ID": "ANA36",
+        "health_sector_manual": 2,
+        "data_status_manual": 1,
+        "health_level_manual": 2,
+        "packages_det": 50
+    },
+    {
+        "AMR_GLASS_AMC_TEA_PRODUCT_ID": "ANA36",
+        "data_status_manual": 3,
+        "packages_det": 96,
+        "health_sector_manual": 3,
+        "health_level_manual": 3
+    },
+    {
+        "AMR_GLASS_AMC_TEA_PRODUCT_ID": "ANA36",
+        "data_status_manual": 3,
+        "health_level_manual": 3,
+        "health_sector_manual": 3,
+        "packages_det": 12
+    },
+    {
+        "AMR_GLASS_AMC_TEA_PRODUCT_ID": "ANA36",
+        "data_status_manual": 2,
+        "health_level_manual": 3,
+        "packages_det": 73,
+        "health_sector_manual": 3
+    },
+    {
+        "AMR_GLASS_AMC_TEA_PRODUCT_ID": "ANA37",
+        "data_status_manual": 1,
+        "packages_det": 45,
+        "health_level_manual": 3,
+        "health_sector_manual": 3
+    },
+    {
+        "AMR_GLASS_AMC_TEA_PRODUCT_ID": "ANA37",
+        "data_status_manual": 3,
+        "packages_det": 18,
+        "health_level_manual": 3,
+        "health_sector_manual": 3
+    }
+]
