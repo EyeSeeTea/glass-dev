@@ -1,0 +1,28 @@
+[
+    {
+        "AMR_GLASS_AMC_TEA_PRODUCT_ID": "ANA36",
+        "AMR_GLASS_AMC_TEA_PACKSIZE": 1,
+        "AMR_GLASS_AMC_TEA_STRENGTH": 1,
+        "AMR_GLASS_AMC_TEA_STRENGTH_UNIT": "millions international unit",
+        "AMR_GLASS_AMC_TEA_CONC_VOLUME": 1,
+        "AMR_GLASS_AMC_TEA_CONC_VOLUME_UNIT": "milliliter",
+        "AMR_GLASS_AMC_TEA_ATC": "J01CE01",
+        "AMR_GLASS_AMC_TEA_ROUTE_ADMIN": "parenteral",
+        "AMR_GLASS_AMC_TEA_SALT": "default",
+        "AMR_AMC_TEA_VOLUME": 1,
+        "AMR_AMC_TEA_VOLUME_UNIT": "milliliter"
+    },
+    {
+        "AMR_GLASS_AMC_TEA_PRODUCT_ID": "ANA37",
+        "AMR_GLASS_AMC_TEA_PACKSIZE": 1,
+        "AMR_GLASS_AMC_TEA_STRENGTH": 1,
+        "AMR_GLASS_AMC_TEA_STRENGTH_UNIT": "millions international unit",
+        "AMR_GLASS_AMC_TEA_CONC_VOLUME": 1,
+        "AMR_GLASS_AMC_TEA_CONC_VOLUME_UNIT": "milliliter",
+        "AMR_GLASS_AMC_TEA_ATC": "J01CE01",
+        "AMR_GLASS_AMC_TEA_ROUTE_ADMIN": "parenteral",
+        "AMR_GLASS_AMC_TEA_SALT": "default",
+        "AMR_AMC_TEA_VOLUME": 1,
+        "AMR_AMC_TEA_VOLUME_UNIT": "milliliter"
+    }
+]

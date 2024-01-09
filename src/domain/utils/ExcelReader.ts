@@ -26,8 +26,8 @@ import { generateUid } from "../../utils/uid";
 import { getGeometryFromString } from "../entities/Geometry";
 import XlsxPopulate from "@eyeseetea/xlsx-populate";
 import { Id } from "../entities/Ref";
-import { InstanceDefaultRepository } from "../../data/repositories/InstanceDefaultRepository";
 import { Relationship } from "../entities/Relationship";
+import { InstanceRepository } from "../repositories/InstanceRepository";
 
 export const isDefined = <T>(item: T) => item !== undefined && item !== null;
 export function removeCharacters(value: unknown): string {
@@ -35,7 +35,7 @@ export function removeCharacters(value: unknown): string {
 }
 
 export class ExcelReader {
-    constructor(private excelRepository: ExcelRepository, private instanceRepository: InstanceDefaultRepository) {}
+    constructor(private excelRepository: ExcelRepository, private instanceRepository: InstanceRepository) {}
 
     public async readTemplate(template: Template, programId: Id): Promise<DataPackage | undefined> {
         const { dataSources = [] } = template;
