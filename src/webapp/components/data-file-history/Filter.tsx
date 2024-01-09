@@ -2,7 +2,7 @@ import styled from "styled-components";
 import { Box, FormControl, MenuItem, Select, Typography, InputLabel, withStyles, makeStyles } from "@material-ui/core";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
 import i18n from "@eyeseetea/d2-ui-components/locales";
-import { Dispatch, SetStateAction } from "react";
+import { Dispatch, SetStateAction, useMemo } from "react";
 import { getLastNYears, getLastNYearsQuarters } from "../../../utils/currentPeriodHelper";
 import { useCurrentModuleContext } from "../../contexts/current-module-context";
 import { useAppContext } from "../../contexts/app-context";
@@ -36,6 +36,8 @@ type StatusOption = {
     label: string;
 };
 
+export const ALL_FILTER_VALUE = "All";
+
 const statusOptions: StatusOption[] = [
     {
         label: "Uploaded",
@@ -54,10 +56,17 @@ const statusOptions: StatusOption[] = [
         value: "Completed",
     },
     {
-        label: "All",
-        value: "All",
+        label: ALL_FILTER_VALUE,
+        value: ALL_FILTER_VALUE,
     },
 ];
+
+export type yearFilterValue = "All" | string;
+
+type YearOption = {
+    value: yearFilterValue;
+    label: string;
+};
 
 interface FilterProps {
     year: string;
@@ -71,17 +80,21 @@ export const Filter: React.FC<FilterProps> = ({ year, setYear, status, setStatus
     const { currentUser } = useAppContext();
     const { currentModuleAccess } = useCurrentModuleContext();
 
-    const yearOptions: { label: string; value: string }[] = [];
-    if (currentUser.quarterlyPeriodModules.find(qm => qm.name === currentModuleAccess.moduleName)) {
-        getLastNYearsQuarters().forEach(quarter => {
-            yearOptions.push({ label: quarter, value: quarter });
-        });
-    } else {
-        const addCurrentYear = currentModuleAccess.populateCurrentYearInHistory;
-        getLastNYears(addCurrentYear).forEach(year => {
-            yearOptions.push({ label: year, value: year });
-        });
-    }
+    const yearOptions: YearOption[] = useMemo(() => {
+        if (currentUser.quarterlyPeriodModules.find(qm => qm.name === currentModuleAccess.moduleName)) {
+            const quarters = getLastNYearsQuarters().map(quarter => ({ label: quarter, value: quarter }));
+            return [...quarters, { label: "All", value: "All" }];
+        } else {
+            const addCurrentYear = currentModuleAccess.populateCurrentYearInHistory;
+            const years = getLastNYears(addCurrentYear).map(year => ({ label: year, value: year }));
+            return [...years, { label: "All", value: "All" }];
+        }
+    }, [
+        currentModuleAccess.moduleName,
+        currentModuleAccess.populateCurrentYearInHistory,
+        currentUser.quarterlyPeriodModules,
+    ]);
+
     return (
         <Box mb={5}>
             <BlackTypography variant="h5">{i18n.t("Filters")}</BlackTypography>
