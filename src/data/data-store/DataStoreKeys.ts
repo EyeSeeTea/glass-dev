@@ -6,4 +6,5 @@ export const DataStoreKeys = {
     DOCUMENTS: "documents",
     GENERAL: "general",
     SIGNALS: "signals",
+    ATC_CLASSIFICATION: "ATCs",
 };
