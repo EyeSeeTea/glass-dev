@@ -4,11 +4,7 @@ import { RawSubstanceConsumptionData } from "../../../../entities/data-entry/amc
 import { ROUTE_OF_ADMINISTRATION_MAPPING } from "../../../../entities/data-entry/amc/RouteOfAdministration";
 import { SALT_MAPPING } from "../../../../entities/data-entry/amc/Salt";
 import { SubstanceConsumptionCalculated } from "../../../../entities/data-entry/amc/SubstanceConsumptionCalculated";
-import {
-    CONVERSION_TO_STANDARDIZED_MEASUREMENT_UNIT,
-    UNITS_MAPPING,
-    Unit,
-} from "../../../../entities/data-entry/amc/Unit";
+import { UNITS_MAPPING, Unit, valueToStandardizedMeasurementUnit } from "../../../../entities/data-entry/amc/Unit";
 
 const DDD_NAME = "ddd";
 const DDD_ALTERATIONS_NAME = "ddd_alterations";
@@ -93,7 +89,7 @@ function getStandardizedDDD(
 
     if (newDddData) {
         const dddUnit = UNITS_MAPPING[newDddData.NEW_DDD_UNIT] as Unit;
-        const dddStandardizedValue = newDddData.NEW_DDD * CONVERSION_TO_STANDARDIZED_MEASUREMENT_UNIT[dddUnit];
+        const dddStandardizedValue = valueToStandardizedMeasurementUnit(newDddData.NEW_DDD, dddUnit);
         return dddStandardizedValue;
     }
 }
