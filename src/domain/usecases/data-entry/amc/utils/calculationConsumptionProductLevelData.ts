@@ -20,7 +20,6 @@ import {
 import { ROUTE_OF_ADMINISTRATION_MAPPING } from "../../../../entities/data-entry/amc/RouteOfAdministration";
 import { SALT_MAPPING } from "../../../../entities/data-entry/amc/Salt";
 import {
-    CONVERSION_TO_STANDARDIZED_MEASUREMENT_UNIT,
     UNITS_MAPPING,
     UNITS_TO_STANDARDIZED_MEASUREMENT_UNIT,
     Unit,
@@ -205,7 +204,7 @@ function getDDDOfProductFromDDDTable(
 
     if (newDddData) {
         const dddUnit = UNITS_MAPPING[newDddData.NEW_DDD_UNIT] as Unit;
-        const dddStandardizedValue = newDddData.NEW_DDD * CONVERSION_TO_STANDARDIZED_MEASUREMENT_UNIT[dddUnit];
+        const dddStandardizedValue = valueToStandardizedMeasurementUnit(newDddData.NEW_DDD, dddUnit);
         const dddStandardizedUnit = UNITS_TO_STANDARDIZED_MEASUREMENT_UNIT[dddUnit] as Unit;
         return {
             dddValue: dddStandardizedValue,
