@@ -45,3 +45,15 @@ export const UNITS_MAPPING: Record<string, Unit> = {
     L: "liter",
     ML: "milliliter",
 };
+
+export function isStrengthUnitValid(strengthUnit: Unit): boolean {
+    return VALID_STRENGTH_UNITS.includes(strengthUnit);
+}
+
+export function isConcVolumeUnitOrVolumeUnitValid(concVolumeUnit: Unit): boolean {
+    return LITER_FAMILY.includes(concVolumeUnit);
+}
+
+export function valueToStandardizedMeasurementUnit(value: number, unit: Unit): number {
+    return value * CONVERSION_TO_STANDARDIZED_MEASUREMENT_UNIT[unit];
+}
