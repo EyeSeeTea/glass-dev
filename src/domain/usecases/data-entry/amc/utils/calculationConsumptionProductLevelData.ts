@@ -21,11 +21,12 @@ import { ROUTE_OF_ADMINISTRATION_MAPPING } from "../../../../entities/data-entry
 import { SALT_MAPPING } from "../../../../entities/data-entry/amc/Salt";
 import {
     CONVERSION_TO_STANDARDIZED_MEASUREMENT_UNIT,
-    LITER_FAMILY,
     UNITS_MAPPING,
     UNITS_TO_STANDARDIZED_MEASUREMENT_UNIT,
     Unit,
-    VALID_STRENGTH_UNITS,
+    isConcVolumeUnitOrVolumeUnitValid,
+    isStrengthUnitValid,
+    valueToStandardizedMeasurementUnit,
 } from "../../../../entities/data-entry/amc/Unit";
 
 const DDD_COMBINATIONS_NAME = "ddd_combinations";
@@ -101,7 +102,7 @@ function calculateContentPerProduct(product: ProductRegistryAttributes): Content
             isConcVolumeUnitOrVolumeUnitValid(maybeConcVolumeUnit) &&
             isConcVolumeUnitOrVolumeUnitValid(maybeVolumeUnit))
     ) {
-        const standardizedStrength: number = strengthUnitToStandardizedMeasurementUnit(
+        const standardizedStrength: number = valueToStandardizedMeasurementUnit(
             AMR_GLASS_AMC_TEA_STRENGTH,
             AMR_GLASS_AMC_TEA_STRENGTH_UNIT
         );
@@ -127,21 +128,6 @@ function calculateContentPerProduct(product: ProductRegistryAttributes): Content
     }
 }
 
-// 1a
-function isStrengthUnitValid(strengthUnit: Unit): boolean {
-    return VALID_STRENGTH_UNITS.includes(strengthUnit);
-}
-
-// 1a
-function isConcVolumeUnitOrVolumeUnitValid(concVolumeUnit: Unit): boolean {
-    return LITER_FAMILY.includes(concVolumeUnit);
-}
-
-// 1b
-function strengthUnitToStandardizedMeasurementUnit(strength: number, strengthUnit: Unit): number {
-    return strength * CONVERSION_TO_STANDARDIZED_MEASUREMENT_UNIT[strengthUnit];
-}
-
 // 1b
 function concVolumeOrVolumeUnitToStandardizedMeasurementUnit(
     concVolumeOrVolume?: number,
@@ -151,7 +137,7 @@ function concVolumeOrVolumeUnitToStandardizedMeasurementUnit(
     if (!concVolumeOrVolume || !concVolumeUnitOrVolumeUnit) {
         return 1;
     }
-    return concVolumeOrVolume * CONVERSION_TO_STANDARDIZED_MEASUREMENT_UNIT[concVolumeUnitOrVolumeUnit];
+    return valueToStandardizedMeasurementUnit(concVolumeOrVolume, concVolumeUnitOrVolumeUnit);
 }
 
 // 2 - Identify corresponding DDD per product
