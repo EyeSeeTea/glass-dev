@@ -115,6 +115,10 @@ export class CalculateConsumptionDataProductLevelUseCase {
                         return Future.error("Cannot find Raw Substance Consumption Calculated program stage metadata");
                     }
 
+                    if (_.isEmpty(rawSubstanceConsumptionCalculatedData)) {
+                        return Future.error("There are no calculated data to import");
+                    }
+
                     return this.amcProductDataRepository
                         .importCalculations(
                             productDataTrackedEntities,
