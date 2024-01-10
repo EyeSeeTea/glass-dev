@@ -270,7 +270,7 @@ export class ImportAMCProductLevelData {
         //2. Run Program Rule Validations
         const programRuleValidations = new ProgramRuleValidationForBLEventProgram(this.programRulesMetadataRepository);
 
-        //3. Run Custom EGASP Validations
+        //3. Run Custom AMC Product Validations
         const customValidations = new CustomValidationsAMCProductData(this.atcRepository);
 
         return Future.joinObj({
@@ -282,7 +282,7 @@ export class ImportAMCProductLevelData {
                 period
             ),
         }).flatMap(({ programRuleValidationResults, customRuleValidationsResults }) => {
-            //4. After proccessing, remove ids to tei, enrollement and events so that they can be imported
+            //4. After processing, remove ids to tei, enrollement and events so that they can be imported
             const teisWithoutId = programRuleValidationResults.teis?.map(tei => {
                 tei.trackedEntity = "";
                 const enrollementsWithId = tei.enrollments?.map(enrollment => {
