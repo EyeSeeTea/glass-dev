@@ -15,6 +15,7 @@ export type SubstanceConsumptionCalculated = {
     health_level_autocalculated: number;
     period: string;
     orgUnitId: Id;
+    report_date: string;
 };
 
 export const SUBSTANCE_CONSUMPTION_CALCULATED_KEYS = [
