@@ -20,6 +20,8 @@ export type GlassATCVersion = Array<
     >
 >;
 
+export type ListGlassATCVersions = Record<string, GlassATCVersion>;
+
 export type DDDCombinationsData = {
     COMB_CODE: string;
     ARS: string;

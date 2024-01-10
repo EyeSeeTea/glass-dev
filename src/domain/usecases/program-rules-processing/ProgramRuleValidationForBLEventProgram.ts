@@ -39,25 +39,7 @@ export class ProgramRuleValidationForBLEventProgram {
         teis?: D2TrackerTrackedEntity[] //For tracker programs only
     ): FutureData<ValidationResult> {
         return this.programRulesMetadataRepository.getMetadata(programId).flatMap(metadata => {
-            //Before proccessing, add ids to tei, enrollement and event so thier relationships can be processed.
-            const teisWithId = teis?.map((tei, teiIndex) => {
-                tei.trackedEntity = teiIndex.toString();
-                const enrollmentsWithId = tei.enrollments?.map((enrollment, enrollmentIndex) => {
-                    enrollment.enrollment = enrollmentIndex.toString();
-                    const eventsWithIds = enrollment.events.map((ev, eventIndex) => {
-                        ev.event = eventIndex.toString();
-                        ev.enrollment = enrollmentIndex.toString();
-                        ev.trackedEntity = teiIndex.toString();
-                        return ev;
-                    });
-                    enrollment.events = eventsWithIds;
-                    return enrollment;
-                });
-                tei.enrollments = enrollmentsWithId;
-                return tei;
-            });
-
-            return this.getEventEffects(metadata, events, teisWithId).flatMap(eventEffects => {
+            return this.getEventEffects(metadata, events, teis).flatMap(eventEffects => {
                 const actionsResult = this.getActions(eventEffects, metadata);
                 if (actionsResult.blockingErrors.length > 0) {
                     //If there are blocking errors, do not process further. return the errors.
@@ -75,7 +57,7 @@ export class ProgramRuleValidationForBLEventProgram {
                     const unChangedEvents = events?.filter(e => !eventsUpdated.some(ue => ue.event === e.event)) ?? [];
                     const consolidatedEvents = [...eventsUpdated, ...unChangedEvents];
 
-                    const teisCurrent = teisWithId ? teisWithId : [];
+                    const teisCurrent = teis ? teis : [];
 
                     const teisUpdated: D2TrackerTrackedEntity[] = this.getUpdatedTeis(
                         teisCurrent,
@@ -87,24 +69,8 @@ export class ProgramRuleValidationForBLEventProgram {
                     const consolidatedTeis = [...teisUpdated, ...unchangedTeis];
                     console.debug(`Changes: events=${eventsUpdated.length}, teis=${teisUpdated.length}`);
 
-                    //After proccessing, remove ids to tei, enrollement and events so that they can be imported
-                    const teisWithoutId = consolidatedTeis?.map(tei => {
-                        tei.trackedEntity = "";
-                        const enrollementsWithId = tei.enrollments?.map(enrollment => {
-                            enrollment.enrollment = "";
-                            const eventsWithIds = enrollment.events.map(ev => {
-                                ev.event = "";
-                                return ev;
-                            });
-                            enrollment.events = eventsWithIds;
-                            return enrollment;
-                        });
-                        tei.enrollments = enrollementsWithId;
-                        return tei;
-                    });
-
                     const results: ValidationResult = {
-                        teis: teisWithoutId,
+                        teis: consolidatedTeis,
                         events: consolidatedEvents,
                         blockingErrors: [],
                         nonBlockingErrors: actionsResult.nonBlockingErrors,

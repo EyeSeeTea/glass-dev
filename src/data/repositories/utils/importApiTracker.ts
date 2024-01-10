@@ -14,6 +14,7 @@ export function importApiTracker(
         api.tracker.postAsync(
             {
                 importStrategy: action,
+                skipRuleEngine: true,
             },
             request
         )

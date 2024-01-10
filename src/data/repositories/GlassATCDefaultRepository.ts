@@ -3,6 +3,7 @@ import {
     ATCAlterationsData,
     ATCData,
     ConversionFactorData,
+    createAtcVersionKey,
     DDDAlterationsData,
     DDDCombinationsData,
     DDDData,
@@ -39,5 +40,19 @@ export class GlassATCDefaultRepository implements GlassATCRepository {
             >(atcVersionKey);
         }
         return Future.error("Upload does not exist");
+    }
+
+    @cache()
+    getCurrentAtcVersion(): FutureData<GlassATCVersion> {
+        return this.getAtcHistory().flatMap(atcVersionHistory => {
+            const atcCurrentVersionInfo = atcVersionHistory.find(({ currentVersion }) => currentVersion);
+
+            if (!atcCurrentVersionInfo) {
+                return Future.error("Cannot find current version of ATC");
+            }
+            const atcVersionKey = createAtcVersionKey(atcCurrentVersionInfo.year, atcCurrentVersionInfo.version);
+
+            return this.getAtcVersion(atcVersionKey);
+        });
     }
 }
