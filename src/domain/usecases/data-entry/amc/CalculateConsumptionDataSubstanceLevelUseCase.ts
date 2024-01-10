@@ -8,12 +8,11 @@ import { GlassDocumentsRepository } from "../../../repositories/GlassDocumentsRe
 import { GlassUploadsRepository } from "../../../repositories/GlassUploadsRepository";
 import { MetadataRepository } from "../../../repositories/MetadataRepository";
 import { AMCSubstanceDataRepository } from "../../../repositories/data-entry/AMCSubstanceDataRepository";
-import { mapToImportSummary, uploadIdListFileAndSave } from "../ImportBLTemplateEventProgram";
+import { mapToImportSummary } from "../ImportBLTemplateEventProgram";
 import { getStringFromFile } from "../utils/fileToString";
 import { calculateConsumptionSubstanceLevelData } from "./utils/calculationConsumptionSubstanceLevelData";
 
 const IMPORT_SUMMARY_EVENT_TYPE = "event";
-const UPLOAD_ID_LOCAL_STORAGE_NAME = "secondaryUploadId";
 
 export class CalculateConsumptionDataSubstanceLevelUseCase {
     constructor(
@@ -79,26 +78,21 @@ export class CalculateConsumptionDataSubstanceLevelUseCase {
                             currentAtcVersionKey
                         );
 
+                        if (_.isEmpty(calculatedConsumptionSubstanceLevelData)) {
+                            return Future.error("There are no calculated data to import");
+                        }
+
                         return this.amcSubstanceDataRepository
                             .importCalculations(orgUnitId, orgUnitName, calculatedConsumptionSubstanceLevelData)
                             .flatMap(result => {
                                 const { response, eventIdLineNoMap } = result;
-
                                 return mapToImportSummary(
                                     response,
                                     IMPORT_SUMMARY_EVENT_TYPE,
                                     this.metadataRepository,
                                     undefined,
                                     eventIdLineNoMap
-                                ).flatMap(summary => {
-                                    return uploadIdListFileAndSave(
-                                        UPLOAD_ID_LOCAL_STORAGE_NAME,
-                                        summary,
-                                        moduleName,
-                                        this.glassDocumentsRepository,
-                                        this.glassUploadsRepository
-                                    );
-                                });
+                                ).flatMap(summary => this.uploadIdListFileAndSave(uploadId, summary, moduleName));
                             });
                     });
                 });
@@ -114,5 +108,25 @@ export class CalculateConsumptionDataSubstanceLevelUseCase {
                 });
             });
         });
+    }
+
+    private uploadIdListFileAndSave(
+        uploadId: string,
+        summary: { importSummary: ImportSummary; eventIdList: string[] },
+        moduleName: string
+    ): FutureData<ImportSummary> {
+        if (summary.eventIdList.length > 0 && uploadId) {
+            const eventListBlob = new Blob([JSON.stringify(summary.eventIdList)], {
+                type: "text/plain",
+            });
+            const calculatedEventListFile = new File([eventListBlob], `${uploadId}_calculatedEventListFileId`);
+            return this.glassDocumentsRepository.save(calculatedEventListFile, moduleName).flatMap(fileId => {
+                return this.glassUploadsRepository.setCalculatedEventListFileId(uploadId, fileId).flatMap(() => {
+                    return Future.success(summary.importSummary);
+                });
+            });
+        } else {
+            return Future.success(summary.importSummary);
+        }
     }
 }
