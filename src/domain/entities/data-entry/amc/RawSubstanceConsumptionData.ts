@@ -12,6 +12,7 @@ export type RawSubstanceConsumptionData = {
     data_status_manual: number;
     health_sector_manual: number;
     health_level_manual: number;
+    report_date: string;
 };
 
 export const RAW_SUBSTANCE_CONSUMPTION_DATA_KEYS = [

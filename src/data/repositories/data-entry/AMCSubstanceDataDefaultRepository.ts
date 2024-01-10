@@ -133,7 +133,11 @@ export class AMCSubstanceDataDefaultRepository implements AMCSubstanceDataReposi
                             const dataValue = optionSetValue
                                 ? optionSet.options.find(option => option.name === value || option.code === value)
                                       ?.code || ""
-                                : valueType === "NUMBER" && value === 0
+                                : (valueType === "NUMBER" ||
+                                      valueType === "INTEGER" ||
+                                      valueType === "INTEGER_POSITIVE" ||
+                                      valueType === "INTEGER_ZERO_OR_POSITIVE") &&
+                                  value === 0
                                 ? value
                                 : value || "";
 
@@ -146,7 +150,7 @@ export class AMCSubstanceDataDefaultRepository implements AMCSubstanceDataReposi
 
                     return {
                         event: generateId(),
-                        occurredAt: new Date().getTime().toString(),
+                        occurredAt: data.report_date,
                         status: "COMPLETED",
                         program: AMC_CALCULATED_CONSUMPTION_DATA_PROGRAM_ID,
                         programStage: AMC_CALCULATED_CONSUMPTION_DATA_PROGRAM_STAGE_ID,
@@ -175,17 +179,15 @@ export class AMCSubstanceDataDefaultRepository implements AMCSubstanceDataReposi
                         RAW_SUBSTANCE_CONSUMPTION_DATA_KEYS.includes(programStageDataElement.code)
                     ) {
                         switch (programStageDataElement.valueType) {
-                            // TODO: delete "packages_manual" and "tons_manual" conditional when tons_manual and packages_manual type Number
                             case "TEXT":
                                 return {
                                     ...acc,
-                                    [programStageDataElement.code]:
-                                        programStageDataElement.code === "tons_manual" ||
-                                        programStageDataElement.code === "packages_manual"
-                                            ? parseFloat(dataValue.value)
-                                            : dataValue.value,
+                                    [programStageDataElement.code]: dataValue.value,
                                 };
                             case "NUMBER":
+                            case "INTEGER":
+                            case "INTEGER_POSITIVE":
+                            case "INTEGER_ZERO_OR_POSITIVE":
                                 return {
                                     ...acc,
                                     [programStageDataElement.code]: parseFloat(dataValue.value),
@@ -199,7 +201,7 @@ export class AMCSubstanceDataDefaultRepository implements AMCSubstanceDataReposi
                     }
                     return acc;
                 },
-                {} as RawSubstanceConsumptionData
+                { report_date: substanceConsumptionDataEvent.occurredAt } as RawSubstanceConsumptionData
             );
         });
     }

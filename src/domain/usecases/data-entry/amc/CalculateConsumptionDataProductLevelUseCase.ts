@@ -226,6 +226,9 @@ export function getProductRegistryAttributes(
                                 : productAttribute.value,
                         };
                     case "NUMBER":
+                    case "INTEGER":
+                    case "INTEGER_POSITIVE":
+                    case "INTEGER_ZERO_OR_POSITIVE":
                         return {
                             ...acc,
                             [programAttribute.code]: programAttribute.optionSetValue
@@ -270,6 +273,9 @@ export function getRawProductConsumption(
                                     : eventDataValue.value,
                             };
                         case "NUMBER":
+                        case "INTEGER":
+                        case "INTEGER_POSITIVE":
+                        case "INTEGER_ZERO_OR_POSITIVE":
                             return {
                                 ...acc,
                                 [programStageDataElement.code]: programStageDataElement.optionSetValue
