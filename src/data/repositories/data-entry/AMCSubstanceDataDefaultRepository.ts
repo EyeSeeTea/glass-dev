@@ -289,4 +289,5 @@ const programFields = {
 const eventFields = {
     event: true,
     dataValues: true,
+    occurredAt: true,
 } as const;
