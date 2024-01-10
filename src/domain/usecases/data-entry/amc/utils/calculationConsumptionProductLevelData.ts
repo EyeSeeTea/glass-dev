@@ -72,8 +72,6 @@ export function calculateConsumptionProductLevelData(
                     dddPerProduct,
                     dddPerPackage,
                 };
-            } else {
-                console.log("ERROR - Content of product cannot be calculated: ", { product });
             }
         })
         .filter(Boolean) as ContentDDDPerProductAndDDDPerPackage[];
@@ -148,9 +146,12 @@ function calculateContentPerProduct(product: ProductRegistryAttributes): Content
             standarizedStrengthUnit,
         };
     } else {
-        console.log("ERROR - Strength unit, concentration volume unit or volume unit not valid of product: ", {
-            product,
-        });
+        console.log(
+            "ERROR - Content of product cannot be calculated. Strength unit, concentration volume unit or volume unit not valid of product: ",
+            {
+                product,
+            }
+        );
     }
 }
 
@@ -394,101 +395,94 @@ function aggregateDataByAtcRouteAdminYearHealthSectorAndHealthLevel(
                     contentDDDPerProductAndDDDPerPackageOfProduct.dddPerPackage
                 );
 
-                // 5b - content_tonnes = (content × conv_factor × packages in year, health_sector and health_level) ÷ 1e6
-                const contentTonnesOfProduct: ContentTonnesPerProduct = getTonnesPerProduct(
-                    period,
-                    product,
-                    productConsumption,
-                    contentDDDPerProductAndDDDPerPackageOfProduct.content,
-                    conversionFactorData
-                );
+                if (dddPerProductConsumptionPackages) {
+                    // 5b - content_tonnes = (content × conv_factor × packages in year, health_sector and health_level) ÷ 1e6
+                    const contentTonnesOfProduct: ContentTonnesPerProduct = getTonnesPerProduct(
+                        period,
+                        product,
+                        productConsumption,
+                        contentDDDPerProductAndDDDPerPackageOfProduct.content,
+                        conversionFactorData
+                    );
 
-                const {
-                    AMR_GLASS_AMC_TEA_PRODUCT_ID,
-                    AMR_GLASS_AMC_TEA_SALT,
-                    AMR_GLASS_AMC_TEA_ATC,
-                    AMR_GLASS_AMC_TEA_ROUTE_ADMIN,
-                } = product;
-                const { packages_det, data_status_manual, health_sector_manual, health_level_manual } =
-                    productConsumption;
-
-                // 5c, 6a, 7a, 8a
-                const id = `${AMR_GLASS_AMC_TEA_PRODUCT_ID}-${AMR_GLASS_AMC_TEA_ATC}-${AMR_GLASS_AMC_TEA_ROUTE_ADMIN}-${period}-${health_sector_manual}-${health_level_manual}-${data_status_manual}`;
-                const accWithThisId = acc[id] as RawSubstanceConsumptionCalculated;
-
-                const isAlreadyInTheAggregation =
-                    accWithThisId &&
-                    (accWithThisId?.tons_autocalculated || accWithThisId?.tons_autocalculated === 0) &&
-                    (accWithThisId?.packages_autocalculated || accWithThisId?.packages_autocalculated === 0);
-
-                if (isAlreadyInTheAggregation)
-                    console.log("Aggregating content_tonnes and packages of: ", {
+                    const {
                         AMR_GLASS_AMC_TEA_PRODUCT_ID,
+                        AMR_GLASS_AMC_TEA_SALT,
                         AMR_GLASS_AMC_TEA_ATC,
                         AMR_GLASS_AMC_TEA_ROUTE_ADMIN,
-                        health_sector_manual,
-                        health_level_manual,
-                        data_status_manual,
-                        content_tonnes: contentTonnesOfProduct.contentTonnes,
-                        packages: packages_det,
-                    });
+                    } = product;
+                    const { packages_det, data_status_manual, health_sector_manual, health_level_manual } =
+                        productConsumption;
 
-                const aggregation: RawSubstanceConsumptionCalculated = isAlreadyInTheAggregation
-                    ? {
-                          ...accWithThisId,
-                          tons_autocalculated: accWithThisId.tons_autocalculated + contentTonnesOfProduct.contentTonnes,
-                          packages_autocalculated: accWithThisId.packages_autocalculated + packages_det,
-                      }
-                    : {
-                          AMR_GLASS_AMC_TEA_PRODUCT_ID,
-                          atc_autocalculated: AMR_GLASS_AMC_TEA_ATC,
-                          route_admin_autocalculated: AMR_GLASS_AMC_TEA_ROUTE_ADMIN,
-                          salt_autocalculated: AMR_GLASS_AMC_TEA_SALT,
-                          year: period,
-                          packages_autocalculated: packages_det,
-                          tons_autocalculated: contentTonnesOfProduct.contentTonnes,
-                          data_status_autocalculated: data_status_manual,
-                          health_sector_autocalculated: health_sector_manual,
-                          atc_version_autocalculated: atcVersion,
-                          health_level_autocalculated: health_level_manual,
-                          orgUnitId,
-                      };
+                    // 5c, 6a, 7a, 8a
+                    const id = `${AMR_GLASS_AMC_TEA_PRODUCT_ID}-${AMR_GLASS_AMC_TEA_ATC}-${AMR_GLASS_AMC_TEA_ROUTE_ADMIN}-${period}-${health_sector_manual}-${health_level_manual}-${data_status_manual}`;
+                    const accWithThisId = acc[id] as RawSubstanceConsumptionCalculated;
 
-                const ddds_autocalculated =
-                    dddPerProductConsumptionPackages?.dddConsumptionPackages &&
-                    (accWithThisId?.ddds_autocalculated || accWithThisId?.ddds_autocalculated === 0)
-                        ? accWithThisId?.ddds_autocalculated + dddPerProductConsumptionPackages.dddConsumptionPackages
-                        : dddPerProductConsumptionPackages?.dddConsumptionPackages;
+                    const isAlreadyInTheAggregation =
+                        accWithThisId &&
+                        (accWithThisId?.tons_autocalculated || accWithThisId?.tons_autocalculated === 0) &&
+                        (accWithThisId?.packages_autocalculated || accWithThisId?.packages_autocalculated === 0) &&
+                        (accWithThisId?.ddds_autocalculated || accWithThisId?.ddds_autocalculated === 0);
 
-                if (
-                    dddPerProductConsumptionPackages?.dddConsumptionPackages &&
-                    (accWithThisId?.ddds_autocalculated || accWithThisId?.ddds_autocalculated === 0)
-                ) {
-                    console.log("Aggregating ddd_cons_product of: ", {
-                        AMR_GLASS_AMC_TEA_PRODUCT_ID,
-                        AMR_GLASS_AMC_TEA_ATC,
-                        AMR_GLASS_AMC_TEA_ROUTE_ADMIN,
-                        health_sector_manual,
-                        health_level_manual,
-                        data_status_manual,
-                        ddd_cons_product: dddPerProductConsumptionPackages.dddConsumptionPackages,
-                    });
+                    if (isAlreadyInTheAggregation)
+                        console.log("Aggregating content_tonnes and packages of: ", {
+                            AMR_GLASS_AMC_TEA_PRODUCT_ID,
+                            AMR_GLASS_AMC_TEA_ATC,
+                            AMR_GLASS_AMC_TEA_ROUTE_ADMIN,
+                            health_sector_manual,
+                            health_level_manual,
+                            data_status_manual,
+                            content_tonnes: contentTonnesOfProduct.contentTonnes,
+                            packages: packages_det,
+                            ddds_autocalculated: dddPerProductConsumptionPackages.dddConsumptionPackages,
+                        });
+
+                    return {
+                        ...acc,
+                        [id]: isAlreadyInTheAggregation
+                            ? {
+                                  ...accWithThisId,
+                                  tons_autocalculated:
+                                      accWithThisId.tons_autocalculated + contentTonnesOfProduct.contentTonnes,
+                                  packages_autocalculated: accWithThisId.packages_autocalculated + packages_det,
+                                  ddds_autocalculated:
+                                      accWithThisId.ddds_autocalculated +
+                                      dddPerProductConsumptionPackages.dddConsumptionPackages,
+                              }
+                            : {
+                                  AMR_GLASS_AMC_TEA_PRODUCT_ID,
+                                  atc_autocalculated: AMR_GLASS_AMC_TEA_ATC,
+                                  route_admin_autocalculated: AMR_GLASS_AMC_TEA_ROUTE_ADMIN,
+                                  salt_autocalculated: AMR_GLASS_AMC_TEA_SALT,
+                                  year: period,
+                                  packages_autocalculated: packages_det,
+                                  tons_autocalculated: contentTonnesOfProduct.contentTonnes,
+                                  ddds_autocalculated: dddPerProductConsumptionPackages.dddConsumptionPackages,
+                                  data_status_autocalculated: data_status_manual,
+                                  health_sector_autocalculated: health_sector_manual,
+                                  atc_version_autocalculated: atcVersion,
+                                  health_level_autocalculated: health_level_manual,
+                                  orgUnitId,
+                              },
+                    };
+                } else {
+                    console.log(
+                        "ERROR not calculate and go to next one - DDD per product consumption packages cannot be calculated",
+                        {
+                            product,
+                            ddd_per_pack: contentDDDPerProductAndDDDPerPackageOfProduct.dddPerPackage,
+                        }
+                    );
+                    return acc;
                 }
-
-                return {
-                    ...acc,
-                    [id]: ddds_autocalculated
-                        ? {
-                              ...aggregation,
-                              ddds_autocalculated,
-                          }
-                        : aggregation,
-                };
             } else {
-                console.log("ERROR - product, ddd of product or ddd_per_pack of product not found: ", {
-                    product,
-                    contentDDDPerProductAndDDDPerPackageOfProduct,
-                });
+                console.log(
+                    "ERROR not calculate and go to next one - product, ddd of product or ddd_per_pack of product not found: ",
+                    {
+                        product,
+                        contentDDDPerProductAndDDDPerPackageOfProduct,
+                    }
+                );
                 return acc;
             }
         },

@@ -33,7 +33,10 @@ export function calculateConsumptionSubstanceLevelData(
             );
 
             if (!dddStandarizedLatest)
-                console.log("ERROR - ddd_value_latest and ddd_unit_latest not found of: ", { rawSubstanceConsumption });
+                console.log(
+                    "ERROR not calculate and go to next one - ddd_value_latest and ddd_unit_latest not found of: ",
+                    { rawSubstanceConsumption }
+                );
 
             if (dddStandarizedLatest) {
                 // 1b & 2
@@ -44,9 +47,12 @@ export function calculateConsumptionSubstanceLevelData(
                     atcVersionsByKeys[atc_version_manual]
                 );
                 if (!dddStandarizedInRawSubstanceConsumption)
-                    console.log("ERROR - ddd_value_uploaded and ddd_unit_uploaded not found of: ", {
-                        rawSubstanceConsumption,
-                    });
+                    console.log(
+                        "ERROR not calculate and go to next one - ddd_value_uploaded and ddd_unit_uploaded not found of: ",
+                        {
+                            rawSubstanceConsumption,
+                        }
+                    );
 
                 if (dddStandarizedInRawSubstanceConsumption) {
                     // 3 & 4
@@ -122,7 +128,10 @@ function getStandardizedDDD(
         console.log("DDD data found in ddd_alterations json: ", dddStandardizedValue);
         return dddStandardizedValue;
     }
-    console.log("ERROR - DDD data not found in ddd_alterations json: ", { atc_manual, route_admin_manual });
+    console.log("ERROR - DDD data not found in ddd_alterations json: ", {
+        atc_manual,
+        route_admin_manual,
+    });
 }
 
 function getDDDsAdjust(
