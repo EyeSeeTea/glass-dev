@@ -28,7 +28,11 @@ export const UploadsTable: React.FC<UploadsTableProps> = ({ title, items, classN
                         <TableRow>
                             <TableCell>{i18n.t("Uploaded")}</TableCell>
                             <TableCell>{i18n.t("Period")}</TableCell>
-                            <TableCell>{i18n.t("Rows")}</TableCell>
+                            {currentModuleAccess.moduleName === "AMC" ? (
+                                <TableCell>{i18n.t("Products/Substances")}</TableCell>
+                            ) : (
+                                <TableCell>{i18n.t("Rows")}</TableCell>
+                            )}
                             <TableCell>{i18n.t("Type")}</TableCell>
                             {moduleProperties.get(currentModuleAccess.moduleName)?.isbatchReq && (
                                 <TableCell>{i18n.t("Batch ID")}</TableCell>
