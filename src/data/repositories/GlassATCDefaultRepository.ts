@@ -3,6 +3,7 @@ import {
     ATCAlterationsData,
     ATCData,
     ConversionFactorData,
+    createAtcVersionKey,
     DDDAlterationsData,
     DDDCombinationsData,
     DDDData,
@@ -10,7 +11,6 @@ import {
     GlassATCVersion,
     GlassATCVersionData,
     ListGlassATCVersions,
-    createAtcVersionKey,
     validateAtcVersion,
 } from "../../domain/entities/GlassATC";
 import { GlassATCRepository } from "../../domain/repositories/GlassATCRepository";

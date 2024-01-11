@@ -8,7 +8,7 @@ import { GlassUploadsRepository } from "../../repositories/GlassUploadsRepositor
 import { MetadataRepository } from "../../repositories/MetadataRepository";
 import * as templates from "../../entities/data-entry/program-templates";
 import { DataForm } from "../../entities/DataForm";
-import { EventResult } from "../../entities/program-rules/EventEffectTypes";
+import { ValidationResult } from "../../entities/program-rules/EventEffectTypes";
 import { generateId, Id } from "../../entities/Ref";
 import { DataPackage, DataPackageDataValue } from "../../entities/data-entry/DataPackage";
 import { D2TrackerEvent } from "@eyeseetea/d2-api/api/trackerEvents";
@@ -65,16 +65,61 @@ export class ImportBLTemplateEventProgram {
                                 calculatedEventListFileId
                             ).flatMap(events => {
                                 if (action === "CREATE_AND_UPDATE") {
-                                    return this.createAndUpdateEvents(
-                                        uploadIdLocalStorageName,
-                                        moduleName,
+                                    //Run validations on import only
+                                    return this.validateEvents(
                                         events,
                                         orgUnitId,
                                         orgUnitName,
                                         period,
                                         programId
-                                    );
-                                } else {
+                                    ).flatMap(validatedEventResults => {
+                                        if (validatedEventResults.blockingErrors.length > 0) {
+                                            const errorSummary: ImportSummary = {
+                                                status: "ERROR",
+                                                importCount: {
+                                                    ignored: 0,
+                                                    imported: 0,
+                                                    deleted: 0,
+                                                    updated: 0,
+                                                },
+                                                nonBlockingErrors: validatedEventResults.nonBlockingErrors,
+                                                blockingErrors: validatedEventResults.blockingErrors,
+                                            };
+                                            return Future.success(errorSummary);
+                                        } else {
+                                            const eventIdLineNoMap: { id: string; lineNo: number }[] = [];
+                                            const eventsWithId = validatedEventResults.events?.map(e => {
+                                                const generatedId = generateId();
+                                                eventIdLineNoMap.push({
+                                                    id: generatedId,
+                                                    lineNo: isNaN(parseInt(e.event)) ? 0 : parseInt(e.event),
+                                                });
+                                                e.event = generatedId;
+                                                return e;
+                                            });
+                                            return this.dhis2EventsDefaultRepository
+                                                .import({ events: eventsWithId ?? [] }, action)
+                                                .flatMap(result => {
+                                                    return mapToImportSummary(
+                                                        result,
+                                                        "event",
+                                                        this.metadataRepository,
+                                                        validatedEventResults.nonBlockingErrors,
+                                                        eventIdLineNoMap
+                                                    ).flatMap(summary => {
+                                                        return uploadIdListFileAndSave(
+                                                            uploadIdLocalStorageName,
+                                                            summary,
+                                                            moduleName,
+                                                            this.glassDocumentsRepository,
+                                                            this.glassUploadsRepository
+                                                        );
+                                                    });
+                                                });
+                                        }
+                                    });
+                                } //action === "DELETE"
+                                else {
                                     return this.deleteEvents(events);
                                 }
                             });
@@ -115,7 +160,7 @@ export class ImportBLTemplateEventProgram {
                 return Future.success(errorSummary);
             } else {
                 const eventIdLineNoMap: { id: string; lineNo: number }[] = [];
-                const eventsWithId = validatedEventResults.events.map(e => {
+                const eventsWithId = (validatedEventResults.events || []).map(e => {
                     const generatedId = generateId();
                     eventIdLineNoMap.push({
                         id: generatedId,
@@ -219,7 +264,7 @@ export class ImportBLTemplateEventProgram {
         orgUnitName: string,
         period: string,
         programId: string
-    ): FutureData<EventResult> {
+    ): FutureData<ValidationResult> {
         //1. Run Program Rule Validations
         const programRuleValidations = new ProgramRuleValidationForBLEventProgram(this.programRulesMetadataRepository);
 
@@ -230,7 +275,7 @@ export class ImportBLTemplateEventProgram {
         );
 
         return Future.joinObj({
-            programRuleValidationResults: programRuleValidations.getValidatedEvents(events, programId),
+            programRuleValidationResults: programRuleValidations.getValidatedTeisAndEvents(programId, events),
             customRuleValidationsResults: customValidations.getValidatedEvents(
                 events,
                 orgUnitId,
@@ -239,7 +284,7 @@ export class ImportBLTemplateEventProgram {
                 programId
             ),
         }).flatMap(({ programRuleValidationResults, customRuleValidationsResults }) => {
-            const consolidatedValidationResults: EventResult = {
+            const consolidatedValidationResults: ValidationResult = {
                 events: programRuleValidationResults.events,
                 blockingErrors: [
                     ...programRuleValidationResults.blockingErrors,
