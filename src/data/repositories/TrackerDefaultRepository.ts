@@ -6,7 +6,7 @@ import { TrackerRepository } from "../../domain/repositories/TrackerRepository";
 import { ImportStrategy } from "../../domain/entities/data-entry/DataValuesSaveSummary";
 import { apiToFuture } from "../../utils/futures";
 import { TrackerPostRequest, TrackerPostResponse } from "@eyeseetea/d2-api/api/tracker";
-import { trackerPostResponseDefaultError } from "./utils/TrackerPostResponseDefaultError";
+import { importApiTracker } from "./utils/importApiTracker";
 
 export class TrackerDefaultRepository implements TrackerRepository {
     private api: D2Api;
@@ -16,22 +16,7 @@ export class TrackerDefaultRepository implements TrackerRepository {
     }
 
     import(req: TrackerPostRequest, action: ImportStrategy): FutureData<TrackerPostResponse> {
-        return apiToFuture(
-            this.api.tracker.postAsync(
-                {
-                    importStrategy: action,
-                },
-                req
-            )
-        ).flatMap(response => {
-            console.debug(response.response.jobType);
-            return apiToFuture(this.api.system.waitFor("TRACKER_IMPORT_JOB", response.response.id)).map(result => {
-                if (result) return result;
-                else {
-                    return trackerPostResponseDefaultError;
-                }
-            });
-        });
+        return importApiTracker(this.api, req, action);
     }
 
     public getProgramMetadata(programID: string, programStageId: string): FutureData<any> {
@@ -47,6 +32,7 @@ export class TrackerDefaultRepository implements TrackerRepository {
                                 id: true,
                                 name: true,
                                 code: true,
+                                valueType: true,
                             },
                         },
                     },
