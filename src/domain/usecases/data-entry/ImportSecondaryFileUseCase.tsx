@@ -37,7 +37,8 @@ export class ImportSecondaryFileUseCase implements UseCase {
         orgUnitName: string,
         countryCode: string,
         dryRun: boolean,
-        eventListId: string | undefined
+        eventListId: string | undefined,
+        calculatedEventListFileId?: string
     ): FutureData<ImportSummary> {
         switch (moduleName) {
             case "AMR": {
@@ -66,7 +67,8 @@ export class ImportSecondaryFileUseCase implements UseCase {
                     moduleName,
                     orgUnitId,
                     orgUnitName,
-                    year
+                    year,
+                    calculatedEventListFileId
                 );
             }
 
