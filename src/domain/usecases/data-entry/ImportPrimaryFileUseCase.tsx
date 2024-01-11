@@ -18,6 +18,7 @@ import { TrackerRepository } from "../../repositories/TrackerRepository";
 import { GlassModuleDefaultRepository } from "../../../data/repositories/GlassModuleDefaultRepository";
 import { ImportAMCProductLevelData } from "./amc/ImportAMCProductLevelData";
 import { InstanceDefaultRepository } from "../../../data/repositories/InstanceDefaultRepository";
+import { GlassATCDefaultRepository } from "../../../data/repositories/GlassATCDefaultRepository";
 
 export class ImportPrimaryFileUseCase {
     constructor(
@@ -33,7 +34,8 @@ export class ImportPrimaryFileUseCase {
         private trackerRepository: TrackerRepository,
         private glassModuleDefaultRepository: GlassModuleDefaultRepository,
         private instanceRepository: InstanceDefaultRepository,
-        private programRulesMetadataRepository: ProgramRulesMetadataRepository
+        private programRulesMetadataRepository: ProgramRulesMetadataRepository,
+        private atcRepository: GlassATCDefaultRepository
     ) {}
 
     public execute(
@@ -112,7 +114,9 @@ export class ImportPrimaryFileUseCase {
                     this.trackerRepository,
                     this.glassDocumentsRepository,
                     this.glassUploadsRepository,
-                    this.metadataRepository
+                    this.metadataRepository,
+                    this.programRulesMetadataRepository,
+                    this.atcRepository
                 );
 
                 return importAMCProductFile.importAMCProductFile(
@@ -121,7 +125,8 @@ export class ImportPrimaryFileUseCase {
                     eventListId,
                     orgUnitId,
                     orgUnitName,
-                    moduleName
+                    moduleName,
+                    period
                 );
             }
             default: {
