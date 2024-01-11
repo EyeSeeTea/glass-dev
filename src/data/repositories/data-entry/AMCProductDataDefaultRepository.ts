@@ -59,7 +59,7 @@ export class AMCProductDataDefaultRepository implements AMCProductDataRepository
 
                 return {
                     isValid: allRawProductColsPresent && allTEIColsPresent ? true : false,
-                    rows: rawProductSheet.rows.length - 2, //two rows for header
+                    rows: teiSheet.rows.length - 1, //one row for header
                     specimens: [],
                 };
             } else
