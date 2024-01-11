@@ -4,7 +4,7 @@ import { ProgramRulesMetadataRepository } from "../../../domain/repositories/pro
 import { apiToFuture } from "../../../utils/futures";
 import { Instance } from "../../entities/Instance";
 import { getD2APiFromInstance } from "../../../utils/d2-api";
-import { EventProgramBLMetadata, metadataQuery } from "../../../domain/entities/program-rules/EventEffectTypes";
+import { BulkLoadMetadata, metadataQuery } from "../../../domain/entities/program-rules/EventEffectTypes";
 
 export const EGASP_PROGRAM_ID = "SOjanrinfuG";
 
@@ -15,7 +15,7 @@ export class ProgramRulesMetadataDefaultRepository implements ProgramRulesMetada
         this.api = getD2APiFromInstance(instance);
     }
 
-    getMetadata(programId: string): FutureData<EventProgramBLMetadata> {
+    getMetadata(programId: string): FutureData<BulkLoadMetadata> {
         return apiToFuture(
             this.api.metadata.get({
                 ...metadataQuery,

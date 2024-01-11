@@ -36,7 +36,7 @@ export class ValidatePrimaryFileUseCase implements UseCase {
                     return this.risIndividualFunghiRepository.validate(customDataColumns, inputFile);
                 });
             }
-            case "AMC": //TO DO : Implement validation for AMC
+            case "AMC":
                 return this.glassModuleDefaultRepository.getByName(moduleName).flatMap(module => {
                     if (module.teiColumns)
                         return this.amcDataRepository.validate(inputFile, module.dataColumns, module.teiColumns);

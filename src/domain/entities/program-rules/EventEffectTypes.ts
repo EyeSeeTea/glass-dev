@@ -1,8 +1,15 @@
-import { D2ProgramRuleAction, D2ProgramRuleVariable, MetadataPick } from "@eyeseetea/d2-api/2.34";
+import {
+    D2ProgramRuleAction,
+    D2ProgramRuleVariable,
+    D2TrackedEntityAttribute,
+    MetadataPick,
+} from "@eyeseetea/d2-api/2.34";
 import { Id } from "../Ref";
 import { TrackerEventsPostRequest } from "../../../data/repositories/Dhis2EventsDefaultRepository";
 import { ConsistencyError } from "../data-entry/ImportSummary";
 import { D2TrackerEvent as Event } from "@eyeseetea/d2-api/api/trackerEvents";
+import { D2TrackerEnrollment } from "@eyeseetea/d2-api/api/trackerEnrollments";
+import { D2TrackerTrackedEntity } from "@eyeseetea/d2-api/api/trackerTrackedEntities";
 export const metadataQuery = {
     programs: {
         fields: {
@@ -68,12 +75,12 @@ interface D2ProgramRuleVariableWithValueType extends D2ProgramRuleVariableBase {
     valueType?: string;
 }
 
-export interface EventProgramBLMetadata extends MetadataPick<MetadataQuery> {
+export interface BulkLoadMetadata extends MetadataPick<MetadataQuery> {
     programRuleVariables: D2ProgramRuleVariableWithValueType[];
     dataElementsById: Record<Id, D2DataElement>;
 }
 
-export type Program = EventProgramBLMetadata["programs"][number];
+export type Program = BulkLoadMetadata["programs"][number];
 export type RuleEffect = RuleEffectAssign | RuleEffectShowError | RuleEffectShowWarn | RuleEffectOther;
 
 export interface RuleEffectAssign {
@@ -120,21 +127,23 @@ export interface EventEffect {
     events: Event[];
     effects: RuleEffect[];
     orgUnit: OrgUnit;
+    tei?: D2TrackerTrackedEntity;
 }
 
+export type UpdateAction = UpdateActionEvent | UpdateActionTeiAttribute;
 export interface ActionResult {
-    actions: UpdateActionEvent[];
+    actions: UpdateAction[];
     blockingErrors: ConsistencyError[];
     nonBlockingErrors: ConsistencyError[];
 }
 
-export interface EventResult {
-    events: Event[];
+export interface ValidationResult {
+    teis?: D2TrackerTrackedEntity[];
+    events?: Event[];
     blockingErrors: ConsistencyError[];
     nonBlockingErrors: ConsistencyError[];
 }
 
-export type UpdateAction = UpdateActionEvent;
 type NamedRef = { id: Id; name: string };
 export interface UpdateActionEvent {
     type: "event";
@@ -144,6 +153,18 @@ export interface UpdateActionEvent {
     programStage?: NamedRef;
     orgUnit: NamedRef;
     dataElement: NamedRef;
+    value: string;
+    valuePrev: string;
+}
+
+export interface UpdateActionTeiAttribute {
+    type: "teiAttribute";
+    teiId: Id;
+    eventId: Id;
+    program: NamedRef;
+    programStage?: NamedRef;
+    orgUnit: NamedRef;
+    teiAttribute: NamedRef;
     value: string;
     valuePrev: string;
 }
@@ -230,12 +251,25 @@ export interface OptionSet {
 }
 export type OptionSetsMap = IdMap<OptionSet>;
 
+export interface TrackedEntityAttribute {
+    id: Id;
+    valueType: D2TrackedEntityAttribute["valueType"];
+    optionSetId?: Id;
+}
+
+export type TrackedEntityAttributesMap = IdMap<TrackedEntityAttribute>;
+
+type DataElementId = Id;
+
+export type TrackedEntityAttributeValuesMap = Record<DataElementId, string>;
 export interface GetProgramRuleEffectsOptions {
     programRulesContainer: ProgramRulesContainer;
     currentEvent?: ProgramRuleEvent;
     otherEvents?: ProgramRuleEvent[];
     dataElements: DataElementsMap;
-
+    selectedEntity?: TrackedEntityAttributeValuesMap | undefined;
+    trackedEntityAttributes?: TrackedEntityAttributesMap | undefined;
+    selectedEnrollment?: D2TrackerEnrollment | undefined;
     selectedOrgUnit: OrgUnit;
     optionSets: OptionSetsMap;
 }

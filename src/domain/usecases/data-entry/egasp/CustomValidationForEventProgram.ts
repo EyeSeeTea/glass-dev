@@ -2,7 +2,7 @@ import i18n from "@eyeseetea/d2-ui-components/locales";
 import { Dhis2EventsDefaultRepository } from "../../../../data/repositories/Dhis2EventsDefaultRepository";
 import { Future, FutureData } from "../../../entities/Future";
 import { ConsistencyError } from "../../../entities/data-entry/ImportSummary";
-import { EventResult } from "../../../entities/program-rules/EventEffectTypes";
+import { ValidationResult } from "../../../entities/program-rules/EventEffectTypes";
 import { D2TrackerEvent as Event } from "@eyeseetea/d2-api/api/trackerEvents";
 import { MetadataRepository } from "../../../repositories/MetadataRepository";
 import { AMC_RAW_SUBSTANCE_CONSUMPTION_PROGRAM_ID } from "../amc/ImportAMCSubstanceLevelData";
@@ -29,7 +29,7 @@ export class CustomValidationForEventProgram {
             const periodErrors = this.checkPeriod(events, period);
 
             if (programId === AMC_RAW_SUBSTANCE_CONSUMPTION_PROGRAM_ID) {
-                const results: EventResult = {
+                const results: ValidationResult = {
                     events: events,
                     blockingErrors: [...orgUnitErrors, ...periodErrors],
                     nonBlockingErrors: [],
@@ -45,7 +45,7 @@ export class CustomValidationForEventProgram {
                     //4. Duplicate Patient ID and Event date combo within org unit validation
                     const duplicatePatientIdErrors = this.checkUniquePatientIdAndDate(events, existingEvents);
 
-                    const results: EventResult = {
+                    const results: ValidationResult = {
                         events: events,
                         blockingErrors: [
                             ...orgUnitErrors,
@@ -60,7 +60,7 @@ export class CustomValidationForEventProgram {
                 });
             } //unkown program id, return success
             else {
-                const results: EventResult = {
+                const results: ValidationResult = {
                     events: events,
                     blockingErrors: [],
                     nonBlockingErrors: [],
