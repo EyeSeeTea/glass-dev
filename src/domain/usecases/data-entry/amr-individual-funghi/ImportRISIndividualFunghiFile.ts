@@ -214,7 +214,7 @@ export class ImportRISIndividualFunghiFile {
                         orgUnit,
                         dataValues: AMRDataStage,
                         occurredAt: new Date().getTime().toString(),
-                        status: "ACTIVE",
+                        status: "COMPLETED",
                     },
                 ];
                 const enrollments: D2TrackerEnrollment[] = [
