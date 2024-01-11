@@ -162,9 +162,12 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                             }).run(
                                 ({ deletePrimaryFileSummary, deleteSecondaryFileSummary }) => {
                                     if (deletePrimaryFileSummary) {
+                                        const itemsDeleted =
+                                            currentModuleAccess.moduleName === "AMC" ? "products" : "rows";
+
                                         let message = `${
                                             primaryFileToDelete?.rows || primaryFileToDelete?.records
-                                        } rows deleted for ${
+                                        } ${itemsDeleted} deleted for ${
                                             moduleProperties.get(currentModuleAccess.moduleName)?.primaryFileType
                                         } file`;
 
@@ -251,9 +254,12 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                                 .run(
                                     deleteSecondaryFileSummary => {
                                         if (secondaryFileToDelete && deleteSecondaryFileSummary) {
+                                            const itemsDeleted =
+                                                currentModuleAccess.moduleName === "AMC" ? "substances" : "rows";
+
                                             const message = ` ${
                                                 secondaryFileToDelete.rows || secondaryFileToDelete.records
-                                            } rows deleted for ${
+                                            } ${itemsDeleted} deleted for ${
                                                 moduleProperties.get(currentModuleAccess.moduleName)?.secondaryFileType
                                             } file.`;
                                             compositionRoot.glassDocuments
