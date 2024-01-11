@@ -159,27 +159,56 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
                 }
             );
         } else {
-            if (moduleProperties.get(currentModuleAccess.moduleName)?.isCalculationRequired && primaryFile) {
-                compositionRoot.calculations
-                    .consumptionDataProductLevel(
-                        currentPeriod,
-                        currentOrgUnitAccess.orgUnitId,
-                        currentOrgUnitAccess.orgUnitName,
-                        primaryFile
-                    )
-                    .run(
-                        importSummary => {
-                            console.debug(importSummary);
-                            setImportLoading(false);
-                            changeStep(3);
-                        },
-                        error => {
-                            snackbar.error(error);
-                            setImportLoading(false);
-                            console.error(error);
-                            changeStep(3);
-                        }
-                    );
+            if (
+                moduleProperties.get(currentModuleAccess.moduleName)?.isCalculationRequired &&
+                (primaryFile || secondaryFile)
+            ) {
+                if (primaryFile) {
+                    compositionRoot.calculations
+                        .consumptionDataProductLevel(
+                            currentPeriod,
+                            currentOrgUnitAccess.orgUnitId,
+                            currentOrgUnitAccess.orgUnitName,
+                            primaryFile
+                        )
+                        .run(
+                            importSummary => {
+                                console.debug(importSummary);
+                                setImportLoading(false);
+                                changeStep(3);
+                            },
+                            error => {
+                                snackbar.error(error);
+                                setImportLoading(false);
+                                console.error(error);
+                                changeStep(3);
+                            }
+                        );
+                }
+                const secondaryUploadId = localStorage.getItem("secondaryUploadId");
+                if (secondaryUploadId) {
+                    compositionRoot.calculations
+                        .consumptionDataSubstanceLevel(
+                            secondaryUploadId,
+                            currentPeriod,
+                            currentOrgUnitAccess.orgUnitId,
+                            currentOrgUnitAccess.orgUnitName,
+                            currentModuleAccess.moduleName
+                        )
+                        .run(
+                            importSummary => {
+                                console.debug(importSummary);
+                                setImportLoading(false);
+                                changeStep(3);
+                            },
+                            error => {
+                                snackbar.error(error);
+                                setImportLoading(false);
+                                console.error(error);
+                                changeStep(3);
+                            }
+                        );
+                }
             } else {
                 changeStep(3);
             }

@@ -246,7 +246,8 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                                     orgUnitName,
                                     secondaryFileToDelete.countryCode,
                                     false,
-                                    secondaryFileToDelete.eventListFileId
+                                    secondaryFileToDelete.eventListFileId,
+                                    secondaryFileToDelete.calculatedEventListFileId
                                 )
                                 .run(
                                     deleteSecondaryFileSummary => {

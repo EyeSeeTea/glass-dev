@@ -10,7 +10,6 @@ import calculationSolutionWrongStrengthUnit from "./data/calculationSolutionWron
 import calculationSolutionConcVolumeAndVolume from "./data/calculationSolutionConcVolumeAndVolume.json";
 import calculationSolutionUnitDoseCombCode from "./data/calculationSolutionUnitDoseCombCode.json";
 import calculationMillionInternationalUnitDifferentDDDUnit from "./data/calculationMillionInternationalUnitDifferentDDDUnit.json";
-import calculationSolutionNoCombCodeNoFoundDDD from "./data/calculationSolutionNoCombCodeNoFoundDDD.json";
 import calculationSolutionNoCombCodeFoundDDDAlterations from "./data/calculationSolutionNoCombCodeFoundDDDAlterations.json";
 import atcCurrentVersionDataJson from "./data/atcCurrentVersionData.json";
 import rawProductConsumptionJson from "./data/rawProductConsumption.json";
@@ -207,7 +206,7 @@ function getExpectedCalculationSolution(type?: string): RawSubstanceConsumptionC
         conc_volume_and_volume: calculationSolutionConcVolumeAndVolume,
         unit_dose_combination_code: calculationSolutionUnitDoseCombCode,
         millions_international_unit_different_ddd_unit: calculationMillionInternationalUnitDifferentDDDUnit,
-        no_combination_code_no_found_ddd: calculationSolutionNoCombCodeNoFoundDDD,
+        no_combination_code_no_found_ddd: [],
         no_combination_code_found_ddd_alterations: calculationSolutionNoCombCodeFoundDDDAlterations,
         wrong_strength_unit: calculationSolutionWrongStrengthUnit,
     } as Record<string, RawSubstanceConsumptionCalculated[]>;

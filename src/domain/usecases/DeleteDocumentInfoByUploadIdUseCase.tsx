@@ -13,9 +13,16 @@ export class DeleteDocumentInfoByUploadIdUseCase implements UseCase {
         return this.GlassUploadsRepository.delete(uploadId).flatMap(uploadFileData => {
             return this.glassDocumentsRepository.delete(uploadFileData.fileId).flatMap(id => {
                 return this.glassDocumentsRepository.deleteDocumentApi(id).flatMap(_data => {
-                    if (uploadFileData.eventListFileId)
-                        return this.glassDocumentsRepository.deleteDocumentApi(uploadFileData.eventListFileId);
-                    else return Future.success(undefined);
+                    return Future.joinObj({
+                        _eventListFileDeleted: uploadFileData.eventListFileId
+                            ? this.glassDocumentsRepository.deleteDocumentApi(uploadFileData.eventListFileId)
+                            : Future.success(undefined),
+                        _calculatedEventListFileDeleted: uploadFileData.calculatedEventListFileId
+                            ? this.glassDocumentsRepository.deleteDocumentApi(uploadFileData.calculatedEventListFileId)
+                            : Future.success(undefined),
+                    }).flatMap(_result => {
+                        return Future.success(undefined);
+                    });
                 });
             });
         });

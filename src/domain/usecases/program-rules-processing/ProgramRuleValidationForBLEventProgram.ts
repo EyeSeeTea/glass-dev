@@ -90,7 +90,7 @@ export class ProgramRuleValidationForBLEventProgram {
             .toPairs()
             .map(([teiId, actions]) => {
                 const tei = teisCurrent.find(tei => tei.trackedEntity === teiId);
-                if (!tei) throw new Error(`TEI found: ${teiId}`);
+                if (!tei) throw new Error(`TEI not found: ${teiId}`);
 
                 return actions.reduce((accTei, action): D2TrackerTrackedEntity => {
                     return this.setTeiAttributeValue(accTei, action.teiAttribute.id, action.value);

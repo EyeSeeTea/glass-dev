@@ -10,6 +10,7 @@ import {
     GlassATCHistory,
     GlassATCVersion,
     GlassATCVersionData,
+    ListGlassATCVersions,
     validateAtcVersion,
 } from "../../domain/entities/GlassATC";
 import { GlassATCRepository } from "../../domain/repositories/GlassATCRepository";
@@ -54,5 +55,17 @@ export class GlassATCDefaultRepository implements GlassATCRepository {
 
             return this.getAtcVersion(atcVersionKey);
         });
+    }
+
+    @cache()
+    getListOfAtcVersionsByKeys(atcVersionKeys: string[]): FutureData<ListGlassATCVersions> {
+        return Future.joinObj(
+            atcVersionKeys.reduce((acc, atcVersionKey) => {
+                return {
+                    ...acc,
+                    [atcVersionKey]: this.getAtcVersion(atcVersionKey),
+                };
+            }, {})
+        );
     }
 }
