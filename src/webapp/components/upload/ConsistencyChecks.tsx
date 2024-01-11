@@ -14,6 +14,7 @@ import { useCurrentPeriodContext } from "../../contexts/current-period-context";
 import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context";
 import { SupportButtons } from "./SupportButtons";
 import { moduleProperties } from "../../../domain/utils/ModuleProperties";
+import { useSnackbar } from "@eyeseetea/d2-ui-components";
 
 interface ConsistencyChecksProps {
     changeStep: (step: number) => void;
@@ -42,6 +43,7 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
     const [fileType, setFileType] = useState<string>("primary");
     const [importLoading, setImportLoading] = useState<boolean>(false);
     const { currentPeriod } = useCurrentPeriodContext();
+    const snackbar = useSnackbar();
 
     const changeType = (fileType: string) => {
         setFileType(fileType);
@@ -157,6 +159,59 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
                 }
             );
         } else {
+            if (
+                moduleProperties.get(currentModuleAccess.moduleName)?.isCalculationRequired &&
+                (primaryFile || secondaryFile)
+            ) {
+                if (primaryFile) {
+                    compositionRoot.calculations
+                        .consumptionDataProductLevel(
+                            currentPeriod,
+                            currentOrgUnitAccess.orgUnitId,
+                            currentOrgUnitAccess.orgUnitName,
+                            primaryFile
+                        )
+                        .run(
+                            importSummary => {
+                                console.debug(importSummary);
+                                setImportLoading(false);
+                                changeStep(3);
+                            },
+                            error => {
+                                snackbar.error(error);
+                                setImportLoading(false);
+                                console.error(error);
+                                changeStep(3);
+                            }
+                        );
+                }
+                const secondaryUploadId = localStorage.getItem("secondaryUploadId");
+                if (secondaryUploadId) {
+                    compositionRoot.calculations
+                        .consumptionDataSubstanceLevel(
+                            secondaryUploadId,
+                            currentPeriod,
+                            currentOrgUnitAccess.orgUnitId,
+                            currentOrgUnitAccess.orgUnitName,
+                            currentModuleAccess.moduleName
+                        )
+                        .run(
+                            importSummary => {
+                                console.debug(importSummary);
+                                setImportLoading(false);
+                                changeStep(3);
+                            },
+                            error => {
+                                snackbar.error(error);
+                                setImportLoading(false);
+                                console.error(error);
+                                changeStep(3);
+                            }
+                        );
+                }
+            } else {
+                changeStep(3);
+            }
             changeStep(3);
         }
     };

@@ -1,5 +1,4 @@
 import { Dhis2EventsDefaultRepository } from "../../../data/repositories/Dhis2EventsDefaultRepository";
-import { InstanceDefaultRepository } from "../../../data/repositories/InstanceDefaultRepository";
 import { ImportStrategy } from "../../entities/data-entry/DataValuesSaveSummary";
 import { ConsistencyError, ImportSummary } from "../../entities/data-entry/ImportSummary";
 import { Future, FutureData } from "../../entities/Future";
@@ -9,7 +8,7 @@ import { GlassUploadsRepository } from "../../repositories/GlassUploadsRepositor
 import { MetadataRepository } from "../../repositories/MetadataRepository";
 import * as templates from "../../entities/data-entry/program-templates";
 import { DataForm } from "../../entities/DataForm";
-import { EventResult } from "../../entities/program-rules/EventEffectTypes";
+import { ValidationResult } from "../../entities/program-rules/EventEffectTypes";
 import { generateId, Id } from "../../entities/Ref";
 import { DataPackage, DataPackageDataValue } from "../../entities/data-entry/DataPackage";
 import { D2TrackerEvent } from "@eyeseetea/d2-api/api/trackerEvents";
@@ -20,11 +19,14 @@ import { ProgramRulesMetadataRepository } from "../../repositories/program-rules
 import { CustomValidationForEventProgram } from "./egasp/CustomValidationForEventProgram";
 import { Template } from "../../entities/Template";
 import { ExcelReader } from "../../utils/ExcelReader";
+import { InstanceRepository } from "../../repositories/InstanceRepository";
+import { AMC_RAW_SUBSTANCE_CONSUMPTION_PROGRAM_ID } from "./amc/ImportAMCSubstanceLevelData";
+import moment from "moment";
 
 export class ImportBLTemplateEventProgram {
     constructor(
         private excelRepository: ExcelRepository,
-        private instanceRepository: InstanceDefaultRepository,
+        private instanceRepository: InstanceRepository,
         private glassDocumentsRepository: GlassDocumentsRepository,
         private glassUploadsRepository: GlassUploadsRepository,
         private dhis2EventsDefaultRepository: Dhis2EventsDefaultRepository,
@@ -35,13 +37,14 @@ export class ImportBLTemplateEventProgram {
     public import(
         file: File,
         action: ImportStrategy,
-        eventListId: string | undefined,
+        eventListFileId: string | undefined,
         moduleName: string,
         orgUnitId: string,
         orgUnitName: string,
         period: string,
         programId: string,
-        uploadIdLocalStorageName: string
+        uploadIdLocalStorageName: string,
+        calculatedEventListFileId?: string
     ): FutureData<ImportSummary> {
         return this.excelRepository.loadTemplate(file, programId).flatMap(_templateId => {
             const template = _.values(templates)
@@ -57,7 +60,13 @@ export class ImportBLTemplateEventProgram {
                         programId
                     ).flatMap(dataPackage => {
                         if (dataPackage) {
-                            return this.buildEventsPayload(dataPackage, action, eventListId).flatMap(events => {
+                            return this.buildEventsPayload(
+                                dataPackage,
+                                action,
+                                period,
+                                eventListFileId,
+                                calculatedEventListFileId
+                            ).flatMap(events => {
                                 if (action === "CREATE_AND_UPDATE") {
                                     //Run validations on import only
                                     return this.validateEvents(
@@ -82,7 +91,7 @@ export class ImportBLTemplateEventProgram {
                                             return Future.success(errorSummary);
                                         } else {
                                             const eventIdLineNoMap: { id: string; lineNo: number }[] = [];
-                                            const eventsWithId = validatedEventResults.events.map(e => {
+                                            const eventsWithId = validatedEventResults.events?.map(e => {
                                                 const generatedId = generateId();
                                                 eventIdLineNoMap.push({
                                                     id: generatedId,
@@ -92,7 +101,7 @@ export class ImportBLTemplateEventProgram {
                                                 return e;
                                             });
                                             return this.dhis2EventsDefaultRepository
-                                                .import({ events: eventsWithId }, action)
+                                                .import({ events: eventsWithId ?? [] }, action)
                                                 .flatMap(result => {
                                                     return mapToImportSummary(
                                                         result,
@@ -114,15 +123,7 @@ export class ImportBLTemplateEventProgram {
                                     });
                                 } //action === "DELETE"
                                 else {
-                                    return this.dhis2EventsDefaultRepository
-                                        .import({ events }, action)
-                                        .flatMap(result => {
-                                            return mapToImportSummary(result, "event", this.metadataRepository).flatMap(
-                                                ({ importSummary }) => {
-                                                    return Future.success(importSummary);
-                                                }
-                                            );
-                                        });
+                                    return this.deleteEvents(events);
                                 }
                             });
                         } else {
@@ -136,21 +137,97 @@ export class ImportBLTemplateEventProgram {
         });
     }
 
+    private createAndUpdateEvents(
+        uploadIdLocalStorageName: string,
+        moduleName: string,
+        events: D2TrackerEvent[],
+        orgUnitId: string,
+        orgUnitName: string,
+        period: string,
+        programId: string
+    ): FutureData<ImportSummary> {
+        //Run validations on import only
+        return this.validateEvents(events, orgUnitId, orgUnitName, period, programId).flatMap(validatedEventResults => {
+            if (validatedEventResults.blockingErrors.length > 0) {
+                const errorSummary: ImportSummary = {
+                    status: "ERROR",
+                    importCount: {
+                        ignored: 0,
+                        imported: 0,
+                        deleted: 0,
+                        updated: 0,
+                    },
+                    nonBlockingErrors: validatedEventResults.nonBlockingErrors,
+                    blockingErrors: validatedEventResults.blockingErrors,
+                };
+                return Future.success(errorSummary);
+            } else {
+                const eventIdLineNoMap: { id: string; lineNo: number }[] = [];
+                const eventsWithId = (validatedEventResults.events || []).map(e => {
+                    const generatedId = generateId();
+                    eventIdLineNoMap.push({
+                        id: generatedId,
+                        lineNo: isNaN(parseInt(e.event)) ? 0 : parseInt(e.event),
+                    });
+                    e.event = generatedId;
+                    return e;
+                });
+                return this.dhis2EventsDefaultRepository
+                    .import({ events: eventsWithId }, "CREATE_AND_UPDATE")
+                    .flatMap(result => {
+                        return mapToImportSummary(
+                            result,
+                            "event",
+                            this.metadataRepository,
+                            validatedEventResults.nonBlockingErrors,
+                            eventIdLineNoMap
+                        ).flatMap(summary => {
+                            return uploadIdListFileAndSave(
+                                uploadIdLocalStorageName,
+                                summary,
+                                moduleName,
+                                this.glassDocumentsRepository,
+                                this.glassUploadsRepository
+                            );
+                        });
+                    });
+            }
+        });
+    }
+
+    private deleteEvents(events: D2TrackerEvent[]): FutureData<ImportSummary> {
+        return this.dhis2EventsDefaultRepository.import({ events }, "DELETE").flatMap(result => {
+            return mapToImportSummary(result, "event", this.metadataRepository).flatMap(({ importSummary }) => {
+                return Future.success(importSummary);
+            });
+        });
+    }
+
     private buildEventsPayload(
         dataPackage: DataPackage,
         action: ImportStrategy,
-        eventListId: string | undefined
+        dataSubmissionPeriod: string,
+        eventListFileId: string | undefined,
+        calculatedEventListFileId?: string
     ): FutureData<D2TrackerEvent[]> {
         if (action === "CREATE_AND_UPDATE") {
             return Future.success(
                 dataPackage.dataEntries.map(
                     ({ id, orgUnit, period, attribute, dataValues, dataForm, coordinate }, index) => {
+                        const occurredAt =
+                            dataForm === AMC_RAW_SUBSTANCE_CONSUMPTION_PROGRAM_ID
+                                ? moment(new Date(`${dataSubmissionPeriod}-01-01`))
+                                      .toISOString()
+                                      .split("T")
+                                      .at(0) ?? period
+                                : period;
+
                         return {
                             event: id || (index + 6).toString(),
                             program: dataForm,
                             status: "COMPLETED",
                             orgUnit,
-                            occurredAt: period,
+                            occurredAt: occurredAt,
                             attributeOptionCombo: attribute,
                             dataValues: dataValues.map(el => {
                                 return { ...el, value: el.value.toString() };
@@ -160,31 +237,37 @@ export class ImportBLTemplateEventProgram {
                     }
                 )
             );
-        } else {
-            if (eventListId)
-                return this.glassDocumentsRepository.download(eventListId).flatMap(file => {
-                    return Future.fromPromise(getStringFromFile(file)).flatMap(_events => {
-                        const eventIdList: [] = JSON.parse(_events);
-                        const events: D2TrackerEvent[] = eventIdList.map(eventId => {
-                            return {
-                                event: eventId,
-                                program: "",
-                                status: "COMPLETED",
-                                orgUnit: "",
-                                occurredAt: "",
-                                attributeOptionCombo: "",
-                                dataValues: [],
-                            };
-                        });
-
-                        return Future.success(events);
-                    });
-                });
-            else {
-                //No events were created during import, so no events to delete.
-                return Future.success([]);
-            }
+        } else if (action === "DELETE") {
+            return Future.joinObj({
+                events: eventListFileId ? this.getEventsFromListFileId(eventListFileId) : Future.success([]),
+                calculatedEvents: calculatedEventListFileId
+                    ? this.getEventsFromListFileId(calculatedEventListFileId)
+                    : Future.success([]),
+            }).flatMap(({ events, calculatedEvents }) => {
+                return Future.success([...events, ...calculatedEvents]);
+            });
         }
+        return Future.success([]);
+    }
+
+    private getEventsFromListFileId(listFileId: string): FutureData<D2TrackerEvent[]> {
+        return this.glassDocumentsRepository.download(listFileId).flatMap(eventListFile => {
+            return Future.fromPromise(getStringFromFile(eventListFile)).flatMap(_events => {
+                const eventIdList: string[] = JSON.parse(_events);
+                const events: D2TrackerEvent[] = eventIdList.map(eventId => {
+                    return {
+                        event: eventId,
+                        program: "",
+                        status: "COMPLETED",
+                        orgUnit: "",
+                        occurredAt: "",
+                        attributeOptionCombo: "",
+                        dataValues: [],
+                    };
+                });
+                return Future.success(events);
+            });
+        });
     }
 
     private validateEvents(
@@ -193,7 +276,7 @@ export class ImportBLTemplateEventProgram {
         orgUnitName: string,
         period: string,
         programId: string
-    ): FutureData<EventResult> {
+    ): FutureData<ValidationResult> {
         //1. Run Program Rule Validations
         const programRuleValidations = new ProgramRuleValidationForBLEventProgram(this.programRulesMetadataRepository);
 
@@ -204,7 +287,7 @@ export class ImportBLTemplateEventProgram {
         );
 
         return Future.joinObj({
-            programRuleValidationResults: programRuleValidations.getValidatedEvents(events, programId),
+            programRuleValidationResults: programRuleValidations.getValidatedTeisAndEvents(programId, events),
             customRuleValidationsResults: customValidations.getValidatedEvents(
                 events,
                 orgUnitId,
@@ -213,7 +296,7 @@ export class ImportBLTemplateEventProgram {
                 programId
             ),
         }).flatMap(({ programRuleValidationResults, customRuleValidationsResults }) => {
-            const consolidatedValidationResults: EventResult = {
+            const consolidatedValidationResults: ValidationResult = {
                 events: programRuleValidationResults.events,
                 blockingErrors: [
                     ...programRuleValidationResults.blockingErrors,
@@ -361,7 +444,7 @@ export const readTemplate = (
     template: Template,
     dataForm: DataForm,
     excelRepository: ExcelRepository,
-    instanceReporsitory: InstanceDefaultRepository,
+    instanceReporsitory: InstanceRepository,
     programId: Id
 ): FutureData<DataPackage | undefined> => {
     const reader = new ExcelReader(excelRepository, instanceReporsitory);

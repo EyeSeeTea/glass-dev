@@ -2,9 +2,9 @@ import {
     ActionResult,
     D2DataValueToPost,
     D2EventToPost,
-    EventProgramBLMetadata,
+    BulkLoadMetadata,
     EventEffect,
-    EventResult,
+    ValidationResult,
     GetProgramRuleEffectsOptions,
     OrgUnit,
     Program,
@@ -13,51 +13,114 @@ import {
     RuleEffect,
     UpdateAction,
     UpdateActionEvent,
+    TrackedEntityAttributeValuesMap,
+    RuleEffectAssign,
+    UpdateActionTeiAttribute,
 } from "../../entities/program-rules/EventEffectTypes";
-import { D2TrackerEvent as Event } from "@eyeseetea/d2-api/api/trackerEvents";
+import { D2TrackerEvent } from "@eyeseetea/d2-api/api/trackerEvents";
 import { ProgramRulesMetadataRepository } from "../../repositories/program-rules/ProgramRulesMetadataRepository";
 import { Id } from "../../entities/Ref";
 import { Future, FutureData } from "../../entities/Future";
 
-import { fromPairs } from "../../../types/utils";
+import { fromPairs, Maybe } from "../../../types/utils";
 import { RulesEngine } from "./RulesEngine";
 import { inputConverter } from "./converters/inputConverter";
 import { outputConverter } from "./converters/outputConverter";
 import { dateUtils } from "./converters/dateUtils";
 import { BlockingError, NonBlockingError } from "../../entities/data-entry/ImportSummary";
+import { Attribute, D2TrackerTrackedEntity } from "@eyeseetea/d2-api/api/trackerTrackedEntities";
 
 export class ProgramRuleValidationForBLEventProgram {
     constructor(private programRulesMetadataRepository: ProgramRulesMetadataRepository) {}
 
-    public getValidatedEvents(events: Event[], programId: string): FutureData<EventResult> {
+    public getValidatedTeisAndEvents(
+        programId: string,
+        events?: D2TrackerEvent[],
+        teis?: D2TrackerTrackedEntity[] //For tracker programs only
+    ): FutureData<ValidationResult> {
         return this.programRulesMetadataRepository.getMetadata(programId).flatMap(metadata => {
-            const eventEffects = this.getEventEffectsForEventProgram(events, metadata);
-            const actionsResult = this.getActions(eventEffects, metadata);
-            if (actionsResult.blockingErrors.length > 0) {
-                //If there are blocking errors, do not process further. return the errors.
-                const errors: EventResult = {
-                    events: [],
-                    blockingErrors: actionsResult.blockingErrors,
-                    nonBlockingErrors: actionsResult.nonBlockingErrors,
-                };
-                return Future.success(errors);
-            } else {
-                const eventsToBeUpdated = _.flatMap(eventEffects, eventEffect => eventEffect.events);
-                const eventsById = _.keyBy(eventsToBeUpdated, "event");
-                const eventsUpdated = this.getUpdatedEvents(actionsResult.actions, eventsById);
-                const unChangedEvents = events.filter(e => !eventsUpdated.some(ue => ue.event === e.event));
-                const consolidatedEvents = [...eventsUpdated, ...unChangedEvents];
-                const results: EventResult = {
-                    events: consolidatedEvents,
-                    blockingErrors: [],
-                    nonBlockingErrors: actionsResult.nonBlockingErrors,
-                };
-                return Future.success(results);
-            }
+            return this.getEventEffects(metadata, events, teis).flatMap(eventEffects => {
+                const actionsResult = this.getActions(eventEffects, metadata);
+                if (actionsResult.blockingErrors.length > 0) {
+                    //If there are blocking errors, do not process further. return the errors.
+                    const errors: ValidationResult = {
+                        teis: [],
+                        events: [],
+                        blockingErrors: actionsResult.blockingErrors,
+                        nonBlockingErrors: actionsResult.nonBlockingErrors,
+                    };
+                    return Future.success(errors);
+                } else {
+                    const eventsToBeUpdated = _.flatMap(eventEffects, eventEffect => eventEffect.events);
+                    const eventsById = _.keyBy(eventsToBeUpdated, "event");
+                    const eventsUpdated = this.getUpdatedEvents(actionsResult.actions, eventsById);
+                    const unChangedEvents = events?.filter(e => !eventsUpdated.some(ue => ue.event === e.event)) ?? [];
+                    const consolidatedEvents = [...eventsUpdated, ...unChangedEvents];
+
+                    const teisCurrent = teis ? teis : [];
+
+                    const teisUpdated: D2TrackerTrackedEntity[] = this.getUpdatedTeis(
+                        teisCurrent,
+                        actionsResult.actions
+                    );
+                    const unchangedTeis = teisCurrent.filter(
+                        tei => !teisUpdated.some(updatedTei => updatedTei.trackedEntity === tei.trackedEntity)
+                    );
+                    const consolidatedTeis = [...teisUpdated, ...unchangedTeis];
+                    console.debug(`Changes: events=${eventsUpdated.length}, teis=${teisUpdated.length}`);
+
+                    const results: ValidationResult = {
+                        teis: consolidatedTeis,
+                        events: consolidatedEvents,
+                        blockingErrors: [],
+                        nonBlockingErrors: actionsResult.nonBlockingErrors,
+                    };
+                    return Future.success(results);
+                }
+            });
         });
     }
 
-    private getActions(eventEffects: EventEffect[], metadata: EventProgramBLMetadata): ActionResult {
+    private getUpdatedTeis(teisCurrent: D2TrackerTrackedEntity[], actions: UpdateAction[]) {
+        const teisUpdated: D2TrackerTrackedEntity[] = _(actions)
+            .uniqWith(_.isEqual)
+            .map(action => (action.type === "teiAttribute" ? action : null))
+            .compact()
+            .groupBy(action => action.teiId)
+            .toPairs()
+            .map(([teiId, actions]) => {
+                const tei = teisCurrent.find(tei => tei.trackedEntity === teiId);
+                if (!tei) throw new Error(`TEI not found: ${teiId}`);
+
+                return actions.reduce((accTei, action): D2TrackerTrackedEntity => {
+                    return this.setTeiAttributeValue(accTei, action.teiAttribute.id, action.value);
+                }, tei);
+            })
+            .value();
+        return teisUpdated;
+    }
+
+    private setTeiAttributeValue(
+        tei: D2TrackerTrackedEntity,
+        attributeId: Id,
+        value: D2DataValueToPost["value"] | undefined
+    ): D2TrackerTrackedEntity {
+        const hasValue = _(tei.attributes).some(attr => attr.attribute === attributeId);
+        const newValue = value === undefined ? "" : value.toString();
+        if (!hasValue && !newValue) return tei;
+
+        const attributesUpdated: Attribute[] = hasValue
+            ? _(tei.attributes)
+                  .map(dv => (dv.attribute === attributeId ? { ...dv, value: newValue } : dv))
+                  .value()
+            : _(tei.attributes)
+                  .concat([{ attribute: attributeId, value: newValue }])
+                  .value();
+
+        return { ...tei, attributes: attributesUpdated };
+    }
+
+    private getActions(eventEffects: EventEffect[], metadata: BulkLoadMetadata): ActionResult {
         const updateActions: ActionResult = { actions: [], blockingErrors: [], nonBlockingErrors: [] };
 
         _(eventEffects)
@@ -65,12 +128,12 @@ export class ProgramRuleValidationForBLEventProgram {
                 return _(eventEffect.effects).flatMap(ruleEffect => {
                     const result = this.getUpdateAction(ruleEffect, eventEffect, metadata);
 
-                    if (result?.type === "event") {
-                        updateActions.actions.push(result);
-                    } else if (result?.type === "blocking") {
+                    if (result?.type === "blocking") {
                         updateActions.blockingErrors.push(result.error);
                     } else if (result?.type === "non-blocking") {
                         updateActions.nonBlockingErrors.push(result.error);
+                    } else if (result) {
+                        updateActions.actions.push(result);
                     }
                 });
             })
@@ -95,9 +158,9 @@ export class ProgramRuleValidationForBLEventProgram {
     private getUpdateAction(
         effect: RuleEffect,
         eventEffect: EventEffect,
-        metadata: EventProgramBLMetadata
+        metadata: BulkLoadMetadata
     ): UpdateAction | BlockingError | NonBlockingError | undefined {
-        const { program, event } = eventEffect;
+        const { program, event, tei } = eventEffect;
 
         switch (effect.type) {
             case "ASSIGN": {
@@ -106,6 +169,10 @@ export class ProgramRuleValidationForBLEventProgram {
                 switch (effect.targetDataType) {
                     case "dataElement":
                         return this.getUpdateActionEvent(metadata, program, event, effect.id, effect.value);
+                    case "trackedEntityAttribute": {
+                        if (tei) return this.getUpdateActionTeiAttribute(program, event, tei, effect);
+                        else return;
+                    }
                     default:
                         return;
                 }
@@ -139,9 +206,9 @@ export class ProgramRuleValidationForBLEventProgram {
     }
 
     private getUpdateActionEvent(
-        metadata: EventProgramBLMetadata,
+        metadata: BulkLoadMetadata,
         program: Program,
-        event: Event,
+        event: D2TrackerEvent,
         dataElementId: Id,
         value: D2DataValueToPost["value"] | undefined | null
     ): UpdateActionEvent | undefined {
@@ -163,7 +230,41 @@ export class ProgramRuleValidationForBLEventProgram {
         };
     }
 
-    private getUpdatedEvents(actions: UpdateAction[], eventsById: _.Dictionary<Event>): D2EventToPost[] {
+    private getUpdateActionTeiAttribute(
+        program: Program,
+        event: D2TrackerEvent,
+        tei: D2TrackerTrackedEntity,
+        ruleEffectAssign: RuleEffectAssign
+    ): UpdateActionTeiAttribute | undefined {
+        const { id: attributeId, value } = ruleEffectAssign;
+        const attributes = _(program.programTrackedEntityAttributes)
+            .flatMap(ptea => ptea.trackedEntityAttribute)
+            .value();
+
+        const attributesById = _.keyBy(attributes, de => de.id);
+        const attributeIdsInProgram = new Set(attributes.map(de => de.id));
+        const programStagesNamedRefById = _.keyBy(program.programStages, programStage => programStage.id);
+
+        if (!attributeIdsInProgram.has(attributeId) || !tei.trackedEntity || !event.programStage) {
+            console.debug(`Skip ASSIGN effect as attribute ${attributeId} does not belong to program`);
+            return undefined;
+        } else {
+            const strValue = value === null || value === undefined ? "" : value.toString();
+            return {
+                type: "teiAttribute",
+                eventId: event.event,
+                teiId: tei.trackedEntity,
+                program,
+                programStage: programStagesNamedRefById[event.programStage],
+                orgUnit: { id: tei.orgUnit ?? "", name: tei.orgUnit ?? "" },
+                teiAttribute: attributesById[attributeId] || { id: attributeId, name: "-" },
+                value: strValue,
+                valuePrev: tei.attributes?.find(dv => dv.attribute === attributeId)?.value ?? "-",
+            };
+        }
+    }
+
+    private getUpdatedEvents(actions: UpdateAction[], eventsById: _.Dictionary<D2TrackerEvent>): D2EventToPost[] {
         return _(actions)
             .uniqWith(_.isEqual)
             .map(action => (action.type === "event" ? action : null))
@@ -203,7 +304,25 @@ export class ProgramRuleValidationForBLEventProgram {
         return { ...event, dataValues: dataValuesUpdated };
     }
 
-    public getEventEffectsForEventProgram(events: Event[], metadata: EventProgramBLMetadata): EventEffect[] {
+    public getEventEffects(
+        metadata: BulkLoadMetadata,
+        events?: D2TrackerEvent[],
+        teis?: D2TrackerTrackedEntity[]
+    ): FutureData<EventEffect[]> {
+        const program = metadata.programs[0];
+        if (program) {
+            switch (program.programType) {
+                case "WITHOUT_REGISTRATION":
+                    if (events) return Future.success(this.getEventEffectsForEventProgram(events, metadata));
+                    else return Future.error("No events");
+
+                case "WITH_REGISTRATION":
+                    return this.getEventEffectsForTrackerProgram(teis, { program, metadata });
+            }
+        } else return Future.error("Unknown program");
+    }
+
+    public getEventEffectsForEventProgram(events: D2TrackerEvent[], metadata: BulkLoadMetadata): EventEffect[] {
         const program = metadata.programs[0]; //EVENT PROGRAM
         const eventsGroups = _(events)
             .filter(ev => Boolean(ev.occurredAt))
@@ -233,17 +352,70 @@ export class ProgramRuleValidationForBLEventProgram {
         } else return [];
     }
 
+    private getEventEffectsForTrackerProgram(
+        teis: D2TrackerTrackedEntity[] | undefined,
+        options: { program: Program; metadata: BulkLoadMetadata }
+    ): FutureData<EventEffect[]> {
+        const { program, metadata } = options;
+
+        const programRulesIds: Id[] = metadata.programRules.map(pr => pr.id);
+
+        const eventEffects = _(teis)
+            .flatMap(tei => {
+                const teiEvents = _.flatMap(tei.enrollments, enrollment => enrollment.events);
+
+                return teiEvents
+                    .filter(event => Boolean(event?.occurredAt))
+                    .map(event =>
+                        event
+                            ? this.getEffects({
+                                  event,
+                                  program,
+                                  programRulesIds,
+                                  metadata,
+                                  events: teiEvents,
+                                  teis,
+                                  tei,
+                              })
+                            : null
+                    );
+            })
+            .compact()
+            .value();
+
+        return Future.success(eventEffects);
+    }
+
     private getEffects(options: {
-        event: Event;
+        event: D2TrackerEvent;
         program: Program;
         programRulesIds: Id[];
-        metadata: EventProgramBLMetadata;
-
-        events: Event[];
+        metadata: BulkLoadMetadata;
+        events: D2TrackerEvent[];
+        teis?: D2TrackerTrackedEntity[];
+        tei?: Maybe<D2TrackerTrackedEntity>;
     }): EventEffect | undefined {
-        const { event: d2Event, program, programRulesIds, metadata, events } = options;
+        const { event: d2Event, program, programRulesIds, metadata, events, teis, tei } = options;
         const allEvents = events.map(event => this.getProgramEvent(event, metadata));
         const event = this.getProgramEvent(d2Event, metadata);
+
+        const enrollmentsById = _(teis)
+            .flatMap(tei => tei.enrollments)
+            .filter(enrollment => enrollment !== undefined)
+            .compact()
+            .keyBy(enrollment => enrollment.enrollment)
+            .value();
+
+        const enrollment = event.enrollmentId ? enrollmentsById[event.enrollmentId] : undefined;
+
+        console.debug(`Process event: ${event.eventId}`);
+
+        const selectedEntity: TrackedEntityAttributeValuesMap | undefined = tei
+            ? _(tei.attributes)
+                  .map(attr => [attr.attribute, attr.value] as [Id, string])
+                  .fromPairs()
+                  .value()
+            : undefined;
 
         const selectedOrgUnit: OrgUnit = {
             id: event.orgUnitId,
@@ -254,6 +426,17 @@ export class ProgramRuleValidationForBLEventProgram {
         const getEffectsOptions: GetProgramRuleEffectsOptions = {
             currentEvent: event,
             otherEvents: allEvents,
+            trackedEntityAttributes: this.getMap(
+                program.programTrackedEntityAttributes
+                    .map(ptea => ptea.trackedEntityAttribute)
+                    .map(tea => ({
+                        id: tea.id,
+                        valueType: tea.valueType,
+                        optionSetId: tea.optionSet?.id,
+                    }))
+            ),
+            selectedEnrollment: enrollment ? enrollment : undefined,
+            selectedEntity,
             programRulesContainer: {
                 programRules: metadata.programRules
                     .filter(rule => !programRulesIds || programRulesIds.includes(rule.id))
@@ -329,6 +512,7 @@ export class ProgramRuleValidationForBLEventProgram {
                 events: events,
                 effects,
                 orgUnit: selectedOrgUnit,
+                tei,
             };
 
             return eventEffect;
@@ -350,7 +534,7 @@ export class ProgramRuleValidationForBLEventProgram {
         return [res, errors.length > 0 ? errors : undefined];
     }
 
-    private getProgramEvent(event: Event, metadata: EventProgramBLMetadata): ProgramRuleEvent {
+    private getProgramEvent(event: D2TrackerEvent, metadata: BulkLoadMetadata): ProgramRuleEvent {
         const trackedEntityId = event.trackedEntity;
 
         return {
@@ -359,7 +543,7 @@ export class ProgramRuleValidationForBLEventProgram {
             programStageId: event.programStage,
             orgUnitId: event.orgUnit,
             orgUnitName: event.orgUnit,
-            enrollmentId: undefined,
+            enrollmentId: event.enrollment,
             enrollmentStatus: undefined,
             status: event.status,
             occurredAt: event.occurredAt,
