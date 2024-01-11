@@ -119,6 +119,7 @@ export function getCompositionRoot(instance: Instance) {
     const amcProductDataRepository = new AMCProductDataDefaultRepository(api);
     const amcSubstanceDataRepository = new AMCSubstanceDataDefaultRepository(api);
     const glassAtcRepository = new GlassATCDefaultRepository(dataStoreClient);
+    const atcRepository = new GlassATCDefaultRepository(dataStoreClient);
 
     return {
         instance: getExecute({
@@ -173,7 +174,8 @@ export function getCompositionRoot(instance: Instance) {
                 trackerRepository,
                 glassModuleRepository,
                 instanceRepository,
-                programRulesMetadataDefaultRepository
+                programRulesMetadataDefaultRepository,
+                atcRepository
             ),
             validatePrimaryFile: new ValidatePrimaryFileUseCase(
                 risDataRepository,
