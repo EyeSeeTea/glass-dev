@@ -53,7 +53,7 @@ export type RawSubstanceConsumptionCalculated = {
     tons_autocalculated: number;
     packages_autocalculated: number;
     atc_version_autocalculated: string;
-    ddds_autocalculated?: number;
+    ddds_autocalculated: number;
     orgUnitId: Id;
 };
 

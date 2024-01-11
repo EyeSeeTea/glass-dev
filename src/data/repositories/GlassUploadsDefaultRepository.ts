@@ -46,14 +46,22 @@ export class GlassUploadsDefaultRepository implements GlassUploadsRepository {
         });
     }
 
-    delete(id: string): FutureData<{ fileId: string; eventListFileId: string | undefined }> {
+    delete(id: string): FutureData<{
+        fileId: string;
+        eventListFileId: string | undefined;
+        calculatedEventListFileId: string | undefined;
+    }> {
         return this.dataStoreClient.listCollection<GlassUploads>(DataStoreKeys.UPLOADS).flatMap(uploads => {
             const upload = uploads?.find(upload => upload.id === id);
             if (upload) {
                 uploads.splice(uploads.indexOf(upload), 1);
-                return this.dataStoreClient
-                    .saveObject(DataStoreKeys.UPLOADS, uploads)
-                    .flatMap(() => Future.success({ fileId: upload.fileId, eventListFileId: upload.eventListFileId }));
+                return this.dataStoreClient.saveObject(DataStoreKeys.UPLOADS, uploads).flatMap(() =>
+                    Future.success({
+                        fileId: upload.fileId,
+                        eventListFileId: upload.eventListFileId,
+                        calculatedEventListFileId: upload.calculatedEventListFileId,
+                    })
+                );
             } else {
                 return Future.error("Upload does not exist");
             }
@@ -134,6 +142,31 @@ export class GlassUploadsDefaultRepository implements GlassUploadsRepository {
                     ? [...restUploads, primaryUpdatedUpload, secondaryUpdatedUpload]
                     : [...restUploads, primaryUpdatedUpload];
 
+                return this.dataStoreClient.saveObject(DataStoreKeys.UPLOADS, newUploads);
+            } else {
+                return Future.error("Upload does not exist");
+            }
+        });
+    }
+
+    getEventListFileIdByUploadId(id: string): FutureData<string> {
+        return this.dataStoreClient.listCollection<GlassUploads>(DataStoreKeys.UPLOADS).flatMap(uploads => {
+            const upload = uploads?.find(upload => upload.id === id);
+            if (upload && upload.eventListFileId) {
+                return Future.success(upload.eventListFileId);
+            } else {
+                return Future.error("Upload does not exist or does not have eventListFileId");
+            }
+        });
+    }
+
+    setCalculatedEventListFileId(uploadId: string, calculatedEventListFileId: string): FutureData<void> {
+        return this.dataStoreClient.listCollection<GlassUploads>(DataStoreKeys.UPLOADS).flatMap(uploads => {
+            const upload = uploads.find(upload => upload.id === uploadId);
+            if (upload) {
+                upload.calculatedEventListFileId = calculatedEventListFileId;
+                const restUploads = uploads.filter(upload => upload.id !== uploadId);
+                const newUploads = [...restUploads, { ...upload, calculatedEventListFileId }];
                 return this.dataStoreClient.saveObject(DataStoreKeys.UPLOADS, newUploads);
             } else {
                 return Future.error("Upload does not exist");

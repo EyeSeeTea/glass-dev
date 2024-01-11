@@ -115,6 +115,10 @@ export class CalculateConsumptionDataProductLevelUseCase {
                         return Future.error("Cannot find Raw Substance Consumption Calculated program stage metadata");
                     }
 
+                    if (_.isEmpty(rawSubstanceConsumptionCalculatedData)) {
+                        return Future.error("There are no calculated data to import");
+                    }
+
                     return this.amcProductDataRepository
                         .importCalculations(
                             productDataTrackedEntities,
@@ -226,6 +230,9 @@ export function getProductRegistryAttributes(
                                 : productAttribute.value,
                         };
                     case "NUMBER":
+                    case "INTEGER":
+                    case "INTEGER_POSITIVE":
+                    case "INTEGER_ZERO_OR_POSITIVE":
                         return {
                             ...acc,
                             [programAttribute.code]: programAttribute.optionSetValue
@@ -270,6 +277,9 @@ export function getRawProductConsumption(
                                     : eventDataValue.value,
                             };
                         case "NUMBER":
+                        case "INTEGER":
+                        case "INTEGER_POSITIVE":
+                        case "INTEGER_ZERO_OR_POSITIVE":
                             return {
                                 ...acc,
                                 [programStageDataElement.code]: programStageDataElement.optionSetValue

@@ -35,13 +35,14 @@ export class ImportBLTemplateEventProgram {
     public import(
         file: File,
         action: ImportStrategy,
-        eventListId: string | undefined,
+        eventListFileId: string | undefined,
         moduleName: string,
         orgUnitId: string,
         orgUnitName: string,
         period: string,
         programId: string,
-        uploadIdLocalStorageName: string
+        uploadIdLocalStorageName: string,
+        calculatedEventListFileId?: string
     ): FutureData<ImportSummary> {
         return this.excelRepository.loadTemplate(file, programId).flatMap(_templateId => {
             const template = _.values(templates)
@@ -57,72 +58,24 @@ export class ImportBLTemplateEventProgram {
                         programId
                     ).flatMap(dataPackage => {
                         if (dataPackage) {
-                            return this.buildEventsPayload(dataPackage, action, eventListId).flatMap(events => {
+                            return this.buildEventsPayload(
+                                dataPackage,
+                                action,
+                                eventListFileId,
+                                calculatedEventListFileId
+                            ).flatMap(events => {
                                 if (action === "CREATE_AND_UPDATE") {
-                                    //Run validations on import only
-                                    return this.validateEvents(
+                                    return this.createAndUpdateEvents(
+                                        uploadIdLocalStorageName,
+                                        moduleName,
                                         events,
                                         orgUnitId,
                                         orgUnitName,
                                         period,
                                         programId
-                                    ).flatMap(validatedEventResults => {
-                                        if (validatedEventResults.blockingErrors.length > 0) {
-                                            const errorSummary: ImportSummary = {
-                                                status: "ERROR",
-                                                importCount: {
-                                                    ignored: 0,
-                                                    imported: 0,
-                                                    deleted: 0,
-                                                    updated: 0,
-                                                },
-                                                nonBlockingErrors: validatedEventResults.nonBlockingErrors,
-                                                blockingErrors: validatedEventResults.blockingErrors,
-                                            };
-                                            return Future.success(errorSummary);
-                                        } else {
-                                            const eventIdLineNoMap: { id: string; lineNo: number }[] = [];
-                                            const eventsWithId = validatedEventResults.events.map(e => {
-                                                const generatedId = generateId();
-                                                eventIdLineNoMap.push({
-                                                    id: generatedId,
-                                                    lineNo: isNaN(parseInt(e.event)) ? 0 : parseInt(e.event),
-                                                });
-                                                e.event = generatedId;
-                                                return e;
-                                            });
-                                            return this.dhis2EventsDefaultRepository
-                                                .import({ events: eventsWithId }, action)
-                                                .flatMap(result => {
-                                                    return mapToImportSummary(
-                                                        result,
-                                                        "event",
-                                                        this.metadataRepository,
-                                                        validatedEventResults.nonBlockingErrors,
-                                                        eventIdLineNoMap
-                                                    ).flatMap(summary => {
-                                                        return uploadIdListFileAndSave(
-                                                            uploadIdLocalStorageName,
-                                                            summary,
-                                                            moduleName,
-                                                            this.glassDocumentsRepository,
-                                                            this.glassUploadsRepository
-                                                        );
-                                                    });
-                                                });
-                                        }
-                                    });
-                                } //action === "DELETE"
-                                else {
-                                    return this.dhis2EventsDefaultRepository
-                                        .import({ events }, action)
-                                        .flatMap(result => {
-                                            return mapToImportSummary(result, "event", this.metadataRepository).flatMap(
-                                                ({ importSummary }) => {
-                                                    return Future.success(importSummary);
-                                                }
-                                            );
-                                        });
+                                    );
+                                } else {
+                                    return this.deleteEvents(events);
                                 }
                             });
                         } else {
@@ -136,10 +89,77 @@ export class ImportBLTemplateEventProgram {
         });
     }
 
+    private createAndUpdateEvents(
+        uploadIdLocalStorageName: string,
+        moduleName: string,
+        events: D2TrackerEvent[],
+        orgUnitId: string,
+        orgUnitName: string,
+        period: string,
+        programId: string
+    ): FutureData<ImportSummary> {
+        //Run validations on import only
+        return this.validateEvents(events, orgUnitId, orgUnitName, period, programId).flatMap(validatedEventResults => {
+            if (validatedEventResults.blockingErrors.length > 0) {
+                const errorSummary: ImportSummary = {
+                    status: "ERROR",
+                    importCount: {
+                        ignored: 0,
+                        imported: 0,
+                        deleted: 0,
+                        updated: 0,
+                    },
+                    nonBlockingErrors: validatedEventResults.nonBlockingErrors,
+                    blockingErrors: validatedEventResults.blockingErrors,
+                };
+                return Future.success(errorSummary);
+            } else {
+                const eventIdLineNoMap: { id: string; lineNo: number }[] = [];
+                const eventsWithId = validatedEventResults.events.map(e => {
+                    const generatedId = generateId();
+                    eventIdLineNoMap.push({
+                        id: generatedId,
+                        lineNo: isNaN(parseInt(e.event)) ? 0 : parseInt(e.event),
+                    });
+                    e.event = generatedId;
+                    return e;
+                });
+                return this.dhis2EventsDefaultRepository
+                    .import({ events: eventsWithId }, "CREATE_AND_UPDATE")
+                    .flatMap(result => {
+                        return mapToImportSummary(
+                            result,
+                            "event",
+                            this.metadataRepository,
+                            validatedEventResults.nonBlockingErrors,
+                            eventIdLineNoMap
+                        ).flatMap(summary => {
+                            return uploadIdListFileAndSave(
+                                uploadIdLocalStorageName,
+                                summary,
+                                moduleName,
+                                this.glassDocumentsRepository,
+                                this.glassUploadsRepository
+                            );
+                        });
+                    });
+            }
+        });
+    }
+
+    private deleteEvents(events: D2TrackerEvent[]): FutureData<ImportSummary> {
+        return this.dhis2EventsDefaultRepository.import({ events }, "DELETE").flatMap(result => {
+            return mapToImportSummary(result, "event", this.metadataRepository).flatMap(({ importSummary }) => {
+                return Future.success(importSummary);
+            });
+        });
+    }
+
     private buildEventsPayload(
         dataPackage: DataPackage,
         action: ImportStrategy,
-        eventListId: string | undefined
+        eventListFileId: string | undefined,
+        calculatedEventListFileId?: string
     ): FutureData<D2TrackerEvent[]> {
         if (action === "CREATE_AND_UPDATE") {
             return Future.success(
@@ -160,31 +180,37 @@ export class ImportBLTemplateEventProgram {
                     }
                 )
             );
-        } else {
-            if (eventListId)
-                return this.glassDocumentsRepository.download(eventListId).flatMap(file => {
-                    return Future.fromPromise(getStringFromFile(file)).flatMap(_events => {
-                        const eventIdList: [] = JSON.parse(_events);
-                        const events: D2TrackerEvent[] = eventIdList.map(eventId => {
-                            return {
-                                event: eventId,
-                                program: "",
-                                status: "COMPLETED",
-                                orgUnit: "",
-                                occurredAt: "",
-                                attributeOptionCombo: "",
-                                dataValues: [],
-                            };
-                        });
-
-                        return Future.success(events);
-                    });
-                });
-            else {
-                //No events were created during import, so no events to delete.
-                return Future.success([]);
-            }
+        } else if (action === "DELETE") {
+            return Future.joinObj({
+                events: eventListFileId ? this.getEventsFromListFileId(eventListFileId) : Future.success([]),
+                calculatedEvents: calculatedEventListFileId
+                    ? this.getEventsFromListFileId(calculatedEventListFileId)
+                    : Future.success([]),
+            }).flatMap(({ events, calculatedEvents }) => {
+                return Future.success([...events, ...calculatedEvents]);
+            });
         }
+        return Future.success([]);
+    }
+
+    private getEventsFromListFileId(listFileId: string): FutureData<D2TrackerEvent[]> {
+        return this.glassDocumentsRepository.download(listFileId).flatMap(eventListFile => {
+            return Future.fromPromise(getStringFromFile(eventListFile)).flatMap(_events => {
+                const eventIdList: string[] = JSON.parse(_events);
+                const events: D2TrackerEvent[] = eventIdList.map(eventId => {
+                    return {
+                        event: eventId,
+                        program: "",
+                        status: "COMPLETED",
+                        orgUnit: "",
+                        occurredAt: "",
+                        attributeOptionCombo: "",
+                        dataValues: [],
+                    };
+                });
+                return Future.success(events);
+            });
+        });
     }
 
     private validateEvents(

@@ -19,5 +19,6 @@ export interface UploadsDataItem {
     rows?: number;
     correspondingRisUploadId: string;
     eventListFileId?: string;
+    calculatedEventListFileId?: string;
     importSummary?: ImportSummaryErrors;
 }
