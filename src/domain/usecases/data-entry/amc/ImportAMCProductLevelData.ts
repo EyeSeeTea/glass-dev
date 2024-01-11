@@ -262,8 +262,8 @@ export class ImportAMCProductLevelData {
                 });
                 return { ...enrollment, enrollment: enrollmentIndex.toString(), events: eventsWithIds };
             });
-            tei.enrollments = enrollmentsWithId;
-            return { ...tei, trackedEntity: teiIndex.toString() };
+
+            return { ...tei, enrollments: enrollmentsWithId, trackedEntity: teiIndex.toString() };
         });
 
         //2. Run Program Rule Validations
@@ -283,20 +283,19 @@ export class ImportAMCProductLevelData {
         }).flatMap(({ programRuleValidationResults, customRuleValidationsResults }) => {
             //4. After processing, remove ids to tei, enrollement and events so that they can be imported
             const teisWithoutId = programRuleValidationResults.teis?.map(tei => {
-                tei.trackedEntity = "";
-                const enrollementsWithId = tei.enrollments?.map(enrollment => {
-                    enrollment.enrollment = "";
-                    const eventsWithIds = enrollment.events.map(ev => {
-                        ev.event = "";
-                        ev.enrollment = "";
-                        ev.trackedEntity = "";
-                        return ev;
+                const enrollementsWithoutId = tei.enrollments?.map(enrollment => {
+                    const eventsWithoutIds = enrollment.events.map(ev => {
+                        return {
+                            ...ev,
+                            event: "",
+                            enrollment: "",
+                            trackedEntity: "",
+                        };
                     });
-                    enrollment.events = eventsWithIds;
-                    return enrollment;
+
+                    return { ...enrollment, enrollment: "", events: eventsWithoutIds };
                 });
-                tei.enrollments = enrollementsWithId;
-                return tei;
+                return { ...tei, enrollments: enrollementsWithoutId, trackedEntity: "" };
             });
 
             const consolidatedValidationResults: ValidationResult = {
