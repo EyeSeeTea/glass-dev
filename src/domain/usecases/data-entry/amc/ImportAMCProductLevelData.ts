@@ -259,20 +259,19 @@ export class ImportAMCProductLevelData {
     ): FutureData<ValidationResult> {
         //1. Before running validations, add ids to tei, enrollement and event so thier relationships can be processed.
         const teisWithId = teis?.map((tei, teiIndex) => {
-            tei.trackedEntity = teiIndex.toString();
             const enrollmentsWithId = tei.enrollments?.map((enrollment, enrollmentIndex) => {
-                enrollment.enrollment = enrollmentIndex.toString();
                 const eventsWithIds = enrollment.events.map((ev, eventIndex) => {
-                    ev.event = eventIndex.toString();
-                    ev.enrollment = enrollmentIndex.toString();
-                    ev.trackedEntity = teiIndex.toString();
-                    return ev;
+                    return {
+                        ...ev,
+                        event: eventIndex.toString(),
+                        enrollment: enrollmentIndex.toString(),
+                        trackedEntity: teiIndex.toString(),
+                    };
                 });
-                enrollment.events = eventsWithIds;
-                return enrollment;
+                return { ...enrollment, enrollment: enrollmentIndex.toString(), events: eventsWithIds };
             });
-            tei.enrollments = enrollmentsWithId;
-            return tei;
+
+            return { ...tei, enrollments: enrollmentsWithId, trackedEntity: teiIndex.toString() };
         });
 
         //2. Run Program Rule Validations
@@ -292,20 +291,19 @@ export class ImportAMCProductLevelData {
         }).flatMap(({ programRuleValidationResults, customRuleValidationsResults }) => {
             //4. After processing, remove ids to tei, enrollement and events so that they can be imported
             const teisWithoutId = programRuleValidationResults.teis?.map(tei => {
-                tei.trackedEntity = "";
-                const enrollementsWithId = tei.enrollments?.map(enrollment => {
-                    enrollment.enrollment = "";
-                    const eventsWithIds = enrollment.events.map(ev => {
-                        ev.event = "";
-                        ev.enrollment = "";
-                        ev.trackedEntity = "";
-                        return ev;
+                const enrollementsWithoutId = tei.enrollments?.map(enrollment => {
+                    const eventsWithoutIds = enrollment.events.map(ev => {
+                        return {
+                            ...ev,
+                            event: "",
+                            enrollment: "",
+                            trackedEntity: "",
+                        };
                     });
-                    enrollment.events = eventsWithIds;
-                    return enrollment;
+
+                    return { ...enrollment, enrollment: "", events: eventsWithoutIds };
                 });
-                tei.enrollments = enrollementsWithId;
-                return tei;
+                return { ...tei, enrollments: enrollementsWithoutId, trackedEntity: "" };
             });
 
             const consolidatedValidationResults: ValidationResult = {

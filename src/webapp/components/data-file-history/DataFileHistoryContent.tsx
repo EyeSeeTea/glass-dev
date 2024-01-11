@@ -4,26 +4,31 @@ import { SortDirection, DataFileTable } from "./DataFileTable";
 import { useLocation } from "react-router-dom";
 import { useAppContext } from "../../contexts/app-context";
 import { useGlassUploads } from "../../hooks/useGlassUploads";
-import { Filter } from "./Filter";
+import { ALL_FILTER_VALUE, Filter, Status, yearFilterValue } from "./Filter";
 import { CustomCard } from "../custom-card/CustomCard";
 import { ContentLoader } from "../content-loader/ContentLoader";
-import { useCurrentPeriodContext } from "../../contexts/current-period-context";
 import { GlassUploads } from "../../../domain/entities/GlassUploads";
 
+const DELETED_STATUS_VALUE = "deleted";
+
 export const DataFileHistoryContent: React.FC = () => {
-    const { currentPeriod } = useCurrentPeriodContext();
     const location = useLocation();
     const { compositionRoot } = useAppContext();
     const uploads = useGlassUploads(compositionRoot);
     const params = new URLSearchParams(location.search);
-    const [year, setYear] = useState(currentPeriod);
-    const [status, setStatus] = useState("Completed");
+    const [yearFilterOption, setYearFilterOption] = useState<yearFilterValue>(ALL_FILTER_VALUE);
+    const [status, setStatus] = useState<Status>(ALL_FILTER_VALUE);
     const [filteredUploads, setFilteredUploads] = useState<GlassUploads[]>();
 
     useEffect(() => {
         if (uploads.kind === "loaded") {
             const filtered = uploads.data
-                .filter(u => u.period === year.toString() && u.status.toLowerCase() === status.toLowerCase())
+                .filter(
+                    u =>
+                        (yearFilterOption === ALL_FILTER_VALUE || u.period === yearFilterOption.toString()) &&
+                        ((status === ALL_FILTER_VALUE && u.status.toLowerCase() !== DELETED_STATUS_VALUE) ||
+                            u.status.toLowerCase() === status.toLowerCase())
+                )
                 .map(uploadData => {
                     // TODO: This is used allow to sort by rows column. Delete mapping when no items in DataStore with records (because becomes rows)
                     const { records, ...restData } = uploadData;
@@ -36,7 +41,7 @@ export const DataFileHistoryContent: React.FC = () => {
                 });
             setFilteredUploads(filtered);
         }
-    }, [status, year, uploads]);
+    }, [status, yearFilterOption, uploads]);
 
     const sortByColumn = (columnName: string, sortDirection: SortDirection) => {
         setFilteredUploads(prevFilteredUploads => {
@@ -47,7 +52,7 @@ export const DataFileHistoryContent: React.FC = () => {
     return (
         <ContentLoader content={uploads}>
             <ContentWrapper>
-                <Filter year={year} setYear={setYear} status={status} setStatus={setStatus} />
+                <Filter year={yearFilterOption} setYear={setYearFilterOption} status={status} setStatus={setStatus} />
                 <CustomCard padding="20px 30px 20px">
                     {uploads.kind === "loaded" && (
                         <DataFileTable
