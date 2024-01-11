@@ -20,6 +20,8 @@ import { CustomValidationForEventProgram } from "./egasp/CustomValidationForEven
 import { Template } from "../../entities/Template";
 import { ExcelReader } from "../../utils/ExcelReader";
 import { InstanceRepository } from "../../repositories/InstanceRepository";
+import { AMC_RAW_SUBSTANCE_CONSUMPTION_PROGRAM_ID } from "./amc/ImportAMCSubstanceLevelData";
+import moment from "moment";
 
 export class ImportBLTemplateEventProgram {
     constructor(
@@ -61,6 +63,7 @@ export class ImportBLTemplateEventProgram {
                             return this.buildEventsPayload(
                                 dataPackage,
                                 action,
+                                period,
                                 eventListFileId,
                                 calculatedEventListFileId
                             ).flatMap(events => {
@@ -203,6 +206,7 @@ export class ImportBLTemplateEventProgram {
     private buildEventsPayload(
         dataPackage: DataPackage,
         action: ImportStrategy,
+        dataSubmissionPeriod: string,
         eventListFileId: string | undefined,
         calculatedEventListFileId?: string
     ): FutureData<D2TrackerEvent[]> {
@@ -210,12 +214,20 @@ export class ImportBLTemplateEventProgram {
             return Future.success(
                 dataPackage.dataEntries.map(
                     ({ id, orgUnit, period, attribute, dataValues, dataForm, coordinate }, index) => {
+                        const occurredAt =
+                            dataForm === AMC_RAW_SUBSTANCE_CONSUMPTION_PROGRAM_ID
+                                ? moment(new Date(`${dataSubmissionPeriod}-01-01`))
+                                      .toISOString()
+                                      .split("T")
+                                      .at(0) ?? period
+                                : period;
+
                         return {
                             event: id || (index + 6).toString(),
                             program: dataForm,
                             status: "COMPLETED",
                             orgUnit,
-                            occurredAt: period,
+                            occurredAt: occurredAt,
                             attributeOptionCombo: attribute,
                             dataValues: dataValues.map(el => {
                                 return { ...el, value: el.value.toString() };

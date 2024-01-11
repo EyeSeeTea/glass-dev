@@ -20,6 +20,7 @@ import { ProgramRuleValidationForBLEventProgram } from "../../program-rules-proc
 import { ProgramRulesMetadataRepository } from "../../../repositories/program-rules/ProgramRulesMetadataRepository";
 import { CustomValidationsAMCProductData } from "./CustomValidationsAMCProductData";
 import { GlassATCDefaultRepository } from "../../../../data/repositories/GlassATCDefaultRepository";
+import moment from "moment";
 
 export const AMC_PRODUCT_REGISTER_PROGRAM_ID = "G6ChA5zMW9n";
 const AMC_RAW_PRODUCT_CONSUMPTION_STAGE_ID = "GmElQHKXLIE";
@@ -189,13 +190,20 @@ export class ImportAMCProductLevelData {
                                 };
                             });
 
+                        //Validation rule : Set to 1st Jan of corresponding year
+                        const occurredAt =
+                            moment(new Date(`${period}-01-01`))
+                                .toISOString()
+                                .split("T")
+                                .at(0) ?? period;
+
                         return {
                             program: AMC_PRODUCT_REGISTER_PROGRAM_ID,
                             event: "",
                             programStage: AMC_RAW_PRODUCT_CONSUMPTION_STAGE_ID,
                             orgUnit: dataEntry.orgUnit,
                             dataValues: rawProductConsumptionStageDataValues,
-                            occurredAt: new Date(`${period}-1-1`).toISOString(), //Validation rule : Set to 1st Jan of corresponding year
+                            occurredAt: occurredAt,
                             status: "COMPLETED",
                         };
                     });
@@ -216,7 +224,7 @@ export class ImportAMCProductLevelData {
                             createdAtClient: new Date().getTime().toString(),
                             updatedAt: new Date().getTime().toString(),
                             updatedAtClient: new Date().getTime().toString(),
-                            status: "ACTIVE",
+                            status: "COMPLETED",
                             orgUnitName: "",
                             followUp: false,
                             deleted: false,
