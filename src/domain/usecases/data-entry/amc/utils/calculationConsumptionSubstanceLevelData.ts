@@ -95,9 +95,9 @@ function getStandardizedDDD(
     atcVersion: GlassATCVersion | undefined
 ): number | undefined {
     const { atc_manual, salt_manual, route_admin_manual } = rawSubstanceConsumptionData;
-    const dddData: DDDData[] = atcVersion?.find(({ name }) => name === DDD_NAME)?.data as DDDData[];
+    const dddData = atcVersion?.find(({ name }) => name === DDD_NAME)?.data as DDDData[] | undefined;
 
-    const dddDataFound = dddData.find(({ ATC5, SALT, ROA }) => {
+    const dddDataFound = dddData?.find(({ ATC5, SALT, ROA }) => {
         const isDefaultSalt = !SALT && SALT_MAPPING[salt_manual] === SALT_MAPPING.default;
         return (
             ATC5 === atc_manual &&
@@ -110,10 +110,16 @@ function getStandardizedDDD(
         console.log("DDD data found in ddd json: ", dddDataFound.DDD_STD);
         return dddDataFound.DDD_STD;
     }
-    console.log("WARNING - DDD data not found in ddd json using: ", { atc_manual, salt_manual, route_admin_manual });
+    console.log("WARNING - DDD data not found in ddd json using: ", {
+        atc_manual,
+        salt_manual,
+        route_admin_manual,
+        ddd_data: dddData,
+    });
 
-    const dddAlterations: DDDAlterationsData[] = atcVersion?.find(({ name }) => name === DDD_ALTERATIONS_NAME)
-        ?.data as DDDAlterationsData[];
+    const dddAlterations = atcVersion?.find(({ name }) => name === DDD_ALTERATIONS_NAME)?.data as
+        | DDDAlterationsData[]
+        | undefined;
     const newDddData = dddAlterations?.find(
         ({ CURRENT_ATC, NEW_ROUTE, DELETED }) =>
             !DELETED &&
@@ -131,6 +137,7 @@ function getStandardizedDDD(
     console.log("ERROR - DDD data not found in ddd_alterations json: ", {
         atc_manual,
         route_admin_manual,
+        ddd_alterations_data: dddAlterations,
     });
 }
 

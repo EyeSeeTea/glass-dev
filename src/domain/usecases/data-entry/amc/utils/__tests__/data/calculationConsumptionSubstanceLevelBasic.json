@@ -11,7 +11,8 @@
         "tons_autocalculated": 0.0755025,
         "period": "2019",
         "orgUnitId": "vboedbUs1As",
-        "ddds_autocalculated": 75502.5
+        "ddds_autocalculated": 75502.5,
+        "report_date": "2023-01-01"
     },
     {
         "data_status_autocalculated": 1,
@@ -25,7 +26,8 @@
         "health_sector_autocalculated": 1,
         "period": "2019",
         "orgUnitId": "vboedbUs1As",
-        "ddds_autocalculated": 760780
+        "ddds_autocalculated": 760780,
+        "report_date": "2023-01-01"
     },
     {
         "data_status_autocalculated": 1,
@@ -39,7 +41,8 @@
         "health_sector_autocalculated": 1,
         "period": "2019",
         "orgUnitId": "vboedbUs1As",
-        "ddds_autocalculated": 50994.6666666667
+        "ddds_autocalculated": 50994.6666666667,
+        "report_date": "2023-01-01"
     },
     {
         "packages_autocalculated": 90169,
@@ -53,7 +56,8 @@
         "atc_autocalculated": "J01CA04",
         "period": "2019",
         "orgUnitId": "vboedbUs1As",
-        "ddds_autocalculated": 846493.333333333
+        "ddds_autocalculated": 846493.333333333,
+        "report_date": "2023-01-01"
     },
     {
         "atc_version_autocalculated": "ATC-2023-v1",
@@ -67,7 +71,8 @@
         "atc_autocalculated": "J01XX05",
         "period": "2019",
         "orgUnitId": "vboedbUs1As",
-        "ddds_autocalculated": 21641774
+        "ddds_autocalculated": 21641774,
+        "report_date": "2023-01-01"
     },
     {
         "atc_version_autocalculated": "ATC-2023-v1",
@@ -81,7 +86,8 @@
         "route_admin_autocalculated": "P",
         "period": "2019",
         "orgUnitId": "vboedbUs1As",
-        "ddds_autocalculated": 510780.774
+        "ddds_autocalculated": 510780.774,
+        "report_date": "2023-01-01"
     },
     {
         "route_admin_autocalculated": "O",
@@ -95,7 +101,8 @@
         "atc_autocalculated": "J01XX05",
         "period": "2019",
         "orgUnitId": "vboedbUs1As",
-        "ddds_autocalculated": 1467802
+        "ddds_autocalculated": 1467802,
+        "report_date": "2023-01-01"
     },
     {
         "atc_autocalculated": "J01CE01",
@@ -109,7 +116,8 @@
         "tons_autocalculated": 0.0175251666666667,
         "period": "2019",
         "orgUnitId": "vboedbUs1As",
-        "ddds_autocalculated": 17525.1666666667
+        "ddds_autocalculated": 17525.1666666667,
+        "report_date": "2023-01-01"
     },
     {
         "atc_autocalculated": "J01CR02",
@@ -123,7 +131,8 @@
         "data_status_autocalculated": 1,
         "period": "2019",
         "orgUnitId": "vboedbUs1As",
-        "ddds_autocalculated": 88905.8333333333
+        "ddds_autocalculated": 88905.8333333333,
+        "report_date": "2023-01-01"
     },
     {
         "salt_autocalculated": "default",
@@ -137,7 +146,8 @@
         "packages_autocalculated": 115145,
         "period": "2019",
         "orgUnitId": "vboedbUs1As",
-        "ddds_autocalculated": 287862.5
+        "ddds_autocalculated": 287862.5,
+        "report_date": "2023-01-01"
     },
     {
         "salt_autocalculated": "default",
@@ -151,7 +161,8 @@
         "data_status_autocalculated": 1,
         "period": "2019",
         "orgUnitId": "vboedbUs1As",
-        "ddds_autocalculated": 280
+        "ddds_autocalculated": 280,
+        "report_date": "2023-01-01"
     },
     {
         "salt_autocalculated": "default",
@@ -165,7 +176,8 @@
         "tons_autocalculated": 0.0051,
         "period": "2019",
         "orgUnitId": "vboedbUs1As",
-        "ddds_autocalculated": 5100
+        "ddds_autocalculated": 5100,
+        "report_date": "2023-01-01"
     },
     {
         "health_level_autocalculated": 1,
@@ -179,6 +191,7 @@
         "packages_autocalculated": 15151,
         "period": "2019",
         "orgUnitId": "vboedbUs1As",
-        "ddds_autocalculated": 5050.33333333333
+        "ddds_autocalculated": 5050.33333333333,
+        "report_date": "2023-01-01"
     }
 ]

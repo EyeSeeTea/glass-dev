@@ -48,13 +48,16 @@ export function calculateConsumptionProductLevelData(
         period,
     });
 
-    const dddCombinations: DDDCombinationsData[] = atcClassification.find(({ name }) => name === DDD_COMBINATIONS_NAME)
-        ?.data as DDDCombinationsData[];
-    const dddData: DDDData[] = atcClassification.find(({ name }) => name === DDD_NAME)?.data as DDDData[];
-    const dddAlterations: DDDAlterationsData[] = atcClassification.find(({ name }) => name === DDD_ALTERATIONS_NAME)
-        ?.data as DDDAlterationsData[];
-    const conversionFactorData: ConversionFactorData[] = atcClassification.find(({ name }) => name === CONVERSION_NAME)
-        ?.data as ConversionFactorData[];
+    const dddCombinations = atcClassification.find(({ name }) => name === DDD_COMBINATIONS_NAME)?.data as
+        | DDDCombinationsData[]
+        | undefined;
+    const dddData = atcClassification.find(({ name }) => name === DDD_NAME)?.data as DDDData[] | undefined;
+    const dddAlterations = atcClassification.find(({ name }) => name === DDD_ALTERATIONS_NAME)?.data as
+        | DDDAlterationsData[]
+        | undefined;
+    const conversionFactorData = atcClassification.find(({ name }) => name === CONVERSION_NAME)?.data as
+        | ConversionFactorData[]
+        | undefined;
 
     const contentDDDPerProductAndDDDPerPackage: ContentDDDPerProductAndDDDPerPackage[] = teiInstancesData
         .map((product: ProductRegistryAttributes) => {
@@ -170,9 +173,9 @@ function concVolumeOrVolumeUnitToStandardizedMeasurementUnit(
 // 2 - Identify corresponding DDD per product
 function calculateDDDPerProduct(
     product: ProductRegistryAttributes,
-    dddCombinations: DDDCombinationsData[],
-    dddData: DDDData[],
-    dddAlterations: DDDAlterationsData[]
+    dddCombinations: DDDCombinationsData[] | undefined,
+    dddData: DDDData[] | undefined,
+    dddAlterations: DDDAlterationsData[] | undefined
 ): DDDPerProduct | undefined {
     console.log("Identify corresponding ddd_value and ddd_unit of product: ", { product });
 
@@ -186,12 +189,12 @@ function calculateDDDPerProduct(
 // 2b
 function getDDDOfProductFromDDDCombinationsTable(
     AMR_GLASS_AMC_TEA_COMBINATION: string,
-    dddCombinations: DDDCombinationsData[]
+    dddCombinations: DDDCombinationsData[] | undefined
 ): DDDPerProduct | undefined {
     console.log("Identify corresponding ddd_value and ddd_unit from ddd_combinations json using: ", {
         AMR_GLASS_AMC_TEA_COMBINATION,
     });
-    const codeCombinationData = dddCombinations.find(({ COMB_CODE }) => COMB_CODE === AMR_GLASS_AMC_TEA_COMBINATION);
+    const codeCombinationData = dddCombinations?.find(({ COMB_CODE }) => COMB_CODE === AMR_GLASS_AMC_TEA_COMBINATION);
 
     if (codeCombinationData) {
         const { DDD: DDD_VALUE, DDD_UNIT } = codeCombinationData;
@@ -204,15 +207,18 @@ function getDDDOfProductFromDDDCombinationsTable(
             dddUnit: UNITS_MAPPING[DDD_UNIT] as Unit,
         };
     } else {
-        console.log("ERROR - Combination code not found in ddd_combinations json: ", { AMR_GLASS_AMC_TEA_COMBINATION });
+        console.log("ERROR - Combination code not found in ddd_combinations json: ", {
+            AMR_GLASS_AMC_TEA_COMBINATION,
+            ddd_combinations_data: codeCombinationData,
+        });
     }
 }
 
 // 2c
 function getDDDOfProductFromDDDTable(
     product: ProductRegistryAttributes,
-    dddData: DDDData[],
-    dddAlterations: DDDAlterationsData[]
+    dddData: DDDData[] | undefined,
+    dddAlterations: DDDAlterationsData[] | undefined
 ): DDDPerProduct | undefined {
     const { AMR_GLASS_AMC_TEA_ATC, AMR_GLASS_AMC_TEA_ROUTE_ADMIN, AMR_GLASS_AMC_TEA_SALT } = product;
     console.log("Identify corresponding ddd_value and ddd_unit from ddd json using: ", {
@@ -220,7 +226,7 @@ function getDDDOfProductFromDDDTable(
         AMR_GLASS_AMC_TEA_ROUTE_ADMIN,
         AMR_GLASS_AMC_TEA_SALT,
     });
-    const dddDataFound = dddData.find(({ ATC5, SALT, ROA }) => {
+    const dddDataFound = dddData?.find(({ ATC5, SALT, ROA }) => {
         const isDefaultSalt = !SALT && AMR_GLASS_AMC_TEA_SALT === SALT_MAPPING.default;
         return (
             ATC5 === AMR_GLASS_AMC_TEA_ATC &&
@@ -241,9 +247,9 @@ function getDDDOfProductFromDDDTable(
             dddUnit: dddStandardizedUnit,
         };
     }
-    console.log("WARNING - DDD data not found in ddd json of product: ", { product });
+    console.log("WARNING - DDD data not found in ddd json of product: ", { product, ddd_data: dddData });
 
-    const newDddData = dddAlterations.find(
+    const newDddData = dddAlterations?.find(
         ({ CURRENT_ATC, NEW_ROUTE, DELETED }) =>
             !DELETED &&
             CURRENT_ATC === AMR_GLASS_AMC_TEA_ATC &&
@@ -264,7 +270,10 @@ function getDDDOfProductFromDDDTable(
             dddUnit: dddStandardizedUnit,
         };
     }
-    console.log("ERROR - DDD data not found in ddd_alterations json of product: ", { product });
+    console.log("ERROR - DDD data not found in ddd_alterations json of product: ", {
+        product,
+        ddd_alterations_data: newDddData,
+    });
 }
 
 // 3 - Calculate DDD per package
@@ -272,7 +281,7 @@ function calculateDDDPerPackage(
     product: ProductRegistryAttributes,
     content: Content,
     dddPerProduct: DDDPerProduct | undefined,
-    conversionFactorData: ConversionFactorData[]
+    conversionFactorData: ConversionFactorData[] | undefined
 ): DDDPerPackage | undefined {
     console.log("Calculate ddd per package of product: ", { product });
     if (dddPerProduct) {
@@ -280,7 +289,7 @@ function calculateDDDPerPackage(
 
         const { standarizedStrengthUnit } = content;
 
-        const conversionFactorAtc = conversionFactorData.find(
+        const conversionFactorAtc = conversionFactorData?.find(
             ({ ATC5, ROA }) =>
                 ATC5 === AMR_GLASS_AMC_TEA_ATC && ROUTE_OF_ADMINISTRATION_MAPPING[ROA] === AMR_GLASS_AMC_TEA_ROUTE_ADMIN
         );
@@ -341,7 +350,7 @@ function getTonnesPerProduct(
     product: ProductRegistryAttributes,
     productConsumption: RawProductConsumption,
     content: Content,
-    conversionFactorData: ConversionFactorData[]
+    conversionFactorData: ConversionFactorData[] | undefined
 ): ContentTonnesPerProduct {
     console.log("Calculate content tonnes of product: ", { product, productConsumption });
 
@@ -350,7 +359,7 @@ function getTonnesPerProduct(
 
     const { standarizedStrengthUnit: contentUnit } = content;
     // 5a
-    const conversionFactorAtc = conversionFactorData.find(({ ATC5 }) => ATC5 === AMR_GLASS_AMC_TEA_ATC);
+    const conversionFactorAtc = conversionFactorData?.find(({ ATC5 }) => ATC5 === AMR_GLASS_AMC_TEA_ATC);
     const conversionFactor = contentUnit !== "gram" && conversionFactorAtc?.FACTOR ? conversionFactorAtc.FACTOR : 1;
     console.log("Conversion factor used to calculate content_tonnes: ", conversionFactor);
 
@@ -372,7 +381,7 @@ function aggregateDataByAtcRouteAdminYearHealthSectorAndHealthLevel(
     teiInstancesData: ProductRegistryAttributes[],
     rawProductConsumptionData: RawProductConsumption[],
     contentDDDPerProductAndDDDPerPackage: ContentDDDPerProductAndDDDPerPackage[],
-    conversionFactorData: ConversionFactorData[],
+    conversionFactorData: ConversionFactorData[] | undefined,
     atcVersion: string
 ): RawSubstanceConsumptionCalculated[] {
     const rawSubstanceConsumptionCalculatedByKey = rawProductConsumptionData.reduce(
