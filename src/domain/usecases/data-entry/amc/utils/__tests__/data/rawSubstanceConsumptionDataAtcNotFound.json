@@ -10,7 +10,8 @@
         "packages_manual": 151005,
         "route_admin_manual": "P",
         "health_sector_manual": 1,
-        "tons_manual": 0.0755025
+        "tons_manual": 0.0755025,
+        "report_date": "2023-01-01"
     },
     {
         "eventId": "GPq4pzoqCJP",
@@ -23,7 +24,8 @@
         "ddds_manual": 760780,
         "atc_version_manual": "ATC-2020-v1",
         "health_level_manual": 1,
-        "health_sector_manual": 1
+        "health_sector_manual": 1,
+        "report_date": "2023-01-01"
     },
     {
         "eventId": "oDa3g1oeT2A",
@@ -36,7 +38,8 @@
         "atc_version_manual": "ATC-2022-v2",
         "packages_manual": 152984,
         "route_admin_manual": "P",
-        "health_sector_manual": 1
+        "health_sector_manual": 1,
+        "report_date": "2023-01-01"
     },
     {
         "eventId": "mfYlg4xTJzZ",
@@ -49,7 +52,8 @@
         "atc_version_manual": "ATC-2020-v1",
         "health_sector_manual": 1,
         "tons_manual": 0.846493333333333,
-        "atc_manual": "J01CA04"
+        "atc_manual": "J01CA04",
+        "report_date": "2023-01-01"
     },
     {
         "eventId": "tpcIHEdyjN7",
@@ -62,7 +66,8 @@
         "health_sector_manual": 1,
         "packages_manual": 108,
         "data_status_manual": 1,
-        "atc_manual": "J01EE01"
+        "atc_manual": "J01EE01",
+        "report_date": "2023-01-01"
     },
     {
         "eventId": "UtHEvI6BQdT",
@@ -75,7 +80,8 @@
         "health_sector_manual": 1,
         "tons_manual": 21.641774,
         "data_status_manual": 1,
-        "atc_manual": "J01XX05"
+        "atc_manual": "J01XX05",
+        "report_date": "2023-01-01"
     },
     {
         "eventId": "U8GcL74VNw3",
@@ -88,7 +94,8 @@
         "health_level_manual": 1,
         "packages_manual": 1021561.548,
         "data_status_manual": 1,
-        "route_admin_manual": "P"
+        "route_admin_manual": "P",
+        "report_date": "2023-01-01"
     },
     {
         "eventId": "ypCmO6ukcAB",
@@ -101,7 +108,8 @@
         "tons_manual": 1.467802,
         "health_sector_manual": 1,
         "data_status_manual": 1,
-        "atc_manual": "J01XX05"
+        "atc_manual": "J01XX05",
+        "report_date": "2023-01-01"
     },
     {
         "eventId": "vLKUOdmKdOP",
@@ -114,7 +122,8 @@
         "health_sector_manual": 1,
         "packages_manual": 105151,
         "data_status_manual": 1,
-        "tons_manual": 0.0175251666666667
+        "tons_manual": 0.0175251666666667,
+        "report_date": "2023-01-01"
     },
     {
         "eventId": "cwXyXFIGgDh",
@@ -127,7 +136,8 @@
         "atc_version_manual": "ATC-2022-v1",
         "health_level_manual": 2,
         "health_sector_manual": 1,
-        "data_status_manual": 1
+        "data_status_manual": 1,
+        "report_date": "2023-01-01"
     },
     {
         "eventId": "sXalPksBKZR",
@@ -140,7 +150,8 @@
         "health_level_manual": 2,
         "atc_manual": "A07AA09",
         "data_status_manual": 1,
-        "packages_manual": 115145
+        "packages_manual": 115145,
+        "report_date": "2023-01-01"
     },
     {
         "eventId": "gS5hoCfREtQ",
@@ -153,7 +164,8 @@
         "packages_manual": 48,
         "atc_version_manual": "ATC-2020-v1",
         "route_admin_manual": "O",
-        "data_status_manual": 1
+        "data_status_manual": 1,
+        "report_date": "2023-01-01"
     },
     {
         "eventId": "SYEDRojebUL",
@@ -166,7 +178,8 @@
         "ddds_manual": 5100,
         "health_level_manual": 2,
         "data_status_manual": 1,
-        "tons_manual": 0.0051
+        "tons_manual": 0.0051,
+        "report_date": "2023-01-01"
     },
     {
         "eventId": "ldXpFeOZVfQ",
@@ -179,7 +192,8 @@
         "atc_version_manual": "ATC-2019-v1",
         "atc_manual": "J01EE01",
         "ddds_manual": 105,
-        "data_status_manual": 1
+        "data_status_manual": 1,
+        "report_date": "2023-01-01"
     },
     {
         "eventId": "zrWTFUXiZQk",
@@ -192,6 +206,7 @@
         "data_status_manual": 1,
         "atc_manual": "J01CR02",
         "tons_manual": 0.00505033333333333,
-        "packages_manual": 15151
+        "packages_manual": 15151,
+        "report_date": "2023-01-01"
     }
 ]

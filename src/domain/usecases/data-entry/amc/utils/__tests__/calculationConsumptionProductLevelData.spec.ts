@@ -171,11 +171,34 @@ describe("Given calculate Consumption Product Level Data function", () => {
             verifyCalculationResult(rawSubstanceConsumptionCalculatedData, type);
         });
     });
+    describe("When we do not have atc data", () => {
+        it("Then should return correct solution and don't do calculations", async () => {
+            const type = "no_atc_data";
+            const period = "2020";
+            const orgUnitId = "vboedbUs1As";
+            const productRegistryAttributes = givenProductRegistryAttributesByType(type);
+            const rawProductConsumption = givenRawProductConsumption();
+            const atcCurrentVersionData: GlassATCVersion = [];
+            const atcVersionKey = "ATC-2023-v1";
+
+            const rawSubstanceConsumptionCalculatedData = calculateConsumptionProductLevelData(
+                period,
+                orgUnitId,
+                productRegistryAttributes,
+                rawProductConsumption,
+                atcCurrentVersionData,
+                atcVersionKey
+            );
+
+            verifyCalculationResult(rawSubstanceConsumptionCalculatedData, type);
+        });
+    });
 });
 
 function givenProductRegistryAttributesByType(type?: string): ProductRegistryAttributes[] {
     const productRegistryAttributesTypes = {
         basic: productRegistryAttributesBasic,
+        no_atc_data: productRegistryAttributesBasic,
         conc_volume_and_volume: productRegistryAttributesConcVolumeAndVolume,
         unit_dose_combination_code: productRegistryAttributesUnitDoseCombCode,
         millions_international_unit_different_ddd_unit:
@@ -209,6 +232,7 @@ function getExpectedCalculationSolution(type?: string): RawSubstanceConsumptionC
         no_combination_code_no_found_ddd: [],
         no_combination_code_found_ddd_alterations: calculationSolutionNoCombCodeFoundDDDAlterations,
         wrong_strength_unit: calculationSolutionWrongStrengthUnit,
+        no_atc_data: [],
     } as Record<string, RawSubstanceConsumptionCalculated[]>;
 
     const calculationSolution = type ? calculationSolutionTypes[type] : calculationSolutionTypes.basic;
