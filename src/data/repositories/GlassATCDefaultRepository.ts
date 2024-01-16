@@ -9,7 +9,6 @@ import {
     DDDData,
     GlassATCHistory,
     GlassATCVersion,
-    GlassATCVersionData,
     ListGlassATCVersions,
     validateAtcVersion,
 } from "../../domain/entities/GlassATC";
@@ -29,16 +28,20 @@ export class GlassATCDefaultRepository implements GlassATCRepository {
     @cache()
     getAtcVersion(atcVersionKey: string): FutureData<GlassATCVersion> {
         if (validateAtcVersion(atcVersionKey)) {
-            return this.dataStoreClient.listCollection<
-                GlassATCVersionData<
-                    | DDDCombinationsData
-                    | ConversionFactorData
-                    | DDDData
-                    | ATCData
-                    | DDDAlterationsData
-                    | ATCAlterationsData
-                >
-            >(atcVersionKey);
+            return this.dataStoreClient
+                .listCollection<
+                    ATCVersionData<
+                        | DDDCombinationsData
+                        | ConversionFactorData
+                        | DDDData
+                        | ATCData
+                        | DDDAlterationsData
+                        | ATCAlterationsData
+                    >
+                >(atcVersionKey)
+                .map(atcVersionDataStore => {
+                    return this.buildGlassATCVersion(atcVersionDataStore);
+                });
         }
         return Future.error("Upload does not exist");
     }
@@ -68,4 +71,34 @@ export class GlassATCDefaultRepository implements GlassATCRepository {
             }, {})
         );
     }
+
+    private buildGlassATCVersion(atcVersionDataStore: ATCVersion): GlassATCVersion {
+        const glassAtcVerion: GlassATCVersion = {
+            atc: (atcVersionDataStore.find(({ name }) => name === "atc")?.data as ATCData[]) ?? [],
+            ddd_combinations:
+                (atcVersionDataStore.find(({ name }) => name === "ddd_combinations")?.data as DDDCombinationsData[]) ??
+                [],
+            ddd: (atcVersionDataStore.find(({ name }) => name === "ddd")?.data as DDDData[]) ?? [],
+            conversion:
+                (atcVersionDataStore.find(({ name }) => name === "conversion")?.data as ConversionFactorData[]) ?? [],
+            ddd_alterations:
+                (atcVersionDataStore.find(({ name }) => name === "ddd_alterations")?.data as DDDAlterationsData[]) ??
+                [],
+            atc_alterations:
+                (atcVersionDataStore.find(({ name }) => name === "atc_alterations")?.data as ATCAlterationsData[]) ??
+                [],
+        };
+        return glassAtcVerion;
+    }
 }
+
+type ATCVersionData<T> = {
+    name: "atc" | "ddd_combinations" | "ddd" | "conversion" | "ddd_alterations" | "atc_alterations";
+    data: T[];
+};
+
+type ATCVersion = Array<
+    ATCVersionData<
+        DDDCombinationsData | ConversionFactorData | DDDData | ATCData | DDDAlterationsData | ATCAlterationsData
+    >
+>;

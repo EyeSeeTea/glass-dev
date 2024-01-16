@@ -48,11 +48,32 @@ describe("Given calculate Consumption Substance Level Data function", () => {
             verifyCalculationResult(rawSubstanceConsumptionCalculatedData, type);
         });
     });
+    describe("When we do not have atc data", () => {
+        it("Then should return correct solution", async () => {
+            const type = "no_atc_data";
+            const period = "2019";
+            const orgUnitId = "vboedbUs1As";
+            const rawSubstanceConsumptionData = givenRawSubstanceConsumptionDataByType(type);
+            const atcVersionsByKeys = {} as ListGlassATCVersions;
+            const currentAtcVersionKey = "ATC-2023-v1";
+
+            const rawSubstanceConsumptionCalculatedData = calculateConsumptionSubstanceLevelData(
+                period,
+                orgUnitId,
+                rawSubstanceConsumptionData,
+                atcVersionsByKeys,
+                currentAtcVersionKey
+            );
+
+            verifyCalculationResult(rawSubstanceConsumptionCalculatedData, type);
+        });
+    });
 });
 
 function givenRawSubstanceConsumptionDataByType(type?: string): RawSubstanceConsumptionData[] {
     const rawSubstanceConsumptionDataByTypes = {
         basic: rawSubstanceConsumptionDataBasic,
+        no_atc_data: rawSubstanceConsumptionDataBasic,
         atcNotFound: rawSubstanceConsumptionDataAtcNotFound,
     } as Record<string, RawSubstanceConsumptionData[]>;
 
@@ -67,6 +88,7 @@ function getExpectedCalculationSolution(type?: string): SubstanceConsumptionCalc
     const calculationSolutionTypes = {
         basic: calculationConsumptionSubstanceLevelBasic,
         atcNotFound: calculationConsumptionSubstanceLevelBasic,
+        no_atc_data: [],
     } as Record<string, SubstanceConsumptionCalculated[]>;
 
     const calculationSolution = type ? calculationSolutionTypes[type] : calculationSolutionTypes.basic;
@@ -93,5 +115,6 @@ function verifyCalculationResult(result: any[], type?: string) {
         expect(calculation.health_level_autocalculated).toBe(expectedCalculation?.health_level_autocalculated);
         expect(calculation.period).toBe(expectedCalculation?.period);
         expect(calculation.orgUnitId).toBe(expectedCalculation?.orgUnitId);
+        expect(calculation.report_date).toBe(expectedCalculation?.report_date);
     });
 }
