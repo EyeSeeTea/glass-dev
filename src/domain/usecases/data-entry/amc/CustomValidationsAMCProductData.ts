@@ -4,7 +4,7 @@ import { ConsistencyError } from "../../../entities/data-entry/ImportSummary";
 import { ValidationResult } from "../../../entities/program-rules/EventEffectTypes";
 import { D2TrackerTrackedEntity } from "@eyeseetea/d2-api/api/trackerTrackedEntities";
 import { GlassATCDefaultRepository } from "../../../../data/repositories/GlassATCDefaultRepository";
-import { ATCData, DDDCombinationsData, GlassATCVersion, GlassATCVersionData } from "../../../entities/GlassATC";
+import { GlassATCVersion } from "../../../entities/GlassATC";
 
 const AMR_GLASS_AMC_TEA_ATC = "aK1JpD14imM";
 const AMR_GLASS_AMC_TEA_COMBINATION = "mG49egdYK3G";
@@ -86,12 +86,8 @@ export class CustomValidationsAMCProductData {
                     });
                 }
                 if (atcCode) {
-                    const atcData = atcVersion.find(atc => atc.name === "atc");
-                    const atcDataWithType = atcData as GlassATCVersionData<ATCData>;
-
-                    const isValidATCCode = atcDataWithType.data.find(
-                        data => data.CODE === atcCode && data.LEVEL === "5"
-                    );
+                    const atcData = atcVersion.atc;
+                    const isValidATCCode = atcData.find(data => data.CODE === atcCode && data.LEVEL === "5");
                     if (!isValidATCCode) {
                         curErrors.push({
                             error: i18n.t(
@@ -151,11 +147,8 @@ export class CustomValidationsAMCProductData {
                         }
                     }
                 }
-                const combinationData = atcVersion.find(atcVer => atcVer.name === "ddd_combinations");
-                const combinationDataWithType = combinationData as GlassATCVersionData<DDDCombinationsData>;
-                const validCombinationCode = combinationDataWithType.data.find(
-                    data => data.COMB_CODE === combinationCode
-                );
+                const combinationData = atcVersion.ddd_combinations;
+                const validCombinationCode = combinationData.find(data => data.COMB_CODE === combinationCode);
 
                 if (combinationCode) {
                     if (!validCombinationCode) {

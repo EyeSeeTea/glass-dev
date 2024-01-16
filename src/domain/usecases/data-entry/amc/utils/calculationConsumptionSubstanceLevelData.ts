@@ -1,14 +1,11 @@
 /* eslint-disable no-console */
-import { DDDAlterationsData, DDDData, GlassATCVersion, ListGlassATCVersions } from "../../../../entities/GlassATC";
+import { GlassATCVersion, ListGlassATCVersions } from "../../../../entities/GlassATC";
 import { Id } from "../../../../entities/Ref";
 import { RawSubstanceConsumptionData } from "../../../../entities/data-entry/amc/RawSubstanceConsumptionData";
 import { ROUTE_OF_ADMINISTRATION_MAPPING } from "../../../../entities/data-entry/amc/RouteOfAdministration";
 import { SALT_MAPPING } from "../../../../entities/data-entry/amc/Salt";
 import { SubstanceConsumptionCalculated } from "../../../../entities/data-entry/amc/SubstanceConsumptionCalculated";
 import { UNITS_MAPPING, Unit, valueToStandardizedMeasurementUnit } from "../../../../entities/data-entry/amc/Unit";
-
-const DDD_NAME = "ddd";
-const DDD_ALTERATIONS_NAME = "ddd_alterations";
 
 export function calculateConsumptionSubstanceLevelData(
     period: string,
@@ -95,8 +92,7 @@ function getStandardizedDDD(
     atcVersion: GlassATCVersion | undefined
 ): number | undefined {
     const { atc_manual, salt_manual, route_admin_manual } = rawSubstanceConsumptionData;
-    const dddData = atcVersion?.find(({ name }) => name === DDD_NAME)?.data as DDDData[] | undefined;
-
+    const dddData = atcVersion?.ddd;
     const dddDataFound = dddData?.find(({ ATC5, SALT, ROA }) => {
         const isDefaultSalt = !SALT && SALT_MAPPING[salt_manual] === SALT_MAPPING.default;
         return (
@@ -117,9 +113,7 @@ function getStandardizedDDD(
         ddd_data: dddData,
     });
 
-    const dddAlterations = atcVersion?.find(({ name }) => name === DDD_ALTERATIONS_NAME)?.data as
-        | DDDAlterationsData[]
-        | undefined;
+    const dddAlterations = atcVersion?.ddd_alterations;
     const newDddData = dddAlterations?.find(
         ({ CURRENT_ATC, NEW_ROUTE, DELETED }) =>
             !DELETED &&

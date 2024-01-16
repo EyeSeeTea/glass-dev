@@ -9,7 +9,6 @@ import {
     DDDData,
     GlassATCHistory,
     GlassATCVersion,
-    GlassATCVersionData,
     ListGlassATCVersions,
     validateAtcVersion,
 } from "../../domain/entities/GlassATC";
@@ -29,16 +28,20 @@ export class GlassATCDefaultRepository implements GlassATCRepository {
     @cache()
     getAtcVersion(atcVersionKey: string): FutureData<GlassATCVersion> {
         if (validateAtcVersion(atcVersionKey)) {
-            return this.dataStoreClient.listCollection<
-                GlassATCVersionData<
-                    | DDDCombinationsData
-                    | ConversionFactorData
-                    | DDDData
-                    | ATCData
-                    | DDDAlterationsData
-                    | ATCAlterationsData
-                >
-            >(atcVersionKey);
+            return this.dataStoreClient
+                .listCollection<
+                    ATCVersionData<
+                        | DDDCombinationsData
+                        | ConversionFactorData
+                        | DDDData
+                        | ATCData
+                        | DDDAlterationsData
+                        | ATCAlterationsData
+                    >
+                >(atcVersionKey)
+                .map(atcVersionDataStore => {
+                    return this.buildGlassATCVersion(atcVersionDataStore);
+                });
         }
         return Future.error("Upload does not exist");
     }
@@ -68,4 +71,24 @@ export class GlassATCDefaultRepository implements GlassATCRepository {
             }, {})
         );
     }
+
+    private buildGlassATCVersion(atcVersionDataStore: ATCVersion): GlassATCVersion {
+        return atcVersionDataStore.reduce((acc, atcVersionData) => {
+            return {
+                ...acc,
+                [atcVersionData.name]: atcVersionData.data,
+            };
+        }, {} as GlassATCVersion);
+    }
 }
+
+type ATCVersionData<T> = {
+    name: "atc" | "ddd_combinations" | "ddd" | "conversion" | "ddd_alterations" | "atc_alterations";
+    data: T[];
+};
+
+type ATCVersion = Array<
+    ATCVersionData<
+        DDDCombinationsData | ConversionFactorData | DDDData | ATCData | DDDAlterationsData | ATCAlterationsData
+    >
+>;
