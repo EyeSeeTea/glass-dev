@@ -73,12 +73,22 @@ export class GlassATCDefaultRepository implements GlassATCRepository {
     }
 
     private buildGlassATCVersion(atcVersionDataStore: ATCVersion): GlassATCVersion {
-        return atcVersionDataStore.reduce((acc, atcVersionData) => {
-            return {
-                ...acc,
-                [atcVersionData.name]: atcVersionData.data,
-            };
-        }, {} as GlassATCVersion);
+        const glassAtcVerion: GlassATCVersion = {
+            atc: (atcVersionDataStore.find(({ name }) => name === "atc")?.data as ATCData[]) ?? [],
+            ddd_combinations:
+                (atcVersionDataStore.find(({ name }) => name === "ddd_combinations")?.data as DDDCombinationsData[]) ??
+                [],
+            ddd: (atcVersionDataStore.find(({ name }) => name === "ddd")?.data as DDDData[]) ?? [],
+            conversion:
+                (atcVersionDataStore.find(({ name }) => name === "conversion")?.data as ConversionFactorData[]) ?? [],
+            ddd_alterations:
+                (atcVersionDataStore.find(({ name }) => name === "ddd_alterations")?.data as DDDAlterationsData[]) ??
+                [],
+            atc_alterations:
+                (atcVersionDataStore.find(({ name }) => name === "atc_alterations")?.data as ATCAlterationsData[]) ??
+                [],
+        };
+        return glassAtcVerion;
     }
 }
 
