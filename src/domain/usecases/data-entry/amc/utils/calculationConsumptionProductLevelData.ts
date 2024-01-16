@@ -29,11 +29,6 @@ import {
     valueToStandardizedMeasurementUnit,
 } from "../../../../entities/data-entry/amc/Unit";
 
-const DDD_COMBINATIONS_NAME = "ddd_combinations";
-const DDD_NAME = "ddd";
-const CONVERSION_NAME = "conversion";
-const DDD_ALTERATIONS_NAME = "ddd_alterations";
-
 export function calculateConsumptionProductLevelData(
     period: string,
     orgUnitId: Id,
@@ -48,16 +43,10 @@ export function calculateConsumptionProductLevelData(
         period,
     });
 
-    const dddCombinations = atcClassification.find(({ name }) => name === DDD_COMBINATIONS_NAME)?.data as
-        | DDDCombinationsData[]
-        | undefined;
-    const dddData = atcClassification.find(({ name }) => name === DDD_NAME)?.data as DDDData[] | undefined;
-    const dddAlterations = atcClassification.find(({ name }) => name === DDD_ALTERATIONS_NAME)?.data as
-        | DDDAlterationsData[]
-        | undefined;
-    const conversionFactorData = atcClassification.find(({ name }) => name === CONVERSION_NAME)?.data as
-        | ConversionFactorData[]
-        | undefined;
+    const dddCombinations = atcClassification?.ddd_combinations;
+    const dddData = atcClassification?.ddd;
+    const dddAlterations = atcClassification?.ddd_alterations;
+    const conversionFactorData = atcClassification?.conversion;
 
     const contentDDDPerProductAndDDDPerPackage: ContentDDDPerProductAndDDDPerPackage[] = teiInstancesData
         .map((product: ProductRegistryAttributes) => {
