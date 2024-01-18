@@ -150,7 +150,11 @@ export const DataFileTable: React.FC<DataFileTableProps> = ({ title, items, clas
                                 }}
                             >
                                 <span>
-                                    <Typography variant="caption">{i18n.t("Rows")}</Typography>
+                                    {currentModuleAccess.moduleName === "AMC" ? (
+                                        <Typography variant="caption">{i18n.t("Products/Substances")}</Typography>
+                                    ) : (
+                                        <Typography variant="caption">{i18n.t("Rows")}</Typography>
+                                    )}
                                     {rowsSortDirection === "asc" ? (
                                         <ArrowUpward fontSize="small" />
                                     ) : (

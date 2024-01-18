@@ -1,5 +1,5 @@
 import { UseCase } from "../../../CompositionRoot";
-import { AMCSubstanceDataRepository } from "../../../data/repositories/data-entry/AMCSubstanceDataRepository";
+import { AMCSubstanceDataRepository } from "../../repositories/data-entry/AMCSubstanceDataRepository";
 import { GlassModuleDefaultRepository } from "../../../data/repositories/GlassModuleDefaultRepository";
 import { Future, FutureData } from "../../entities/Future";
 import { SampleDataRepository } from "../../repositories/data-entry/SampleDataRepository";
