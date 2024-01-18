@@ -80,9 +80,12 @@ import { DownloadTemplateDefaultRepository } from "./data/repositories/download-
 import { BulkLoadDataStoreClient } from "./data/data-store/BulkLoadDataStoreClient";
 import { ApplyAMCQuestionUpdationUseCase } from "./domain/usecases/ApplyAMCQuestionUpdationUseCase";
 import { SaveImportSummaryErrorsOfFilesInUploadsUseCase } from "./domain/usecases/SaveImportSummaryErrorsOfFilesInUploadsUseCase";
-import { AMCProductDataRepository } from "./data/repositories/data-entry/AMCProductDataRepository";
-import { AMCSubstanceDataRepository } from "./data/repositories/data-entry/AMCSubstanceDataRepository";
+import { AMCProductDataDefaultRepository } from "./data/repositories/data-entry/AMCProductDataDefaultRepository";
+import { AMCSubstanceDataDefaultRepository } from "./data/repositories/data-entry/AMCSubstanceDataDefaultRepository";
 import { GetCurrentDataSubmissionFileTypeUseCase } from "./domain/usecases/GetCurrentDataSubmissionFileTypeUseCase";
+import { CalculateConsumptionDataProductLevelUseCase } from "./domain/usecases/data-entry/amc/CalculateConsumptionDataProductLevelUseCase";
+import { GlassATCDefaultRepository } from "./data/repositories/GlassATCDefaultRepository";
+import { CalculateConsumptionDataSubstanceLevelUseCase } from "./domain/usecases/data-entry/amc/CalculateConsumptionDataSubstanceLevelUseCase";
 
 export function getCompositionRoot(instance: Instance) {
     const api = getD2APiFromInstance(instance);
@@ -114,8 +117,10 @@ export function getCompositionRoot(instance: Instance) {
     const captureFormRepository = new CaptureFormDefaultRepository(api);
     const signalRepository = new SignalDefaultRepository(dataStoreClient, api);
     const downloadTemplateRepository = new DownloadTemplateDefaultRepository(instance);
-    const amcProductDataRepository = new AMCProductDataRepository();
-    const amcSubstanceDataRepository = new AMCSubstanceDataRepository();
+    const amcProductDataRepository = new AMCProductDataDefaultRepository(api);
+    const amcSubstanceDataRepository = new AMCSubstanceDataDefaultRepository(api);
+    const glassAtcRepository = new GlassATCDefaultRepository(dataStoreClient);
+    const atcRepository = new GlassATCDefaultRepository(dataStoreClient);
 
     return {
         instance: getExecute({
@@ -171,7 +176,8 @@ export function getCompositionRoot(instance: Instance) {
                 trackerRepository,
                 glassModuleRepository,
                 instanceRepository,
-                programRulesMetadataDefaultRepository
+                programRulesMetadataDefaultRepository,
+                atcRepository
             ),
             validatePrimaryFile: new ValidatePrimaryFileUseCase(
                 risDataRepository,
@@ -244,6 +250,22 @@ export function getCompositionRoot(instance: Instance) {
             getPopulatedForm: new GetPopulatedProgramQuestionnaireUseCase(captureFormRepository),
             delete: new DeleteSignalUseCase(dhis2EventsDefaultRepository, signalRepository),
             applyValidations: new ApplyAMCQuestionUpdationUseCase(),
+        }),
+        calculations: getExecute({
+            consumptionDataProductLevel: new CalculateConsumptionDataProductLevelUseCase(
+                excelRepository,
+                instanceRepository,
+                amcProductDataRepository,
+                glassAtcRepository,
+                metadataRepository
+            ),
+            consumptionDataSubstanceLevel: new CalculateConsumptionDataSubstanceLevelUseCase(
+                glassUploadsRepository,
+                glassDocumentsRepository,
+                amcSubstanceDataRepository,
+                glassAtcRepository,
+                metadataRepository
+            ),
         }),
     };
 }

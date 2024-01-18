@@ -31,7 +31,8 @@ export class ImportAMCSubstanceLevelData {
         moduleName: string,
         orgUnitId: string,
         orgUnitName: string,
-        period: string
+        period: string,
+        calculatedEventListFileId?: string
     ): FutureData<ImportSummary> {
         const importBLTemplateEventProgram = new ImportBLTemplateEventProgram(
             this.excelRepository,
@@ -52,7 +53,8 @@ export class ImportAMCSubstanceLevelData {
             orgUnitName,
             period,
             AMC_RAW_SUBSTANCE_CONSUMPTION_PROGRAM_ID,
-            "secondaryUploadId"
+            "secondaryUploadId",
+            calculatedEventListFileId
         );
     }
 }
