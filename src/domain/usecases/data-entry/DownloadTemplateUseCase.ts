@@ -18,14 +18,14 @@ import { getRelationshipMetadata } from "../../../data/repositories/download-tem
 import { EGASPProgramDefaultRepository } from "../../../data/repositories/download-template/EGASPProgramDefaultRepository";
 import { EGASP_PROGRAM_ID } from "../../../data/repositories/program-rule/ProgramRulesMetadataDefaultRepository";
 import {
+    AMC_PRODUCT_REGISTER_PROGRAM_ID,
+    AMC_RAW_PRODUCT_CONSUMPTION_CALCULATED_STAGE_ID,
+    AMC_RAW_PRODUCT_CONSUMPTION_STAGE_ID,
+} from "./amc/ImportAMCProductLevelData";
+import {
     AMC_RAW_SUBSTANCE_CONSUMPTION_PROGRAM_ID,
     AMC_SUBSTANCE_CALCULATED_CONSUMPTION_PROGRAM_ID,
 } from "./amc/ImportAMCSubstanceLevelData";
-import {
-    AMC_PRODUCT_REGISTER_PROGRAM_ID,
-    AMR_RAW_PRODUCT_CONSUMPTION_CALCULATED_STAGE_ID,
-    AMR_RAW_PRODUCT_CONSUMPTION_STAGE_ID,
-} from "./amc/ImportAMCProductLevelData";
 
 export type FileType = "PRODUCT" | "SUBSTANCE";
 export type DownloadType = "SUBMITTED" | "CALCULATED";
@@ -354,12 +354,12 @@ const getProgramId = (
             if (downloadType === "CALCULATED") {
                 return {
                     programId: AMC_PRODUCT_REGISTER_PROGRAM_ID,
-                    programStageId: AMR_RAW_PRODUCT_CONSUMPTION_CALCULATED_STAGE_ID,
+                    programStageId: AMC_RAW_PRODUCT_CONSUMPTION_CALCULATED_STAGE_ID,
                 };
             } else if (downloadType === "SUBMITTED") {
                 return {
                     programId: AMC_PRODUCT_REGISTER_PROGRAM_ID,
-                    programStageId: AMR_RAW_PRODUCT_CONSUMPTION_STAGE_ID,
+                    programStageId: AMC_RAW_PRODUCT_CONSUMPTION_STAGE_ID,
                 };
             } else {
                 return {
