@@ -17,7 +17,8 @@ import { mapToImportSummary, readTemplate, uploadIdListFileAndSave } from "../Im
 import { MetadataRepository } from "../../../repositories/MetadataRepository";
 
 export const AMC_PRODUCT_REGISTER_PROGRAM_ID = "G6ChA5zMW9n";
-const AMR_RAW_PRODUCT_CONSUMPTION_STAGE_ID = "GmElQHKXLIE";
+export const AMR_RAW_PRODUCT_CONSUMPTION_STAGE_ID = "GmElQHKXLIE";
+export const AMR_RAW_PRODUCT_CONSUMPTION_CALCULATED_STAGE_ID = "q8cl5qllyjd";
 const AMR_GLASS_AMC_TET_PRODUCT_REGISTER = "uE6bIKLsGYW";
 export class ImportAMCProductLevelData {
     constructor(

@@ -15,9 +15,16 @@ export interface ContentLoaderProps {
     children: ReactNode;
     showErrorAsSnackbar?: boolean;
     onError?: () => void;
+    extraLoading?: boolean;
 }
 
-export const ContentLoader: React.FC<ContentLoaderProps> = ({ content, children, showErrorAsSnackbar, onError }) => {
+export const ContentLoader: React.FC<ContentLoaderProps> = ({
+    content,
+    children,
+    showErrorAsSnackbar,
+    onError,
+    extraLoading,
+}) => {
     const snackbar = useSnackbar();
 
     useEffect(() => {
@@ -41,6 +48,8 @@ export const ContentLoader: React.FC<ContentLoaderProps> = ({ content, children,
             }
 
         case "loaded":
-            return <>{children}</>;
+            if (extraLoading) {
+                return <CircularProgress />;
+            } else return <>{children}</>;
     }
 };

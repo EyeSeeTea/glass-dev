@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: i18next-conv\n"
-"POT-Creation-Date: 2023-12-01T11:57:23.836Z\n"
+"POT-Creation-Date: 2024-01-15T15:44:46.396Z\n"
 "PO-Revision-Date: 2018-10-25T09:02:35.143Z\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -676,6 +676,9 @@ msgid "Enable message SMS notifications"
 msgstr ""
 
 msgid "Error fetching user Modules"
+msgstr ""
+
+msgid "Unknown file type"
 msgstr ""
 
 msgid "Country Information"
