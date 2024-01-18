@@ -15,6 +15,7 @@ import { Id } from "../../domain/entities/Ref";
 import { AMC_PRODUCT_REGISTER_PROGRAM_ID } from "../../domain/usecases/data-entry/amc/ImportAMCProductLevelData";
 import { EGASP_PROGRAM_ID } from "./program-rule/ProgramRulesMetadataDefaultRepository";
 import { AMC_RAW_SUBSTANCE_CONSUMPTION_PROGRAM_ID } from "../../domain/usecases/data-entry/amc/ImportAMCSubstanceLevelData";
+import { removeCharacters } from "./utils/string";
 
 type RowWithCells = XLSX.Row & { _cells: XLSX.Cell[] };
 
@@ -42,11 +43,10 @@ export class ExcelPopulateDefaultRepository extends ExcelRepository {
         });
     }
 
-    public toBlob(id: string): FutureData<Blob> {
-        return Future.fromPromise(this.toBuffer(id)).map(data => {
-            return new Blob([data], {
-                type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            });
+    public async toBlob(id: string): Promise<Blob> {
+        const data = await this.toBuffer(id);
+        return new Blob([data], {
+            type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         });
     }
 
@@ -71,6 +71,28 @@ export class ExcelPopulateDefaultRepository extends ExcelRepository {
             const column = location.type === "column" ? location.ref : cell.columnName();
             const destination = workbook.sheet(location.sheet).cell(row, column);
             return { type: "cell", sheet: destination.sheet().name(), ref: destination.address() };
+        }
+    }
+
+    public async writeCell(id: string, cellRef: CellRef, value: string | number | boolean): Promise<void> {
+        const workbook = await this.getWorkbook(id);
+        const mergedCells = this.listMergedCells(workbook, cellRef.sheet);
+        const definedNames = await this.listDefinedNames(id);
+        const definedName = definedNames.find(name => removeCharacters(name) === removeCharacters(value));
+
+        const cell = workbook.sheet(cellRef.sheet)?.cell(cellRef.ref);
+        if (!cell) return;
+
+        const { startCell: destination = cell } = mergedCells.find(range => range.hasCell(cell)) ?? {};
+
+        if (!!value && !isNaN(Number(value))) {
+            destination.value(Number(value));
+        } else if (String(value).startsWith("=")) {
+            destination.formula(String(value));
+        } else if (definedName) {
+            destination.formula(`=${definedName}`);
+        } else {
+            destination.value(value);
         }
     }
 

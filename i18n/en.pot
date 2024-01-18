@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2023-12-01T11:57:23.836Z\n"
-"PO-Revision-Date: 2023-12-01T11:57:23.836Z\n"
+"POT-Creation-Date: 2024-01-15T15:44:46.396Z\n"
+"PO-Revision-Date: 2024-01-15T15:44:46.396Z\n"
 
 msgid "Template {{id}} not loaded"
 msgstr ""
@@ -675,6 +675,9 @@ msgid "Enable message SMS notifications"
 msgstr ""
 
 msgid "Error fetching user Modules"
+msgstr ""
+
+msgid "Unknown file type"
 msgstr ""
 
 msgid "Country Information"

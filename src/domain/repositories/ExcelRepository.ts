@@ -11,8 +11,9 @@ export interface ReadCellOptions {
 
 export abstract class ExcelRepository {
     public abstract loadTemplate(file: Blob, programId: Id): FutureData<string>;
-    public abstract toBlob(id: string): FutureData<Blob>;
+    public abstract toBlob(id: string): Promise<Blob>;
     public abstract findRelativeCell(id: string, location?: SheetRef, cell?: CellRef): Promise<CellRef | undefined>;
+    public abstract writeCell(id: string, cellRef: CellRef, value: ExcelValue): Promise<void>;
     public abstract readCell(
         id: string,
         cellRef?: CellRef | ValueRef,
@@ -23,4 +24,5 @@ export abstract class ExcelRepository {
     public abstract listDefinedNames(id: string): Promise<string[]>;
     public abstract buildRowNumber(row: string): number;
     public abstract getSheetRowsCount(id: string, sheetId: string | number): Promise<number | undefined>;
+    public abstract toBuffer(id: string): Promise<Buffer>;
 }

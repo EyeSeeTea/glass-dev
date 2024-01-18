@@ -78,7 +78,7 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
     setPrimaryFileImportSummary,
     setSecondaryFileImportSummary,
 }) => {
-    const { compositionRoot } = useAppContext();
+    const { api, compositionRoot } = useAppContext();
     const snackbar = useSnackbar();
     const [isValidated, setIsValidated] = useState(false);
     const [isPrimaryFileValid, setIsPrimaryFileValid] = useState(false);
@@ -327,29 +327,30 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
         }
     };
 
-    const downloadEmptyTemplate = useCallback(() => {
+    const downloadEmptyTemplate = useCallback(async () => {
         setLoading(true);
-        compositionRoot.fileSubmission.downloadEmptyTemplate(moduleName, uploadFileType as string, orgUnitId).run(
-            file => {
-                //download file automatically
-                const downloadSimulateAnchor = document.createElement("a");
-                downloadSimulateAnchor.href = URL.createObjectURL(file);
-                const fileType = moduleProperties.get(moduleName)?.isSingleFileTypePerSubmission
-                    ? `${uploadFileType}-LEVEL-DATA`
-                    : "";
-                downloadSimulateAnchor.download = `${moduleName}-${fileType}-${orgUnitCode}-TEMPLATE`;
-                // simulate link click
-                document.body.appendChild(downloadSimulateAnchor);
-                downloadSimulateAnchor.click();
-                setLoading(false);
-            },
-            error => {
-                snackbar.error("Error downloading file");
-                console.error(error);
-                setLoading(false);
-            }
-        );
-    }, [compositionRoot.fileSubmission, snackbar, orgUnitId, moduleName, orgUnitCode, uploadFileType]);
+        const file = await compositionRoot.fileSubmission.downloadTemplate(api, {
+            fileType: uploadFileType,
+            moduleName: moduleName,
+            orgUnits: [orgUnitId],
+            populate: false,
+            downloadRelationships: true,
+            splitDataEntryTabsBySection: true,
+            useCodesForMetadata: true,
+        });
+
+        //download file automatically
+        const downloadSimulateAnchor = document.createElement("a");
+        downloadSimulateAnchor.href = URL.createObjectURL(file);
+        const fileType = moduleProperties.get(moduleName)?.isSingleFileTypePerSubmission
+            ? `${uploadFileType}-LEVEL-DATA`
+            : "";
+        downloadSimulateAnchor.download = `${moduleName}-${fileType}-${orgUnitCode}-TEMPLATE.xlsx`;
+        // simulate link click
+        document.body.appendChild(downloadSimulateAnchor);
+        downloadSimulateAnchor.click();
+        setLoading(false);
+    }, [api, compositionRoot.fileSubmission, moduleName, orgUnitCode, orgUnitId, uploadFileType]);
 
     return (
         <ContentWrapper>

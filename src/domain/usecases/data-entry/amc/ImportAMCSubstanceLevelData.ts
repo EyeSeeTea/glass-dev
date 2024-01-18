@@ -11,6 +11,7 @@ import { ImportBLTemplateEventProgram } from "../ImportBLTemplateEventProgram";
 import { ProgramRulesMetadataRepository } from "../../../repositories/program-rules/ProgramRulesMetadataRepository";
 
 export const AMC_RAW_SUBSTANCE_CONSUMPTION_PROGRAM_ID = "q8aSKr17J5S";
+export const AMC_SUBSTANCE_CALCULATED_CONSUMPTION_PROGRAM_ID = "eUmWZeKZNrg";
 
 export class ImportAMCSubstanceLevelData {
     constructor(

@@ -19,4 +19,9 @@ export interface GlassUploadsRepository {
         secondaryUploadId?: Id;
         secondaryImportSummaryErrors?: ImportSummaryErrors;
     }): FutureData<void>;
+    getUploadsByModuleDataSubmissionPeriod(
+        module: Id,
+        dataSubmissionId: Id,
+        period: string
+    ): FutureData<GlassUploads[]>;
 }

@@ -84,7 +84,7 @@ export class SheetBuilder {
         this.validations = new Map();
     }
 
-    public generate(programId: Id) {
+    public generate(programId: Id, programStageId?: string): Excel.Workbook {
         const { builder } = this;
         const { element } = builder;
         const dataEntrySheetsInfo: Array<{ sheet: any }> = [];
@@ -96,7 +96,9 @@ export class SheetBuilder {
             this.relationshipsSheets = [];
 
             // ProgramStage sheets
-            const programStages = this.getProgramStages().map(programStageT => metadata.get(programStageT.id));
+            const programStages = this.getProgramStages(programStageId).map(programStageT =>
+                metadata.get(programStageT.id)
+            );
 
             withSheetNames(programStages).forEach((programStage: any) => {
                 const sheet = this.workbook.addWorksheet(programStage.sheetName);
@@ -877,10 +879,11 @@ export class SheetBuilder {
     }
 
     // Return only program stages for which the current user has permissions to export/import data.
-    private getProgramStages() {
+    private getProgramStages(programStageId?: Id) {
         const { element } = this.builder;
 
         return _(element.programStages)
+            .filter(({ id }) => (programStageId ? id === programStageId : true))
             .filter(({ access }) => access?.read && access?.data?.read && access?.data?.write)
             .value();
     }
