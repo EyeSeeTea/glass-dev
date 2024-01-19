@@ -4,41 +4,20 @@ import { mapToImportSummary, readTemplate } from "../ImportBLTemplateEventProgra
 import { ExcelRepository } from "../../../repositories/ExcelRepository";
 import { GlassATCRepository } from "../../../repositories/GlassATCRepository";
 import { InstanceRepository } from "../../../repositories/InstanceRepository";
-import { GlassATCHistory, createAtcVersionKey } from "../../../entities/GlassATC";
 import { AMCProductDataRepository } from "../../../repositories/data-entry/AMCProductDataRepository";
 import {
     AMC_PRODUCT_REGISTER_PROGRAM_ID,
     AMR_GLASS_AMC_TEA_PRODUCT_ID,
-    AMC_RAW_PRODUCT_CONSUMPTION_STAGE_ID,
     AMC_RAW_SUBSTANCE_CONSUMPTION_CALCULATED_STAGE_ID,
 } from "../../../../data/repositories/data-entry/AMCProductDataDefaultRepository";
 import * as templates from "../../../entities/data-entry/program-templates";
-import { calculateConsumptionProductLevelData } from "./utils/calculationConsumptionProductLevelData";
-import {
-    Attributes,
-    Event,
-    EventDataValue,
-    ProductDataTrackedEntity,
-} from "../../../entities/data-entry/amc/ProductDataTrackedEntity";
-import {
-    ProductRegisterProgramMetadata,
-    ProgramStage,
-    ProgramStageDataElement,
-    ProgramTrackedEntityAttribute,
-} from "../../../entities/data-entry/amc/ProductRegisterProgram";
 import { MetadataRepository } from "../../../repositories/MetadataRepository";
 import { ImportSummary } from "../../../entities/data-entry/ImportSummary";
-import {
-    PRODUCT_REGISTRY_ATTRIBUTES_KEYS,
-    ProductRegistryAttributes,
-} from "../../../entities/data-entry/amc/ProductRegistryAttributes";
-import {
-    RAW_PRODUCT_CONSUMPTION_KEYS,
-    RawProductConsumption,
-} from "../../../entities/data-entry/amc/RawProductConsumption";
+import { getConsumptionDataProductLevel } from "./utils/getConsumptionDataProductLevel";
 
 const TEMPLATE_ID = "TRACKER_PROGRAM_GENERATED_v3";
 const IMPORT_SUMMARY_EVENT_TYPE = "event";
+const IMPORT_STRATEGY_CREATE_AND_UPDATE = "CREATE_AND_UPDATE";
 
 export class CalculateConsumptionDataProductLevelUseCase {
     constructor(
@@ -49,7 +28,7 @@ export class CalculateConsumptionDataProductLevelUseCase {
         private metadataRepository: MetadataRepository
     ) {}
 
-    public execute(period: string, orgUnitId: Id, orgUnitName: string, file: File): FutureData<ImportSummary> {
+    public execute(period: string, orgUnitId: Id, file: File): FutureData<ImportSummary> {
         return this.getProductIdsFromFile(file)
             .flatMap(productIds => {
                 return Future.joinObj({
@@ -63,48 +42,32 @@ export class CalculateConsumptionDataProductLevelUseCase {
                 });
             })
             .flatMap(result => {
-                const { productRegisterProgramMetadata, productDataTrackedEntities, atcVersionHistory } = result as {
-                    productRegisterProgramMetadata: ProductRegisterProgramMetadata | undefined;
-                    productDataTrackedEntities: ProductDataTrackedEntity[];
-                    atcVersionHistory: GlassATCHistory[];
-                };
-
-                if (!productRegisterProgramMetadata) {
-                    return Future.error("Cannot find Product Register program metadata");
-                }
-
-                const rawProductConsumptionStage = productRegisterProgramMetadata?.programStages.find(
-                    ({ id }) => id === AMC_RAW_PRODUCT_CONSUMPTION_STAGE_ID
-                );
-
-                if (!rawProductConsumptionStage) {
-                    return Future.error("Cannot find Raw Product Consumption program stage metadata");
-                }
-
-                const atcCurrentVersionInfo = atcVersionHistory.find(({ currentVersion }) => currentVersion);
-
-                if (!atcCurrentVersionInfo) {
-                    return Future.error("Cannot find current version of ATC");
-                }
-
-                const atcVersionKey = createAtcVersionKey(atcCurrentVersionInfo.year, atcCurrentVersionInfo.version);
-
-                return this.atcRepository.getAtcVersion(atcVersionKey).flatMap(atcCurrentVersionData => {
-                    const { productRegistryAttributes, rawProductConsumption } =
-                        getProductRegistryAttributesAndRawProductConsumption(
-                            productDataTrackedEntities,
-                            productRegisterProgramMetadata.programAttributes,
-                            rawProductConsumptionStage
+                const { productRegisterProgramMetadata, productDataTrackedEntities, atcVersionHistory } = result;
+                return getConsumptionDataProductLevel({
+                    productRegisterProgramMetadata,
+                    productDataTrackedEntities,
+                    atcVersionHistory,
+                    atcRepository: this.atcRepository,
+                    orgUnitId,
+                    period,
+                }).flatMap(rawSubstanceConsumptionCalculatedData => {
+                    if (_.isEmpty(rawSubstanceConsumptionCalculatedData)) {
+                        console.error(
+                            `Product level: here are no calculated data to import for orgUnitId=${orgUnitId} and period=${period}`
                         );
-
-                    const rawSubstanceConsumptionCalculatedData = calculateConsumptionProductLevelData(
-                        period,
-                        orgUnitId,
-                        productRegistryAttributes,
-                        rawProductConsumption,
-                        atcCurrentVersionData,
-                        atcVersionKey
-                    );
+                        const errorSummary: ImportSummary = {
+                            status: "ERROR",
+                            importCount: {
+                                ignored: 0,
+                                imported: 0,
+                                deleted: 0,
+                                updated: 0,
+                            },
+                            nonBlockingErrors: [],
+                            blockingErrors: [],
+                        };
+                        return Future.success(errorSummary);
+                    }
 
                     const rawSubstanceConsumptionCalculatedStageMetadata =
                         productRegisterProgramMetadata?.programStages.find(
@@ -115,17 +78,13 @@ export class CalculateConsumptionDataProductLevelUseCase {
                         return Future.error("Cannot find Raw Substance Consumption Calculated program stage metadata");
                     }
 
-                    if (_.isEmpty(rawSubstanceConsumptionCalculatedData)) {
-                        return Future.error("There are no calculated data to import");
-                    }
-
                     return this.amcProductDataRepository
                         .importCalculations(
+                            IMPORT_STRATEGY_CREATE_AND_UPDATE,
                             productDataTrackedEntities,
                             rawSubstanceConsumptionCalculatedStageMetadata,
                             rawSubstanceConsumptionCalculatedData,
-                            orgUnitId,
-                            orgUnitName
+                            orgUnitId
                         )
                         .flatMap(response => {
                             return mapToImportSummary(
@@ -172,134 +131,4 @@ export class CalculateConsumptionDataProductLevelUseCase {
             });
         });
     }
-}
-
-export function getProductRegistryAttributesAndRawProductConsumption(
-    productDataTrackedEntities: ProductDataTrackedEntity[],
-    productRegisterProgramAttributes: ProgramTrackedEntityAttribute[],
-    rawProductConsumptionStage: ProgramStage
-) {
-    return productDataTrackedEntities.reduce(
-        (acc, productDataTrackedEntity) => {
-            const productId = productDataTrackedEntity.attributes.find(
-                ({ id }) => id === AMR_GLASS_AMC_TEA_PRODUCT_ID
-            )?.value;
-            if (!productId) {
-                return acc;
-            }
-            return {
-                productRegistryAttributes: [
-                    ...acc.productRegistryAttributes,
-                    getProductRegistryAttributes(productDataTrackedEntity.attributes, productRegisterProgramAttributes),
-                ],
-                rawProductConsumption: [
-                    ...acc.rawProductConsumption,
-                    ...getRawProductConsumption(productId, productDataTrackedEntity.events, rawProductConsumptionStage),
-                ],
-            };
-        },
-        {
-            productRegistryAttributes: [],
-            rawProductConsumption: [],
-        } as {
-            productRegistryAttributes: ProductRegistryAttributes[];
-            rawProductConsumption: RawProductConsumption[];
-        }
-    );
-}
-
-export function getProductRegistryAttributes(
-    attributes: Attributes[],
-    programAttributes: ProgramTrackedEntityAttribute[]
-): ProductRegistryAttributes {
-    return programAttributes.reduce(
-        (acc: ProductRegistryAttributes, programAttribute: ProgramTrackedEntityAttribute) => {
-            const productAttribute: Attributes | undefined = attributes.find(
-                attribute => attribute.id === programAttribute.id
-            );
-
-            if (productAttribute && PRODUCT_REGISTRY_ATTRIBUTES_KEYS.includes(programAttribute.code)) {
-                switch (programAttribute.valueType) {
-                    case "TEXT":
-                        return {
-                            ...acc,
-                            [programAttribute.code]: programAttribute.optionSetValue
-                                ? programAttribute.optionSet.options.find(
-                                      option => option.code === productAttribute.value
-                                  )?.name
-                                : productAttribute.value,
-                        };
-                    case "NUMBER":
-                    case "INTEGER":
-                    case "INTEGER_POSITIVE":
-                    case "INTEGER_ZERO_OR_POSITIVE":
-                        return {
-                            ...acc,
-                            [programAttribute.code]: programAttribute.optionSetValue
-                                ? programAttribute.optionSet.options.find(
-                                      option => option.code === productAttribute.value
-                                  )?.name
-                                : parseFloat(productAttribute.value),
-                        };
-                    default:
-                        return {
-                            ...acc,
-                            [programAttribute.code]: productAttribute.value,
-                        };
-                }
-            }
-            return acc;
-        },
-        {} as ProductRegistryAttributes
-    );
-}
-
-export function getRawProductConsumption(
-    productId: string,
-    events: Event[],
-    programStage: ProgramStage
-): RawProductConsumption[] {
-    return events.map(event => {
-        return event.dataValues.reduce(
-            (acc: RawProductConsumption, eventDataValue: EventDataValue) => {
-                const programStageDataElement: ProgramStageDataElement | undefined = programStage.dataElements.find(
-                    dataElement => dataElement.id === eventDataValue.id
-                );
-                if (programStageDataElement && RAW_PRODUCT_CONSUMPTION_KEYS.includes(programStageDataElement.code)) {
-                    switch (programStageDataElement.valueType) {
-                        case "TEXT":
-                            return {
-                                ...acc,
-                                [programStageDataElement.code]: programStageDataElement.optionSetValue
-                                    ? programStageDataElement.optionSet.options.find(
-                                          option => option.code === eventDataValue.value
-                                      )?.name
-                                    : eventDataValue.value,
-                            };
-                        case "NUMBER":
-                        case "INTEGER":
-                        case "INTEGER_POSITIVE":
-                        case "INTEGER_ZERO_OR_POSITIVE":
-                            return {
-                                ...acc,
-                                [programStageDataElement.code]: programStageDataElement.optionSetValue
-                                    ? programStageDataElement.optionSet.options.find(
-                                          option => option.code === eventDataValue.value
-                                      )?.name
-                                    : parseFloat(eventDataValue.value),
-                            };
-                        default:
-                            return {
-                                ...acc,
-                                [programStageDataElement.code]: eventDataValue.value,
-                            };
-                    }
-                }
-                return acc;
-            },
-            {
-                AMR_GLASS_AMC_TEA_PRODUCT_ID: productId,
-            } as RawProductConsumption
-        );
-    });
 }

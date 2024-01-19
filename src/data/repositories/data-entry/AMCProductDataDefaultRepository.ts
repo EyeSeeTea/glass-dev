@@ -1,3 +1,4 @@
+import _ from "lodash";
 import { D2Api, MetadataPick } from "@eyeseetea/d2-api/2.34";
 import { Future, FutureData } from "../../../domain/entities/Future";
 import { SpreadsheetXlsxDataSource } from "../SpreadsheetXlsxDefaultRepository";
@@ -22,6 +23,7 @@ import {
 } from "../../../domain/entities/data-entry/amc/RawSubstanceConsumptionCalculated";
 import { TrackerPostResponse } from "@eyeseetea/d2-api/api/tracker";
 import { importApiTracker } from "../utils/importApiTracker";
+import { ImportStrategy } from "../../../domain/entities/data-entry/DataValuesSaveSummary";
 
 export const AMC_PRODUCT_REGISTER_PROGRAM_ID = "G6ChA5zMW9n";
 
@@ -29,7 +31,6 @@ export const AMC_RAW_PRODUCT_CONSUMPTION_STAGE_ID = "GmElQHKXLIE";
 export const AMC_RAW_SUBSTANCE_CONSUMPTION_CALCULATED_STAGE_ID = "q8cl5qllyjd";
 
 export const AMR_GLASS_AMC_TEA_PRODUCT_ID = "iasfoeU8veF";
-const TRACKER_IMPORT_STRATEGY_CREATE_AND_UPDATE = "CREATE_AND_UPDATE";
 
 export class AMCProductDataDefaultRepository implements AMCProductDataRepository {
     constructor(private api: D2Api) {}
@@ -73,25 +74,21 @@ export class AMCProductDataDefaultRepository implements AMCProductDataRepository
 
     // TODO: decouple TrackerPostResponse from DHIS2
     importCalculations(
+        importStrategy: ImportStrategy,
         productDataTrackedEntities: ProductDataTrackedEntity[],
         rawSubstanceConsumptionCalculatedStageMetadata: ProgramStage,
         rawSubstanceConsumptionCalculatedData: RawSubstanceConsumptionCalculated[],
-        orgUnitId: Id,
-        orgUnitName: string
+        orgUnitId: Id
     ): FutureData<TrackerPostResponse> {
         const d2TrackerEvents = this.mapRawSubstanceConsumptionCalculatedToD2TrackerEvent(
             productDataTrackedEntities,
             rawSubstanceConsumptionCalculatedStageMetadata,
             rawSubstanceConsumptionCalculatedData,
             orgUnitId,
-            orgUnitName
+            importStrategy
         );
         if (!_.isEmpty(d2TrackerEvents)) {
-            return importApiTracker(
-                this.api,
-                { events: d2TrackerEvents },
-                TRACKER_IMPORT_STRATEGY_CREATE_AND_UPDATE
-            ).flatMap(response => {
+            return importApiTracker(this.api, { events: d2TrackerEvents }, importStrategy).flatMap(response => {
                 return Future.success(response);
             });
         } else {
@@ -110,6 +107,17 @@ export class AMCProductDataDefaultRepository implements AMCProductDataRepository
         });
     }
 
+    getAllProductRegisterAndRawProductConsumptionByPeriod(
+        orgUnitId: Id,
+        period: string
+    ): FutureData<ProductDataTrackedEntity[]> {
+        return Future.fromPromise(
+            this.getAllProductRegisterAndRawProductConsumptionByPeriodAsync(orgUnitId, period)
+        ).map(trackedEntities => {
+            return this.mapFromTrackedEntitiesToProductData(trackedEntities);
+        });
+    }
+
     getProductRegisterProgramMetadata(): FutureData<ProductRegisterProgramMetadata | undefined> {
         return apiToFuture(
             this.api.models.programs.get({
@@ -121,29 +129,8 @@ export class AMCProductDataDefaultRepository implements AMCProductDataRepository
         });
     }
 
-    private getTrackedEntitiesByProductIdsOfPage(
-        orgUnitId: Id,
-        productIds: string[],
-        page: number,
-        pageSize: number
-    ): Promise<TrackedEntitiesGetResponse> {
-        const productIdsString = productIds.join(";");
-        const filterStr = `${AMR_GLASS_AMC_TEA_PRODUCT_ID}:IN:${productIdsString}`;
-        return this.api.tracker.trackedEntities
-            .get({
-                orgUnit: orgUnitId,
-                fields: trackedEntitiesFields,
-                program: AMC_PRODUCT_REGISTER_PROGRAM_ID,
-                programStage: AMC_RAW_PRODUCT_CONSUMPTION_STAGE_ID,
-                page,
-                pageSize,
-                filter: filterStr,
-            })
-            .getData();
-    }
-
     private async getProductRegisterAndRawProductConsumptionByProductIdsAsync(
-        orgUnitId: Id,
+        orgUnit: Id,
         productIds: string[]
     ): Promise<D2TrackerTrackedEntity[]> {
         const trackedEntities: D2TrackerTrackedEntity[] = [];
@@ -151,14 +138,71 @@ export class AMCProductDataDefaultRepository implements AMCProductDataRepository
         const totalPages = Math.ceil(productIds.length / pageSize);
         let page = 1;
         let result;
+        const productIdsString = productIds.join(";");
+        const filter = `${AMR_GLASS_AMC_TEA_PRODUCT_ID}:IN:${productIdsString}`;
 
         do {
-            result = await this.getTrackedEntitiesByProductIdsOfPage(orgUnitId, productIds, page, pageSize);
+            result = await this.getTrackedEntitiesOfPage({ orgUnit, filter, page, pageSize });
             trackedEntities.push(...result.instances);
             page++;
         } while (result.page < totalPages);
 
         return trackedEntities;
+    }
+
+    private async getAllProductRegisterAndRawProductConsumptionByPeriodAsync(
+        orgUnit: Id,
+        period: string
+    ): Promise<D2TrackerTrackedEntity[]> {
+        const trackedEntities: D2TrackerTrackedEntity[] = [];
+        const enrollmentEnrolledAfter = `${period}-1-1`;
+        const enrollmentEnrolledBefore = `${period}-12-31`;
+        const totalPages = true;
+        const pageSize = 250;
+        let page = 1;
+        let result;
+
+        try {
+            do {
+                result = await this.getTrackedEntitiesOfPage({
+                    orgUnit,
+                    page,
+                    pageSize,
+                    totalPages,
+                    enrollmentEnrolledBefore,
+                    enrollmentEnrolledAfter,
+                });
+                if (!result.total) {
+                    throw new Error(
+                        `Error getting paginated tracked entities of period ${period} and organisation ${orgUnit}`
+                    );
+                }
+                trackedEntities.push(...result.instances);
+                page++;
+            } while (result.page < Math.ceil((result.total as number) / pageSize));
+            return trackedEntities;
+        } catch {
+            return [];
+        }
+    }
+
+    private getTrackedEntitiesOfPage(params: {
+        orgUnit: Id;
+        page: number;
+        pageSize: number;
+        filter?: string;
+        totalPages?: boolean;
+        enrollmentEnrolledAfter?: string;
+        enrollmentEnrolledBefore?: string;
+    }): Promise<TrackedEntitiesGetResponse> {
+        return this.api.tracker.trackedEntities
+            .get({
+                fields: trackedEntitiesFields,
+                program: AMC_PRODUCT_REGISTER_PROGRAM_ID,
+                programStage: AMC_RAW_PRODUCT_CONSUMPTION_STAGE_ID,
+                ...params,
+            })
+            .getData();
     }
 
     private mapFromD2ProgramToProductRegisterProgramMetadata(
@@ -191,12 +235,14 @@ export class AMCProductDataDefaultRepository implements AMCProductDataRepository
         return trackedEntities
             .map(trackedEntity => {
                 if (trackedEntity.enrollments && trackedEntity.enrollments[0] && trackedEntity.attributes) {
-                    const events: Event[] = trackedEntity.enrollments[0].events.map(eventDataValues => {
-                        const dataValues = eventDataValues.dataValues.map(({ dataElement, value }) => ({
+                    const events: Event[] = trackedEntity.enrollments[0].events.map(event => {
+                        const dataValues = event.dataValues.map(({ dataElement, value }) => ({
                             id: dataElement,
                             value,
                         })) as EventDataValue[];
                         return {
+                            eventId: event.event ?? "",
+                            occurredAt: event.occurredAt,
                             dataValues,
                         };
                     });
@@ -204,6 +250,7 @@ export class AMCProductDataDefaultRepository implements AMCProductDataRepository
                     return {
                         trackedEntityId: trackedEntity.trackedEntity,
                         enrollmentId: trackedEntity.enrollments[0].enrollment,
+                        enrollmentStatus: trackedEntity.enrollments[0].status,
                         events,
                         attributes: trackedEntity.attributes.map(({ attribute, valueType, value }) => ({
                             id: attribute,
@@ -221,7 +268,7 @@ export class AMCProductDataDefaultRepository implements AMCProductDataRepository
         rawSubstanceConsumptionCalculatedStageMetadata: ProgramStage,
         rawSubstanceConsumptionCalculatedData: RawSubstanceConsumptionCalculated[],
         orgUnitId: Id,
-        orgUnitName: string
+        importStrategy: ImportStrategy
     ): D2TrackerEvent[] {
         return rawSubstanceConsumptionCalculatedData
             .map(data => {
@@ -251,16 +298,20 @@ export class AMCProductDataDefaultRepository implements AMCProductDataRepository
                     );
 
                     return {
-                        event: "",
-                        occurredAt: new Date().getTime().toString(),
+                        event: importStrategy === "UPDATE" ? data.eventId : "",
+                        occurredAt:
+                            importStrategy === "UPDATE"
+                                ? productDataTrackedEntity.events.find(({ eventId }) => eventId === data.eventId)
+                                      ?.occurredAt
+                                : new Date().getTime().toString(),
                         status: "COMPLETED",
                         trackedEntity: productDataTrackedEntity.trackedEntityId,
                         enrollment: productDataTrackedEntity.enrollmentId,
-                        enrollmentStatus: "ACTIVE",
+                        enrollmentStatus:
+                            importStrategy === "UPDATE" ? productDataTrackedEntity.enrollmentStatus : "ACTIVE",
                         program: AMC_PRODUCT_REGISTER_PROGRAM_ID,
                         programStage: AMC_RAW_SUBSTANCE_CONSUMPTION_CALCULATED_STAGE_ID,
                         orgUnit: orgUnitId,
-                        orgUnitName,
                         dataValues,
                     };
                 }
@@ -273,7 +324,11 @@ const trackedEntitiesFields = {
     trackedEntity: true,
     enrollments: {
         enrollment: true,
+        status: true,
+        enrolledAt: true,
         events: {
+            event: true,
+            occurredAt: true,
             dataValues: {
                 dataElement: true,
                 value: true,
