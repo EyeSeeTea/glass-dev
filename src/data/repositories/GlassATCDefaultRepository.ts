@@ -8,6 +8,7 @@ import {
     DDDCombinationsData,
     DDDData,
     GlassATCHistory,
+    GlassATCRecalculateDataInfo,
     GlassATCVersion,
     ListGlassATCVersions,
     validateAtcVersion,
@@ -64,12 +65,34 @@ export class GlassATCDefaultRepository implements GlassATCRepository {
     getListOfAtcVersionsByKeys(atcVersionKeys: string[]): FutureData<ListGlassATCVersions> {
         return Future.joinObj(
             atcVersionKeys.reduce((acc, atcVersionKey) => {
-                return {
-                    ...acc,
-                    [atcVersionKey]: this.getAtcVersion(atcVersionKey),
-                };
+                if (validateAtcVersion(atcVersionKey)) {
+                    return {
+                        ...acc,
+                        [atcVersionKey]: this.getAtcVersion(atcVersionKey),
+                    };
+                }
+                console.error(`ATC version key not valid: ${atcVersionKey}`);
+                return acc;
             }, {})
         );
+    }
+
+    getRecalculateDataInfo(): FutureData<GlassATCRecalculateDataInfo | undefined> {
+        return this.dataStoreClient.getObject(DataStoreKeys.AMC_RECALCULATION);
+    }
+
+    disableRecalculations(): FutureData<void> {
+        return this.getRecalculateDataInfo().flatMap(recalculateDataInfo => {
+            if (recalculateDataInfo) {
+                const newRecalculateDataInfo = {
+                    ...recalculateDataInfo,
+                    recalculate: false,
+                    date: new Date().toISOString(),
+                };
+                return this.dataStoreClient.saveObject(DataStoreKeys.AMC_RECALCULATION, newRecalculateDataInfo);
+            }
+            return Future.success(undefined);
+        });
     }
 
     private buildGlassATCVersion(atcVersionDataStore: ATCVersion): GlassATCVersion {
