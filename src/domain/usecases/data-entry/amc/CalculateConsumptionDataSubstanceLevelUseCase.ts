@@ -1,8 +1,6 @@
 import { Future, FutureData } from "../../../entities/Future";
-import { GlassATCHistory, createAtcVersionKey } from "../../../entities/GlassATC";
 import { Id } from "../../../entities/Ref";
 import { ImportSummary } from "../../../entities/data-entry/ImportSummary";
-import { RawSubstanceConsumptionData } from "../../../entities/data-entry/amc/RawSubstanceConsumptionData";
 import { GlassATCRepository } from "../../../repositories/GlassATCRepository";
 import { GlassDocumentsRepository } from "../../../repositories/GlassDocumentsRepository";
 import { GlassUploadsRepository } from "../../../repositories/GlassUploadsRepository";
@@ -10,9 +8,10 @@ import { MetadataRepository } from "../../../repositories/MetadataRepository";
 import { AMCSubstanceDataRepository } from "../../../repositories/data-entry/AMCSubstanceDataRepository";
 import { mapToImportSummary } from "../ImportBLTemplateEventProgram";
 import { getStringFromFile } from "../utils/fileToString";
-import { calculateConsumptionSubstanceLevelData } from "./utils/calculationConsumptionSubstanceLevelData";
+import { getConsumptionDataSubstanceLevel } from "./utils/getConsumptionDataSubstanceLevel";
 
 const IMPORT_SUMMARY_EVENT_TYPE = "event";
+const IMPORT_STRATEGY_CREATE_AND_UPDATE = "CREATE_AND_UPDATE";
 
 export class CalculateConsumptionDataSubstanceLevelUseCase {
     constructor(
@@ -23,13 +22,7 @@ export class CalculateConsumptionDataSubstanceLevelUseCase {
         private metadataRepository: MetadataRepository
     ) {}
 
-    public execute(
-        uploadId: Id,
-        period: string,
-        orgUnitId: Id,
-        orgUnitName: string,
-        moduleName: string
-    ): FutureData<ImportSummary> {
+    public execute(uploadId: Id, period: string, orgUnitId: Id, moduleName: string): FutureData<ImportSummary> {
         return this.getEventsIdsFromUploadId(uploadId)
             .flatMap(eventsIds => {
                 return Future.joinObj({
@@ -39,62 +32,47 @@ export class CalculateConsumptionDataSubstanceLevelUseCase {
                 });
             })
             .flatMap(result => {
-                const { rawSubstanceConsumptionData, atcVersionHistory } = result as {
-                    rawSubstanceConsumptionData: RawSubstanceConsumptionData[] | undefined;
-                    atcVersionHistory: GlassATCHistory[];
-                };
-
-                if (!rawSubstanceConsumptionData) {
-                    return Future.error("Cannot find Raw Substance Consumption Data");
-                }
-
-                const atcVersionKeys: string[] = rawSubstanceConsumptionData?.map(
-                    ({ atc_version_manual }) => atc_version_manual
-                );
-
-                const atcCurrentVersionInfo = atcVersionHistory.find(({ currentVersion }) => currentVersion);
-
-                if (!atcCurrentVersionInfo) {
-                    return Future.error("Cannot find current version of ATC");
-                }
-
-                const currentAtcVersionKey = createAtcVersionKey(
-                    atcCurrentVersionInfo.year,
-                    atcCurrentVersionInfo.version
-                );
-
-                return this.atcRepository.getAtcVersion(currentAtcVersionKey).flatMap(atcCurrentVersionData => {
-                    return this.atcRepository.getListOfAtcVersionsByKeys(atcVersionKeys).flatMap(atcVersionsByKeys => {
-                        const allATCClassificationsByVersion = {
-                            ...atcVersionsByKeys,
-                            [currentAtcVersionKey]: atcCurrentVersionData,
-                        };
-
-                        const calculatedConsumptionSubstanceLevelData = calculateConsumptionSubstanceLevelData(
-                            period,
-                            orgUnitId,
-                            rawSubstanceConsumptionData,
-                            allATCClassificationsByVersion,
-                            currentAtcVersionKey
+                const { rawSubstanceConsumptionData, atcVersionHistory } = result;
+                return getConsumptionDataSubstanceLevel({
+                    orgUnitId,
+                    period,
+                    atcRepository: this.atcRepository,
+                    rawSubstanceConsumptionData,
+                    atcVersionHistory,
+                }).flatMap(calculatedConsumptionSubstanceLevelData => {
+                    if (_.isEmpty(calculatedConsumptionSubstanceLevelData)) {
+                        console.error(
+                            `Substance level: there are no calculated data to import for orgUnitId=${orgUnitId} and period=${period}`
                         );
-
-                        if (_.isEmpty(calculatedConsumptionSubstanceLevelData)) {
-                            return Future.error("There are no calculated data to import");
-                        }
-
-                        return this.amcSubstanceDataRepository
-                            .importCalculations(orgUnitId, orgUnitName, calculatedConsumptionSubstanceLevelData)
-                            .flatMap(result => {
-                                const { response, eventIdLineNoMap } = result;
-                                return mapToImportSummary(
-                                    response,
-                                    IMPORT_SUMMARY_EVENT_TYPE,
-                                    this.metadataRepository,
-                                    undefined,
-                                    eventIdLineNoMap
-                                ).flatMap(summary => this.uploadIdListFileAndSave(uploadId, summary, moduleName));
-                            });
-                    });
+                        const errorSummary: ImportSummary = {
+                            status: "ERROR",
+                            importCount: {
+                                ignored: 0,
+                                imported: 0,
+                                deleted: 0,
+                                updated: 0,
+                            },
+                            nonBlockingErrors: [],
+                            blockingErrors: [],
+                        };
+                        return Future.success(errorSummary);
+                    }
+                    return this.amcSubstanceDataRepository
+                        .importCalculations(
+                            IMPORT_STRATEGY_CREATE_AND_UPDATE,
+                            orgUnitId,
+                            calculatedConsumptionSubstanceLevelData
+                        )
+                        .flatMap(result => {
+                            const { response, eventIdLineNoMap } = result;
+                            return mapToImportSummary(
+                                response,
+                                IMPORT_SUMMARY_EVENT_TYPE,
+                                this.metadataRepository,
+                                undefined,
+                                eventIdLineNoMap
+                            ).flatMap(summary => this.uploadIdListFileAndSave(uploadId, summary, moduleName));
+                        });
                 });
             });
     }
