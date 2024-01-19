@@ -19,9 +19,9 @@ const ALWAYS = true;
 
 async function main() {
     const cmd = command({
-        name: "Calculate consumption in product level data and substance level data for all orgnaisation units and all periods",
+        name: "Recalculate consumption in product level data and substance level data for all orgnaisation units and all periods",
         description:
-            "Calculate for all registered products the raw substance consumption from raw product consumption and calculate from raw substances consumption data the consumption data",
+            "Recalculate for all registered products the raw substance consumption from raw product consumption and recalculate from raw substances consumption data the consumption data",
         args: {
             ...getApiUrlOptions(),
         },
