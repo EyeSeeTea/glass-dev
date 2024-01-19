@@ -178,7 +178,7 @@ describe("Given calculate Consumption Product Level Data function", () => {
             const orgUnitId = "vboedbUs1As";
             const productRegistryAttributes = givenProductRegistryAttributesByType(type);
             const rawProductConsumption = givenRawProductConsumption();
-            const atcCurrentVersionData: GlassATCVersion = [];
+            const atcCurrentVersionDataEmpty = [] as unknown as GlassATCVersion;
             const atcVersionKey = "ATC-2023-v1";
 
             const rawSubstanceConsumptionCalculatedData = calculateConsumptionProductLevelData(
@@ -186,7 +186,7 @@ describe("Given calculate Consumption Product Level Data function", () => {
                 orgUnitId,
                 productRegistryAttributes,
                 rawProductConsumption,
-                atcCurrentVersionData,
+                atcCurrentVersionDataEmpty,
                 atcVersionKey
             );
 

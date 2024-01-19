@@ -14,7 +14,7 @@ describe("Given calculate Consumption Substance Level Data function", () => {
             const period = "2019";
             const orgUnitId = "vboedbUs1As";
             const rawSubstanceConsumptionData = givenRawSubstanceConsumptionDataByType(type);
-            const atcVersionsByKeys = atcVersionsByKeysData as ListGlassATCVersions;
+            const atcVersionsByKeys = atcVersionsByKeysData as unknown as ListGlassATCVersions;
             const currentAtcVersionKey = "ATC-2023-v1";
 
             const rawSubstanceConsumptionCalculatedData = calculateConsumptionSubstanceLevelData(
@@ -34,7 +34,7 @@ describe("Given calculate Consumption Substance Level Data function", () => {
             const period = "2019";
             const orgUnitId = "vboedbUs1As";
             const rawSubstanceConsumptionData = givenRawSubstanceConsumptionDataByType(type);
-            const atcVersionsByKeys = atcVersionsByKeysData as ListGlassATCVersions;
+            const atcVersionsByKeys = atcVersionsByKeysData as unknown as ListGlassATCVersions;
             const currentAtcVersionKey = "ATC-2023-v1";
 
             const rawSubstanceConsumptionCalculatedData = calculateConsumptionSubstanceLevelData(
