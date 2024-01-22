@@ -373,7 +373,7 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                                         downloadFile(row.fileId, row.fileName);
                                     }}
                                 >
-                                    <StyledUnderLineType>{row.fileName}</StyledUnderLineType>
+                                    <StyledUnderLineType title={row.fileName}>{row.fileName}</StyledUnderLineType>
                                 </Button>
                             </TableCell>
                             <TableCell style={{ opacity: 0.5 }}>
@@ -418,6 +418,9 @@ const StyledCTACell = styled(TableCell)`
 `;
 
 const StyledUnderLineType = styled(Typography)`
+    max-width: 250px;
+    text-overflow: ellipsis;
+    overflow: hidden;
     &:hover {
         text-decoration: underline;
     }
