@@ -9,6 +9,8 @@ import { useCurrentModuleContext } from "../../contexts/current-module-context";
 import { EmbeddedReport } from "../../components/reports/EmbeddedReport";
 import { useGlassDashboard } from "../../hooks/useGlassDashboard";
 import { CircularProgress } from "material-ui";
+import { moduleProperties } from "../../../domain/utils/ModuleProperties";
+import { MultiDashboardContent } from "../../components/reports/MultiDashboardContent";
 
 export const GLASS_DASHBOARD_ID = "w7Kub3oACD9";
 export const ReportsPage: React.FC = React.memo(() => {
@@ -32,8 +34,15 @@ export const ReportPageContent: React.FC = React.memo(() => {
                     </Button>
                 </StyledBreadCrumbs>
             </PreContent>
-            {reportDashboardId.kind === "loading" && <CircularProgress />}
-            {reportDashboardId.kind === "loaded" && <EmbeddedReport dashboardId={reportDashboardId.data} />}
+
+            {moduleProperties.get(currentModuleAccess.moduleName)?.isMultiDashboard ? (
+                <MultiDashboardContent type="Report" />
+            ) : (
+                <>
+                    {reportDashboardId.kind === "loading" && <CircularProgress />}
+                    {reportDashboardId.kind === "loaded" && <EmbeddedReport dashboardId={reportDashboardId.data} />}
+                </>
+            )}
         </ContentWrapper>
     );
 });
