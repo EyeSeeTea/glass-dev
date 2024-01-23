@@ -4,12 +4,11 @@ import styled from "styled-components";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import dayjs from "dayjs";
 import { UploadsDataItem } from "../../entities/uploads";
-import { CloudDownloadOutlined, DeleteOutline } from "@material-ui/icons";
+import { DeleteOutline } from "@material-ui/icons";
 import { useAppContext } from "../../contexts/app-context";
 import { ConfirmationDialog, useSnackbar } from "@eyeseetea/d2-ui-components";
 import { CircularProgress } from "material-ui";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
-
 import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context";
 import { Future } from "../../../domain/entities/Future";
 import { isEditModeStatus } from "../../../utils/editModeStatus";
@@ -374,7 +373,7 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                                         downloadFile(row.fileId, row.fileName);
                                     }}
                                 >
-                                    <CloudDownloadOutlined />
+                                    <StyledUnderLineType title={row.fileName}>{row.fileName}</StyledUnderLineType>
                                 </Button>
                             </TableCell>
                             <TableCell style={{ opacity: 0.5 }}>
@@ -415,5 +414,14 @@ const StyledCTACell = styled(TableCell)`
         svg {
             color: ${glassColors.greyBlack};
         }
+    }
+`;
+
+const StyledUnderLineType = styled(Typography)`
+    max-width: 250px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    &:hover {
+        text-decoration: underline;
     }
 `;
