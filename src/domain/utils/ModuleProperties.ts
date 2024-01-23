@@ -147,7 +147,7 @@ export const moduleProperties = new Map<string, ModuleDetails>([
         },
     ],
     [
-        "AMR - Funghi",
+        "AMR - Fungal",
         {
             isbatchReq: false,
             isQuestionnaireReq: true,
@@ -162,9 +162,9 @@ export const moduleProperties = new Map<string, ModuleDetails>([
                 title: "Confirm Delete",
                 description: "Are you sure you want to delete this RIS individual file and corresponding enrollments?",
             },
-            primaryFileType: "RIS Funghi",
+            primaryFileType: "RIS Fungal",
             secondaryFileType: "",
-            primaryUploadLabel: "Choose RIS Funghi File",
+            primaryUploadLabel: "Choose RIS Fungal File",
             unit: "enrollment",
             isSpecimenReq: true,
             isDownloadEmptyTemplateReq: false,
