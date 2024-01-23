@@ -12,8 +12,8 @@ import { ExcelRepository } from "../../repositories/ExcelRepository";
 import { GlassDocumentsRepository } from "../../repositories/GlassDocumentsRepository";
 import { GlassUploadsDefaultRepository } from "../../../data/repositories/GlassUploadsDefaultRepository";
 import { ProgramRulesMetadataRepository } from "../../repositories/program-rules/ProgramRulesMetadataRepository";
-import { ImportRISIndividualFunghiFile } from "./amr-individual-funghi/ImportRISIndividualFunghiFile";
-import { RISIndividualFunghiDataRepository } from "../../repositories/data-entry/RISIndividualFunghiDataRepository";
+import { ImportRISIndividualFungalFile } from "./amr-individual-fungal/ImportRISIndividualFungalFile";
+import { RISIndividualFungalDataRepository } from "../../repositories/data-entry/RISIndividualFungalDataRepository";
 import { TrackerRepository } from "../../repositories/TrackerRepository";
 import { GlassModuleDefaultRepository } from "../../../data/repositories/GlassModuleDefaultRepository";
 import { ImportAMCProductLevelData } from "./amc/ImportAMCProductLevelData";
@@ -23,7 +23,7 @@ import { GlassATCDefaultRepository } from "../../../data/repositories/GlassATCDe
 export class ImportPrimaryFileUseCase {
     constructor(
         private risDataRepository: RISDataRepository,
-        private risIndividualFunghiRepository: RISIndividualFunghiDataRepository,
+        private risIndividualFungalRepository: RISIndividualFungalDataRepository,
         private metadataRepository: MetadataRepository,
         private dataValuesRepository: DataValuesRepository,
         private moduleRepository: GlassModuleRepository,
@@ -84,16 +84,16 @@ export class ImportPrimaryFileUseCase {
             }
 
             case "AMR - Individual":
-            case "AMR - Funghi": {
-                const importRISIndividualFunghiFile = new ImportRISIndividualFunghiFile(
-                    this.risIndividualFunghiRepository,
+            case "AMR - Fungal": {
+                const importRISIndividualFungalFile = new ImportRISIndividualFungalFile(
+                    this.risIndividualFungalRepository,
                     this.trackerRepository,
                     this.glassDocumentsRepository,
                     this.glassUploadsRepository,
                     this.metadataRepository
                 );
                 return this.glassModuleDefaultRepository.getByName(moduleName).flatMap(module => {
-                    return importRISIndividualFunghiFile.importRISIndividualFunghiFile(
+                    return importRISIndividualFungalFile.importRISIndividualFungalFile(
                         inputFile,
                         action,
                         orgUnitId,
