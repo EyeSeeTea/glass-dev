@@ -266,6 +266,10 @@ export function getCompositionRoot(instance: Instance) {
                 metadataRepository
             ),
         }),
+
+        downloads: getExecute({
+           downloadAllData: 
+        }),
     };
 }
 

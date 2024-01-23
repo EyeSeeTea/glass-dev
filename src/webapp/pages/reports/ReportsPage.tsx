@@ -9,6 +9,7 @@ import { useCurrentModuleContext } from "../../contexts/current-module-context";
 import { EmbeddedReport } from "../../components/reports/EmbeddedReport";
 import { useGlassDashboard } from "../../hooks/useGlassDashboard";
 import { CircularProgress } from "material-ui";
+import { useDownloadAllData } from "../../hooks/useDownloadAllData";
 
 export const GLASS_DASHBOARD_ID = "w7Kub3oACD9";
 export const ReportsPage: React.FC = React.memo(() => {
@@ -18,6 +19,7 @@ export const ReportsPage: React.FC = React.memo(() => {
 export const ReportPageContent: React.FC = React.memo(() => {
     const { currentModuleAccess } = useCurrentModuleContext();
     const { reportDashboardId } = useGlassDashboard();
+    const { downloadAllData } = useDownloadAllData();
 
     return (
         <ContentWrapper>
@@ -32,6 +34,12 @@ export const ReportPageContent: React.FC = React.memo(() => {
                     </Button>
                 </StyledBreadCrumbs>
             </PreContent>
+            <DownloadButtonContainer>
+                <Button variant="contained" color="primary" onClick={downloadAllData}>
+                    Download all data
+                </Button>
+            </DownloadButtonContainer>
+
             {reportDashboardId.kind === "loading" && <CircularProgress />}
             {reportDashboardId.kind === "loaded" && <EmbeddedReport dashboardId={reportDashboardId.data} />}
         </ContentWrapper>
@@ -83,4 +91,9 @@ const StyledBreadCrumbs = styled(Breadcrumbs)`
     svg {
         color: ${palette.text.secondary};
     }
+`;
+
+const DownloadButtonContainer = styled.div`
+    display: flex;
+    justify-content: flex-end;
 `;
