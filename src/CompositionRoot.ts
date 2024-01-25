@@ -82,7 +82,7 @@ import { ApplyAMCQuestionUpdationUseCase } from "./domain/usecases/ApplyAMCQuest
 import { SaveImportSummaryErrorsOfFilesInUploadsUseCase } from "./domain/usecases/SaveImportSummaryErrorsOfFilesInUploadsUseCase";
 import { AMCProductDataDefaultRepository } from "./data/repositories/data-entry/AMCProductDataDefaultRepository";
 import { AMCSubstanceDataDefaultRepository } from "./data/repositories/data-entry/AMCSubstanceDataDefaultRepository";
-import { GetCurrentDataSubmissionFileTypeUseCase } from "./domain/usecases/GetCurrentDataSubmissionFileTypeUseCase";
+import { GetUploadsByDataSubmissionUseCase } from "./domain/usecases/GetUploadsByDataSubmissionUseCase";
 import { CalculateConsumptionDataProductLevelUseCase } from "./domain/usecases/data-entry/amc/CalculateConsumptionDataProductLevelUseCase";
 import { GlassATCDefaultRepository } from "./data/repositories/GlassATCDefaultRepository";
 import { CalculateConsumptionDataSubstanceLevelUseCase } from "./domain/usecases/data-entry/amc/CalculateConsumptionDataSubstanceLevelUseCase";
@@ -153,7 +153,7 @@ export function getCompositionRoot(instance: Instance) {
             getByModuleOUPeriod: new GetGlassUploadsByModuleOUPeriodUseCase(glassUploadsRepository),
             setBatchId: new SetUploadBatchIdUseCase(glassUploadsRepository),
             saveImportSummaryErrorsOfFiles: new SaveImportSummaryErrorsOfFilesInUploadsUseCase(glassUploadsRepository),
-            getCurrentDataSubmissionFileType: new GetCurrentDataSubmissionFileTypeUseCase(glassUploadsRepository),
+            getCurrentDataSubmissionFileType: new GetUploadsByDataSubmissionUseCase(glassUploadsRepository),
         }),
         glassDocuments: getExecute({
             getAll: new GetGlassDocumentsUseCase(glassDocumentsRepository),
@@ -205,7 +205,8 @@ export function getCompositionRoot(instance: Instance) {
             downloadTemplate: new DownloadTemplateUseCase(
                 downloadTemplateRepository,
                 excelRepository,
-                egaspProgramRepository
+                egaspProgramRepository,
+                metadataRepository
             ),
         }),
         questionnaires: getExecute({
