@@ -1,81 +1,20 @@
 import { Id } from "@eyeseetea/d2-api";
 import {
-    Relationship as RelationshipApi,
     RelationshipItem as RelationshipItemApi,
     TeiOuRequest as TrackedEntityOURequestApi,
     TrackedEntityInstance as TrackedEntityInstanceApi,
 } from "@eyeseetea/d2-api/api/trackedEntityInstances";
 import _ from "lodash";
 import moment from "moment";
-import { D2Api, D2RelationshipType } from "../../../types/d2-api";
-import { TrackedEntityInstance, isRelationshipValid } from "../../../domain/entities/TrackedEntityInstance";
+import { D2Api } from "../../../types/d2-api";
 import { Relationship } from "../../../domain/entities/Relationship";
-import { getUid } from "../../../utils/uid";
 import { RelationshipConstraint, memoizeAsync } from "./DownloadTemplateDefaultRepository";
 import { NamedRef, Ref } from "../../../domain/entities/Ref";
 import { promiseMap } from "../../../utils/promises";
 import { D2RelationshipConstraint } from "@eyeseetea/d2-api/schemas";
 import { RelationshipType } from "../../../domain/entities/RelationshipType";
 
-type RelationshipTypesById = Record<Id, Pick<D2RelationshipType, "id" | "toConstraint" | "fromConstraint">>;
-
 export type RelationshipOrgUnitFilter = TrackedEntityOURequestApi["ouMode"];
-
-export function getApiRelationships(
-    existingTei: TrackedEntityInstance | undefined,
-    relationships: Relationship[],
-    relationshipTypesById: RelationshipTypesById
-): RelationshipApi[] {
-    const existingRelationships = existingTei?.relationships || [];
-
-    const apiRelationships = _(relationships)
-        .concat(existingRelationships)
-        .filter(isRelationshipValid)
-        .uniqBy(rel => [rel.typeId, rel.fromId, rel.toId].join("-"))
-        .map(rel => {
-            const relationshipId =
-                rel.id ||
-                existingRelationships.find(
-                    eRel => eRel.typeId === rel.typeId && eRel.fromId === rel.fromId && eRel.toId === rel.toId
-                )?.id ||
-                getUid([rel.typeId, rel.fromId, rel.toId].join("-"));
-
-            const fromConstraint = getRelationshipConstraint(rel, relationshipTypesById, "from");
-            const toConstraint = getRelationshipConstraint(rel, relationshipTypesById, "to");
-
-            if (!fromConstraint || !toConstraint) return undefined;
-
-            const relApi: RelationshipApi = {
-                relationship: relationshipId,
-                relationshipType: rel.typeId,
-                relationshipName: rel.typeName,
-                from: fromConstraint,
-                to: toConstraint,
-            };
-            return relApi;
-        })
-        .compact()
-        .value();
-    return apiRelationships;
-}
-
-function getRelationshipConstraint(
-    relationship: Relationship,
-    relationshipTypesById: RelationshipTypesById,
-    key: "from" | "to"
-) {
-    const relationshipType = relationshipTypesById[relationship.typeId];
-    if (!relationshipType) return;
-
-    const [constraint, id] =
-        key === "from"
-            ? [relationshipType.fromConstraint, relationship.fromId]
-            : [relationshipType.toConstraint, relationship.toId];
-
-    return constraint.relationshipEntity === "TRACKED_ENTITY_INSTANCE"
-        ? { trackedEntityInstance: { trackedEntityInstance: id } }
-        : { event: { event: id } };
-}
 
 export function fromApiRelationships(metadata: RelationshipMetadata, teiApi: TrackedEntityInstanceApi): Relationship[] {
     return _(teiApi.relationships)
