@@ -17,21 +17,23 @@ import { ContentLoader } from "../content-loader/ContentLoader";
 import { DownloadButton } from "./DownloadButton";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { useSnackbar } from "@eyeseetea/d2-ui-components";
+import { MultiDashboardContent } from "../reports/MultiDashboardContent";
 
 export const Validations: React.FC = () => {
     const { compositionRoot } = useAppContext();
     const snackbar = useSnackbar();
 
     const { validationDashboardId } = useGlassDashboard();
+
+    const { currentModuleAccess } = useCurrentModuleContext();
+    const { currentOrgUnitAccess } = useCurrentOrgUnitContext();
+    const { currentPeriod } = useCurrentPeriodContext();
+
     const { lastSuccessfulAnalyticsRunTime } = useGetLastSuccessfulAnalyticsRunTime();
 
     const [isLoading, setIsLoading] = useState(false);
 
     const fileTypeState = useFileTypeByDataSubmission();
-
-    const { currentOrgUnitAccess } = useCurrentOrgUnitContext();
-    const { currentModuleAccess } = useCurrentModuleContext();
-    const { currentPeriod } = useCurrentPeriodContext();
 
     const downloadTemplate = useCallback(
         async (downloadType: "SUBMITTED" | "CALCULATED") => {
@@ -106,8 +108,16 @@ export const Validations: React.FC = () => {
                     </DownloadButtonsWrapper>
                 </ContentLoader>
             )}
-            {validationDashboardId.kind === "loading" && <CircularProgress />}
-            {validationDashboardId.kind === "loaded" && <EmbeddedReport dashboardId={validationDashboardId.data} />}
+            {moduleProperties.get(currentModuleAccess.moduleName)?.isMultiDashboard ? (
+                <MultiDashboardContent type="Validation" />
+            ) : (
+                <>
+                    {validationDashboardId.kind === "loading" && <CircularProgress />}
+                    {validationDashboardId.kind === "loaded" && (
+                        <EmbeddedReport dashboardId={validationDashboardId.data} />
+                    )}
+                </>
+            )}
         </>
     );
 };
