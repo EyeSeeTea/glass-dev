@@ -10,46 +10,44 @@ import { GlassState } from "./State";
 type GlassUploadsState = GlassState<string>;
 
 export const useFileTypeByDataSubmission = () => {
-    const [fileType, setFileType] = useState<GlassUploadsState>({ kind: "loading" });
+    const [fileTypeState, setFileTypeState] = useState<GlassUploadsState>({ kind: "loading" });
 
     const { compositionRoot } = useAppContext();
-    const { currentOrgUnitAccess } = useCurrentOrgUnitContext();
+    const {
+        currentOrgUnitAccess: { orgUnitId },
+    } = useCurrentOrgUnitContext();
     const {
         currentModuleAccess: { moduleId, moduleName },
     } = useCurrentModuleContext();
     const { currentPeriod } = useCurrentPeriodContext();
-    const dataSubmissionId = useCurrentDataSubmissionId(
-        moduleId,
-        moduleName,
-        currentOrgUnitAccess.orgUnitId,
-        currentPeriod
-    );
+    const dataSubmissionId = useCurrentDataSubmissionId(moduleId, moduleName, orgUnitId, currentPeriod);
     const snackbar = useSnackbar();
 
     useEffect(() => {
-        compositionRoot.glassUploads.getCurrentDataSubmissionFileType(moduleId, dataSubmissionId, currentPeriod).run(
-            uploads => {
-                // Using first upload, only one upload per dataSubmission & period
-                const fileType = uploads[0]?.fileType;
-                const type =
-                    fileType === "Substance Level Data"
-                        ? "SUBSTANCE"
-                        : fileType === "Product Level Data"
-                        ? "PRODUCT"
-                        : undefined;
+        moduleName === "AMC" &&
+            compositionRoot.glassUploads.getCurrentDataSubmissionFileType(dataSubmissionId).run(
+                uploads => {
+                    // Using first upload, only one upload per dataSubmission & period
+                    const fileType = uploads[0]?.fileType;
+                    const type =
+                        fileType === "Substance Level Data"
+                            ? "SUBSTANCE"
+                            : fileType === "Product Level Data"
+                            ? "PRODUCT"
+                            : undefined;
 
-                if (type) {
-                    setFileType({
-                        kind: "loaded",
-                        data: type,
-                    });
+                    if (type) {
+                        setFileTypeState({
+                            kind: "loaded",
+                            data: type,
+                        });
+                    }
+                },
+                () => {
+                    snackbar.error("Error fetching current data submission's upload file type");
                 }
-            },
-            () => {
-                snackbar.error("Error fetching current data submission's upload file type");
-            }
-        );
-    }, [compositionRoot.glassUploads, currentPeriod, dataSubmissionId, moduleId, snackbar]);
+            );
+    }, [compositionRoot.glassUploads, dataSubmissionId, moduleName, snackbar]);
 
-    return fileType;
+    return fileTypeState;
 };
