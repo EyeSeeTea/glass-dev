@@ -149,18 +149,10 @@ export class GlassUploadsDefaultRepository implements GlassUploadsRepository {
         });
     }
 
-    getUploadsByModuleDataSubmissionPeriod(
-        module: string,
-        dataSubmissionId: string,
-        period: string
-    ): FutureData<GlassUploads[]> {
+    getUploadsByDataSubmission(dataSubmissionId: string): FutureData<GlassUploads[]> {
         return this.dataStoreClient.getObjectsFilteredByProps<GlassUploads>(
             DataStoreKeys.UPLOADS,
-            new Map<keyof GlassUploads, unknown>([
-                ["module", module],
-                ["dataSubmission", dataSubmissionId],
-                ["period", period],
-            ])
+            new Map<keyof GlassUploads, unknown>([["dataSubmission", dataSubmissionId]])
         );
     }
 
