@@ -365,7 +365,7 @@ export class SheetBuilder {
 
     private fillInstancesSheet(programId: Id) {
         const { element: program } = this.builder;
-        const { rowOffset = 0 } = this.builder.template;
+        const rowOffset = this.builder.template.rowOffset || 0;
         const sheet = this.instancesSheet;
 
         // Add cells for themes
@@ -447,10 +447,10 @@ export class SheetBuilder {
         if (!header) sheet.column(columnId).hide();
     }
     private getFeatureTypeHeader(program: any): string | undefined {
-        const { featureType } = program.trackedEntityType;
+        const trackedEntityType = program.trackedEntityType;
         const opts = { lng: this.builder.language };
 
-        switch (featureType) {
+        switch (trackedEntityType?.featureType) {
             case "POINT":
                 return [i18n.t("Point in map", opts), "([LON, LAT])"].join("\n");
             case "POLYGON":
