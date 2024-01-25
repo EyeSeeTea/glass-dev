@@ -78,7 +78,7 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
     setPrimaryFileImportSummary,
     setSecondaryFileImportSummary,
 }) => {
-    const { api, compositionRoot } = useAppContext();
+    const { compositionRoot } = useAppContext();
     const snackbar = useSnackbar();
     const [isValidated, setIsValidated] = useState(false);
     const [isPrimaryFileValid, setIsPrimaryFileValid] = useState(false);
@@ -329,28 +329,34 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
 
     const downloadEmptyTemplate = useCallback(async () => {
         setLoading(true);
-        const file = await compositionRoot.fileSubmission.downloadTemplate(api, {
-            fileType: uploadFileType,
-            moduleName: moduleName,
-            orgUnits: [orgUnitId],
-            populate: false,
-            downloadRelationships: true,
-            splitDataEntryTabsBySection: true,
-            useCodesForMetadata: true,
-        });
+        try {
+            const file = await compositionRoot.fileSubmission.downloadTemplate({
+                fileType: uploadFileType,
+                moduleName: moduleName,
+                orgUnit: orgUnitId,
+                populate: false,
+                downloadRelationships: true,
+                splitDataEntryTabsBySection: true,
+                useCodesForMetadata: true,
+            });
 
-        //download file automatically
-        const downloadSimulateAnchor = document.createElement("a");
-        downloadSimulateAnchor.href = URL.createObjectURL(file);
-        const fileType = moduleProperties.get(moduleName)?.isSingleFileTypePerSubmission
-            ? `${uploadFileType}-LEVEL-DATA`
-            : "";
-        downloadSimulateAnchor.download = `${moduleName}-${fileType}-${orgUnitCode}-TEMPLATE.xlsx`;
-        // simulate link click
-        document.body.appendChild(downloadSimulateAnchor);
-        downloadSimulateAnchor.click();
-        setLoading(false);
-    }, [api, compositionRoot.fileSubmission, moduleName, orgUnitCode, orgUnitId, uploadFileType]);
+            //download file automatically
+            const downloadSimulateAnchor = document.createElement("a");
+            downloadSimulateAnchor.href = URL.createObjectURL(file);
+            const fileType = moduleProperties.get(moduleName)?.isSingleFileTypePerSubmission
+                ? `-${uploadFileType}-LEVEL-DATA`
+                : "";
+            downloadSimulateAnchor.download = `${moduleName}${fileType}-${orgUnitCode}-TEMPLATE.xlsx`;
+            // simulate link click
+            document.body.appendChild(downloadSimulateAnchor);
+            downloadSimulateAnchor.click();
+        } catch (err) {
+            snackbar.error(i18n.t("Error downloading empty template"));
+            console.error(err);
+        } finally {
+            setLoading(false);
+        }
+    }, [compositionRoot.fileSubmission, moduleName, orgUnitCode, orgUnitId, snackbar, uploadFileType]);
 
     return (
         <ContentWrapper>

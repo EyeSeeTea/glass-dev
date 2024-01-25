@@ -1,4 +1,8 @@
-import { RelationshipOrgUnitFilter } from "../../data/repositories/download-template/DownloadTemplateDefaultRepository";
+import {
+    GetElementMetadataType,
+    GetElementType,
+    RelationshipOrgUnitFilter,
+} from "../../data/repositories/download-template/DownloadTemplateDefaultRepository";
 import { DataFormType } from "../entities/DataForm";
 import { Id, NamedRef } from "../entities/Ref";
 import { GeneratedTemplate } from "../entities/Template";
@@ -18,10 +22,22 @@ export interface GetDataPackageParams {
     filterTEIEnrollmentDate?: boolean;
 }
 
+export interface GetElementMetadataParams {
+    element: any;
+    orgUnitIds: string[];
+    downloadRelationships: boolean;
+    startDate?: Date;
+    endDate?: Date;
+    populateStartDate?: Date;
+    populateEndDate?: Date;
+}
+
 export interface DownloadTemplateRepository {
     getTemplate(programId: Id): GeneratedTemplate;
     getBuilderMetadata(teis: TrackedEntityInstance[]): Promise<BuilderMetadata>;
     getDataPackage(params: GetDataPackageParams): Promise<DataPackage>;
+    getElement(type: string, id: string): Promise<GetElementType>;
+    getElementMetadata(params: GetElementMetadataParams): Promise<GetElementMetadataType>;
 }
 
 export interface BuilderMetadata {

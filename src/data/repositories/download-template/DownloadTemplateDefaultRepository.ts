@@ -1,6 +1,6 @@
 import _ from "lodash";
 import "lodash.product";
-import { D2Api, DataValueSetsGetResponse, Pager } from "@eyeseetea/d2-api/2.34";
+import { D2Api, D2Program, DataValueSetsGetResponse, Pager } from "@eyeseetea/d2-api/2.34";
 import {
     BuilderMetadata,
     DownloadTemplateRepository,
@@ -69,10 +69,46 @@ interface MetadataItem {
     [key: string]: any;
 }
 
+interface CategoryOptionCombo {
+    categoryOptions: Ref[];
+}
+
+interface ElementMetadata {
+    categoryOptionCombos: CategoryOptionCombo[];
+}
+
 type MetadataPackage = Record<string, MetadataItem[] | undefined>;
 
 interface PagedEventsApiResponse extends EventsPackage {
     pager: Pager;
+}
+
+interface Element {
+    type: "dataSets" | "programs";
+    organisationUnits: Ref[];
+}
+
+export type GetElementType = D2Program & { type: string };
+
+export type GetElementMetadataType = {
+    element: any;
+    metadata: RelationshipMetadata | {};
+    elementMetadata: Map<any, any>;
+    organisationUnits: {
+        id: string;
+        displayName: string;
+        code?: string | undefined;
+        translations: unknown;
+        type: string;
+    }[];
+    rawMetadata: any;
+};
+
+interface CategoryOption {
+    id: Id;
+    startDate?: string;
+    endDate?: String;
+    organisationUnits: Ref[];
 }
 
 export class DownloadTemplateDefaultRepository implements DownloadTemplateRepository {
@@ -207,6 +243,91 @@ export class DownloadTemplateDefaultRepository implements DownloadTemplateReposi
             default:
                 throw new Error(`Unsupported type ${params.type} for data package`);
         }
+    }
+
+    public async getElement(type: string, id: string): Promise<GetElementType> {
+        const fields = [
+            "id",
+            "displayName",
+            "organisationUnits[id,path]",
+            "attributeValues[attribute[code],value]",
+            "categoryCombo",
+            "dataSetElements",
+            "formType",
+            "sections[id,sortOrder,dataElements[id]]",
+            "periodType",
+            "programStages[id,access]",
+            "programType",
+            "enrollmentDateLabel",
+            "incidentDateLabel",
+            "trackedEntityType[id,featureType]",
+            "captureCoordinates",
+            "programTrackedEntityAttributes[trackedEntityAttribute[id,name,valueType,confidential,optionSet[id,name,options[id]]]],",
+        ].join(",");
+        const response = await this.api.get<D2Program>(`/programs/${id}`, { fields }).getData();
+        return { ...response, type };
+    }
+
+    public async getElementMetadata({
+        element,
+        orgUnitIds,
+        downloadRelationships,
+        populateStartDate,
+        populateEndDate,
+        startDate,
+        endDate,
+    }: {
+        element: any;
+        orgUnitIds: string[];
+        downloadRelationships: boolean;
+        startDate?: Date;
+        endDate?: Date;
+        populateStartDate?: Date;
+        populateEndDate?: Date;
+    }): Promise<GetElementMetadataType> {
+        const elementMetadataMap = new Map();
+        const elementMetadata = await this.api.get<ElementMetadata>(`/programs/${element.id}/metadata.json`).getData();
+
+        const rawMetadata = await this.filterRawMetadata({ element, elementMetadata, orgUnitIds, startDate, endDate });
+
+        _.forOwn(rawMetadata, (value, type) => {
+            if (Array.isArray(value)) {
+                _.forEach(value, (object: any) => {
+                    if (object.id) elementMetadataMap.set(object.id, { ...object, type });
+                });
+            }
+        });
+
+        // FIXME: This is needed for getting all possible org units for a program/dataSet
+        const requestOrgUnits = orgUnitIds;
+
+        const responses = await promiseMap(_.chunk(_.uniq(requestOrgUnits), 400), orgUnits =>
+            this.api
+                .get<{
+                    organisationUnits: { id: string; displayName: string; code?: string; translations: unknown }[];
+                }>("/metadata", {
+                    fields: "id,displayName,code,translations",
+                    filter: `id:in:[${orgUnits}]`,
+                })
+                .getData()
+        );
+
+        const organisationUnits = _.flatMap(responses, ({ organisationUnits }) =>
+            organisationUnits.map(orgUnit => ({
+                type: "organisationUnits",
+                ...orgUnit,
+            }))
+        );
+
+        const metadata =
+            element.type === "trackerPrograms" && downloadRelationships
+                ? await getRelationshipMetadata(element, this.api, {
+                      startDate: populateStartDate,
+                      endDate: populateEndDate,
+                  })
+                : {};
+
+        return { element, metadata, elementMetadata: elementMetadataMap, organisationUnits, rawMetadata };
     }
 
     private async getDataSetPackage({
@@ -370,6 +491,97 @@ export class DownloadTemplateDefaultRepository implements DownloadTemplateReposi
             trackedEntityInstances,
             dataEntries: dataPackage.dataEntries,
         };
+    }
+
+    /* Return the raw metadata filtering out non-relevant category option combos.
+
+    /api/dataSets/ID/metadata returns categoryOptionCombos that may not be relevant for the
+    data set. Here we filter out category option combos with categoryOptions not matching these
+    conditions:
+
+     - categoryOption.startDate/endDate outside the startDate -> endDate interval
+     - categoryOption.orgUnit EMPTY or assigned to the dataSet orgUnits (intersected with the requested).
+*/
+    private async filterRawMetadata(options: {
+        element: Element;
+        elementMetadata: ElementMetadata;
+        orgUnitIds: Id[];
+        startDate: Date | undefined;
+        endDate: Date | undefined;
+    }): Promise<ElementMetadata & unknown> {
+        const { element, elementMetadata, orgUnitIds } = options;
+
+        if (element.type === "dataSets") {
+            const categoryOptions = await this.getCategoryOptions(this.api);
+            const categoryOptionIdsToInclude = this.getCategoryOptionIdsToInclude(
+                element,
+                orgUnitIds,
+                categoryOptions,
+                options
+            );
+
+            const categoryOptionCombosFiltered = elementMetadata.categoryOptionCombos.filter(coc =>
+                _(coc.categoryOptions).every(categoryOption => {
+                    return categoryOptionIdsToInclude.has(categoryOption.id);
+                })
+            );
+
+            return { ...elementMetadata, categoryOptionCombos: categoryOptionCombosFiltered };
+        } else {
+            return elementMetadata;
+        }
+    }
+
+    private getCategoryOptionIdsToInclude(
+        element: Element,
+        orgUnitIds: string[],
+        categoryOptions: CategoryOption[],
+        options: { startDate: Date | undefined; endDate: Date | undefined }
+    ) {
+        const dataSetOrgUnitIds = element.organisationUnits.map(ou => ou.id);
+
+        const orgUnitIdsToInclude = new Set(
+            _.isEmpty(orgUnitIds) ? dataSetOrgUnitIds : _.intersection(orgUnitIds, dataSetOrgUnitIds)
+        );
+
+        const startDate = options.startDate?.toISOString();
+        const endDate = options.endDate?.toISOString();
+
+        const categoryOptionIdsToInclude = new Set(
+            categoryOptions
+                .filter(categoryOption => {
+                    const noStartDateIntersect =
+                        startDate && categoryOption.endDate && startDate > categoryOption.endDate;
+                    const noEndDateIntersect =
+                        endDate && categoryOption.startDate && endDate < categoryOption.startDate;
+                    const dateCondition = !noStartDateIntersect && !noEndDateIntersect;
+
+                    const categoryOptionOrgUnitCondition =
+                        _.isEmpty(categoryOption.organisationUnits) ||
+                        _(categoryOption.organisationUnits).some(orgUnit => orgUnitIdsToInclude.has(orgUnit.id));
+
+                    return dateCondition && categoryOptionOrgUnitCondition;
+                })
+                .map(categoryOption => categoryOption.id)
+        );
+        return categoryOptionIdsToInclude;
+    }
+
+    private async getCategoryOptions(api: D2Api): Promise<CategoryOption[]> {
+        const { categoryOptions } = await api.metadata
+            .get({
+                categoryOptions: {
+                    fields: {
+                        id: true,
+                        startDate: true,
+                        endDate: true,
+                        organisationUnits: { id: true },
+                    },
+                },
+            })
+            .getData();
+
+        return categoryOptions;
     }
 }
 
