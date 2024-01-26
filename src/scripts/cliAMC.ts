@@ -1,5 +1,5 @@
 import { command, run } from "cmd-ts";
-import logger from "../utils/log";
+import { setupLogger, logger } from "../utils/logger";
 import { getApiUrlOptions, getD2ApiFromArgs, getInstance, sleep } from "./common";
 import { DataStoreClient } from "../data/data-store/DataStoreClient";
 import { RecalculateConsumptionDataProductLevelForAllUseCase } from "../domain/usecases/data-entry/amc/RecalculateConsumptionDataProductLevelForAllUseCase";
@@ -35,9 +35,10 @@ async function main() {
                 const atcRepository = new GlassATCDefaultRepository(dataStoreClient);
 
                 while (ALWAYS) {
-                    logger.info(`Starting recalculations...`);
+                    await setupLogger(instance);
+                    logger.info(`Starting AMC recalculations...`);
                     const recalculateDataInfo = await getRecalculateDataInfo(atcRepository);
-                    logger.info(
+                    logger.debug(
                         `Recalculate data info: date=${recalculateDataInfo?.date}, recalculate=${
                             recalculateDataInfo?.recalculate
                         }, periods=${recalculateDataInfo?.periods.join(
@@ -54,9 +55,9 @@ async function main() {
                         });
                         await disableRecalculations(atcRepository);
                     } else {
-                        logger.info(`Recalculations are disabled`);
+                        logger.info(`AMC recalculations are disabled`);
                     }
-                    logger.info(`Waiting for next recalculations...`);
+                    logger.info(`Waiting for next AMC recalculations...`);
                     await sleep(DAY_IN_MILLISECONDS);
                 }
             } catch (err) {
@@ -90,7 +91,7 @@ export async function recalculateData(params: {
 }): Promise<void> {
     const { orgUnitsIds, periods, amcProductDataRepository, amcSubstanceDataRepository, atcRepository } = params;
     logger.info(
-        `Recalculating data for orgnanisations ${orgUnitsIds.join(",")} and periods ${periods.join(
+        `Recalculating AMC data for orgnanisations ${orgUnitsIds.join(",")} and periods ${periods.join(
             ","
         )} with new ATC version`
     );
@@ -101,7 +102,9 @@ export async function recalculateData(params: {
     await new RecalculateConsumptionDataSubstanceLevelForAllUseCase(amcSubstanceDataRepository, atcRepository)
         .execute(orgUnitsIds, periods)
         .toPromise();
-    logger.info(`End of recalculations for orgnanisations ${orgUnitsIds.join(",")} and periods ${periods.join(",")}`);
+    logger.success(
+        `End of AMC recalculations for orgnanisations ${orgUnitsIds.join(",")} and periods ${periods.join(",")}`
+    );
 }
 
 main();
