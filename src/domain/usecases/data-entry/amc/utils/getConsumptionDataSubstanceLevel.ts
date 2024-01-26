@@ -5,6 +5,7 @@ import { RawSubstanceConsumptionData } from "../../../../entities/data-entry/amc
 import { SubstanceConsumptionCalculated } from "../../../../entities/data-entry/amc/SubstanceConsumptionCalculated";
 import { GlassATCRepository } from "../../../../repositories/GlassATCRepository";
 import { calculateConsumptionSubstanceLevelData } from "./calculationConsumptionSubstanceLevelData";
+import { logger } from "../../../../../utils/logger";
 
 export function getConsumptionDataSubstanceLevel(params: {
     orgUnitId: Id;
@@ -15,7 +16,7 @@ export function getConsumptionDataSubstanceLevel(params: {
 }): FutureData<SubstanceConsumptionCalculated[]> {
     const { orgUnitId, period, atcRepository, rawSubstanceConsumptionData, atcVersionHistory } = params;
     if (!rawSubstanceConsumptionData) {
-        console.error(`Cannot find Raw Substance Consumption Data for orgUnitsId=${orgUnitId} and period=${period}`);
+        logger.error(`Cannot find Raw Substance Consumption Data for orgUnitsId ${orgUnitId} and period ${period}`);
         return Future.error("Cannot find Raw Substance Consumption Data");
     }
 
@@ -27,9 +28,8 @@ export function getConsumptionDataSubstanceLevel(params: {
 
     if (!atcCurrentVersionInfo) {
         if (!atcCurrentVersionInfo) {
-            console.error(
-                `Cannot find current version of ATC in version history: ${JSON.stringify(atcVersionHistory)}`
-            );
+            logger.error(`Cannot find current version of ATC in version history.`);
+            logger.debug(`Cannot find current version of ATC in version history: ${JSON.stringify(atcVersionHistory)}`);
             return Future.error("Cannot find current version of ATC");
         }
     }
@@ -40,7 +40,7 @@ export function getConsumptionDataSubstanceLevel(params: {
         return atcRepository.getListOfAtcVersionsByKeys(atcVersionKeys).flatMap(atcVersionsByKeys => {
             const keysNotFound = atcVersionKeys.filter(key => !Object.keys(atcVersionsByKeys).includes(key));
             if (keysNotFound.length) {
-                console.warn(`ATC data not found: keys=${keysNotFound.join(",")}`);
+                logger.error(`ATC data not found: ${keysNotFound.join(",")}`);
             }
             const allATCClassificationsByVersion = {
                 ...atcVersionsByKeys,

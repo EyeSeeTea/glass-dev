@@ -18,6 +18,7 @@ import {
     SubstanceConsumptionCalculatedKeys,
 } from "../../../domain/entities/data-entry/amc/SubstanceConsumptionCalculated";
 import { ImportStrategy } from "../../../domain/entities/data-entry/DataValuesSaveSummary";
+import { logger } from "../../../utils/logger";
 
 export const AMC_RAW_SUBSTANCE_CONSUMPTION_PROGRAM_ID = "q8aSKr17J5S";
 const AMC_CALCULATED_CONSUMPTION_DATA_PROGRAM_ID = "eUmWZeKZNrg";
@@ -153,6 +154,7 @@ export class AMCSubstanceDataDefaultRepository implements AMCSubstanceDataReposi
                     });
                 });
             } else {
+                logger.error(`Substance level data: there are no events to be created`);
                 return Future.error("There are no events to be created");
             }
         });

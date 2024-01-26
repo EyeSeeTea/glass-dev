@@ -1,5 +1,4 @@
-/* eslint-disable no-console */
-// TODO: Change console logs to d2-logger
+import { logger } from "../../../../../utils/logger";
 import { GlassATCVersion, ListGlassATCVersions } from "../../../../entities/GlassATC";
 import { Id } from "../../../../entities/Ref";
 import { RawSubstanceConsumptionData } from "../../../../entities/data-entry/amc/RawSubstanceConsumptionData";
@@ -15,39 +14,43 @@ export function calculateConsumptionSubstanceLevelData(
     atcVersionsByKeys: ListGlassATCVersions,
     currentAtcVersionKey: string
 ): SubstanceConsumptionCalculated[] {
-    console.time("calculateConsumptionSubstanceLevelData");
-    console.log(
-        new Date(),
-        `*** INIT - Calculate consumption substance level data for organisation=${orgUnitId} and period=${period}`
+    logger.info(
+        `Starting the calculation of consumption substance level data for organisation ${orgUnitId} and period ${period}`
     );
     const calculatedConsumptionSubstanceLevelData = rawSubstanceConsumptionData
         .map(rawSubstanceConsumption => {
-            console.log(`Calculate consumption substance level data of: ${rawSubstanceConsumption}`);
+            logger.debug(`Calculate consumption substance level data of: ${JSON.stringify(rawSubstanceConsumption)}`);
             // 1a & 2
-            console.log(`Get ddd_value_latest and ddd_unit_latest using version ${currentAtcVersionKey}`);
+            logger.info(`Getting ddd_value_latest and ddd_unit_latest using version ${currentAtcVersionKey}`);
             const dddStandarizedLatest = getStandardizedDDD(
                 rawSubstanceConsumption,
                 atcVersionsByKeys[currentAtcVersionKey]
             );
 
             if (!dddStandarizedLatest) {
-                console.error(
-                    `ERROR - not calculate and go to next one - ddd_value_latest and ddd_unit_latest not found of ${JSON.stringify(
+                logger.error(
+                    `Data not calculated and moving to the next. ddd_value_latest and ddd_unit_latest could not be calculated.`
+                );
+                logger.debug(
+                    `ddd_value_latest and ddd_unit_latest could not be calculated for ${JSON.stringify(
                         rawSubstanceConsumption
                     )}`
                 );
             } else {
                 // 1b & 2
                 const { atc_version_manual } = rawSubstanceConsumption;
-                console.log(`Get ddd_value_uploaded and ddd_unit_uploaded using version ${atc_version_manual}`);
+                logger.info(`Getting ddd_value_uploaded and ddd_unit_uploaded using version ${atc_version_manual}`);
                 const dddStandarizedInRawSubstanceConsumption = getStandardizedDDD(
                     rawSubstanceConsumption,
                     atcVersionsByKeys[atc_version_manual]
                 );
 
                 if (!dddStandarizedInRawSubstanceConsumption) {
-                    console.error(
-                        `ERROR - not calculate and go to next one - ddd_value_uploaded and ddd_unit_uploaded not found of: ${JSON.stringify(
+                    logger.error(
+                        `Data not calculated and moving to the next. ddd_value_uploaded and ddd_unit_uploaded could not be calculated.`
+                    );
+                    logger.debug(
+                        `ddd_value_uploaded and ddd_unit_uploaded could not be calculated for ${JSON.stringify(
                             rawSubstanceConsumption
                         )}`
                     );
@@ -78,13 +81,14 @@ export function calculateConsumptionSubstanceLevelData(
         })
         .filter(Boolean) as SubstanceConsumptionCalculated[];
 
-    console.log(
-        new Date(),
-        `*** END - Calculate consumption substance level data for organisation=${orgUnitId} and period=${period}: results=${JSON.stringify(
+    logger.success(
+        `End of the calculation of consumption substance level data for organisation ${orgUnitId} and period ${period}`
+    );
+    logger.debug(
+        `End of the calculation of consumption substance level data for organisation ${orgUnitId} and period ${period}: results=${JSON.stringify(
             calculatedConsumptionSubstanceLevelData
         )}`
     );
-    console.timeEnd("calculateConsumptionSubstanceLevelData");
     return calculatedConsumptionSubstanceLevelData;
 }
 
@@ -104,13 +108,11 @@ function getStandardizedDDD(
     });
 
     if (dddDataFound) {
-        console.log(`DDD data found in ddd json:  ${dddDataFound.DDD_STD}`);
+        logger.debug(`DDD data found in ddd json:  ${dddDataFound.DDD_STD}`);
         return dddDataFound.DDD_STD;
     }
 
-    console.log(
-        `WARNING - DDD data not found in ddd json using: ${atc_manual}, ${salt_manual} and ${route_admin_manual}`
-    );
+    logger.warn(`DDD data not found in ddd json using: ${atc_manual}, ${salt_manual} and ${route_admin_manual}`);
 
     const dddAlterations = atcVersion?.ddd_alterations;
     const newDddData = dddAlterations?.find(
@@ -124,10 +126,10 @@ function getStandardizedDDD(
     if (newDddData) {
         const dddUnit = UNITS_MAPPING[newDddData.NEW_DDD_UNIT] as Unit;
         const dddStandardizedValue = valueToStandardizedMeasurementUnit(newDddData.NEW_DDD, dddUnit);
-        console.log(`DDD data found in ddd_alterations json:  ${dddStandardizedValue}`);
+        logger.debug(`DDD data found in ddd_alterations json:  ${dddStandardizedValue}`);
         return dddStandardizedValue;
     }
-    console.error(`ERROR - DDD data not found in ddd_alterations json: ${atc_manual} and ${route_admin_manual}`);
+    logger.error(`DDD data not found in ddd_alterations json: ${atc_manual} and ${route_admin_manual}`);
 }
 
 function getDDDsAdjust(
@@ -139,7 +141,7 @@ function getDDDsAdjust(
     // 3 - ratio_ddd = standardized_ddd_value_uploaded ÷ standardized_ddd_value_latest
     const ratioDDD = dddStandarizedInRawSubstanceConsumption / dddStandarizedLatest;
     // 4 - ddds_adjust = ddds × ratio_ddd
-    console.log(`Get ratio_ddd: :  ${ratioDDD}`);
-    console.log(`Get ddds_adjust from ddds_manual: ${ddds_manual * ratioDDD}`);
+    logger.debug(`Get ratio_ddd: :  ${ratioDDD}`);
+    logger.debug(`Get ddds_adjust from ddds_manual: ${ddds_manual * ratioDDD}`);
     return ddds_manual * ratioDDD;
 }
