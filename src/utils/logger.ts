@@ -24,3 +24,11 @@ export async function setupLogger(instance: Instance, orgUnitId?: Id): Promise<v
     // });
     logger = loggerInstance;
 }
+
+export function setupLoggerForTesting(): void {
+    const loggerInstance = new Logger();
+    loggerInstance.init({
+        type: "console",
+    });
+    logger = loggerInstance;
+}
