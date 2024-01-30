@@ -3,6 +3,7 @@ import { Instance } from "../data/entities/Instance";
 import { Id } from "../domain/entities/Base";
 
 // TODO: add here program and data elements
+const GLOBAL_ORG_UNIT = "H8RixfF8ugH";
 const LOGS_PROGRAM = "zARxYmOD18Z";
 const MESSAGE_DATA_ELEMENT = "BjUzF5E4eR8";
 const MESSAGE_TYPE_DATA_ELEMENT = "NpS5LoLuhgS";
@@ -16,7 +17,7 @@ export async function setupLogger(instance: Instance, orgUnitId?: Id): Promise<v
         baseUrl: instance.url,
         auth: instance.auth,
         programId: LOGS_PROGRAM,
-        organisationUnitId: orgUnitId,
+        organisationUnitId: orgUnitId || GLOBAL_ORG_UNIT,
         loggerDataElements: {
             messageId: MESSAGE_DATA_ELEMENT,
             messageTypeId: MESSAGE_TYPE_DATA_ELEMENT,
