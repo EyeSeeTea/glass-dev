@@ -86,15 +86,13 @@ export class GlassATCDefaultRepository implements GlassATCRepository {
 
     disableRecalculations(): FutureData<void> {
         return this.getRecalculateDataInfo().flatMap(recalculateDataInfo => {
-            if (recalculateDataInfo) {
-                const newRecalculateDataInfo = {
-                    ...recalculateDataInfo,
-                    recalculate: false,
-                    date: new Date().toISOString(),
-                };
-                return this.dataStoreClient.saveObject(DataStoreKeys.AMC_RECALCULATION, newRecalculateDataInfo);
-            }
-            return Future.success(undefined);
+            if (!recalculateDataInfo) return Future.success(undefined);
+            const newRecalculateDataInfo = {
+                ...recalculateDataInfo,
+                recalculate: false,
+                date: new Date().toISOString(),
+            };
+            return this.dataStoreClient.saveObject(DataStoreKeys.AMC_RECALCULATION, newRecalculateDataInfo);
         });
     }
 
