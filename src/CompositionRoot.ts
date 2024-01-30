@@ -66,7 +66,7 @@ import { SavePasswordUseCase } from "./domain/usecases/SavePasswordUseCase";
 import { SaveKeyDbLocaleUseCase } from "./domain/usecases/SaveKeyDbLocaleUseCase";
 import { SaveKeyUiLocaleUseCase } from "./domain/usecases/SaveKeyUiLocaleUseCase";
 import { ProgramRulesMetadataDefaultRepository } from "./data/repositories/program-rule/ProgramRulesMetadataDefaultRepository";
-import { RISIndividualFunghiDataCSVDefaultRepository } from "./data/repositories/data-entry/RISIndividualFunghiDataCSVDefaultRepository";
+import { RISIndividualFungalDataCSVDefaultRepository } from "./data/repositories/data-entry/RISIndividualFungalDataCSVDefaultRepository";
 import { TrackerDefaultRepository } from "./data/repositories/TrackerDefaultRepository";
 import { GetProgramQuestionnaireUseCase } from "./domain/usecases/GetProgramQuestionnaireUseCase";
 import { CaptureFormDefaultRepository } from "./data/repositories/CaptureFormDefaultRepository";
@@ -85,6 +85,7 @@ import { AMCSubstanceDataDefaultRepository } from "./data/repositories/data-entr
 import { CalculateConsumptionDataProductLevelUseCase } from "./domain/usecases/data-entry/amc/CalculateConsumptionDataProductLevelUseCase";
 import { GlassATCDefaultRepository } from "./data/repositories/GlassATCDefaultRepository";
 import { CalculateConsumptionDataSubstanceLevelUseCase } from "./domain/usecases/data-entry/amc/CalculateConsumptionDataSubstanceLevelUseCase";
+import { GetMultipleDashboardUseCase } from "./domain/usecases/GetMultipleDashboardUseCase";
 
 export function getCompositionRoot(instance: Instance) {
     const api = getD2APiFromInstance(instance);
@@ -97,7 +98,7 @@ export function getCompositionRoot(instance: Instance) {
     const glassUploadsRepository = new GlassUploadsDefaultRepository(dataStoreClient);
     const glassDocumentsRepository = new GlassDocumentsDefaultRepository(dataStoreClient, instance);
     const risDataRepository = new RISDataCSVDefaultRepository();
-    const risIndividualFunghiRepository = new RISIndividualFunghiDataCSVDefaultRepository();
+    const risIndividualFungalRepository = new RISIndividualFungalDataCSVDefaultRepository();
     const sampleDataRepository = new SampleDataCSVDeafultRepository();
     const dataValuesRepository = new DataValuesDefaultRepository(instance);
     const metadataRepository = new MetadataDefaultRepository(instance);
@@ -163,7 +164,7 @@ export function getCompositionRoot(instance: Instance) {
         fileSubmission: getExecute({
             primaryFile: new ImportPrimaryFileUseCase(
                 risDataRepository,
-                risIndividualFunghiRepository,
+                risIndividualFungalRepository,
                 metadataRepository,
                 dataValuesRepository,
                 glassModuleRepository,
@@ -179,7 +180,7 @@ export function getCompositionRoot(instance: Instance) {
             ),
             validatePrimaryFile: new ValidatePrimaryFileUseCase(
                 risDataRepository,
-                risIndividualFunghiRepository,
+                risIndividualFungalRepository,
                 egaspDataRepository,
                 glassModuleRepository,
                 amcProductDataRepository
@@ -224,6 +225,7 @@ export function getCompositionRoot(instance: Instance) {
         }),
         glassDashboard: getExecute({
             getDashboard: new GetDashboardUseCase(glassModuleRepository),
+            getMultipleDashboards: new GetMultipleDashboardUseCase(glassModuleRepository),
         }),
         systemInfo: getExecute({
             lastAnalyticsRunTime: new GetLastAnalyticsRunTimeUseCase(systemInfoRepository),
