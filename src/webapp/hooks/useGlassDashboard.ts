@@ -4,7 +4,6 @@ import { useAppContext } from "../contexts/app-context";
 import { useCurrentModuleContext } from "../contexts/current-module-context";
 
 export type GlassDashboardState = GlassState<string>;
-
 export function useGlassDashboard() {
     const { compositionRoot } = useAppContext();
     const { currentModuleAccess } = useCurrentModuleContext();
@@ -21,7 +20,10 @@ export function useGlassDashboard() {
                 setReportDashboardId({ kind: "loaded", data: dashboardData.reportDashboard });
                 setValidationDashboardId({ kind: "loaded", data: dashboardData.validationDashboard });
             },
-            error => setReportDashboardId({ kind: "error", message: error })
+            error => {
+                setReportDashboardId({ kind: "error", message: error });
+                setValidationDashboardId({ kind: "error", message: error });
+            }
         );
     }, [compositionRoot, currentModuleAccess]);
 
