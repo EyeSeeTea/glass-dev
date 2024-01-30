@@ -1,12 +1,21 @@
 import { UseCase } from "../../CompositionRoot";
-import { Future, FutureData } from "../entities/Future";
-import { GlassDocumentsRepository } from "../repositories/GlassDocumentsRepository";
+import { GlassModuleDefaultRepository } from "../../data/repositories/GlassModuleDefaultRepository";
+import { FutureData, Future } from "../entities/Future";
+import { EventVisualizationAnalyticsRepository } from "../repositories/EventVisualizationAnalyticsRepository";
 
 export class DownloadAllDataForModuleUseCase implements UseCase {
-    constructor(private glassDocumentsRepository: GlassDocumentsRepository) {}
+    constructor(
+        private eventVisualizationRepository: EventVisualizationAnalyticsRepository,
+        private glassModuleDefaultRepository: GlassModuleDefaultRepository
+    ) {}
 
-    public execute(id: string): FutureData<Blob> {
-        if (id !== "") return this.glassDocumentsRepository.download(id);
-        else return Future.error("File id not found");
+    public execute(moduleName: string): FutureData<Blob> {
+        return this.glassModuleDefaultRepository.getByName(moduleName).flatMap(module => {
+            if (module.lineListId) {
+                return this.eventVisualizationRepository.downloadAllData(module.lineListId, moduleName);
+            } else {
+                return Future.error("Cannot fine saved line list id for given module");
+            }
+        });
     }
 }

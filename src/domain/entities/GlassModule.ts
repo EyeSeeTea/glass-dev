@@ -37,6 +37,7 @@ export interface GlassModule {
     }[];
     populateCurrentYearInHistory?: boolean;
     customDataColumns?: CustomDataColumns;
+    lineListId?: Id;
 }
 
 interface QuestionnaireConfig {

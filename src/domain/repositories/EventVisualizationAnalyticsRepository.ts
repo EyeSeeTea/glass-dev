@@ -1,5 +1,6 @@
 import { FutureData } from "../entities/Future";
+import { Id } from "../entities/Ref";
 
 export interface EventVisualizationAnalyticsRepository {
-    downloadAllData(): FutureData<void>;
+    downloadAllData(lineListId: Id, module: string): FutureData<Blob>;
 }
