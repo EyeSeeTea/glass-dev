@@ -32,6 +32,7 @@ export const AMC_RAW_SUBSTANCE_CONSUMPTION_CALCULATED_STAGE_ID = "q8cl5qllyjd";
 
 export const AMR_GLASS_AMC_TEA_PRODUCT_ID = "iasfoeU8veF";
 
+// TODO: Move logic to use case and entity instead of in repository which should be logic-less, just get/store the data.
 export class AMCProductDataDefaultRepository implements AMCProductDataRepository {
     constructor(private api: D2Api) {}
 
@@ -88,9 +89,7 @@ export class AMCProductDataDefaultRepository implements AMCProductDataRepository
             importStrategy
         );
         if (!_.isEmpty(d2TrackerEvents)) {
-            return importApiTracker(this.api, { events: d2TrackerEvents }, importStrategy).flatMap(response => {
-                return Future.success(response);
-            });
+            return importApiTracker(this.api, { events: d2TrackerEvents }, importStrategy);
         } else {
             return Future.error("There are no events to be created");
         }
