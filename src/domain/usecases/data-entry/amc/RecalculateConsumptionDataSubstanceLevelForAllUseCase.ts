@@ -1,10 +1,10 @@
-import { GlassATCHistory } from "../../../entities/GlassATC";
+import { GlassATCHistory, createAtcVersionKey } from "../../../entities/GlassATC";
 import { Id } from "../../../entities/Ref";
 import { GlassATCRepository } from "../../../repositories/GlassATCRepository";
 import { Future, FutureData } from "../../../entities/Future";
 import { RawSubstanceConsumptionData } from "../../../entities/data-entry/amc/RawSubstanceConsumptionData";
 import { AMCSubstanceDataRepository } from "../../../repositories/data-entry/AMCSubstanceDataRepository";
-import logger from "../../../../utils/log";
+import { logger } from "../../../../utils/logger";
 import _ from "lodash";
 import { getConsumptionDataSubstanceLevel } from "./utils/getConsumptionDataSubstanceLevel";
 import { SubstanceConsumptionCalculated } from "../../../entities/data-entry/amc/SubstanceConsumptionCalculated";
@@ -34,13 +34,14 @@ export class RecalculateConsumptionDataSubstanceLevelForAllUseCase {
         ).toVoid();
     }
     private calculateByOrgUnitAndPeriod(orgUnitId: Id, period: string): FutureData<void> {
-        logger.info(`Calculating consumption data of substance level for orgUnitsId=${orgUnitId} and period=${period}`);
+        logger.info(`Calculating consumption data of substance level for orgUnitsId ${orgUnitId} and period ${period}`);
         return this.getDataForRecalculations(orgUnitId, period).flatMap(data => {
             const { rawSubstanceConsumptionData, atcVersionHistory, currentCalculatedConsumptionData } = data;
             const atcCurrentVersionInfo = atcVersionHistory.find(({ currentVersion }) => currentVersion);
-            logger.info(
-                `New ATC version used in recalculations: atcVersionHistory=${JSON.stringify(atcCurrentVersionInfo)}`
-            );
+            if (atcCurrentVersionInfo) {
+                const atcVersionKey = createAtcVersionKey(atcCurrentVersionInfo.year, atcCurrentVersionInfo.version);
+                logger.info(`New ATC version used in recalculations: ${atcVersionKey}`);
+            }
             return getConsumptionDataSubstanceLevel({
                 orgUnitId,
                 period,
@@ -50,14 +51,14 @@ export class RecalculateConsumptionDataSubstanceLevelForAllUseCase {
             }).flatMap(newCalculatedConsumptionData => {
                 if (_.isEmpty(newCalculatedConsumptionData)) {
                     logger.error(
-                        `Substance level: there are no calculated data to update current for orgUnitId=${orgUnitId} and period=${period}`
+                        `Substance level: there are no calculated data to update current for orgUnitId ${orgUnitId} and period ${period}`
                     );
                     return Future.success(undefined);
                 }
 
                 if (!currentCalculatedConsumptionData || _.isEmpty(currentCalculatedConsumptionData)) {
                     logger.error(
-                        `Substance level: there are no current calculated data to update for orgUnitId=${orgUnitId} and period=${period}`
+                        `Substance level: there are no current calculated data to update for orgUnitId ${orgUnitId} and period ${period}`
                     );
                     return Future.success(undefined);
                 }
@@ -73,32 +74,35 @@ export class RecalculateConsumptionDataSubstanceLevelForAllUseCase {
                     ({ eventId }) => !eventIdsToUpdate.includes(eventId)
                 );
                 if (eventIdsNoUpdated.length) {
-                    logger.warn(`These events could not be updated: events=${eventIdsNoUpdated.join(",")}`);
+                    logger.error(`These events could not be updated: events=${eventIdsNoUpdated.join(",")}`);
                 }
 
-                logger.info(
-                    `Updating calculations of substance level events in DHIS2 for orgUnitId=${orgUnitId} and period=${period}: events=${eventIdsToUpdate.join(
+                logger.debug(
+                    `Updating calculations of substance level events in DHIS2 for orgUnitId ${orgUnitId} and period ${period}: events=${eventIdsToUpdate.join(
                         ","
                     )}`
+                );
+                logger.info(
+                    `Updating calculations of substance level for ${eventIdsToUpdate.length} events in DHIS2 for orgUnitId ${orgUnitId} and period ${period}`
                 );
                 return this.amcSubstanceDataRepository
                     .importCalculations(IMPORT_STRATEGY_UPDATE, orgUnitId, newCalculatedConsumptionDataWithIds)
                     .flatMap(({ response }) => {
                         if (response.status === "OK") {
-                            logger.info(
-                                `SUCCESS - Calculations of substance level updated for orgUnitId=${orgUnitId} and period=${period}: updated=${response.stats.updated} and total=${response.stats.total}`
+                            logger.success(
+                                `Calculations of substance level updated for orgUnitId ${orgUnitId} and period ${period}: ${response.stats.updated} of ${response.stats.total} events updated`
                             );
                         }
                         if (response.status === "ERROR") {
                             logger.error(
-                                `Error updating calculations of substance level updated for orgUnitId=${orgUnitId} and period=${period}: error=${JSON.stringify(
+                                `Error updating calculations of substance level updated for orgUnitId ${orgUnitId} and period ${period}: ${JSON.stringify(
                                     response.validationReport.errorReports
                                 )}`
                             );
                         }
                         if (response.status === "WARNING") {
                             logger.warn(
-                                `Warning updating calculations of substance level updated for orgUnitId=${orgUnitId} and period=${period}: warning=${JSON.stringify(
+                                `Warning updating calculations of substance level updated for orgUnitId ${orgUnitId} and period ${period}: ${JSON.stringify(
                                     response.validationReport.warningReports
                                 )}`
                             );
@@ -116,6 +120,7 @@ export class RecalculateConsumptionDataSubstanceLevelForAllUseCase {
         atcVersionHistory: GlassATCHistory[];
         currentCalculatedConsumptionData: SubstanceConsumptionCalculated[] | undefined;
     }> {
+        logger.info("Getting data for AMC calculations in substance level data...");
         return Future.joinObj({
             rawSubstanceConsumptionData: this.amcSubstanceDataRepository.getAllRawSubstanceConsumptionDataByByPeriod(
                 orgUnitId,

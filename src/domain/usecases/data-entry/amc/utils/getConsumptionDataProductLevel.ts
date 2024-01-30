@@ -2,6 +2,7 @@ import {
     AMC_RAW_PRODUCT_CONSUMPTION_STAGE_ID,
     AMR_GLASS_AMC_TEA_PRODUCT_ID,
 } from "../../../../../data/repositories/data-entry/AMCProductDataDefaultRepository";
+import { logger } from "../../../../../utils/logger";
 import { Future, FutureData } from "../../../../entities/Future";
 import { GlassATCHistory, createAtcVersionKey } from "../../../../entities/GlassATC";
 import { Id } from "../../../../entities/Ref";
@@ -47,9 +48,9 @@ export function getConsumptionDataProductLevel(params: {
     } = params;
 
     if (!productRegisterProgramMetadata) {
-        console.error(`Cannot find Product Register program metadata for orgUnitId=${orgUnitId} and period=${period}`);
+        logger.error(`Cannot find Product Register program metadata for orgUnitId ${orgUnitId} and period ${period}`);
         return Future.error(
-            `Cannot find Product Register program metadata for orgUnitId=${orgUnitId} and period=${period}`
+            `Cannot find Product Register program metadata for orgUnitId ${orgUnitId} and period ${period}`
         );
     }
 
@@ -58,17 +59,18 @@ export function getConsumptionDataProductLevel(params: {
     );
 
     if (!rawProductConsumptionStage) {
-        console.error(
-            `Cannot find Raw Product Consumption program stage metadata for orgUnitId=${orgUnitId} and period=${period}`
+        logger.error(
+            `Cannot find Raw Product Consumption program stage metadata for orgUnitId ${orgUnitId} and period ${period} with id ${AMC_RAW_PRODUCT_CONSUMPTION_STAGE_ID}`
         );
         return Future.error(
-            `Cannot find Raw Product Consumption program stage metadata for orgUnitId=${orgUnitId} and period=${period}`
+            `Cannot find Raw Product Consumption program stage metadata for orgUnitId ${orgUnitId} and period ${period} with id ${AMC_RAW_PRODUCT_CONSUMPTION_STAGE_ID}`
         );
     }
 
     const atcCurrentVersionInfo = atcVersionHistory.find(({ currentVersion }) => currentVersion);
     if (!atcCurrentVersionInfo) {
-        console.error(`Cannot find current version of ATC in version history: ${JSON.stringify(atcVersionHistory)}`);
+        logger.error(`Cannot find current version of ATC in version history.`);
+        logger.debug(`Cannot find current version of ATC in version history: ${JSON.stringify(atcVersionHistory)}`);
         return Future.error("Cannot find current version of ATC");
     }
 

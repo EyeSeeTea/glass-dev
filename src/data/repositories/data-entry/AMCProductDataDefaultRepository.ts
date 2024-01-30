@@ -24,6 +24,7 @@ import {
 import { TrackerPostResponse } from "@eyeseetea/d2-api/api/tracker";
 import { importApiTracker } from "../utils/importApiTracker";
 import { ImportStrategy } from "../../../domain/entities/data-entry/DataValuesSaveSummary";
+import { logger } from "../../../utils/logger";
 
 export const AMC_PRODUCT_REGISTER_PROGRAM_ID = "G6ChA5zMW9n";
 
@@ -91,6 +92,7 @@ export class AMCProductDataDefaultRepository implements AMCProductDataRepository
         if (!_.isEmpty(d2TrackerEvents)) {
             return importApiTracker(this.api, { events: d2TrackerEvents }, importStrategy);
         } else {
+            logger.error(`Product level data: there are no events to be created`);
             return Future.error("There are no events to be created");
         }
     }

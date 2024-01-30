@@ -2,7 +2,7 @@ import {
     AMC_RAW_SUBSTANCE_CONSUMPTION_CALCULATED_STAGE_ID,
     AMR_GLASS_AMC_TEA_PRODUCT_ID,
 } from "../../../../data/repositories/data-entry/AMCProductDataDefaultRepository";
-import { GlassATCHistory } from "../../../entities/GlassATC";
+import { GlassATCHistory, createAtcVersionKey } from "../../../entities/GlassATC";
 import { Id } from "../../../entities/Ref";
 import { GlassATCRepository } from "../../../repositories/GlassATCRepository";
 import { AMCProductDataRepository } from "../../../repositories/data-entry/AMCProductDataRepository";
@@ -17,7 +17,7 @@ import {
     Event,
     EventDataValue,
 } from "../../../entities/data-entry/amc/ProductDataTrackedEntity";
-import logger from "../../../../utils/log";
+import { logger } from "../../../../utils/logger";
 import _ from "lodash";
 import { getConsumptionDataProductLevel } from "./utils/getConsumptionDataProductLevel";
 import {
@@ -49,7 +49,7 @@ export class RecalculateConsumptionDataProductLevelForAllUseCase {
         ).toVoid();
     }
     private calculateByOrgUnitAndPeriod(orgUnitId: Id, period: string): FutureData<void> {
-        logger.info(`Calculating consumption data of product level for orgUnitsId=${orgUnitId} and period=${period}`);
+        logger.info(`Calculating consumption data of product level for orgUnitsId ${orgUnitId} and period ${period}`);
         return this.getDataForRecalculations(orgUnitId, period).flatMap(data => {
             const {
                 productRegisterProgramMetadata,
@@ -58,9 +58,10 @@ export class RecalculateConsumptionDataProductLevelForAllUseCase {
                 currentRawSubstanceConsumptionCalculatedByProductId,
             } = data;
             const atcCurrentVersionInfo = atcVersionHistory.find(({ currentVersion }) => currentVersion);
-            logger.info(
-                `New ATC version used in recalculations: atcVersionHistory=${JSON.stringify(atcCurrentVersionInfo)}`
-            );
+            if (atcCurrentVersionInfo) {
+                const atcVersionKey = createAtcVersionKey(atcCurrentVersionInfo.year, atcCurrentVersionInfo.version);
+                logger.info(`New ATC version used in recalculations: ${atcVersionKey}`);
+            }
             return getConsumptionDataProductLevel({
                 productRegisterProgramMetadata,
                 productDataTrackedEntities,
@@ -71,7 +72,7 @@ export class RecalculateConsumptionDataProductLevelForAllUseCase {
             }).flatMap(newRawSubstanceConsumptionCalculatedData => {
                 if (_.isEmpty(newRawSubstanceConsumptionCalculatedData)) {
                     logger.error(
-                        `Product level: there are no calculated data to update current for orgUnitId=${orgUnitId} and period=${period}`
+                        `Product level: there are no calculated data to update current for orgUnitId ${orgUnitId} and period ${period}`
                     );
                     return Future.success(undefined);
                 }
@@ -81,7 +82,7 @@ export class RecalculateConsumptionDataProductLevelForAllUseCase {
                     );
                 if (!rawSubstanceConsumptionCalculatedStageMetadata) {
                     logger.error(
-                        `Cannot find Raw Substance Consumption Calculated program stage metadata with id=${AMC_RAW_SUBSTANCE_CONSUMPTION_CALCULATED_STAGE_ID}`
+                        `Cannot find Raw Substance Consumption Calculated program stage metadata with id ${AMC_RAW_SUBSTANCE_CONSUMPTION_CALCULATED_STAGE_ID}`
                     );
                     return Future.error("Cannot find Raw Substance Consumption Calculated program stage metadata");
                 }
@@ -111,13 +112,17 @@ export class RecalculateConsumptionDataProductLevelForAllUseCase {
                     []
                 );
                 if (eventIdsNoUpdated.length) {
-                    logger.warn(`These events could not be updated: events=${eventIdsNoUpdated.join(",")}`);
+                    logger.error(`These events could not be updated: events=${eventIdsNoUpdated.join(",")}`);
                 }
 
-                logger.info(
-                    `Updating calculations of product level events in DHIS2 for orgUnitId=${orgUnitId} and period=${period}: events=${eventIdsToUpdate.join(
+                logger.debug(
+                    `Updating calculations of product level events in DHIS2 for orgUnitId ${orgUnitId} and period ${period}: events=${eventIdsToUpdate.join(
                         ","
                     )}`
+                );
+
+                logger.info(
+                    `Updating calculations of product level for ${eventIdsToUpdate.length} events in DHIS2 for orgUnitId ${orgUnitId} and period ${period}`
                 );
                 return this.amcProductDataRepository
                     .importCalculations(
@@ -129,20 +134,20 @@ export class RecalculateConsumptionDataProductLevelForAllUseCase {
                     )
                     .flatMap(response => {
                         if (response.status === "OK") {
-                            logger.info(
-                                `SUCCESS - Calculations of product level updated for orgUnitId=${orgUnitId} and period=${period}: updated=${response.stats.updated} and total=${response.stats.total}`
+                            logger.success(
+                                `Calculations of product level updated for orgUnitId ${orgUnitId} and period ${period}: ${response.stats.updated} of ${response.stats.total} events updated`
                             );
                         }
                         if (response.status === "ERROR") {
                             logger.error(
-                                `Error updating calculations of product level updated for orgUnitId=${orgUnitId} and period=${period}: error=${JSON.stringify(
+                                `Error updating calculations of product level updated for orgUnitId ${orgUnitId} and period ${period}: ${JSON.stringify(
                                     response.validationReport.errorReports
                                 )}`
                             );
                         }
                         if (response.status === "WARNING") {
                             logger.warn(
-                                `Warning updating calculations of product level updated for orgUnitId=${orgUnitId} and period=${period}: updated=${
+                                `Warning updating calculations of product level updated for orgUnitId ${orgUnitId} and period ${period}: updated=${
                                     response.stats.updated
                                 }, total=${response.stats.total} and warning=${JSON.stringify(
                                     response.validationReport.warningReports
@@ -164,7 +169,7 @@ export class RecalculateConsumptionDataProductLevelForAllUseCase {
         atcVersionHistory: GlassATCHistory[];
         currentRawSubstanceConsumptionCalculatedByProductId: Record<string, RawSubstanceConsumptionCalculated[]>;
     }> {
-        logger.info("Getting data for calculations...");
+        logger.info("Getting data for AMC calculations in product level data...");
         return Future.joinObj({
             productRegisterProgramMetadata: this.amcProductDataRepository.getProductRegisterProgramMetadata(),
             productDataTrackedEntities:

@@ -3,13 +3,14 @@ import { OrgUnitAccess } from "../../domain/entities/User";
 import { useHistory, useLocation } from "react-router-dom";
 import { CurrentOrgUnitContext, defaultOrgUnitContextState } from "../contexts/current-orgUnit-context";
 import { useAppContext } from "../contexts/app-context";
+import { setupLogger } from "../../utils/logger";
 
 export const CurrentOrgUnitContextProvider: React.FC = ({ children }) => {
     const history = useHistory();
     const location = useLocation();
     const orgUnitQueryParam = new URLSearchParams(location.search).get("orgUnit");
 
-    const { currentUser } = useAppContext();
+    const { currentUser, instance } = useAppContext();
 
     //Set default org unit to the first org unit in list
     const defaultOrgUnit: OrgUnitAccess = currentUser.userOrgUnitsAccess[0]
@@ -52,6 +53,14 @@ export const CurrentOrgUnitContextProvider: React.FC = ({ children }) => {
         location.search,
         orgUnitQueryParam,
     ]);
+
+    useEffect(() => {
+        // TODO: logger in each org unit? By now all in global org unit
+        async function setupLoggerWithCurrentOrgUnit() {
+            await setupLogger(instance);
+        }
+        setupLoggerWithCurrentOrgUnit();
+    }, [instance]);
 
     return (
         <CurrentOrgUnitContext.Provider
