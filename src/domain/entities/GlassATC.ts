@@ -79,7 +79,6 @@ export type ATCAlterationsData = {
     SUBSTANCE: string;
     NEW_ATC: string;
     YEAR_CHANGED: string;
-    ROUTE: RouteOfAdministrationKey;
 };
 
 export type ATCData = {
