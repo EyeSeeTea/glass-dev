@@ -51,7 +51,7 @@ export class RecalculateConsumptionDataSubstanceLevelForAllUseCase {
             }).flatMap(newCalculatedConsumptionData => {
                 if (_.isEmpty(newCalculatedConsumptionData)) {
                     logger.error(
-                        `Substance level: there are no calculated data to update current for orgUnitId ${orgUnitId} and period ${period}`
+                        `Substance level: there are no new calculated data to update current data for orgUnitId ${orgUnitId} and period ${period}`
                     );
                     return Future.success(undefined);
                 }
@@ -151,7 +151,8 @@ function linkEventIdToNewCalculatedConsumptionData(
                         newCalulatedData.health_sector_autocalculated &&
                     currentCalculatedData.health_level_autocalculated ===
                         newCalulatedData.health_level_autocalculated &&
-                    currentCalculatedData.data_status_autocalculated === newCalulatedData.data_status_autocalculated
+                    currentCalculatedData.data_status_autocalculated === newCalulatedData.data_status_autocalculated &&
+                    currentCalculatedData.report_date === newCalulatedData.report_date
                 );
             })?.eventId;
 

@@ -72,7 +72,7 @@ export class RecalculateConsumptionDataProductLevelForAllUseCase {
             }).flatMap(newRawSubstanceConsumptionCalculatedData => {
                 if (_.isEmpty(newRawSubstanceConsumptionCalculatedData)) {
                     logger.error(
-                        `Product level: there are no calculated data to update current for orgUnitId ${orgUnitId} and period ${period}`
+                        `Product level: there are no new calculated data to update current data for orgUnitId ${orgUnitId} and period ${period}`
                     );
                     return Future.success(undefined);
                 }
