@@ -4,12 +4,12 @@ import { FutureData, Future } from "../../entities/Future";
 import { AMCDataRepository } from "../../repositories/data-entry/AMCDataRepository";
 import { EGASPDataRepository } from "../../repositories/data-entry/EGASPDataRepository";
 import { RISDataRepository } from "../../repositories/data-entry/RISDataRepository";
-import { RISIndividualFunghiDataRepository } from "../../repositories/data-entry/RISIndividualFunghiDataRepository";
+import { RISIndividualFungalDataRepository } from "../../repositories/data-entry/RISIndividualFungalDataRepository";
 
 export class ValidatePrimaryFileUseCase implements UseCase {
     constructor(
         private risDataRepository: RISDataRepository,
-        private risIndividualFunghiRepository: RISIndividualFunghiDataRepository,
+        private risIndividualFungalRepository: RISIndividualFungalDataRepository,
         private egaspDataRepository: EGASPDataRepository,
         private glassModuleDefaultRepository: GlassModuleDefaultRepository,
         private amcDataRepository: AMCDataRepository
@@ -30,10 +30,10 @@ export class ValidatePrimaryFileUseCase implements UseCase {
                 });
             }
             case "AMR - Individual":
-            case "AMR - Funghi": {
+            case "AMR - Fungal": {
                 return this.glassModuleDefaultRepository.getByName(moduleName).flatMap(module => {
                     const customDataColumns = module.customDataColumns ? module.customDataColumns : [];
-                    return this.risIndividualFunghiRepository.validate(customDataColumns, inputFile);
+                    return this.risIndividualFungalRepository.validate(customDataColumns, inputFile);
                 });
             }
             case "AMC":

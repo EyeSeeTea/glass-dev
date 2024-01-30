@@ -3,15 +3,15 @@ import {
     CustomDataColumns,
     CustomDataElementNumber,
     CustomDataElementString,
-} from "../../../domain/entities/data-entry/amr-individual-funghi-external/RISIndividualFunghiData";
+} from "../../../domain/entities/data-entry/amr-individual-fungal-external/RISIndividualFungalData";
 import { SpreadsheetXlsxDataSource } from "../SpreadsheetXlsxDefaultRepository";
 import { doesColumnExist, getNumberValue, getTextValue } from "../utils/CSVUtils";
-import { RISIndividualFunghiDataRepository } from "../../../domain/repositories/data-entry/RISIndividualFunghiDataRepository";
+import { RISIndividualFungalDataRepository } from "../../../domain/repositories/data-entry/RISIndividualFungalDataRepository";
 
-export class RISIndividualFunghiDataCSVDefaultRepository implements RISIndividualFunghiDataRepository {
+export class RISIndividualFungalDataCSVDefaultRepository implements RISIndividualFungalDataRepository {
     get(dataColumns: CustomDataColumns, file: File): FutureData<CustomDataColumns[]> {
         return Future.fromPromise(new SpreadsheetXlsxDataSource().read(file)).map(spreadsheet => {
-            const sheet = spreadsheet.sheets[0]; //Only one sheet for AMR Individual & Funghi
+            const sheet = spreadsheet.sheets[0]; //Only one sheet for AMR Individual & Fungal
 
             const rows: CustomDataColumns[] =
                 sheet?.rows.map(row => {
@@ -45,7 +45,7 @@ export class RISIndividualFunghiDataCSVDefaultRepository implements RISIndividua
             const headerRow = sheet?.headers;
 
             if (headerRow) {
-                const allRISIndividualFunghiColsPresent = dataColumns.every(col => doesColumnExist(headerRow, col.key));
+                const allRISIndividualFungalColsPresent = dataColumns.every(col => doesColumnExist(headerRow, col.key));
 
                 const uniqSpecimens = _(sheet.rows)
                     .uniqBy("SPECIMEN")
@@ -53,7 +53,7 @@ export class RISIndividualFunghiDataCSVDefaultRepository implements RISIndividua
                     .map(row => (row["SPECIMEN"] ? row["SPECIMEN"] : ""));
 
                 return {
-                    isValid: allRISIndividualFunghiColsPresent ? true : false,
+                    isValid: allRISIndividualFungalColsPresent ? true : false,
                     rows: sheet.rows.length,
                     specimens: uniqSpecimens,
                 };
