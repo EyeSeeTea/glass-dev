@@ -11,6 +11,7 @@ import { useGlassDashboard } from "../../hooks/useGlassDashboard";
 import { CircularProgress } from "material-ui";
 import { useDownloadAllData } from "../../hooks/useDownloadAllData";
 import { moduleProperties } from "../../../domain/utils/ModuleProperties";
+import { MultiDashboardContent } from "../../components/reports/MultiDashboardContent";
 
 export const GLASS_DASHBOARD_ID = "w7Kub3oACD9";
 export const ReportsPage: React.FC = React.memo(() => {
@@ -43,8 +44,14 @@ export const ReportPageContent: React.FC = React.memo(() => {
                 </DownloadButtonContainer>
             )}
 
-            {reportDashboardId.kind === "loading" && <CircularProgress />}
-            {reportDashboardId.kind === "loaded" && <EmbeddedReport dashboardId={reportDashboardId.data} />}
+            {moduleProperties.get(currentModuleAccess.moduleName)?.isMultiDashboard ? (
+                <MultiDashboardContent type="Report" />
+            ) : (
+                <>
+                    {reportDashboardId.kind === "loading" && <CircularProgress />}
+                    {reportDashboardId.kind === "loaded" && <EmbeddedReport dashboardId={reportDashboardId.data} />}
+                </>
+            )}
         </ContentWrapper>
     );
 });

@@ -1,11 +1,9 @@
 import { useAppContext } from "../contexts/app-context";
 import { useCurrentModuleContext } from "../contexts/current-module-context";
-import { useCurrentPeriodContext } from "../contexts/current-period-context";
 
 export function useDownloadAllData() {
     const { compositionRoot } = useAppContext();
     const { currentModuleAccess } = useCurrentModuleContext();
-    const { currentPeriod } = useCurrentPeriodContext();
 
     const downloadAllData = () => {
         compositionRoot.downloads.downloadAllData(currentModuleAccess.moduleName).run(
