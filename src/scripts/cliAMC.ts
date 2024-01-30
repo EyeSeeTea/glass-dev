@@ -46,6 +46,7 @@ async function main() {
                         )} and orgUnitsIds=${recalculateDataInfo?.orgUnitsIds.join(",")}`
                     );
                     if (recalculateDataInfo && recalculateDataInfo.recalculate) {
+                        await disableRecalculations(atcRepository);
                         await recalculateData({
                             periods: Array.from(new Set(recalculateDataInfo.periods)),
                             orgUnitsIds: Array.from(new Set(recalculateDataInfo.orgUnitsIds)),
@@ -53,7 +54,6 @@ async function main() {
                             amcSubstanceDataRepository,
                             atcRepository,
                         });
-                        await disableRecalculations(atcRepository);
                     } else {
                         logger.info(`AMC recalculations are disabled`);
                     }
@@ -78,7 +78,7 @@ export async function getRecalculateDataInfo(
 }
 
 export async function disableRecalculations(atcRepository: GlassATCRepository): Promise<void> {
-    logger.info(`Disabling AMC recalculations`);
+    logger.info(`Disabling AMC recalculations before start with calculations`);
     await new DisableAMCRecalculationsUseCase(atcRepository).execute().toPromise();
 }
 

@@ -2,7 +2,6 @@ import { Logger } from "@eyeseetea/d2-logger";
 import { Instance } from "../data/entities/Instance";
 import { Id } from "../domain/entities/Base";
 
-// TODO: add here program and data elements
 const GLOBAL_ORG_UNIT = "H8RixfF8ugH";
 const LOGS_PROGRAM = "zARxYmOD18Z";
 const MESSAGE_DATA_ELEMENT = "BjUzF5E4eR8";
