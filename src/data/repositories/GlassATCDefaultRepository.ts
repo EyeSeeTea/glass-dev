@@ -15,6 +15,7 @@ import {
 } from "../../domain/entities/GlassATC";
 import { GlassATCRepository } from "../../domain/repositories/GlassATCRepository";
 import { cache } from "../../utils/cache";
+import { logger } from "../../utils/logger";
 import { DataStoreClient } from "../data-store/DataStoreClient";
 import { DataStoreKeys } from "../data-store/DataStoreKeys";
 
@@ -44,7 +45,8 @@ export class GlassATCDefaultRepository implements GlassATCRepository {
                     return this.buildGlassATCVersion(atcVersionDataStore);
                 });
         }
-        return Future.error("Upload does not exist");
+        logger.error(`Cannot find ${atcVersionKey} version of ATC`);
+        return Future.error(`Cannot find ${atcVersionKey} version of ATC`);
     }
 
     @cache()
@@ -53,6 +55,7 @@ export class GlassATCDefaultRepository implements GlassATCRepository {
             const atcCurrentVersionInfo = atcVersionHistory.find(({ currentVersion }) => currentVersion);
 
             if (!atcCurrentVersionInfo) {
+                logger.error(`Cannot find current version of ATC`);
                 return Future.error("Cannot find current version of ATC");
             }
             const atcVersionKey = createAtcVersionKey(atcCurrentVersionInfo.year, atcCurrentVersionInfo.version);
@@ -71,7 +74,7 @@ export class GlassATCDefaultRepository implements GlassATCRepository {
                         [atcVersionKey]: this.getAtcVersion(atcVersionKey),
                     };
                 }
-                console.error(`ATC version key not valid: ${atcVersionKey}`);
+                logger.error(`ATC version key not valid: ${atcVersionKey}`);
                 return acc;
             }, {})
         );

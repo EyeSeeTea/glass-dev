@@ -14,6 +14,7 @@ import * as templates from "../../../entities/data-entry/program-templates";
 import { MetadataRepository } from "../../../repositories/MetadataRepository";
 import { ImportSummary } from "../../../entities/data-entry/ImportSummary";
 import { getConsumptionDataProductLevel } from "./utils/getConsumptionDataProductLevel";
+import { logger } from "../../../../utils/logger";
 
 const TEMPLATE_ID = "TRACKER_PROGRAM_GENERATED_v3";
 const IMPORT_SUMMARY_EVENT_TYPE = "event";
@@ -31,6 +32,11 @@ export class CalculateConsumptionDataProductLevelUseCase {
     public execute(period: string, orgUnitId: Id, file: File): FutureData<ImportSummary> {
         return this.getProductIdsFromFile(file)
             .flatMap(productIds => {
+                logger.info(
+                    `Calculating raw substance consumption data for the following products (total: ${
+                        productIds.length
+                    }): ${productIds.join(", ")}`
+                );
                 return Future.joinObj({
                     productRegisterProgramMetadata: this.amcProductDataRepository.getProductRegisterProgramMetadata(),
                     productDataTrackedEntities:
@@ -52,8 +58,8 @@ export class CalculateConsumptionDataProductLevelUseCase {
                     period,
                 }).flatMap(rawSubstanceConsumptionCalculatedData => {
                     if (_.isEmpty(rawSubstanceConsumptionCalculatedData)) {
-                        console.error(
-                            `Product level: here are no calculated data to import for orgUnitId=${orgUnitId} and period=${period}`
+                        logger.error(
+                            `Product level: there are no calculated data to import for orgUnitId ${orgUnitId} and period ${period}`
                         );
                         const errorSummary: ImportSummary = {
                             status: "ERROR",
@@ -75,9 +81,14 @@ export class CalculateConsumptionDataProductLevelUseCase {
                         );
 
                     if (!rawSubstanceConsumptionCalculatedStageMetadata) {
+                        logger.error(
+                            `Cannot find Raw Substance Consumption Calculated program stage metadata with id ${AMC_RAW_SUBSTANCE_CONSUMPTION_CALCULATED_STAGE_ID}`
+                        );
                         return Future.error("Cannot find Raw Substance Consumption Calculated program stage metadata");
                     }
-
+                    logger.info(
+                        `Creating calculations of product level data as events for orgUnitId ${orgUnitId} and period ${period}`
+                    );
                     return this.amcProductDataRepository
                         .importCalculations(
                             IMPORT_STRATEGY_CREATE_AND_UPDATE,
@@ -87,6 +98,27 @@ export class CalculateConsumptionDataProductLevelUseCase {
                             orgUnitId
                         )
                         .flatMap(response => {
+                            if (response.status === "OK") {
+                                logger.success(
+                                    `Calculations of product level created for orgUnitId ${orgUnitId} and period ${period}: ${response.stats.created} of ${response.stats.total} events created`
+                                );
+                            }
+                            if (response.status === "ERROR") {
+                                logger.error(
+                                    `Error creating calculations of product level for orgUnitId ${orgUnitId} and period ${period}: ${JSON.stringify(
+                                        response.validationReport.errorReports
+                                    )}`
+                                );
+                            }
+                            if (response.status === "WARNING") {
+                                logger.warn(
+                                    `Warning creating calculations of product level updated for orgUnitId ${orgUnitId} and period ${period}: ${
+                                        response.stats.created
+                                    } of ${response.stats.total} events created and warning=${JSON.stringify(
+                                        response.validationReport.warningReports
+                                    )}`
+                                );
+                            }
                             return mapToImportSummary(
                                 response,
                                 IMPORT_SUMMARY_EVENT_TYPE,
@@ -105,7 +137,10 @@ export class CalculateConsumptionDataProductLevelUseCase {
                 .map(TemplateClass => new TemplateClass())
                 .filter(t => t.id === TEMPLATE_ID)[0];
             return this.instanceRepository.getProgram(AMC_PRODUCT_REGISTER_PROGRAM_ID).flatMap(amcProgram => {
-                if (!amcTemplate) return Future.error("Cannot find template");
+                if (!amcTemplate) {
+                    logger.error(`Product level: cannot find template`);
+                    return Future.error("Cannot find template");
+                }
 
                 return readTemplate(
                     amcTemplate,
@@ -114,9 +149,15 @@ export class CalculateConsumptionDataProductLevelUseCase {
                     this.instanceRepository,
                     AMC_PRODUCT_REGISTER_PROGRAM_ID
                 ).flatMap(amcProductData => {
-                    if (!amcProductData) return Future.error("Cannot find data package");
+                    if (!amcProductData) {
+                        logger.error(`Product level: cannot find data package`);
+                        return Future.error("Cannot find data package");
+                    }
 
-                    if (amcProductData.type !== "trackerPrograms") return Future.error("Incorrect data package");
+                    if (amcProductData.type !== "trackerPrograms") {
+                        logger.error(`Product level: incorrect data package`);
+                        return Future.error("Incorrect data package");
+                    }
 
                     const productIds = amcProductData.trackedEntityInstances
                         .map(({ attributeValues }) => {

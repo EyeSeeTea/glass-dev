@@ -1,3 +1,4 @@
+import { logger } from "../../../../utils/logger";
 import { Future, FutureData } from "../../../entities/Future";
 import { Id } from "../../../entities/Ref";
 import { ImportSummary } from "../../../entities/data-entry/ImportSummary";
@@ -25,6 +26,14 @@ export class CalculateConsumptionDataSubstanceLevelUseCase {
     public execute(uploadId: Id, period: string, orgUnitId: Id, moduleName: string): FutureData<ImportSummary> {
         return this.getEventsIdsFromUploadId(uploadId)
             .flatMap(eventsIds => {
+                logger.info(
+                    `Calculating consumption data in substance level for ${eventsIds.length} raw substance consumption data`
+                );
+                logger.debug(
+                    `Calculating consumption data in substance level for the following raw substance consumption data (total: ${
+                        eventsIds.length
+                    }): ${eventsIds.join(", ")}`
+                );
                 return Future.joinObj({
                     rawSubstanceConsumptionData:
                         this.amcSubstanceDataRepository.getRawSubstanceConsumptionDataByEventsIds(orgUnitId, eventsIds),
@@ -41,8 +50,8 @@ export class CalculateConsumptionDataSubstanceLevelUseCase {
                     atcVersionHistory,
                 }).flatMap(calculatedConsumptionSubstanceLevelData => {
                     if (_.isEmpty(calculatedConsumptionSubstanceLevelData)) {
-                        console.error(
-                            `Substance level: there are no calculated data to import for orgUnitId=${orgUnitId} and period=${period}`
+                        logger.error(
+                            `Substance level: there are no calculated data to import for orgUnitId ${orgUnitId} and period ${period}`
                         );
                         const errorSummary: ImportSummary = {
                             status: "ERROR",
@@ -57,6 +66,9 @@ export class CalculateConsumptionDataSubstanceLevelUseCase {
                         };
                         return Future.success(errorSummary);
                     }
+                    logger.info(
+                        `Creating calculations of substance level data as events for orgUnitId ${orgUnitId} and period ${period}`
+                    );
                     return this.amcSubstanceDataRepository
                         .importCalculations(
                             IMPORT_STRATEGY_CREATE_AND_UPDATE,
@@ -65,6 +77,27 @@ export class CalculateConsumptionDataSubstanceLevelUseCase {
                         )
                         .flatMap(result => {
                             const { response, eventIdLineNoMap } = result;
+                            if (response.status === "OK") {
+                                logger.success(
+                                    `Calculations of substance level created for orgUnitId ${orgUnitId} and period ${period}: ${response.stats.created} of ${response.stats.total} events created`
+                                );
+                            }
+                            if (response.status === "ERROR") {
+                                logger.error(
+                                    `Error creating calculations of substance level for orgUnitId ${orgUnitId} and period ${period}: ${JSON.stringify(
+                                        response.validationReport.errorReports
+                                    )}`
+                                );
+                            }
+                            if (response.status === "WARNING") {
+                                logger.warn(
+                                    `Warning creating calculations of substance level updated for orgUnitId ${orgUnitId} and period ${period}: ${
+                                        response.stats.created
+                                    } of ${response.stats.total} events created and warning=${JSON.stringify(
+                                        response.validationReport.warningReports
+                                    )}`
+                                );
+                            }
                             return mapToImportSummary(
                                 response,
                                 IMPORT_SUMMARY_EVENT_TYPE,
