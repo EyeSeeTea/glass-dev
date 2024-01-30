@@ -1,4 +1,4 @@
-import { FutureData } from "../../domain/entities/Future";
+import { FutureData, Future } from "../../domain/entities/Future";
 import { D2Api } from "@eyeseetea/d2-api/2.34";
 import { apiToFuture } from "../../utils/futures";
 import { EventVisualizationAnalyticsRepository } from "../../domain/repositories/EventVisualizationAnalyticsRepository";
@@ -34,9 +34,10 @@ export class EventVisualizationAnalyticsDefaultRepository implements EventVisual
                 method: "get",
             })
         ).flatMap(response => {
-         
-
             const eventDownloadQuery = this.parseLinelistMetadataToEventsQuery(response, module);
+
+            if (!eventDownloadQuery)
+                return Future.error("No program data for given line listing and corresponding module");
 
             return apiToFuture(
                 this.api.request<Blob>({
@@ -48,8 +49,12 @@ export class EventVisualizationAnalyticsDefaultRepository implements EventVisual
         });
     }
 
-    parseLinelistMetadataToEventsQuery = (lineListMetadata: EventVisualization, module: string): string => {
-        const { programId, programStageId } = getProgramIdForModule(module);
+    parseLinelistMetadataToEventsQuery = (lineListMetadata: EventVisualization, module: string): string | undefined => {
+        const programData = getProgramIdForModule(module);
+
+        if (!programData) return undefined;
+
+        const { programId, programStageId } = programData;
         const dimensionStr = _(
             lineListMetadata.columnDimensions.map(colDimension => {
                 if (colDimension === "ou") {
@@ -75,8 +80,10 @@ export class EventVisualizationAnalyticsDefaultRepository implements EventVisual
             .join("&");
 
         const outputTypeStr = `&outputType=${lineListMetadata.outputType}&`;
+        const paging = `paging=false&`;
         const stageStr = programStageId ? `stage=${programStageId}` : "";
-        const eventDownloadQuery = `analytics/events/query/${programId}.csv?${dimensionStr}${outputTypeStr}${stageStr}`;
+
+        const eventDownloadQuery = `analytics/events/query/${programId}.csv?${dimensionStr}${outputTypeStr}${paging}${stageStr}`;
 
         return eventDownloadQuery;
     };

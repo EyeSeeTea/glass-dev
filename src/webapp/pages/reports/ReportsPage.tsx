@@ -21,7 +21,7 @@ export const ReportsPage: React.FC = React.memo(() => {
 export const ReportPageContent: React.FC = React.memo(() => {
     const { currentModuleAccess } = useCurrentModuleContext();
     const { reportDashboardId } = useGlassDashboard();
-    const { downloadAllData } = useDownloadAllData();
+    const { downloadAllData, downloadAllLoading } = useDownloadAllData();
 
     return (
         <ContentWrapper>
@@ -38,9 +38,13 @@ export const ReportPageContent: React.FC = React.memo(() => {
             </PreContent>
             {moduleProperties.get(currentModuleAccess.moduleName)?.downloadAllDataButtonReq && (
                 <DownloadButtonContainer>
-                    <Button variant="contained" color="primary" onClick={downloadAllData}>
-                        Download all data
-                    </Button>
+                    {downloadAllLoading ? (
+                        <CircularProgress size={40} />
+                    ) : (
+                        <Button variant="contained" color="primary" onClick={downloadAllData}>
+                            {i18n.t("Download all data")}
+                        </Button>
+                    )}
                 </DownloadButtonContainer>
             )}
 
