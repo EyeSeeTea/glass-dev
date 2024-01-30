@@ -55,12 +55,12 @@ export const CurrentOrgUnitContextProvider: React.FC = ({ children }) => {
     ]);
 
     useEffect(() => {
-        // TODO: logger in each org unit?
+        // TODO: logger in each org unit? By now all in global org unit
         async function setupLoggerWithCurrentOrgUnit() {
-            await setupLogger(instance, currentOrgUnitAccess.orgUnitId);
+            await setupLogger(instance);
         }
         setupLoggerWithCurrentOrgUnit();
-    }, [currentOrgUnitAccess.orgUnitId]);
+    }, [instance]);
 
     return (
         <CurrentOrgUnitContext.Provider
