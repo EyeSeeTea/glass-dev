@@ -24,6 +24,7 @@ const AMC_CALCULATED_CONSUMPTION_DATA_PROGRAM_ID = "eUmWZeKZNrg";
 export const AMC_RAW_SUBSTANCE_CONSUMPTION_DATA_PROGRAM_STAGE_ID = "GuGDhDZUSBX";
 const AMC_CALCULATED_CONSUMPTION_DATA_PROGRAM_STAGE_ID = "ekEXxadjL0e";
 
+// TODO: Move logic to use case and entity instead of in repository which should be logic-less, just get/store the data.
 export class AMCSubstanceDataDefaultRepository implements AMCSubstanceDataRepository {
     constructor(private api: D2Api) {}
 
@@ -87,7 +88,11 @@ export class AMCSubstanceDataDefaultRepository implements AMCSubstanceDataReposi
     ): FutureData<RawSubstanceConsumptionData[] | undefined> {
         return Future.joinObj({
             rawSubstanceConsumptionProgram: this.getRawSubstanceConsumptionProgram(),
-            substanceConsumptionDataEvents: this.getAllRawSubstanceConsumptionDataD2EventsByPeriod(orgUnitId, period),
+            substanceConsumptionDataEvents: this.getAllD2EventsFromProgramByPeriod(
+                orgUnitId,
+                AMC_RAW_SUBSTANCE_CONSUMPTION_PROGRAM_ID,
+                period
+            ),
         }).map(result => {
             const { rawSubstanceConsumptionProgram, substanceConsumptionDataEvents } = result as {
                 rawSubstanceConsumptionProgram: D2Program | undefined;
@@ -110,8 +115,9 @@ export class AMCSubstanceDataDefaultRepository implements AMCSubstanceDataReposi
     ): FutureData<SubstanceConsumptionCalculated[] | undefined> {
         return Future.joinObj({
             calculatedConsumptionDataProgram: this.getCalculatedConsumptionDataProgram(),
-            calculatedConsumptionDataEvents: this.getAllCalculatedSubstanceConsumptionDataD2EventsByPeriod(
+            calculatedConsumptionDataEvents: this.getAllD2EventsFromProgramByPeriod(
                 orgUnitId,
+                AMC_CALCULATED_CONSUMPTION_DATA_PROGRAM_ID,
                 period
             ),
         }).map(result => {
@@ -327,12 +333,15 @@ export class AMCSubstanceDataDefaultRepository implements AMCSubstanceDataReposi
     }
 
     private getRawSubstanceConsumptionDataD2EventsByIds(orgUnitId: Id, eventsIds: Id[]): FutureData<D2TrackerEvent[]> {
-        return Future.fromPromise(this.getSubstanceConsumptionDataByEventsIdsAsync(orgUnitId, eventsIds)).map(
+        return Future.fromPromise(this.getRawSubstanceConsumptionDataByEventsIdsAsync(orgUnitId, eventsIds)).map(
             d2Events => d2Events
         );
     }
 
-    private async getSubstanceConsumptionDataByEventsIdsAsync(orgUnit: Id, eventsIds: Id[]): Promise<D2TrackerEvent[]> {
+    private async getRawSubstanceConsumptionDataByEventsIdsAsync(
+        orgUnit: Id,
+        eventsIds: Id[]
+    ): Promise<D2TrackerEvent[]> {
         const d2TrackerEvents: D2TrackerEvent[] = [];
         const event = eventsIds.join(";");
         const pageSize = 250;
@@ -340,8 +349,9 @@ export class AMCSubstanceDataDefaultRepository implements AMCSubstanceDataReposi
         let page = 1;
         let result;
         do {
-            result = await this.getSubstanceConsumptionDataOfPage({
+            result = await this.getEventsFromProgramByPeriodOfPage({
                 orgUnit,
+                program: AMC_RAW_SUBSTANCE_CONSUMPTION_PROGRAM_ID,
                 event,
                 pageSize,
                 page,
@@ -353,17 +363,19 @@ export class AMCSubstanceDataDefaultRepository implements AMCSubstanceDataReposi
         return d2TrackerEvents;
     }
 
-    private getAllCalculatedSubstanceConsumptionDataD2EventsByPeriod(
+    private getAllD2EventsFromProgramByPeriod(
         orgUnitId: Id,
+        programId: Id,
         period: string
     ): FutureData<D2TrackerEvent[]> {
-        return Future.fromPromise(this.getCalculatedSubstanceConsumptionDataByPeriodAsync(orgUnitId, period)).map(
+        return Future.fromPromise(this.getEventsFromProgramByPeriodAsync(orgUnitId, programId, period)).map(
             d2Events => d2Events
         );
     }
 
-    private async getCalculatedSubstanceConsumptionDataByPeriodAsync(
+    private async getEventsFromProgramByPeriodAsync(
         orgUnit: Id,
+        programId: Id,
         period: string
     ): Promise<D2TrackerEvent[]> {
         const d2TrackerEvents: D2TrackerEvent[] = [];
@@ -375,8 +387,9 @@ export class AMCSubstanceDataDefaultRepository implements AMCSubstanceDataReposi
         let result;
         try {
             do {
-                result = await this.getCalculatedSubstanceConsumptionDataOfPage({
+                result = await this.getEventsFromProgramByPeriodOfPage({
                     orgUnit,
+                    program: programId,
                     totalPages,
                     occurredAfter,
                     occurredBefore,
@@ -385,7 +398,7 @@ export class AMCSubstanceDataDefaultRepository implements AMCSubstanceDataReposi
                 });
                 if (!result.total) {
                     throw new Error(
-                        `Error getting paginated substance consumption data of period ${period} and organisation ${orgUnit}`
+                        `Error getting paginated events of program ${programId} in period ${period} and organisation ${orgUnit}`
                     );
                 }
                 d2TrackerEvents.push(...result.instances);
@@ -397,8 +410,9 @@ export class AMCSubstanceDataDefaultRepository implements AMCSubstanceDataReposi
         }
     }
 
-    private getSubstanceConsumptionDataOfPage(params: {
+    private getEventsFromProgramByPeriodOfPage(params: {
         orgUnit: Id;
+        program: Id;
         page: number;
         pageSize: number;
         event?: string;
@@ -409,69 +423,9 @@ export class AMCSubstanceDataDefaultRepository implements AMCSubstanceDataReposi
         return this.api.tracker.events
             .get({
                 fields: eventFields,
-                program: AMC_RAW_SUBSTANCE_CONSUMPTION_PROGRAM_ID,
                 ...params,
             })
             .getData();
-    }
-
-    private getCalculatedSubstanceConsumptionDataOfPage(params: {
-        orgUnit: Id;
-        page: number;
-        pageSize: number;
-        event?: string;
-        totalPages?: boolean;
-        occurredAfter?: string;
-        occurredBefore?: string;
-    }): Promise<TrackerEventsResponse> {
-        return this.api.tracker.events
-            .get({
-                fields: eventFields,
-                program: AMC_CALCULATED_CONSUMPTION_DATA_PROGRAM_ID,
-                ...params,
-            })
-            .getData();
-    }
-
-    private getAllRawSubstanceConsumptionDataD2EventsByPeriod(
-        orgUnitId: Id,
-        period: string
-    ): FutureData<D2TrackerEvent[]> {
-        return Future.fromPromise(this.getRawSubstanceConsumptionDataByPeriodAsync(orgUnitId, period)).map(
-            d2Events => d2Events
-        );
-    }
-
-    private async getRawSubstanceConsumptionDataByPeriodAsync(orgUnit: Id, period: string): Promise<D2TrackerEvent[]> {
-        const d2TrackerEvents: D2TrackerEvent[] = [];
-        const totalPages = true;
-        const occurredAfter = `${period}-01-01`;
-        const occurredBefore = `${period}-12-31`;
-        const pageSize = 250;
-        let page = 1;
-        let result;
-        try {
-            do {
-                result = await this.getSubstanceConsumptionDataOfPage({
-                    orgUnit,
-                    totalPages,
-                    occurredAfter,
-                    occurredBefore,
-                    page,
-                    pageSize,
-                });
-                if (!result.total) {
-                    throw new Error(
-                        `Error getting paginated substance consumption data of period ${period} and organisation ${orgUnit}`
-                    );
-                }
-                d2TrackerEvents.push(...result.instances);
-                page++;
-            } while (result.page < Math.ceil((result.total as number) / pageSize));
-            return d2TrackerEvents;
-        } catch {
-            return [];
-        }
     }
 }
 
