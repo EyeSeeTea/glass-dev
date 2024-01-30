@@ -1,11 +1,14 @@
+import { useState } from "react";
 import { useAppContext } from "../contexts/app-context";
 import { useCurrentModuleContext } from "../contexts/current-module-context";
 
 export function useDownloadAllData() {
     const { compositionRoot } = useAppContext();
     const { currentModuleAccess } = useCurrentModuleContext();
+    const [downloadAllLoading, setDownloadAllLoading] = useState(false);
 
     const downloadAllData = () => {
+        setDownloadAllLoading(true);
         compositionRoot.downloads.downloadAllData(currentModuleAccess.moduleName).run(
             file => {
                 //download file automatically
@@ -15,12 +18,14 @@ export function useDownloadAllData() {
                 // simulate link click
                 document.body.appendChild(downloadSimulateAnchor);
                 downloadSimulateAnchor.click();
+                setDownloadAllLoading(false);
             },
             error => {
                 console.debug(`Error occurred on download all data : ${error}`);
+                setDownloadAllLoading(false);
             }
         );
     };
 
-    return { downloadAllData };
+    return { downloadAllData, downloadAllLoading };
 }
