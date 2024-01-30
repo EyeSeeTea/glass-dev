@@ -14,7 +14,7 @@ export class DownloadAllDataForModuleUseCase implements UseCase {
             if (module.lineListId) {
                 return this.eventVisualizationRepository.downloadAllData(module.lineListId, moduleName);
             } else {
-                return Future.error("Cannot fine saved line list id for given module");
+                return Future.error("Cannot find line listing id for given module");
             }
         });
     }

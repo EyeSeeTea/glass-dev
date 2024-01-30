@@ -10,6 +10,7 @@ import { EmbeddedReport } from "../../components/reports/EmbeddedReport";
 import { useGlassDashboard } from "../../hooks/useGlassDashboard";
 import { CircularProgress } from "material-ui";
 import { useDownloadAllData } from "../../hooks/useDownloadAllData";
+import { moduleProperties } from "../../../domain/utils/ModuleProperties";
 
 export const GLASS_DASHBOARD_ID = "w7Kub3oACD9";
 export const ReportsPage: React.FC = React.memo(() => {
@@ -34,11 +35,13 @@ export const ReportPageContent: React.FC = React.memo(() => {
                     </Button>
                 </StyledBreadCrumbs>
             </PreContent>
-            <DownloadButtonContainer>
-                <Button variant="contained" color="primary" onClick={downloadAllData}>
-                    Download all data
-                </Button>
-            </DownloadButtonContainer>
+            {moduleProperties.get(currentModuleAccess.moduleName)?.downloadAllDataButtonReq && (
+                <DownloadButtonContainer>
+                    <Button variant="contained" color="primary" onClick={downloadAllData}>
+                        Download all data
+                    </Button>
+                </DownloadButtonContainer>
+            )}
 
             {reportDashboardId.kind === "loading" && <CircularProgress />}
             {reportDashboardId.kind === "loaded" && <EmbeddedReport dashboardId={reportDashboardId.data} />}

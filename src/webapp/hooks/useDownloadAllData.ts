@@ -13,12 +13,14 @@ export function useDownloadAllData() {
                 //download file automatically
                 const downloadSimulateAnchor = document.createElement("a");
                 downloadSimulateAnchor.href = URL.createObjectURL(file);
-                downloadSimulateAnchor.download = `${currentModuleAccess.moduleName}-${currentPeriod}-All-Data.csv`;
+                downloadSimulateAnchor.download = `${currentModuleAccess.moduleName}-GLASS-Data.csv`;
                 // simulate link click
                 document.body.appendChild(downloadSimulateAnchor);
                 downloadSimulateAnchor.click();
             },
-            () => {}
+            error => {
+                console.debug(`Error occurred on download all data : ${error}`);
+            }
         );
     };
 

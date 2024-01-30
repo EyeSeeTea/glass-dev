@@ -30,11 +30,11 @@ export class EventVisualizationAnalyticsDefaultRepository implements EventVisual
     downloadAllData(lineListId: Id, module: string): FutureData<Blob> {
         return apiToFuture(
             this.api.request<EventVisualization>({
-                url: `eventVisualizations/${lineListId}?fields=columnDimensions,dataElementDimensions,outputType,outputIdScheme,eventDate,headers,stage,simpleDimensions`,
+                url: `eventVisualizations/${lineListId}?fields=columnDimensions,dataElementDimensions,outputType,headers,stage,simpleDimensions`,
                 method: "get",
             })
         ).flatMap(response => {
-            console.debug(response);
+         
 
             const eventDownloadQuery = this.parseLinelistMetadataToEventsQuery(response, module);
 
@@ -75,7 +75,7 @@ export class EventVisualizationAnalyticsDefaultRepository implements EventVisual
             .join("&");
 
         const outputTypeStr = `&outputType=${lineListMetadata.outputType}&`;
-        const stageStr = `stage=${programStageId}`;
+        const stageStr = programStageId ? `stage=${programStageId}` : "";
         const eventDownloadQuery = `analytics/events/query/${programId}.csv?${dimensionStr}${outputTypeStr}${stageStr}`;
 
         return eventDownloadQuery;
