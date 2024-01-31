@@ -88,6 +88,7 @@ import { CalculateConsumptionDataSubstanceLevelUseCase } from "./domain/usecases
 import { DownloadAllDataForModuleUseCase } from "./domain/usecases/DownloadAllDataForModuleUseCase";
 import { EventVisualizationAnalyticsDefaultRepository } from "./data/repositories/EventVisualizationAnalyticsDefaultRepository";
 import { GetMultipleDashboardUseCase } from "./domain/usecases/GetMultipleDashboardUseCase";
+import { DownloadAllDataButtonData } from "./domain/usecases/DownloadAllDataButtonData";
 
 export function getCompositionRoot(instance: Instance) {
     const api = getD2APiFromInstance(instance);
@@ -273,7 +274,11 @@ export function getCompositionRoot(instance: Instance) {
         }),
 
         downloads: getExecute({
-            downloadAllData: new DownloadAllDataForModuleUseCase(eventVisualizationRepository, glassModuleRepository),
+            getDownloadButtonDetails: new DownloadAllDataButtonData(
+                eventVisualizationRepository,
+                glassModuleRepository
+            ),
+            downloadAllData: new DownloadAllDataForModuleUseCase(eventVisualizationRepository),
         }),
     };
 }

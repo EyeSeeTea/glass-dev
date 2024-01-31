@@ -21,7 +21,7 @@ export const ReportsPage: React.FC = React.memo(() => {
 export const ReportPageContent: React.FC = React.memo(() => {
     const { currentModuleAccess } = useCurrentModuleContext();
     const { reportDashboardId } = useGlassDashboard();
-    const { downloadAllData, downloadAllLoading } = useDownloadAllData();
+    const { moduleLineListings, downloadAllData, downloadAllLoading } = useDownloadAllData();
 
     return (
         <ContentWrapper>
@@ -41,9 +41,18 @@ export const ReportPageContent: React.FC = React.memo(() => {
                     {downloadAllLoading ? (
                         <CircularProgress size={40} />
                     ) : (
-                        <Button variant="contained" color="primary" onClick={downloadAllData}>
-                            {i18n.t("Download all data")}
-                        </Button>
+                        moduleLineListings?.map(lineListing => {
+                            return (
+                                <Button
+                                    key={lineListing.id}
+                                    variant="contained"
+                                    color="primary"
+                                    onClick={() => downloadAllData(lineListing)}
+                                >
+                                    {i18n.t(`Download ${lineListing.name}` ?? "Download All Data")}
+                                </Button>
+                            );
+                        })
                     )}
                 </DownloadButtonContainer>
             )}
@@ -110,4 +119,5 @@ const StyledBreadCrumbs = styled(Breadcrumbs)`
 const DownloadButtonContainer = styled.div`
     display: flex;
     justify-content: flex-end;
+    gap: 10px;
 `;

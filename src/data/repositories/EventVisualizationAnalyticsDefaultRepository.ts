@@ -3,9 +3,10 @@ import { D2Api } from "@eyeseetea/d2-api/2.34";
 import { apiToFuture } from "../../utils/futures";
 import { EventVisualizationAnalyticsRepository } from "../../domain/repositories/EventVisualizationAnalyticsRepository";
 import { Id, Ref } from "../../domain/entities/Ref";
-import { getProgramIdForModule } from "./utils/eventAnalyticsHelper";
+import { LineListDetails } from "../../domain/entities/GlassModule";
 
 interface EventVisualization {
+    name: string;
     outputType: "EVENT" | string;
     dataElementDimensions: DataElementDimension[];
     columnDimensions: string[];
@@ -27,14 +28,25 @@ interface SimpleDimension {
 export class EventVisualizationAnalyticsDefaultRepository implements EventVisualizationAnalyticsRepository {
     constructor(private api: D2Api) {}
 
-    downloadAllData(lineListId: Id, module: string): FutureData<Blob> {
+    getLineListName(lineListId: Id): FutureData<string> {
         return apiToFuture(
             this.api.request<EventVisualization>({
-                url: `eventVisualizations/${lineListId}?fields=columnDimensions,dataElementDimensions,outputType,headers,stage,simpleDimensions`,
+                url: `eventVisualizations/${lineListId}?fields=name`,
                 method: "get",
             })
         ).flatMap(response => {
-            const eventDownloadQuery = this.parseLinelistMetadataToEventsQuery(response, module);
+            return Future.success(response.name);
+        });
+    }
+
+    downloadAllData(lineListDetails: LineListDetails): FutureData<Blob> {
+        return apiToFuture(
+            this.api.request<EventVisualization>({
+                url: `eventVisualizations/${lineListDetails.id}?fields=columnDimensions,dataElementDimensions,outputType,headers,stage,simpleDimensions`,
+                method: "get",
+            })
+        ).flatMap(response => {
+            const eventDownloadQuery = this.parseLinelistMetadataToEventsQuery(response, lineListDetails);
 
             if (!eventDownloadQuery)
                 return Future.error("No program data for given line listing and corresponding module");
@@ -49,12 +61,13 @@ export class EventVisualizationAnalyticsDefaultRepository implements EventVisual
         });
     }
 
-    parseLinelistMetadataToEventsQuery = (lineListMetadata: EventVisualization, module: string): string | undefined => {
-        const programData = getProgramIdForModule(module);
+    parseLinelistMetadataToEventsQuery = (
+        lineListMetadata: EventVisualization,
+        lineListDetails: LineListDetails
+    ): string | undefined => {
+        if (!lineListDetails) return undefined;
 
-        if (!programData) return undefined;
-
-        const { programId, programStageId } = programData;
+        const { programId, programStageId } = lineListDetails;
         const dimensionStr = _(
             lineListMetadata.columnDimensions.map(colDimension => {
                 if (colDimension === "ou") {
