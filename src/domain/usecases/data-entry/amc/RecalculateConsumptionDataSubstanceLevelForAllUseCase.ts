@@ -137,31 +137,33 @@ function linkEventIdToNewCalculatedConsumptionData(
     currentCalculatedConsumptionData: SubstanceConsumptionCalculated[],
     newCalculatedConsumptionData: SubstanceConsumptionCalculated[]
 ): SubstanceConsumptionCalculated[] {
-    return newCalculatedConsumptionData
-        .map(newCalulatedData => {
-            const eventIdFound = currentCalculatedConsumptionData?.find(currentCalculatedData => {
-                return (
-                    currentCalculatedData.atc_autocalculated === newCalulatedData.atc_autocalculated &&
-                    currentCalculatedData.route_admin_autocalculated === newCalulatedData.route_admin_autocalculated &&
-                    (currentCalculatedData.salt_autocalculated === newCalulatedData.salt_autocalculated ||
-                        SALT_MAPPING.default === newCalulatedData.salt_autocalculated) &&
-                    currentCalculatedData.packages_autocalculated === newCalulatedData.packages_autocalculated &&
-                    currentCalculatedData.tons_autocalculated === newCalulatedData.tons_autocalculated &&
-                    currentCalculatedData.health_sector_autocalculated ===
-                        newCalulatedData.health_sector_autocalculated &&
-                    currentCalculatedData.health_level_autocalculated ===
-                        newCalulatedData.health_level_autocalculated &&
-                    currentCalculatedData.data_status_autocalculated === newCalulatedData.data_status_autocalculated &&
-                    currentCalculatedData.report_date === newCalulatedData.report_date
-                );
-            })?.eventId;
-
-            if (eventIdFound) {
-                return {
-                    eventId: eventIdFound,
-                    ...newCalulatedData,
-                };
-            }
-        })
-        .filter(Boolean) as SubstanceConsumptionCalculated[];
+    const newCalculatedConsumptionDataWithIdsObject = newCalculatedConsumptionData.reduce((acc, newCalulatedData) => {
+        const idsAlreadyUsed = Object.keys(acc);
+        const eventIdFound = currentCalculatedConsumptionData?.find(currentCalculatedData => {
+            return (
+                currentCalculatedData?.eventId &&
+                !idsAlreadyUsed.includes(currentCalculatedData.eventId) &&
+                currentCalculatedData.atc_autocalculated === newCalulatedData.atc_autocalculated &&
+                currentCalculatedData.route_admin_autocalculated === newCalulatedData.route_admin_autocalculated &&
+                (currentCalculatedData.salt_autocalculated === newCalulatedData.salt_autocalculated ||
+                    SALT_MAPPING.default === newCalulatedData.salt_autocalculated) &&
+                currentCalculatedData.packages_autocalculated === newCalulatedData.packages_autocalculated &&
+                currentCalculatedData.tons_autocalculated === newCalulatedData.tons_autocalculated &&
+                currentCalculatedData.health_sector_autocalculated === newCalulatedData.health_sector_autocalculated &&
+                currentCalculatedData.health_level_autocalculated === newCalulatedData.health_level_autocalculated &&
+                currentCalculatedData.data_status_autocalculated === newCalulatedData.data_status_autocalculated &&
+                currentCalculatedData.report_date === newCalulatedData.report_date
+            );
+        })?.eventId;
+        return eventIdFound
+            ? {
+                  [eventIdFound]: {
+                      eventId: eventIdFound,
+                      ...newCalulatedData,
+                  },
+                  ...acc,
+              }
+            : acc;
+    }, {});
+    return Object.values(newCalculatedConsumptionDataWithIdsObject);
 }

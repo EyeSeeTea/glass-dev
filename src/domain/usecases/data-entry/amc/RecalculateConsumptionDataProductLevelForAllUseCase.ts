@@ -24,6 +24,7 @@ import {
     RAW_SUBSTANCE_CONSUMPTION_CALCULATED_KEYS,
     RawSubstanceConsumptionCalculated,
 } from "../../../entities/data-entry/amc/RawSubstanceConsumptionCalculated";
+import { SALT_MAPPING } from "../../../entities/data-entry/amc/Salt";
 
 const IMPORT_STRATEGY_UPDATE = "UPDATE";
 
@@ -76,6 +77,19 @@ export class RecalculateConsumptionDataProductLevelForAllUseCase {
                     );
                     return Future.success(undefined);
                 }
+
+                if (
+                    _.isEmpty(currentRawSubstanceConsumptionCalculatedByProductId) ||
+                    Object.values(currentRawSubstanceConsumptionCalculatedByProductId || {}).every(
+                        rawSubstanceConsumptionCalculated => rawSubstanceConsumptionCalculated.length === 0
+                    )
+                ) {
+                    logger.error(
+                        `Product level: there are no current calculated data to update for orgUnitId ${orgUnitId} and period ${period}`
+                    );
+                    return Future.success(undefined);
+                }
+
                 const rawSubstanceConsumptionCalculatedStageMetadata =
                     productRegisterProgramMetadata?.programStages.find(
                         ({ id }) => id === AMC_RAW_SUBSTANCE_CONSUMPTION_CALCULATED_STAGE_ID
@@ -231,6 +245,8 @@ function linkEventIdToNewRawSubstanceConsumptionCalculated(
                 return (
                     currentCalculatedData.atc_autocalculated === newCalulatedData.atc_autocalculated &&
                     currentCalculatedData.route_admin_autocalculated === newCalulatedData.route_admin_autocalculated &&
+                    (currentCalculatedData.salt_autocalculated === newCalulatedData.salt_autocalculated ||
+                        SALT_MAPPING.default === newCalulatedData.salt_autocalculated) &&
                     currentCalculatedData.health_sector_autocalculated ===
                         newCalulatedData.health_sector_autocalculated &&
                     currentCalculatedData.health_level_autocalculated ===
