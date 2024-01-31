@@ -40,9 +40,10 @@ export interface GlassModule {
     }[];
     populateCurrentYearInHistory?: boolean;
     customDataColumns?: CustomDataColumns;
-    lineListId?: Id;
+    lineLists?: LineListDetails[];
 }
 
+export type LineListDetails = { id: Id; name?: string; programId: Id; programStageId?: Id };
 interface QuestionnaireConfig {
     id: Id;
     mandatory?: boolean;

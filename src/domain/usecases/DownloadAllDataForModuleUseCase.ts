@@ -1,21 +1,12 @@
 import { UseCase } from "../../CompositionRoot";
-import { GlassModuleDefaultRepository } from "../../data/repositories/GlassModuleDefaultRepository";
-import { FutureData, Future } from "../entities/Future";
+import { FutureData } from "../entities/Future";
+import { LineListDetails } from "../entities/GlassModule";
 import { EventVisualizationAnalyticsRepository } from "../repositories/EventVisualizationAnalyticsRepository";
 
 export class DownloadAllDataForModuleUseCase implements UseCase {
-    constructor(
-        private eventVisualizationRepository: EventVisualizationAnalyticsRepository,
-        private glassModuleDefaultRepository: GlassModuleDefaultRepository
-    ) {}
+    constructor(private eventVisualizationRepository: EventVisualizationAnalyticsRepository) {}
 
-    public execute(moduleName: string): FutureData<Blob> {
-        return this.glassModuleDefaultRepository.getByName(moduleName).flatMap(module => {
-            if (module.lineListId) {
-                return this.eventVisualizationRepository.downloadAllData(module.lineListId, moduleName);
-            } else {
-                return Future.error("Cannot find line listing id for given module");
-            }
-        });
+    public execute(lineListDetails: LineListDetails): FutureData<Blob> {
+        return this.eventVisualizationRepository.downloadAllData(lineListDetails);
     }
 }
