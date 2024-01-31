@@ -17,7 +17,7 @@ export async function setupLogger(instance: Instance, orgUnitId?: Id): Promise<v
         auth: instance.auth,
         programId: LOGS_PROGRAM,
         organisationUnitId: orgUnitId || GLOBAL_ORG_UNIT,
-        loggerDataElements: {
+        dataElements: {
             messageId: MESSAGE_DATA_ELEMENT,
             messageTypeId: MESSAGE_TYPE_DATA_ELEMENT,
         },

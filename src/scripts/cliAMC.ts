@@ -61,6 +61,7 @@ async function main() {
                     await sleep(DAY_IN_MILLISECONDS);
                 }
             } catch (err) {
+                logger.error(`AMC recalculations have stopped`);
                 logger.error(`${err}`);
                 process.exit(1);
             }
