@@ -88,22 +88,22 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
     const [importLoading, setImportLoading] = useState<boolean>(false);
     const [previousBatchIdsLoading, setPreviousBatchIdsLoading] = useState<boolean>(true);
     const [loading, setLoading] = useState<boolean>(false);
-    const [uploadFileType, setUploadFileType] = useState<"PRODUCT" | "SUBSTANCE">(
-        secondaryFile ? "SUBSTANCE" : "PRODUCT"
-    );
-
     const {
         currentModuleAccess: { moduleId, moduleName },
     } = useCurrentModuleContext();
     const {
         currentOrgUnitAccess: { orgUnitId, orgUnitName, orgUnitCode },
     } = useCurrentOrgUnitContext();
-
     const { currentPeriod } = useCurrentPeriodContext();
     const dataSubmissionId = useCurrentDataSubmissionId(moduleId, moduleName, orgUnitId, currentPeriod);
+    const currentModuleProperties = moduleProperties.get(moduleName);
+    const [uploadFileType, setUploadFileType] = useState(
+        secondaryFile ? currentModuleProperties?.secondaryFileType : currentModuleProperties?.primaryFileType
+    );
 
     useEffect(() => {
         if (moduleProperties.get(moduleName)?.isbatchReq) {
+            //TO DO : fetch from both AMR-I and AMR-AGG
             setPreviousBatchIdsLoading(true);
             if (dataSubmissionId !== "") {
                 compositionRoot.glassUploads.getByDataSubmission(dataSubmissionId).run(
@@ -142,6 +142,10 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
             }
         } else if (moduleProperties.get(moduleName)?.isSingleFileTypePerSubmission) {
             if (isPrimaryFileValid || isSecondaryFileValid) setIsValidated(true);
+            else setIsValidated(false);
+        } else if (moduleProperties.get(moduleName)?.isExternalSecondaryFile) {
+            if (isPrimaryFileValid) setIsValidated(true);
+            else if (batchId && isSecondaryFileValid) setIsValidated(true);
             else setIsValidated(false);
         } else {
             if (isPrimaryFileValid) setIsValidated(true);
@@ -351,6 +355,30 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
         );
     }, [compositionRoot.fileSubmission, snackbar, orgUnitId, moduleName, orgUnitCode, uploadFileType]);
 
+    const getBatchIdDropDown = () => {
+        return (
+            <div className="batch-id">
+                <h3>{i18n.t("Batch ID")}</h3>
+                <FormControl variant="outlined" style={{ minWidth: 180 }}>
+                    <InputLabel id="dataset-label">{i18n.t("Choose a Dataset")}</InputLabel>
+                    <Select
+                        value={batchId}
+                        onChange={changeBatchId}
+                        label={i18n.t("Choose a Dataset")}
+                        labelId="dataset-label"
+                        MenuProps={{ disableScrollLock: true }}
+                    >
+                        {datasetOptions.map(({ label, value }) => (
+                            <MenuItem key={value} value={value} disabled={previousUploadsBatchIds.includes(value)}>
+                                {i18n.t(label)}
+                            </MenuItem>
+                        ))}
+                    </Select>
+                </FormControl>
+            </div>
+        );
+    };
+
     return (
         <ContentWrapper>
             <Backdrop open={loading} style={{ color: "#fff", zIndex: 1 }}>
@@ -365,51 +393,62 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
                     <CircularProgress color="inherit" size={50} />
 
                     <Typography variant="h6">
-                        {i18n.t(moduleProperties.get(moduleName)?.importLoadingMsg.line1 || "Loading")}
+                        {i18n.t(currentModuleProperties?.importLoadingMsg.line1 || "Loading")}
                     </Typography>
 
                     <Typography variant="h5">
-                        {i18n.t(moduleProperties.get(moduleName)?.importLoadingMsg.line2 || "")}
+                        {i18n.t(currentModuleProperties?.importLoadingMsg.line2 || "")}
                     </Typography>
                 </StyledLoaderContainer>
             </Backdrop>
-            {moduleProperties.get(moduleName)?.isSingleFileTypePerSubmission ? (
-                <StyledSingleFileSelectContainer>
-                    <FormControl variant="outlined" style={{ minWidth: 180 }}>
-                        <InputLabel>{i18n.t("Choose file type")}</InputLabel>
-                        <Select
-                            value={uploadFileType}
-                            onChange={changeFileType}
-                            label={i18n.t("Choose file type")}
-                            labelId="file-type-label"
-                            MenuProps={{ disableScrollLock: true }}
-                            disabled={primaryFile !== null || secondaryFile !== null}
-                        >
-                            <MenuItem key={"PRODUCT"} value={"PRODUCT"}>
-                                {i18n.t("Product level data")}
-                            </MenuItem>
-                            <MenuItem key={"SUBSTANCE"} value={"SUBSTANCE"}>
-                                {i18n.t("Substance level data")}
-                            </MenuItem>
-                        </Select>
-                    </FormControl>
-                    {uploadFileType === "PRODUCT" ? (
-                        <UploadPrimaryFile
-                            validate={setIsPrimaryFileValid}
-                            batchId={batchId}
-                            primaryFile={primaryFile}
-                            setPrimaryFile={setPrimaryFile}
-                        />
-                    ) : (
-                        <UploadSecondary
-                            validate={setIsSecondaryFileValid}
-                            batchId={batchId}
-                            secondaryFile={secondaryFile}
-                            setSecondaryFile={setSecondaryFile}
-                            setHasSecondaryFile={setHasSecondaryFile}
-                        />
-                    )}
-                </StyledSingleFileSelectContainer>
+            {currentModuleProperties &&
+            (currentModuleProperties.isSingleFileTypePerSubmission ||
+                currentModuleProperties.isExternalSecondaryFile) ? (
+                <>
+                    <StyledSingleFileSelectContainer>
+                        <FormControl variant="outlined" style={{ minWidth: 180 }}>
+                            <InputLabel>{i18n.t("Choose file type")}</InputLabel>
+                            <Select
+                                value={uploadFileType}
+                                onChange={changeFileType}
+                                label={i18n.t("Choose file type")}
+                                labelId="file-type-label"
+                                MenuProps={{ disableScrollLock: true }}
+                                disabled={primaryFile !== null || secondaryFile !== null}
+                            >
+                                <MenuItem
+                                    key={currentModuleProperties.primaryFileType}
+                                    value={currentModuleProperties.primaryFileType}
+                                >
+                                    {i18n.t(currentModuleProperties.primaryFileType)}
+                                </MenuItem>
+                                <MenuItem
+                                    key={currentModuleProperties.secondaryFileType}
+                                    value={currentModuleProperties.secondaryFileType}
+                                >
+                                    {i18n.t(currentModuleProperties.secondaryFileType)}
+                                </MenuItem>
+                            </Select>
+                        </FormControl>
+                        {uploadFileType === currentModuleProperties.primaryFileType ? (
+                            <UploadPrimaryFile
+                                validate={setIsPrimaryFileValid}
+                                batchId={batchId}
+                                primaryFile={primaryFile}
+                                setPrimaryFile={setPrimaryFile}
+                            />
+                        ) : (
+                            <UploadSecondary
+                                validate={setIsSecondaryFileValid}
+                                batchId={batchId}
+                                secondaryFile={secondaryFile}
+                                setSecondaryFile={setSecondaryFile}
+                                setHasSecondaryFile={setHasSecondaryFile}
+                            />
+                        )}
+                    </StyledSingleFileSelectContainer>
+                    {currentModuleProperties.isExternalSecondaryFile && hasSecondaryFile && getBatchIdDropDown()}
+                </>
             ) : (
                 <>
                     {previousBatchIdsLoading ? (
@@ -433,31 +472,7 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
                                     />
                                 )}
                             </div>
-                            {moduleProperties.get(moduleName)?.isbatchReq && (
-                                <div className="batch-id">
-                                    <h3>{i18n.t("Batch ID")}</h3>
-                                    <FormControl variant="outlined" style={{ minWidth: 180 }}>
-                                        <InputLabel id="dataset-label">{i18n.t("Choose a Dataset")}</InputLabel>
-                                        <Select
-                                            value={batchId}
-                                            onChange={changeBatchId}
-                                            label={i18n.t("Choose a Dataset")}
-                                            labelId="dataset-label"
-                                            MenuProps={{ disableScrollLock: true }}
-                                        >
-                                            {datasetOptions.map(({ label, value }) => (
-                                                <MenuItem
-                                                    key={value}
-                                                    value={value}
-                                                    disabled={previousUploadsBatchIds.includes(value)}
-                                                >
-                                                    {i18n.t(label)}
-                                                </MenuItem>
-                                            ))}
-                                        </Select>
-                                    </FormControl>
-                                </div>
-                            )}
+                            {moduleProperties.get(moduleName)?.isbatchReq && getBatchIdDropDown()}
                         </>
                     )}
                 </>
