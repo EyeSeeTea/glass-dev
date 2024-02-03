@@ -16,7 +16,6 @@ import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import { UploadPrimaryFile } from "./UploadPrimaryFile";
 import { UploadSecondary } from "./UploadSecondary";
 import { useAppContext } from "../../contexts/app-context";
-import { useCurrentDataSubmissionId } from "../../hooks/useCurrentDataSubmissionId";
 import { useCurrentModuleContext } from "../../contexts/current-module-context";
 import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context";
 import { useCurrentPeriodContext } from "../../contexts/current-period-context";
@@ -84,54 +83,64 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
     const [isPrimaryFileValid, setIsPrimaryFileValid] = useState(false);
     const [isSecondaryFileValid, setIsSecondaryFileValid] = useState(false);
     const [previousUploadsBatchIds, setPreviousUploadsBatchIds] = useState<string[]>([]);
-    const [hasSecondaryFile, setHasSecondaryFile] = useState<boolean>(false);
+    const [hasSecondaryFile, setHasSecondaryFile] = useState<boolean>(secondaryFile ? true : false);
     const [importLoading, setImportLoading] = useState<boolean>(false);
     const [previousBatchIdsLoading, setPreviousBatchIdsLoading] = useState<boolean>(true);
     const [loading, setLoading] = useState<boolean>(false);
     const {
-        currentModuleAccess: { moduleId, moduleName },
+        currentModuleAccess: { moduleName },
     } = useCurrentModuleContext();
     const {
         currentOrgUnitAccess: { orgUnitId, orgUnitName, orgUnitCode },
     } = useCurrentOrgUnitContext();
     const { currentPeriod } = useCurrentPeriodContext();
-    const dataSubmissionId = useCurrentDataSubmissionId(moduleId, moduleName, orgUnitId, currentPeriod);
+
     const currentModuleProperties = moduleProperties.get(moduleName);
     const [uploadFileType, setUploadFileType] = useState(
         secondaryFile ? currentModuleProperties?.secondaryFileType : currentModuleProperties?.primaryFileType
     );
 
     useEffect(() => {
-        if (moduleProperties.get(moduleName)?.isbatchReq) {
-            //TO DO : fetch from both AMR-I and AMR-AGG
+        if (
+            currentModuleProperties?.isbatchReq ||
+            (currentModuleProperties?.isExternalSecondaryFile && hasSecondaryFile)
+        ) {
             setPreviousBatchIdsLoading(true);
-            if (dataSubmissionId !== "") {
-                compositionRoot.glassUploads.getByDataSubmission(dataSubmissionId).run(
-                    uploads => {
-                        const uniquePreviousBatchIds = [
-                            ...new Set(
-                                uploads
-                                    .filter(upload => upload.status.toLowerCase() !== UPLOADED_STATUS)
-                                    .map(upload => upload.batchId)
-                            ),
-                        ];
-                        setPreviousUploadsBatchIds(uniquePreviousBatchIds);
-                        const firstSelectableBatchId = datasetOptions.find(
-                            ({ value }) => !uniquePreviousBatchIds.includes(value)
-                        )?.value;
-                        setBatchId(firstSelectableBatchId || "");
-                        setPreviousBatchIdsLoading(false);
-                    },
-                    () => {
-                        snackbar.error(i18n.t("Error fetching previous uploads."));
-                        setPreviousBatchIdsLoading(false);
-                    }
-                );
-            }
+
+            compositionRoot.glassUploads.getAMRUploadsForCurrentDataSubmission(orgUnitId, currentPeriod).run(
+                uploads => {
+                    const uniquePreviousBatchIds = _(
+                        uploads
+                            .filter(upload => upload.status.toLowerCase() !== UPLOADED_STATUS && upload.batchId !== "")
+                            .map(upload => upload.batchId)
+                    )
+                        .uniq()
+                        .value();
+                    setPreviousUploadsBatchIds(uniquePreviousBatchIds);
+                    const firstSelectableBatchId = datasetOptions.find(
+                        ({ value }) => !uniquePreviousBatchIds.includes(value)
+                    )?.value;
+                    setBatchId(firstSelectableBatchId || "");
+                    setPreviousBatchIdsLoading(false);
+                },
+                () => {
+                    snackbar.error(i18n.t("Error fetching previous uploads."));
+                    setPreviousBatchIdsLoading(false);
+                }
+            );
         } else {
             setPreviousBatchIdsLoading(false);
         }
-    }, [compositionRoot.glassUploads, dataSubmissionId, setBatchId, snackbar, moduleName]);
+    }, [
+        compositionRoot.glassUploads,
+        setBatchId,
+        snackbar,
+        moduleName,
+        currentPeriod,
+        orgUnitId,
+        currentModuleProperties,
+        hasSecondaryFile,
+    ]);
 
     useEffect(() => {
         if (moduleProperties.get(moduleName)?.isbatchReq) {
@@ -268,7 +277,7 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
                     orgUnitId,
                     orgUnitName,
                     orgUnitCode,
-                    true,
+                    currentModuleProperties?.isExternalSecondaryFile ? false : true, //TO DO  : move to second screen
                     ""
                 )
                 .run(
@@ -305,6 +314,7 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
         setPrimaryFileImportSummary,
         changeStep,
         setSecondaryFileImportSummary,
+        currentModuleProperties,
     ]);
 
     const continueClick = () => {
@@ -479,7 +489,10 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
             )}
 
             <BottomContainer>
-                {previousUploadsBatchIds.length > 0 && moduleProperties.get(moduleName)?.isbatchReq ? (
+                {previousBatchIdsLoading && <CircularProgress size={25} />}
+                {previousUploadsBatchIds.length > 0 &&
+                (moduleProperties.get(moduleName)?.isbatchReq ||
+                    (currentModuleProperties?.isExternalSecondaryFile && hasSecondaryFile)) ? (
                     <div>
                         <h4>{i18n.t("You Previously Submitted:")} </h4>
                         <ul>
