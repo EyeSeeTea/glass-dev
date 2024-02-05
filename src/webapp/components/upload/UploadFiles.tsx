@@ -103,7 +103,8 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
     useEffect(() => {
         if (
             currentModuleProperties?.isbatchReq ||
-            (currentModuleProperties?.isExternalSecondaryFile && hasSecondaryFile)
+            (currentModuleProperties?.isExternalSecondaryFile &&
+                uploadFileType === currentModuleProperties.secondaryFileType)
         ) {
             setPreviousBatchIdsLoading(true);
 
@@ -139,7 +140,7 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
         currentPeriod,
         orgUnitId,
         currentModuleProperties,
-        hasSecondaryFile,
+        uploadFileType,
     ]);
 
     useEffect(() => {
@@ -166,17 +167,43 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
         const primaryUploadId = localStorage.getItem("primaryUploadId");
         const secondaryUploadId = localStorage.getItem("secondaryUploadId");
         setBatchId(batchId);
-
         if (primaryUploadId) {
-            await compositionRoot.glassUploads.setBatchId({ id: primaryUploadId, batchId }).toPromise();
-        }
-        if (secondaryUploadId) {
-            await compositionRoot.glassUploads.setBatchId({ id: secondaryUploadId, batchId }).toPromise();
+            setLoading(true);
+            compositionRoot.glassUploads.setBatchId({ id: primaryUploadId, batchId }).run(
+                () => {
+                    if (secondaryUploadId) {
+                        compositionRoot.glassUploads.setBatchId({ id: secondaryUploadId, batchId }).run(
+                            () => {
+                                setLoading(false);
+                            },
+                            () => {
+                                console.debug(`error occured while updating batch id to secondary upload in datastore`);
+                                setLoading(false);
+                            }
+                        );
+                    }
+                },
+                () => {
+                    console.debug(`error occured while updating batch id to primary upload in datastore`);
+                    setLoading(false);
+                }
+            );
+        } else if (secondaryUploadId) {
+            setLoading(true);
+            compositionRoot.glassUploads.setBatchId({ id: secondaryUploadId, batchId }).run(
+                () => {
+                    setLoading(false);
+                },
+                () => {
+                    console.debug(`error occured while updating batch id to secondary upload in datastore`);
+                    setLoading(false);
+                }
+            );
         }
     };
 
     const changeFileType = (event: React.ChangeEvent<{ value: unknown }>) => {
-        const fileType = event.target.value as "PRODUCT" | "SUBSTANCE";
+        const fileType = event.target.value as string;
         setUploadFileType(fileType);
     };
 
@@ -394,7 +421,7 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
             <Backdrop open={loading} style={{ color: "#fff", zIndex: 1 }}>
                 <StyledLoaderContainer>
                     <CircularProgress color="inherit" size={50} />
-                    <Typography variant="h6">{i18n.t("Downloading")}</Typography>
+                    <Typography variant="h6">{i18n.t("Loading")}</Typography>
                 </StyledLoaderContainer>
             </Backdrop>
 
@@ -457,7 +484,14 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
                             />
                         )}
                     </StyledSingleFileSelectContainer>
-                    {currentModuleProperties.isExternalSecondaryFile && hasSecondaryFile && getBatchIdDropDown()}
+
+                    {previousBatchIdsLoading ? (
+                        <CircularProgress size={25} />
+                    ) : (
+                        currentModuleProperties.isExternalSecondaryFile &&
+                        uploadFileType === currentModuleProperties.secondaryFileType &&
+                        getBatchIdDropDown()
+                    )}
                 </>
             ) : (
                 <>
@@ -489,10 +523,10 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
             )}
 
             <BottomContainer>
-                {previousBatchIdsLoading && <CircularProgress size={25} />}
                 {previousUploadsBatchIds.length > 0 &&
                 (moduleProperties.get(moduleName)?.isbatchReq ||
-                    (currentModuleProperties?.isExternalSecondaryFile && hasSecondaryFile)) ? (
+                    (currentModuleProperties?.isExternalSecondaryFile &&
+                        uploadFileType === currentModuleProperties.secondaryFileType)) ? (
                     <div>
                         <h4>{i18n.t("You Previously Submitted:")} </h4>
                         <ul>
