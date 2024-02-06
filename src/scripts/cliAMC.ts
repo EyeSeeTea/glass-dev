@@ -1,4 +1,4 @@
-import { command, run } from "cmd-ts";
+import { boolean, command, flag, run } from "cmd-ts";
 import { setupLogger, logger } from "../utils/logger";
 import { getApiUrlOptions, getD2ApiFromArgs, getInstance, sleep } from "./common";
 import { DataStoreClient } from "../data/data-store/DataStoreClient";
@@ -24,6 +24,17 @@ async function main() {
             "Recalculate for all registered products the raw substance consumption from raw product consumption and recalculate from raw substances consumption data the consumption data",
         args: {
             ...getApiUrlOptions(),
+            debug: flag({
+                type: boolean,
+                long: "debug",
+                description: "Option to print also logs in console",
+            }),
+            calculate: flag({
+                type: boolean,
+                long: "calculate",
+                description:
+                    "Option to enabling not only recalculate but also calculate producing the events if they do not exist",
+            }),
         },
         handler: async args => {
             try {
@@ -35,7 +46,7 @@ async function main() {
                 const atcRepository = new GlassATCDefaultRepository(dataStoreClient);
 
                 while (ALWAYS) {
-                    await setupLogger(instance);
+                    await setupLogger(instance, { isDebug: args.debug });
                     logger.info(`Starting AMC recalculations...`);
                     const recalculateDataInfo = await getRecalculateDataInfo(atcRepository);
                     logger.debug(
@@ -61,8 +72,10 @@ async function main() {
                     await sleep(DAY_IN_MILLISECONDS);
                 }
             } catch (err) {
-                logger.error(`AMC recalculations have stopped`);
-                logger.error(`${err}`);
+                await logger.error(
+                    `STOPPING AMC RECALCULATIONS SCRIPT: AMC recalculations have stopped with error ${err}. Please, restart again the script.`
+                );
+                console.error(`AMC recalculations have stopped: ${err}`);
                 process.exit(1);
             }
         },
