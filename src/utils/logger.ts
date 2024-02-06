@@ -9,7 +9,9 @@ const MESSAGE_TYPE_DATA_ELEMENT = "NpS5LoLuhgS";
 
 export let logger: Logger;
 
-export async function setupLogger(instance: Instance, orgUnitId?: Id): Promise<void> {
+export async function setupLogger(instance: Instance, options?: { isDebug?: boolean; orgUnitId?: Id }): Promise<void> {
+    const { isDebug = false, orgUnitId } = options ?? {};
+
     const loggerInstance = new Logger();
     await loggerInstance.init({
         type: "program",
@@ -21,6 +23,7 @@ export async function setupLogger(instance: Instance, orgUnitId?: Id): Promise<v
             messageId: MESSAGE_DATA_ELEMENT,
             messageTypeId: MESSAGE_TYPE_DATA_ELEMENT,
         },
+        debug: isDebug,
     });
     logger = loggerInstance;
 }
