@@ -181,7 +181,7 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
                                 setLoading(false);
                             }
                         );
-                    }
+                    } else setLoading(false);
                 },
                 () => {
                     console.debug(`error occured while updating batch id to primary upload in datastore`);
@@ -304,7 +304,7 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
                     orgUnitId,
                     orgUnitName,
                     orgUnitCode,
-                    currentModuleProperties?.isExternalSecondaryFile ? false : true, //TO DO  : move to second screen
+                    true,
                     ""
                 )
                 .run(
@@ -341,7 +341,6 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
         setPrimaryFileImportSummary,
         changeStep,
         setSecondaryFileImportSummary,
-        currentModuleProperties,
     ]);
 
     const continueClick = () => {
