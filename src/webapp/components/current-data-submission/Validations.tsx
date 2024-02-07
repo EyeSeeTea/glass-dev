@@ -1,9 +1,4 @@
 import React, { useCallback, useState } from "react";
-import { EmbeddedReport } from "../reports/EmbeddedReport";
-import { CircularProgress } from "material-ui";
-import { useGlassDashboard } from "../../hooks/useGlassDashboard";
-import { Typography } from "@material-ui/core";
-import { useGetLastSuccessfulAnalyticsRunTime } from "../../hooks/useGetLastSuccessfulAnalyticsRunTime";
 import { useAppContext } from "../../contexts/app-context";
 import { useFileTypeByDataSubmission } from "../../hooks/useFileTypeByDataSubmission";
 import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context";
@@ -17,7 +12,12 @@ import { ContentLoader } from "../content-loader/ContentLoader";
 import { DownloadButton } from "./DownloadButton";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { useSnackbar } from "@eyeseetea/d2-ui-components";
+import { DownloadingBackdrop } from "../loading/DownloadingBackdrop";
+import { useGlassDashboard } from "../../hooks/useGlassDashboard";
+import { useGetLastSuccessfulAnalyticsRunTime } from "../../hooks/useGetLastSuccessfulAnalyticsRunTime";
+import { CircularProgress, Typography } from "@material-ui/core";
 import { MultiDashboardContent } from "../reports/MultiDashboardContent";
+import { EmbeddedReport } from "../reports/EmbeddedReport";
 
 export const Validations: React.FC = () => {
     const { compositionRoot } = useAppContext();
@@ -52,7 +52,8 @@ export const Validations: React.FC = () => {
                         populateEndDate: endDateOfPeriod,
                         downloadRelationships: true,
                         splitDataEntryTabsBySection: true,
-                        useCodesForMetadata: true,
+                        useCodesForMetadata: false,
+                        filterTEIEnrollmentDate: true,
                     });
 
                     const downloadSimulateAnchor = document.createElement("a");
@@ -93,20 +94,24 @@ export const Validations: React.FC = () => {
                 </Typography>
             )}
             {moduleProperties.get(currentModuleAccess.moduleName)?.isDownloadDataAllowed && (
-                <ContentLoader content={fileTypeState} extraLoading={isLoading}>
-                    <DownloadButtonsWrapper>
-                        <DownloadButton
-                            title="Download submitted data"
-                            helperText="An excel file with all the data in this dashboard"
-                            onClick={() => downloadTemplate("SUBMITTED")}
-                        />
-                        <DownloadButton
-                            title="Download calculated data"
-                            helperText="An excel file with all the data in this dashboard"
-                            onClick={() => downloadTemplate("CALCULATED")}
-                        />
-                    </DownloadButtonsWrapper>
-                </ContentLoader>
+                <>
+                    <ContentLoader content={fileTypeState}>
+                        <DownloadButtonsWrapper>
+                            <DownloadButton
+                                title="Download submitted data"
+                                helperText="An excel file with all the submitted data in this dashboard"
+                                onClick={() => downloadTemplate("SUBMITTED")}
+                                disabled={fileTypeState.kind === "loaded" && !fileTypeState.data}
+                            />
+                            <DownloadButton
+                                title="Download calculated data"
+                                helperText="An excel file with all the calculated data in this dashboard"
+                                onClick={() => downloadTemplate("CALCULATED")}
+                                disabled={fileTypeState.kind === "loaded" && !fileTypeState.data}
+                            />
+                        </DownloadButtonsWrapper>
+                    </ContentLoader>
+                </>
             )}
             {moduleProperties.get(currentModuleAccess.moduleName)?.isMultiDashboard ? (
                 <MultiDashboardContent type="Validation" />
@@ -118,6 +123,7 @@ export const Validations: React.FC = () => {
                     )}
                 </>
             )}
+            <DownloadingBackdrop isOpen={isLoading} />
         </>
     );
 };

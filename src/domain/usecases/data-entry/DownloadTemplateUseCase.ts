@@ -28,7 +28,6 @@ export type FileType = "PRODUCT" | "SUBSTANCE";
 export type DownloadType = "SUBMITTED" | "CALCULATED";
 
 export interface DownloadTemplateProps {
-    formType?: DataFormType;
     moduleName: string;
     fileType: "PRODUCT" | "SUBSTANCE";
     downloadType?: "SUBMITTED" | "CALCULATED";
@@ -56,7 +55,6 @@ export class DownloadTemplateUseCase implements UseCase {
     ) {}
 
     public async execute({
-        formType = "trackerPrograms",
         moduleName,
         fileType,
         downloadType,
@@ -70,9 +68,10 @@ export class DownloadTemplateUseCase implements UseCase {
         filterTEIEnrollmentDate,
         relationshipsOuFilter,
         splitDataEntryTabsBySection = false,
-        useCodesForMetadata = true,
+        useCodesForMetadata = false,
     }: DownloadTemplateProps): Promise<File> {
         const { programId, programStageId } = getProgramId(moduleName, fileType, downloadType);
+        const formType = getFormType(programId);
         const settings = await this.egaspRepository.getTemplateSettings().toPromise();
         const template = this.getTemplate(programId);
         if (!template) {
@@ -81,12 +80,12 @@ export class DownloadTemplateUseCase implements UseCase {
 
         const element = await this.DownloadtemplateRepository.getElement(formType, programId);
 
-        const orgUnits = [orgUnit];
+        let orgUnits = [orgUnit];
         if (moduleName === "EGASP") {
             const clinicsAndLabsOrgUnits = await this.metadataRepository
                 .getClinicsAndLabsInOrgUnitId(orgUnit)
                 .toPromise();
-            orgUnits.push(...clinicsAndLabsOrgUnits);
+            orgUnits = clinicsAndLabsOrgUnits;
         }
 
         const result = await this.DownloadtemplateRepository.getElementMetadata({
@@ -181,5 +180,18 @@ const getProgramId = (
         } else throw new Error(`Unknown file type: ${fileType}`);
     } else {
         throw new Error("Unknown module type");
+    }
+};
+
+const getFormType = (programId: Id): DataFormType => {
+    switch (programId) {
+        case AMC_PRODUCT_REGISTER_PROGRAM_ID:
+            return "trackerPrograms";
+        case EGASP_PROGRAM_ID:
+        case AMC_RAW_SUBSTANCE_CONSUMPTION_PROGRAM_ID:
+        case AMC_SUBSTANCE_CALCULATED_CONSUMPTION_PROGRAM_ID:
+            return "programs";
+        default:
+            return "programs";
     }
 };

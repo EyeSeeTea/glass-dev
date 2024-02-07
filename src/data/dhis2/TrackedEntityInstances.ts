@@ -102,7 +102,7 @@ export async function getProgram(api: D2Api, id: Id): Promise<Program | undefine
 
     const program: Program = {
         id: apiProgram.id,
-        trackedEntityType: { id: apiProgram.trackedEntityType.id },
+        trackedEntityType: { id: apiProgram.trackedEntityType?.id },
         attributes: apiProgram.programTrackedEntityAttributes.map(
             ({ trackedEntityAttribute }) => trackedEntityAttribute
         ),

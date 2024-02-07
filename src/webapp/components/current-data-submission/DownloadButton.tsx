@@ -10,11 +10,13 @@ export const DownloadButton = ({
     onClick,
     buttonProps,
     helperText,
+    disabled,
 }: {
     title: string;
     onClick: React.MouseEventHandler<HTMLButtonElement> | undefined;
     buttonProps?: ButtonProps;
     helperText?: string;
+    disabled?: boolean;
 }) => {
     return (
         <ButtonWrapper>
@@ -22,6 +24,7 @@ export const DownloadButton = ({
                 variant="outlined"
                 onClick={onClick}
                 endIcon={<StyledCloudDownloadIcon />}
+                disabled={disabled}
                 {...buttonProps}
             >
                 {i18n.t(title)}
