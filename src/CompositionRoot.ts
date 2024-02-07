@@ -86,7 +86,10 @@ import { GetUploadsByDataSubmissionUseCase } from "./domain/usecases/GetUploadsB
 import { CalculateConsumptionDataProductLevelUseCase } from "./domain/usecases/data-entry/amc/CalculateConsumptionDataProductLevelUseCase";
 import { GlassATCDefaultRepository } from "./data/repositories/GlassATCDefaultRepository";
 import { CalculateConsumptionDataSubstanceLevelUseCase } from "./domain/usecases/data-entry/amc/CalculateConsumptionDataSubstanceLevelUseCase";
+import { DownloadAllDataForModuleUseCase } from "./domain/usecases/DownloadAllDataForModuleUseCase";
+import { EventVisualizationAnalyticsDefaultRepository } from "./data/repositories/EventVisualizationAnalyticsDefaultRepository";
 import { GetMultipleDashboardUseCase } from "./domain/usecases/GetMultipleDashboardUseCase";
+import { DownloadAllDataButtonData } from "./domain/usecases/DownloadAllDataButtonData";
 
 export function getCompositionRoot(instance: Instance) {
     const api = getD2APiFromInstance(instance);
@@ -122,6 +125,7 @@ export function getCompositionRoot(instance: Instance) {
     const amcSubstanceDataRepository = new AMCSubstanceDataDefaultRepository(api);
     const glassAtcRepository = new GlassATCDefaultRepository(dataStoreClient);
     const atcRepository = new GlassATCDefaultRepository(dataStoreClient);
+    const eventVisualizationRepository = new EventVisualizationAnalyticsDefaultRepository(api);
 
     return {
         instance: getExecute({
@@ -269,6 +273,14 @@ export function getCompositionRoot(instance: Instance) {
                 glassAtcRepository,
                 metadataRepository
             ),
+        }),
+
+        downloads: getExecute({
+            getDownloadButtonDetails: new DownloadAllDataButtonData(
+                eventVisualizationRepository,
+                glassModuleRepository
+            ),
+            downloadAllData: new DownloadAllDataForModuleUseCase(eventVisualizationRepository),
         }),
     };
 }
