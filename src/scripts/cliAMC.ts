@@ -70,6 +70,7 @@ async function main() {
                                 amcProductDataRepository,
                                 amcSubstanceDataRepository,
                                 atcRepository,
+                                calculate: args.calculate,
                             });
                         } else {
                             logger.info(`AMC recalculations are disabled`);
@@ -119,8 +120,10 @@ export async function recalculateData(params: {
     amcProductDataRepository: AMCProductDataRepository;
     amcSubstanceDataRepository: AMCSubstanceDataRepository;
     atcRepository: GlassATCRepository;
+    calculate: boolean;
 }): Promise<void> {
-    const { orgUnitsIds, periods, amcProductDataRepository, amcSubstanceDataRepository, atcRepository } = params;
+    const { orgUnitsIds, periods, amcProductDataRepository, amcSubstanceDataRepository, atcRepository, calculate } =
+        params;
     logger.info(
         `START - Recalculating AMC data for orgnanisations ${orgUnitsIds.join(",")} and periods ${periods.join(
             ","
@@ -132,12 +135,13 @@ export async function recalculateData(params: {
         .toPromise();
 
     await new RecalculateConsumptionDataProductLevelForAllUseCase(amcProductDataRepository)
-        .execute(orgUnitsIds, periods, currentATCVersion, currentATCData)
+        .execute(orgUnitsIds, periods, currentATCVersion, currentATCData, calculate)
         .toPromise();
 
     await new RecalculateConsumptionDataSubstanceLevelForAllUseCase(amcSubstanceDataRepository, atcRepository)
-        .execute(orgUnitsIds, periods, currentATCVersion, currentATCData)
+        .execute(orgUnitsIds, periods, currentATCVersion, currentATCData, calculate)
         .toPromise();
+
     logger.success(
         `END - End of AMC recalculations for orgnanisations ${orgUnitsIds.join(",")} and periods ${periods.join(",")}`
     );

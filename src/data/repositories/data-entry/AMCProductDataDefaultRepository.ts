@@ -86,8 +86,7 @@ export class AMCProductDataDefaultRepository implements AMCProductDataRepository
             productDataTrackedEntities,
             rawSubstanceConsumptionCalculatedStageMetadata,
             rawSubstanceConsumptionCalculatedData,
-            orgUnitId,
-            importStrategy
+            orgUnitId
         );
         if (!_.isEmpty(d2TrackerEvents)) {
             return importApiTracker(this.api, { events: d2TrackerEvents }, importStrategy);
@@ -268,8 +267,7 @@ export class AMCProductDataDefaultRepository implements AMCProductDataRepository
         productDataTrackedEntities: ProductDataTrackedEntity[],
         rawSubstanceConsumptionCalculatedStageMetadata: ProgramStage,
         rawSubstanceConsumptionCalculatedData: RawSubstanceConsumptionCalculated[],
-        orgUnitId: Id,
-        importStrategy: ImportStrategy
+        orgUnitId: Id
     ): D2TrackerEvent[] {
         return rawSubstanceConsumptionCalculatedData
             .map(data => {
@@ -299,17 +297,15 @@ export class AMCProductDataDefaultRepository implements AMCProductDataRepository
                     );
 
                     return {
-                        event: importStrategy === "UPDATE" ? data.eventId : "",
-                        occurredAt:
-                            importStrategy === "UPDATE"
-                                ? productDataTrackedEntity.events.find(({ eventId }) => eventId === data.eventId)
-                                      ?.occurredAt
-                                : new Date().getTime().toString(),
+                        event: data.eventId ?? "",
+                        occurredAt: data.eventId
+                            ? productDataTrackedEntity.events.find(({ eventId }) => eventId === data.eventId)
+                                  ?.occurredAt
+                            : new Date().getTime().toString(),
                         status: "COMPLETED",
                         trackedEntity: productDataTrackedEntity.trackedEntityId,
                         enrollment: productDataTrackedEntity.enrollmentId,
-                        enrollmentStatus:
-                            importStrategy === "UPDATE" ? productDataTrackedEntity.enrollmentStatus : "ACTIVE",
+                        enrollmentStatus: data.eventId ? productDataTrackedEntity.enrollmentStatus : "ACTIVE",
                         program: AMC_PRODUCT_REGISTER_PROGRAM_ID,
                         programStage: AMC_RAW_SUBSTANCE_CONSUMPTION_CALCULATED_STAGE_ID,
                         orgUnit: orgUnitId,

@@ -21,7 +21,8 @@ export class RecalculateConsumptionDataSubstanceLevelForAllUseCase {
         orgUnitsIds: Id[],
         periods: string[],
         currentATCVersion: string,
-        currentATCData: GlassATCVersion
+        currentATCData: GlassATCVersion,
+        allowCreationIfNotExist: boolean
     ): FutureData<void> {
         logger.info(
             `Calculate consumption data of substance level for orgUnitsIds=${orgUnitsIds.join(

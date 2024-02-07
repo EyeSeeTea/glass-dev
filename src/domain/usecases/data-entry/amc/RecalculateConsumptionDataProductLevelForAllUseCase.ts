@@ -26,6 +26,7 @@ import { SALT_MAPPING } from "../../../entities/data-entry/amc/Salt";
 import { getConsumptionDataProductLevel } from "./utils/getConsumptionDataProductLevel";
 
 const IMPORT_STRATEGY_UPDATE = "UPDATE";
+const IMPORT_STRATEGY_CREATE_AND_UPDATE = "CREATE_AND_UPDATE";
 
 export class RecalculateConsumptionDataProductLevelForAllUseCase {
     constructor(private amcProductDataRepository: AMCProductDataRepository) {}
@@ -33,7 +34,8 @@ export class RecalculateConsumptionDataProductLevelForAllUseCase {
         orgUnitsIds: Id[],
         periods: string[],
         currentATCVersion: string,
-        currentATCData: GlassATCVersion
+        currentATCData: GlassATCVersion,
+        allowCreationIfNotExist: boolean
     ): FutureData<void> {
         logger.info(
             `Calculate consumption data of product level for orgUnitsIds=${orgUnitsIds.join(
@@ -56,7 +58,8 @@ export class RecalculateConsumptionDataProductLevelForAllUseCase {
                                     orgUnitId,
                                     period,
                                     currentATCData,
-                                    currentATCVersion
+                                    currentATCVersion,
+                                    allowCreationIfNotExist
                                 ).toVoid();
                             })
                         ).toVoid();
@@ -69,7 +72,8 @@ export class RecalculateConsumptionDataProductLevelForAllUseCase {
         orgUnitId: Id,
         period: string,
         atcCurrentVersionData: GlassATCVersion,
-        atcVersionKey: string
+        atcVersionKey: string,
+        allowCreationIfNotExist: boolean
     ): FutureData<void> {
         logger.info(`Calculating consumption data of product level for orgUnitsId ${orgUnitId} and period ${period}`);
         return this.getTrackedEntitiesAndRawSubstanceConsumptionCalculatedEvents(
@@ -122,7 +126,10 @@ export class RecalculateConsumptionDataProductLevelForAllUseCase {
                         newRawSubstanceConsumptionCalculatedData
                     );
 
-                const eventIdsToUpdate = newRawSubstanceConsumptionCalculatedDataWithIds.map(({ eventId }) => eventId);
+                const rawSubstanceConsumptionCalculatedDataToUpdate =
+                    newRawSubstanceConsumptionCalculatedDataWithIds.filter(({ eventId }) => eventId !== undefined);
+                const eventIdsToUpdate = rawSubstanceConsumptionCalculatedDataToUpdate.map(({ eventId }) => eventId);
+
                 const eventIdsNoUpdated: Id[] = Object.keys(currentRawSubstanceConsumptionCalculatedByProductId).reduce(
                     (acc: Id[], productId) => {
                         const rawSubstanceConsumptionCalculatedNotToUpdate =
@@ -140,7 +147,8 @@ export class RecalculateConsumptionDataProductLevelForAllUseCase {
                     },
                     []
                 );
-                if (eventIdsNoUpdated.length) {
+
+                if (eventIdsNoUpdated.length && !allowCreationIfNotExist) {
                     logger.error(`These events could not be updated: events=${eventIdsNoUpdated.join(",")}`);
                 }
 
@@ -154,18 +162,44 @@ export class RecalculateConsumptionDataProductLevelForAllUseCase {
                     `Updating calculations of product level for ${eventIdsToUpdate.length} events in DHIS2 for orgUnitId ${orgUnitId} and period ${period}`
                 );
 
+                if (allowCreationIfNotExist && eventIdsNoUpdated.length) {
+                    logger.debug(
+                        `Creating Raw Substance Consumption Calculated data events in DHIS2 for orgUnitId ${orgUnitId} and period ${period}: events=${eventIdsNoUpdated.join(
+                            ","
+                        )}`
+                    );
+
+                    logger.info(
+                        `Creating Raw Substance Consumption Calculated data for ${eventIdsNoUpdated.length} events in DHIS2 for orgUnitId ${orgUnitId} and period ${period}`
+                    );
+                }
+
+                const rawSubstanceConsumptionCalculatedDataToCreate =
+                    newRawSubstanceConsumptionCalculatedDataWithIds.filter(({ eventId }) => eventId === undefined);
+
                 return this.amcProductDataRepository
                     .importCalculations(
-                        IMPORT_STRATEGY_UPDATE,
+                        allowCreationIfNotExist ? IMPORT_STRATEGY_CREATE_AND_UPDATE : IMPORT_STRATEGY_UPDATE,
                         productDataTrackedEntities,
                         rawSubstanceConsumptionCalculatedStageMetadata,
-                        newRawSubstanceConsumptionCalculatedDataWithIds,
+                        allowCreationIfNotExist
+                            ? [
+                                  ...rawSubstanceConsumptionCalculatedDataToUpdate,
+                                  ...rawSubstanceConsumptionCalculatedDataToCreate,
+                              ]
+                            : rawSubstanceConsumptionCalculatedDataToUpdate,
                         orgUnitId
                     )
                     .flatMap(response => {
                         if (response.status === "OK") {
                             logger.success(
-                                `Calculations of product level updated for orgUnitId ${orgUnitId} and period ${period}: ${response.stats.updated} of ${response.stats.total} events updated`
+                                `Calculations of product level updated for orgUnitId ${orgUnitId} and period ${period}: ${
+                                    response.stats.updated
+                                } of ${response.stats.total} events updated${
+                                    allowCreationIfNotExist
+                                        ? ` and ${response.stats.created} of ${response.stats.total} events created`
+                                        : ""
+                                }`
                             );
                         }
                         if (response.status === "ERROR") {
@@ -179,9 +213,9 @@ export class RecalculateConsumptionDataProductLevelForAllUseCase {
                             logger.warn(
                                 `Warning updating calculations of product level updated for orgUnitId ${orgUnitId} and period ${period}: updated=${
                                     response.stats.updated
-                                }, total=${response.stats.total} and warning=${JSON.stringify(
-                                    response.validationReport.warningReports
-                                )}`
+                                }, ${allowCreationIfNotExist ? `created=${response.stats.created}, ` : ""} total=${
+                                    response.stats.total
+                                } and warning=${JSON.stringify(response.validationReport.warningReports)}`
                             );
                         }
                         return Future.success(undefined);
@@ -248,32 +282,26 @@ function linkEventIdToNewRawSubstanceConsumptionCalculated(
     currentRawSubstanceConsumptionCalculatedByProductId: Record<string, RawSubstanceConsumptionCalculated[]>,
     newRawSubstanceConsumptionCalculatedData: RawSubstanceConsumptionCalculated[]
 ): RawSubstanceConsumptionCalculated[] {
-    return newRawSubstanceConsumptionCalculatedData
-        .map(newCalulatedData => {
-            const eventIdFound = currentRawSubstanceConsumptionCalculatedByProductId[
-                newCalulatedData.AMR_GLASS_AMC_TEA_PRODUCT_ID
-            ]?.find(currentCalculatedData => {
-                return (
-                    currentCalculatedData.atc_autocalculated === newCalulatedData.atc_autocalculated &&
-                    currentCalculatedData.route_admin_autocalculated === newCalulatedData.route_admin_autocalculated &&
-                    (currentCalculatedData.salt_autocalculated === newCalulatedData.salt_autocalculated ||
-                        SALT_MAPPING.default === newCalulatedData.salt_autocalculated) &&
-                    currentCalculatedData.health_sector_autocalculated ===
-                        newCalulatedData.health_sector_autocalculated &&
-                    currentCalculatedData.health_level_autocalculated ===
-                        newCalulatedData.health_level_autocalculated &&
-                    currentCalculatedData.data_status_autocalculated === newCalulatedData.data_status_autocalculated
-                );
-            })?.eventId;
+    return newRawSubstanceConsumptionCalculatedData.map(newCalulatedData => {
+        const eventIdFound = currentRawSubstanceConsumptionCalculatedByProductId[
+            newCalulatedData.AMR_GLASS_AMC_TEA_PRODUCT_ID
+        ]?.find(currentCalculatedData => {
+            return (
+                currentCalculatedData.atc_autocalculated === newCalulatedData.atc_autocalculated &&
+                currentCalculatedData.route_admin_autocalculated === newCalulatedData.route_admin_autocalculated &&
+                (currentCalculatedData.salt_autocalculated === newCalulatedData.salt_autocalculated ||
+                    SALT_MAPPING.default === newCalulatedData.salt_autocalculated) &&
+                currentCalculatedData.health_sector_autocalculated === newCalulatedData.health_sector_autocalculated &&
+                currentCalculatedData.health_level_autocalculated === newCalulatedData.health_level_autocalculated &&
+                currentCalculatedData.data_status_autocalculated === newCalulatedData.data_status_autocalculated
+            );
+        })?.eventId;
 
-            if (eventIdFound) {
-                return {
-                    eventId: eventIdFound,
-                    ...newCalulatedData,
-                };
-            }
-        })
-        .filter(Boolean) as RawSubstanceConsumptionCalculated[];
+        return {
+            eventId: eventIdFound ?? undefined,
+            ...newCalulatedData,
+        };
+    });
 }
 
 function getCurrentRawSubstanceConsumptionCalculated(
