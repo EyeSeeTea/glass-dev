@@ -1,5 +1,6 @@
 import { Future, FutureData } from "../../../entities/Future";
 import { Id } from "../../../entities/Ref";
+import { createAtcVersionKey } from "../../../entities/GlassATC";
 import { mapToImportSummary, readTemplate } from "../ImportBLTemplateEventProgram";
 import { ExcelRepository } from "../../../repositories/ExcelRepository";
 import { GlassATCRepository } from "../../../repositories/GlassATCRepository";
@@ -49,84 +50,98 @@ export class CalculateConsumptionDataProductLevelUseCase {
             })
             .flatMap(result => {
                 const { productRegisterProgramMetadata, productDataTrackedEntities, atcVersionHistory } = result;
-                return getConsumptionDataProductLevel({
-                    productRegisterProgramMetadata,
-                    productDataTrackedEntities,
-                    atcVersionHistory,
-                    atcRepository: this.atcRepository,
-                    orgUnitId,
-                    period,
-                }).flatMap(rawSubstanceConsumptionCalculatedData => {
-                    if (_.isEmpty(rawSubstanceConsumptionCalculatedData)) {
-                        logger.error(
-                            `Product level: there are no calculated data to import for orgUnitId ${orgUnitId} and period ${period}`
-                        );
-                        const errorSummary: ImportSummary = {
-                            status: "ERROR",
-                            importCount: {
-                                ignored: 0,
-                                imported: 0,
-                                deleted: 0,
-                                updated: 0,
-                            },
-                            nonBlockingErrors: [],
-                            blockingErrors: [],
-                        };
-                        return Future.success(errorSummary);
-                    }
-
-                    const rawSubstanceConsumptionCalculatedStageMetadata =
-                        productRegisterProgramMetadata?.programStages.find(
-                            ({ id }) => id === AMC_RAW_SUBSTANCE_CONSUMPTION_CALCULATED_STAGE_ID
-                        );
-
-                    if (!rawSubstanceConsumptionCalculatedStageMetadata) {
-                        logger.error(
-                            `Cannot find Raw Substance Consumption Calculated program stage metadata with id ${AMC_RAW_SUBSTANCE_CONSUMPTION_CALCULATED_STAGE_ID}`
-                        );
-                        return Future.error("Cannot find Raw Substance Consumption Calculated program stage metadata");
-                    }
-                    logger.info(
-                        `Creating calculations of product level data as events for orgUnitId ${orgUnitId} and period ${period}`
+                const atcCurrentVersionInfo = atcVersionHistory.find(({ currentVersion }) => currentVersion);
+                if (!atcCurrentVersionInfo) {
+                    logger.error(`Cannot find current version of ATC in version history.`);
+                    logger.debug(
+                        `Cannot find current version of ATC in version history: ${JSON.stringify(atcVersionHistory)}`
                     );
-                    return this.amcProductDataRepository
-                        .importCalculations(
-                            IMPORT_STRATEGY_CREATE_AND_UPDATE,
-                            productDataTrackedEntities,
-                            rawSubstanceConsumptionCalculatedStageMetadata,
-                            rawSubstanceConsumptionCalculatedData,
-                            orgUnitId
-                        )
-                        .flatMap(response => {
-                            if (response.status === "OK") {
-                                logger.success(
-                                    `Calculations of product level created for orgUnitId ${orgUnitId} and period ${period}: ${response.stats.created} of ${response.stats.total} events created`
-                                );
-                            }
-                            if (response.status === "ERROR") {
-                                logger.error(
-                                    `Error creating calculations of product level for orgUnitId ${orgUnitId} and period ${period}: ${JSON.stringify(
-                                        response.validationReport.errorReports
-                                    )}`
-                                );
-                            }
-                            if (response.status === "WARNING") {
-                                logger.warn(
-                                    `Warning creating calculations of product level updated for orgUnitId ${orgUnitId} and period ${period}: ${
-                                        response.stats.created
-                                    } of ${response.stats.total} events created and warning=${JSON.stringify(
-                                        response.validationReport.warningReports
-                                    )}`
-                                );
-                            }
-                            return mapToImportSummary(
-                                response,
-                                IMPORT_SUMMARY_EVENT_TYPE,
-                                this.metadataRepository
-                            ).flatMap(summary => {
-                                return Future.success(summary.importSummary);
+                    return Future.error("Cannot find current version of ATC in version history.");
+                }
+                const atcVersionKey = createAtcVersionKey(atcCurrentVersionInfo.year, atcCurrentVersionInfo.version);
+                logger.info(`Current ATC version: ${atcVersionKey}`);
+                return this.atcRepository.getAtcVersion(atcVersionKey).flatMap(atcCurrentVersionData => {
+                    return getConsumptionDataProductLevel({
+                        orgUnitId,
+                        period,
+                        productRegisterProgramMetadata,
+                        productDataTrackedEntities,
+                        atcCurrentVersionData,
+                        atcVersionKey,
+                    }).flatMap(rawSubstanceConsumptionCalculatedData => {
+                        if (_.isEmpty(rawSubstanceConsumptionCalculatedData)) {
+                            logger.error(
+                                `Product level: there are no calculated data to import for orgUnitId ${orgUnitId} and period ${period}`
+                            );
+                            const errorSummary: ImportSummary = {
+                                status: "ERROR",
+                                importCount: {
+                                    ignored: 0,
+                                    imported: 0,
+                                    deleted: 0,
+                                    updated: 0,
+                                },
+                                nonBlockingErrors: [],
+                                blockingErrors: [],
+                            };
+                            return Future.success(errorSummary);
+                        }
+
+                        const rawSubstanceConsumptionCalculatedStageMetadata =
+                            productRegisterProgramMetadata?.programStages.find(
+                                ({ id }) => id === AMC_RAW_SUBSTANCE_CONSUMPTION_CALCULATED_STAGE_ID
+                            );
+
+                        if (!rawSubstanceConsumptionCalculatedStageMetadata) {
+                            logger.error(
+                                `Cannot find Raw Substance Consumption Calculated program stage metadata with id ${AMC_RAW_SUBSTANCE_CONSUMPTION_CALCULATED_STAGE_ID}`
+                            );
+                            return Future.error(
+                                "Cannot find Raw Substance Consumption Calculated program stage metadata"
+                            );
+                        }
+                        logger.info(
+                            `Creating calculations of product level data as events for orgUnitId ${orgUnitId} and period ${period}`
+                        );
+                        return this.amcProductDataRepository
+                            .importCalculations(
+                                IMPORT_STRATEGY_CREATE_AND_UPDATE,
+                                productDataTrackedEntities,
+                                rawSubstanceConsumptionCalculatedStageMetadata,
+                                rawSubstanceConsumptionCalculatedData,
+                                orgUnitId
+                            )
+                            .flatMap(response => {
+                                if (response.status === "OK") {
+                                    logger.success(
+                                        `Calculations of product level created for orgUnitId ${orgUnitId} and period ${period}: ${response.stats.created} of ${response.stats.total} events created`
+                                    );
+                                }
+                                if (response.status === "ERROR") {
+                                    logger.error(
+                                        `Error creating calculations of product level for orgUnitId ${orgUnitId} and period ${period}: ${JSON.stringify(
+                                            response.validationReport.errorReports
+                                        )}`
+                                    );
+                                }
+                                if (response.status === "WARNING") {
+                                    logger.warn(
+                                        `Warning creating calculations of product level updated for orgUnitId ${orgUnitId} and period ${period}: ${
+                                            response.stats.created
+                                        } of ${response.stats.total} events created and warning=${JSON.stringify(
+                                            response.validationReport.warningReports
+                                        )}`
+                                    );
+                                }
+                                return mapToImportSummary(
+                                    response,
+                                    IMPORT_SUMMARY_EVENT_TYPE,
+                                    this.metadataRepository
+                                ).flatMap(summary => {
+                                    return Future.success(summary.importSummary);
+                                });
                             });
-                        });
+                    });
                 });
             });
     }

@@ -1,5 +1,6 @@
 import { logger } from "../../../../utils/logger";
 import { Future, FutureData } from "../../../entities/Future";
+import { createAtcVersionKey } from "../../../entities/GlassATC";
 import { Id } from "../../../entities/Ref";
 import { ImportSummary } from "../../../entities/data-entry/ImportSummary";
 import { GlassATCRepository } from "../../../repositories/GlassATCRepository";
@@ -42,70 +43,86 @@ export class CalculateConsumptionDataSubstanceLevelUseCase {
             })
             .flatMap(result => {
                 const { rawSubstanceConsumptionData, atcVersionHistory } = result;
-                return getConsumptionDataSubstanceLevel({
-                    orgUnitId,
-                    period,
-                    atcRepository: this.atcRepository,
-                    rawSubstanceConsumptionData,
-                    atcVersionHistory,
-                }).flatMap(calculatedConsumptionSubstanceLevelData => {
-                    if (_.isEmpty(calculatedConsumptionSubstanceLevelData)) {
-                        logger.error(
-                            `Substance level: there are no calculated data to import for orgUnitId ${orgUnitId} and period ${period}`
-                        );
-                        const errorSummary: ImportSummary = {
-                            status: "ERROR",
-                            importCount: {
-                                ignored: 0,
-                                imported: 0,
-                                deleted: 0,
-                                updated: 0,
-                            },
-                            nonBlockingErrors: [],
-                            blockingErrors: [],
-                        };
-                        return Future.success(errorSummary);
-                    }
-                    logger.info(
-                        `Creating calculations of substance level data as events for orgUnitId ${orgUnitId} and period ${period}`
+                const atcCurrentVersionInfo = atcVersionHistory.find(({ currentVersion }) => currentVersion);
+                if (!atcCurrentVersionInfo) {
+                    logger.error(`Cannot find current version of ATC in version history.`);
+                    logger.debug(
+                        `Cannot find current version of ATC in version history: ${JSON.stringify(atcVersionHistory)}`
                     );
-                    return this.amcSubstanceDataRepository
-                        .importCalculations(
-                            IMPORT_STRATEGY_CREATE_AND_UPDATE,
-                            orgUnitId,
-                            calculatedConsumptionSubstanceLevelData
-                        )
-                        .flatMap(result => {
-                            const { response, eventIdLineNoMap } = result;
-                            if (response.status === "OK") {
-                                logger.success(
-                                    `Calculations of substance level created for orgUnitId ${orgUnitId} and period ${period}: ${response.stats.created} of ${response.stats.total} events created`
-                                );
-                            }
-                            if (response.status === "ERROR") {
-                                logger.error(
-                                    `Error creating calculations of substance level for orgUnitId ${orgUnitId} and period ${period}: ${JSON.stringify(
-                                        response.validationReport.errorReports
-                                    )}`
-                                );
-                            }
-                            if (response.status === "WARNING") {
-                                logger.warn(
-                                    `Warning creating calculations of substance level updated for orgUnitId ${orgUnitId} and period ${period}: ${
-                                        response.stats.created
-                                    } of ${response.stats.total} events created and warning=${JSON.stringify(
-                                        response.validationReport.warningReports
-                                    )}`
-                                );
-                            }
-                            return mapToImportSummary(
-                                response,
-                                IMPORT_SUMMARY_EVENT_TYPE,
-                                this.metadataRepository,
-                                undefined,
-                                eventIdLineNoMap
-                            ).flatMap(summary => this.uploadIdListFileAndSave(uploadId, summary, moduleName));
-                        });
+                    return Future.error("Cannot find current version of ATC in version history.");
+                }
+                const currentAtcVersionKey = createAtcVersionKey(
+                    atcCurrentVersionInfo.year,
+                    atcCurrentVersionInfo.version
+                );
+                logger.info(`Current ATC version: ${currentAtcVersionKey}`);
+                return this.atcRepository.getAtcVersion(currentAtcVersionKey).flatMap(atcCurrentVersionData => {
+                    return getConsumptionDataSubstanceLevel({
+                        orgUnitId,
+                        period,
+                        atcRepository: this.atcRepository,
+                        rawSubstanceConsumptionData,
+                        currentAtcVersionKey,
+                        atcCurrentVersionData,
+                    }).flatMap(calculatedConsumptionSubstanceLevelData => {
+                        if (_.isEmpty(calculatedConsumptionSubstanceLevelData)) {
+                            logger.error(
+                                `Substance level: there are no calculated data to import for orgUnitId ${orgUnitId} and period ${period}`
+                            );
+                            const errorSummary: ImportSummary = {
+                                status: "ERROR",
+                                importCount: {
+                                    ignored: 0,
+                                    imported: 0,
+                                    deleted: 0,
+                                    updated: 0,
+                                },
+                                nonBlockingErrors: [],
+                                blockingErrors: [],
+                            };
+                            return Future.success(errorSummary);
+                        }
+                        logger.info(
+                            `Creating calculations of substance level data as events for orgUnitId ${orgUnitId} and period ${period}`
+                        );
+                        return this.amcSubstanceDataRepository
+                            .importCalculations(
+                                IMPORT_STRATEGY_CREATE_AND_UPDATE,
+                                orgUnitId,
+                                calculatedConsumptionSubstanceLevelData
+                            )
+                            .flatMap(result => {
+                                const { response, eventIdLineNoMap } = result;
+                                if (response.status === "OK") {
+                                    logger.success(
+                                        `Calculations of substance level created for orgUnitId ${orgUnitId} and period ${period}: ${response.stats.created} of ${response.stats.total} events created`
+                                    );
+                                }
+                                if (response.status === "ERROR") {
+                                    logger.error(
+                                        `Error creating calculations of substance level for orgUnitId ${orgUnitId} and period ${period}: ${JSON.stringify(
+                                            response.validationReport.errorReports
+                                        )}`
+                                    );
+                                }
+                                if (response.status === "WARNING") {
+                                    logger.warn(
+                                        `Warning creating calculations of substance level updated for orgUnitId ${orgUnitId} and period ${period}: ${
+                                            response.stats.created
+                                        } of ${response.stats.total} events created and warning=${JSON.stringify(
+                                            response.validationReport.warningReports
+                                        )}`
+                                    );
+                                }
+                                return mapToImportSummary(
+                                    response,
+                                    IMPORT_SUMMARY_EVENT_TYPE,
+                                    this.metadataRepository,
+                                    undefined,
+                                    eventIdLineNoMap
+                                ).flatMap(summary => this.uploadIdListFileAndSave(uploadId, summary, moduleName));
+                            });
+                    });
                 });
             });
     }

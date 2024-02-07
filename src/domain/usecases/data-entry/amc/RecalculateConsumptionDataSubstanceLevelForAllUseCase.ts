@@ -1,14 +1,14 @@
-import { GlassATCHistory, createAtcVersionKey } from "../../../entities/GlassATC";
-import { Id } from "../../../entities/Ref";
-import { GlassATCRepository } from "../../../repositories/GlassATCRepository";
-import { Future, FutureData } from "../../../entities/Future";
-import { RawSubstanceConsumptionData } from "../../../entities/data-entry/amc/RawSubstanceConsumptionData";
-import { AMCSubstanceDataRepository } from "../../../repositories/data-entry/AMCSubstanceDataRepository";
-import { logger } from "../../../../utils/logger";
 import _ from "lodash";
-import { getConsumptionDataSubstanceLevel } from "./utils/getConsumptionDataSubstanceLevel";
-import { SubstanceConsumptionCalculated } from "../../../entities/data-entry/amc/SubstanceConsumptionCalculated";
+import { logger } from "../../../../utils/logger";
+import { Id } from "../../../entities/Ref";
+import { Future, FutureData } from "../../../entities/Future";
+import { GlassATCVersion } from "../../../entities/GlassATC";
 import { SALT_MAPPING } from "../../../entities/data-entry/amc/Salt";
+import { RawSubstanceConsumptionData } from "../../../entities/data-entry/amc/RawSubstanceConsumptionData";
+import { SubstanceConsumptionCalculated } from "../../../entities/data-entry/amc/SubstanceConsumptionCalculated";
+import { GlassATCRepository } from "../../../repositories/GlassATCRepository";
+import { AMCSubstanceDataRepository } from "../../../repositories/data-entry/AMCSubstanceDataRepository";
+import { getConsumptionDataSubstanceLevel } from "./utils/getConsumptionDataSubstanceLevel";
 
 const IMPORT_STRATEGY_UPDATE = "UPDATE";
 
@@ -17,7 +17,12 @@ export class RecalculateConsumptionDataSubstanceLevelForAllUseCase {
         private amcSubstanceDataRepository: AMCSubstanceDataRepository,
         private atcRepository: GlassATCRepository
     ) {}
-    public execute(orgUnitsIds: Id[], periods: string[]): FutureData<void> {
+    public execute(
+        orgUnitsIds: Id[],
+        periods: string[],
+        currentATCVersion: string,
+        currentATCData: GlassATCVersion
+    ): FutureData<void> {
         logger.info(
             `Calculate consumption data of substance level for orgUnitsIds=${orgUnitsIds.join(
                 ","
@@ -27,106 +32,116 @@ export class RecalculateConsumptionDataSubstanceLevelForAllUseCase {
             orgUnitsIds.map(orgUnitId => {
                 return Future.sequential(
                     periods.map(period => {
-                        return this.calculateByOrgUnitAndPeriod(orgUnitId, period).toVoid();
+                        return this.calculateByOrgUnitAndPeriod(
+                            orgUnitId,
+                            period,
+                            currentATCVersion,
+                            currentATCData
+                        ).toVoid();
                     })
                 ).toVoid();
             })
         ).toVoid();
     }
-    private calculateByOrgUnitAndPeriod(orgUnitId: Id, period: string): FutureData<void> {
+
+    private calculateByOrgUnitAndPeriod(
+        orgUnitId: Id,
+        period: string,
+        currentATCVersion: string,
+        currentATCData: GlassATCVersion
+    ): FutureData<void> {
         logger.info(`Calculating consumption data of substance level for orgUnitsId ${orgUnitId} and period ${period}`);
-        return this.getDataForRecalculations(orgUnitId, period).flatMap(data => {
-            const { rawSubstanceConsumptionData, atcVersionHistory, currentCalculatedConsumptionData } = data;
-            const atcCurrentVersionInfo = atcVersionHistory.find(({ currentVersion }) => currentVersion);
-            if (atcCurrentVersionInfo) {
-                const atcVersionKey = createAtcVersionKey(atcCurrentVersionInfo.year, atcCurrentVersionInfo.version);
-                logger.info(`New ATC version used in recalculations: ${atcVersionKey}`);
-            }
-            return getConsumptionDataSubstanceLevel({
-                orgUnitId,
-                period,
-                atcRepository: this.atcRepository,
-                rawSubstanceConsumptionData,
-                atcVersionHistory,
-            }).flatMap(newCalculatedConsumptionData => {
-                if (_.isEmpty(newCalculatedConsumptionData)) {
-                    logger.error(
-                        `Substance level: there are no new calculated data to update current data for orgUnitId ${orgUnitId} and period ${period}`
-                    );
-                    return Future.success(undefined);
-                }
-
-                if (!currentCalculatedConsumptionData || _.isEmpty(currentCalculatedConsumptionData)) {
-                    logger.error(
-                        `Substance level: there are no current calculated data to update for orgUnitId ${orgUnitId} and period ${period}`
-                    );
-                    return Future.success(undefined);
-                }
-
-                const newCalculatedConsumptionDataWithIds = linkEventIdToNewCalculatedConsumptionData(
-                    currentCalculatedConsumptionData,
-                    newCalculatedConsumptionData
-                );
-
-                const eventIdsToUpdate = newCalculatedConsumptionDataWithIds.map(({ eventId }) => eventId);
-
-                const eventIdsNoUpdated = currentCalculatedConsumptionData.filter(
-                    ({ eventId }) => !eventIdsToUpdate.includes(eventId)
-                );
-                if (eventIdsNoUpdated.length) {
-                    logger.error(`These events could not be updated: events=${eventIdsNoUpdated.join(",")}`);
-                }
-
-                logger.debug(
-                    `Updating calculations of substance level events in DHIS2 for orgUnitId ${orgUnitId} and period ${period}: events=${eventIdsToUpdate.join(
-                        ","
-                    )}`
-                );
-                logger.info(
-                    `Updating calculations of substance level for ${eventIdsToUpdate.length} events in DHIS2 for orgUnitId ${orgUnitId} and period ${period}`
-                );
-                return this.amcSubstanceDataRepository
-                    .importCalculations(IMPORT_STRATEGY_UPDATE, orgUnitId, newCalculatedConsumptionDataWithIds)
-                    .flatMap(({ response }) => {
-                        if (response.status === "OK") {
-                            logger.success(
-                                `Calculations of substance level updated for orgUnitId ${orgUnitId} and period ${period}: ${response.stats.updated} of ${response.stats.total} events updated`
-                            );
-                        }
-                        if (response.status === "ERROR") {
-                            logger.error(
-                                `Error updating calculations of substance level updated for orgUnitId ${orgUnitId} and period ${period}: ${JSON.stringify(
-                                    response.validationReport.errorReports
-                                )}`
-                            );
-                        }
-                        if (response.status === "WARNING") {
-                            logger.warn(
-                                `Warning updating calculations of substance level updated for orgUnitId ${orgUnitId} and period ${period}: ${JSON.stringify(
-                                    response.validationReport.warningReports
-                                )}`
-                            );
-                        }
+        return this.getDataForRecalculations(orgUnitId, period).flatMap(
+            ({ rawSubstanceConsumptionData, currentCalculatedConsumptionData }) => {
+                return getConsumptionDataSubstanceLevel({
+                    orgUnitId,
+                    period,
+                    atcRepository: this.atcRepository,
+                    rawSubstanceConsumptionData,
+                    currentAtcVersionKey: currentATCVersion,
+                    atcCurrentVersionData: currentATCData,
+                }).flatMap(newCalculatedConsumptionData => {
+                    if (_.isEmpty(newCalculatedConsumptionData)) {
+                        logger.error(
+                            `Substance level: there are no new calculated data to update current data for orgUnitId ${orgUnitId} and period ${period}`
+                        );
                         return Future.success(undefined);
-                    });
-            });
-        });
+                    }
+
+                    if (!currentCalculatedConsumptionData || _.isEmpty(currentCalculatedConsumptionData)) {
+                        logger.error(
+                            `Substance level: there are no current calculated data to update for orgUnitId ${orgUnitId} and period ${period}`
+                        );
+                        return Future.success(undefined);
+                    }
+
+                    const newCalculatedConsumptionDataWithIds = linkEventIdToNewCalculatedConsumptionData(
+                        currentCalculatedConsumptionData,
+                        newCalculatedConsumptionData
+                    );
+
+                    const eventIdsToUpdate = newCalculatedConsumptionDataWithIds.map(({ eventId }) => eventId);
+
+                    const eventIdsNoUpdated = currentCalculatedConsumptionData.filter(
+                        ({ eventId }) => !eventIdsToUpdate.includes(eventId)
+                    );
+                    if (eventIdsNoUpdated.length) {
+                        logger.error(`These events could not be updated: events=${eventIdsNoUpdated.join(",")}`);
+                    }
+
+                    logger.debug(
+                        `Updating calculations of substance level events in DHIS2 for orgUnitId ${orgUnitId} and period ${period}: events=${eventIdsToUpdate.join(
+                            ","
+                        )}`
+                    );
+                    logger.info(
+                        `Updating calculations of substance level for ${eventIdsToUpdate.length} events in DHIS2 for orgUnitId ${orgUnitId} and period ${period}`
+                    );
+
+                    return this.amcSubstanceDataRepository
+                        .importCalculations(IMPORT_STRATEGY_UPDATE, orgUnitId, newCalculatedConsumptionDataWithIds)
+                        .flatMap(({ response }) => {
+                            if (response.status === "OK") {
+                                logger.success(
+                                    `Calculations of substance level updated for orgUnitId ${orgUnitId} and period ${period}: ${response.stats.updated} of ${response.stats.total} events updated`
+                                );
+                            }
+                            if (response.status === "ERROR") {
+                                logger.error(
+                                    `Error updating calculations of substance level updated for orgUnitId ${orgUnitId} and period ${period}: ${JSON.stringify(
+                                        response.validationReport.errorReports
+                                    )}`
+                                );
+                            }
+                            if (response.status === "WARNING") {
+                                logger.warn(
+                                    `Warning updating calculations of substance level updated for orgUnitId ${orgUnitId} and period ${period}: ${JSON.stringify(
+                                        response.validationReport.warningReports
+                                    )}`
+                                );
+                            }
+                            return Future.success(undefined);
+                        });
+                });
+            }
+        );
     }
+
     private getDataForRecalculations(
         orgUnitId: Id,
         period: string
     ): FutureData<{
         rawSubstanceConsumptionData: RawSubstanceConsumptionData[] | undefined;
-        atcVersionHistory: GlassATCHistory[];
         currentCalculatedConsumptionData: SubstanceConsumptionCalculated[] | undefined;
     }> {
-        logger.info("Getting data for AMC calculations in substance level data...");
+        logger.info(
+            `Getting raw substance consumption data and current calculated consumption data for orgUnitId ${orgUnitId} and period ${period}`
+        );
         return Future.joinObj({
             rawSubstanceConsumptionData: this.amcSubstanceDataRepository.getAllRawSubstanceConsumptionDataByByPeriod(
                 orgUnitId,
                 period
             ),
-            atcVersionHistory: this.atcRepository.getAtcHistory(),
             currentCalculatedConsumptionData:
                 this.amcSubstanceDataRepository.getAllCalculatedSubstanceConsumptionDataByByPeriod(orgUnitId, period),
         });
