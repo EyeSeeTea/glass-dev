@@ -212,8 +212,8 @@ function getRawProductConsumption(
             }, {});
             if (Object.keys(consumptionData).length) {
                 return {
-                    AMR_GLASS_AMC_TEA_PRODUCT_ID: productId,
                     ...consumptionData,
+                    AMR_GLASS_AMC_TEA_PRODUCT_ID: productId,
                 };
             }
         })
