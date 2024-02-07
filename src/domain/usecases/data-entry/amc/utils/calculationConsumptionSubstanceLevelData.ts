@@ -20,62 +20,74 @@ export function calculateConsumptionSubstanceLevelData(
     const calculatedConsumptionSubstanceLevelData = rawSubstanceConsumptionData
         .map(rawSubstanceConsumption => {
             logger.debug(`Calculate consumption substance level data of: ${JSON.stringify(rawSubstanceConsumption)}`);
-            // 1a & 2
-            logger.info(`Getting ddd_value_latest and ddd_unit_latest using version ${currentAtcVersionKey}`);
-            const dddStandarizedLatest = getStandardizedDDD(
-                rawSubstanceConsumption,
-                atcVersionsByKeys[currentAtcVersionKey]
-            );
-
-            if (!dddStandarizedLatest) {
+            const { atc_version_manual } = rawSubstanceConsumption;
+            if (!atcVersionsByKeys[atc_version_manual]) {
                 logger.error(
-                    `Data not calculated and moving to the next. ddd_value_latest and ddd_unit_latest could not be calculated.`
+                    `ATC data not found for these version: ${atc_version_manual}. Calculated consumption data for this raw substance consumption data cannot be calculated.`
                 );
                 logger.debug(
-                    `ddd_value_latest and ddd_unit_latest could not be calculated for ${JSON.stringify(
+                    `ATC data not found for these version: ${atc_version_manual}. Calculated consumption data for this raw substance consumption data cannot be calculated: ${JSON.stringify(
                         rawSubstanceConsumption
                     )}`
                 );
             } else {
-                // 1b & 2
-                const { atc_version_manual } = rawSubstanceConsumption;
-                logger.info(`Getting ddd_value_uploaded and ddd_unit_uploaded using version ${atc_version_manual}`);
-                const dddStandarizedInRawSubstanceConsumption = getStandardizedDDD(
+                // 1a & 2
+                logger.info(`Getting ddd_value_latest and ddd_unit_latest using version ${currentAtcVersionKey}`);
+                const dddStandarizedLatest = getStandardizedDDD(
                     rawSubstanceConsumption,
-                    atcVersionsByKeys[atc_version_manual]
+                    atcVersionsByKeys[currentAtcVersionKey]
                 );
 
-                if (!dddStandarizedInRawSubstanceConsumption) {
+                if (!dddStandarizedLatest) {
                     logger.error(
-                        `Data not calculated and moving to the next. ddd_value_uploaded and ddd_unit_uploaded could not be calculated.`
+                        `Data not calculated and moving to the next. ddd_value_latest and ddd_unit_latest could not be calculated.`
                     );
                     logger.debug(
-                        `ddd_value_uploaded and ddd_unit_uploaded could not be calculated for ${JSON.stringify(
+                        `ddd_value_latest and ddd_unit_latest could not be calculated for ${JSON.stringify(
                             rawSubstanceConsumption
                         )}`
                     );
                 } else {
-                    // 3 & 4
-                    const dddsAdjust = getDDDsAdjust(
+                    // 1b & 2
+                    const { atc_version_manual } = rawSubstanceConsumption;
+                    logger.info(`Getting ddd_value_uploaded and ddd_unit_uploaded using version ${atc_version_manual}`);
+                    const dddStandarizedInRawSubstanceConsumption = getStandardizedDDD(
                         rawSubstanceConsumption,
-                        dddStandarizedLatest,
-                        dddStandarizedInRawSubstanceConsumption
+                        atcVersionsByKeys[atc_version_manual]
                     );
-                    return {
-                        period,
-                        orgUnitId,
-                        report_date: rawSubstanceConsumption.report_date,
-                        atc_autocalculated: rawSubstanceConsumption.atc_manual,
-                        route_admin_autocalculated: rawSubstanceConsumption.route_admin_manual,
-                        salt_autocalculated: rawSubstanceConsumption.salt_manual,
-                        packages_autocalculated: rawSubstanceConsumption.packages_manual,
-                        ddds_autocalculated: dddsAdjust,
-                        atc_version_autocalculated: currentAtcVersionKey,
-                        tons_autocalculated: rawSubstanceConsumption.tons_manual,
-                        data_status_autocalculated: rawSubstanceConsumption.data_status_manual,
-                        health_sector_autocalculated: rawSubstanceConsumption.health_sector_manual,
-                        health_level_autocalculated: rawSubstanceConsumption.health_level_manual,
-                    };
+
+                    if (!dddStandarizedInRawSubstanceConsumption) {
+                        logger.error(
+                            `Data not calculated and moving to the next. ddd_value_uploaded and ddd_unit_uploaded could not be calculated.`
+                        );
+                        logger.debug(
+                            `ddd_value_uploaded and ddd_unit_uploaded could not be calculated for ${JSON.stringify(
+                                rawSubstanceConsumption
+                            )}`
+                        );
+                    } else {
+                        // 3 & 4
+                        const dddsAdjust = getDDDsAdjust(
+                            rawSubstanceConsumption,
+                            dddStandarizedLatest,
+                            dddStandarizedInRawSubstanceConsumption
+                        );
+                        return {
+                            period,
+                            orgUnitId,
+                            report_date: rawSubstanceConsumption.report_date,
+                            atc_autocalculated: rawSubstanceConsumption.atc_manual,
+                            route_admin_autocalculated: rawSubstanceConsumption.route_admin_manual,
+                            salt_autocalculated: rawSubstanceConsumption.salt_manual,
+                            packages_autocalculated: rawSubstanceConsumption.packages_manual,
+                            ddds_autocalculated: dddsAdjust,
+                            atc_version_autocalculated: currentAtcVersionKey,
+                            tons_autocalculated: rawSubstanceConsumption.tons_manual,
+                            data_status_autocalculated: rawSubstanceConsumption.data_status_manual,
+                            health_sector_autocalculated: rawSubstanceConsumption.health_sector_manual,
+                            health_level_autocalculated: rawSubstanceConsumption.health_level_manual,
+                        };
+                    }
                 }
             }
         })
@@ -141,7 +153,7 @@ function getDDDsAdjust(
     // 3 - ratio_ddd = standardized_ddd_value_uploaded ÷ standardized_ddd_value_latest
     const ratioDDD = dddStandarizedInRawSubstanceConsumption / dddStandarizedLatest;
     // 4 - ddds_adjust = ddds × ratio_ddd
-    logger.debug(`Get ratio_ddd: :  ${ratioDDD}`);
+    logger.debug(`Get ratio_ddd:  ${ratioDDD}`);
     logger.debug(`Get ddds_adjust from ddds_manual: ${ddds_manual * ratioDDD}`);
     return ddds_manual * ratioDDD;
 }
