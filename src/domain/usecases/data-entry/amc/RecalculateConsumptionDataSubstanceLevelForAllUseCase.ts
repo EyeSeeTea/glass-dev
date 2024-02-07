@@ -11,6 +11,7 @@ import { AMCSubstanceDataRepository } from "../../../repositories/data-entry/AMC
 import { getConsumptionDataSubstanceLevel } from "./utils/getConsumptionDataSubstanceLevel";
 
 const IMPORT_STRATEGY_UPDATE = "UPDATE";
+const IMPORT_STRATEGY_CREATE_AND_UPDATE = "CREATE_AND_UPDATE";
 
 export class RecalculateConsumptionDataSubstanceLevelForAllUseCase {
     constructor(
@@ -37,7 +38,8 @@ export class RecalculateConsumptionDataSubstanceLevelForAllUseCase {
                             orgUnitId,
                             period,
                             currentATCVersion,
-                            currentATCData
+                            currentATCData,
+                            allowCreationIfNotExist
                         ).toVoid();
                     })
                 ).toVoid();
@@ -49,7 +51,8 @@ export class RecalculateConsumptionDataSubstanceLevelForAllUseCase {
         orgUnitId: Id,
         period: string,
         currentATCVersion: string,
-        currentATCData: GlassATCVersion
+        currentATCData: GlassATCVersion,
+        allowCreationIfNotExist: boolean
     ): FutureData<void> {
         logger.info(`Calculating consumption data of substance level for orgUnitsId ${orgUnitId} and period ${period}`);
         return this.getDataForRecalculations(orgUnitId, period).flatMap(
@@ -69,25 +72,34 @@ export class RecalculateConsumptionDataSubstanceLevelForAllUseCase {
                         return Future.success(undefined);
                     }
 
-                    if (!currentCalculatedConsumptionData || _.isEmpty(currentCalculatedConsumptionData)) {
+                    if (
+                        !allowCreationIfNotExist &&
+                        (!currentCalculatedConsumptionData || _.isEmpty(currentCalculatedConsumptionData))
+                    ) {
                         logger.error(
                             `Substance level: there are no current calculated data to update for orgUnitId ${orgUnitId} and period ${period}`
                         );
                         return Future.success(undefined);
                     }
 
-                    const newCalculatedConsumptionDataWithIds = linkEventIdToNewCalculatedConsumptionData(
-                        currentCalculatedConsumptionData,
+                    const {
+                        withEventId: newCalculatedConsumptionDataWithIds,
+                        withoutEventId: newCalculatedConsumptionDataWithoutIds,
+                    } = linkEventIdToNewCalculatedConsumptionData(
+                        currentCalculatedConsumptionData || [],
                         newCalculatedConsumptionData
                     );
 
                     const eventIdsToUpdate = newCalculatedConsumptionDataWithIds.map(({ eventId }) => eventId);
 
-                    const eventIdsNoUpdated = currentCalculatedConsumptionData.filter(
+                    const eventIdsNoUpdated = (currentCalculatedConsumptionData || []).filter(
                         ({ eventId }) => !eventIdsToUpdate.includes(eventId)
                     );
+
                     if (eventIdsNoUpdated.length) {
-                        logger.error(`These events could not be updated: events=${eventIdsNoUpdated.join(",")}`);
+                        logger.error(
+                            `Substance level: these events could not be updated events=${eventIdsNoUpdated.join(",")}`
+                        );
                     }
 
                     logger.debug(
@@ -99,12 +111,36 @@ export class RecalculateConsumptionDataSubstanceLevelForAllUseCase {
                         `Updating calculations of substance level for ${eventIdsToUpdate.length} events in DHIS2 for orgUnitId ${orgUnitId} and period ${period}`
                     );
 
+                    if (allowCreationIfNotExist && newCalculatedConsumptionDataWithoutIds.length) {
+                        logger.debug(
+                            `Creating calculated consumption data events in DHIS2 for orgUnitId ${orgUnitId} and period ${period}: events=${JSON.stringify(
+                                newCalculatedConsumptionDataWithoutIds
+                            )}`
+                        );
+
+                        logger.info(
+                            `Creating calculated consumption data for ${newCalculatedConsumptionDataWithoutIds.length} events in DHIS2 for orgUnitId ${orgUnitId} and period ${period}`
+                        );
+                    }
+
                     return this.amcSubstanceDataRepository
-                        .importCalculations(IMPORT_STRATEGY_UPDATE, orgUnitId, newCalculatedConsumptionDataWithIds)
+                        .importCalculations(
+                            allowCreationIfNotExist ? IMPORT_STRATEGY_CREATE_AND_UPDATE : IMPORT_STRATEGY_UPDATE,
+                            orgUnitId,
+                            allowCreationIfNotExist
+                                ? [...newCalculatedConsumptionDataWithIds, ...newCalculatedConsumptionDataWithoutIds]
+                                : newCalculatedConsumptionDataWithIds
+                        )
                         .flatMap(({ response }) => {
                             if (response.status === "OK") {
                                 logger.success(
-                                    `Calculations of substance level updated for orgUnitId ${orgUnitId} and period ${period}: ${response.stats.updated} of ${response.stats.total} events updated`
+                                    `Calculations of substance level updated for orgUnitId ${orgUnitId} and period ${period}: ${
+                                        response.stats.updated
+                                    } of ${response.stats.total} events updated${
+                                        allowCreationIfNotExist
+                                            ? ` and ${response.stats.created} of ${response.stats.total} events created`
+                                            : ""
+                                    }`
                                 );
                             }
                             if (response.status === "ERROR") {
@@ -116,9 +152,11 @@ export class RecalculateConsumptionDataSubstanceLevelForAllUseCase {
                             }
                             if (response.status === "WARNING") {
                                 logger.warn(
-                                    `Warning updating calculations of substance level updated for orgUnitId ${orgUnitId} and period ${period}: ${JSON.stringify(
-                                        response.validationReport.warningReports
-                                    )}`
+                                    `Warning updating calculations of substance level updated for orgUnitId ${orgUnitId} and period ${period}: updated=${
+                                        response.stats.updated
+                                    }, ${allowCreationIfNotExist ? `created=${response.stats.created}, ` : ""} total=${
+                                        response.stats.total
+                                    } and warning=${JSON.stringify(response.validationReport.warningReports)}`
                                 );
                             }
                             return Future.success(undefined);
@@ -152,34 +190,60 @@ export class RecalculateConsumptionDataSubstanceLevelForAllUseCase {
 function linkEventIdToNewCalculatedConsumptionData(
     currentCalculatedConsumptionData: SubstanceConsumptionCalculated[],
     newCalculatedConsumptionData: SubstanceConsumptionCalculated[]
-): SubstanceConsumptionCalculated[] {
-    const newCalculatedConsumptionDataWithIdsObject = newCalculatedConsumptionData.reduce((acc, newCalulatedData) => {
-        const idsAlreadyUsed = Object.keys(acc);
-        const eventIdFound = currentCalculatedConsumptionData?.find(currentCalculatedData => {
-            return (
-                currentCalculatedData?.eventId &&
-                !idsAlreadyUsed.includes(currentCalculatedData.eventId) &&
-                currentCalculatedData.atc_autocalculated === newCalulatedData.atc_autocalculated &&
-                currentCalculatedData.route_admin_autocalculated === newCalulatedData.route_admin_autocalculated &&
-                (currentCalculatedData.salt_autocalculated === newCalulatedData.salt_autocalculated ||
-                    SALT_MAPPING.default === newCalulatedData.salt_autocalculated) &&
-                currentCalculatedData.packages_autocalculated === newCalulatedData.packages_autocalculated &&
-                currentCalculatedData.tons_autocalculated === newCalulatedData.tons_autocalculated &&
-                currentCalculatedData.health_sector_autocalculated === newCalulatedData.health_sector_autocalculated &&
-                currentCalculatedData.health_level_autocalculated === newCalulatedData.health_level_autocalculated &&
-                currentCalculatedData.data_status_autocalculated === newCalulatedData.data_status_autocalculated &&
-                currentCalculatedData.report_date === newCalulatedData.report_date
-            );
-        })?.eventId;
-        return eventIdFound
-            ? {
-                  [eventIdFound]: {
-                      eventId: eventIdFound,
-                      ...newCalulatedData,
-                  },
-                  ...acc,
-              }
-            : acc;
-    }, {});
-    return Object.values(newCalculatedConsumptionDataWithIdsObject);
+): {
+    withEventId: SubstanceConsumptionCalculated[];
+    withoutEventId: SubstanceConsumptionCalculated[];
+} {
+    return newCalculatedConsumptionData.reduce(
+        (
+            acc: {
+                withEventId: SubstanceConsumptionCalculated[];
+                withoutEventId: SubstanceConsumptionCalculated[];
+            },
+            newCalulatedData: SubstanceConsumptionCalculated
+        ): {
+            withEventId: SubstanceConsumptionCalculated[];
+            withoutEventId: SubstanceConsumptionCalculated[];
+        } => {
+            const idsAlreadyUsed = acc.withEventId.map(({ eventId }) => eventId);
+            const eventIdFound = currentCalculatedConsumptionData?.find(currentCalculatedData => {
+                return (
+                    currentCalculatedData?.eventId &&
+                    !idsAlreadyUsed.includes(currentCalculatedData.eventId) &&
+                    currentCalculatedData.atc_autocalculated === newCalulatedData.atc_autocalculated &&
+                    currentCalculatedData.route_admin_autocalculated === newCalulatedData.route_admin_autocalculated &&
+                    (currentCalculatedData.salt_autocalculated === newCalulatedData.salt_autocalculated ||
+                        SALT_MAPPING.default === newCalulatedData.salt_autocalculated) &&
+                    currentCalculatedData.packages_autocalculated === newCalulatedData.packages_autocalculated &&
+                    currentCalculatedData.tons_autocalculated === newCalulatedData.tons_autocalculated &&
+                    currentCalculatedData.health_sector_autocalculated ===
+                        newCalulatedData.health_sector_autocalculated &&
+                    currentCalculatedData.health_level_autocalculated ===
+                        newCalulatedData.health_level_autocalculated &&
+                    currentCalculatedData.data_status_autocalculated === newCalulatedData.data_status_autocalculated &&
+                    currentCalculatedData.report_date === newCalulatedData.report_date
+                );
+            })?.eventId;
+
+            return eventIdFound
+                ? {
+                      ...acc,
+                      withEventId: [
+                          ...acc.withEventId,
+                          {
+                              ...newCalulatedData,
+                              eventId: eventIdFound,
+                          },
+                      ],
+                  }
+                : {
+                      ...acc,
+                      withoutEventId: [...acc.withoutEventId, newCalulatedData],
+                  };
+        },
+        {
+            withEventId: [],
+            withoutEventId: [],
+        }
+    );
 }

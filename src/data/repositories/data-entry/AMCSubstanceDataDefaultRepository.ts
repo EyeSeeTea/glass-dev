@@ -144,8 +144,7 @@ export class AMCSubstanceDataDefaultRepository implements AMCSubstanceDataReposi
             const d2TrackerEvents = this.mapSubstanceConsumptionCalculatedToD2TrackerEvent(
                 calculatedConsumptionSubstanceLevelData,
                 calculatedConsumptionDataProgram,
-                orgUnitId,
-                importStrategy
+                orgUnitId
             );
 
             if (d2TrackerEvents) {
@@ -169,8 +168,7 @@ export class AMCSubstanceDataDefaultRepository implements AMCSubstanceDataReposi
     private mapSubstanceConsumptionCalculatedToD2TrackerEvent(
         substanceConsumptionCalculated: SubstanceConsumptionCalculated[],
         calculatedConsumptionDataProgram: D2Program | undefined,
-        orgUnitId: Id,
-        importStrategy: ImportStrategy
+        orgUnitId: Id
     ): D2TrackerEvent[] | undefined {
         const programStageDataElements = calculatedConsumptionDataProgram?.programStages
             .find(({ id }) => AMC_CALCULATED_CONSUMPTION_DATA_PROGRAM_STAGE_ID === id)
@@ -201,7 +199,7 @@ export class AMCSubstanceDataDefaultRepository implements AMCSubstanceDataReposi
                     );
 
                     return {
-                        event: importStrategy === "UPDATE" ? data.eventId : generateId(),
+                        event: data.eventId ?? generateId(),
                         occurredAt: data.report_date,
                         status: "COMPLETED",
                         program: AMC_CALCULATED_CONSUMPTION_DATA_PROGRAM_ID,
