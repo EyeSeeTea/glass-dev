@@ -25,6 +25,7 @@ import { Future } from "../../../domain/entities/Future";
 import { ImportSummary } from "../../../domain/entities/data-entry/ImportSummary";
 import { StyledLoaderContainer } from "./ConsistencyChecks";
 import { moduleProperties } from "../../../domain/utils/ModuleProperties";
+import { DownloadingBackdrop } from "../loading/DownloadingBackdrop";
 
 interface UploadFilesProps {
     changeStep: (step: number) => void;
@@ -337,7 +338,7 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
                 populate: false,
                 downloadRelationships: true,
                 splitDataEntryTabsBySection: true,
-                useCodesForMetadata: true,
+                useCodesForMetadata: moduleName === "EGASP" ? true : false,
             });
 
             //download file automatically
@@ -360,13 +361,7 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
 
     return (
         <ContentWrapper>
-            <Backdrop open={loading} style={{ color: "#fff", zIndex: 1 }}>
-                <StyledLoaderContainer>
-                    <CircularProgress color="inherit" size={50} />
-                    <Typography variant="h6">{i18n.t("Downloading")}</Typography>
-                </StyledLoaderContainer>
-            </Backdrop>
-
+            <DownloadingBackdrop isOpen={loading} />
             <Backdrop open={importLoading} style={{ color: "#fff", zIndex: 1 }}>
                 <StyledLoaderContainer>
                     <CircularProgress color="inherit" size={50} />

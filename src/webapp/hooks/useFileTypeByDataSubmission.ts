@@ -7,7 +7,7 @@ import { useAppContext } from "../contexts/app-context";
 import { useSnackbar } from "@eyeseetea/d2-ui-components";
 import { GlassState } from "./State";
 
-type GlassUploadsState = GlassState<string>;
+type GlassUploadsState = GlassState<string | undefined>;
 
 export const useFileTypeByDataSubmission = () => {
     const [fileTypeState, setFileTypeState] = useState<GlassUploadsState>({ kind: "loading" });
@@ -25,21 +25,29 @@ export const useFileTypeByDataSubmission = () => {
 
     useEffect(() => {
         moduleName === "AMC" &&
+            dataSubmissionId &&
             compositionRoot.glassUploads.getCurrentDataSubmissionFileType(dataSubmissionId).run(
                 uploads => {
                     // Using first upload, only one upload per dataSubmission & period
-                    const fileType = uploads[0]?.fileType;
-                    const type =
-                        fileType === "Substance Level Data"
-                            ? "SUBSTANCE"
-                            : fileType === "Product Level Data"
-                            ? "PRODUCT"
-                            : undefined;
+                    const completedUpload = uploads.filter(upload => upload.status === "COMPLETED")?.[0];
+                    if (completedUpload) {
+                        const fileType =
+                            completedUpload.fileType === "Substance Level Data"
+                                ? "SUBSTANCE"
+                                : completedUpload.fileType === "Product Level Data"
+                                ? "PRODUCT"
+                                : undefined;
 
-                    if (type) {
+                        if (fileType) {
+                            setFileTypeState({
+                                kind: "loaded",
+                                data: fileType,
+                            });
+                        }
+                    } else {
                         setFileTypeState({
                             kind: "loaded",
-                            data: type,
+                            data: undefined,
                         });
                     }
                 },

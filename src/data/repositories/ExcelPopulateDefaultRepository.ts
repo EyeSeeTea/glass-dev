@@ -14,7 +14,10 @@ import { Future, FutureData } from "../../domain/entities/Future";
 import { Id } from "../../domain/entities/Ref";
 import { AMC_PRODUCT_REGISTER_PROGRAM_ID } from "../../domain/usecases/data-entry/amc/ImportAMCProductLevelData";
 import { EGASP_PROGRAM_ID } from "./program-rule/ProgramRulesMetadataDefaultRepository";
-import { AMC_RAW_SUBSTANCE_CONSUMPTION_PROGRAM_ID } from "../../domain/usecases/data-entry/amc/ImportAMCSubstanceLevelData";
+import {
+    AMC_RAW_SUBSTANCE_CONSUMPTION_PROGRAM_ID,
+    AMC_SUBSTANCE_CALCULATED_CONSUMPTION_PROGRAM_ID,
+} from "../../domain/usecases/data-entry/amc/ImportAMCSubstanceLevelData";
 import { removeCharacters } from "./utils/string";
 
 type RowWithCells = XLSX.Row & { _cells: XLSX.Cell[] };
@@ -25,6 +28,7 @@ export const getTemplateId = (programId: Id): string => {
             return "TRACKER_PROGRAM_GENERATED_v3";
         case EGASP_PROGRAM_ID:
         case AMC_RAW_SUBSTANCE_CONSUMPTION_PROGRAM_ID:
+        case AMC_SUBSTANCE_CALCULATED_CONSUMPTION_PROGRAM_ID:
             return "PROGRAM_GENERATED_v4";
         default:
             return "";
