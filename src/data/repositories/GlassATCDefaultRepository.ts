@@ -45,8 +45,8 @@ export class GlassATCDefaultRepository implements GlassATCRepository {
                     return this.buildGlassATCVersion(atcVersionDataStore);
                 });
         }
-        logger.error(`Cannot find ${atcVersionKey} version of ATC`);
-        return Future.error(`Cannot find ${atcVersionKey} version of ATC`);
+        logger.error(`ATC version ${atcVersionKey} is not valid`);
+        return Future.error(`ATC version ${atcVersionKey} is not valid`);
     }
 
     @cache()
