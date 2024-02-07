@@ -58,6 +58,9 @@ async function main() {
                     );
                     if (recalculateDataInfo && recalculateDataInfo.recalculate) {
                         await disableRecalculations(atcRepository);
+                        if (args.calculate) {
+                            logger.info(`Calculate flag enabled. Events will be created if they do not exist`);
+                        }
                         await recalculateData({
                             periods: Array.from(new Set(recalculateDataInfo.periods)),
                             orgUnitsIds: Array.from(new Set(recalculateDataInfo.orgUnitsIds)),
