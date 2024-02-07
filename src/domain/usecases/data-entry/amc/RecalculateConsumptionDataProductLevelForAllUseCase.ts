@@ -98,10 +98,11 @@ export class RecalculateConsumptionDataProductLevelForAllUseCase {
                 }
 
                 if (
-                    _.isEmpty(currentRawSubstanceConsumptionCalculatedByProductId) ||
-                    Object.values(currentRawSubstanceConsumptionCalculatedByProductId || {}).every(
-                        rawSubstanceConsumptionCalculated => rawSubstanceConsumptionCalculated.length === 0
-                    )
+                    !allowCreationIfNotExist &&
+                    (_.isEmpty(currentRawSubstanceConsumptionCalculatedByProductId) ||
+                        Object.values(currentRawSubstanceConsumptionCalculatedByProductId || {}).every(
+                            rawSubstanceConsumptionCalculated => rawSubstanceConsumptionCalculated.length === 0
+                        ))
                 ) {
                     logger.error(
                         `Product level: there are no current calculated data to update for orgUnitId ${orgUnitId} and period ${period}`
@@ -148,8 +149,10 @@ export class RecalculateConsumptionDataProductLevelForAllUseCase {
                     []
                 );
 
-                if (eventIdsNoUpdated.length && !allowCreationIfNotExist) {
-                    logger.error(`These events could not be updated: events=${eventIdsNoUpdated.join(",")}`);
+                if (eventIdsNoUpdated.length) {
+                    logger.error(
+                        `Product level: these events could not be updated events=${eventIdsNoUpdated.join(",")}`
+                    );
                 }
 
                 logger.debug(
@@ -162,20 +165,20 @@ export class RecalculateConsumptionDataProductLevelForAllUseCase {
                     `Updating calculations of product level for ${eventIdsToUpdate.length} events in DHIS2 for orgUnitId ${orgUnitId} and period ${period}`
                 );
 
-                if (allowCreationIfNotExist && eventIdsNoUpdated.length) {
+                const rawSubstanceConsumptionCalculatedDataToCreate =
+                    newRawSubstanceConsumptionCalculatedDataWithIds.filter(({ eventId }) => eventId === undefined);
+
+                if (allowCreationIfNotExist && rawSubstanceConsumptionCalculatedDataToCreate.length) {
                     logger.debug(
-                        `Creating Raw Substance Consumption Calculated data events in DHIS2 for orgUnitId ${orgUnitId} and period ${period}: events=${eventIdsNoUpdated.join(
-                            ","
+                        `Creating Raw Substance Consumption Calculated data events in DHIS2 for orgUnitId ${orgUnitId} and period ${period}: events=${JSON.stringify(
+                            rawSubstanceConsumptionCalculatedDataToCreate
                         )}`
                     );
 
                     logger.info(
-                        `Creating Raw Substance Consumption Calculated data for ${eventIdsNoUpdated.length} events in DHIS2 for orgUnitId ${orgUnitId} and period ${period}`
+                        `Creating Raw Substance Consumption Calculated data for ${rawSubstanceConsumptionCalculatedDataToCreate.length} events in DHIS2 for orgUnitId ${orgUnitId} and period ${period}`
                     );
                 }
-
-                const rawSubstanceConsumptionCalculatedDataToCreate =
-                    newRawSubstanceConsumptionCalculatedDataWithIds.filter(({ eventId }) => eventId === undefined);
 
                 return this.amcProductDataRepository
                     .importCalculations(
@@ -298,8 +301,8 @@ function linkEventIdToNewRawSubstanceConsumptionCalculated(
         })?.eventId;
 
         return {
-            eventId: eventIdFound ?? undefined,
             ...newCalulatedData,
+            eventId: eventIdFound ?? undefined,
         };
     });
 }
@@ -353,9 +356,9 @@ function getCurrentRawSubstanceConsumptionCalculated(
             }, {});
             if (Object.keys(consumptionData).length) {
                 return {
+                    ...consumptionData,
                     AMR_GLASS_AMC_TEA_PRODUCT_ID: productId,
                     eventId: event.eventId,
-                    ...consumptionData,
                 };
             }
         })
