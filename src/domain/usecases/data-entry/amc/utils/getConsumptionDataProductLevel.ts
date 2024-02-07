@@ -4,7 +4,7 @@ import {
 } from "../../../../../data/repositories/data-entry/AMCProductDataDefaultRepository";
 import { logger } from "../../../../../utils/logger";
 import { Future, FutureData } from "../../../../entities/Future";
-import { GlassATCHistory, createAtcVersionKey } from "../../../../entities/GlassATC";
+import { GlassATCVersion } from "../../../../entities/GlassATC";
 import { Id } from "../../../../entities/Ref";
 import {
     Attributes,
@@ -27,7 +27,6 @@ import {
     RawProductConsumption,
 } from "../../../../entities/data-entry/amc/RawProductConsumption";
 import { RawSubstanceConsumptionCalculated } from "../../../../entities/data-entry/amc/RawSubstanceConsumptionCalculated";
-import { GlassATCRepository } from "../../../../repositories/GlassATCRepository";
 import { calculateConsumptionProductLevelData } from "./calculationConsumptionProductLevelData";
 
 export function getConsumptionDataProductLevel(params: {
@@ -35,16 +34,16 @@ export function getConsumptionDataProductLevel(params: {
     period: string;
     productRegisterProgramMetadata: ProductRegisterProgramMetadata | undefined;
     productDataTrackedEntities: ProductDataTrackedEntity[];
-    atcVersionHistory: GlassATCHistory[];
-    atcRepository: GlassATCRepository;
+    atcCurrentVersionData: GlassATCVersion;
+    atcVersionKey: string;
 }): FutureData<RawSubstanceConsumptionCalculated[]> {
     const {
         orgUnitId,
         period,
-        atcRepository,
         productRegisterProgramMetadata,
         productDataTrackedEntities,
-        atcVersionHistory,
+        atcCurrentVersionData,
+        atcVersionKey,
     } = params;
 
     if (!productRegisterProgramMetadata) {
@@ -67,33 +66,21 @@ export function getConsumptionDataProductLevel(params: {
         );
     }
 
-    const atcCurrentVersionInfo = atcVersionHistory.find(({ currentVersion }) => currentVersion);
-    if (!atcCurrentVersionInfo) {
-        logger.error(`Cannot find current version of ATC in version history.`);
-        logger.debug(`Cannot find current version of ATC in version history: ${JSON.stringify(atcVersionHistory)}`);
-        return Future.error("Cannot find current version of ATC");
-    }
+    const { productRegistryAttributes, rawProductConsumption } = getProductRegistryAttributesAndRawProductConsumption(
+        productDataTrackedEntities,
+        productRegisterProgramMetadata.programAttributes,
+        rawProductConsumptionStage
+    );
 
-    const atcVersionKey = createAtcVersionKey(atcCurrentVersionInfo.year, atcCurrentVersionInfo.version);
-
-    return atcRepository.getAtcVersion(atcVersionKey).flatMap(atcCurrentVersionData => {
-        const { productRegistryAttributes, rawProductConsumption } =
-            getProductRegistryAttributesAndRawProductConsumption(
-                productDataTrackedEntities,
-                productRegisterProgramMetadata.programAttributes,
-                rawProductConsumptionStage
-            );
-
-        const rawSubstanceConsumptionCalculatedData = calculateConsumptionProductLevelData(
-            period,
-            orgUnitId,
-            productRegistryAttributes,
-            rawProductConsumption,
-            atcCurrentVersionData,
-            atcVersionKey
-        );
-        return Future.success(rawSubstanceConsumptionCalculatedData);
-    });
+    const rawSubstanceConsumptionCalculatedData = calculateConsumptionProductLevelData(
+        period,
+        orgUnitId,
+        productRegistryAttributes,
+        rawProductConsumption,
+        atcCurrentVersionData,
+        atcVersionKey
+    );
+    return Future.success(rawSubstanceConsumptionCalculatedData);
 }
 
 function getProductRegistryAttributesAndRawProductConsumption(
