@@ -3,6 +3,7 @@ import { FutureData } from "../../entities/Future";
 import { Id } from "../../entities/Ref";
 import { RawSubstanceConsumptionData } from "../../entities/data-entry/amc/RawSubstanceConsumptionData";
 import { SubstanceConsumptionCalculated } from "../../entities/data-entry/amc/SubstanceConsumptionCalculated";
+import { ImportStrategy } from "../../entities/data-entry/DataValuesSaveSummary";
 
 export interface AMCSubstanceDataRepository {
     validate(
@@ -14,8 +15,16 @@ export interface AMCSubstanceDataRepository {
         eventsIds: Id[]
     ): FutureData<RawSubstanceConsumptionData[] | undefined>;
     importCalculations(
+        importStrategy: ImportStrategy,
         orgUnitId: Id,
-        orgUnitName: string,
         calculatedConsumptionSubstanceLevelData: SubstanceConsumptionCalculated[]
     ): FutureData<{ response: TrackerPostResponse; eventIdLineNoMap: { id: string; lineNo: number }[] }>;
+    getAllRawSubstanceConsumptionDataByByPeriod(
+        orgUnitId: Id,
+        period: string
+    ): FutureData<RawSubstanceConsumptionData[] | undefined>;
+    getAllCalculatedSubstanceConsumptionDataByByPeriod(
+        orgUnitId: Id,
+        period: string
+    ): FutureData<SubstanceConsumptionCalculated[] | undefined>;
 }
