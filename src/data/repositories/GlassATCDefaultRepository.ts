@@ -8,12 +8,14 @@ import {
     DDDCombinationsData,
     DDDData,
     GlassATCHistory,
+    GlassATCRecalculateDataInfo,
     GlassATCVersion,
     ListGlassATCVersions,
     validateAtcVersion,
 } from "../../domain/entities/GlassATC";
 import { GlassATCRepository } from "../../domain/repositories/GlassATCRepository";
 import { cache } from "../../utils/cache";
+import { logger } from "../../utils/logger";
 import { DataStoreClient } from "../data-store/DataStoreClient";
 import { DataStoreKeys } from "../data-store/DataStoreKeys";
 
@@ -43,7 +45,8 @@ export class GlassATCDefaultRepository implements GlassATCRepository {
                     return this.buildGlassATCVersion(atcVersionDataStore);
                 });
         }
-        return Future.error("Upload does not exist");
+        logger.error(`ATC version ${atcVersionKey} is not valid`);
+        return Future.error(`ATC version ${atcVersionKey} is not valid`);
     }
 
     @cache()
@@ -52,6 +55,7 @@ export class GlassATCDefaultRepository implements GlassATCRepository {
             const atcCurrentVersionInfo = atcVersionHistory.find(({ currentVersion }) => currentVersion);
 
             if (!atcCurrentVersionInfo) {
+                logger.error(`Cannot find current version of ATC`);
                 return Future.error("Cannot find current version of ATC");
             }
             const atcVersionKey = createAtcVersionKey(atcCurrentVersionInfo.year, atcCurrentVersionInfo.version);
@@ -64,12 +68,32 @@ export class GlassATCDefaultRepository implements GlassATCRepository {
     getListOfAtcVersionsByKeys(atcVersionKeys: string[]): FutureData<ListGlassATCVersions> {
         return Future.joinObj(
             atcVersionKeys.reduce((acc, atcVersionKey) => {
-                return {
-                    ...acc,
-                    [atcVersionKey]: this.getAtcVersion(atcVersionKey),
-                };
+                if (validateAtcVersion(atcVersionKey)) {
+                    return {
+                        ...acc,
+                        [atcVersionKey]: this.getAtcVersion(atcVersionKey),
+                    };
+                }
+                logger.error(`ATC version key not valid: ${atcVersionKey}`);
+                return acc;
             }, {})
         );
+    }
+
+    getRecalculateDataInfo(): FutureData<GlassATCRecalculateDataInfo | undefined> {
+        return this.dataStoreClient.getObject(DataStoreKeys.AMC_RECALCULATION);
+    }
+
+    disableRecalculations(): FutureData<void> {
+        return this.getRecalculateDataInfo().flatMap(recalculateDataInfo => {
+            if (!recalculateDataInfo) return Future.success(undefined);
+            const newRecalculateDataInfo = {
+                ...recalculateDataInfo,
+                recalculate: false,
+                date: new Date().toISOString(),
+            };
+            return this.dataStoreClient.saveObject(DataStoreKeys.AMC_RECALCULATION, newRecalculateDataInfo);
+        });
     }
 
     private buildGlassATCVersion(atcVersionDataStore: ATCVersion): GlassATCVersion {
