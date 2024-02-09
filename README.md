@@ -59,6 +59,29 @@ $ yarn cy:e2e:open
 $ yarn build
 ```
 
+## AMC data consumption recalculations
+
+The app provides a server-side AMC recalculations script that runs in the background. The script requires Node v10+.
+
+1. Build and generates glass-dev-amc-recalculate-server.zip file:
+
+```
+$ yarn build-amc-recalculate
+```
+
+2. Unzip glass-dev-amc-recalculate-server.zip and executed it like this:
+
+```
+$ cd glass-dev-amc-recalculate-server
+$ node index.js --url "http[s]://HOST:PORT" --auth USERNAME:PASSWORD
+```
+
+To just run the script manually for development:
+
+```
+$ yarn start-amc-recalculate --url "http[s]://HOST:PORT" --auth USERNAME:PASSWORD
+```
+
 ## Some development tips
 
 ### Structure

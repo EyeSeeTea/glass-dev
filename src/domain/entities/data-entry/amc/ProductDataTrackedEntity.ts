@@ -6,6 +6,8 @@ export type EventDataValue = {
 };
 
 export type Event = {
+    eventId: Id;
+    occurredAt: Id;
     dataValues: EventDataValue[];
 };
 
@@ -19,6 +21,7 @@ export type Attributes = {
 export type ProductDataTrackedEntity = {
     trackedEntityId: Id;
     enrollmentId: Id;
+    enrollmentStatus: Id;
     events: Event[];
     attributes: Attributes[];
 };

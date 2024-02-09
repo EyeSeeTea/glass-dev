@@ -6,8 +6,11 @@ import atcVersionsByKeysData from "./data/atcVersionsByKeys.json";
 import calculationConsumptionSubstanceLevelBasic from "./data/calculationConsumptionSubstanceLevelBasic.json";
 import { ListGlassATCVersions } from "../../../../../entities/GlassATC";
 import { SubstanceConsumptionCalculated } from "../../../../../entities/data-entry/amc/SubstanceConsumptionCalculated";
+import { setupLoggerForTesting } from "../../../../../../utils/logger";
 
 describe("Given calculate Consumption Substance Level Data function", () => {
+    beforeAll(() => setupLoggerForTesting());
+
     describe("When all ddds are assigned correctly", () => {
         it("Then should return correct solution", async () => {
             const type = "basic";
