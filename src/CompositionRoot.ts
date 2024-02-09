@@ -152,7 +152,10 @@ export function getCompositionRoot(instance: Instance) {
         glassUploads: getExecute({
             getAll: new GetGlassUploadsUseCase(glassUploadsRepository),
             setStatus: new SetUploadStatusUseCase(glassUploadsRepository),
-            getByDataSubmission: new GetGlassUploadsByDataSubmissionUseCase(glassUploadsRepository),
+            getAMRUploadsForCurrentDataSubmission: new GetGlassUploadsByDataSubmissionUseCase(
+                glassUploadsRepository,
+                glassDataSubmissionRepository
+            ),
             getByModuleOU: new GetGlassUploadsByModuleOUUseCase(glassUploadsRepository),
             getByModuleOUPeriod: new GetGlassUploadsByModuleOUPeriodUseCase(glassUploadsRepository),
             setBatchId: new SetUploadBatchIdUseCase(glassUploadsRepository),

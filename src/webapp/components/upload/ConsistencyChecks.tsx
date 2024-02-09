@@ -158,6 +158,85 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
                     setImportLoading(false);
                 }
             );
+        } else if (secondaryFile && moduleProperties.get(currentModuleAccess.moduleName)?.isExternalSecondaryFile) {
+            setImportLoading(true);
+
+            compositionRoot.fileSubmission
+                .secondaryFile(
+                    secondaryFile,
+                    batchId,
+                    currentModuleAccess.moduleName,
+                    currentPeriod,
+                    "CREATE_AND_UPDATE",
+                    currentOrgUnitAccess.orgUnitId,
+                    currentOrgUnitAccess.orgUnitName,
+                    currentOrgUnitAccess.orgUnitCode,
+                    false,
+                    ""
+                )
+                .run(
+                    importSecondaryFileSummary => {
+                        if (importSecondaryFileSummary) {
+                            setSecondaryFileImportSummary(importSecondaryFileSummary);
+
+                            const secondaryUploadId = localStorage.getItem("secondaryUploadId");
+                            const params = {
+                                primaryUploadId: "",
+                                primaryImportSummaryErrors: {
+                                    nonBlockingErrors: [],
+                                    blockingErrors: [],
+                                },
+                                secondaryUploadId: secondaryUploadId || "",
+                                secondaryImportSummaryErrors: {
+                                    nonBlockingErrors: importSecondaryFileSummary?.nonBlockingErrors || [],
+                                    blockingErrors: importSecondaryFileSummary?.blockingErrors || [],
+                                },
+                            };
+
+                            compositionRoot.glassUploads.saveImportSummaryErrorsOfFiles(params).run(
+                                () => {},
+                                () => {}
+                            );
+
+                            if (importSecondaryFileSummary.blockingErrors.length === 0 && secondaryUploadId) {
+                                compositionRoot.glassUploads
+                                    .setStatus({ id: secondaryUploadId, status: "VALIDATED" })
+                                    .run(
+                                        () => {
+                                            changeStep(3);
+                                            setImportLoading(false);
+                                        },
+                                        () => {
+                                            setImportLoading(false);
+                                        }
+                                    );
+                            } else {
+                                if (secondaryUploadId) {
+                                    compositionRoot.glassUploads
+                                        .setStatus({ id: secondaryUploadId, status: "IMPORTED" })
+                                        .run(
+                                            () => {
+                                                setImportLoading(false);
+                                            },
+                                            () => {
+                                                setImportLoading(false);
+                                            }
+                                        );
+                                }
+                            }
+                        }
+                    },
+                    error => {
+                        setPrimaryFileImportSummary({
+                            status: "ERROR",
+                            importCount: { ignored: 0, imported: 0, deleted: 0, updated: 0 },
+                            nonBlockingErrors: [],
+                            blockingErrors: [{ error: error, count: 1 }],
+                        });
+
+                        setImportLoading(false);
+                    }
+                );
         } else {
             if (
                 moduleProperties.get(currentModuleAccess.moduleName)?.isCalculationRequired &&
