@@ -41,7 +41,8 @@ export class ImportSecondaryFileUseCase implements UseCase {
         calculatedEventListFileId?: string
     ): FutureData<ImportSummary> {
         switch (moduleName) {
-            case "AMR": {
+            case "AMR":
+            case "AMR - Individual": {
                 const importSampleFile = new ImportSampleFile(
                     this.sampleDataRepository,
                     this.metadataRepository,
