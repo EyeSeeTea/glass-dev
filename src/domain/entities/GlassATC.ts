@@ -1,3 +1,4 @@
+import { Id } from "./Ref";
 import { RouteOfAdministrationKey } from "./data-entry/amc/RouteOfAdministration";
 import { SaltKey } from "./data-entry/amc/Salt";
 import { UnitKey } from "./data-entry/amc/Unit";
@@ -7,6 +8,13 @@ export type GlassATCHistory = {
     year: number;
     version: number;
     uploadedDate: Date;
+};
+
+export type GlassATCRecalculateDataInfo = {
+    date: string;
+    recalculate: boolean;
+    periods: string[];
+    orgUnitsIds: Id[];
 };
 
 export type GlassATCVersion = {
@@ -71,7 +79,6 @@ export type ATCAlterationsData = {
     SUBSTANCE: string;
     NEW_ATC: string;
     YEAR_CHANGED: string;
-    ROUTE: RouteOfAdministrationKey;
 };
 
 export type ATCData = {

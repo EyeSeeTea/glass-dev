@@ -24,12 +24,11 @@ import {
 } from "./amc/ImportAMCSubstanceLevelData";
 import { MetadataRepository } from "../../repositories/MetadataRepository";
 
-export type FileType = "PRODUCT" | "SUBSTANCE";
 export type DownloadType = "SUBMITTED" | "CALCULATED";
 
 export interface DownloadTemplateProps {
     moduleName: string;
-    fileType: "PRODUCT" | "SUBSTANCE";
+    fileType: string;
     downloadType?: "SUBMITTED" | "CALCULATED";
     orgUnit: string;
     startDate?: Moment;
@@ -151,7 +150,7 @@ export class DownloadTemplateUseCase implements UseCase {
 
 const getProgramId = (
     moduleName: string,
-    fileType: FileType,
+    fileType: string,
     downloadType?: DownloadType
 ): { programId: Id; programStageId?: Id } => {
     if (moduleName === "EGASP") {

@@ -16,6 +16,7 @@ export type SubstanceConsumptionCalculated = {
     period: string;
     orgUnitId: Id;
     report_date: string;
+    eventId?: Id;
 };
 
 export const SUBSTANCE_CONSUMPTION_CALCULATED_KEYS = [
