@@ -16,7 +16,6 @@ import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import { UploadPrimaryFile } from "./UploadPrimaryFile";
 import { UploadSecondary } from "./UploadSecondary";
 import { useAppContext } from "../../contexts/app-context";
-import { useCurrentDataSubmissionId } from "../../hooks/useCurrentDataSubmissionId";
 import { useCurrentModuleContext } from "../../contexts/current-module-context";
 import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context";
 import { useCurrentPeriodContext } from "../../contexts/current-period-context";
@@ -25,7 +24,6 @@ import { Future } from "../../../domain/entities/Future";
 import { ImportSummary } from "../../../domain/entities/data-entry/ImportSummary";
 import { StyledLoaderContainer } from "./ConsistencyChecks";
 import { moduleProperties } from "../../../domain/utils/ModuleProperties";
-import { DownloadingBackdrop } from "../loading/DownloadingBackdrop";
 
 interface UploadFilesProps {
     changeStep: (step: number) => void;
@@ -85,54 +83,65 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
     const [isPrimaryFileValid, setIsPrimaryFileValid] = useState(false);
     const [isSecondaryFileValid, setIsSecondaryFileValid] = useState(false);
     const [previousUploadsBatchIds, setPreviousUploadsBatchIds] = useState<string[]>([]);
-    const [hasSecondaryFile, setHasSecondaryFile] = useState<boolean>(false);
+    const [hasSecondaryFile, setHasSecondaryFile] = useState<boolean>(secondaryFile ? true : false);
     const [importLoading, setImportLoading] = useState<boolean>(false);
     const [previousBatchIdsLoading, setPreviousBatchIdsLoading] = useState<boolean>(true);
     const [loading, setLoading] = useState<boolean>(false);
-    const [uploadFileType, setUploadFileType] = useState<"PRODUCT" | "SUBSTANCE">(
-        secondaryFile ? "SUBSTANCE" : "PRODUCT"
-    );
-
     const {
-        currentModuleAccess: { moduleId, moduleName },
+        currentModuleAccess: { moduleName },
     } = useCurrentModuleContext();
     const {
         currentOrgUnitAccess: { orgUnitId, orgUnitName, orgUnitCode },
     } = useCurrentOrgUnitContext();
-
     const { currentPeriod } = useCurrentPeriodContext();
-    const dataSubmissionId = useCurrentDataSubmissionId(moduleId, moduleName, orgUnitId, currentPeriod);
+
+    const currentModuleProperties = moduleProperties.get(moduleName);
+    const [uploadFileType, setUploadFileType] = useState(
+        secondaryFile ? currentModuleProperties?.secondaryFileType : currentModuleProperties?.primaryFileType
+    );
 
     useEffect(() => {
-        if (moduleProperties.get(moduleName)?.isbatchReq) {
+        if (
+            currentModuleProperties?.isbatchReq ||
+            (currentModuleProperties?.isExternalSecondaryFile &&
+                uploadFileType === currentModuleProperties.secondaryFileType)
+        ) {
             setPreviousBatchIdsLoading(true);
-            if (dataSubmissionId !== "") {
-                compositionRoot.glassUploads.getByDataSubmission(dataSubmissionId).run(
-                    uploads => {
-                        const uniquePreviousBatchIds = [
-                            ...new Set(
-                                uploads
-                                    .filter(upload => upload.status.toLowerCase() !== UPLOADED_STATUS)
-                                    .map(upload => upload.batchId)
-                            ),
-                        ];
-                        setPreviousUploadsBatchIds(uniquePreviousBatchIds);
-                        const firstSelectableBatchId = datasetOptions.find(
-                            ({ value }) => !uniquePreviousBatchIds.includes(value)
-                        )?.value;
-                        setBatchId(firstSelectableBatchId || "");
-                        setPreviousBatchIdsLoading(false);
-                    },
-                    () => {
-                        snackbar.error(i18n.t("Error fetching previous uploads."));
-                        setPreviousBatchIdsLoading(false);
-                    }
-                );
-            }
+
+            compositionRoot.glassUploads.getAMRUploadsForCurrentDataSubmission(orgUnitId, currentPeriod).run(
+                uploads => {
+                    const uniquePreviousBatchIds = _(
+                        uploads
+                            .filter(upload => upload.status.toLowerCase() !== UPLOADED_STATUS && upload.batchId !== "")
+                            .map(upload => upload.batchId)
+                    )
+                        .uniq()
+                        .value();
+                    setPreviousUploadsBatchIds(uniquePreviousBatchIds);
+                    const firstSelectableBatchId = datasetOptions.find(
+                        ({ value }) => !uniquePreviousBatchIds.includes(value)
+                    )?.value;
+                    setBatchId(firstSelectableBatchId || "");
+                    setPreviousBatchIdsLoading(false);
+                },
+                () => {
+                    snackbar.error(i18n.t("Error fetching previous uploads."));
+                    setPreviousBatchIdsLoading(false);
+                }
+            );
         } else {
             setPreviousBatchIdsLoading(false);
         }
-    }, [compositionRoot.glassUploads, dataSubmissionId, setBatchId, snackbar, moduleName]);
+    }, [
+        compositionRoot.glassUploads,
+        setBatchId,
+        snackbar,
+        moduleName,
+        currentPeriod,
+        orgUnitId,
+        currentModuleProperties,
+        uploadFileType,
+    ]);
 
     useEffect(() => {
         if (moduleProperties.get(moduleName)?.isbatchReq) {
@@ -144,6 +153,10 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
         } else if (moduleProperties.get(moduleName)?.isSingleFileTypePerSubmission) {
             if (isPrimaryFileValid || isSecondaryFileValid) setIsValidated(true);
             else setIsValidated(false);
+        } else if (moduleProperties.get(moduleName)?.isExternalSecondaryFile) {
+            if (isPrimaryFileValid) setIsValidated(true);
+            else if (batchId && isSecondaryFileValid) setIsValidated(true);
+            else setIsValidated(false);
         } else {
             if (isPrimaryFileValid) setIsValidated(true);
         }
@@ -154,17 +167,43 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
         const primaryUploadId = localStorage.getItem("primaryUploadId");
         const secondaryUploadId = localStorage.getItem("secondaryUploadId");
         setBatchId(batchId);
-
         if (primaryUploadId) {
-            await compositionRoot.glassUploads.setBatchId({ id: primaryUploadId, batchId }).toPromise();
-        }
-        if (secondaryUploadId) {
-            await compositionRoot.glassUploads.setBatchId({ id: secondaryUploadId, batchId }).toPromise();
+            setLoading(true);
+            compositionRoot.glassUploads.setBatchId({ id: primaryUploadId, batchId }).run(
+                () => {
+                    if (secondaryUploadId) {
+                        compositionRoot.glassUploads.setBatchId({ id: secondaryUploadId, batchId }).run(
+                            () => {
+                                setLoading(false);
+                            },
+                            () => {
+                                console.debug(`error occured while updating batch id to secondary upload in datastore`);
+                                setLoading(false);
+                            }
+                        );
+                    } else setLoading(false);
+                },
+                () => {
+                    console.debug(`error occured while updating batch id to primary upload in datastore`);
+                    setLoading(false);
+                }
+            );
+        } else if (secondaryUploadId) {
+            setLoading(true);
+            compositionRoot.glassUploads.setBatchId({ id: secondaryUploadId, batchId }).run(
+                () => {
+                    setLoading(false);
+                },
+                () => {
+                    console.debug(`error occured while updating batch id to secondary upload in datastore`);
+                    setLoading(false);
+                }
+            );
         }
     };
 
     const changeFileType = (event: React.ChangeEvent<{ value: unknown }>) => {
-        const fileType = event.target.value as "PRODUCT" | "SUBSTANCE";
+        const fileType = event.target.value as string;
         setUploadFileType(fileType);
     };
 
@@ -332,7 +371,7 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
         setLoading(true);
         try {
             const file = await compositionRoot.fileSubmission.downloadTemplate({
-                fileType: uploadFileType,
+                fileType: uploadFileType ?? "",
                 moduleName: moduleName,
                 orgUnit: orgUnitId,
                 populate: false,
@@ -359,59 +398,107 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
         }
     }, [compositionRoot.fileSubmission, moduleName, orgUnitCode, orgUnitId, snackbar, uploadFileType]);
 
+    const getBatchIdDropDown = () => {
+        return (
+            <div className="batch-id">
+                <h3>{i18n.t("Batch ID")}</h3>
+                <FormControl variant="outlined" style={{ minWidth: 180 }}>
+                    <InputLabel id="dataset-label">{i18n.t("Choose a Dataset")}</InputLabel>
+                    <Select
+                        value={batchId}
+                        onChange={changeBatchId}
+                        label={i18n.t("Choose a Dataset")}
+                        labelId="dataset-label"
+                        MenuProps={{ disableScrollLock: true }}
+                    >
+                        {datasetOptions.map(({ label, value }) => (
+                            <MenuItem key={value} value={value} disabled={previousUploadsBatchIds.includes(value)}>
+                                {i18n.t(label)}
+                            </MenuItem>
+                        ))}
+                    </Select>
+                </FormControl>
+            </div>
+        );
+    };
+
     return (
         <ContentWrapper>
-            <DownloadingBackdrop isOpen={loading} />
+            <Backdrop open={loading} style={{ color: "#fff", zIndex: 1 }}>
+                <StyledLoaderContainer>
+                    <CircularProgress color="inherit" size={50} />
+                    <Typography variant="h6">{i18n.t("Loading")}</Typography>
+                </StyledLoaderContainer>
+            </Backdrop>
+
             <Backdrop open={importLoading} style={{ color: "#fff", zIndex: 1 }}>
                 <StyledLoaderContainer>
                     <CircularProgress color="inherit" size={50} />
 
                     <Typography variant="h6">
-                        {i18n.t(moduleProperties.get(moduleName)?.importLoadingMsg.line1 || "Loading")}
+                        {i18n.t(currentModuleProperties?.importLoadingMsg.line1 || "Loading")}
                     </Typography>
 
                     <Typography variant="h5">
-                        {i18n.t(moduleProperties.get(moduleName)?.importLoadingMsg.line2 || "")}
+                        {i18n.t(currentModuleProperties?.importLoadingMsg.line2 || "")}
                     </Typography>
                 </StyledLoaderContainer>
             </Backdrop>
-            {moduleProperties.get(moduleName)?.isSingleFileTypePerSubmission ? (
-                <StyledSingleFileSelectContainer>
-                    <FormControl variant="outlined" style={{ minWidth: 180 }}>
-                        <InputLabel>{i18n.t("Choose file type")}</InputLabel>
-                        <Select
-                            value={uploadFileType}
-                            onChange={changeFileType}
-                            label={i18n.t("Choose file type")}
-                            labelId="file-type-label"
-                            MenuProps={{ disableScrollLock: true }}
-                            disabled={primaryFile !== null || secondaryFile !== null}
-                        >
-                            <MenuItem key={"PRODUCT"} value={"PRODUCT"}>
-                                {i18n.t("Product level data")}
-                            </MenuItem>
-                            <MenuItem key={"SUBSTANCE"} value={"SUBSTANCE"}>
-                                {i18n.t("Substance level data")}
-                            </MenuItem>
-                        </Select>
-                    </FormControl>
-                    {uploadFileType === "PRODUCT" ? (
-                        <UploadPrimaryFile
-                            validate={setIsPrimaryFileValid}
-                            batchId={batchId}
-                            primaryFile={primaryFile}
-                            setPrimaryFile={setPrimaryFile}
-                        />
+            {currentModuleProperties &&
+            (currentModuleProperties.isSingleFileTypePerSubmission ||
+                currentModuleProperties.isExternalSecondaryFile) ? (
+                <>
+                    <StyledSingleFileSelectContainer>
+                        <FormControl variant="outlined" style={{ minWidth: 180 }}>
+                            <InputLabel>{i18n.t("Choose file type")}</InputLabel>
+                            <Select
+                                value={uploadFileType}
+                                onChange={changeFileType}
+                                label={i18n.t("Choose file type")}
+                                labelId="file-type-label"
+                                MenuProps={{ disableScrollLock: true }}
+                                disabled={primaryFile !== null || secondaryFile !== null}
+                            >
+                                <MenuItem
+                                    key={currentModuleProperties.primaryFileType}
+                                    value={currentModuleProperties.primaryFileType}
+                                >
+                                    {i18n.t(currentModuleProperties.primaryFileType)}
+                                </MenuItem>
+                                <MenuItem
+                                    key={currentModuleProperties.secondaryFileType}
+                                    value={currentModuleProperties.secondaryFileType}
+                                >
+                                    {i18n.t(currentModuleProperties.secondaryFileType)}
+                                </MenuItem>
+                            </Select>
+                        </FormControl>
+                        {uploadFileType === currentModuleProperties.primaryFileType ? (
+                            <UploadPrimaryFile
+                                validate={setIsPrimaryFileValid}
+                                batchId={batchId}
+                                primaryFile={primaryFile}
+                                setPrimaryFile={setPrimaryFile}
+                            />
+                        ) : (
+                            <UploadSecondary
+                                validate={setIsSecondaryFileValid}
+                                batchId={batchId}
+                                secondaryFile={secondaryFile}
+                                setSecondaryFile={setSecondaryFile}
+                                setHasSecondaryFile={setHasSecondaryFile}
+                            />
+                        )}
+                    </StyledSingleFileSelectContainer>
+
+                    {previousBatchIdsLoading ? (
+                        <CircularProgress size={25} />
                     ) : (
-                        <UploadSecondary
-                            validate={setIsSecondaryFileValid}
-                            batchId={batchId}
-                            secondaryFile={secondaryFile}
-                            setSecondaryFile={setSecondaryFile}
-                            setHasSecondaryFile={setHasSecondaryFile}
-                        />
+                        currentModuleProperties.isExternalSecondaryFile &&
+                        uploadFileType === currentModuleProperties.secondaryFileType &&
+                        getBatchIdDropDown()
                     )}
-                </StyledSingleFileSelectContainer>
+                </>
             ) : (
                 <>
                     {previousBatchIdsLoading ? (
@@ -435,38 +522,17 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
                                     />
                                 )}
                             </div>
-                            {moduleProperties.get(moduleName)?.isbatchReq && (
-                                <div className="batch-id">
-                                    <h3>{i18n.t("Batch ID")}</h3>
-                                    <FormControl variant="outlined" style={{ minWidth: 180 }}>
-                                        <InputLabel id="dataset-label">{i18n.t("Choose a Dataset")}</InputLabel>
-                                        <Select
-                                            value={batchId}
-                                            onChange={changeBatchId}
-                                            label={i18n.t("Choose a Dataset")}
-                                            labelId="dataset-label"
-                                            MenuProps={{ disableScrollLock: true }}
-                                        >
-                                            {datasetOptions.map(({ label, value }) => (
-                                                <MenuItem
-                                                    key={value}
-                                                    value={value}
-                                                    disabled={previousUploadsBatchIds.includes(value)}
-                                                >
-                                                    {i18n.t(label)}
-                                                </MenuItem>
-                                            ))}
-                                        </Select>
-                                    </FormControl>
-                                </div>
-                            )}
+                            {moduleProperties.get(moduleName)?.isbatchReq && getBatchIdDropDown()}
                         </>
                     )}
                 </>
             )}
 
             <BottomContainer>
-                {previousUploadsBatchIds.length > 0 && moduleProperties.get(moduleName)?.isbatchReq ? (
+                {previousUploadsBatchIds.length > 0 &&
+                (moduleProperties.get(moduleName)?.isbatchReq ||
+                    (currentModuleProperties?.isExternalSecondaryFile &&
+                        uploadFileType === currentModuleProperties.secondaryFileType)) ? (
                     <div>
                         <h4>{i18n.t("You Previously Submitted:")} </h4>
                         <ul>

@@ -5,7 +5,6 @@ import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context
 import { useCurrentModuleContext } from "../../contexts/current-module-context";
 import { useCurrentPeriodContext } from "../../contexts/current-period-context";
 import { moduleProperties } from "../../../domain/utils/ModuleProperties";
-import { FileType } from "../../../domain/usecases/data-entry/DownloadTemplateUseCase";
 import moment from "moment";
 import styled from "styled-components";
 import { ContentLoader } from "../content-loader/ContentLoader";
@@ -44,7 +43,7 @@ export const Validations: React.FC = () => {
                     const endDateOfPeriod = moment(currentPeriod).endOf("year");
                     const file = await compositionRoot.fileSubmission.downloadTemplate({
                         downloadType: downloadType,
-                        fileType: fileTypeState.data as FileType,
+                        fileType: fileTypeState.data ?? "",
                         moduleName: currentModuleAccess.moduleName,
                         orgUnit: currentOrgUnitAccess.orgUnitId,
                         populate: true,
