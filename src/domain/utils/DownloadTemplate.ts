@@ -1,51 +1,46 @@
 import _ from "lodash";
 import { Moment } from "moment";
-import { DataFormType } from "../../entities/DataForm";
+import { DataFormType } from "../entities/DataForm";
 import { Id } from "@eyeseetea/d2-api";
-import { RelationshipOrgUnitFilter } from "../../../data/repositories/download-template/DownloadTemplateDefaultRepository";
-import { GeneratedTemplate, TemplateType } from "../../entities/Template";
-import { UseCase } from "../../../CompositionRoot";
-import { ExcelRepository } from "../../repositories/ExcelRepository";
-import { DownloadTemplateRepository } from "../../repositories/DownloadTemplateRepository";
-import { SheetBuilder } from "../../../data/repositories/download-template/sheetBuilder";
-import { ExcelBuilder } from "../../helpers/ExcelBuilder";
-import { getTemplateId } from "../../../data/repositories/ExcelPopulateDefaultRepository";
-import * as templates from "../../entities/data-entry/program-templates";
-import { EGASPProgramDefaultRepository } from "../../../data/repositories/download-template/EGASPProgramDefaultRepository";
-import { EGASP_PROGRAM_ID } from "../../../data/repositories/program-rule/ProgramRulesMetadataDefaultRepository";
+import { RelationshipOrgUnitFilter } from "../../data/repositories/download-template/DownloadTemplateDefaultRepository";
+import { GeneratedTemplate } from "../entities/Template";
+import { ExcelRepository } from "../repositories/ExcelRepository";
+import { DownloadTemplateRepository } from "../repositories/DownloadTemplateRepository";
+import { SheetBuilder } from "../../data/repositories/download-template/sheetBuilder";
+import { ExcelBuilder } from "../helpers/ExcelBuilder";
+import { getTemplateId } from "../../data/repositories/ExcelPopulateDefaultRepository";
+import * as templates from "../entities/data-entry/program-templates";
+import { EGASPProgramDefaultRepository } from "../../data/repositories/download-template/EGASPProgramDefaultRepository";
+import { EGASP_PROGRAM_ID } from "../../data/repositories/program-rule/ProgramRulesMetadataDefaultRepository";
 import {
     AMC_PRODUCT_REGISTER_PROGRAM_ID,
     AMC_RAW_PRODUCT_CONSUMPTION_CALCULATED_STAGE_ID,
     AMC_RAW_PRODUCT_CONSUMPTION_STAGE_ID,
-} from "./amc/ImportAMCProductLevelData";
+} from "../usecases/data-entry/amc/ImportAMCProductLevelData";
 import {
     AMC_RAW_SUBSTANCE_CONSUMPTION_PROGRAM_ID,
     AMC_SUBSTANCE_CALCULATED_CONSUMPTION_PROGRAM_ID,
-} from "./amc/ImportAMCSubstanceLevelData";
-import { MetadataRepository } from "../../repositories/MetadataRepository";
+} from "../usecases/data-entry/amc/ImportAMCSubstanceLevelData";
+import { MetadataRepository } from "../repositories/MetadataRepository";
 
 export type DownloadType = "SUBMITTED" | "CALCULATED";
-
 export interface DownloadTemplateProps {
     moduleName: string;
     fileType: string;
-    downloadType?: "SUBMITTED" | "CALCULATED";
-    orgUnit: string;
+    orgUnits: string[];
+    populate: boolean;
+    downloadRelationships: boolean;
+    useCodesForMetadata: boolean;
     startDate?: Moment;
     endDate?: Moment;
-    populate?: boolean;
+    downloadType?: DownloadType;
     populateStartDate?: Moment;
     populateEndDate?: Moment;
-    downloadRelationships: boolean;
     filterTEIEnrollmentDate?: boolean;
     relationshipsOuFilter?: RelationshipOrgUnitFilter;
-    templateId?: string;
-    templateType?: TemplateType;
-    splitDataEntryTabsBySection?: boolean;
-    useCodesForMetadata: boolean;
 }
 
-export class DownloadTemplateUseCase implements UseCase {
+export class DownloadTemplate {
     constructor(
         private DownloadtemplateRepository: DownloadTemplateRepository,
         private excelRepository: ExcelRepository,
@@ -53,20 +48,19 @@ export class DownloadTemplateUseCase implements UseCase {
         private metadataRepository: MetadataRepository
     ) {}
 
-    public async execute({
+    public async downloadTemplate({
         moduleName,
         fileType,
         downloadType,
-        orgUnit,
+        orgUnits,
         startDate,
         endDate,
         populate,
         populateStartDate,
         populateEndDate,
-        downloadRelationships = true,
+        downloadRelationships,
         filterTEIEnrollmentDate,
         relationshipsOuFilter,
-        splitDataEntryTabsBySection = false,
         useCodesForMetadata = false,
     }: DownloadTemplateProps): Promise<File> {
         const { programId, programStageId } = getProgramId(moduleName, fileType, downloadType);
@@ -79,18 +73,10 @@ export class DownloadTemplateUseCase implements UseCase {
 
         const element = await this.DownloadtemplateRepository.getElement(formType, programId);
 
-        let orgUnits = [orgUnit];
-        if (moduleName === "EGASP") {
-            const clinicsAndLabsOrgUnits = await this.metadataRepository
-                .getClinicsAndLabsInOrgUnitId(orgUnit)
-                .toPromise();
-            orgUnits = clinicsAndLabsOrgUnits;
-        }
-
         const result = await this.DownloadtemplateRepository.getElementMetadata({
             element,
             orgUnitIds: orgUnits,
-            downloadRelationships,
+            downloadRelationships: downloadRelationships,
             startDate: startDate?.toDate(),
             endDate: endDate?.toDate(),
             populateStartDate: populateStartDate?.toDate(),
@@ -103,8 +89,8 @@ export class DownloadTemplateUseCase implements UseCase {
             language: "en",
             template: template,
             settings: settings,
-            downloadRelationships: true,
-            splitDataEntryTabsBySection: splitDataEntryTabsBySection,
+            downloadRelationships: downloadRelationships,
+            splitDataEntryTabsBySection: true,
             useCodesForMetadata: useCodesForMetadata,
         });
 

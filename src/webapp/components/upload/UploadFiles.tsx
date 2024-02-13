@@ -367,36 +367,31 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
         }
     };
 
-    const downloadEmptyTemplate = useCallback(async () => {
+    const downloadEmptyTemplate = useCallback(() => {
         setLoading(true);
-        try {
-            const file = await compositionRoot.fileSubmission.downloadTemplate({
-                fileType: uploadFileType ?? "",
-                moduleName: moduleName,
-                orgUnit: orgUnitId,
-                populate: false,
-                downloadRelationships: true,
-                splitDataEntryTabsBySection: true,
-                useCodesForMetadata: moduleName === "EGASP" ? true : false,
-            });
 
-            //download file automatically
-            const downloadSimulateAnchor = document.createElement("a");
-            downloadSimulateAnchor.href = URL.createObjectURL(file);
-            const fileType = moduleProperties.get(moduleName)?.isSingleFileTypePerSubmission
-                ? `-${uploadFileType}-LEVEL-DATA`
-                : "";
-            downloadSimulateAnchor.download = `${moduleName}${fileType}-${orgUnitCode}-TEMPLATE.xlsx`;
-            // simulate link click
-            document.body.appendChild(downloadSimulateAnchor);
-            downloadSimulateAnchor.click();
-        } catch (err) {
-            snackbar.error(i18n.t("Error downloading empty template"));
-            console.error(err);
-        } finally {
-            setLoading(false);
-        }
-    }, [compositionRoot.fileSubmission, moduleName, orgUnitCode, orgUnitId, snackbar, uploadFileType]);
+        const fileType = uploadFileType === "Product Level Data" ? "PRODUCT" : "SUBSTANCE";
+        compositionRoot.fileSubmission.downloadEmptyTemplate(moduleName, fileType, orgUnitId).run(
+            file => {
+                //download file automatically
+                const downloadSimulateAnchor = document.createElement("a");
+                downloadSimulateAnchor.href = URL.createObjectURL(file);
+                const fileType = moduleProperties.get(moduleName)?.isSingleFileTypePerSubmission
+                    ? `-${uploadFileType}`
+                    : "";
+                downloadSimulateAnchor.download = `${moduleName}${fileType}-${orgUnitCode}-TEMPLATE.xlsx`;
+                // simulate link click
+                document.body.appendChild(downloadSimulateAnchor);
+                downloadSimulateAnchor.click();
+                setLoading(false);
+            },
+            (error: string) => {
+                snackbar.error("Error downloading file");
+                console.error(error);
+                setLoading(false);
+            }
+        );
+    }, [compositionRoot.fileSubmission, snackbar, orgUnitId, moduleName, orgUnitCode, uploadFileType]);
 
     const getBatchIdDropDown = () => {
         return (

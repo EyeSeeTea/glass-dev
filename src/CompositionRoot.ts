@@ -75,7 +75,6 @@ import { SignalDefaultRepository } from "./data/repositories/SignalDefaultReposi
 import { GetProgramQuestionnairesUseCase } from "./domain/usecases/GetProgramQuestionnairesUseCase";
 import { GetPopulatedProgramQuestionnaireUseCase } from "./domain/usecases/GetPopulatedProgramQuestionnaireUseCase";
 import { DeleteSignalUseCase } from "./domain/usecases/DeleteSignalUseCase";
-import { DownloadTemplateUseCase } from "./domain/usecases/data-entry/DownloadTemplateUseCase";
 import { DownloadTemplateDefaultRepository } from "./data/repositories/download-template/DownloadTemplateDefaultRepository";
 import { BulkLoadDataStoreClient } from "./data/data-store/BulkLoadDataStoreClient";
 import { ApplyAMCQuestionUpdationUseCase } from "./domain/usecases/ApplyAMCQuestionUpdationUseCase";
@@ -90,6 +89,8 @@ import { DownloadAllDataForModuleUseCase } from "./domain/usecases/DownloadAllDa
 import { EventVisualizationAnalyticsDefaultRepository } from "./data/repositories/EventVisualizationAnalyticsDefaultRepository";
 import { GetMultipleDashboardUseCase } from "./domain/usecases/GetMultipleDashboardUseCase";
 import { DownloadAllDataButtonData } from "./domain/usecases/DownloadAllDataButtonData";
+import { DownloadEmptyTemplateUseCase } from "./domain/usecases/DownloadEmptyTemplateUseCase";
+import { DownloadPopulatedTemplateUseCase } from "./domain/usecases/DownloadPopulatedTemplateUseCase";
 
 export function getCompositionRoot(instance: Instance) {
     const api = getD2APiFromInstance(instance);
@@ -210,7 +211,14 @@ export function getCompositionRoot(instance: Instance) {
                 amcSubstanceDataRepository,
                 glassModuleRepository
             ),
-            downloadTemplate: new DownloadTemplateUseCase(
+
+            downloadEmptyTemplate: new DownloadEmptyTemplateUseCase(
+                downloadTemplateRepository,
+                excelRepository,
+                egaspProgramRepository,
+                metadataRepository
+            ),
+            downloadPopulatedTemplate: new DownloadPopulatedTemplateUseCase(
                 downloadTemplateRepository,
                 excelRepository,
                 egaspProgramRepository,
