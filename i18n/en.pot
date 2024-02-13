@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2024-02-12T12:50:20.609Z\n"
-"PO-Revision-Date: 2024-02-12T12:50:20.609Z\n"
+"POT-Creation-Date: 2024-02-13T08:00:47.815Z\n"
+"PO-Revision-Date: 2024-02-13T08:00:47.815Z\n"
 
 msgid "Template {{id}} not loaded"
 msgstr ""
@@ -581,9 +581,6 @@ msgid "Fix upload data"
 msgstr ""
 
 msgid "Error fetching previous uploads."
-msgstr ""
-
-msgid "Error downloading empty template"
 msgstr ""
 
 msgid "Choose a Dataset"

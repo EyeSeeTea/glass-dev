@@ -31,8 +31,7 @@ export class DownloadPopulatedTemplateUseCase implements UseCase {
         const downloadTemplate = new DownloadTemplate(
             this.downloadTemplateRepository,
             this.excelRepository,
-            this.egaspRepository,
-            this.metadataRepository
+            this.egaspRepository
         );
         return Future.fromPromise(
             downloadTemplate.downloadTemplate({

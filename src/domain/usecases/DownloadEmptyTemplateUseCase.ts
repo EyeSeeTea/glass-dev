@@ -18,8 +18,7 @@ export class DownloadEmptyTemplateUseCase implements UseCase {
         const downloadTemplate = new DownloadTemplate(
             this.downloadTemplateRepository,
             this.excelRepository,
-            this.egaspRepository,
-            this.metadataRepository
+            this.egaspRepository
         );
 
         const downloadRelationships = moduleName === "AMC" && fileType === "PRODUCT" ? true : false;

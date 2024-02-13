@@ -1,6 +1,5 @@
 import _ from "lodash";
-import "lodash.product";
-import { D2Api, D2Program, DataValueSetsGetResponse, Pager } from "@eyeseetea/d2-api/2.34";
+import { D2Api, D2Program } from "@eyeseetea/d2-api/2.34";
 import {
     BuilderMetadata,
     DownloadTemplateRepository,
@@ -9,22 +8,26 @@ import {
 import { Instance } from "../../entities/Instance";
 import { getD2APiFromInstance } from "../../../utils/d2-api";
 import { TeiOuRequest as TrackedEntityOURequestApi } from "@eyeseetea/d2-api/api/trackedEntityInstances";
-import * as templates from "../../../domain/entities/data-entry/program-templates";
 import { promiseMap } from "../../../utils/promises";
-import { GeneratedTemplate } from "../../../domain/entities/Template";
 import { Id, NamedRef, Ref } from "../../../domain/entities/Ref";
-import { getTemplateId } from "../ExcelPopulateDefaultRepository";
 import { D2RelationshipConstraint } from "@eyeseetea/d2-api/schemas";
-import moment from "moment";
-import { TrackedEntityInstance } from "../../../domain/entities/TrackedEntityInstance";
+import { Moment } from "moment";
+import {
+    Attribute,
+    AttributeValue,
+    Enrollment,
+    TrackedEntityInstance,
+} from "../../../domain/entities/TrackedEntityInstance";
 import { DataPackage } from "../../../domain/entities/data-entry/DataPackage";
-import { EventsPackage, Event } from "../../../domain/entities/DhisDataPackage";
-import { cache } from "../../../utils/cache";
-import { getTrackedEntityInstances } from "../../dhis2/TrackedEntityInstances";
+import moment from "moment";
+import { D2TrackerEvent } from "@eyeseetea/d2-api/api/trackerEvents";
+import { D2TrackerTrackedEntity } from "@eyeseetea/d2-api/api/trackerTrackedEntities";
+import { DataElementType } from "../../../domain/entities/DataForm";
 
-interface Program {
+export interface Program {
     id: Id;
     trackedEntityType: Ref;
+    attributes: Attribute[];
 }
 export type RelationshipConstraint = RelationshipConstraintTei | RelationshipConstraintEventInProgram;
 
@@ -44,7 +47,7 @@ export interface RelationshipConstraintEventInProgram {
     events: Ref[];
 }
 
-interface RelationshipType {
+export interface RelationshipType {
     id: Id;
     name: string;
     constraints: {
@@ -60,6 +63,7 @@ interface ProgramFilters {
     organisationUnits?: Ref[];
     startDate?: Date;
     endDate?: Date;
+    ouMode?: RelationshipOrgUnitFilter;
 }
 
 interface MetadataItem {
@@ -78,10 +82,6 @@ interface ElementMetadata {
 }
 
 type MetadataPackage = Record<string, MetadataItem[] | undefined>;
-
-interface PagedEventsApiResponse extends EventsPackage {
-    pager: Pager;
-}
 
 interface Element {
     type: "dataSets" | "programs";
@@ -104,11 +104,14 @@ export type GetElementMetadataType = {
     rawMetadata: any;
 };
 
-interface CategoryOption {
-    id: Id;
-    startDate?: string;
-    endDate?: String;
-    organisationUnits: Ref[];
+export interface GetOptions {
+    api: D2Api;
+    program: Ref;
+    orgUnits: Ref[];
+    pageSize?: number;
+    enrollmentStartDate?: Moment;
+    enrollmentEndDate?: Moment;
+    relationshipsOuFilter?: RelationshipOrgUnitFilter;
 }
 
 export class DownloadTemplateDefaultRepository implements DownloadTemplateRepository {
@@ -116,53 +119,6 @@ export class DownloadTemplateDefaultRepository implements DownloadTemplateReposi
 
     constructor(instance: Instance) {
         this.api = getD2APiFromInstance(instance);
-    }
-
-    public getTemplate(programId: Id): GeneratedTemplate {
-        const id = getTemplateId(programId);
-
-        return _.values(templates)
-            .map(TemplateClass => new TemplateClass())
-            .filter(t => t.id === id)[0] as GeneratedTemplate;
-    }
-
-    @cache()
-    private async getDefaultIds(filter?: string): Promise<string[]> {
-        const response = await this.api
-            .get<Record<string, { id: string }[]>>("/metadata", {
-                filter: "identifiable:eq:default",
-                fields: "id",
-            })
-            .getData();
-
-        const metadata = _.pickBy(response, (_value, type) => !filter || type === filter);
-
-        return _(metadata)
-            .omit(["system"])
-            .values()
-            .flatten()
-            .map(({ id }) => id)
-            .value();
-    }
-
-    private buildProgramAttributeOptions(metadata: MetadataPackage, categoryComboId?: string): string[] {
-        if (!categoryComboId) return [];
-
-        // Get all the categories assigned to the categoryCombo of the program
-        const categoryCombo = _.find(metadata?.categoryCombos, { id: categoryComboId });
-
-        const categoryIds: string[] = _.compact(categoryCombo?.categories?.map(({ id }: MetadataItem) => id));
-
-        // Get all the category options for each category on the categoryCombo
-        const categories = _.compact(categoryIds.map(id => _.find(metadata?.categories, { id })));
-
-        // Cartesian product to fix bug in DHIS2 with multiple categories in a combo
-        const optionsByCategory = categories.map(({ categoryOptions }) => categoryOptions.map(({ id }) => id));
-
-        //@ts-ignore Polyfilled lodash product
-        const categoryOptions = _.product(...optionsByCategory).map(items => items.join(";"));
-
-        return categoryOptions;
     }
 
     private formatDataValue(
@@ -234,8 +190,8 @@ export class DownloadTemplateDefaultRepository implements DownloadTemplateReposi
 
     public async getDataPackage(params: GetDataPackageParams): Promise<DataPackage> {
         switch (params.type) {
-            case "dataSets":
-                return this.getDataSetPackage(params);
+            // case "dataSets":
+            //     return this.getDataSetPackage(params);
             case "programs":
                 return this.getProgramPackage(params);
             case "trackerPrograms":
@@ -330,62 +286,6 @@ export class DownloadTemplateDefaultRepository implements DownloadTemplateReposi
         return { element, metadata, elementMetadata: elementMetadataMap, organisationUnits, rawMetadata };
     }
 
-    private async getDataSetPackage({
-        id,
-        orgUnits,
-        periods = [],
-        startDate,
-        endDate,
-        translateCodes = true,
-    }: GetDataPackageParams): Promise<DataPackage> {
-        const defaultIds = await this.getDefaultIds();
-        const metadata = await this.api.get<MetadataPackage>(`/dataSets/${id}/metadata`).getData();
-        const response = await promiseMap(_.chunk(orgUnits, 200), async orgUnit => {
-            const query = (period?: string[]): Promise<DataValueSetsGetResponse> =>
-                this.api.dataValues
-                    .getSet({
-                        dataSet: [id],
-                        orgUnit,
-                        period,
-                        startDate: startDate?.format("YYYY-MM-DD"),
-                        endDate: endDate?.format("YYYY-MM-DD"),
-                    })
-                    .getData();
-
-            return periods.length > 0 ? await promiseMap(_.chunk(periods, 200), query) : [await query()];
-        });
-
-        return {
-            type: "dataSets",
-            dataEntries: _(response)
-                .flatten()
-                .flatMap(({ dataValues = [] }) => dataValues)
-                .groupBy(({ period, orgUnit, attributeOptionCombo }) =>
-                    [period, orgUnit, attributeOptionCombo].join("-")
-                )
-                .map((dataValues, key) => {
-                    const [period, orgUnit, attribute] = key.split("-");
-                    if (!period || !orgUnit) return undefined;
-
-                    return {
-                        type: "aggregated" as const,
-                        dataForm: id,
-                        orgUnit,
-                        period,
-                        attribute: attribute && defaultIds.includes(attribute) ? undefined : attribute,
-                        dataValues: dataValues.map(({ dataElement, categoryOptionCombo, value, comment }) => ({
-                            dataElement,
-                            category: defaultIds.includes(categoryOptionCombo) ? undefined : categoryOptionCombo,
-                            value: this.formatDataValue(dataElement, value, metadata, translateCodes),
-                            comment,
-                        })),
-                    };
-                })
-                .compact()
-                .value(),
-        };
-    }
-
     private async getProgramPackage({
         id,
         orgUnits,
@@ -394,46 +294,12 @@ export class DownloadTemplateDefaultRepository implements DownloadTemplateReposi
         translateCodes = true,
     }: GetDataPackageParams): Promise<DataPackage> {
         const metadata = await this.api.get<MetadataPackage>(`/programs/${id}/metadata`).getData();
-        const categoryComboId: string = _.find(metadata.programs, { id })?.categoryCombo.id;
 
-        const categoryOptions = this.buildProgramAttributeOptions(metadata, categoryComboId);
-        if (categoryOptions.length === 0) {
-            throw new Error(`Could not find category options for the program ${id}`);
-        }
-
-        const getEvents = (orgUnit: Id, categoryOptionId: Id, page: number): Promise<PagedEventsApiResponse> => {
-            // DHIS2 bug if we do not provide CC and COs, endpoint only works with ALL authority
-            return this.api
-                .get<PagedEventsApiResponse>("/events", {
-                    program: id,
-                    orgUnit,
-                    paging: true,
-                    totalPages: true,
-                    page,
-                    pageSize: 250,
-                    attributeCc: categoryComboId,
-                    attributeCos: categoryOptionId,
-                    startDate: startDate?.format("YYYY-MM-DD"),
-                    endDate: endDate?.format("YYYY-MM-DD"),
-                    cache: Math.random(),
-                    // @ts-ignore FIXME: Add property in d2-api
-                    fields: "*",
-                })
-                .getData();
-        };
-
-        const programEvents: Event[] = [];
+        const programEvents: D2TrackerEvent[] = [];
 
         for (const orgUnit of orgUnits) {
-            for (const categoryOptionId of categoryOptions) {
-                const { events, pager } = await getEvents(orgUnit, categoryOptionId, 1);
-                programEvents.push(...events);
-
-                await promiseMap(_.range(2, pager.pageCount + 1, 1), async page => {
-                    const { events } = await getEvents(orgUnit, categoryOptionId, page);
-                    programEvents.push(...events);
-                });
-            }
+            const events = await this.getEventsForPopulatingBLTemplate(id, orgUnit, startDate, endDate);
+            programEvents.push(...events);
         }
 
         return {
@@ -443,20 +309,18 @@ export class DownloadTemplateDefaultRepository implements DownloadTemplateReposi
                     ({
                         event,
                         orgUnit,
-                        eventDate,
+                        occurredAt,
                         attributeOptionCombo,
-                        coordinate,
                         dataValues,
-                        trackedEntityInstance,
+                        trackedEntity,
                         programStage,
                     }) => ({
                         id: event,
                         dataForm: id,
                         orgUnit,
-                        period: moment(eventDate).format("YYYY-MM-DD"),
+                        period: moment(occurredAt).format("YYYY-MM-DD"),
                         attribute: attributeOptionCombo,
-                        coordinate,
-                        trackedEntityInstance,
+                        trackedEntityInstance: trackedEntity,
                         programStage,
                         dataValues:
                             dataValues?.map(({ dataElement, value }) => ({
@@ -493,6 +357,54 @@ export class DownloadTemplateDefaultRepository implements DownloadTemplateReposi
         };
     }
 
+    private async getEventsForPopulatingBLTemplate(
+        program: Id,
+        orgUnit: Id,
+        startDate: Moment | undefined,
+        endDate: Moment | undefined
+    ): Promise<D2TrackerEvent[]> {
+        const d2TrackerEvents: D2TrackerEvent[] = [];
+
+        const pageSize = 250;
+        let page = 1;
+        let result;
+        try {
+            do {
+                result = await this.api.tracker.events
+                    .get({
+                        fields: {
+                            $owner: true,
+                            event: true,
+                            dataValues: true,
+                            orgUnit: true,
+                            occurredAt: true,
+                            attributeOptionCombo: true,
+                            latitude: true,
+                            longitude: true,
+                            trackedEntityInstance: true,
+                            programStage: true,
+                        },
+                        program: program,
+                        orgUnit: orgUnit,
+                        totalPages: true,
+                        page,
+                        pageSize: 250,
+                        occurredAfter: startDate?.format("YYYY-MM-DD"),
+                        occurredBefore: endDate?.format("YYYY-MM-DD"),
+                    })
+                    .getData();
+                if (!result.total) {
+                    throw new Error(`Error getting paginated events of program ${program} and organisation ${orgUnit}`);
+                }
+                d2TrackerEvents.push(...result.instances);
+                page++;
+            } while (result.page < Math.ceil((result.total as number) / pageSize));
+            return d2TrackerEvents;
+        } catch {
+            return [];
+        }
+    }
+
     /* Return the raw metadata filtering out non-relevant category option combos.
 
     /api/dataSets/ID/metadata returns categoryOptionCombos that may not be relevant for the
@@ -509,82 +421,93 @@ export class DownloadTemplateDefaultRepository implements DownloadTemplateReposi
         startDate: Date | undefined;
         endDate: Date | undefined;
     }): Promise<ElementMetadata & unknown> {
-        const { element, elementMetadata, orgUnitIds } = options;
+        const { elementMetadata } = options;
 
-        if (element.type === "dataSets") {
-            const categoryOptions = await this.getCategoryOptions(this.api);
-            const categoryOptionIdsToInclude = this.getCategoryOptionIdsToInclude(
-                element,
-                orgUnitIds,
-                categoryOptions,
-                options
-            );
+        // if (element.type === "dataSets") {
+        //     const categoryOptions = await this.getCategoryOptions(this.api);
+        //     const categoryOptionIdsToInclude = this.getCategoryOptionIdsToInclude(
+        //         element,
+        //         orgUnitIds,
+        //         categoryOptions,
+        //         options
+        //     );
 
-            const categoryOptionCombosFiltered = elementMetadata.categoryOptionCombos.filter(coc =>
-                _(coc.categoryOptions).every(categoryOption => {
-                    return categoryOptionIdsToInclude.has(categoryOption.id);
-                })
-            );
+        //     const categoryOptionCombosFiltered = elementMetadata.categoryOptionCombos.filter(coc =>
+        //         _(coc.categoryOptions).every(categoryOption => {
+        //             return categoryOptionIdsToInclude.has(categoryOption.id);
+        //         })
+        //     );
 
-            return { ...elementMetadata, categoryOptionCombos: categoryOptionCombosFiltered };
-        } else {
-            return elementMetadata;
-        }
-    }
-
-    private getCategoryOptionIdsToInclude(
-        element: Element,
-        orgUnitIds: string[],
-        categoryOptions: CategoryOption[],
-        options: { startDate: Date | undefined; endDate: Date | undefined }
-    ) {
-        const dataSetOrgUnitIds = element.organisationUnits.map(ou => ou.id);
-
-        const orgUnitIdsToInclude = new Set(
-            _.isEmpty(orgUnitIds) ? dataSetOrgUnitIds : _.intersection(orgUnitIds, dataSetOrgUnitIds)
-        );
-
-        const startDate = options.startDate?.toISOString();
-        const endDate = options.endDate?.toISOString();
-
-        const categoryOptionIdsToInclude = new Set(
-            categoryOptions
-                .filter(categoryOption => {
-                    const noStartDateIntersect =
-                        startDate && categoryOption.endDate && startDate > categoryOption.endDate;
-                    const noEndDateIntersect =
-                        endDate && categoryOption.startDate && endDate < categoryOption.startDate;
-                    const dateCondition = !noStartDateIntersect && !noEndDateIntersect;
-
-                    const categoryOptionOrgUnitCondition =
-                        _.isEmpty(categoryOption.organisationUnits) ||
-                        _(categoryOption.organisationUnits).some(orgUnit => orgUnitIdsToInclude.has(orgUnit.id));
-
-                    return dateCondition && categoryOptionOrgUnitCondition;
-                })
-                .map(categoryOption => categoryOption.id)
-        );
-        return categoryOptionIdsToInclude;
-    }
-
-    private async getCategoryOptions(api: D2Api): Promise<CategoryOption[]> {
-        const { categoryOptions } = await api.metadata
-            .get({
-                categoryOptions: {
-                    fields: {
-                        id: true,
-                        startDate: true,
-                        endDate: true,
-                        organisationUnits: { id: true },
-                    },
-                },
-            })
-            .getData();
-
-        return categoryOptions;
+        //     return { ...elementMetadata, categoryOptionCombos: categoryOptionCombosFiltered };
+        // } else {
+        return elementMetadata;
+        // }
     }
 }
 
+async function getTrackedEntityInstances(options: GetOptions): Promise<TrackedEntityInstance[]> {
+    const { api, orgUnits, enrollmentStartDate, enrollmentEndDate, relationshipsOuFilter = "CAPTURE" } = options;
+    if (_.isEmpty(orgUnits)) return [];
+
+    const program = await getProgram(api, options.program.id);
+    if (!program) return [];
+
+    const metadata = await getRelationshipMetadata(program, api, {
+        organisationUnits: orgUnits,
+        ouMode: relationshipsOuFilter,
+    });
+
+    // Get TEIs for the first page:
+    const apiTeis: D2TrackerTrackedEntity[] = [];
+
+    for (const orgUnit of orgUnits) {
+        const trackedEntityInstances = await getTeisFromApi({
+            api,
+            program,
+            orgUnit,
+            enrollmentStartDate,
+            enrollmentEndDate,
+            ouMode: relationshipsOuFilter,
+        });
+        apiTeis.push(...trackedEntityInstances);
+    }
+
+    return apiTeis.map(tei => buildTei(metadata, program, tei));
+}
+
+async function getProgram(api: D2Api, id: Id): Promise<Program | undefined> {
+    const {
+        objects: [apiProgram],
+    } = await api.models.programs
+        .get({
+            fields: {
+                id: true,
+                trackedEntityType: { id: true },
+                programTrackedEntityAttributes: {
+                    trackedEntityAttribute: {
+                        id: true,
+                        name: true,
+                        valueType: true,
+                        optionSet: { id: true, options: { id: true, code: true } },
+                    },
+                },
+            },
+            filter: { id: { eq: id } },
+        })
+        .getData();
+
+    if (!apiProgram) return;
+
+    const program: Program = {
+        id: apiProgram.id,
+        trackedEntityType: { id: apiProgram.trackedEntityType?.id },
+        attributes: apiProgram.programTrackedEntityAttributes.map(
+            ({ trackedEntityAttribute }) => trackedEntityAttribute
+        ),
+    };
+
+    return program;
+}
 export async function getRelationshipMetadata(
     program: Program,
     api: D2Api,
@@ -625,6 +548,114 @@ export async function getRelationshipMetadata(
     });
 
     return { relationshipTypes: _.compact(relationshipTypesWithTeis) };
+}
+
+async function getTeisFromApi(options: {
+    api: D2Api;
+    program: Program;
+    orgUnit: Ref;
+    enrollmentStartDate: Moment | undefined;
+    enrollmentEndDate: Moment | undefined;
+    ouMode: RelationshipOrgUnitFilter;
+}): Promise<D2TrackerTrackedEntity[]> {
+    const trackedEntities: D2TrackerTrackedEntity[] = [];
+    const { api, program, orgUnit, enrollmentStartDate, enrollmentEndDate, ouMode } = options;
+
+    const ouModeQuery =
+        ouMode === "SELECTED" || ouMode === "CHILDREN" || ouMode === "DESCENDANTS"
+            ? { ouMode, ou: orgUnit }
+            : { ouMode };
+
+    const pageSize = 250;
+    let page = 1;
+    let result;
+    try {
+        do {
+            result = await api.tracker.trackedEntities
+                .get({
+                    ...ouModeQuery,
+                    program: program.id,
+                    orgUnit: orgUnit.id,
+                    pageSize,
+                    page,
+                    totalPages: true,
+                    fields: {
+                        trackedEntity: true,
+                        orgUnit: true,
+                        inactive: true,
+                        attributes: true,
+                        enrollments: true,
+                        relationships: true,
+                        featureType: true,
+                        geometry: true,
+                    },
+
+                    enrollmentEnrolledAfter: enrollmentStartDate?.format("YYYY-MM-DD") ?? "",
+                    enrollmentEnrolledBefore: enrollmentEndDate?.format("YYYY-MM-DD") ?? "",
+                })
+                .getData();
+            if (!result.total) {
+                throw new Error(`Error getting paginated events of program ${program} and organisation ${orgUnit}`);
+            }
+            trackedEntities.push(...result.instances);
+            page++;
+        } while (result.page < Math.ceil((result.total as number) / pageSize));
+        return trackedEntities;
+    } catch {
+        return [];
+    }
+}
+
+function buildTei(
+    metadata: RelationshipMetadata,
+    program: Program,
+    teiApi: D2TrackerTrackedEntity
+): TrackedEntityInstance {
+    const orgUnit = { id: teiApi.orgUnit };
+    const attributesById = _.keyBy(program.attributes, attribute => attribute.id);
+
+    const enrollment: Enrollment | undefined = _(teiApi.enrollments)
+        .filter(e => e.program === program.id && orgUnit.id === e.orgUnit)
+        .map(enrollmentApi => ({
+            id: enrollmentApi.enrollment,
+            enrollmentDate: enrollmentApi.enrolledAt,
+            incidentDate: enrollmentApi.occurredAt,
+        }))
+        .first();
+
+    const attributeValues: AttributeValue[] =
+        teiApi.attributes?.map((attrApi): AttributeValue => {
+            const optionSet = attributesById[attrApi.attribute]?.optionSet;
+            const option = optionSet && optionSet.options.find(option => option.code === attrApi.value);
+
+            return {
+                attribute: {
+                    id: attrApi.attribute,
+                    valueType: attrApi.valueType as DataElementType,
+                    ...(optionSet ? { optionSet } : {}),
+                },
+                value: attrApi.value,
+                ...(option ? { optionId: option.id } : {}),
+            };
+        }) ?? [];
+
+    return {
+        program: { id: program.id },
+        id: teiApi.trackedEntity ?? "",
+        orgUnit: { id: teiApi.orgUnit ?? "" },
+        disabled: teiApi.inactive ? true : false,
+        enrollment: enrollment,
+        attributeValues,
+        relationships:
+            teiApi.relationships?.map(relationship => ({
+                id: relationship.relationship,
+                typeId: relationship.relationshipType,
+                typeName: relationship.relationshipName,
+                fromId: relationship.from.trackedEntity?.trackedEntity ?? "",
+                toId: relationship.to.event?.event ?? "",
+            })) ?? [],
+        geometry: { type: "none" },
+    };
 }
 
 function isProgramAssociatedWithTeiConstraint(program: Program, constraint: D2RelationshipConstraint): boolean {
