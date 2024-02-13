@@ -21,7 +21,6 @@ import {
     AMC_RAW_SUBSTANCE_CONSUMPTION_PROGRAM_ID,
     AMC_SUBSTANCE_CALCULATED_CONSUMPTION_PROGRAM_ID,
 } from "../usecases/data-entry/amc/ImportAMCSubstanceLevelData";
-import { MetadataRepository } from "../repositories/MetadataRepository";
 
 export type DownloadType = "SUBMITTED" | "CALCULATED";
 export interface DownloadTemplateProps {
@@ -42,10 +41,9 @@ export interface DownloadTemplateProps {
 
 export class DownloadTemplate {
     constructor(
-        private DownloadtemplateRepository: DownloadTemplateRepository,
+        private downloadtemplateRepository: DownloadTemplateRepository,
         private excelRepository: ExcelRepository,
-        private egaspRepository: EGASPProgramDefaultRepository,
-        private metadataRepository: MetadataRepository
+        private egaspRepository: EGASPProgramDefaultRepository
     ) {}
 
     public async downloadTemplate({
@@ -71,9 +69,9 @@ export class DownloadTemplate {
             throw new Error("No template found for this Program");
         }
 
-        const element = await this.DownloadtemplateRepository.getElement(formType, programId);
+        const element = await this.downloadtemplateRepository.getElement(formType, programId);
 
-        const result = await this.DownloadtemplateRepository.getElementMetadata({
+        const result = await this.downloadtemplateRepository.getElementMetadata({
             element,
             orgUnitIds: orgUnits,
             downloadRelationships: downloadRelationships,
@@ -103,7 +101,7 @@ export class DownloadTemplate {
         await this.excelRepository.loadTemplate(file, programId).toPromise();
 
         const dataPackage = enablePopulate
-            ? await this.DownloadtemplateRepository.getDataPackage({
+            ? await this.downloadtemplateRepository.getDataPackage({
                   type: formType,
                   id: programId,
                   orgUnits,
@@ -114,7 +112,9 @@ export class DownloadTemplate {
               })
             : undefined;
 
-        const builder = new ExcelBuilder(this.excelRepository, this.DownloadtemplateRepository);
+        
+
+        const builder = new ExcelBuilder(this.excelRepository, this.downloadtemplateRepository);
 
         if (enablePopulate && dataPackage) {
             await builder.populateTemplate(template, dataPackage, settings);

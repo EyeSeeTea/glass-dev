@@ -5,7 +5,6 @@ import {
 } from "../../data/repositories/download-template/DownloadTemplateDefaultRepository";
 import { DataFormType } from "../entities/DataForm";
 import { Id, NamedRef } from "../entities/Ref";
-import { GeneratedTemplate } from "../entities/Template";
 import { TrackedEntityInstance } from "../entities/TrackedEntityInstance";
 import { DataPackage } from "../entities/data-entry/DataPackage";
 import { Moment } from "moment";
@@ -33,7 +32,6 @@ export interface GetElementMetadataParams {
 }
 
 export interface DownloadTemplateRepository {
-    getTemplate(programId: Id): GeneratedTemplate;
     getBuilderMetadata(teis: TrackedEntityInstance[]): Promise<BuilderMetadata>;
     getDataPackage(params: GetDataPackageParams): Promise<DataPackage>;
     getElement(type: string, id: string): Promise<GetElementType>;
