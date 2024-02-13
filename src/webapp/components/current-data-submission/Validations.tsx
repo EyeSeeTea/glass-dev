@@ -5,7 +5,6 @@ import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context
 import { useCurrentModuleContext } from "../../contexts/current-module-context";
 import { useCurrentPeriodContext } from "../../contexts/current-period-context";
 import { moduleProperties } from "../../../domain/utils/ModuleProperties";
-import moment from "moment";
 import styled from "styled-components";
 import { ContentLoader } from "../content-loader/ContentLoader";
 import { DownloadButton } from "./DownloadButton";
@@ -17,6 +16,7 @@ import { useGetLastSuccessfulAnalyticsRunTime } from "../../hooks/useGetLastSucc
 import { CircularProgress, Typography } from "@material-ui/core";
 import { MultiDashboardContent } from "../reports/MultiDashboardContent";
 import { EmbeddedReport } from "../reports/EmbeddedReport";
+import { DownloadType } from "../../../domain/utils/DownloadTemplate";
 
 export const Validations: React.FC = () => {
     const { compositionRoot } = useAppContext();
@@ -35,41 +35,37 @@ export const Validations: React.FC = () => {
     const fileTypeState = useFileTypeByDataSubmission();
 
     const downloadTemplate = useCallback(
-        async (downloadType: "SUBMITTED" | "CALCULATED") => {
+        (downloadType: DownloadType) => {
             setIsLoading(true);
-            try {
-                if (fileTypeState.kind === "loaded") {
-                    const startDateOfPeriod = moment(currentPeriod).startOf("year");
-                    const endDateOfPeriod = moment(currentPeriod).endOf("year");
-                    const file = await compositionRoot.fileSubmission.downloadTemplate({
-                        downloadType: downloadType,
-                        fileType: fileTypeState.data ?? "",
-                        moduleName: currentModuleAccess.moduleName,
-                        orgUnit: currentOrgUnitAccess.orgUnitId,
-                        populate: true,
-                        populateStartDate: startDateOfPeriod,
-                        populateEndDate: endDateOfPeriod,
-                        downloadRelationships: true,
-                        splitDataEntryTabsBySection: true,
-                        useCodesForMetadata: false,
-                        filterTEIEnrollmentDate: true,
-                    });
 
-                    const downloadSimulateAnchor = document.createElement("a");
-                    downloadSimulateAnchor.href = URL.createObjectURL(file);
-                    const fileTypeName = moduleProperties.get(currentModuleAccess.moduleName)
-                        ?.isSingleFileTypePerSubmission
-                        ? `-${fileTypeState.data}-LEVEL-DATA`
-                        : "";
-                    downloadSimulateAnchor.download = `${currentModuleAccess.moduleName}${fileTypeName}-${currentOrgUnitAccess.orgUnitCode}-TEMPLATE.xlsx`;
-                    // simulate link click
-                    document.body.appendChild(downloadSimulateAnchor);
-                    downloadSimulateAnchor.click();
-                }
-            } catch {
-                snackbar.error(i18n.t("Error downloading data"));
-            } finally {
-                setIsLoading(false);
+            if (fileTypeState.kind === "loaded") {
+                compositionRoot.fileSubmission
+                    .downloadPopulatedTemplate(
+                        currentModuleAccess.moduleName,
+                        currentOrgUnitAccess.orgUnitId,
+                        currentPeriod,
+                        fileTypeState.data ?? "",
+                        downloadType
+                    )
+                    .run(
+                        file => {
+                            const downloadSimulateAnchor = document.createElement("a");
+                            downloadSimulateAnchor.href = URL.createObjectURL(file);
+                            const fileTypeName = moduleProperties.get(currentModuleAccess.moduleName)
+                                ?.isSingleFileTypePerSubmission
+                                ? `-${fileTypeState.data}`
+                                : "";
+                            downloadSimulateAnchor.download = `${currentModuleAccess.moduleName}${fileTypeName}-${downloadType}-${currentOrgUnitAccess.orgUnitCode}-Populated.xlsx`;
+                            // simulate link click
+                            document.body.appendChild(downloadSimulateAnchor);
+                            downloadSimulateAnchor.click();
+                            setIsLoading(false);
+                        },
+                        _error => {
+                            snackbar.error(i18n.t("Error downloading data"));
+                            setIsLoading(false);
+                        }
+                    );
             }
         },
         [
