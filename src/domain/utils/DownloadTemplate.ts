@@ -112,8 +112,6 @@ export class DownloadTemplate {
               })
             : undefined;
 
-        
-
         const builder = new ExcelBuilder(this.excelRepository, this.downloadtemplateRepository);
 
         if (enablePopulate && dataPackage) {

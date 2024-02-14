@@ -467,7 +467,6 @@ async function getTrackedEntityInstances(options: GetOptions): Promise<TrackedEn
             orgUnit,
             enrollmentStartDate,
             enrollmentEndDate,
-            ouMode: relationshipsOuFilter,
         });
         apiTeis.push(...trackedEntityInstances);
     }
@@ -556,15 +555,9 @@ async function getTeisFromApi(options: {
     orgUnit: Ref;
     enrollmentStartDate: Moment | undefined;
     enrollmentEndDate: Moment | undefined;
-    ouMode: RelationshipOrgUnitFilter;
 }): Promise<D2TrackerTrackedEntity[]> {
     const trackedEntities: D2TrackerTrackedEntity[] = [];
-    const { api, program, orgUnit, enrollmentStartDate, enrollmentEndDate, ouMode } = options;
-
-    const ouModeQuery =
-        ouMode === "SELECTED" || ouMode === "CHILDREN" || ouMode === "DESCENDANTS"
-            ? { ouMode, ou: orgUnit }
-            : { ouMode };
+    const { api, program, orgUnit, enrollmentStartDate, enrollmentEndDate } = options;
 
     const pageSize = 250;
     let page = 1;
@@ -573,7 +566,6 @@ async function getTeisFromApi(options: {
         do {
             result = await api.tracker.trackedEntities
                 .get({
-                    ...ouModeQuery,
                     program: program.id,
                     orgUnit: orgUnit.id,
                     pageSize,
