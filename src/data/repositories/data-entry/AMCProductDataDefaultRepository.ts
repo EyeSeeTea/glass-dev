@@ -25,6 +25,7 @@ import { TrackerPostResponse } from "@eyeseetea/d2-api/api/tracker";
 import { importApiTracker } from "../utils/importApiTracker";
 import { ImportStrategy } from "../../../domain/entities/data-entry/DataValuesSaveSummary";
 import { logger } from "../../../utils/logger";
+import moment from "moment";
 
 export const AMC_PRODUCT_REGISTER_PROGRAM_ID = "G6ChA5zMW9n";
 
@@ -80,13 +81,15 @@ export class AMCProductDataDefaultRepository implements AMCProductDataRepository
         productDataTrackedEntities: ProductDataTrackedEntity[],
         rawSubstanceConsumptionCalculatedStageMetadata: ProgramStage,
         rawSubstanceConsumptionCalculatedData: RawSubstanceConsumptionCalculated[],
-        orgUnitId: Id
+        orgUnitId: Id,
+        period: string
     ): FutureData<TrackerPostResponse> {
         const d2TrackerEvents = this.mapRawSubstanceConsumptionCalculatedToD2TrackerEvent(
             productDataTrackedEntities,
             rawSubstanceConsumptionCalculatedStageMetadata,
             rawSubstanceConsumptionCalculatedData,
-            orgUnitId
+            orgUnitId,
+            period
         );
         if (!_.isEmpty(d2TrackerEvents)) {
             return importApiTracker(this.api, { events: d2TrackerEvents }, importStrategy);
@@ -267,7 +270,8 @@ export class AMCProductDataDefaultRepository implements AMCProductDataRepository
         productDataTrackedEntities: ProductDataTrackedEntity[],
         rawSubstanceConsumptionCalculatedStageMetadata: ProgramStage,
         rawSubstanceConsumptionCalculatedData: RawSubstanceConsumptionCalculated[],
-        orgUnitId: Id
+        orgUnitId: Id,
+        period: string
     ): D2TrackerEvent[] {
         return rawSubstanceConsumptionCalculatedData
             .map(data => {
@@ -296,12 +300,17 @@ export class AMCProductDataDefaultRepository implements AMCProductDataRepository
                         }
                     );
 
+                    //Validation rule : Set to 1st Jan of corresponding year
+                    const occurredAt = data.eventId
+                        ? productDataTrackedEntity.events.find(({ eventId }) => eventId === data.eventId)?.occurredAt
+                        : moment(new Date(`${period}-01-01`))
+                              .toISOString()
+                              .split("T")
+                              .at(0);
+
                     return {
                         event: data.eventId ?? "",
-                        occurredAt: data.eventId
-                            ? productDataTrackedEntity.events.find(({ eventId }) => eventId === data.eventId)
-                                  ?.occurredAt
-                            : new Date().getTime().toString(),
+                        occurredAt: occurredAt,
                         status: "COMPLETED",
                         trackedEntity: productDataTrackedEntity.trackedEntityId,
                         enrollment: productDataTrackedEntity.enrollmentId,
