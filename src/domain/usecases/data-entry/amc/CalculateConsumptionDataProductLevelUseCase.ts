@@ -109,7 +109,8 @@ export class CalculateConsumptionDataProductLevelUseCase {
                                 productDataTrackedEntities,
                                 rawSubstanceConsumptionCalculatedStageMetadata,
                                 rawSubstanceConsumptionCalculatedData,
-                                orgUnitId
+                                orgUnitId,
+                                period
                             )
                             .flatMap(response => {
                                 if (response.status === "OK") {

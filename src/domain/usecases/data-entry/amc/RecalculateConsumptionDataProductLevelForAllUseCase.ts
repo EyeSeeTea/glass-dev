@@ -191,7 +191,8 @@ export class RecalculateConsumptionDataProductLevelForAllUseCase {
                                   ...rawSubstanceConsumptionCalculatedDataToCreate,
                               ]
                             : rawSubstanceConsumptionCalculatedDataToUpdate,
-                        orgUnitId
+                        orgUnitId,
+                        period
                     )
                     .flatMap(response => {
                         if (response.status === "OK") {
