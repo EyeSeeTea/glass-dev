@@ -49,6 +49,10 @@ export class Future<E, D> {
         });
     }
 
+    toVoid(): Future<E, void> {
+        return this.map(() => undefined);
+    }
+
     /* Static methods */
     static noCancel: Cancel = () => {};
 
