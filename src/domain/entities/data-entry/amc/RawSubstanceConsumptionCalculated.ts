@@ -55,6 +55,20 @@ export type RawSubstanceConsumptionCalculated = {
     atc_version_autocalculated: string;
     ddds_autocalculated: number;
     orgUnitId: Id;
+    eventId?: Id;
 };
 
 export type RawSubstanceConsumptionCalculatedKeys = keyof RawSubstanceConsumptionCalculated;
+
+export const RAW_SUBSTANCE_CONSUMPTION_CALCULATED_KEYS = [
+    "atc_autocalculated",
+    "route_admin_autocalculated",
+    "salt_autocalculated",
+    "data_status_autocalculated",
+    "health_sector_autocalculated",
+    "health_level_autocalculated",
+    "tons_autocalculated",
+    "packages_autocalculated",
+    "atc_version_autocalculated",
+    "ddds_autocalculated",
+];

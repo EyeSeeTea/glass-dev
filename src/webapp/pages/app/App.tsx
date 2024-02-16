@@ -37,7 +37,7 @@ export const App: React.FC<AppProps> = React.memo(function App({ api, d2, instan
 
             // const isShareButtonVisible = _(appConfig).get("appearance.showShareButton") || false;
 
-            setAppContext({ api, currentUser, compositionRoot });
+            setAppContext({ api, currentUser, compositionRoot, instance: instance });
             // setShowShareButton(isShareButtonVisible);
             initFeedbackTool(d2, appConfig);
             setLoading(false);

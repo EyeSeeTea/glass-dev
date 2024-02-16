@@ -16,6 +16,7 @@
         "@dhis2/d2-i18n-generate": "1.2.0",
         "@dhis2/ui": "6.12.0",
         "@eyeseetea/d2-api": "1.13.2-beta.6",
+        "@eyeseetea/d2-logger": "0.1.1",
         "@eyeseetea/d2-ui-components": "2.6.11",
         "@eyeseetea/xlsx-populate": "4.1.0",
         "@material-ui/core": "4.12.3",
@@ -63,6 +64,7 @@
         "@types/styled-components": "5.1.24",
         "@typescript-eslint/eslint-plugin": "4.29.0",
         "@typescript-eslint/parser": "4.29.0",
+        "@vercel/ncc": "^0.38.1",
         "@welldone-software/why-did-you-render": "^6.2.3",
         "axios-mock-adapter": "1.20.0",
         "babel-core": "6.26.3",
@@ -111,7 +113,9 @@
         "cy:e2e:open": "NODE_ENV=test CYPRESS_E2E=true cypress open",
         "cy:e2e:run": "NODE_ENV=test CYPRESS_E2E=true cypress run --browser chrome",
         "prepare": "husky install",
-        "script-example": "npx ts-node src/scripts/example.ts"
+        "script-example": "npx ts-node src/scripts/index.ts example getExample",
+        "start-amc-recalculate": "npx ts-node src/scripts/cliAMC.ts  --debug",
+        "build-amc-recalculate": "ncc build src/scripts/cliAMC.ts -m -o $npm_package_name-amc-recalculate-server && zip -r $npm_package_name-amc-recalculate-server.zip $npm_package_name-amc-recalculate-server && npx rimraf $npm_package_name-amc-recalculate-server/"
     },
     "manifest.webapp": {
         "name": "glass",

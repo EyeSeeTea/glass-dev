@@ -14,10 +14,10 @@ import { MetadataRepository } from "../../../repositories/MetadataRepository";
 import { downloadIdsAndDeleteTrackedEntities } from "../amc/ImportAMCProductLevelData";
 import { CustomDataColumns } from "../../../entities/data-entry/amr-individual-fungal-external/RISIndividualFungalData";
 
-const AMRIProgramID = "mMAj6Gofe49";
+export const AMRIProgramID = "mMAj6Gofe49";
 const AMR_GLASS_AMR_TET_PATIENT = "CcgnfemKr5U";
-const AMRDataProgramStageId = "KCmWZD8qoAk";
-const AMRCandidaProgramStageId = "ysGSonDq9Bc";
+export const AMRDataProgramStageId = "KCmWZD8qoAk";
+export const AMRCandidaProgramStageId = "ysGSonDq9Bc";
 
 const PATIENT_COUNTER_ID = "uSGcLbT5gJJ";
 const PATIENT_ID = "qKWPfeSgTnc";
