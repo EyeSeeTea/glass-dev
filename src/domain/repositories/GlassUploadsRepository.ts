@@ -23,6 +23,7 @@ export interface GlassUploadsRepository {
         secondaryUploadId?: Id;
         secondaryImportSummaryErrors?: ImportSummaryErrors;
     }): FutureData<void>;
+    getUploadsByDataSubmission(dataSubmissionId: Id): FutureData<GlassUploads[]>;
     getEventListFileIdByUploadId(id: string): FutureData<string>;
     setCalculatedEventListFileId(uploadId: string, calculatedEventListFileId: string): FutureData<void>;
 }

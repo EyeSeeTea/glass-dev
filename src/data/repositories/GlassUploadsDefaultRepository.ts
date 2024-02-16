@@ -149,6 +149,13 @@ export class GlassUploadsDefaultRepository implements GlassUploadsRepository {
         });
     }
 
+    getUploadsByDataSubmission(dataSubmissionId: string): FutureData<GlassUploads[]> {
+        return this.dataStoreClient.getObjectsFilteredByProps<GlassUploads>(
+            DataStoreKeys.UPLOADS,
+            new Map<keyof GlassUploads, unknown>([["dataSubmission", dataSubmissionId]])
+        );
+    }
+
     getEventListFileIdByUploadId(id: string): FutureData<string> {
         return this.dataStoreClient.listCollection<GlassUploads>(DataStoreKeys.UPLOADS).flatMap(uploads => {
             const upload = uploads?.find(upload => upload.id === id);

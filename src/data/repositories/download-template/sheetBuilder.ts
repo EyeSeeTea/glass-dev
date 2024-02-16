@@ -84,7 +84,7 @@ export class SheetBuilder {
         this.validations = new Map();
     }
 
-    public generate(programId: Id) {
+    public generate(programId: Id, programStageId?: string): Excel.Workbook {
         const { builder } = this;
         const { element } = builder;
         const dataEntrySheetsInfo: Array<{ sheet: any }> = [];
@@ -96,7 +96,9 @@ export class SheetBuilder {
             this.relationshipsSheets = [];
 
             // ProgramStage sheets
-            const programStages = this.getProgramStages().map(programStageT => metadata.get(programStageT.id));
+            const programStages = this.getProgramStages(programStageId).map(programStageT =>
+                metadata.get(programStageT.id)
+            );
 
             withSheetNames(programStages).forEach((programStage: any) => {
                 const sheet = this.workbook.addWorksheet(programStage.sheetName);
@@ -363,7 +365,7 @@ export class SheetBuilder {
 
     private fillInstancesSheet(programId: Id) {
         const { element: program } = this.builder;
-        const { rowOffset = 0 } = this.builder.template;
+        const rowOffset = this.builder.template.rowOffset || 0;
         const sheet = this.instancesSheet;
 
         // Add cells for themes
@@ -445,10 +447,10 @@ export class SheetBuilder {
         if (!header) sheet.column(columnId).hide();
     }
     private getFeatureTypeHeader(program: any): string | undefined {
-        const { featureType } = program.trackedEntityType;
+        const trackedEntityType = program.trackedEntityType;
         const opts = { lng: this.builder.language };
 
-        switch (featureType) {
+        switch (trackedEntityType?.featureType) {
             case "POINT":
                 return [i18n.t("Point in map", opts), "([LON, LAT])"].join("\n");
             case "POLYGON":
@@ -877,10 +879,11 @@ export class SheetBuilder {
     }
 
     // Return only program stages for which the current user has permissions to export/import data.
-    private getProgramStages() {
+    private getProgramStages(programStageId?: Id) {
         const { element } = this.builder;
 
         return _(element.programStages)
+            .filter(({ id }) => (programStageId ? id === programStageId : true))
             .filter(({ access }) => access?.read && access?.data?.read && access?.data?.write)
             .value();
     }

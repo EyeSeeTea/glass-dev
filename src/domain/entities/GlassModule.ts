@@ -1,6 +1,7 @@
 import { Id } from "./Base";
-import { CustomDataColumns } from "./data-entry/amr-individual-funghi-external/RISIndividualFunghiData";
+import { CustomDataColumns } from "./data-entry/amr-individual-fungal-external/RISIndividualFungalData";
 import { QuestionnaireRule, QuestionnairesType } from "./Questionnaire";
+import { NamedRef } from "./Ref";
 import { UserGroup } from "./User";
 
 interface ModuleUserGroups {
@@ -26,6 +27,8 @@ export interface GlassModule {
     dashboards: {
         reportsMenu: string;
         validationReport: string;
+        multiReportsMenu?: NamedRef[];
+        multiValidationReports?: NamedRef[];
     };
     dataSubmissionPeriod: DataSubmissionPeriodTypes;
     dataColumns: string[];
@@ -37,8 +40,10 @@ export interface GlassModule {
     }[];
     populateCurrentYearInHistory?: boolean;
     customDataColumns?: CustomDataColumns;
+    lineLists?: LineListDetails[];
 }
 
+export type LineListDetails = { id: Id; name?: string; programId: Id; programStageId?: Id };
 interface QuestionnaireConfig {
     id: Id;
     mandatory?: boolean;

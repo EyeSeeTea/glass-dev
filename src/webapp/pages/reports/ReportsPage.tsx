@@ -9,6 +9,9 @@ import { useCurrentModuleContext } from "../../contexts/current-module-context";
 import { EmbeddedReport } from "../../components/reports/EmbeddedReport";
 import { useGlassDashboard } from "../../hooks/useGlassDashboard";
 import { CircularProgress } from "material-ui";
+import { useDownloadAllData } from "../../hooks/useDownloadAllData";
+import { moduleProperties } from "../../../domain/utils/ModuleProperties";
+import { MultiDashboardContent } from "../../components/reports/MultiDashboardContent";
 
 export const GLASS_DASHBOARD_ID = "w7Kub3oACD9";
 export const ReportsPage: React.FC = React.memo(() => {
@@ -18,6 +21,7 @@ export const ReportsPage: React.FC = React.memo(() => {
 export const ReportPageContent: React.FC = React.memo(() => {
     const { currentModuleAccess } = useCurrentModuleContext();
     const { reportDashboardId } = useGlassDashboard();
+    const { moduleLineListings, downloadAllData, downloadAllLoading } = useDownloadAllData();
 
     return (
         <ContentWrapper>
@@ -32,8 +36,35 @@ export const ReportPageContent: React.FC = React.memo(() => {
                     </Button>
                 </StyledBreadCrumbs>
             </PreContent>
-            {reportDashboardId.kind === "loading" && <CircularProgress />}
-            {reportDashboardId.kind === "loaded" && <EmbeddedReport dashboardId={reportDashboardId.data} />}
+            {moduleProperties.get(currentModuleAccess.moduleName)?.downloadAllDataButtonReq && (
+                <DownloadButtonContainer>
+                    {downloadAllLoading ? (
+                        <CircularProgress size={40} />
+                    ) : (
+                        moduleLineListings?.map(lineListing => {
+                            return (
+                                <Button
+                                    key={lineListing.id}
+                                    variant="contained"
+                                    color="primary"
+                                    onClick={() => downloadAllData(lineListing)}
+                                >
+                                    {i18n.t(`Download ${lineListing.name}` ?? "Download All Data")}
+                                </Button>
+                            );
+                        })
+                    )}
+                </DownloadButtonContainer>
+            )}
+
+            {moduleProperties.get(currentModuleAccess.moduleName)?.isMultiDashboard ? (
+                <MultiDashboardContent type="Report" />
+            ) : (
+                <>
+                    {reportDashboardId.kind === "loading" && <CircularProgress />}
+                    {reportDashboardId.kind === "loaded" && <EmbeddedReport dashboardId={reportDashboardId.data} />}
+                </>
+            )}
         </ContentWrapper>
     );
 });
@@ -83,4 +114,10 @@ const StyledBreadCrumbs = styled(Breadcrumbs)`
     svg {
         color: ${palette.text.secondary};
     }
+`;
+
+const DownloadButtonContainer = styled.div`
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
 `;

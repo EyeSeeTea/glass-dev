@@ -18,8 +18,11 @@ import { GlassATCVersion } from "../../../../../entities/GlassATC";
 import { ProductRegistryAttributes } from "../../../../../entities/data-entry/amc/ProductRegistryAttributes";
 import { RawProductConsumption } from "../../../../../entities/data-entry/amc/RawProductConsumption";
 import { RawSubstanceConsumptionCalculated } from "../../../../../entities/data-entry/amc/RawSubstanceConsumptionCalculated";
+import { setupLoggerForTesting } from "../../../../../../utils/logger";
 
 describe("Given calculate Consumption Product Level Data function", () => {
+    beforeAll(() => setupLoggerForTesting());
+
     describe("When product registry attributes has: strength unit from gram family (then content from gram family), no concentration volume and no volume, no combination codes, strength unit and ddd unit are the same", () => {
         it("Then should return correct solution", async () => {
             const period = "2020";
@@ -171,11 +174,34 @@ describe("Given calculate Consumption Product Level Data function", () => {
             verifyCalculationResult(rawSubstanceConsumptionCalculatedData, type);
         });
     });
+    describe("When we do not have atc data", () => {
+        it("Then should return correct solution and don't do calculations", async () => {
+            const type = "no_atc_data";
+            const period = "2020";
+            const orgUnitId = "vboedbUs1As";
+            const productRegistryAttributes = givenProductRegistryAttributesByType(type);
+            const rawProductConsumption = givenRawProductConsumption();
+            const atcCurrentVersionDataEmpty = [] as unknown as GlassATCVersion;
+            const atcVersionKey = "ATC-2023-v1";
+
+            const rawSubstanceConsumptionCalculatedData = calculateConsumptionProductLevelData(
+                period,
+                orgUnitId,
+                productRegistryAttributes,
+                rawProductConsumption,
+                atcCurrentVersionDataEmpty,
+                atcVersionKey
+            );
+
+            verifyCalculationResult(rawSubstanceConsumptionCalculatedData, type);
+        });
+    });
 });
 
 function givenProductRegistryAttributesByType(type?: string): ProductRegistryAttributes[] {
     const productRegistryAttributesTypes = {
         basic: productRegistryAttributesBasic,
+        no_atc_data: productRegistryAttributesBasic,
         conc_volume_and_volume: productRegistryAttributesConcVolumeAndVolume,
         unit_dose_combination_code: productRegistryAttributesUnitDoseCombCode,
         millions_international_unit_different_ddd_unit:
@@ -209,6 +235,7 @@ function getExpectedCalculationSolution(type?: string): RawSubstanceConsumptionC
         no_combination_code_no_found_ddd: [],
         no_combination_code_found_ddd_alterations: calculationSolutionNoCombCodeFoundDDDAlterations,
         wrong_strength_unit: calculationSolutionWrongStrengthUnit,
+        no_atc_data: [],
     } as Record<string, RawSubstanceConsumptionCalculated[]>;
 
     const calculationSolution = type ? calculationSolutionTypes[type] : calculationSolutionTypes.basic;
