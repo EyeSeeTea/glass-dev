@@ -5,33 +5,33 @@ import { ConsistencyError, ImportSummary } from "../../../entities/data-entry/Im
 import { GlassDocumentsRepository } from "../../../repositories/GlassDocumentsRepository";
 import { GlassUploadsRepository } from "../../../repositories/GlassUploadsRepository";
 import { TrackerRepository } from "../../../repositories/TrackerRepository";
-import { RISIndividualFunghiDataRepository } from "../../../repositories/data-entry/RISIndividualFunghiDataRepository";
+import { RISIndividualFungalDataRepository } from "../../../repositories/data-entry/RISIndividualFungalDataRepository";
 import { D2TrackerTrackedEntity as TrackedEntity } from "@eyeseetea/d2-api/api/trackerTrackedEntities";
 import { D2TrackerEnrollment, D2TrackerEnrollmentAttribute } from "@eyeseetea/d2-api/api/trackerEnrollments";
 import { D2TrackerEvent } from "@eyeseetea/d2-api/api/trackerEvents";
 import { mapToImportSummary, uploadIdListFileAndSave } from "../ImportBLTemplateEventProgram";
 import { MetadataRepository } from "../../../repositories/MetadataRepository";
 import { downloadIdsAndDeleteTrackedEntities } from "../amc/ImportAMCProductLevelData";
-import { CustomDataColumns } from "../../../entities/data-entry/amr-individual-funghi-external/RISIndividualFunghiData";
+import { CustomDataColumns } from "../../../entities/data-entry/amr-individual-fungal-external/RISIndividualFungalData";
 
-const AMRIProgramID = "mMAj6Gofe49";
+export const AMRIProgramID = "mMAj6Gofe49";
 const AMR_GLASS_AMR_TET_PATIENT = "CcgnfemKr5U";
-const AMRDataProgramStageId = "KCmWZD8qoAk";
-const AMRCandidaProgramStageId = "ysGSonDq9Bc";
+export const AMRDataProgramStageId = "KCmWZD8qoAk";
+export const AMRCandidaProgramStageId = "ysGSonDq9Bc";
 
 const PATIENT_COUNTER_ID = "uSGcLbT5gJJ";
 const PATIENT_ID = "qKWPfeSgTnc";
 
-export class ImportRISIndividualFunghiFile {
+export class ImportRISIndividualFungalFile {
     constructor(
-        private risIndividualFunghiRepository: RISIndividualFunghiDataRepository,
+        private risIndividualFungalRepository: RISIndividualFungalDataRepository,
         private trackerRepository: TrackerRepository,
         private glassDocumentsRepository: GlassDocumentsRepository,
         private glassUploadsRepository: GlassUploadsRepository,
         private metadataRepository: MetadataRepository
     ) {}
 
-    public importRISIndividualFunghiFile(
+    public importRISIndividualFungalFile(
         inputFile: File,
         action: ImportStrategy,
         orgUnit: string,
@@ -48,10 +48,10 @@ export class ImportRISIndividualFunghiFile {
         dataColumns: CustomDataColumns
     ): FutureData<ImportSummary> {
         if (action === "CREATE_AND_UPDATE") {
-            return this.risIndividualFunghiRepository
+            return this.risIndividualFungalRepository
                 .get(dataColumns, inputFile)
-                .flatMap(risIndividualFunghiDataItems => {
-                    return this.validateDataItems(risIndividualFunghiDataItems, countryCode, period).flatMap(
+                .flatMap(risIndividualFungalDataItems => {
+                    return this.validateDataItems(risIndividualFungalDataItems, countryCode, period).flatMap(
                         validationSummary => {
                             //If there are blocking errors on custom validation, do not import. Return immediately.
                             if (validationSummary.blockingErrors.length > 0) {
@@ -70,8 +70,8 @@ export class ImportRISIndividualFunghiFile {
                                 }
                             };
 
-                            return this.mapIndividualFunghiDataItemsToEntities(
-                                risIndividualFunghiDataItems,
+                            return this.mapIndividualFungalDataItemsToEntities(
+                                risIndividualFungalDataItems,
                                 orgUnit,
                                 AMRIProgramIDl,
                                 AMRDataProgramStageIdl(),
@@ -112,12 +112,12 @@ export class ImportRISIndividualFunghiFile {
     }
 
     private validateDataItems(
-        risIndividualFunghiDataItems: CustomDataColumns[],
+        risIndividualFungalDataItems: CustomDataColumns[],
         orgUnit: string,
         period: string
     ): FutureData<ImportSummary> {
-        const orgUnitErrors = this.checkCountry(risIndividualFunghiDataItems, orgUnit);
-        const periodErrors = this.checkPeriod(risIndividualFunghiDataItems, period);
+        const orgUnitErrors = this.checkCountry(risIndividualFungalDataItems, orgUnit);
+        const periodErrors = this.checkPeriod(risIndividualFungalDataItems, period);
         const summary: ImportSummary = {
             status: "ERROR",
             importCount: { ignored: 0, imported: 0, deleted: 0, updated: 0 },
@@ -127,9 +127,9 @@ export class ImportRISIndividualFunghiFile {
         return Future.success(summary);
     }
 
-    private checkCountry(risIndividualFunghiDataItems: CustomDataColumns[], orgUnit: string): ConsistencyError[] {
+    private checkCountry(risIndividualFungalDataItems: CustomDataColumns[], orgUnit: string): ConsistencyError[] {
         const errors = _(
-            risIndividualFunghiDataItems.map((dataItem, index) => {
+            risIndividualFungalDataItems.map((dataItem, index) => {
                 if (dataItem.find(item => item.key === "COUNTRY")?.value !== orgUnit) {
                     return {
                         error: i18n.t(
@@ -153,9 +153,9 @@ export class ImportRISIndividualFunghiFile {
             lines: errors[error] || [],
         }));
     }
-    private checkPeriod(risIndividualFunghiDataItems: CustomDataColumns[], period: string): ConsistencyError[] {
+    private checkPeriod(risIndividualFungalDataItems: CustomDataColumns[], period: string): ConsistencyError[] {
         const errors = _(
-            risIndividualFunghiDataItems.map((dataItem, index) => {
+            risIndividualFungalDataItems.map((dataItem, index) => {
                 if (dataItem.find(item => item.key === "YEAR")?.value !== parseInt(period)) {
                     return {
                         error: i18n.t(
@@ -180,15 +180,15 @@ export class ImportRISIndividualFunghiFile {
         }));
     }
 
-    private mapIndividualFunghiDataItemsToEntities(
-        individualFunghiDataItems: CustomDataColumns[],
+    private mapIndividualFungalDataItemsToEntities(
+        individualFungalDataItems: CustomDataColumns[],
         orgUnit: string,
         AMRIProgramIDl: string,
         AMRDataProgramStageIdl: string,
         countryCode: string
     ): FutureData<TrackedEntity[]> {
         return this.trackerRepository.getProgramMetadata(AMRIProgramIDl, AMRDataProgramStageIdl).flatMap(metadata => {
-            const trackedEntities = individualFunghiDataItems.map(dataItem => {
+            const trackedEntities = individualFungalDataItems.map(dataItem => {
                 const attributes: D2TrackerEnrollmentAttribute[] = metadata.programAttributes.map(
                     (attr: { id: string; name: string; code: string }) => {
                         return {

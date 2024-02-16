@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: i18next-conv\n"
-"POT-Creation-Date: 2024-01-11T19:08:09.492Z\n"
+"POT-Creation-Date: 2024-02-05T17:15:45.577Z\n"
 "PO-Revision-Date: 2018-10-25T09:02:35.143Z\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -578,19 +578,13 @@ msgstr ""
 msgid "Error fetching previous uploads."
 msgstr ""
 
-msgid "Downloading"
+msgid "Choose a Dataset"
+msgstr ""
+
+msgid "Loading"
 msgstr ""
 
 msgid "Choose file type"
-msgstr ""
-
-msgid "Product level data"
-msgstr ""
-
-msgid "Substance level data"
-msgstr ""
-
-msgid "Choose a Dataset"
 msgstr ""
 
 msgid "Download empty template"
@@ -684,6 +678,9 @@ msgid "Enable message SMS notifications"
 msgstr ""
 
 msgid "Error fetching user Modules"
+msgstr ""
+
+msgid "Unknown file type"
 msgstr ""
 
 msgid "Country Information"

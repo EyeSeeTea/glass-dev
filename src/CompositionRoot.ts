@@ -60,13 +60,13 @@ import { GetDatabaseLocalesUseCase } from "./domain/usecases/GetDatabaseLocalesU
 import { LocalesDefaultRepository } from "./data/repositories/LocalesDefaultRepository";
 import { EGASPDataCSVDefaultRepository } from "./data/repositories/data-entry/EGASPDataCSVDefaultRepository";
 import { Dhis2EventsDefaultRepository } from "./data/repositories/Dhis2EventsDefaultRepository";
-import { EGASPProgramDefaultRepository } from "./data/repositories/download-empty-template/EGASPProgramDefaultRepository";
+import { EGASPProgramDefaultRepository } from "./data/repositories/download-template/EGASPProgramDefaultRepository";
 import { ExcelPopulateDefaultRepository } from "./data/repositories/ExcelPopulateDefaultRepository";
 import { SavePasswordUseCase } from "./domain/usecases/SavePasswordUseCase";
 import { SaveKeyDbLocaleUseCase } from "./domain/usecases/SaveKeyDbLocaleUseCase";
 import { SaveKeyUiLocaleUseCase } from "./domain/usecases/SaveKeyUiLocaleUseCase";
 import { ProgramRulesMetadataDefaultRepository } from "./data/repositories/program-rule/ProgramRulesMetadataDefaultRepository";
-import { RISIndividualFunghiDataCSVDefaultRepository } from "./data/repositories/data-entry/RISIndividualFunghiDataCSVDefaultRepository";
+import { RISIndividualFungalDataCSVDefaultRepository } from "./data/repositories/data-entry/RISIndividualFungalDataCSVDefaultRepository";
 import { TrackerDefaultRepository } from "./data/repositories/TrackerDefaultRepository";
 import { GetProgramQuestionnaireUseCase } from "./domain/usecases/GetProgramQuestionnaireUseCase";
 import { CaptureFormDefaultRepository } from "./data/repositories/CaptureFormDefaultRepository";
@@ -75,16 +75,22 @@ import { SignalDefaultRepository } from "./data/repositories/SignalDefaultReposi
 import { GetProgramQuestionnairesUseCase } from "./domain/usecases/GetProgramQuestionnairesUseCase";
 import { GetPopulatedProgramQuestionnaireUseCase } from "./domain/usecases/GetPopulatedProgramQuestionnaireUseCase";
 import { DeleteSignalUseCase } from "./domain/usecases/DeleteSignalUseCase";
-import { GetEventProgramEmptyTemplateUseCase } from "./domain/usecases/data-entry/egasp/GetEventProgramEmptyTemplateUseCase";
-import { DownloadEmptyTemplateDefautlRepository } from "./data/repositories/download-empty-template/DownloadEmptyTemplateDefautlRepository";
+import { DownloadTemplateDefaultRepository } from "./data/repositories/download-template/DownloadTemplateDefaultRepository";
 import { BulkLoadDataStoreClient } from "./data/data-store/BulkLoadDataStoreClient";
 import { ApplyAMCQuestionUpdationUseCase } from "./domain/usecases/ApplyAMCQuestionUpdationUseCase";
 import { SaveImportSummaryErrorsOfFilesInUploadsUseCase } from "./domain/usecases/SaveImportSummaryErrorsOfFilesInUploadsUseCase";
 import { AMCProductDataDefaultRepository } from "./data/repositories/data-entry/AMCProductDataDefaultRepository";
 import { AMCSubstanceDataDefaultRepository } from "./data/repositories/data-entry/AMCSubstanceDataDefaultRepository";
+import { GetUploadsByDataSubmissionUseCase } from "./domain/usecases/GetUploadsByDataSubmissionUseCase";
 import { CalculateConsumptionDataProductLevelUseCase } from "./domain/usecases/data-entry/amc/CalculateConsumptionDataProductLevelUseCase";
 import { GlassATCDefaultRepository } from "./data/repositories/GlassATCDefaultRepository";
 import { CalculateConsumptionDataSubstanceLevelUseCase } from "./domain/usecases/data-entry/amc/CalculateConsumptionDataSubstanceLevelUseCase";
+import { DownloadAllDataForModuleUseCase } from "./domain/usecases/DownloadAllDataForModuleUseCase";
+import { EventVisualizationAnalyticsDefaultRepository } from "./data/repositories/EventVisualizationAnalyticsDefaultRepository";
+import { GetMultipleDashboardUseCase } from "./domain/usecases/GetMultipleDashboardUseCase";
+import { DownloadAllDataButtonData } from "./domain/usecases/DownloadAllDataButtonData";
+import { DownloadEmptyTemplateUseCase } from "./domain/usecases/DownloadEmptyTemplateUseCase";
+import { DownloadPopulatedTemplateUseCase } from "./domain/usecases/DownloadPopulatedTemplateUseCase";
 
 export function getCompositionRoot(instance: Instance) {
     const api = getD2APiFromInstance(instance);
@@ -97,7 +103,7 @@ export function getCompositionRoot(instance: Instance) {
     const glassUploadsRepository = new GlassUploadsDefaultRepository(dataStoreClient);
     const glassDocumentsRepository = new GlassDocumentsDefaultRepository(dataStoreClient, instance);
     const risDataRepository = new RISDataCSVDefaultRepository();
-    const risIndividualFunghiRepository = new RISIndividualFunghiDataCSVDefaultRepository();
+    const risIndividualFungalRepository = new RISIndividualFungalDataCSVDefaultRepository();
     const sampleDataRepository = new SampleDataCSVDeafultRepository();
     const dataValuesRepository = new DataValuesDefaultRepository(instance);
     const metadataRepository = new MetadataDefaultRepository(instance);
@@ -115,11 +121,12 @@ export function getCompositionRoot(instance: Instance) {
     const trackerRepository = new TrackerDefaultRepository(instance);
     const captureFormRepository = new CaptureFormDefaultRepository(api);
     const signalRepository = new SignalDefaultRepository(dataStoreClient, api);
-    const downloadEmptyTemplateRepository = new DownloadEmptyTemplateDefautlRepository(instance);
+    const downloadTemplateRepository = new DownloadTemplateDefaultRepository(instance);
     const amcProductDataRepository = new AMCProductDataDefaultRepository(api);
     const amcSubstanceDataRepository = new AMCSubstanceDataDefaultRepository(api);
     const glassAtcRepository = new GlassATCDefaultRepository(dataStoreClient);
     const atcRepository = new GlassATCDefaultRepository(dataStoreClient);
+    const eventVisualizationRepository = new EventVisualizationAnalyticsDefaultRepository(api);
 
     return {
         instance: getExecute({
@@ -147,11 +154,15 @@ export function getCompositionRoot(instance: Instance) {
         glassUploads: getExecute({
             getAll: new GetGlassUploadsUseCase(glassUploadsRepository),
             setStatus: new SetUploadStatusUseCase(glassUploadsRepository),
-            getByDataSubmission: new GetGlassUploadsByDataSubmissionUseCase(glassUploadsRepository),
+            getAMRUploadsForCurrentDataSubmission: new GetGlassUploadsByDataSubmissionUseCase(
+                glassUploadsRepository,
+                glassDataSubmissionRepository
+            ),
             getByModuleOU: new GetGlassUploadsByModuleOUUseCase(glassUploadsRepository),
             getByModuleOUPeriod: new GetGlassUploadsByModuleOUPeriodUseCase(glassUploadsRepository),
             setBatchId: new SetUploadBatchIdUseCase(glassUploadsRepository),
             saveImportSummaryErrorsOfFiles: new SaveImportSummaryErrorsOfFilesInUploadsUseCase(glassUploadsRepository),
+            getCurrentDataSubmissionFileType: new GetUploadsByDataSubmissionUseCase(glassUploadsRepository),
         }),
         glassDocuments: getExecute({
             getAll: new GetGlassDocumentsUseCase(glassDocumentsRepository),
@@ -163,7 +174,7 @@ export function getCompositionRoot(instance: Instance) {
         fileSubmission: getExecute({
             primaryFile: new ImportPrimaryFileUseCase(
                 risDataRepository,
-                risIndividualFunghiRepository,
+                risIndividualFungalRepository,
                 metadataRepository,
                 dataValuesRepository,
                 glassModuleRepository,
@@ -179,7 +190,7 @@ export function getCompositionRoot(instance: Instance) {
             ),
             validatePrimaryFile: new ValidatePrimaryFileUseCase(
                 risDataRepository,
-                risIndividualFunghiRepository,
+                risIndividualFungalRepository,
                 egaspDataRepository,
                 glassModuleRepository,
                 amcProductDataRepository
@@ -200,11 +211,18 @@ export function getCompositionRoot(instance: Instance) {
                 amcSubstanceDataRepository,
                 glassModuleRepository
             ),
-            downloadEmptyTemplate: new GetEventProgramEmptyTemplateUseCase(
-                metadataRepository,
-                downloadEmptyTemplateRepository,
+
+            downloadEmptyTemplate: new DownloadEmptyTemplateUseCase(
+                downloadTemplateRepository,
                 excelRepository,
-                egaspProgramRepository
+                egaspProgramRepository,
+                metadataRepository
+            ),
+            downloadPopulatedTemplate: new DownloadPopulatedTemplateUseCase(
+                downloadTemplateRepository,
+                excelRepository,
+                egaspProgramRepository,
+                metadataRepository
             ),
         }),
         questionnaires: getExecute({
@@ -224,6 +242,7 @@ export function getCompositionRoot(instance: Instance) {
         }),
         glassDashboard: getExecute({
             getDashboard: new GetDashboardUseCase(glassModuleRepository),
+            getMultipleDashboards: new GetMultipleDashboardUseCase(glassModuleRepository),
         }),
         systemInfo: getExecute({
             lastAnalyticsRunTime: new GetLastAnalyticsRunTimeUseCase(systemInfoRepository),
@@ -265,6 +284,14 @@ export function getCompositionRoot(instance: Instance) {
                 glassAtcRepository,
                 metadataRepository
             ),
+        }),
+
+        downloads: getExecute({
+            getDownloadButtonDetails: new DownloadAllDataButtonData(
+                eventVisualizationRepository,
+                glassModuleRepository
+            ),
+            downloadAllData: new DownloadAllDataForModuleUseCase(eventVisualizationRepository),
         }),
     };
 }

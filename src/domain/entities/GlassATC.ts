@@ -1,3 +1,4 @@
+import { Id } from "./Ref";
 import { RouteOfAdministrationKey } from "./data-entry/amc/RouteOfAdministration";
 import { SaltKey } from "./data-entry/amc/Salt";
 import { UnitKey } from "./data-entry/amc/Unit";
@@ -9,16 +10,21 @@ export type GlassATCHistory = {
     uploadedDate: Date;
 };
 
-export type GlassATCVersionData<T> = {
-    name: "atc" | "ddd_combinations" | "ddd" | "conversion" | "ddd_alterations" | "atc_alterations";
-    data: T[];
+export type GlassATCRecalculateDataInfo = {
+    date: string;
+    recalculate: boolean;
+    periods: string[];
+    orgUnitsIds: Id[];
 };
 
-export type GlassATCVersion = Array<
-    GlassATCVersionData<
-        DDDCombinationsData | ConversionFactorData | DDDData | ATCData | DDDAlterationsData | ATCAlterationsData
-    >
->;
+export type GlassATCVersion = {
+    atc: ATCData[];
+    ddd_combinations: DDDCombinationsData[];
+    ddd: DDDData[];
+    conversion: ConversionFactorData[];
+    ddd_alterations?: DDDAlterationsData[];
+    atc_alterations?: ATCAlterationsData[];
+};
 
 export type ListGlassATCVersions = Record<string, GlassATCVersion>;
 
@@ -73,7 +79,6 @@ export type ATCAlterationsData = {
     SUBSTANCE: string;
     NEW_ATC: string;
     YEAR_CHANGED: string;
-    ROUTE: RouteOfAdministrationKey;
 };
 
 export type ATCData = {
