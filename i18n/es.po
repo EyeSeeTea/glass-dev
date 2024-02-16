@@ -680,6 +680,9 @@ msgstr ""
 msgid "Error fetching user Modules"
 msgstr ""
 
+msgid "Unknown file type"
+msgstr ""
+
 msgid "Country Information"
 msgstr ""
 

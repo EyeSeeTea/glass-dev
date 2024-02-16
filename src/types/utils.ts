@@ -41,6 +41,8 @@ export type ComponentParameter<
     Prop extends keyof ComponentProps<ObjectType>
 > = ComponentProps<ObjectType>[Prop];
 
+export type KeysOfUnion<T> = T extends T ? keyof T : never;
+
 export function isValueInUnionType<S, T extends S>(value: S, values: readonly T[]): value is T {
     return (values as readonly S[]).indexOf(value) >= 0;
 }

@@ -369,21 +369,23 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
 
     const downloadEmptyTemplate = useCallback(() => {
         setLoading(true);
-        compositionRoot.fileSubmission.downloadEmptyTemplate(moduleName, uploadFileType as string, orgUnitId).run(
+
+        const fileType = uploadFileType === "Product Level Data" ? "PRODUCT" : "SUBSTANCE";
+        compositionRoot.fileSubmission.downloadEmptyTemplate(moduleName, fileType, orgUnitId).run(
             file => {
                 //download file automatically
                 const downloadSimulateAnchor = document.createElement("a");
                 downloadSimulateAnchor.href = URL.createObjectURL(file);
                 const fileType = moduleProperties.get(moduleName)?.isSingleFileTypePerSubmission
-                    ? `${uploadFileType}-LEVEL-DATA`
+                    ? `-${uploadFileType}`
                     : "";
-                downloadSimulateAnchor.download = `${moduleName}-${fileType}-${orgUnitCode}-TEMPLATE`;
+                downloadSimulateAnchor.download = `${moduleName}${fileType}-${orgUnitCode}-TEMPLATE.xlsx`;
                 // simulate link click
                 document.body.appendChild(downloadSimulateAnchor);
                 downloadSimulateAnchor.click();
                 setLoading(false);
             },
-            error => {
+            (error: string) => {
                 snackbar.error("Error downloading file");
                 console.error(error);
                 setLoading(false);
