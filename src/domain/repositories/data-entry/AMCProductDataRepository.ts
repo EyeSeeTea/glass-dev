@@ -17,7 +17,8 @@ export interface AMCProductDataRepository {
         productDataTrackedEntities: ProductDataTrackedEntity[],
         rawSubstanceConsumptionCalculatedStageMetadata: ProgramStage,
         rawSubstanceConsumptionCalculatedData: RawSubstanceConsumptionCalculated[],
-        orgUnitId: Id
+        orgUnitId: Id,
+        period: string
     ): FutureData<TrackerPostResponse>;
     getProductRegisterProgramMetadata(): FutureData<ProductRegisterProgramMetadata | undefined>;
     getProductRegisterAndRawProductConsumptionByProductIds(

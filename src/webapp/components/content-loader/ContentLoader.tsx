@@ -39,7 +39,6 @@ export const ContentLoader: React.FC<ContentLoaderProps> = ({ content, children,
             } else {
                 return <>{children}</>;
             }
-
         case "loaded":
             return <>{children}</>;
     }

@@ -60,7 +60,7 @@ import { GetDatabaseLocalesUseCase } from "./domain/usecases/GetDatabaseLocalesU
 import { LocalesDefaultRepository } from "./data/repositories/LocalesDefaultRepository";
 import { EGASPDataCSVDefaultRepository } from "./data/repositories/data-entry/EGASPDataCSVDefaultRepository";
 import { Dhis2EventsDefaultRepository } from "./data/repositories/Dhis2EventsDefaultRepository";
-import { EGASPProgramDefaultRepository } from "./data/repositories/download-empty-template/EGASPProgramDefaultRepository";
+import { EGASPProgramDefaultRepository } from "./data/repositories/download-template/EGASPProgramDefaultRepository";
 import { ExcelPopulateDefaultRepository } from "./data/repositories/ExcelPopulateDefaultRepository";
 import { SavePasswordUseCase } from "./domain/usecases/SavePasswordUseCase";
 import { SaveKeyDbLocaleUseCase } from "./domain/usecases/SaveKeyDbLocaleUseCase";
@@ -75,13 +75,13 @@ import { SignalDefaultRepository } from "./data/repositories/SignalDefaultReposi
 import { GetProgramQuestionnairesUseCase } from "./domain/usecases/GetProgramQuestionnairesUseCase";
 import { GetPopulatedProgramQuestionnaireUseCase } from "./domain/usecases/GetPopulatedProgramQuestionnaireUseCase";
 import { DeleteSignalUseCase } from "./domain/usecases/DeleteSignalUseCase";
-import { GetEventProgramEmptyTemplateUseCase } from "./domain/usecases/data-entry/egasp/GetEventProgramEmptyTemplateUseCase";
-import { DownloadEmptyTemplateDefautlRepository } from "./data/repositories/download-empty-template/DownloadEmptyTemplateDefautlRepository";
+import { DownloadTemplateDefaultRepository } from "./data/repositories/download-template/DownloadTemplateDefaultRepository";
 import { BulkLoadDataStoreClient } from "./data/data-store/BulkLoadDataStoreClient";
 import { ApplyAMCQuestionUpdationUseCase } from "./domain/usecases/ApplyAMCQuestionUpdationUseCase";
 import { SaveImportSummaryErrorsOfFilesInUploadsUseCase } from "./domain/usecases/SaveImportSummaryErrorsOfFilesInUploadsUseCase";
 import { AMCProductDataDefaultRepository } from "./data/repositories/data-entry/AMCProductDataDefaultRepository";
 import { AMCSubstanceDataDefaultRepository } from "./data/repositories/data-entry/AMCSubstanceDataDefaultRepository";
+import { GetUploadsByDataSubmissionUseCase } from "./domain/usecases/GetUploadsByDataSubmissionUseCase";
 import { CalculateConsumptionDataProductLevelUseCase } from "./domain/usecases/data-entry/amc/CalculateConsumptionDataProductLevelUseCase";
 import { GlassATCDefaultRepository } from "./data/repositories/GlassATCDefaultRepository";
 import { CalculateConsumptionDataSubstanceLevelUseCase } from "./domain/usecases/data-entry/amc/CalculateConsumptionDataSubstanceLevelUseCase";
@@ -89,6 +89,8 @@ import { DownloadAllDataForModuleUseCase } from "./domain/usecases/DownloadAllDa
 import { EventVisualizationAnalyticsDefaultRepository } from "./data/repositories/EventVisualizationAnalyticsDefaultRepository";
 import { GetMultipleDashboardUseCase } from "./domain/usecases/GetMultipleDashboardUseCase";
 import { DownloadAllDataButtonData } from "./domain/usecases/DownloadAllDataButtonData";
+import { DownloadEmptyTemplateUseCase } from "./domain/usecases/DownloadEmptyTemplateUseCase";
+import { DownloadPopulatedTemplateUseCase } from "./domain/usecases/DownloadPopulatedTemplateUseCase";
 
 export function getCompositionRoot(instance: Instance) {
     const api = getD2APiFromInstance(instance);
@@ -119,7 +121,7 @@ export function getCompositionRoot(instance: Instance) {
     const trackerRepository = new TrackerDefaultRepository(instance);
     const captureFormRepository = new CaptureFormDefaultRepository(api);
     const signalRepository = new SignalDefaultRepository(dataStoreClient, api);
-    const downloadEmptyTemplateRepository = new DownloadEmptyTemplateDefautlRepository(instance);
+    const downloadTemplateRepository = new DownloadTemplateDefaultRepository(instance);
     const amcProductDataRepository = new AMCProductDataDefaultRepository(api);
     const amcSubstanceDataRepository = new AMCSubstanceDataDefaultRepository(api);
     const glassAtcRepository = new GlassATCDefaultRepository(dataStoreClient);
@@ -160,6 +162,7 @@ export function getCompositionRoot(instance: Instance) {
             getByModuleOUPeriod: new GetGlassUploadsByModuleOUPeriodUseCase(glassUploadsRepository),
             setBatchId: new SetUploadBatchIdUseCase(glassUploadsRepository),
             saveImportSummaryErrorsOfFiles: new SaveImportSummaryErrorsOfFilesInUploadsUseCase(glassUploadsRepository),
+            getCurrentDataSubmissionFileType: new GetUploadsByDataSubmissionUseCase(glassUploadsRepository),
         }),
         glassDocuments: getExecute({
             getAll: new GetGlassDocumentsUseCase(glassDocumentsRepository),
@@ -208,11 +211,18 @@ export function getCompositionRoot(instance: Instance) {
                 amcSubstanceDataRepository,
                 glassModuleRepository
             ),
-            downloadEmptyTemplate: new GetEventProgramEmptyTemplateUseCase(
-                metadataRepository,
-                downloadEmptyTemplateRepository,
+
+            downloadEmptyTemplate: new DownloadEmptyTemplateUseCase(
+                downloadTemplateRepository,
                 excelRepository,
-                egaspProgramRepository
+                egaspProgramRepository,
+                metadataRepository
+            ),
+            downloadPopulatedTemplate: new DownloadPopulatedTemplateUseCase(
+                downloadTemplateRepository,
+                excelRepository,
+                egaspProgramRepository,
+                metadataRepository
             ),
         }),
         questionnaires: getExecute({
