@@ -1,9 +1,7 @@
-import i18n from "@eyeseetea/d2-ui-components/locales";
 import { D2ValidationResponse } from "../../../../data/repositories/MetadataDefaultRepository";
 import { Future, FutureData } from "../../../entities/Future";
-import { DataValue } from "../../../entities/data-entry/DataValue";
 import { ImportStrategy } from "../../../entities/data-entry/DataValuesSaveSummary";
-import { ImportSummary } from "../../../entities/data-entry/ImportSummary";
+import { ConsistencyError, ImportSummary } from "../../../entities/data-entry/ImportSummary";
 import { GlassModuleRepository } from "../../../repositories/GlassModuleRepository";
 import { MetadataRepository } from "../../../repositories/MetadataRepository";
 import { DataValuesRepository } from "../../../repositories/data-entry/DataValuesRepository";
@@ -20,7 +18,7 @@ import {
     getCategoryOptionComboByDataElement,
     getCategoryOptionComboByOptionCodes,
 } from "../utils/getCategoryOptionCombo";
-import { includeBlokingErrors } from "../utils/includeBlockingErrors";
+import { includeBlockingErrors } from "../utils/includeBlockingErrors";
 import { mapDataValuesToImportSummary } from "../utils/mapDhis2Summary";
 import { RISData } from "../../../entities/data-entry/amr-external/RISData";
 
@@ -72,29 +70,29 @@ export class ImportRISFile {
                     : [];
 
                 const astResultsErrors = checkASTResults(risDataItems);
-
                 const batchIdErrors = checkBatchId(risDataItems, batchId);
                 const yearErrors = checkYear(risDataItems, year);
                 const countryErrors = checkCountry(risDataItems, countryCode);
-                const nonBlockingCategoryOptionErrors: string[] = [];
+                const blockingCategoryOptionErrors: { error: string; line: number }[] = [];
 
                 const dataValues = risDataItems
-                    .map(risData => {
+                    .map((risData, index) => {
                         return dataSet.dataElements.map(dataElement => {
                             const dataSetCategoryOptionValues = dataSet_CC.categories.map(category =>
                                 risData[category.code as keyof RISData].toString()
                             );
 
-                            const { categoryOptionComboId: attributeOptionCombo, error: nonBlockingError } =
+                            const { categoryOptionComboId: attributeOptionCombo, error: aocBlockingError } =
                                 getCategoryOptionComboByOptionCodes(dataSet_CC, dataSetCategoryOptionValues);
 
-                            if (nonBlockingError !== "") nonBlockingCategoryOptionErrors.push(nonBlockingError);
+                            if (aocBlockingError !== "")
+                                blockingCategoryOptionErrors.push({ error: aocBlockingError, line: index + 1 });
 
-                            const categoryOptionCombo = getCategoryOptionComboByDataElement(
-                                dataElement,
-                                dataElement_CC,
-                                risData
-                            );
+                            const { categoryOptionComboId: categoryOptionCombo, error: ccoBlockingError } =
+                                getCategoryOptionComboByDataElement(dataElement, dataElement_CC, risData);
+
+                            if (ccoBlockingError !== "")
+                                blockingCategoryOptionErrors.push({ error: ccoBlockingError, line: index + 1 });
 
                             const value = risData[dataElement.code as keyof RISData]?.toString() || "";
 
@@ -112,18 +110,48 @@ export class ImportRISFile {
                     })
                     .flat();
 
+                const blockingCategoryOptionConsistencyErrors: ConsistencyError[] = _(
+                    blockingCategoryOptionErrors.map(error => {
+                        return { error: error.error, count: 1, lines: [error.line] };
+                    })
+                )
+                    .uniqBy("error")
+                    .value();
+
+                const allBlockingErrors = [
+                    ...blockingCategoryOptionConsistencyErrors,
+                    ...pathogenAntibioticErrors,
+                    ...specimenPathogenErrors,
+                    ...astResultsErrors,
+                    ...batchIdErrors,
+                    ...yearErrors,
+                    ...countryErrors,
+                ];
+
+                if (allBlockingErrors.length > 0) {
+                    const errorImportSummary: ImportSummary = {
+                        status: "ERROR",
+                        importCount: {
+                            imported: 0,
+                            updated: 0,
+                            ignored: 0,
+                            deleted: 0,
+                        },
+                        nonBlockingErrors: [],
+                        blockingErrors: allBlockingErrors,
+                    };
+
+                    return Future.success(errorImportSummary);
+                }
+
                 /* eslint-disable no-console */
 
-                const finalDataValues: DataValue[] = dataValues.filter(
-                    (dv: DataValue) => dv.attributeOptionCombo !== ""
-                );
-
                 console.log({ risInitialFileDataValues: dataValues });
-                console.log({ risFinalFileDataValues: finalDataValues });
+                console.log({ risFinalFileDataValues: dataValues });
 
-                const uniqueAOCs = _.uniq(finalDataValues.map(el => el.attributeOptionCombo || ""));
+                const uniqueAOCs = _.uniq(dataValues.map(el => el.attributeOptionCombo || ""));
 
-                return this.dataValuesRepository.save(finalDataValues, action, dryRun).flatMap(saveSummary => {
+                return this.dataValuesRepository.save(dataValues, action, dryRun).flatMap(saveSummary => {
                     //Run validations only on actual import
                     if (!dryRun) {
                         return this.metadataRepository
@@ -148,28 +176,14 @@ export class ImportRISFile {
 
                                         const importSummary = mapDataValuesToImportSummary(saveSummary);
 
-                                        const summaryWithConsistencyBlokingErrors = includeBlokingErrors(
+                                        const summaryWithConsistencyBlokingErrors = includeBlockingErrors(
                                             importSummary,
-                                            [
-                                                ...pathogenAntibioticErrors,
-                                                ...specimenPathogenErrors,
-                                                ...astResultsErrors,
-                                                ...batchIdErrors,
-                                                ...yearErrors,
-                                                ...countryErrors,
-                                                ...dhis2ValidationErrors,
-                                            ]
+                                            [...allBlockingErrors, ...dhis2ValidationErrors]
                                         );
 
-                                        const finalImportSummary = this.includeDataValuesRemovedWarning(
-                                            dataValues,
-                                            finalDataValues,
-                                            summaryWithConsistencyBlokingErrors,
-                                            nonBlockingCategoryOptionErrors
-                                        );
-                                        finalImportSummary.importTime = saveSummary.importTime;
+                                        summaryWithConsistencyBlokingErrors.importTime = saveSummary.importTime;
 
-                                        return finalImportSummary;
+                                        return summaryWithConsistencyBlokingErrors;
                                     });
                             });
                     }
@@ -177,48 +191,14 @@ export class ImportRISFile {
                     else {
                         const importSummary = mapDataValuesToImportSummary(saveSummary);
 
-                        const summaryWithConsistencyBlokingErrors = includeBlokingErrors(importSummary, [
-                            ...pathogenAntibioticErrors,
-                            ...specimenPathogenErrors,
-                            ...astResultsErrors,
-                            ...batchIdErrors,
-                            ...yearErrors,
-                            ...countryErrors,
+                        const summaryWithConsistencyBlokingErrors = includeBlockingErrors(importSummary, [
+                            ...allBlockingErrors,
                         ]);
 
-                        const finalImportSummary = this.includeDataValuesRemovedWarning(
-                            dataValues,
-                            finalDataValues,
-                            summaryWithConsistencyBlokingErrors,
-                            nonBlockingCategoryOptionErrors
-                        );
-                        finalImportSummary.importTime = saveSummary.importTime;
-                        return Future.success(finalImportSummary);
+                        summaryWithConsistencyBlokingErrors.importTime = saveSummary.importTime;
+                        return Future.success(summaryWithConsistencyBlokingErrors);
                     }
                 });
             });
-    }
-
-    private includeDataValuesRemovedWarning(
-        dataValues: DataValue[],
-        finalDataValues: DataValue[],
-        importSummary: ImportSummary,
-        nonBlockingCategoryOptionErrors: string[]
-    ): ImportSummary {
-        const removedDataValues = dataValues.length - finalDataValues.length;
-
-        const nonBlockingErrors =
-            removedDataValues > 0
-                ? [
-                      ...importSummary.nonBlockingErrors,
-                      ...Object.entries(_.countBy(nonBlockingCategoryOptionErrors)).map(error => {
-                          return { error: i18n.t(`Removed Data Values : ${error[0]}`), count: error[1] };
-                      }),
-                  ]
-                : importSummary.nonBlockingErrors;
-
-        const status = importSummary.status === "SUCCESS" && removedDataValues ? "WARNING" : importSummary.status;
-
-        return { ...importSummary, status, nonBlockingErrors };
     }
 }
