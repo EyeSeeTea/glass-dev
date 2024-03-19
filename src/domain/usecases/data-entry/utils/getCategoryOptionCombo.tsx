@@ -14,13 +14,13 @@ export function getCategoryOptionComboByDataElement(
     // in the metadata we have a category option separate for every category
     // this funcion map the value in the file to the expected in category option
     return dataElement.categoryCombo.id === defaultCategoryCombo
-        ? undefined
+        ? { categoryOptionComboId: "", error: "" }
         : getCategoryOptionComboByOptionCodes(dataElement_CC, [
-              externalData.SPECIMEN,
-              externalData.GENDER.replace("UNK", "UNKG"),
-              externalData.ORIGIN.replace("UNK", "UNKO"),
-              externalData.AGEGROUP.replace("UNK", "UNKA"),
-          ]).categoryOptionComboId;
+              externalData.SPECIMEN.trim(),
+              externalData.GENDER.replace("UNK", "UNKG").trim(),
+              externalData.ORIGIN.replace("UNK", "UNKO").trim(),
+              externalData.AGEGROUP.replace("UNK", "UNKA").trim(),
+          ]);
 }
 
 export function getCategoryOptionComboByOptionCodes(categoryCombo: CategoryCombo, codes: string[]) {
@@ -30,9 +30,7 @@ export function getCategoryOptionComboByOptionCodes(categoryCombo: CategoryCombo
     );
 
     if (!categoryOptionCombo) {
-        const errorMessage = `Combination of antibiotic, pathogen and batchId not found ${
-            categoryCombo.name
-        } for codes: ${codes.join(",")}`;
+        const errorMessage = `Combination of ${categoryCombo.name} not found for codes: "${codes.join(",")}"`;
         return { categoryOptionComboId: "", error: errorMessage };
     }
 

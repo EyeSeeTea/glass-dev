@@ -13,7 +13,7 @@ import {
     getCategoryOptionComboByDataElement,
     getCategoryOptionComboByOptionCodes,
 } from "../utils/getCategoryOptionCombo";
-import { includeBlokingErrors } from "../utils/includeBlockingErrors";
+import { includeBlockingErrors } from "../utils/includeBlockingErrors";
 import { mapDataValuesToImportSummary } from "../utils/mapDhis2Summary";
 import { SampleDataRepository } from "../../../repositories/data-entry/SampleDataRepository";
 import { SampleData } from "../../../entities/data-entry/amr-external/SampleData";
@@ -69,7 +69,7 @@ export class ImportSampleFile {
                                 dataSetCategoryOptionValues
                             );
 
-                            const categoryOptionCombo = getCategoryOptionComboByDataElement(
+                            const { categoryOptionComboId: categoryOptionCombo } = getCategoryOptionComboByDataElement(
                                 dataElement,
                                 dataElement_CC,
                                 risData
@@ -114,7 +114,7 @@ export class ImportSampleFile {
 
                                     const importSummary = mapDataValuesToImportSummary(saveSummary);
 
-                                    const summaryWithConsistencyBlokingErrors = includeBlokingErrors(importSummary, [
+                                    const summaryWithConsistencyBlokingErrors = includeBlockingErrors(importSummary, [
                                         ...batchIdErrors,
                                         ...yearErrors,
                                         ...countryErrors,
