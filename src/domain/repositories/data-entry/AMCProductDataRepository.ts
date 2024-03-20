@@ -29,4 +29,5 @@ export interface AMCProductDataRepository {
         orgUnitId: Id,
         period: string
     ): FutureData<ProductDataTrackedEntity[]>;
+    getTrackedEntityProductIdsByOUAndPeriod(orgUnitId: Id, period: string): FutureData<string[]>;
 }
