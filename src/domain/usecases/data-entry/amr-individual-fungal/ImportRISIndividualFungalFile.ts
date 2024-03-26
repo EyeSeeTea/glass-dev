@@ -22,6 +22,7 @@ export const AMRCandidaProgramStageId = "ysGSonDq9Bc";
 
 const PATIENT_COUNTER_ID = "uSGcLbT5gJJ";
 const PATIENT_ID = "qKWPfeSgTnc";
+const AMR_GLASS_AMR_DET_SAMPLE_DATE = "Xtn5zEL9mGx";
 
 export class ImportRISIndividualFungalFile {
     constructor(
@@ -209,11 +210,10 @@ export class ImportRISIndividualFungalFile {
                     }
                 );
 
-                const occurredAt =
-                    moment(new Date(`${period}-01-01`))
-                        .toISOString()
-                        .split("T")
-                        .at(0) ?? period;
+                const sampleDateStr =
+                    AMRDataStage.find(de => de.dataElement === AMR_GLASS_AMR_DET_SAMPLE_DATE)?.value ??
+                    `01-01-${period}`;
+                const sampleDate = moment(new Date(sampleDateStr)).toISOString().split("T").at(0) ?? period;
 
                 const createdAt = moment(new Date()).toISOString().split("T").at(0) ?? period;
 
@@ -224,7 +224,7 @@ export class ImportRISIndividualFungalFile {
                         programStage: AMRDataProgramStageIdl,
                         orgUnit,
                         dataValues: AMRDataStage,
-                        occurredAt: occurredAt,
+                        occurredAt: sampleDate,
                         status: "COMPLETED",
                     },
                 ];
@@ -238,8 +238,8 @@ export class ImportRISIndividualFungalFile {
                         relationships: [],
                         attributes: attributes,
                         events: events,
-                        enrolledAt: occurredAt,
-                        occurredAt: occurredAt,
+                        enrolledAt: sampleDate,
+                        occurredAt: sampleDate,
                         createdAt: createdAt,
                         createdAtClient: createdAt,
                         updatedAt: createdAt,
