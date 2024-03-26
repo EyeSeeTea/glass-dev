@@ -186,7 +186,8 @@ export function getCompositionRoot(instance: Instance) {
                 glassModuleRepository,
                 instanceRepository,
                 programRulesMetadataDefaultRepository,
-                atcRepository
+                atcRepository,
+                amcProductDataRepository
             ),
             validatePrimaryFile: new ValidatePrimaryFileUseCase(
                 risDataRepository,

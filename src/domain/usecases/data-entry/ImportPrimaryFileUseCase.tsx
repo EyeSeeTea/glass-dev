@@ -19,6 +19,7 @@ import { GlassModuleDefaultRepository } from "../../../data/repositories/GlassMo
 import { ImportAMCProductLevelData } from "./amc/ImportAMCProductLevelData";
 import { InstanceDefaultRepository } from "../../../data/repositories/InstanceDefaultRepository";
 import { GlassATCDefaultRepository } from "../../../data/repositories/GlassATCDefaultRepository";
+import { AMCProductDataRepository } from "../../repositories/data-entry/AMCProductDataRepository";
 
 export class ImportPrimaryFileUseCase {
     constructor(
@@ -35,7 +36,8 @@ export class ImportPrimaryFileUseCase {
         private glassModuleDefaultRepository: GlassModuleDefaultRepository,
         private instanceRepository: InstanceDefaultRepository,
         private programRulesMetadataRepository: ProgramRulesMetadataRepository,
-        private atcRepository: GlassATCDefaultRepository
+        private atcRepository: GlassATCDefaultRepository,
+        private amcProductRepository: AMCProductDataRepository
     ) {}
 
     public execute(
@@ -116,7 +118,8 @@ export class ImportPrimaryFileUseCase {
                     this.glassUploadsRepository,
                     this.metadataRepository,
                     this.programRulesMetadataRepository,
-                    this.atcRepository
+                    this.atcRepository,
+                    this.amcProductRepository
                 );
 
                 return importAMCProductFile.importAMCProductFile(
