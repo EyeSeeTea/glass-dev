@@ -162,7 +162,7 @@ export class ImportRISIndividualFungalFile {
                 if (dataItem.find(item => item.key === "YEAR")?.value !== parseInt(period)) {
                     return {
                         error: i18n.t(
-                            `Year is different: Selected Data Submission Country : ${period}, Country in file: ${
+                            `Year is different: Selected Data Submission Year : ${period}, Year in file: ${
                                 dataItem.find(item => item.key === "YEAR")?.value
                             }`
                         ),
