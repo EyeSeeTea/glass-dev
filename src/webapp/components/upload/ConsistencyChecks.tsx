@@ -9,7 +9,7 @@ import i18n from "@eyeseetea/d2-ui-components/locales";
 import { useAppContext } from "../../contexts/app-context";
 import { useCurrentModuleContext } from "../../contexts/current-module-context";
 import { Future } from "../../../domain/entities/Future";
-import { ImportSummary } from "../../../domain/entities/data-entry/ImportSummary";
+import { ImportOptions, ImportSummary } from "../../../domain/entities/data-entry/ImportSummary";
 import { useCurrentPeriodContext } from "../../contexts/current-period-context";
 import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context";
 import { SupportButtons } from "./SupportButtons";
@@ -50,35 +50,24 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
     };
 
     const continueClick = () => {
+        const options: ImportOptions = {
+            moduleName: currentModuleAccess.moduleName,
+            batchId,
+            period: currentPeriod,
+            action: "CREATE_AND_UPDATE",
+            orgUnitId: currentOrgUnitAccess.orgUnitId,
+            orgUnitName: currentOrgUnitAccess.orgUnitName,
+            countryCode: currentOrgUnitAccess.orgUnitCode,
+            dryRun: false,
+            eventListId: "",
+        };
         if (primaryFile && moduleProperties.get(currentModuleAccess.moduleName)?.isDryRunReq) {
             setImportLoading(true);
 
             Future.joinObj({
-                importPrimaryFileSummary: compositionRoot.fileSubmission.primaryFile(
-                    currentModuleAccess.moduleName,
-                    primaryFile,
-                    batchId,
-                    currentPeriod,
-                    "CREATE_AND_UPDATE",
-                    currentOrgUnitAccess.orgUnitId,
-                    currentOrgUnitAccess.orgUnitName,
-                    currentOrgUnitAccess.orgUnitCode,
-                    false,
-                    ""
-                ),
+                importPrimaryFileSummary: compositionRoot.fileSubmission.primaryFile(primaryFile, options),
                 importSecondaryFileSummary: secondaryFile
-                    ? compositionRoot.fileSubmission.secondaryFile(
-                          secondaryFile,
-                          batchId,
-                          currentModuleAccess.moduleName,
-                          currentPeriod,
-                          "CREATE_AND_UPDATE",
-                          currentOrgUnitAccess.orgUnitId,
-                          currentOrgUnitAccess.orgUnitName,
-                          currentOrgUnitAccess.orgUnitCode,
-                          false,
-                          ""
-                      )
+                    ? compositionRoot.fileSubmission.secondaryFile(secondaryFile, options)
                     : Future.success(undefined),
             }).run(
                 ({ importPrimaryFileSummary, importSecondaryFileSummary }) => {
@@ -161,82 +150,67 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
         } else if (secondaryFile && moduleProperties.get(currentModuleAccess.moduleName)?.isExternalSecondaryFile) {
             setImportLoading(true);
 
-            compositionRoot.fileSubmission
-                .secondaryFile(
-                    secondaryFile,
-                    batchId,
-                    currentModuleAccess.moduleName,
-                    currentPeriod,
-                    "CREATE_AND_UPDATE",
-                    currentOrgUnitAccess.orgUnitId,
-                    currentOrgUnitAccess.orgUnitName,
-                    currentOrgUnitAccess.orgUnitCode,
-                    false,
-                    ""
-                )
-                .run(
-                    importSecondaryFileSummary => {
-                        if (importSecondaryFileSummary) {
-                            setSecondaryFileImportSummary(importSecondaryFileSummary);
+            compositionRoot.fileSubmission.secondaryFile(secondaryFile, options).run(
+                importSecondaryFileSummary => {
+                    if (importSecondaryFileSummary) {
+                        setSecondaryFileImportSummary(importSecondaryFileSummary);
 
-                            const secondaryUploadId = localStorage.getItem("secondaryUploadId");
-                            const params = {
-                                primaryUploadId: "",
-                                primaryImportSummaryErrors: {
-                                    nonBlockingErrors: [],
-                                    blockingErrors: [],
-                                },
-                                secondaryUploadId: secondaryUploadId || "",
-                                secondaryImportSummaryErrors: {
-                                    nonBlockingErrors: importSecondaryFileSummary?.nonBlockingErrors || [],
-                                    blockingErrors: importSecondaryFileSummary?.blockingErrors || [],
-                                },
-                            };
+                        const secondaryUploadId = localStorage.getItem("secondaryUploadId");
+                        const params = {
+                            primaryUploadId: "",
+                            primaryImportSummaryErrors: {
+                                nonBlockingErrors: [],
+                                blockingErrors: [],
+                            },
+                            secondaryUploadId: secondaryUploadId || "",
+                            secondaryImportSummaryErrors: {
+                                nonBlockingErrors: importSecondaryFileSummary?.nonBlockingErrors || [],
+                                blockingErrors: importSecondaryFileSummary?.blockingErrors || [],
+                            },
+                        };
 
-                            compositionRoot.glassUploads.saveImportSummaryErrorsOfFiles(params).run(
-                                () => {},
-                                () => {}
+                        compositionRoot.glassUploads.saveImportSummaryErrorsOfFiles(params).run(
+                            () => {},
+                            () => {}
+                        );
+
+                        if (importSecondaryFileSummary.blockingErrors.length === 0 && secondaryUploadId) {
+                            compositionRoot.glassUploads.setStatus({ id: secondaryUploadId, status: "VALIDATED" }).run(
+                                () => {
+                                    changeStep(3);
+                                    setImportLoading(false);
+                                },
+                                () => {
+                                    setImportLoading(false);
+                                }
                             );
-
-                            if (importSecondaryFileSummary.blockingErrors.length === 0 && secondaryUploadId) {
+                        } else {
+                            if (secondaryUploadId) {
                                 compositionRoot.glassUploads
-                                    .setStatus({ id: secondaryUploadId, status: "VALIDATED" })
+                                    .setStatus({ id: secondaryUploadId, status: "IMPORTED" })
                                     .run(
                                         () => {
-                                            changeStep(3);
                                             setImportLoading(false);
                                         },
                                         () => {
                                             setImportLoading(false);
                                         }
                                     );
-                            } else {
-                                if (secondaryUploadId) {
-                                    compositionRoot.glassUploads
-                                        .setStatus({ id: secondaryUploadId, status: "IMPORTED" })
-                                        .run(
-                                            () => {
-                                                setImportLoading(false);
-                                            },
-                                            () => {
-                                                setImportLoading(false);
-                                            }
-                                        );
-                                }
                             }
                         }
-                    },
-                    error => {
-                        setPrimaryFileImportSummary({
-                            status: "ERROR",
-                            importCount: { ignored: 0, imported: 0, deleted: 0, updated: 0 },
-                            nonBlockingErrors: [],
-                            blockingErrors: [{ error: error, count: 1 }],
-                        });
-
-                        setImportLoading(false);
                     }
-                );
+                },
+                error => {
+                    setPrimaryFileImportSummary({
+                        status: "ERROR",
+                        importCount: { ignored: 0, imported: 0, deleted: 0, updated: 0 },
+                        nonBlockingErrors: [],
+                        blockingErrors: [{ error: error, count: 1 }],
+                    });
+
+                    setImportLoading(false);
+                }
+            );
         } else {
             if (
                 moduleProperties.get(currentModuleAccess.moduleName)?.isCalculationRequired &&

@@ -1,3 +1,5 @@
+import { ImportStrategy } from "./DataValuesSaveSummary";
+
 export type ImportSummary = {
     status: "SUCCESS" | "ERROR" | "WARNING";
     importCount: {
@@ -31,3 +33,15 @@ export type NonBlockingError = {
     type: "non-blocking";
     error: ConsistencyError;
 };
+
+export interface ImportOptions {
+    moduleName: string;
+    batchId: string;
+    period: string;
+    action: ImportStrategy;
+    orgUnitId: string;
+    orgUnitName: string;
+    countryCode: string;
+    dryRun: boolean;
+    eventListId: string | undefined;
+}

@@ -133,8 +133,6 @@ export function useBatchHandling(
         }
     };
 
-    
-
     return {
         previousBatchIdsLoading,
         previousUploadsBatchIds,

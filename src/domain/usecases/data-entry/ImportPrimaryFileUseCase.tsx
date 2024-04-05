@@ -2,9 +2,8 @@ import { Future, FutureData } from "../../entities/Future";
 import { MetadataRepository } from "../../repositories/MetadataRepository";
 import { DataValuesRepository } from "../../repositories/data-entry/DataValuesRepository";
 import { RISDataRepository } from "../../repositories/data-entry/RISDataRepository";
-import { ImportSummary } from "../../entities/data-entry/ImportSummary";
+import { ImportOptions, ImportSummary } from "../../entities/data-entry/ImportSummary";
 import { GlassModuleRepository } from "../../repositories/GlassModuleRepository";
-import { ImportStrategy } from "../../entities/data-entry/DataValuesSaveSummary";
 import { ImportRISFile } from "./amr/ImportRISFile";
 import { ImportEGASPFile } from "./egasp/ImportEGASPFile";
 import { Dhis2EventsDefaultRepository } from "../../../data/repositories/Dhis2EventsDefaultRepository";
@@ -40,18 +39,9 @@ export class ImportPrimaryFileUseCase {
         private amcProductRepository: AMCProductDataRepository
     ) {}
 
-    public execute(
-        moduleName: string,
-        inputFile: File,
-        batchId: string,
-        period: string,
-        action: ImportStrategy,
-        orgUnitId: string,
-        orgUnitName: string,
-        countryCode: string,
-        dryRun: boolean,
-        eventListId: string | undefined
-    ): FutureData<ImportSummary> {
+    public execute(inputFile: File, options: ImportOptions): FutureData<ImportSummary> {
+        const { moduleName, batchId, period, action, orgUnitId, orgUnitName, countryCode, dryRun, eventListId } =
+            options;
         switch (moduleName) {
             case "AMR": {
                 const importRISFile = new ImportRISFile(

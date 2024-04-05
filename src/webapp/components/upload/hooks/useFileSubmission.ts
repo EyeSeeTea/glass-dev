@@ -6,7 +6,7 @@ import { useCurrentOrgUnitContext } from "../../../contexts/current-orgUnit-cont
 import { useCurrentPeriodContext } from "../../../contexts/current-period-context";
 
 import { Future } from "../../../../domain/entities/Future";
-import { ImportSummary } from "../../../../domain/entities/data-entry/ImportSummary";
+import { ImportOptions, ImportSummary } from "../../../../domain/entities/data-entry/ImportSummary";
 
 export function useFileSubmission(
     changeStep: (step: number) => void,
@@ -41,32 +41,22 @@ export function useFileSubmission(
         (primaryFile: File) => {
             setImportLoading(true);
 
+            const options: ImportOptions = {
+                moduleName: moduleName,
+                batchId: batchId,
+                period: currentPeriod,
+                action: "CREATE_AND_UPDATE",
+                orgUnitId: orgUnitId,
+                orgUnitName: orgUnitName,
+                countryCode: orgUnitCode,
+                dryRun: true,
+                eventListId: "",
+            };
+
             Future.joinObj({
-                importPrimaryFileSummary: compositionRoot.fileSubmission.primaryFile(
-                    moduleName,
-                    primaryFile,
-                    batchId,
-                    currentPeriod,
-                    "CREATE_AND_UPDATE",
-                    orgUnitId,
-                    orgUnitName,
-                    orgUnitCode,
-                    true,
-                    ""
-                ),
+                importPrimaryFileSummary: compositionRoot.fileSubmission.primaryFile(primaryFile, options),
                 importSecondaryFileSummary: secondaryFile
-                    ? compositionRoot.fileSubmission.secondaryFile(
-                          secondaryFile,
-                          batchId,
-                          moduleName,
-                          currentPeriod,
-                          "CREATE_AND_UPDATE",
-                          orgUnitId,
-                          orgUnitName,
-                          orgUnitCode,
-                          true,
-                          ""
-                      )
+                    ? compositionRoot.fileSubmission.secondaryFile(secondaryFile, options)
                     : Future.success(undefined),
             }).run(
                 ({ importPrimaryFileSummary, importSecondaryFileSummary }) => {
@@ -141,38 +131,36 @@ export function useFileSubmission(
     const uploadSecondaryFile = useCallback(
         (secondaryFile: File) => {
             setImportLoading(true);
-            compositionRoot.fileSubmission
-                .secondaryFile(
-                    secondaryFile,
-                    batchId,
-                    moduleName,
-                    currentPeriod,
-                    "CREATE_AND_UPDATE",
-                    orgUnitId,
-                    orgUnitName,
-                    orgUnitCode,
-                    true,
-                    ""
-                )
-                .run(
-                    importSubstanceFileSummary => {
-                        if (importSubstanceFileSummary) {
-                            setPrimaryFileImportSummary(importSubstanceFileSummary);
-                        }
-                        setImportLoading(false);
-                        changeStep(2);
-                    },
-                    error => {
-                        setPrimaryFileImportSummary({
-                            status: "ERROR",
-                            importCount: { ignored: 0, imported: 0, deleted: 0, updated: 0 },
-                            nonBlockingErrors: [],
-                            blockingErrors: [{ error: error, count: 1 }],
-                        });
-                        setImportLoading(false);
-                        changeStep(2);
+            const options: ImportOptions = {
+                batchId: batchId,
+                moduleName: moduleName,
+                period: currentPeriod,
+                action: "CREATE_AND_UPDATE",
+                orgUnitId: orgUnitId,
+                orgUnitName: orgUnitName,
+                countryCode: orgUnitCode,
+                dryRun: true,
+                eventListId: "",
+            };
+            compositionRoot.fileSubmission.secondaryFile(secondaryFile, options).run(
+                importSubstanceFileSummary => {
+                    if (importSubstanceFileSummary) {
+                        setPrimaryFileImportSummary(importSubstanceFileSummary);
                     }
-                );
+                    setImportLoading(false);
+                    changeStep(2);
+                },
+                error => {
+                    setPrimaryFileImportSummary({
+                        status: "ERROR",
+                        importCount: { ignored: 0, imported: 0, deleted: 0, updated: 0 },
+                        nonBlockingErrors: [],
+                        blockingErrors: [{ error: error, count: 1 }],
+                    });
+                    setImportLoading(false);
+                    changeStep(2);
+                }
+            );
         },
         [
             batchId,

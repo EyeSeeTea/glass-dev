@@ -18,9 +18,10 @@ import { useGlassCaptureAccess } from "../../hooks/useGlassCaptureAccess";
 import { StyledLoaderContainer } from "../upload/ConsistencyChecks";
 import { useCurrentPeriodContext } from "../../contexts/current-period-context";
 import { moduleProperties } from "../../../domain/utils/ModuleProperties";
-import { ImportSummaryErrors } from "../../../domain/entities/data-entry/ImportSummary";
+import { ImportOptions, ImportSummaryErrors } from "../../../domain/entities/data-entry/ImportSummary";
 import { ImportSummaryErrorsDialog } from "../import-summary-errors-dialog/ImportSummaryErrorsDialog";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
+import { ImportStrategy } from "../../../domain/entities/data-entry/DataValuesSaveSummary";
 
 export interface UploadsTableBodyProps {
     rows?: UploadsDataItem[];
@@ -124,22 +125,35 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                             //If the file is in uploaded status then, data vales have not been imported.
                             //No need for deletion
 
+                            const baseOptions = {
+                                moduleName: currentModuleAccess.moduleName,
+                                action: "DELETE" as ImportStrategy,
+                                orgUnitId: orgUnitId,
+                                orgUnitName: orgUnitName,
+                                dryRun: false,
+                            };
+
+                            const primaryOptions: ImportOptions = {
+                                ...baseOptions,
+                                batchId: primaryFileToDelete.batchId,
+                                period: primaryFileToDelete.period,
+                                countryCode: primaryFileToDelete.countryCode,
+                                eventListId: primaryFileToDelete.eventListFileId,
+                            };
+
+                            const secondaryOptions: ImportOptions = {
+                                ...baseOptions,
+                                batchId: secondaryFileToDelete?.batchId || "",
+                                period: secondaryFileToDelete?.period || "",
+                                countryCode: secondaryFileToDelete?.countryCode || "",
+                                eventListId: secondaryFileToDelete?.eventListFileId,
+                            };
+
                             Future.joinObj({
                                 deletePrimaryFileSummary:
                                     primaryFileToDelete.status.toLowerCase() !== "uploaded" ||
                                     !moduleProperties.get(currentModuleAccess.moduleName)?.isDryRunReq
-                                        ? compositionRoot.fileSubmission.primaryFile(
-                                              currentModuleAccess.moduleName,
-                                              primaryFile,
-                                              primaryFileToDelete.batchId,
-                                              primaryFileToDelete.period,
-                                              "DELETE",
-                                              orgUnitId,
-                                              orgUnitName,
-                                              primaryFileToDelete.countryCode,
-                                              false,
-                                              primaryFileToDelete.eventListFileId
-                                          )
+                                        ? compositionRoot.fileSubmission.primaryFile(primaryFile, primaryOptions)
                                         : Future.success(undefined),
                                 deleteSecondaryFileSummary:
                                     secondaryFileToDelete &&
@@ -147,15 +161,7 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                                     secondaryFileDownload
                                         ? compositionRoot.fileSubmission.secondaryFile(
                                               new File([secondaryFileDownload], secondaryFileToDelete.fileName),
-                                              secondaryFileToDelete.batchId,
-                                              currentModuleAccess.moduleName,
-                                              secondaryFileToDelete.period,
-                                              "DELETE",
-                                              orgUnitId,
-                                              orgUnitName,
-                                              secondaryFileToDelete.countryCode,
-                                              false,
-                                              secondaryFileToDelete.eventListFileId
+                                              secondaryOptions
                                           )
                                         : Future.success(undefined),
                             }).run(
@@ -237,18 +243,22 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                             secondaryFileToDelete.status.toLowerCase() !== "uploaded" &&
                             secondaryFileDownload
                         ) {
+                            const secondaryOptions: ImportOptions = {
+                                moduleName: currentModuleAccess.moduleName,
+                                action: "DELETE" as ImportStrategy,
+                                orgUnitId: orgUnitId,
+                                orgUnitName: orgUnitName,
+                                dryRun: false,
+                                batchId: secondaryFileToDelete.batchId,
+                                period: secondaryFileToDelete.period,
+                                countryCode: secondaryFileToDelete.countryCode,
+                                eventListId: secondaryFileToDelete.eventListFileId,
+                            };
+
                             compositionRoot.fileSubmission
                                 .secondaryFile(
                                     new File([secondaryFileDownload], secondaryFileToDelete.fileName),
-                                    secondaryFileToDelete.batchId,
-                                    currentModuleAccess.moduleName,
-                                    secondaryFileToDelete.period,
-                                    "DELETE",
-                                    orgUnitId,
-                                    orgUnitName,
-                                    secondaryFileToDelete.countryCode,
-                                    false,
-                                    secondaryFileToDelete.eventListFileId,
+                                    secondaryOptions,
                                     secondaryFileToDelete.calculatedEventListFileId
                                 )
                                 .run(
