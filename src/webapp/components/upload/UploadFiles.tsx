@@ -275,6 +275,15 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
                             () => {},
                             () => {}
                         );
+
+                        if (
+                            !currentModuleProperties?.isDryRunReq &&
+                            importPrimaryFileSummary.blockingErrors.length === 0
+                        )
+                            compositionRoot.glassUploads.setStatus({ id: primaryUploadId, status: "VALIDATED" }).run(
+                                () => {},
+                                () => {}
+                            );
                     }
 
                     setImportLoading(false);
@@ -311,6 +320,19 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
                     importSubstanceFileSummary => {
                         if (importSubstanceFileSummary) {
                             setPrimaryFileImportSummary(importSubstanceFileSummary);
+                            const secondaryUploadId = localStorage.getItem("secondaryUploadId");
+
+                            if (
+                                !currentModuleProperties?.isDryRunReq &&
+                                importSubstanceFileSummary.blockingErrors.length === 0 &&
+                                secondaryUploadId
+                            )
+                                compositionRoot.glassUploads
+                                    .setStatus({ id: secondaryUploadId, status: "VALIDATED" })
+                                    .run(
+                                        () => {},
+                                        () => {}
+                                    );
                         }
                         setImportLoading(false);
                         changeStep(2);
@@ -341,6 +363,7 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
         setPrimaryFileImportSummary,
         changeStep,
         setSecondaryFileImportSummary,
+        currentModuleProperties?.isDryRunReq,
     ]);
 
     const continueClick = () => {
