@@ -1,16 +1,13 @@
-import React, { useCallback, useState } from "react";
+import React from "react";
 import { Backdrop, TableBody, TableCell, TableRow, Button, DialogContent, Typography } from "@material-ui/core";
 import styled from "styled-components";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import dayjs from "dayjs";
-import { UploadsDataItem } from "../../entities/uploads";
 import { DeleteOutline } from "@material-ui/icons";
-import { useAppContext } from "../../contexts/app-context";
-import { ConfirmationDialog, useSnackbar } from "@eyeseetea/d2-ui-components";
+import { ConfirmationDialog } from "@eyeseetea/d2-ui-components";
 import { CircularProgress } from "material-ui";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context";
-import { Future } from "../../../domain/entities/Future";
 import { isEditModeStatus } from "../../../utils/editModeStatus";
 import { useStatusDataSubmission } from "../../hooks/useStatusDataSubmission";
 import { useCurrentModuleContext } from "../../contexts/current-module-context";
@@ -18,9 +15,10 @@ import { useGlassCaptureAccess } from "../../hooks/useGlassCaptureAccess";
 import { StyledLoaderContainer } from "../upload/ConsistencyChecks";
 import { useCurrentPeriodContext } from "../../contexts/current-period-context";
 import { moduleProperties } from "../../../domain/utils/ModuleProperties";
-import { ImportSummaryErrors } from "../../../domain/entities/data-entry/ImportSummary";
 import { ImportSummaryErrorsDialog } from "../import-summary-errors-dialog/ImportSummaryErrorsDialog";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
+import { UploadsDataItem } from "../../entities/uploads";
+import { useDatasets } from "./hooks/useDatasets";
 
 export interface UploadsTableBodyProps {
     rows?: UploadsDataItem[];
@@ -28,21 +26,10 @@ export interface UploadsTableBodyProps {
 }
 
 export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refreshUploads }) => {
-    const { compositionRoot } = useAppContext();
-    const snackbar = useSnackbar();
-
-    const [loading, setLoading] = useState<boolean>(false);
-    const {
-        currentOrgUnitAccess: { orgUnitId, orgUnitName },
-    } = useCurrentOrgUnitContext();
-    const [open, setOpen] = React.useState(false);
-    const [importSummaryErrorsToShow, setImportSummaryErrorsToShow] = React.useState<ImportSummaryErrors | null>(null);
-    const [rowToDelete, setRowToDelete] = useState<UploadsDataItem>();
-
-    const { currentPeriod } = useCurrentPeriodContext();
-
     const { currentModuleAccess } = useCurrentModuleContext();
     const { currentOrgUnitAccess } = useCurrentOrgUnitContext();
+    const { currentPeriod } = useCurrentPeriodContext();
+
     const currentDataSubmissionStatus = useStatusDataSubmission(
         { id: currentModuleAccess.moduleId, name: currentModuleAccess.moduleName },
         currentOrgUnitAccess.orgUnitId,
@@ -50,265 +37,17 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
     );
     const hasCurrentUserCaptureAccess = useGlassCaptureAccess();
 
-    const showConfirmationDialog = (rowToDelete: UploadsDataItem) => {
-        setRowToDelete(rowToDelete);
-        setOpen(true);
-    };
-    const hideConfirmationDialog = () => {
-        setOpen(false);
-    };
-
-    const downloadFile = (fileId: string, fileName: string) => {
-        compositionRoot.glassDocuments.download(fileId).run(
-            file => {
-                //download file automatically
-                const downloadSimulateAnchor = document.createElement("a");
-                downloadSimulateAnchor.href = URL.createObjectURL(file);
-                downloadSimulateAnchor.download = fileName;
-                // simulate link click
-                document.body.appendChild(downloadSimulateAnchor);
-                downloadSimulateAnchor.click();
-            },
-            () => {}
-        );
-    };
-
-    //Deleting a dataset completely has the following steps:
-    //1. Delete corresponsding datasetValue/event for each row in the file.
-    //2. Delete corresponding document from DHIS
-    //3. Delete corresponding 'upload' and 'document' from Datastore
-    const deleteDataset = () => {
-        hideConfirmationDialog();
-        if (rowToDelete) {
-            let primaryFileToDelete: UploadsDataItem | undefined, secondaryFileToDelete: UploadsDataItem | undefined;
-            //For AMR, Ris file is mandatory, so there will be a ris file with given batch id.
-            //Sample file is optional and could be absent
-            if (
-                moduleProperties.get(currentModuleAccess.moduleName)?.isSecondaryFileApplicable &&
-                moduleProperties.get(currentModuleAccess.moduleName)?.isSecondaryRelated
-            ) {
-                if (
-                    rowToDelete.fileType.toLowerCase() ===
-                    moduleProperties.get(currentModuleAccess.moduleName)?.primaryFileType.toLowerCase()
-                ) {
-                    primaryFileToDelete = rowToDelete;
-                    secondaryFileToDelete = rows
-                        ?.filter(sample => sample.correspondingRisUploadId === rowToDelete.id)
-                        ?.at(0);
-                } else {
-                    secondaryFileToDelete = rowToDelete;
-                    primaryFileToDelete = rows?.filter(ris => ris.id === rowToDelete.correspondingRisUploadId)?.at(0);
-                }
-            } else if (!moduleProperties.get(currentModuleAccess.moduleName)?.isSecondaryRelated) {
-                if (rowToDelete.fileType === moduleProperties.get(currentModuleAccess.moduleName)?.primaryFileType) {
-                    primaryFileToDelete = rowToDelete;
-                } else {
-                    secondaryFileToDelete = rowToDelete;
-                }
-            } else {
-                primaryFileToDelete = rowToDelete;
-                secondaryFileToDelete = undefined;
-            }
-
-            if (primaryFileToDelete) {
-                setLoading(true);
-                Future.joinObj({
-                    primaryFileDownload: compositionRoot.glassDocuments.download(primaryFileToDelete.fileId),
-                    secondaryFileDownload: secondaryFileToDelete
-                        ? compositionRoot.glassDocuments.download(secondaryFileToDelete.fileId)
-                        : Future.success(undefined),
-                }).run(
-                    ({ primaryFileDownload, secondaryFileDownload }) => {
-                        if (primaryFileToDelete) {
-                            const primaryFile = new File([primaryFileDownload], primaryFileToDelete.fileName);
-                            //If the file is in uploaded status then, data vales have not been imported.
-                            //No need for deletion
-
-                            Future.joinObj({
-                                deletePrimaryFileSummary:
-                                    primaryFileToDelete.status.toLowerCase() !== "uploaded" ||
-                                    !moduleProperties.get(currentModuleAccess.moduleName)?.isDryRunReq
-                                        ? compositionRoot.fileSubmission.primaryFile(
-                                              currentModuleAccess.moduleName,
-                                              primaryFile,
-                                              primaryFileToDelete.batchId,
-                                              primaryFileToDelete.period,
-                                              "DELETE",
-                                              orgUnitId,
-                                              orgUnitName,
-                                              primaryFileToDelete.countryCode,
-                                              false,
-                                              primaryFileToDelete.eventListFileId
-                                          )
-                                        : Future.success(undefined),
-                                deleteSecondaryFileSummary:
-                                    secondaryFileToDelete &&
-                                    secondaryFileToDelete.status.toLowerCase() !== "uploaded" &&
-                                    secondaryFileDownload
-                                        ? compositionRoot.fileSubmission.secondaryFile(
-                                              new File([secondaryFileDownload], secondaryFileToDelete.fileName),
-                                              secondaryFileToDelete.batchId,
-                                              currentModuleAccess.moduleName,
-                                              secondaryFileToDelete.period,
-                                              "DELETE",
-                                              orgUnitId,
-                                              orgUnitName,
-                                              secondaryFileToDelete.countryCode,
-                                              false,
-                                              secondaryFileToDelete.eventListFileId
-                                          )
-                                        : Future.success(undefined),
-                            }).run(
-                                ({ deletePrimaryFileSummary, deleteSecondaryFileSummary }) => {
-                                    if (deletePrimaryFileSummary) {
-                                        const itemsDeleted =
-                                            currentModuleAccess.moduleName === "AMC" ? "products" : "rows";
-
-                                        let message = `${
-                                            primaryFileToDelete?.rows || primaryFileToDelete?.records
-                                        } ${itemsDeleted} deleted for ${
-                                            moduleProperties.get(currentModuleAccess.moduleName)?.primaryFileType
-                                        } file`;
-
-                                        if (secondaryFileToDelete && deleteSecondaryFileSummary) {
-                                            message =
-                                                message +
-                                                ` and ${
-                                                    secondaryFileToDelete.rows || secondaryFileToDelete.records
-                                                } rows deleted for ${
-                                                    moduleProperties.get(currentModuleAccess.moduleName)
-                                                        ?.secondaryFileType
-                                                } file.`;
-                                        }
-
-                                        snackbar.info(message);
-                                    }
-                                    if (primaryFileToDelete) {
-                                        compositionRoot.glassDocuments.deleteByUploadId(primaryFileToDelete.id).run(
-                                            () => {
-                                                if (secondaryFileToDelete) {
-                                                    compositionRoot.glassDocuments
-                                                        .deleteByUploadId(secondaryFileToDelete.id)
-                                                        .run(
-                                                            () => {
-                                                                refreshUploads({}); //Trigger re-render of parent
-                                                                setLoading(false);
-                                                                hideConfirmationDialog();
-                                                            },
-                                                            error => {
-                                                                snackbar.error("Error deleting file");
-                                                                console.error(error);
-                                                            }
-                                                        );
-                                                } else {
-                                                    refreshUploads({}); //Trigger re-render of parent
-                                                    setLoading(false);
-                                                    hideConfirmationDialog();
-                                                }
-                                            },
-                                            error => {
-                                                snackbar.error("Error deleting file");
-                                                console.error(error);
-                                            }
-                                        );
-                                    }
-                                },
-                                error => {
-                                    snackbar.error("Error deleting file");
-                                    console.error(error);
-                                    setLoading(false);
-                                }
-                            );
-                        }
-                    },
-                    error => {
-                        console.debug(
-                            `Unable to download primary fileid : ${primaryFileToDelete?.fileId} OR secondary fileid : ${secondaryFileToDelete?.fileId}, error: ${error} `
-                        );
-                        setLoading(false);
-                    }
-                );
-            } else if (secondaryFileToDelete) {
-                setLoading(true);
-                compositionRoot.glassDocuments.download(secondaryFileToDelete.fileId).run(
-                    secondaryFileDownload => {
-                        if (
-                            secondaryFileToDelete &&
-                            secondaryFileToDelete.status.toLowerCase() !== "uploaded" &&
-                            secondaryFileDownload
-                        ) {
-                            compositionRoot.fileSubmission
-                                .secondaryFile(
-                                    new File([secondaryFileDownload], secondaryFileToDelete.fileName),
-                                    secondaryFileToDelete.batchId,
-                                    currentModuleAccess.moduleName,
-                                    secondaryFileToDelete.period,
-                                    "DELETE",
-                                    orgUnitId,
-                                    orgUnitName,
-                                    secondaryFileToDelete.countryCode,
-                                    false,
-                                    secondaryFileToDelete.eventListFileId,
-                                    secondaryFileToDelete.calculatedEventListFileId
-                                )
-                                .run(
-                                    deleteSecondaryFileSummary => {
-                                        if (secondaryFileToDelete && deleteSecondaryFileSummary) {
-                                            const itemsDeleted =
-                                                currentModuleAccess.moduleName === "AMC" ? "substances" : "rows";
-
-                                            const message = ` ${
-                                                secondaryFileToDelete.rows || secondaryFileToDelete.records
-                                            } ${itemsDeleted} deleted for ${
-                                                moduleProperties.get(currentModuleAccess.moduleName)?.secondaryFileType
-                                            } file.`;
-                                            compositionRoot.glassDocuments
-                                                .deleteByUploadId(secondaryFileToDelete.id)
-                                                .run(
-                                                    () => {
-                                                        refreshUploads({}); //Trigger re-render of parent
-                                                        setLoading(false);
-                                                        hideConfirmationDialog();
-                                                        snackbar.info(message);
-                                                    },
-                                                    error => {
-                                                        snackbar.error("Error deleting file");
-                                                        console.error(error);
-                                                    }
-                                                );
-                                        }
-                                    },
-                                    error => {
-                                        snackbar.error("Error deleting file");
-                                        console.error(error);
-                                        setLoading(false);
-                                    }
-                                );
-                        }
-                    },
-                    error => {
-                        console.debug(
-                            `Unable to download secondary fileid : ${secondaryFileToDelete?.fileId}, error: ${error} `
-                        );
-                        setLoading(false);
-                    }
-                );
-            } else {
-                //Primary file doesnt exist, only secondary file exists. This should never happen as Primary file is mandatory.
-                snackbar.error(
-                    `Mandatory ${
-                        moduleProperties.get(currentModuleAccess.moduleName)?.primaryFileType
-                    } file does not exist.`
-                );
-            }
-        }
-    };
-
-    const handleShowImportSummaryErrors = useCallback((row: UploadsDataItem) => {
-        if (row.importSummary) {
-            setImportSummaryErrorsToShow(row.importSummary);
-        }
-    }, []);
+    const {
+        loading,
+        open,
+        importSummaryErrorsToShow,
+        showConfirmationDialog,
+        downloadFile,
+        deleteDataset,
+        handleShowImportSummaryErrors,
+        hideConfirmationDialog,
+        setImportSummaryErrorsToShow,
+    } = useDatasets(refreshUploads, rows);
 
     return (
         <>

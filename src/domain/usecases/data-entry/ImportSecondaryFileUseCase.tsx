@@ -3,8 +3,7 @@ import { Future, FutureData } from "../../entities/Future";
 import { MetadataRepository } from "../../repositories/MetadataRepository";
 import { DataValuesRepository } from "../../repositories/data-entry/DataValuesRepository";
 import { SampleDataRepository } from "../../repositories/data-entry/SampleDataRepository";
-import { ImportSummary } from "../../entities/data-entry/ImportSummary";
-import { ImportStrategy } from "../../entities/data-entry/DataValuesSaveSummary";
+import { ImportOptions, ImportSummary } from "../../entities/data-entry/ImportSummary";
 import { ImportSampleFile } from "./amr/ImportSampleFile";
 import { ImportAMCSubstanceLevelData } from "./amc/ImportAMCSubstanceLevelData";
 import { ExcelRepository } from "../../repositories/ExcelRepository";
@@ -29,17 +28,20 @@ export class ImportSecondaryFileUseCase implements UseCase {
 
     public execute(
         inputFile: File,
-        batchId: string,
-        moduleName: string,
-        year: string,
-        action: ImportStrategy,
-        orgUnitId: string,
-        orgUnitName: string,
-        countryCode: string,
-        dryRun: boolean,
-        eventListId: string | undefined,
+        options: ImportOptions,
         calculatedEventListFileId?: string
     ): FutureData<ImportSummary> {
+        const {
+            moduleName,
+            batchId,
+            period: year,
+            action,
+            orgUnitId,
+            orgUnitName,
+            countryCode,
+            dryRun,
+            eventListId,
+        } = options;
         switch (moduleName) {
             case "AMR":
             case "AMR - Individual": {
