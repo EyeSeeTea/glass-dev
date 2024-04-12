@@ -1,23 +1,14 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React from "react";
 import { Button, CircularProgress, Typography } from "@material-ui/core";
 import styled from "styled-components";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { ImportSummary } from "../../../domain/entities/data-entry/ImportSummary";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
-import { useCallbackEffect } from "../../hooks/use-callback-effect";
-import { useSnackbar } from "@eyeseetea/d2-ui-components";
-import { useAppContext } from "../../contexts/app-context";
 import { moduleProperties } from "../../../domain/utils/ModuleProperties";
 import { useCurrentModuleContext } from "../../contexts/current-module-context";
-import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context";
-import { useCurrentPeriodContext } from "../../contexts/current-period-context";
-import { useCurrentDataSubmissionId } from "../../hooks/useCurrentDataSubmissionId";
-import { useCurrentUserGroupsAccess } from "../../hooks/useCurrentUserGroupsAccess";
-import { useGetLastSuccessfulAnalyticsRunTime } from "../../hooks/useGetLastSuccessfulAnalyticsRunTime";
 import { Validations } from "../current-data-submission/Validations";
-import { useQuestionnaires } from "../current-data-submission/Questionnaires";
-import { QuestionnaireBase } from "../../../domain/entities/Questionnaire";
+import { useReviewDataSummary } from "./hooks/useReviewDataSummary";
 
 interface ReviewDataSummaryProps {
     changeStep: (step: number) => void;
@@ -25,203 +16,17 @@ interface ReviewDataSummaryProps {
     secondaryFileImportSummary?: ImportSummary | undefined;
 }
 
-const COMPLETED_STATUS = "COMPLETED";
-
 export const ReviewDataSummary: React.FC<ReviewDataSummaryProps> = ({
     changeStep,
     primaryFileImportSummary,
     secondaryFileImportSummary,
 }) => {
-    const { compositionRoot } = useAppContext();
-    const snackbar = useSnackbar();
     const { currentModuleAccess } = useCurrentModuleContext();
-    const { currentOrgUnitAccess } = useCurrentOrgUnitContext();
-    const { currentPeriod } = useCurrentPeriodContext();
 
-    const [fileType, setFileType] = useState<string>("primary");
-    const [isLoading, setIsLoading] = useState<boolean>(false);
-    const dataSubmissionId = useCurrentDataSubmissionId(
-        currentModuleAccess.moduleId,
-        currentModuleAccess.moduleName,
-        currentOrgUnitAccess.orgUnitId,
-        currentPeriod
-    );
-    const { captureAccessGroup } = useCurrentUserGroupsAccess();
-    const [isReportReady, setIsReportReady] = useState<boolean>(false);
-    const [currentDataSubmissionId, setCurrentDataSubmissionId] = useState<string>("");
-    const [currentQuestionnaires, setCurrentQuestionnaires] = useState<QuestionnaireBase[]>();
-
-    const [questionnaires] = useQuestionnaires();
-
-    const changeType = (fileType: string) => {
-        setFileType(fileType);
-    };
-
-    const { lastSuccessfulAnalyticsRunTime, setRefetch } = useGetLastSuccessfulAnalyticsRunTime();
-
-    useEffect(() => {
-        if (dataSubmissionId !== "" && currentDataSubmissionId === "") {
-            setCurrentDataSubmissionId(dataSubmissionId);
-        }
-
-        if (questionnaires && !currentQuestionnaires) {
-            setCurrentQuestionnaires(questionnaires);
-        }
-        if (lastSuccessfulAnalyticsRunTime.kind === "loaded") {
-            const lastAnalyticsRunTime = new Date(lastSuccessfulAnalyticsRunTime.data);
-
-            console.debug(
-                `Last Analytics Run time : ${lastAnalyticsRunTime}, Import time: ${primaryFileImportSummary?.importTime} `
-            );
-            if (primaryFileImportSummary?.importTime) {
-                if (lastAnalyticsRunTime > primaryFileImportSummary.importTime) {
-                    setIsReportReady(true);
-                }
-            }
-        }
-    }, [
-        setIsReportReady,
-        lastSuccessfulAnalyticsRunTime,
-        primaryFileImportSummary?.importTime,
-        dataSubmissionId,
-        currentDataSubmissionId,
-        currentQuestionnaires,
-        questionnaires,
-    ]);
-
-    React.useEffect(() => {
-        const timer = setInterval(() => {
-            setRefetch({});
-        }, 3000);
-        return () => {
-            clearInterval(timer);
-        };
-    }, [setRefetch]);
-
-    const goToFinalStep = useCallback(() => {
-        const primaryUploadId = localStorage.getItem("primaryUploadId");
-        const secondaryUploadId = localStorage.getItem("secondaryUploadId");
-        setIsLoading(true);
-        if (primaryUploadId) {
-            return compositionRoot.glassUploads.setStatus({ id: primaryUploadId, status: COMPLETED_STATUS }).run(
-                () => {
-                    if (!secondaryUploadId) {
-                        changeStep(4);
-                        setIsLoading(false);
-                        //If Questionnaires are not applicable to a module, then set status as COMPLETE on
-                        //completion of dataset.
-                        if (
-                            moduleProperties.get(currentModuleAccess.moduleName)?.completeStatusChange === "DATASET" ||
-                            (moduleProperties.get(currentModuleAccess.moduleName)?.completeStatusChange ===
-                                "QUESTIONNAIRE_AND_DATASET" &&
-                                currentQuestionnaires?.every(q => q.isMandatory && q.isCompleted))
-                        ) {
-                            compositionRoot.glassDataSubmission.setStatus(currentDataSubmissionId, "COMPLETE").run(
-                                () => {
-                                    if (captureAccessGroup.kind === "loaded") {
-                                        const userGroupsIds = captureAccessGroup.data.map(cag => {
-                                            return cag.id;
-                                        });
-                                        const notificationText = `The data submission for ${currentModuleAccess.moduleName} module for year ${currentPeriod} and country ${currentOrgUnitAccess.orgUnitName} has changed to DATA TO BE APPROVED BY COUNTRY`;
-
-                                        compositionRoot.notifications
-                                            .send(
-                                                notificationText,
-                                                notificationText,
-                                                userGroupsIds,
-                                                currentOrgUnitAccess.orgUnitPath
-                                            )
-                                            .run(
-                                                () => {},
-                                                () => {}
-                                            );
-                                    }
-                                },
-                                error => {
-                                    console.debug(
-                                        "Error occurred when setting data submission status, error: " + error
-                                    );
-                                }
-                            );
-                        }
-                    } else {
-                        return compositionRoot.glassUploads
-                            .setStatus({ id: secondaryUploadId, status: COMPLETED_STATUS })
-                            .run(
-                                () => {
-                                    changeStep(4);
-                                    setIsLoading(false);
-                                },
-                                errorMessage => {
-                                    snackbar.error(i18n.t(errorMessage));
-                                    setIsLoading(false);
-                                }
-                            );
-                    }
-                },
-                errorMessage => {
-                    snackbar.error(i18n.t(errorMessage));
-                    setIsLoading(false);
-                }
-            );
-        } else if (secondaryUploadId) {
-            return compositionRoot.glassUploads.setStatus({ id: secondaryUploadId, status: COMPLETED_STATUS }).run(
-                () => {
-                    if (
-                        moduleProperties.get(currentModuleAccess.moduleName)?.completeStatusChange ===
-                            "QUESTIONNAIRE_AND_DATASET" &&
-                        currentQuestionnaires?.every(q => q.isMandatory && q.isCompleted)
-                    ) {
-                        compositionRoot.glassDataSubmission.setStatus(currentDataSubmissionId, "COMPLETE").run(
-                            () => {
-                                if (captureAccessGroup.kind === "loaded") {
-                                    const userGroupsIds = captureAccessGroup.data.map(cag => {
-                                        return cag.id;
-                                    });
-                                    const notificationText = `The data submission for ${currentModuleAccess.moduleName} module for year ${currentPeriod} and country ${currentOrgUnitAccess.orgUnitName} has changed to DATA TO BE APPROVED BY COUNTRY`;
-
-                                    compositionRoot.notifications
-                                        .send(
-                                            notificationText,
-                                            notificationText,
-                                            userGroupsIds,
-                                            currentOrgUnitAccess.orgUnitPath
-                                        )
-                                        .run(
-                                            () => {},
-                                            () => {}
-                                        );
-                                }
-                            },
-                            error => {
-                                console.debug("Error occurred when setting data submission status, error: " + error);
-                            }
-                        );
-                    }
-                    changeStep(4);
-                    setIsLoading(false);
-                },
-                errorMessage => {
-                    snackbar.error(i18n.t(errorMessage));
-                    setIsLoading(false);
-                }
-            );
-        }
-    }, [
+    const { goToFinalStep, isReportReady, isLoading, fileType, changeType } = useReviewDataSummary(
         changeStep,
-        compositionRoot.glassUploads,
-        snackbar,
-        captureAccessGroup,
-        compositionRoot.glassDataSubmission,
-        compositionRoot.notifications,
-        currentModuleAccess.moduleName,
-        currentOrgUnitAccess,
-        currentPeriod,
-        currentDataSubmissionId,
-        currentQuestionnaires,
-    ]);
-
-    const goToFinalStepEffect = useCallbackEffect(goToFinalStep);
+        primaryFileImportSummary
+    );
 
     return (
         <ContentWrapper>
@@ -303,7 +108,7 @@ export const ReviewDataSummary: React.FC<ReviewDataSummaryProps> = ({
                         variant="contained"
                         color={"primary"}
                         endIcon={<ChevronRightIcon />}
-                        onClick={goToFinalStepEffect}
+                        onClick={goToFinalStep}
                         disableElevation
                     >
                         {i18n.t("Continue")}
