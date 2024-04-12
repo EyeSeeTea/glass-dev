@@ -45,7 +45,7 @@ export const UploadsTable: React.FC<UploadsTableProps> = ({ title, items, classN
                                         <>
                                             <Typography variant="caption">
                                                 {i18n.t(
-                                                    "UPLOADED - The file has been uploaded, but data has not been imported due to errors in Step 2"
+                                                    "UPLOADED - The file has been uploaded, but data has not been imported as upload was discarded in Step 1 or due to errors in Step 2"
                                                 )}
                                                 <br />
                                             </Typography>
@@ -57,7 +57,7 @@ export const UploadsTable: React.FC<UploadsTableProps> = ({ title, items, classN
                                             </Typography>
                                             <Typography variant="caption">
                                                 {i18n.t(
-                                                    "VALIDATED - The data has been imported and validated, but the data was not reviewed in Step 3"
+                                                    "VALIDATED - The data has been imported and automatically validated, but the data was not reviewed by user in Step 3"
                                                 )}
                                                 <br />
                                             </Typography>
