@@ -1,10 +1,10 @@
-import { TrackerPostResponse } from "@eyeseetea/d2-api/api/tracker";
 import { FutureData } from "../../entities/Future";
 import { Id } from "../../entities/Ref";
 import { ProductDataTrackedEntity } from "../../entities/data-entry/amc/ProductDataTrackedEntity";
 import { ProductRegisterProgramMetadata, ProgramStage } from "../../entities/data-entry/amc/ProductRegisterProgram";
 import { RawSubstanceConsumptionCalculated } from "../../entities/data-entry/amc/RawSubstanceConsumptionCalculated";
 import { ImportStrategy } from "../../entities/data-entry/DataValuesSaveSummary";
+import { ImportSummary } from "../../entities/data-entry/ImportSummary";
 
 export interface AMCProductDataRepository {
     validate(
@@ -19,7 +19,7 @@ export interface AMCProductDataRepository {
         rawSubstanceConsumptionCalculatedData: RawSubstanceConsumptionCalculated[],
         orgUnitId: Id,
         period: string
-    ): FutureData<TrackerPostResponse>;
+    ): FutureData<ImportSummary>;
     getProductRegisterProgramMetadata(): FutureData<ProductRegisterProgramMetadata | undefined>;
     getProductRegisterAndRawProductConsumptionByProductIds(
         orgUnitId: Id,

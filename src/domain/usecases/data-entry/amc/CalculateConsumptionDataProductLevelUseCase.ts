@@ -1,7 +1,7 @@
 import { Future, FutureData } from "../../../entities/Future";
 import { Id } from "../../../entities/Ref";
 import { createAtcVersionKey } from "../../../entities/GlassATC";
-import { mapToImportSummary, readTemplate } from "../ImportBLTemplateEventProgram";
+import { readTemplate } from "../ImportBLTemplateEventProgram";
 import { ExcelRepository } from "../../../repositories/ExcelRepository";
 import { GlassATCRepository } from "../../../repositories/GlassATCRepository";
 import { InstanceRepository } from "../../../repositories/InstanceRepository";
@@ -18,8 +18,6 @@ import { getConsumptionDataProductLevel } from "./utils/getConsumptionDataProduc
 import { logger } from "../../../../utils/logger";
 
 const TEMPLATE_ID = "TRACKER_PROGRAM_GENERATED_v3";
-const IMPORT_SUMMARY_EVENT_TYPE = "event";
-const IMPORT_STRATEGY_CREATE_AND_UPDATE = "CREATE_AND_UPDATE";
 
 export class CalculateConsumptionDataProductLevelUseCase {
     constructor(
@@ -105,42 +103,36 @@ export class CalculateConsumptionDataProductLevelUseCase {
                         );
                         return this.amcProductDataRepository
                             .importCalculations(
-                                IMPORT_STRATEGY_CREATE_AND_UPDATE,
+                                "CREATE_AND_UPDATE",
                                 productDataTrackedEntities,
                                 rawSubstanceConsumptionCalculatedStageMetadata,
                                 rawSubstanceConsumptionCalculatedData,
                                 orgUnitId,
                                 period
                             )
-                            .flatMap(response => {
-                                if (response.status === "OK") {
+                            .flatMap(importSummary => {
+                                if (importSummary.status === "SUCCESS") {
                                     logger.success(
-                                        `Calculations of product level created for orgUnitId ${orgUnitId} and period ${period}: ${response.stats.created} of ${response.stats.total} events created`
+                                        `Calculations of product level created for orgUnitId ${orgUnitId} and period ${period}: ${importSummary.importCount.imported} of ${importSummary.importCount.total} events created`
                                     );
                                 }
-                                if (response.status === "ERROR") {
+                                if (importSummary.status === "ERROR") {
                                     logger.error(
                                         `Error creating calculations of product level for orgUnitId ${orgUnitId} and period ${period}: ${JSON.stringify(
-                                            response.validationReport.errorReports
+                                            importSummary.blockingErrors
                                         )}`
                                     );
                                 }
-                                if (response.status === "WARNING") {
+                                if (importSummary.status === "WARNING") {
                                     logger.warn(
                                         `Warning creating calculations of product level updated for orgUnitId ${orgUnitId} and period ${period}: ${
-                                            response.stats.created
-                                        } of ${response.stats.total} events created and warning=${JSON.stringify(
-                                            response.validationReport.warningReports
-                                        )}`
+                                            importSummary.importCount.imported
+                                        } of ${
+                                            importSummary.importCount.total
+                                        } events created and warning=${JSON.stringify(importSummary.warningErrors)}`
                                     );
                                 }
-                                return mapToImportSummary(
-                                    response,
-                                    IMPORT_SUMMARY_EVENT_TYPE,
-                                    this.metadataRepository
-                                ).flatMap(summary => {
-                                    return Future.success(summary.importSummary);
-                                });
+                                return Future.success(importSummary);
                             });
                     });
                 });

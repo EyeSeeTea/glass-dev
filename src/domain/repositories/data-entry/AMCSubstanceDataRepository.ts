@@ -1,9 +1,9 @@
-import { TrackerPostResponse } from "@eyeseetea/d2-api/api/tracker";
 import { FutureData } from "../../entities/Future";
 import { Id } from "../../entities/Ref";
 import { RawSubstanceConsumptionData } from "../../entities/data-entry/amc/RawSubstanceConsumptionData";
 import { SubstanceConsumptionCalculated } from "../../entities/data-entry/amc/SubstanceConsumptionCalculated";
 import { ImportStrategy } from "../../entities/data-entry/DataValuesSaveSummary";
+import { ImportSummary } from "../../entities/data-entry/ImportSummary";
 
 export interface AMCSubstanceDataRepository {
     validate(
@@ -18,7 +18,10 @@ export interface AMCSubstanceDataRepository {
         importStrategy: ImportStrategy,
         orgUnitId: Id,
         calculatedConsumptionSubstanceLevelData: SubstanceConsumptionCalculated[]
-    ): FutureData<{ response: TrackerPostResponse; eventIdLineNoMap: { id: string; lineNo: number }[] }>;
+    ): FutureData<{
+        importSummary: ImportSummary;
+        eventIdList: string[];
+    }>;
     getAllRawSubstanceConsumptionDataByByPeriod(
         orgUnitId: Id,
         period: string

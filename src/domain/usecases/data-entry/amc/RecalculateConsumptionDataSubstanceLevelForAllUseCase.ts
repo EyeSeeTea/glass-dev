@@ -131,32 +131,34 @@ export class RecalculateConsumptionDataSubstanceLevelForAllUseCase {
                                 ? [...newCalculatedConsumptionDataWithIds, ...newCalculatedConsumptionDataWithoutIds]
                                 : newCalculatedConsumptionDataWithIds
                         )
-                        .flatMap(({ response }) => {
-                            if (response.status === "OK") {
+                        .flatMap(({ importSummary }) => {
+                            if (importSummary.status === "SUCCESS") {
                                 logger.success(
                                     `Calculations of substance level updated for orgUnitId ${orgUnitId} and period ${period}: ${
-                                        response.stats.updated
-                                    } of ${response.stats.total} events updated${
+                                        importSummary.importCount.updated
+                                    } of ${importSummary.importCount.total} events updated${
                                         allowCreationIfNotExist
-                                            ? ` and ${response.stats.created} of ${response.stats.total} events created`
+                                            ? ` and ${importSummary.importCount.imported} of ${importSummary.importCount.total} events created`
                                             : ""
                                     }`
                                 );
                             }
-                            if (response.status === "ERROR") {
+                            if (importSummary.status === "ERROR") {
                                 logger.error(
                                     `Error updating calculations of substance level updated for orgUnitId ${orgUnitId} and period ${period}: ${JSON.stringify(
-                                        response.validationReport.errorReports
+                                        importSummary.blockingErrors
                                     )}`
                                 );
                             }
-                            if (response.status === "WARNING") {
+                            if (importSummary.status === "WARNING") {
                                 logger.warn(
                                     `Warning updating calculations of substance level updated for orgUnitId ${orgUnitId} and period ${period}: updated=${
-                                        response.stats.updated
-                                    }, ${allowCreationIfNotExist ? `created=${response.stats.created}, ` : ""} total=${
-                                        response.stats.total
-                                    } and warning=${JSON.stringify(response.validationReport.warningReports)}`
+                                        importSummary.importCount.updated
+                                    }, ${
+                                        allowCreationIfNotExist ? `created=${importSummary.importCount.imported}, ` : ""
+                                    } total=${importSummary.importCount.total} and warning=${JSON.stringify(
+                                        importSummary.warningErrors
+                                    )}`
                                 );
                             }
                             return Future.success(undefined);

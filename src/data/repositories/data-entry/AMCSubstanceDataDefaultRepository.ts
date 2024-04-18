@@ -10,7 +10,6 @@ import {
     RAW_SUBSTANCE_CONSUMPTION_DATA_KEYS,
     RawSubstanceConsumptionData,
 } from "../../../domain/entities/data-entry/amc/RawSubstanceConsumptionData";
-import { TrackerPostResponse } from "@eyeseetea/d2-api/api/tracker";
 import { importApiTracker } from "../utils/importApiTracker";
 import {
     SUBSTANCE_CONSUMPTION_CALCULATED_KEYS,
@@ -19,6 +18,8 @@ import {
 } from "../../../domain/entities/data-entry/amc/SubstanceConsumptionCalculated";
 import { ImportStrategy } from "../../../domain/entities/data-entry/DataValuesSaveSummary";
 import { logger } from "../../../utils/logger";
+import { ImportSummary } from "../../../domain/entities/data-entry/ImportSummary";
+import { mapToImportSummary } from "./utils/mapToImportSummary";
 
 export const AMC_RAW_SUBSTANCE_CONSUMPTION_PROGRAM_ID = "q8aSKr17J5S";
 const AMC_CALCULATED_CONSUMPTION_DATA_PROGRAM_ID = "eUmWZeKZNrg";
@@ -134,12 +135,14 @@ export class AMCSubstanceDataDefaultRepository implements AMCSubstanceDataReposi
         });
     }
 
-    // TODO: decouple TrackerPostResponse from DHIS2
     importCalculations(
         importStrategy: ImportStrategy,
         orgUnitId: Id,
         calculatedConsumptionSubstanceLevelData: SubstanceConsumptionCalculated[]
-    ): FutureData<{ response: TrackerPostResponse; eventIdLineNoMap: { id: string; lineNo: number }[] }> {
+    ): FutureData<{
+        importSummary: ImportSummary;
+        eventIdList: string[];
+    }> {
         return this.getCalculatedConsumptionDataProgram().flatMap(calculatedConsumptionDataProgram => {
             const d2TrackerEvents = this.mapSubstanceConsumptionCalculatedToD2TrackerEvent(
                 calculatedConsumptionSubstanceLevelData,
@@ -153,9 +156,11 @@ export class AMCSubstanceDataDefaultRepository implements AMCSubstanceDataReposi
                     lineNo: isNaN(parseInt(d2TrackerEvent.event)) ? 0 : parseInt(d2TrackerEvent.event),
                 }));
                 return importApiTracker(this.api, { events: d2TrackerEvents }, importStrategy).flatMap(response => {
-                    return Future.success({
-                        response,
-                        eventIdLineNoMap,
+                    return mapToImportSummary({
+                        result: response,
+                        type: "event",
+                        api: this.api,
+                        eventIdLineNoMap: eventIdLineNoMap,
                     });
                 });
             } else {
