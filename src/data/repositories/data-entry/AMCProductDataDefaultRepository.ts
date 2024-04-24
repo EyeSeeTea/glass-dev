@@ -208,6 +208,19 @@ export class AMCProductDataDefaultRepository implements AMCProductDataRepository
             .getData();
     }
 
+    public getTrackedEntityProductIdsByOUAndPeriod(orgUnitId: Id, period: string): FutureData<string[]> {
+        return Future.fromPromise(
+            this.getAllProductRegisterAndRawProductConsumptionByPeriodAsync(orgUnitId, period)
+        ).map(trackedEntities => {
+            const productsIds = trackedEntities.map(trackedEntity => {
+                return trackedEntity.attributes?.find(attribute => attribute.attribute === AMR_GLASS_AMC_TEA_PRODUCT_ID)
+                    ?.value;
+            });
+
+            return _(productsIds).compact().value();
+        });
+    }
+
     private mapFromD2ProgramToProductRegisterProgramMetadata(
         program: D2Program | undefined
     ): ProductRegisterProgramMetadata | undefined {

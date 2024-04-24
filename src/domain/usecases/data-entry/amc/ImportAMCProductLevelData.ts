@@ -21,6 +21,7 @@ import { ProgramRulesMetadataRepository } from "../../../repositories/program-ru
 import { CustomValidationsAMCProductData } from "./CustomValidationsAMCProductData";
 import { GlassATCDefaultRepository } from "../../../../data/repositories/GlassATCDefaultRepository";
 import moment from "moment";
+import { AMCProductDataRepository } from "../../../repositories/data-entry/AMCProductDataRepository";
 
 export const AMC_PRODUCT_REGISTER_PROGRAM_ID = "G6ChA5zMW9n";
 export const AMC_RAW_PRODUCT_CONSUMPTION_STAGE_ID = "GmElQHKXLIE";
@@ -35,7 +36,8 @@ export class ImportAMCProductLevelData {
         private glassUploadsRepository: GlassUploadsRepository,
         private metadataRepository: MetadataRepository,
         private programRulesMetadataRepository: ProgramRulesMetadataRepository,
-        private atcRepository: GlassATCDefaultRepository
+        private atcRepository: GlassATCDefaultRepository,
+        private amcProductRepository: AMCProductDataRepository
     ) {}
 
     public importAMCProductFile(
@@ -279,7 +281,7 @@ export class ImportAMCProductLevelData {
         const programRuleValidations = new ProgramRuleValidationForBLEventProgram(this.programRulesMetadataRepository);
 
         //3. Run Custom AMC Product Validations
-        const customValidations = new CustomValidationsAMCProductData(this.atcRepository);
+        const customValidations = new CustomValidationsAMCProductData(this.atcRepository, this.amcProductRepository);
 
         return Future.joinObj({
             programRuleValidationResults: programRuleValidations.getValidatedTeisAndEvents(programId, [], teis),

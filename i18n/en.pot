@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2024-02-13T08:00:47.815Z\n"
-"PO-Revision-Date: 2024-02-13T08:00:47.815Z\n"
+"POT-Creation-Date: 2024-04-12T05:19:17.327Z\n"
+"PO-Revision-Date: 2024-04-12T05:19:17.327Z\n"
 
 msgid "Template {{id}} not loaded"
 msgstr ""
@@ -335,6 +335,24 @@ msgid "Batch ID"
 msgstr ""
 
 msgid "Status"
+msgstr ""
+
+msgid ""
+"UPLOADED - The file has been uploaded, but data has not been imported as "
+"upload was discarded in Step 1 or due to errors in Step 2"
+msgstr ""
+
+msgid ""
+"IMPORTED - The data has been imported, but validations(if applicable) were "
+"not run successfully, in Step 2"
+msgstr ""
+
+msgid ""
+"VALIDATED - The data has been imported and automatically validated, but the "
+"data was not reviewed by user in Step 3"
+msgstr ""
+
+msgid "COMPLETED - The data has been imported, validated and reviewed successfully."
 msgstr ""
 
 msgid "Download File"

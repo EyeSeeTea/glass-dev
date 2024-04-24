@@ -5,11 +5,13 @@ import { ValidationResult } from "../../../entities/program-rules/EventEffectTyp
 import { D2TrackerTrackedEntity } from "@eyeseetea/d2-api/api/trackerTrackedEntities";
 import { GlassATCDefaultRepository } from "../../../../data/repositories/GlassATCDefaultRepository";
 import { GlassATCVersion } from "../../../entities/GlassATC";
+import { AMCProductDataRepository } from "../../../repositories/data-entry/AMCProductDataRepository";
 
 const AMR_GLASS_AMC_TEA_ATC = "aK1JpD14imM";
 const AMR_GLASS_AMC_TEA_COMBINATION = "mG49egdYK3G";
 const AMR_GLASS_AMC_TEA_ROUTE_ADMIN = "m4eyu3tO5IV";
 const AMR_GLASS_AMC_TEA_SALT = "K8wjLXjYFzf";
+const AMR_GLASS_AMC_TEA_PRODUCT_ID = "iasfoeU8veF";
 const atcLevel4WithOralROA1 = "A07AA";
 const atcLevel4WithOralROA2 = "P01AB";
 const atcLevel4WithOralROA3 = "J01XD";
@@ -18,7 +20,10 @@ const atcCodeWithSaltHippAndMand = "J01XX05";
 const atcCodeWithRoaOAndSaltDefault = "J01FA01";
 
 export class CustomValidationsAMCProductData {
-    constructor(private atcRepository: GlassATCDefaultRepository) {}
+    constructor(
+        private atcRepository: GlassATCDefaultRepository,
+        private amcProductRepository: AMCProductDataRepository
+    ) {}
     // private dhis2EventsDefaultRepository: Dhis2EventsDefaultRepository,
     public getValidatedEvents(
         teis: D2TrackerTrackedEntity[],
@@ -27,23 +32,75 @@ export class CustomValidationsAMCProductData {
         period: string
     ): FutureData<ValidationResult> {
         return this.atcRepository.getCurrentAtcVersion().flatMap(atcVersion => {
-            const attributeLevelErrors = this.checkTEIAttributeValidations(
-                teis,
-                orgUnitId,
-                orgUnitName,
-                period,
-                atcVersion
-            );
+            return this.amcProductRepository
+                .getTrackedEntityProductIdsByOUAndPeriod(orgUnitId, period)
+                .flatMap(existingProductIds => {
+                    const duplicateProductIdsErrors = this.checkUniqueProductIds(teis, orgUnitId, existingProductIds);
+                    const attributeLevelErrors = this.checkTEIAttributeValidations(
+                        teis,
+                        orgUnitId,
+                        orgUnitName,
+                        period,
+                        atcVersion
+                    );
 
-            const dateErrors = this.checkSameEnrollmentDate(teis);
-            const results: ValidationResult = {
-                teis: teis,
-                blockingErrors: [...attributeLevelErrors, ...dateErrors],
-                nonBlockingErrors: [],
-            };
+                    const dateErrors = this.checkSameEnrollmentDate(teis);
+                    const results: ValidationResult = {
+                        teis: teis,
+                        blockingErrors: [...duplicateProductIdsErrors, ...attributeLevelErrors, ...dateErrors],
+                        nonBlockingErrors: [],
+                    };
 
-            return Future.success(results);
+                    return Future.success(results);
+                });
         });
+    }
+
+    private checkUniqueProductIds(
+        teis: D2TrackerTrackedEntity[],
+        orgUnitId: string,
+        existingProductIds: string[]
+    ): ConsistencyError[] {
+        //1. Product ids of tracked entities in file.
+        const fileProductIDs = teis.map(tei => {
+            const productId = tei.attributes?.find(attr => attr.attribute === AMR_GLASS_AMC_TEA_PRODUCT_ID);
+
+            if (productId) return { teiID: tei.trackedEntity, orgUnit: tei.orgUnit, productId: productId.value };
+            else return null;
+        });
+
+        //2. Product ids of existing tracked entities.
+        const existingProductIDs = existingProductIds.map(productId => {
+            return { teiID: "", orgUnit: orgUnitId, productId: productId };
+        });
+
+        const allProductIds = _([...fileProductIDs, ...existingProductIDs])
+            .compact()
+            .value();
+
+        const errors = _(allProductIds)
+            .groupBy("productId")
+            .map(duplicateProductIdGroup => {
+                if (
+                    duplicateProductIdGroup.length > 1 &&
+                    duplicateProductIdGroup.some(pg =>
+                        fileProductIDs.some(fileProduct => pg.teiID === fileProduct?.teiID)
+                    )
+                ) {
+                    return {
+                        error: i18n.t(`This Product ID already exists : ${duplicateProductIdGroup[0]?.productId}`),
+                        lines: _(duplicateProductIdGroup.map(product => (product.teiID ? parseInt(product.teiID) : "")))
+                            .compact()
+                            .value(),
+                        count: duplicateProductIdGroup.length,
+                    };
+                }
+            })
+            .flatMap()
+            .compact()
+            .value();
+
+        return errors;
     }
 
     private checkTEIAttributeValidations(

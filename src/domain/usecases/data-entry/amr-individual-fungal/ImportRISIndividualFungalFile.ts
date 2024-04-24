@@ -13,6 +13,7 @@ import { mapToImportSummary, uploadIdListFileAndSave } from "../ImportBLTemplate
 import { MetadataRepository } from "../../../repositories/MetadataRepository";
 import { downloadIdsAndDeleteTrackedEntities } from "../amc/ImportAMCProductLevelData";
 import { CustomDataColumns } from "../../../entities/data-entry/amr-individual-fungal-external/RISIndividualFungalData";
+import moment from "moment";
 
 export const AMRIProgramID = "mMAj6Gofe49";
 const AMR_GLASS_AMR_TET_PATIENT = "CcgnfemKr5U";
@@ -21,6 +22,7 @@ export const AMRCandidaProgramStageId = "ysGSonDq9Bc";
 
 const PATIENT_COUNTER_ID = "uSGcLbT5gJJ";
 const PATIENT_ID = "qKWPfeSgTnc";
+const AMR_GLASS_AMR_DET_SAMPLE_DATE = "Xtn5zEL9mGx";
 
 export class ImportRISIndividualFungalFile {
     constructor(
@@ -75,7 +77,8 @@ export class ImportRISIndividualFungalFile {
                                 orgUnit,
                                 AMRIProgramIDl,
                                 AMRDataProgramStageIdl(),
-                                countryCode
+                                countryCode,
+                                period
                             ).flatMap(entities => {
                                 return this.trackerRepository
                                     .import({ trackedEntities: entities }, action)
@@ -159,7 +162,7 @@ export class ImportRISIndividualFungalFile {
                 if (dataItem.find(item => item.key === "YEAR")?.value !== parseInt(period)) {
                     return {
                         error: i18n.t(
-                            `Year is different: Selected Data Submission Country : ${period}, Country in file: ${
+                            `Year is different: Selected Data Submission Year : ${period}, Year in file: ${
                                 dataItem.find(item => item.key === "YEAR")?.value
                             }`
                         ),
@@ -185,7 +188,8 @@ export class ImportRISIndividualFungalFile {
         orgUnit: string,
         AMRIProgramIDl: string,
         AMRDataProgramStageIdl: string,
-        countryCode: string
+        countryCode: string,
+        period: string
     ): FutureData<TrackedEntity[]> {
         return this.trackerRepository.getProgramMetadata(AMRIProgramIDl, AMRDataProgramStageIdl).flatMap(metadata => {
             const trackedEntities = individualFungalDataItems.map(dataItem => {
@@ -206,6 +210,13 @@ export class ImportRISIndividualFungalFile {
                     }
                 );
 
+                const sampleDateStr =
+                    AMRDataStage.find(de => de.dataElement === AMR_GLASS_AMR_DET_SAMPLE_DATE)?.value ??
+                    `01-01-${period}`;
+                const sampleDate = moment(new Date(sampleDateStr)).toISOString().split("T").at(0) ?? period;
+
+                const createdAt = moment(new Date()).toISOString().split("T").at(0) ?? period;
+
                 const events: D2TrackerEvent[] = [
                     {
                         program: AMRIProgramIDl,
@@ -213,7 +224,7 @@ export class ImportRISIndividualFungalFile {
                         programStage: AMRDataProgramStageIdl,
                         orgUnit,
                         dataValues: AMRDataStage,
-                        occurredAt: new Date().getTime().toString(),
+                        occurredAt: sampleDate,
                         status: "COMPLETED",
                     },
                 ];
@@ -227,12 +238,12 @@ export class ImportRISIndividualFungalFile {
                         relationships: [],
                         attributes: attributes,
                         events: events,
-                        enrolledAt: new Date().getTime().toString(),
-                        occurredAt: new Date().getTime().toString(),
-                        createdAt: new Date().getTime().toString(),
-                        createdAtClient: new Date().getTime().toString(),
-                        updatedAt: new Date().getTime().toString(),
-                        updatedAtClient: new Date().getTime().toString(),
+                        enrolledAt: sampleDate,
+                        occurredAt: sampleDate,
+                        createdAt: createdAt,
+                        createdAtClient: createdAt,
+                        updatedAt: createdAt,
+                        updatedAtClient: createdAt,
                         status: "COMPLETED",
                         orgUnitName: countryCode,
                         followUp: false,
