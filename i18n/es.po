@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: i18next-conv\n"
-"POT-Creation-Date: 2024-04-12T05:19:17.327Z\n"
+"POT-Creation-Date: 2024-04-30T07:52:46.176Z\n"
 "PO-Revision-Date: 2018-10-25T09:02:35.143Z\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -600,6 +600,9 @@ msgstr ""
 msgid "Fix upload data"
 msgstr ""
 
+msgid "Select file"
+msgstr ""
+
 msgid "Error fetching previous uploads."
 msgstr ""
 
@@ -622,9 +625,6 @@ msgid "Error in file upload"
 msgstr ""
 
 msgid "Incorrect File Format. Please retry with a valid file"
-msgstr ""
-
-msgid "Select file"
 msgstr ""
 
 msgid "The password and confirm password fields don't match"
