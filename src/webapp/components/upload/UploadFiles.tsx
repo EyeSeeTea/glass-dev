@@ -24,6 +24,7 @@ import { Future } from "../../../domain/entities/Future";
 import { ImportSummary } from "../../../domain/entities/data-entry/ImportSummary";
 import { StyledLoaderContainer } from "./ConsistencyChecks";
 import { moduleProperties } from "../../../domain/utils/ModuleProperties";
+import { UploadAMCPrimaryFile } from "./UploadAMCPrimaryFile";
 
 interface UploadFilesProps {
     changeStep: (step: number) => void;
@@ -469,12 +470,21 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
                             </Select>
                         </FormControl>
                         {uploadFileType === currentModuleProperties.primaryFileType ? (
-                            <UploadPrimaryFile
-                                validate={setIsPrimaryFileValid}
-                                batchId={batchId}
-                                primaryFile={primaryFile}
-                                setPrimaryFile={setPrimaryFile}
-                            />
+                            moduleName === "AMC" ? (
+                                <UploadAMCPrimaryFile
+                                    validate={setIsPrimaryFileValid}
+                                    batchId={batchId}
+                                    primaryFile={primaryFile}
+                                    setPrimaryFile={setPrimaryFile}
+                                />
+                            ) : (
+                                <UploadPrimaryFile
+                                    validate={setIsPrimaryFileValid}
+                                    batchId={batchId}
+                                    primaryFile={primaryFile}
+                                    setPrimaryFile={setPrimaryFile}
+                                />
+                            )
                         ) : (
                             <UploadSecondary
                                 validate={setIsSecondaryFileValid}
@@ -501,12 +511,22 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
                     ) : (
                         <>
                             <div className="file-fields">
-                                <UploadPrimaryFile
-                                    validate={setIsPrimaryFileValid}
-                                    batchId={batchId}
-                                    primaryFile={primaryFile}
-                                    setPrimaryFile={setPrimaryFile}
-                                />
+                                {moduleName === "AMC" ? (
+                                    <UploadAMCPrimaryFile
+                                        validate={setIsPrimaryFileValid}
+                                        batchId={batchId}
+                                        primaryFile={primaryFile}
+                                        setPrimaryFile={setPrimaryFile}
+                                    />
+                                ) : (
+                                    <UploadPrimaryFile
+                                        validate={setIsPrimaryFileValid}
+                                        batchId={batchId}
+                                        primaryFile={primaryFile}
+                                        setPrimaryFile={setPrimaryFile}
+                                    />
+                                )}
+
                                 {moduleProperties.get(moduleName)?.isSecondaryFileApplicable && (
                                     <UploadSecondary
                                         validate={setIsSecondaryFileValid}
