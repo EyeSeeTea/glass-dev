@@ -337,6 +337,7 @@ export const uploadIdListFileAndSave = (
     }
 };
 
+/** @deprecated This should be in data layer. Use mapToImportSummary.ts instead. */
 export const mapToImportSummary = (
     result: TrackerPostResponse,
     type: "event" | "trackedEntity",

@@ -1,7 +1,7 @@
 import { UseCase } from "../../../CompositionRoot";
 import { GlassModuleDefaultRepository } from "../../../data/repositories/GlassModuleDefaultRepository";
 import { FutureData, Future } from "../../entities/Future";
-import { AMCDataRepository } from "../../repositories/data-entry/AMCDataRepository";
+import { AMCProductDataRepository } from "../../repositories/data-entry/AMCProductDataRepository";
 import { EGASPDataRepository } from "../../repositories/data-entry/EGASPDataRepository";
 import { RISDataRepository } from "../../repositories/data-entry/RISDataRepository";
 import { RISIndividualFungalDataRepository } from "../../repositories/data-entry/RISIndividualFungalDataRepository";
@@ -12,7 +12,7 @@ export class ValidatePrimaryFileUseCase implements UseCase {
         private risIndividualFungalRepository: RISIndividualFungalDataRepository,
         private egaspDataRepository: EGASPDataRepository,
         private glassModuleDefaultRepository: GlassModuleDefaultRepository,
-        private amcDataRepository: AMCDataRepository
+        private amcProductDataRepository: AMCProductDataRepository
     ) {}
 
     public execute(
@@ -39,7 +39,7 @@ export class ValidatePrimaryFileUseCase implements UseCase {
             case "AMC":
                 return this.glassModuleDefaultRepository.getByName(moduleName).flatMap(module => {
                     if (module.teiColumns)
-                        return this.amcDataRepository.validate(inputFile, module.dataColumns, module.teiColumns);
+                        return this.amcProductDataRepository.validate(inputFile, module.dataColumns, module.teiColumns);
                     else return Future.error("An error occured in file validation");
                 });
 

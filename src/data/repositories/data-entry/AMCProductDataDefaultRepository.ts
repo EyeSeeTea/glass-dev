@@ -21,11 +21,12 @@ import {
     RawSubstanceConsumptionCalculated,
     RawSubstanceConsumptionCalculatedKeys,
 } from "../../../domain/entities/data-entry/amc/RawSubstanceConsumptionCalculated";
-import { TrackerPostResponse } from "@eyeseetea/d2-api/api/tracker";
 import { importApiTracker } from "../utils/importApiTracker";
 import { ImportStrategy } from "../../../domain/entities/data-entry/DataValuesSaveSummary";
 import { logger } from "../../../utils/logger";
 import moment from "moment";
+import { mapToImportSummary } from "./utils/mapToImportSummary";
+import { ImportSummary } from "../../../domain/entities/data-entry/ImportSummary";
 
 export const AMC_PRODUCT_REGISTER_PROGRAM_ID = "G6ChA5zMW9n";
 
@@ -75,7 +76,6 @@ export class AMCProductDataDefaultRepository implements AMCProductDataRepository
         });
     }
 
-    // TODO: decouple TrackerPostResponse from DHIS2
     importCalculations(
         importStrategy: ImportStrategy,
         productDataTrackedEntities: ProductDataTrackedEntity[],
@@ -83,7 +83,7 @@ export class AMCProductDataDefaultRepository implements AMCProductDataRepository
         rawSubstanceConsumptionCalculatedData: RawSubstanceConsumptionCalculated[],
         orgUnitId: Id,
         period: string
-    ): FutureData<TrackerPostResponse> {
+    ): FutureData<ImportSummary> {
         const d2TrackerEvents = this.mapRawSubstanceConsumptionCalculatedToD2TrackerEvent(
             productDataTrackedEntities,
             rawSubstanceConsumptionCalculatedStageMetadata,
@@ -92,7 +92,15 @@ export class AMCProductDataDefaultRepository implements AMCProductDataRepository
             period
         );
         if (!_.isEmpty(d2TrackerEvents)) {
-            return importApiTracker(this.api, { events: d2TrackerEvents }, importStrategy);
+            return importApiTracker(this.api, { events: d2TrackerEvents }, importStrategy).flatMap(response => {
+                return mapToImportSummary({
+                    result: response,
+                    type: "event",
+                    api: this.api,
+                }).flatMap(({ importSummary }) => {
+                    return Future.success(importSummary);
+                });
+            });
         } else {
             logger.error(`Product level data: there are no events to be created`);
             return Future.error("There are no events to be created");

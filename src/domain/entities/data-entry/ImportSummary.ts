@@ -5,9 +5,11 @@ export type ImportSummary = {
         updated: number;
         ignored: number;
         deleted: number;
+        total?: number;
     };
     nonBlockingErrors: ConsistencyError[];
     blockingErrors: ConsistencyError[];
+    warningErrors?: ConsistencyError[];
     importTime?: Date;
 };
 
