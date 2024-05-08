@@ -475,7 +475,7 @@ export const formatDhis2Value = (item: DataPackageDataValue, dataForm: DataForm)
         return booleanValue ? { ...item, value: true } : undefined;
     }
 
-    const selectedOption = dataElement?.options?.find(({ id }) => item.value === id);
+    const selectedOption = dataElement?.options?.find(({ id }) => item.optionId === id);
     const value = selectedOption?.code ?? item.value;
     return { ...item, value };
 };

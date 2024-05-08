@@ -2,7 +2,7 @@ import _ from "lodash";
 import { logger } from "../../../../utils/logger";
 import { Id } from "../../../entities/Ref";
 import { Future, FutureData } from "../../../entities/Future";
-import { GlassATCVersion } from "../../../entities/GlassATC";
+import { DEFAULT_SALT_CODE, GlassAtcVersionData } from "../../../entities/GlassAtcVersionData";
 import {
     AMC_RAW_SUBSTANCE_CONSUMPTION_CALCULATED_STAGE_ID,
     AMR_GLASS_AMC_TEA_PRODUCT_ID,
@@ -22,7 +22,6 @@ import {
     RAW_SUBSTANCE_CONSUMPTION_CALCULATED_KEYS,
     RawSubstanceConsumptionCalculated,
 } from "../../../entities/data-entry/amc/RawSubstanceConsumptionCalculated";
-import { SALT_MAPPING } from "../../../entities/data-entry/amc/Salt";
 import { getConsumptionDataProductLevel } from "./utils/getConsumptionDataProductLevel";
 
 const IMPORT_STRATEGY_UPDATE = "UPDATE";
@@ -34,7 +33,7 @@ export class RecalculateConsumptionDataProductLevelForAllUseCase {
         orgUnitsIds: Id[],
         periods: string[],
         currentATCVersion: string,
-        currentATCData: GlassATCVersion,
+        currentATCData: GlassAtcVersionData,
         allowCreationIfNotExist: boolean
     ): FutureData<void> {
         logger.info(
@@ -71,7 +70,7 @@ export class RecalculateConsumptionDataProductLevelForAllUseCase {
         productRegisterProgramMetadata: ProductRegisterProgramMetadata,
         orgUnitId: Id,
         period: string,
-        atcCurrentVersionData: GlassATCVersion,
+        atcCurrentVersionData: GlassAtcVersionData,
         atcVersionKey: string,
         allowCreationIfNotExist: boolean
     ): FutureData<void> {
@@ -294,7 +293,7 @@ function linkEventIdToNewRawSubstanceConsumptionCalculated(
                 currentCalculatedData.atc_autocalculated === newCalulatedData.atc_autocalculated &&
                 currentCalculatedData.route_admin_autocalculated === newCalulatedData.route_admin_autocalculated &&
                 (currentCalculatedData.salt_autocalculated === newCalulatedData.salt_autocalculated ||
-                    SALT_MAPPING.default === newCalulatedData.salt_autocalculated) &&
+                    DEFAULT_SALT_CODE === newCalulatedData.salt_autocalculated) &&
                 currentCalculatedData.health_sector_autocalculated === newCalulatedData.health_sector_autocalculated &&
                 currentCalculatedData.health_level_autocalculated === newCalulatedData.health_level_autocalculated &&
                 currentCalculatedData.data_status_autocalculated === newCalulatedData.data_status_autocalculated

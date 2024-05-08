@@ -4,7 +4,7 @@ import {
 } from "../../../../../data/repositories/data-entry/AMCProductDataDefaultRepository";
 import { logger } from "../../../../../utils/logger";
 import { Future, FutureData } from "../../../../entities/Future";
-import { GlassATCVersion } from "../../../../entities/GlassATC";
+import { GlassAtcVersionData } from "../../../../entities/GlassAtcVersionData";
 import { Id } from "../../../../entities/Ref";
 import {
     Attributes,
@@ -34,7 +34,7 @@ export function getConsumptionDataProductLevel(params: {
     period: string;
     productRegisterProgramMetadata: ProductRegisterProgramMetadata | undefined;
     productDataTrackedEntities: ProductDataTrackedEntity[];
-    atcCurrentVersionData: GlassATCVersion;
+    atcCurrentVersionData: GlassAtcVersionData;
     atcVersionKey: string;
 }): FutureData<RawSubstanceConsumptionCalculated[]> {
     const {
@@ -139,7 +139,7 @@ function getProductRegistryAttributes(
                             [programAttribute.code]: programAttribute.optionSetValue
                                 ? programAttribute.optionSet.options.find(
                                       option => option.code === productAttribute.value
-                                  )?.name
+                                  )?.code
                                 : productAttribute.value,
                         };
                     case "NUMBER":
@@ -151,7 +151,7 @@ function getProductRegistryAttributes(
                             [programAttribute.code]: programAttribute.optionSetValue
                                 ? programAttribute.optionSet.options.find(
                                       option => option.code === productAttribute.value
-                                  )?.name
+                                  )?.code
                                 : parseFloat(productAttribute.value),
                         };
                     default:
@@ -186,7 +186,7 @@ function getRawProductConsumption(
                                 [programStageDataElement.code]: programStageDataElement.optionSetValue
                                     ? programStageDataElement.optionSet.options.find(
                                           option => option.code === eventDataValue.value
-                                      )?.name
+                                      )?.code
                                     : eventDataValue.value,
                             };
                         case "NUMBER":
@@ -198,7 +198,7 @@ function getRawProductConsumption(
                                 [programStageDataElement.code]: programStageDataElement.optionSetValue
                                     ? programStageDataElement.optionSet.options.find(
                                           option => option.code === eventDataValue.value
-                                      )?.name
+                                      )?.code
                                     : parseFloat(eventDataValue.value),
                             };
                         default:

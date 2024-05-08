@@ -297,7 +297,12 @@ export class AMCProductDataDefaultRepository implements AMCProductDataRepository
                         ({ id, code, valueType, optionSetValue, optionSet }) => {
                             const value = data[code.trim() as RawSubstanceConsumptionCalculatedKeys];
                             const dataValue = optionSetValue
-                                ? optionSet.options.find(option => option.name === value)?.code || ""
+                                ? optionSet.options.find(
+                                      option =>
+                                          option.code === value ||
+                                          option.code === value?.toString() ||
+                                          option.name === value
+                                  )?.code || ""
                                 : (valueType === "NUMBER" ||
                                       valueType === "INTEGER" ||
                                       valueType === "INTEGER_POSITIVE" ||

@@ -2,8 +2,7 @@ import _ from "lodash";
 import { logger } from "../../../../utils/logger";
 import { Id } from "../../../entities/Ref";
 import { Future, FutureData } from "../../../entities/Future";
-import { GlassATCVersion } from "../../../entities/GlassATC";
-import { SALT_MAPPING } from "../../../entities/data-entry/amc/Salt";
+import { DEFAULT_SALT_CODE, GlassAtcVersionData } from "../../../entities/GlassAtcVersionData";
 import { RawSubstanceConsumptionData } from "../../../entities/data-entry/amc/RawSubstanceConsumptionData";
 import { SubstanceConsumptionCalculated } from "../../../entities/data-entry/amc/SubstanceConsumptionCalculated";
 import { GlassATCRepository } from "../../../repositories/GlassATCRepository";
@@ -22,7 +21,7 @@ export class RecalculateConsumptionDataSubstanceLevelForAllUseCase {
         orgUnitsIds: Id[],
         periods: string[],
         currentATCVersion: string,
-        currentATCData: GlassATCVersion,
+        currentATCData: GlassAtcVersionData,
         allowCreationIfNotExist: boolean
     ): FutureData<void> {
         logger.info(
@@ -51,7 +50,7 @@ export class RecalculateConsumptionDataSubstanceLevelForAllUseCase {
         orgUnitId: Id,
         period: string,
         currentATCVersion: string,
-        currentATCData: GlassATCVersion,
+        currentATCData: GlassAtcVersionData,
         allowCreationIfNotExist: boolean
     ): FutureData<void> {
         logger.info(`Calculating consumption data of substance level for orgUnitsId ${orgUnitId} and period ${period}`);
@@ -213,7 +212,7 @@ function linkEventIdToNewCalculatedConsumptionData(
                     currentCalculatedData.atc_autocalculated === newCalulatedData.atc_autocalculated &&
                     currentCalculatedData.route_admin_autocalculated === newCalulatedData.route_admin_autocalculated &&
                     (currentCalculatedData.salt_autocalculated === newCalulatedData.salt_autocalculated ||
-                        SALT_MAPPING.default === newCalulatedData.salt_autocalculated) &&
+                        DEFAULT_SALT_CODE === newCalulatedData.salt_autocalculated) &&
                     currentCalculatedData.packages_autocalculated === newCalulatedData.packages_autocalculated &&
                     currentCalculatedData.tons_autocalculated === newCalulatedData.tons_autocalculated &&
                     currentCalculatedData.health_sector_autocalculated ===
