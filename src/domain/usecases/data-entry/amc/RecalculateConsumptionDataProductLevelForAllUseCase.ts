@@ -330,7 +330,7 @@ function getCurrentRawSubstanceConsumptionCalculated(
                                 [programStageDataElement.code]: programStageDataElement.optionSetValue
                                     ? programStageDataElement.optionSet.options.find(
                                           option => option.code === eventDataValue.value
-                                      )?.name
+                                      )?.code
                                     : eventDataValue.value,
                             };
                         case "NUMBER":
@@ -342,7 +342,7 @@ function getCurrentRawSubstanceConsumptionCalculated(
                                 [programStageDataElement.code]: programStageDataElement.optionSetValue
                                     ? programStageDataElement.optionSet.options.find(
                                           option => option.code === eventDataValue.value
-                                      )?.name
+                                      )?.code
                                     : parseFloat(eventDataValue.value),
                             };
                         default:

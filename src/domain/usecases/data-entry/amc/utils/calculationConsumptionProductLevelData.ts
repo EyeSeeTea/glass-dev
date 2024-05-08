@@ -490,10 +490,9 @@ function aggregateDataByAtcRouteAdminYearHealthSectorAndHealthLevel(
                         );
                     }
 
-                    const atcCode = getNewAtcCode(AMR_GLASS_AMC_TEA_ATC, atcChanges) || AMR_GLASS_AMC_TEA_ATC;
-                    const am_class = getAmClass(amClassData, atcCode);
-                    const atcCodeByLevel = getAtcCodeByLevel(atcData, atcCode);
-                    const aware = getAwareClass(awareClassData, atcCode);
+                    const am_class = getAmClass(amClassData, AMR_GLASS_AMC_TEA_ATC);
+                    const atcCodeByLevel = getAtcCodeByLevel(atcData, AMR_GLASS_AMC_TEA_ATC);
+                    const aware = getAwareClass(awareClassData, AMR_GLASS_AMC_TEA_ATC);
 
                     if (
                         !atcCodeByLevel?.level2 ||

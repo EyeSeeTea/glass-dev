@@ -97,13 +97,10 @@ export function calculateConsumptionSubstanceLevelData(
             const amClassData = latestAtcVersionData.am_classification;
             const awareClassData = latestAtcVersionData.aware_classification;
             const atcData = latestAtcVersionData.atcs;
-            const atcChanges = getATCChanges(latestAtcVersionData.changes);
-            const atcCode =
-                getNewAtcCode(rawSubstanceConsumption.atc_manual, atcChanges) || rawSubstanceConsumption.atc_manual;
 
-            const am_class = getAmClass(amClassData, atcCode);
-            const atcCodeByLevel = getAtcCodeByLevel(atcData, atcCode);
-            const aware = getAwareClass(awareClassData, atcCode);
+            const am_class = getAmClass(amClassData, rawSubstanceConsumption.atc_manual);
+            const atcCodeByLevel = getAtcCodeByLevel(atcData, rawSubstanceConsumption.atc_manual);
+            const aware = getAwareClass(awareClassData, rawSubstanceConsumption.atc_manual);
 
             if (!atcCodeByLevel?.level2 || !atcCodeByLevel?.level3 || !atcCodeByLevel?.level4 || !am_class || !aware) {
                 logger.error(
