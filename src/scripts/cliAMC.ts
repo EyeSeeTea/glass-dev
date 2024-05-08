@@ -10,7 +10,7 @@ import { AMCSubstanceDataDefaultRepository } from "../data/repositories/data-ent
 import { AMCProductDataRepository } from "../domain/repositories/data-entry/AMCProductDataRepository";
 import { AMCSubstanceDataRepository } from "../domain/repositories/data-entry/AMCSubstanceDataRepository";
 import { GlassATCRepository } from "../domain/repositories/GlassATCRepository";
-import { GlassATCRecalculateDataInfo } from "../domain/entities/GlassATC";
+import { GlassATCRecalculateDataInfo } from "../domain/entities/GlassAtcVersionData";
 import { DisableAMCRecalculationsUseCase } from "../domain/usecases/data-entry/amc/DisableAMCRecalculationsUseCase";
 import { GetRecalculateDataInfoUseCase } from "../domain/usecases/data-entry/amc/GetRecalculateDataInfoUseCase";
 import { GetCurrentATCVersionData } from "../domain/usecases/data-entry/amc/GetCurrentATCVersionData";

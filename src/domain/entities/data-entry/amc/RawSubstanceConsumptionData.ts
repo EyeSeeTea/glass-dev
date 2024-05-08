@@ -1,17 +1,16 @@
-import { RouteOfAdministrationKey } from "./RouteOfAdministration";
-import { SaltKey } from "./Salt";
+import { RouteOfAdministrationCode, SaltCode } from "../../GlassAtcVersionData";
 
 export type RawSubstanceConsumptionData = {
     atc_manual: string;
-    route_admin_manual: RouteOfAdministrationKey;
-    salt_manual: SaltKey;
+    route_admin_manual: RouteOfAdministrationCode;
+    salt_manual: SaltCode;
     packages_manual: number;
     ddds_manual: number;
     atc_version_manual: string;
     tons_manual: number;
     data_status_manual: number;
-    health_sector_manual: number;
-    health_level_manual: number;
+    health_sector_manual: string;
+    health_level_manual: string;
     report_date: string;
 };
 

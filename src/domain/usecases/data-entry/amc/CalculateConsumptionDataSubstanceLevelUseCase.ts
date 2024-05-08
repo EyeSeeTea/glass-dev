@@ -1,6 +1,6 @@
 import { logger } from "../../../../utils/logger";
 import { Future, FutureData } from "../../../entities/Future";
-import { createAtcVersionKey } from "../../../entities/GlassATC";
+import { createAtcVersionKey } from "../../../entities/GlassAtcVersionData";
 import { Id } from "../../../entities/Ref";
 import { ImportSummary } from "../../../entities/data-entry/ImportSummary";
 import { GlassATCRepository } from "../../../repositories/GlassATCRepository";
