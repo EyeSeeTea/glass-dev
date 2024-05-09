@@ -2,7 +2,11 @@ import _ from "lodash";
 import { logger } from "../../../../utils/logger";
 import { Id } from "../../../entities/Ref";
 import { Future, FutureData } from "../../../entities/Future";
-import { DEFAULT_SALT_CODE, GlassAtcVersionData } from "../../../entities/GlassAtcVersionData";
+import {
+    CODE_PRODUCT_NOT_HAVE_ATC,
+    DEFAULT_SALT_CODE,
+    GlassAtcVersionData,
+} from "../../../entities/GlassAtcVersionData";
 import { RawSubstanceConsumptionData } from "../../../entities/data-entry/amc/RawSubstanceConsumptionData";
 import { SubstanceConsumptionCalculated } from "../../../entities/data-entry/amc/SubstanceConsumptionCalculated";
 import { GlassATCRepository } from "../../../repositories/GlassATCRepository";
@@ -182,6 +186,14 @@ export class RecalculateConsumptionDataSubstanceLevelForAllUseCase {
             ),
             currentCalculatedConsumptionData:
                 this.amcSubstanceDataRepository.getAllCalculatedSubstanceConsumptionDataByByPeriod(orgUnitId, period),
+        }).flatMap(({ rawSubstanceConsumptionData, currentCalculatedConsumptionData }) => {
+            const validRawSubstanceConsumptionData = rawSubstanceConsumptionData?.filter(
+                ({ atc_manual }) => atc_manual !== CODE_PRODUCT_NOT_HAVE_ATC
+            );
+            return Future.success({
+                rawSubstanceConsumptionData: validRawSubstanceConsumptionData,
+                currentCalculatedConsumptionData,
+            });
         });
     }
 }

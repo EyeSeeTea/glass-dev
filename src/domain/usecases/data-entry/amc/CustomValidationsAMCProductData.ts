@@ -18,6 +18,8 @@ const atcLevel4WithOralROA3 = "J01XD";
 const atcLevel4WithOralROA4 = "J01XA";
 const atcCodeWithSaltHippAndMand = "J01XX05";
 const atcCodeWithRoaOAndSaltDefault = "J01FA01";
+const CODE_PRODUCT_NOT_HAVE_ATC = "Z99ZZ99";
+const COMB_CODE_PRODUCT_NOT_HAVE_ATC = "Z99ZZ99_99";
 
 export class CustomValidationsAMCProductData {
     constructor(
@@ -144,10 +146,12 @@ export class CustomValidationsAMCProductData {
                 }
                 if (atcCode) {
                     const atcData = atcVersion.atcs;
-                    const isValidATCCode = atcData.find(
-                        data => data.CODE === atcCode && data.LEVEL === LAST_ATC_CODE_LEVEL
-                    );
-                    if (!isValidATCCode) {
+                    const validATCCode =
+                        atcCode === CODE_PRODUCT_NOT_HAVE_ATC
+                            ? atcCode
+                            : atcData.find(data => data.CODE === atcCode && data.LEVEL === LAST_ATC_CODE_LEVEL)?.CODE;
+
+                    if (!validATCCode) {
                         curErrors.push({
                             error: i18n.t(
                                 `ATC code specified in the file is not a valid level 5 ATC code : ${atcCode}`
@@ -173,12 +177,7 @@ export class CustomValidationsAMCProductData {
                             });
                         }
 
-                        if (
-                            isValidATCCode.CODE === atcCodeWithSaltHippAndMand &&
-                            salt &&
-                            salt !== "HIPP" &&
-                            salt !== "MAND"
-                        ) {
+                        if (validATCCode === atcCodeWithSaltHippAndMand && salt && salt !== "HIPP" && salt !== "MAND") {
                             curErrors.push({
                                 error: i18n.t(
                                     `If ATC code is ${atcCodeWithSaltHippAndMand}, salt must be either HIPP or MAND`
@@ -186,7 +185,7 @@ export class CustomValidationsAMCProductData {
                                 line: tei.trackedEntity ? parseInt(tei.trackedEntity) + 6 : -1,
                             });
                         }
-                        if (isValidATCCode.CODE === atcCodeWithRoaOAndSaltDefault) {
+                        if (validATCCode === atcCodeWithRoaOAndSaltDefault) {
                             if (roa && roa === "O" && !(salt === "XXXX" || salt === "ESUC")) {
                                 curErrors.push({
                                     error: i18n.t(
@@ -210,7 +209,7 @@ export class CustomValidationsAMCProductData {
                 const validCombinationCode = combinationData.find(data => data.COMB_CODE === combinationCode);
 
                 if (combinationCode) {
-                    if (!validCombinationCode) {
+                    if (!validCombinationCode && combinationCode !== COMB_CODE_PRODUCT_NOT_HAVE_ATC) {
                         curErrors.push({
                             error: i18n.t(
                                 `Combination code specified in the file is not a valid combination code : ${combinationCode}`
@@ -220,7 +219,7 @@ export class CustomValidationsAMCProductData {
                     }
                 }
 
-                if (roa && validCombinationCode) {
+                if (roa && validCombinationCode && combinationCode !== COMB_CODE_PRODUCT_NOT_HAVE_ATC) {
                     if (roa !== validCombinationCode.ROA) {
                         curErrors.push({
                             error: i18n.t(
