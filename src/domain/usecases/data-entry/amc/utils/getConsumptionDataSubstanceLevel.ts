@@ -1,6 +1,6 @@
 import { Id } from "@eyeseetea/d2-api";
 import { Future, FutureData } from "../../../../entities/Future";
-import { GlassATCVersion } from "../../../../entities/GlassATC";
+import { GlassAtcVersionData } from "../../../../entities/GlassAtcVersionData";
 import { RawSubstanceConsumptionData } from "../../../../entities/data-entry/amc/RawSubstanceConsumptionData";
 import { SubstanceConsumptionCalculated } from "../../../../entities/data-entry/amc/SubstanceConsumptionCalculated";
 import { GlassATCRepository } from "../../../../repositories/GlassATCRepository";
@@ -11,7 +11,7 @@ export function getConsumptionDataSubstanceLevel(params: {
     orgUnitId: Id;
     period: string;
     rawSubstanceConsumptionData: RawSubstanceConsumptionData[] | undefined;
-    atcCurrentVersionData: GlassATCVersion;
+    atcCurrentVersionData: GlassAtcVersionData;
     currentAtcVersionKey: string;
     atcRepository: GlassATCRepository;
 }): FutureData<SubstanceConsumptionCalculated[]> {

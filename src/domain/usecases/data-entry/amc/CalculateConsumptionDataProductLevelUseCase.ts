@@ -1,6 +1,6 @@
 import { Future, FutureData } from "../../../entities/Future";
 import { Id } from "../../../entities/Ref";
-import { createAtcVersionKey } from "../../../entities/GlassATC";
+import { createAtcVersionKey } from "../../../entities/GlassAtcVersionData";
 import { mapToImportSummary, readTemplate } from "../ImportBLTemplateEventProgram";
 import { ExcelRepository } from "../../../repositories/ExcelRepository";
 import { GlassATCRepository } from "../../../repositories/GlassATCRepository";
