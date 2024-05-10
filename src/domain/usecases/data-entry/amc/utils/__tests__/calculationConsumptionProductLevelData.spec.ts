@@ -4,17 +4,14 @@ import productRegistryAttributesConcVolumeAndVolume from "./data/productRegistry
 import productRegistryAttributesUnitDoseCombCode from "./data/productRegistryAttributesUnitDoseCombCode.json";
 import productRegistryAttributesMillionInternationalUnitDifferentDDDUnit from "./data/productRegistryAttributesMillionInternationalUnitDifferentDDDUnit.json";
 import productRegistryAttributesNoCombCodeNoFoundDDD from "./data/productRegistryAttributesNoCombCodeNoFoundDDD.json";
-import productRegistryAttributesNoCombCodeFoundDDDAlterations from "./data/productRegistryAttributesNoCombCodeFoundDDDAlterations.json";
 import calculationSolutionBasic from "./data/calculationSolutionBasic.json";
-import calculationSolutionWrongStrengthUnit from "./data/calculationSolutionWrongStrengthUnit.json";
 import calculationSolutionConcVolumeAndVolume from "./data/calculationSolutionConcVolumeAndVolume.json";
 import calculationSolutionUnitDoseCombCode from "./data/calculationSolutionUnitDoseCombCode.json";
 import calculationMillionInternationalUnitDifferentDDDUnit from "./data/calculationMillionInternationalUnitDifferentDDDUnit.json";
-import calculationSolutionNoCombCodeFoundDDDAlterations from "./data/calculationSolutionNoCombCodeFoundDDDAlterations.json";
 import atcCurrentVersionDataJson from "./data/atcCurrentVersionData.json";
 import rawProductConsumptionJson from "./data/rawProductConsumption.json";
 import { calculateConsumptionProductLevelData } from "../calculationConsumptionProductLevelData";
-import { GlassATCVersion } from "../../../../../entities/GlassATC";
+import { GlassAtcVersionData } from "../../../../../entities/GlassAtcVersionData";
 import { ProductRegistryAttributes } from "../../../../../entities/data-entry/amc/ProductRegistryAttributes";
 import { RawProductConsumption } from "../../../../../entities/data-entry/amc/RawProductConsumption";
 import { RawSubstanceConsumptionCalculated } from "../../../../../entities/data-entry/amc/RawSubstanceConsumptionCalculated";
@@ -131,27 +128,6 @@ describe("Given calculate Consumption Product Level Data function", () => {
             verifyCalculationResult(rawSubstanceConsumptionCalculatedData, type);
         });
     });
-    describe("When product registry attributes has no combination code and there is no found DDD in ddd data inside atcCurrentVersionData for the corresponding ATC, Route of Administration and Salt, but it's found in the alterations data inside atcCurrentVersionData", () => {
-        it("Then should return correct solution", async () => {
-            const type = "no_combination_code_found_ddd_alterations";
-            const period = "2020";
-            const orgUnitId = "vboedbUs1As";
-            const productRegistryAttributes = givenProductRegistryAttributesByType(type);
-            const rawProductConsumption = givenRawProductConsumption();
-            const atcCurrentVersionData = givenAtcCurrentVersionData();
-            const atcVersionKey = "ATC-2023-v1";
-
-            const rawSubstanceConsumptionCalculatedData = calculateConsumptionProductLevelData(
-                period,
-                orgUnitId,
-                productRegistryAttributes,
-                rawProductConsumption,
-                atcCurrentVersionData,
-                atcVersionKey
-            );
-            verifyCalculationResult(rawSubstanceConsumptionCalculatedData, type);
-        });
-    });
     describe("When product registry attributes has strength unit NOT from gram family", () => {
         it("Then should return correct solution and don't do calculations for that row", async () => {
             const type = "wrong_strength_unit";
@@ -181,7 +157,7 @@ describe("Given calculate Consumption Product Level Data function", () => {
             const orgUnitId = "vboedbUs1As";
             const productRegistryAttributes = givenProductRegistryAttributesByType(type);
             const rawProductConsumption = givenRawProductConsumption();
-            const atcCurrentVersionDataEmpty = [] as unknown as GlassATCVersion;
+            const atcCurrentVersionDataEmpty = {} as unknown as GlassAtcVersionData;
             const atcVersionKey = "ATC-2023-v1";
 
             const rawSubstanceConsumptionCalculatedData = calculateConsumptionProductLevelData(
@@ -207,7 +183,6 @@ function givenProductRegistryAttributesByType(type?: string): ProductRegistryAtt
         millions_international_unit_different_ddd_unit:
             productRegistryAttributesMillionInternationalUnitDifferentDDDUnit,
         no_combination_code_no_found_ddd: productRegistryAttributesNoCombCodeNoFoundDDD,
-        no_combination_code_found_ddd_alterations: productRegistryAttributesNoCombCodeFoundDDDAlterations,
         wrong_strength_unit: productRegistryAttributesWrongStrengthUnit,
     } as Record<string, ProductRegistryAttributes[]>;
 
@@ -222,8 +197,8 @@ function givenRawProductConsumption(): RawProductConsumption[] {
     return rawProductConsumptionJson as RawProductConsumption[];
 }
 
-function givenAtcCurrentVersionData(): GlassATCVersion {
-    return atcCurrentVersionDataJson as GlassATCVersion;
+function givenAtcCurrentVersionData(): GlassAtcVersionData {
+    return atcCurrentVersionDataJson as GlassAtcVersionData;
 }
 
 function getExpectedCalculationSolution(type?: string): RawSubstanceConsumptionCalculated[] {
@@ -233,8 +208,7 @@ function getExpectedCalculationSolution(type?: string): RawSubstanceConsumptionC
         unit_dose_combination_code: calculationSolutionUnitDoseCombCode,
         millions_international_unit_different_ddd_unit: calculationMillionInternationalUnitDifferentDDDUnit,
         no_combination_code_no_found_ddd: [],
-        no_combination_code_found_ddd_alterations: calculationSolutionNoCombCodeFoundDDDAlterations,
-        wrong_strength_unit: calculationSolutionWrongStrengthUnit,
+        wrong_strength_unit: [],
         no_atc_data: [],
     } as Record<string, RawSubstanceConsumptionCalculated[]>;
 

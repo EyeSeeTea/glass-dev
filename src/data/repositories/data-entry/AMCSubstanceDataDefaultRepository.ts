@@ -67,12 +67,7 @@ export class AMCSubstanceDataDefaultRepository implements AMCSubstanceDataReposi
         return Future.joinObj({
             rawSubstanceConsumptionProgram: this.getRawSubstanceConsumptionProgram(),
             substanceConsumptionDataEvents: this.getRawSubstanceConsumptionDataD2EventsByIds(orgUnitId, eventsIds),
-        }).map(result => {
-            const { rawSubstanceConsumptionProgram, substanceConsumptionDataEvents } = result as {
-                rawSubstanceConsumptionProgram: D2Program | undefined;
-                substanceConsumptionDataEvents: D2TrackerEvent[];
-            };
-
+        }).map(({ rawSubstanceConsumptionProgram, substanceConsumptionDataEvents }) => {
             const programStageDataElements = rawSubstanceConsumptionProgram?.programStages.find(
                 ({ id }) => AMC_RAW_SUBSTANCE_CONSUMPTION_DATA_PROGRAM_STAGE_ID === id
             )?.programStageDataElements;
@@ -181,8 +176,12 @@ export class AMCSubstanceDataDefaultRepository implements AMCSubstanceDataReposi
                         ({ id, code, valueType, optionSetValue, optionSet }) => {
                             const value = data[code.trim() as SubstanceConsumptionCalculatedKeys];
                             const dataValue = optionSetValue
-                                ? optionSet.options.find(option => option.name === value || option.code === value)
-                                      ?.code || ""
+                                ? optionSet.options.find(
+                                      option =>
+                                          option.code === value ||
+                                          option.code === value?.toString() ||
+                                          option.name === value
+                                  )?.code || ""
                                 : (valueType === "NUMBER" ||
                                       valueType === "INTEGER" ||
                                       valueType === "INTEGER_POSITIVE" ||

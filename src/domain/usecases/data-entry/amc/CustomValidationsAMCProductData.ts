@@ -4,7 +4,7 @@ import { ConsistencyError } from "../../../entities/data-entry/ImportSummary";
 import { ValidationResult } from "../../../entities/program-rules/EventEffectTypes";
 import { D2TrackerTrackedEntity } from "@eyeseetea/d2-api/api/trackerTrackedEntities";
 import { GlassATCDefaultRepository } from "../../../../data/repositories/GlassATCDefaultRepository";
-import { GlassATCVersion } from "../../../entities/GlassATC";
+import { GlassAtcVersionData, LAST_ATC_CODE_LEVEL, getAtcCodeByLevel } from "../../../entities/GlassAtcVersionData";
 import { AMCProductDataRepository } from "../../../repositories/data-entry/AMCProductDataRepository";
 
 const AMR_GLASS_AMC_TEA_ATC = "aK1JpD14imM";
@@ -108,7 +108,7 @@ export class CustomValidationsAMCProductData {
         countryId: string,
         countryName: string,
         period: string,
-        atcVersion: GlassATCVersion
+        atcVersion: GlassAtcVersionData
     ): ConsistencyError[] {
         const errors = _(
             teis.map(tei => {
@@ -143,8 +143,10 @@ export class CustomValidationsAMCProductData {
                     });
                 }
                 if (atcCode) {
-                    const atcData = atcVersion.atc;
-                    const isValidATCCode = atcData.find(data => data.CODE === atcCode && data.LEVEL === "5");
+                    const atcData = atcVersion.atcs;
+                    const isValidATCCode = atcData.find(
+                        data => data.CODE === atcCode && data.LEVEL === LAST_ATC_CODE_LEVEL
+                    );
                     if (!isValidATCCode) {
                         curErrors.push({
                             error: i18n.t(
@@ -153,8 +155,8 @@ export class CustomValidationsAMCProductData {
                             line: tei.trackedEntity ? parseInt(tei.trackedEntity) + 6 : -1,
                         });
                     } else {
-                        const atcCodeLevelHeirarchy = isValidATCCode.PATH?.split("\\");
-                        const atcCodeLevel4 = atcCodeLevelHeirarchy?.at(atcCodeLevelHeirarchy.length - 1);
+                        const atcCodeByLevel = getAtcCodeByLevel(atcData, atcCode);
+                        const atcCodeLevel4 = atcCodeByLevel?.level4;
                         if (
                             (atcCodeLevel4 === atcLevel4WithOralROA1 ||
                                 atcCodeLevel4 === atcLevel4WithOralROA2 ||
@@ -204,7 +206,7 @@ export class CustomValidationsAMCProductData {
                         }
                     }
                 }
-                const combinationData = atcVersion.ddd_combinations;
+                const combinationData = atcVersion.combinations;
                 const validCombinationCode = combinationData.find(data => data.COMB_CODE === combinationCode);
 
                 if (combinationCode) {
@@ -219,11 +221,11 @@ export class CustomValidationsAMCProductData {
                 }
 
                 if (roa && validCombinationCode) {
-                    if (roa !== validCombinationCode.ROUTE) {
+                    if (roa !== validCombinationCode.ROA) {
                         curErrors.push({
                             error: i18n.t(
                                 `Route of Administration specified in the file : ${roa} is not valid for given combination code : ${combinationCode}. 
-                                \n It should be ${validCombinationCode.ROUTE}`
+                                \n It should be ${validCombinationCode.ROA}`
                             ),
                             line: tei.trackedEntity ? parseInt(tei.trackedEntity) + 6 : -1,
                         });

@@ -1,18 +1,15 @@
 import { Future, FutureData } from "../../domain/entities/Future";
 import {
-    ATCAlterationsData,
-    ATCData,
-    ConversionFactorData,
     createAtcVersionKey,
-    DDDAlterationsData,
-    DDDCombinationsData,
-    DDDData,
     GlassATCHistory,
     GlassATCRecalculateDataInfo,
-    GlassATCVersion,
+    GlassAtcVersionData,
     ListGlassATCVersions,
+    UnitCode,
+    UnitName,
+    UnitsData,
     validateAtcVersion,
-} from "../../domain/entities/GlassATC";
+} from "../../domain/entities/GlassAtcVersionData";
 import { GlassATCRepository } from "../../domain/repositories/GlassATCRepository";
 import { cache } from "../../utils/cache";
 import { logger } from "../../utils/logger";
@@ -28,29 +25,22 @@ export class GlassATCDefaultRepository implements GlassATCRepository {
     }
 
     @cache()
-    getAtcVersion(atcVersionKey: string): FutureData<GlassATCVersion> {
+    getAtcVersion(atcVersionKey: string): FutureData<GlassAtcVersionData> {
         if (validateAtcVersion(atcVersionKey)) {
-            return this.dataStoreClient
-                .listCollection<
-                    ATCVersionData<
-                        | DDDCombinationsData
-                        | ConversionFactorData
-                        | DDDData
-                        | ATCData
-                        | DDDAlterationsData
-                        | ATCAlterationsData
-                    >
-                >(atcVersionKey)
-                .map(atcVersionDataStore => {
-                    return this.buildGlassATCVersion(atcVersionDataStore);
-                });
+            return this.dataStoreClient.getObject<GlassAtcVersionData>(atcVersionKey).flatMap(atcVersionDataStore => {
+                if (atcVersionDataStore) {
+                    return Future.success(this.buildGlassAtcVersionDataWithCorrectNames(atcVersionDataStore));
+                }
+                logger.error(`ATC version ${atcVersionKey} not found`);
+                return Future.error(`ATC version ${atcVersionKey} not found`);
+            });
         }
         logger.error(`ATC version ${atcVersionKey} is not valid`);
         return Future.error(`ATC version ${atcVersionKey} is not valid`);
     }
 
     @cache()
-    getCurrentAtcVersion(): FutureData<GlassATCVersion> {
+    getCurrentAtcVersion(): FutureData<GlassAtcVersionData> {
         return this.getAtcHistory().flatMap(atcVersionHistory => {
             const atcCurrentVersionInfo = atcVersionHistory.find(({ currentVersion }) => currentVersion);
 
@@ -96,33 +86,26 @@ export class GlassATCDefaultRepository implements GlassATCRepository {
         });
     }
 
-    private buildGlassATCVersion(atcVersionDataStore: ATCVersion): GlassATCVersion {
-        const glassAtcVerion: GlassATCVersion = {
-            atc: (atcVersionDataStore.find(({ name }) => name === "atc")?.data as ATCData[]) ?? [],
-            ddd_combinations:
-                (atcVersionDataStore.find(({ name }) => name === "ddd_combinations")?.data as DDDCombinationsData[]) ??
-                [],
-            ddd: (atcVersionDataStore.find(({ name }) => name === "ddd")?.data as DDDData[]) ?? [],
-            conversion:
-                (atcVersionDataStore.find(({ name }) => name === "conversion")?.data as ConversionFactorData[]) ?? [],
-            ddd_alterations:
-                (atcVersionDataStore.find(({ name }) => name === "ddd_alterations")?.data as DDDAlterationsData[]) ??
-                [],
-            atc_alterations:
-                (atcVersionDataStore.find(({ name }) => name === "atc_alterations")?.data as ATCAlterationsData[]) ??
-                [],
+    private buildGlassAtcVersionDataWithCorrectNames(glassAtcVersionData: GlassAtcVersionData): GlassAtcVersionData {
+        return {
+            ...glassAtcVersionData,
+            roas: glassAtcVersionData.roas.map(roa => ({ ...roa, NAME: roa.NAME.toLowerCase().replace(/_/g, " ") })),
+            salts: glassAtcVersionData.salts.map(salt => ({
+                ...salt,
+                NAME: salt.NAME.toLowerCase().replace(/_/g, " "),
+            })),
+            units: glassAtcVersionData.units.map(unit => ({
+                ...unit,
+                NAME: unit.NAME.toLowerCase().replace(/_/g, " "),
+                UNIT_FAMILY: this.getUnitFamilyCode(
+                    glassAtcVersionData.units,
+                    unit?.UNIT_FAMILY?.toLowerCase()?.replace(/_/g, " ")
+                ),
+            })),
         };
-        return glassAtcVerion;
+    }
+
+    private getUnitFamilyCode(unitsData: UnitsData[], unitFamilyName: UnitName | undefined): UnitCode | undefined {
+        return unitsData.find(unit => unit.NAME === unitFamilyName)?.UNIT;
     }
 }
-
-type ATCVersionData<T> = {
-    name: "atc" | "ddd_combinations" | "ddd" | "conversion" | "ddd_alterations" | "atc_alterations";
-    data: T[];
-};
-
-type ATCVersion = Array<
-    ATCVersionData<
-        DDDCombinationsData | ConversionFactorData | DDDData | ATCData | DDDAlterationsData | ATCAlterationsData
-    >
->;
