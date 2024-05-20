@@ -92,7 +92,8 @@ export class ImportPrimaryFileUseCase {
                     this.trackerRepository,
                     this.glassDocumentsRepository,
                     this.glassUploadsRepository,
-                    this.metadataRepository
+                    this.metadataRepository,
+                    this.programRulesMetadataRepository
                 );
                 return this.glassModuleDefaultRepository.getByName(moduleName).flatMap(module => {
                     return importRISIndividualFungalFile.importRISIndividualFungalFile(
