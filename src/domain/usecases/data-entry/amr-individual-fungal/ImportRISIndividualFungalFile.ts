@@ -6,7 +6,7 @@ import { GlassDocumentsRepository } from "../../../repositories/GlassDocumentsRe
 import { GlassUploadsRepository } from "../../../repositories/GlassUploadsRepository";
 import { TrackerRepository } from "../../../repositories/TrackerRepository";
 import { RISIndividualFungalDataRepository } from "../../../repositories/data-entry/RISIndividualFungalDataRepository";
-import { D2TrackerTrackedEntity as TrackedEntity } from "@eyeseetea/d2-api/api/trackerTrackedEntities";
+import { D2TrackerTrackedEntity } from "@eyeseetea/d2-api/api/trackerTrackedEntities";
 import { D2TrackerEnrollment, D2TrackerEnrollmentAttribute } from "@eyeseetea/d2-api/api/trackerEnrollments";
 import { D2TrackerEvent } from "@eyeseetea/d2-api/api/trackerEvents";
 import { mapToImportSummary, uploadIdListFileAndSave } from "../ImportBLTemplateEventProgram";
@@ -14,6 +14,9 @@ import { MetadataRepository } from "../../../repositories/MetadataRepository";
 import { downloadIdsAndDeleteTrackedEntities } from "../amc/ImportAMCProductLevelData";
 import { CustomDataColumns } from "../../../entities/data-entry/amr-individual-fungal-external/RISIndividualFungalData";
 import moment from "moment";
+import { ValidationResult } from "../../../entities/program-rules/EventEffectTypes";
+import { ProgramRuleValidationForBLEventProgram } from "../../program-rules-processing/ProgramRuleValidationForBLEventProgram";
+import { ProgramRulesMetadataRepository } from "../../../repositories/program-rules/ProgramRulesMetadataRepository";
 
 export const AMRIProgramID = "mMAj6Gofe49";
 const AMR_GLASS_AMR_TET_PATIENT = "CcgnfemKr5U";
@@ -30,7 +33,8 @@ export class ImportRISIndividualFungalFile {
         private trackerRepository: TrackerRepository,
         private glassDocumentsRepository: GlassDocumentsRepository,
         private glassUploadsRepository: GlassUploadsRepository,
-        private metadataRepository: MetadataRepository
+        private metadataRepository: MetadataRepository,
+        private programRulesMetadataRepository: ProgramRulesMetadataRepository
     ) {}
 
     public importRISIndividualFungalFile(
@@ -53,7 +57,7 @@ export class ImportRISIndividualFungalFile {
             return this.risIndividualFungalRepository
                 .get(dataColumns, inputFile)
                 .flatMap(risIndividualFungalDataItems => {
-                    return this.validateDataItems(risIndividualFungalDataItems, countryCode, period).flatMap(
+                    return this.runCustomValidations(risIndividualFungalDataItems, countryCode, period).flatMap(
                         validationSummary => {
                             //If there are blocking errors on custom validation, do not import. Return immediately.
                             if (validationSummary.blockingErrors.length > 0) {
@@ -80,23 +84,52 @@ export class ImportRISIndividualFungalFile {
                                 countryCode,
                                 period
                             ).flatMap(entities => {
-                                return this.trackerRepository
-                                    .import({ trackedEntities: entities }, action)
-                                    .flatMap(response => {
-                                        return mapToImportSummary(
-                                            response,
-                                            "trackedEntity",
-                                            this.metadataRepository
-                                        ).flatMap(summary => {
-                                            return uploadIdListFileAndSave(
-                                                "primaryUploadId",
-                                                summary,
-                                                moduleName,
-                                                this.glassDocumentsRepository,
-                                                this.glassUploadsRepository
-                                            );
+                                return this.runProgramRuleValidations(
+                                    AMRIProgramIDl,
+                                    entities,
+                                    AMRDataProgramStageIdl()
+                                ).flatMap(validationResult => {
+                                    if (validationResult.blockingErrors.length > 0) {
+                                        const errorSummary: ImportSummary = {
+                                            status: "ERROR",
+                                            importCount: {
+                                                ignored: 0,
+                                                imported: 0,
+                                                deleted: 0,
+                                                updated: 0,
+                                            },
+                                            nonBlockingErrors: validationResult.nonBlockingErrors,
+                                            blockingErrors: validationResult.blockingErrors,
+                                        };
+                                        return Future.success(errorSummary);
+                                    }
+
+                                    return this.trackerRepository
+                                        .import(
+                                            {
+                                                trackedEntities:
+                                                    validationResult.teis && validationResult.teis.length > 0
+                                                        ? validationResult.teis
+                                                        : [],
+                                            },
+                                            action
+                                        )
+                                        .flatMap(response => {
+                                            return mapToImportSummary(
+                                                response,
+                                                "trackedEntity",
+                                                this.metadataRepository
+                                            ).flatMap(summary => {
+                                                return uploadIdListFileAndSave(
+                                                    "primaryUploadId",
+                                                    summary,
+                                                    moduleName,
+                                                    this.glassDocumentsRepository,
+                                                    this.glassUploadsRepository
+                                                );
+                                            });
                                         });
-                                    });
+                                });
                             });
                         }
                     );
@@ -114,7 +147,7 @@ export class ImportRISIndividualFungalFile {
         }
     }
 
-    private validateDataItems(
+    private runCustomValidations(
         risIndividualFungalDataItems: CustomDataColumns[],
         orgUnit: string,
         period: string
@@ -128,6 +161,59 @@ export class ImportRISIndividualFungalFile {
             blockingErrors: [...orgUnitErrors, ...periodErrors],
         };
         return Future.success(summary);
+    }
+
+    private runProgramRuleValidations(
+        programId: string,
+        teis: D2TrackerTrackedEntity[],
+        AMRDataProgramStageIdl: string
+    ): FutureData<ValidationResult> {
+        //1. Before running validations, add ids to tei, enrollement and event so thier relationships can be processed.
+        const teisWithId = teis?.map((tei, teiIndex) => {
+            const enrollmentsWithId = tei.enrollments?.map((enrollment, enrollmentIndex) => {
+                const eventsWithIds = enrollment.events.map((ev, eventIndex) => {
+                    return {
+                        ...ev,
+                        event: (eventIndex + 1 + teiIndex).toString(),
+                        enrollment: enrollmentIndex.toString(),
+                        trackedEntity: teiIndex.toString(),
+                    };
+                });
+                return { ...enrollment, enrollment: enrollmentIndex.toString(), events: eventsWithIds };
+            });
+
+            return { ...tei, enrollments: enrollmentsWithId, trackedEntity: teiIndex.toString() };
+        });
+
+        //2. Run Program Rule Validations
+        const programRuleValidations = new ProgramRuleValidationForBLEventProgram(this.programRulesMetadataRepository);
+
+        return programRuleValidations
+            .getValidatedTeisAndEvents(programId, [], teisWithId, AMRDataProgramStageIdl)
+            .flatMap(programRuleValidationResults => {
+                //3. After processing, remove ids to tei, enrollement and events so that they can be imported
+                const teisWithoutId = programRuleValidationResults.teis?.map(tei => {
+                    const enrollementsWithoutId = tei.enrollments?.map(enrollment => {
+                        const eventsWithoutIds = enrollment.events.map(ev => {
+                            return {
+                                ...ev,
+                                event: "",
+                                enrollment: "",
+                                trackedEntity: "",
+                            };
+                        });
+
+                        return { ...enrollment, enrollment: "", events: eventsWithoutIds };
+                    });
+                    return { ...tei, enrollments: enrollementsWithoutId, trackedEntity: "" };
+                });
+
+                return Future.success({
+                    blockingErrors: programRuleValidationResults.blockingErrors,
+                    nonBlockingErrors: programRuleValidationResults.nonBlockingErrors,
+                    teis: teisWithoutId,
+                });
+            });
     }
 
     private checkCountry(risIndividualFungalDataItems: CustomDataColumns[], orgUnit: string): ConsistencyError[] {
@@ -190,7 +276,7 @@ export class ImportRISIndividualFungalFile {
         AMRDataProgramStageIdl: string,
         countryCode: string,
         period: string
-    ): FutureData<TrackedEntity[]> {
+    ): FutureData<D2TrackerTrackedEntity[]> {
         return this.trackerRepository.getProgramMetadata(AMRIProgramIDl, AMRDataProgramStageIdl).flatMap(metadata => {
             const trackedEntities = individualFungalDataItems.map(dataItem => {
                 const attributes: D2TrackerEnrollmentAttribute[] = metadata.programAttributes.map(
@@ -252,7 +338,7 @@ export class ImportRISIndividualFungalFile {
                     },
                 ];
 
-                const entity: TrackedEntity = {
+                const entity: D2TrackerTrackedEntity = {
                     orgUnit,
                     trackedEntity: "",
                     trackedEntityType: AMR_GLASS_AMR_TET_PATIENT,
