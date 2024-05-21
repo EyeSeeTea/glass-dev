@@ -160,6 +160,16 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                                         : Future.success(undefined),
                             }).run(
                                 ({ deletePrimaryFileSummary, deleteSecondaryFileSummary }) => {
+                                    if (
+                                        deletePrimaryFileSummary?.status === "ERROR" ||
+                                        deleteSecondaryFileSummary?.status === "ERROR"
+                                    ) {
+                                        snackbar.error(
+                                            "An Error occured deleting the data, exiting. Please try again or contact your administrator."
+                                        );
+                                        setLoading(false);
+                                        return;
+                                    }
                                     if (deletePrimaryFileSummary) {
                                         const itemsDeleted =
                                             currentModuleAccess.moduleName === "AMC" ? "products" : "rows";
@@ -253,6 +263,14 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                                 )
                                 .run(
                                     deleteSecondaryFileSummary => {
+                                        if (deleteSecondaryFileSummary?.status === "ERROR") {
+                                            snackbar.error(
+                                                "An Error occured deleting the data, exiting. Please try again or contact your administrator."
+                                            );
+                                            setLoading(false);
+                                            return;
+                                        }
+
                                         if (secondaryFileToDelete && deleteSecondaryFileSummary) {
                                             const itemsDeleted =
                                                 currentModuleAccess.moduleName === "AMC" ? "substances" : "rows";
