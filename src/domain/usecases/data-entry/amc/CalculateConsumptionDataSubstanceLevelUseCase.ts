@@ -1,6 +1,6 @@
 import { logger } from "../../../../utils/logger";
 import { Future, FutureData } from "../../../entities/Future";
-import { createAtcVersionKey } from "../../../entities/GlassATC";
+import { CODE_PRODUCT_NOT_HAVE_ATC, createAtcVersionKey } from "../../../entities/GlassAtcVersionData";
 import { Id } from "../../../entities/Ref";
 import { ImportSummary } from "../../../entities/data-entry/ImportSummary";
 import { GlassATCRepository } from "../../../repositories/GlassATCRepository";
@@ -41,8 +41,10 @@ export class CalculateConsumptionDataSubstanceLevelUseCase {
                     atcVersionHistory: this.atcRepository.getAtcHistory(),
                 });
             })
-            .flatMap(result => {
-                const { rawSubstanceConsumptionData, atcVersionHistory } = result;
+            .flatMap(({ rawSubstanceConsumptionData, atcVersionHistory }) => {
+                const validRawSubstanceConsumptionData = rawSubstanceConsumptionData?.filter(
+                    ({ atc_manual }) => atc_manual !== CODE_PRODUCT_NOT_HAVE_ATC
+                );
                 const atcCurrentVersionInfo = atcVersionHistory.find(({ currentVersion }) => currentVersion);
                 if (!atcCurrentVersionInfo) {
                     logger.error(`Cannot find current version of ATC in version history.`);
@@ -61,7 +63,7 @@ export class CalculateConsumptionDataSubstanceLevelUseCase {
                         orgUnitId,
                         period,
                         atcRepository: this.atcRepository,
-                        rawSubstanceConsumptionData,
+                        rawSubstanceConsumptionData: validRawSubstanceConsumptionData,
                         currentAtcVersionKey,
                         atcCurrentVersionData,
                     }).flatMap(calculatedConsumptionSubstanceLevelData => {

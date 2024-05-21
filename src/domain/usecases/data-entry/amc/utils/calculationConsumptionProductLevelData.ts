@@ -1,11 +1,27 @@
 import { logger } from "../../../../../utils/logger";
 import {
-    ConversionFactorData,
-    DDDAlterationsData,
-    DDDCombinationsData,
+    ATCChangesData,
+    ATCData,
+    AmClassificationData,
+    AwareClassificationData,
+    CombinationsData,
+    ConversionsIUToGramsData,
+    DDDChangesData,
     DDDData,
-    GlassATCVersion,
-} from "../../../../entities/GlassATC";
+    DEFAULT_SALT_CODE,
+    GlassAtcVersionData,
+    UnitsData,
+    getATCChanges,
+    getAmClass,
+    getAtcCodeByLevel,
+    getAwareClass,
+    getDDDChanges,
+    getNewAtcCode,
+    getNewDddData,
+    getStandardizedUnit,
+    getStandardizedUnitsAndValue,
+    isStrengthUnitValid,
+} from "../../../../entities/GlassAtcVersionData";
 import { Id } from "../../../../entities/Ref";
 import { ProductRegistryAttributes } from "../../../../entities/data-entry/amc/ProductRegistryAttributes";
 import { RawProductConsumption } from "../../../../entities/data-entry/amc/RawProductConsumption";
@@ -18,44 +34,57 @@ import {
     DDDPerProductConsumptionPackages,
     RawSubstanceConsumptionCalculated,
 } from "../../../../entities/data-entry/amc/RawSubstanceConsumptionCalculated";
-import { ROUTE_OF_ADMINISTRATION_MAPPING } from "../../../../entities/data-entry/amc/RouteOfAdministration";
-import { SALT_MAPPING } from "../../../../entities/data-entry/amc/Salt";
-import {
-    UNITS_MAPPING,
-    UNITS_TO_STANDARDIZED_MEASUREMENT_UNIT,
-    Unit,
-    isConcVolumeUnitOrVolumeUnitValid,
-    isStrengthUnitValid,
-    valueToStandardizedMeasurementUnit,
-} from "../../../../entities/data-entry/amc/Unit";
 
 export function calculateConsumptionProductLevelData(
     period: string,
     orgUnitId: Id,
     teiInstancesData: ProductRegistryAttributes[],
     rawProductConsumptionData: RawProductConsumption[],
-    atcClassification: GlassATCVersion,
+    atcClassification: GlassAtcVersionData,
     atcVersion: string
 ): RawSubstanceConsumptionCalculated[] {
     logger.info(
         `Starting the calculation of consumption product level data for organisation ${orgUnitId} and period ${period}`
     );
 
-    const dddCombinations = atcClassification?.ddd_combinations;
-    const dddData = atcClassification?.ddd;
-    const dddAlterations = atcClassification?.ddd_alterations;
-    const conversionFactorData = atcClassification?.conversion;
+    if (!Object.keys(atcClassification)?.length) {
+        logger.error(`Atc classsification data is empty.`);
+        return [];
+    }
+
+    const dddCombinations = atcClassification?.combinations;
+    const dddData = atcClassification?.ddds;
+    const dddChanges = getDDDChanges(atcClassification?.changes);
+    const atcChanges = getATCChanges(atcClassification?.changes);
+    const unitsData = atcClassification?.units;
+    const conversionsIUToGramsData = atcClassification?.conversions_iu_g;
+    const amClassData = atcClassification.am_classification;
+    const awareClassData = atcClassification.aware_classification;
+    const atcData = atcClassification.atcs;
 
     const contentDDDPerProductAndDDDPerPackage: ContentDDDPerProductAndDDDPerPackage[] = teiInstancesData
         .map((product: ProductRegistryAttributes) => {
             logger.debug(`Calculating content, ddd and  ddd_per_pack of product: ${JSON.stringify(product)}`);
             // 1 - Calculate the content per product = content
-            const content = calculateContentPerProduct(product);
+            const content = calculateContentPerProduct(product, unitsData);
             if (content) {
                 // 2 - Identify corresponding DDD per product = ddd
-                const dddPerProduct = calculateDDDPerProduct(product, dddCombinations, dddData, dddAlterations);
+                const dddPerProduct = calculateDDDPerProduct(
+                    product,
+                    dddCombinations,
+                    dddData,
+                    dddChanges,
+                    atcChanges,
+                    unitsData
+                );
                 // 3 - Calculate DDD per package = ddd_per_pack
-                const dddPerPackage = calculateDDDPerPackage(product, content, dddPerProduct, conversionFactorData);
+                const dddPerPackage = calculateDDDPerPackage(
+                    product,
+                    content,
+                    dddPerProduct,
+                    conversionsIUToGramsData,
+                    atcChanges
+                );
 
                 return {
                     AMR_GLASS_AMC_TEA_PRODUCT_ID: product.AMR_GLASS_AMC_TEA_PRODUCT_ID,
@@ -75,7 +104,11 @@ export function calculateConsumptionProductLevelData(
             teiInstancesData,
             rawProductConsumptionData,
             contentDDDPerProductAndDDDPerPackage,
-            conversionFactorData,
+            conversionsIUToGramsData,
+            amClassData,
+            awareClassData,
+            atcData,
+            atcChanges,
             atcVersion
         );
 
@@ -92,49 +125,39 @@ export function calculateConsumptionProductLevelData(
 }
 
 // 1 - Calculate the content per product
-function calculateContentPerProduct(product: ProductRegistryAttributes): Content | undefined {
+function calculateContentPerProduct(product: ProductRegistryAttributes, unitsData: UnitsData[]): Content | undefined {
     logger.info(`Calculating content of product: ${product.AMR_GLASS_AMC_TEA_PRODUCT_ID}`);
     const {
         AMR_GLASS_AMC_TEA_STRENGTH,
         AMR_GLASS_AMC_TEA_STRENGTH_UNIT,
         AMR_GLASS_AMC_TEA_CONC_VOLUME: maybeConcVolume,
-        AMR_GLASS_AMC_TEA_CONC_VOLUME_UNIT: maybeConcVolumeUnit,
-        AMR_AMC_TEA_VOLUME: maybeVolume,
-        AMR_AMC_TEA_VOLUME_UNIT: maybeVolumeUnit,
+        AMR_GLASS_AMC_TEA_VOLUME: maybeVolume,
         AMR_GLASS_AMC_TEA_PACKSIZE,
     } = product;
 
-    if (
-        (isStrengthUnitValid(AMR_GLASS_AMC_TEA_STRENGTH_UNIT) && (!maybeConcVolumeUnit || !maybeVolumeUnit)) ||
-        (isStrengthUnitValid(AMR_GLASS_AMC_TEA_STRENGTH_UNIT) &&
-            isConcVolumeUnitOrVolumeUnitValid(maybeConcVolumeUnit) &&
-            isConcVolumeUnitOrVolumeUnitValid(maybeVolumeUnit))
-    ) {
-        const standardizedStrength: number = valueToStandardizedMeasurementUnit(
-            AMR_GLASS_AMC_TEA_STRENGTH,
-            AMR_GLASS_AMC_TEA_STRENGTH_UNIT
-        );
-        const standarizedStrengthUnit: Unit = UNITS_TO_STANDARDIZED_MEASUREMENT_UNIT[AMR_GLASS_AMC_TEA_STRENGTH_UNIT];
-
-        const standardizedConcVolume: number = concVolumeOrVolumeUnitToStandardizedMeasurementUnit(
-            maybeConcVolume,
-            maybeConcVolumeUnit
+    if (isStrengthUnitValid(AMR_GLASS_AMC_TEA_STRENGTH_UNIT, unitsData)) {
+        const standarizedStrength = getStandardizedUnitsAndValue(
+            unitsData,
+            AMR_GLASS_AMC_TEA_STRENGTH_UNIT,
+            AMR_GLASS_AMC_TEA_STRENGTH
         );
 
-        const standardizedVolume: number = concVolumeOrVolumeUnitToStandardizedMeasurementUnit(
-            maybeVolume,
-            maybeVolumeUnit
-        );
+        if (standarizedStrength && standarizedStrength.standarizedUnit) {
+            const standarizedConcVolumeValue = maybeConcVolume ?? 1;
+            const standarizedVolumeValue = maybeVolume ?? 1;
 
-        // 1d - content = standardized_strength × (standardized_volume ÷ standardized_conc_volume) × packsize
-        const content =
-            standardizedStrength * (standardizedVolume / standardizedConcVolume) * AMR_GLASS_AMC_TEA_PACKSIZE;
+            // 1d - content = standardized_strength × (standardized_volume ÷ standardized_conc_volume) × packsize
+            const content =
+                standarizedStrength.standarizedValue *
+                (standarizedVolumeValue / standarizedConcVolumeValue) *
+                AMR_GLASS_AMC_TEA_PACKSIZE;
 
-        logger.debug(`Content of product: ${content} ${standarizedStrengthUnit}`);
-        return {
-            value: content,
-            standarizedStrengthUnit,
-        };
+            logger.debug(`Content of product: ${content} ${standarizedStrength.standarizedUnit}`);
+            return {
+                value: content,
+                standarizedStrengthUnit: standarizedStrength.standarizedUnit,
+            };
+        }
     } else {
         logger.error(
             `Content of product cannot be calculated. Strength unit, concentration volume unit or volume unit not valid of product: ${product.AMR_GLASS_AMC_TEA_PRODUCT_ID}`
@@ -142,63 +165,60 @@ function calculateContentPerProduct(product: ProductRegistryAttributes): Content
     }
 }
 
-// 1b
-function concVolumeOrVolumeUnitToStandardizedMeasurementUnit(
-    concVolumeOrVolume?: number,
-    concVolumeUnitOrVolumeUnit?: Unit
-): number {
-    // 1c
-    if (!concVolumeOrVolume || !concVolumeUnitOrVolumeUnit) {
-        return 1;
-    }
-    return valueToStandardizedMeasurementUnit(concVolumeOrVolume, concVolumeUnitOrVolumeUnit);
-}
-
 // 2 - Identify corresponding DDD per product
 function calculateDDDPerProduct(
     product: ProductRegistryAttributes,
-    dddCombinations: DDDCombinationsData[] | undefined,
+    dddCombinations: CombinationsData[] | undefined,
     dddData: DDDData[] | undefined,
-    dddAlterations: DDDAlterationsData[] | undefined
+    dddChanges: DDDChangesData[] | undefined,
+    atcChanges: ATCChangesData[] | undefined,
+    unitsData: UnitsData[]
 ): DDDPerProduct | undefined {
-    logger.info(`Identifying corresponding ddd_value and ddd_unit of product: ${product.AMR_GLASS_AMC_TEA_PRODUCT_ID}`);
-
-    const { AMR_GLASS_AMC_TEA_COMBINATION } = product;
-
-    return AMR_GLASS_AMC_TEA_COMBINATION
-        ? getDDDOfProductFromDDDCombinationsTable(AMR_GLASS_AMC_TEA_COMBINATION, dddCombinations)
-        : getDDDOfProductFromDDDTable(product, dddData, dddAlterations);
+    if (product.AMR_GLASS_AMC_TEA_COMBINATION) {
+        const codeCombinationData = dddCombinations?.find(
+            ({ COMB_CODE, ATC5 }) =>
+                COMB_CODE === product.AMR_GLASS_AMC_TEA_COMBINATION ||
+                ATC5 === getNewAtcCode(product.AMR_GLASS_AMC_TEA_ATC, atcChanges)
+        );
+        return getDDDOfProductFromDDDCombinationsTable(product, codeCombinationData, atcChanges, dddChanges, unitsData);
+    } else {
+        return getDDDOfProductFromDDDTable(product, dddData, atcChanges, dddChanges, unitsData);
+    }
 }
 
 // 2b
 function getDDDOfProductFromDDDCombinationsTable(
-    AMR_GLASS_AMC_TEA_COMBINATION: string,
-    dddCombinations: DDDCombinationsData[] | undefined
+    product: ProductRegistryAttributes,
+    codeCombinationData: CombinationsData | undefined,
+    atcChanges: ATCChangesData[] | undefined,
+    dddChanges: DDDChangesData[] | undefined,
+    unitsData: UnitsData[]
 ): DDDPerProduct | undefined {
-    logger.info(
-        `Identifying corresponding ddd_value and ddd_unit from ddd_combinations json using: ${AMR_GLASS_AMC_TEA_COMBINATION}`
-    );
-
-    const codeCombinationData = dddCombinations?.find(({ COMB_CODE }) => COMB_CODE === AMR_GLASS_AMC_TEA_COMBINATION);
-
     if (codeCombinationData) {
+        logger.info(
+            `Identifying corresponding ddd_value and ddd_unit using code combination data: ${codeCombinationData}`
+        );
         const { DDD: DDD_VALUE, DDD_UNIT } = codeCombinationData;
-        logger.debug(`DDD data found in ddd_combinations json: ${DDD_VALUE} ${UNITS_MAPPING[DDD_UNIT]}`);
+        logger.debug(`DDD data found in combinations json: ${DDD_VALUE} ${DDD_UNIT}`);
 
         return {
             dddValue: DDD_VALUE,
-            dddUnit: UNITS_MAPPING[DDD_UNIT] as Unit,
+            dddUnit: DDD_UNIT,
         };
     } else {
-        logger.error(`Combination code not found in ddd_combinations json: ${AMR_GLASS_AMC_TEA_COMBINATION}`);
+        logger.warn(`Combination code not found in combinations json: ${product.AMR_GLASS_AMC_TEA_COMBINATION}`);
     }
+
+    return getLatestDDDStandardized(product, atcChanges, dddChanges, unitsData);
 }
 
 // 2c
 function getDDDOfProductFromDDDTable(
     product: ProductRegistryAttributes,
     dddData: DDDData[] | undefined,
-    dddAlterations: DDDAlterationsData[] | undefined
+    atcChanges: ATCChangesData[] | undefined,
+    dddChanges: DDDChangesData[] | undefined,
+    unitsData: UnitsData[]
 ): DDDPerProduct | undefined {
     const { AMR_GLASS_AMC_TEA_ATC, AMR_GLASS_AMC_TEA_ROUTE_ADMIN, AMR_GLASS_AMC_TEA_SALT } = product;
     logger.info(
@@ -206,46 +226,68 @@ function getDDDOfProductFromDDDTable(
     );
 
     const dddDataFound = dddData?.find(({ ATC5, SALT, ROA }) => {
-        const isDefaultSalt = !SALT && AMR_GLASS_AMC_TEA_SALT === SALT_MAPPING.default;
+        const isDefaultSalt = !SALT && AMR_GLASS_AMC_TEA_SALT === DEFAULT_SALT_CODE;
+
         return (
-            ATC5 === AMR_GLASS_AMC_TEA_ATC &&
-            ROUTE_OF_ADMINISTRATION_MAPPING[ROA] === AMR_GLASS_AMC_TEA_ROUTE_ADMIN &&
-            ((SALT && SALT_MAPPING[SALT] === AMR_GLASS_AMC_TEA_SALT) || isDefaultSalt)
+            (ATC5 === AMR_GLASS_AMC_TEA_ATC || ATC5 === getNewAtcCode(product.AMR_GLASS_AMC_TEA_ATC, atcChanges)) &&
+            ROA === AMR_GLASS_AMC_TEA_ROUTE_ADMIN &&
+            (SALT === AMR_GLASS_AMC_TEA_SALT || isDefaultSalt)
         );
     });
 
     if (dddDataFound) {
-        const dddUnit = UNITS_MAPPING[dddDataFound.DDD_UNIT] as Unit;
-        const dddStandardizedUnit = UNITS_TO_STANDARDIZED_MEASUREMENT_UNIT[dddUnit] as Unit;
-        logger.debug(`DDD data found in ddd json: ${dddDataFound.DDD_STD} ${dddStandardizedUnit}`);
-        return {
-            dddValue: dddDataFound.DDD_STD,
-            dddUnit: dddStandardizedUnit,
-        };
+        const dddStandardizedUnit = getStandardizedUnit(unitsData, dddDataFound.DDD_UNIT);
+        if (dddStandardizedUnit) {
+            logger.debug(`DDD data found in ddd json: ${dddDataFound.DDD_STD} ${dddStandardizedUnit}`);
+            return {
+                dddValue: dddDataFound.DDD_STD,
+                dddUnit: dddStandardizedUnit,
+            };
+        }
+        logger.error(`Standarized unit not found in units data for: ${dddDataFound.DDD_UNIT}`);
+    } else {
+        logger.warn(`DDD data not found in ddd json of product: ${product.AMR_GLASS_AMC_TEA_PRODUCT_ID}`);
     }
-    logger.warn(`DDD data not found in ddd json of product: ${product.AMR_GLASS_AMC_TEA_PRODUCT_ID}`);
 
-    const newDddData = dddAlterations?.find(
-        ({ CURRENT_ATC, NEW_ROUTE, DELETED }) =>
-            !DELETED &&
-            CURRENT_ATC === AMR_GLASS_AMC_TEA_ATC &&
-            NEW_ROUTE &&
-            ROUTE_OF_ADMINISTRATION_MAPPING[NEW_ROUTE] === AMR_GLASS_AMC_TEA_ROUTE_ADMIN
+    return getLatestDDDStandardized(product, atcChanges, dddChanges, unitsData);
+}
+
+// 2d
+function getLatestDDDStandardized(
+    product: ProductRegistryAttributes,
+    atcChanges: ATCChangesData[] | undefined,
+    dddChanges: DDDChangesData[] | undefined,
+    unitsData: UnitsData[]
+): DDDPerProduct | undefined {
+    const atcCode = getNewAtcCode(product.AMR_GLASS_AMC_TEA_ATC, atcChanges) || product.AMR_GLASS_AMC_TEA_ATC;
+    logger.info(
+        `Get latest ddd_value and ddd_unit from ddd changes for ${product.AMR_GLASS_AMC_TEA_PRODUCT_ID} using: ${atcCode}`
     );
 
-    if (newDddData) {
-        const dddUnit = UNITS_MAPPING[newDddData.NEW_DDD_UNIT] as Unit;
-        const dddStandardizedValue = valueToStandardizedMeasurementUnit(newDddData.NEW_DDD, dddUnit);
-        const dddStandardizedUnit = UNITS_TO_STANDARDIZED_MEASUREMENT_UNIT[dddUnit] as Unit;
-        logger.warn(`DDD data found in ddd_alterations json: ${dddStandardizedValue} ${dddStandardizedUnit}`);
+    const newDddData = getNewDddData(atcCode, product.AMR_GLASS_AMC_TEA_ROUTE_ADMIN, dddChanges);
 
-        return {
-            dddValue: dddStandardizedValue,
-            dddUnit: dddStandardizedUnit,
-        };
+    if (newDddData) {
+        const dddStandardized = getStandardizedUnitsAndValue(
+            unitsData,
+            newDddData.NEW_DDD_UNIT,
+            newDddData.NEW_DDD_VALUE
+        );
+        if (dddStandardized?.standarizedUnit) {
+            logger.warn(
+                `DDD data found in changes json: ${dddStandardized.standarizedValue} ${dddStandardized.standarizedUnit}`
+            );
+
+            return {
+                dddValue: dddStandardized.standarizedValue,
+                dddUnit: dddStandardized.standarizedUnit,
+            };
+        }
+        logger.error(`Standarized unit not found for ${newDddData.NEW_DDD_UNIT}.`);
+        logger.debug(`Standarized unit not found for ${newDddData.NEW_DDD_UNIT}. Product: ${JSON.stringify(product)}`);
+    } else {
+        logger.error(`DDD data not found in changes json for product: ${product.AMR_GLASS_AMC_TEA_PRODUCT_ID}`);
+        logger.debug(`DDD data not found in changes json for product: ${JSON.stringify(product)}`);
     }
-    logger.error(`DDD data not found in ddd_alterations json of product: ${product.AMR_GLASS_AMC_TEA_PRODUCT_ID}`);
-    logger.debug(`DDD data not found in ddd_alterations json of product: ${JSON.stringify(product)}`);
 }
 
 // 3 - Calculate DDD per package
@@ -253,7 +295,8 @@ function calculateDDDPerPackage(
     product: ProductRegistryAttributes,
     content: Content,
     dddPerProduct: DDDPerProduct | undefined,
-    conversionFactorData: ConversionFactorData[] | undefined
+    conversionsIUToGramsData: ConversionsIUToGramsData[] | undefined,
+    atcChanges: ATCChangesData[] | undefined
 ): DDDPerPackage | undefined {
     logger.info(`Calculating ddd per package of product: ${product.AMR_GLASS_AMC_TEA_PRODUCT_ID}`);
 
@@ -262,15 +305,16 @@ function calculateDDDPerPackage(
 
         const { standarizedStrengthUnit } = content;
 
-        const conversionFactorAtc = conversionFactorData?.find(
+        const conversionFactorIuToGram = conversionsIUToGramsData?.find(
             ({ ATC5, ROA }) =>
-                ATC5 === AMR_GLASS_AMC_TEA_ATC && ROUTE_OF_ADMINISTRATION_MAPPING[ROA] === AMR_GLASS_AMC_TEA_ROUTE_ADMIN
+                (ATC5 === AMR_GLASS_AMC_TEA_ATC || ATC5 === getNewAtcCode(AMR_GLASS_AMC_TEA_ATC, atcChanges)) &&
+                ROA === AMR_GLASS_AMC_TEA_ROUTE_ADMIN
         );
 
         // 3a
         const conversionFactor =
-            standarizedStrengthUnit !== dddPerProduct.dddUnit && conversionFactorAtc?.FACTOR
-                ? conversionFactorAtc.FACTOR
+            standarizedStrengthUnit !== dddPerProduct.dddUnit && conversionFactorIuToGram?.FACTOR
+                ? conversionFactorIuToGram.FACTOR
                 : 1;
         logger.debug(`Conversion factor used to calculate ddd_per_pack: ${conversionFactor}`);
 
@@ -306,11 +350,11 @@ function calculateDDDPerProductConsumptionPackages(
         )}`
     );
     if (dddPerPackage) {
-        const { AMR_GLASS_AMC_TEA_PRODUCT_ID, packages_det, health_sector_manual, health_level_manual } =
+        const { AMR_GLASS_AMC_TEA_PRODUCT_ID, packages_manual, health_sector_manual, health_level_manual } =
             productConsumption;
 
         // 4b - ddd_cons_product = ddd_per_pack × packages (in year, health_sector and health_level)
-        const dddConsumptionPackages = dddPerPackage.value * packages_det;
+        const dddConsumptionPackages = dddPerPackage.value * packages_manual;
         logger.debug(`DDD per product consumption packages: ${dddConsumptionPackages}`);
         return {
             AMR_GLASS_AMC_TEA_PRODUCT_ID,
@@ -334,7 +378,8 @@ function getTonnesPerProduct(
     product: ProductRegistryAttributes,
     productConsumption: RawProductConsumption,
     content: Content,
-    conversionFactorData: ConversionFactorData[] | undefined
+    conversionsIUToGramsData: ConversionsIUToGramsData[] | undefined,
+    atcChanges: ATCChangesData[] | undefined
 ): ContentTonnesPerProduct {
     logger.info(`Calculating content tonnes of product ${product.AMR_GLASS_AMC_TEA_PRODUCT_ID}`);
     logger.debug(
@@ -342,22 +387,24 @@ function getTonnesPerProduct(
     );
 
     const { AMR_GLASS_AMC_TEA_PRODUCT_ID: teiIdProduct, AMR_GLASS_AMC_TEA_ATC } = product;
-    const { packages_det, health_sector_manual, health_level_manual } = productConsumption;
+    const { packages_manual, health_sector_manual, health_level_manual } = productConsumption;
 
     const { standarizedStrengthUnit: contentUnit } = content;
     // 5a
-    const conversionFactorAtc = conversionFactorData?.find(({ ATC5 }) => ATC5 === AMR_GLASS_AMC_TEA_ATC);
+    const conversionFactorAtc = conversionsIUToGramsData?.find(
+        ({ ATC5 }) => ATC5 === AMR_GLASS_AMC_TEA_ATC || ATC5 === getNewAtcCode(AMR_GLASS_AMC_TEA_ATC, atcChanges)
+    );
     const conversionFactor = contentUnit !== "gram" && conversionFactorAtc?.FACTOR ? conversionFactorAtc.FACTOR : 1;
     logger.debug(`Conversion factor used to calculate content_tonnes: ${conversionFactor}`);
 
     // 5b - content_tonnes = (content × conv_factor × packages in the year, health_sector and health_level) ÷ 1e6
-    logger.debug(`Content tonnes: ${(content.value * conversionFactor * packages_det) / 1e6}`);
+    logger.debug(`Content tonnes: ${(content.value * conversionFactor * packages_manual) / 1e6}`);
     return {
         AMR_GLASS_AMC_TEA_PRODUCT_ID: teiIdProduct,
         year: period,
         health_sector_manual,
         health_level_manual,
-        contentTonnes: (content.value * conversionFactor * packages_det) / 1e6,
+        contentTonnes: (content.value * conversionFactor * packages_manual) / 1e6,
     };
 }
 
@@ -368,7 +415,11 @@ function aggregateDataByAtcRouteAdminYearHealthSectorAndHealthLevel(
     teiInstancesData: ProductRegistryAttributes[],
     rawProductConsumptionData: RawProductConsumption[],
     contentDDDPerProductAndDDDPerPackage: ContentDDDPerProductAndDDDPerPackage[],
-    conversionFactorData: ConversionFactorData[] | undefined,
+    conversionsIUToGramsData: ConversionsIUToGramsData[],
+    amClassData: AmClassificationData,
+    awareClassData: AwareClassificationData,
+    atcData: ATCData[],
+    atcChanges: ATCChangesData[] | undefined,
     atcVersion: string
 ): RawSubstanceConsumptionCalculated[] {
     const rawSubstanceConsumptionCalculatedByKey = rawProductConsumptionData.reduce(
@@ -403,7 +454,8 @@ function aggregateDataByAtcRouteAdminYearHealthSectorAndHealthLevel(
                         product,
                         productConsumption,
                         contentDDDPerProductAndDDDPerPackageOfProduct.content,
-                        conversionFactorData
+                        conversionsIUToGramsData,
+                        atcChanges
                     );
 
                     const {
@@ -412,7 +464,7 @@ function aggregateDataByAtcRouteAdminYearHealthSectorAndHealthLevel(
                         AMR_GLASS_AMC_TEA_ATC,
                         AMR_GLASS_AMC_TEA_ROUTE_ADMIN,
                     } = product;
-                    const { packages_det, data_status_manual, health_sector_manual, health_level_manual } =
+                    const { packages_manual, data_status_manual, health_sector_manual, health_level_manual } =
                         productConsumption;
 
                     // 5c, 6a, 7a, 8a
@@ -438,6 +490,23 @@ function aggregateDataByAtcRouteAdminYearHealthSectorAndHealthLevel(
                         );
                     }
 
+                    const am_class = getAmClass(amClassData, AMR_GLASS_AMC_TEA_ATC);
+                    const atcCodeByLevel = getAtcCodeByLevel(atcData, AMR_GLASS_AMC_TEA_ATC);
+                    const aware = getAwareClass(awareClassData, AMR_GLASS_AMC_TEA_ATC);
+
+                    if (
+                        !atcCodeByLevel?.level2 ||
+                        !atcCodeByLevel?.level3 ||
+                        !atcCodeByLevel?.level4 ||
+                        !am_class ||
+                        !aware
+                    ) {
+                        logger.error(
+                            `Data not found. atc2: ${atcCodeByLevel?.level2}, atc3: ${atcCodeByLevel?.level3}, atc4: ${atcCodeByLevel?.level4}, am_class: ${am_class}, aware: ${aware}`
+                        );
+                        return acc;
+                    }
+
                     return {
                         ...acc,
                         [id]: isAlreadyInTheAggregation
@@ -445,7 +514,7 @@ function aggregateDataByAtcRouteAdminYearHealthSectorAndHealthLevel(
                                   ...accWithThisId,
                                   tons_autocalculated:
                                       accWithThisId.tons_autocalculated + contentTonnesOfProduct.contentTonnes,
-                                  packages_autocalculated: accWithThisId.packages_autocalculated + packages_det,
+                                  packages_autocalculated: accWithThisId.packages_autocalculated + packages_manual,
                                   ddds_autocalculated:
                                       accWithThisId.ddds_autocalculated +
                                       dddPerProductConsumptionPackages.dddConsumptionPackages,
@@ -456,7 +525,7 @@ function aggregateDataByAtcRouteAdminYearHealthSectorAndHealthLevel(
                                   route_admin_autocalculated: AMR_GLASS_AMC_TEA_ROUTE_ADMIN,
                                   salt_autocalculated: AMR_GLASS_AMC_TEA_SALT,
                                   year: period,
-                                  packages_autocalculated: packages_det,
+                                  packages_autocalculated: packages_manual,
                                   tons_autocalculated: contentTonnesOfProduct.contentTonnes,
                                   ddds_autocalculated: dddPerProductConsumptionPackages.dddConsumptionPackages,
                                   data_status_autocalculated: data_status_manual,
@@ -464,6 +533,11 @@ function aggregateDataByAtcRouteAdminYearHealthSectorAndHealthLevel(
                                   atc_version_autocalculated: atcVersion,
                                   health_level_autocalculated: health_level_manual,
                                   orgUnitId,
+                                  am_class: am_class,
+                                  atc2: atcCodeByLevel?.level2,
+                                  atc3: atcCodeByLevel?.level3,
+                                  atc4: atcCodeByLevel?.level4,
+                                  aware: aware,
                               },
                     };
                 } else {

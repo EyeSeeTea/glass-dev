@@ -4,7 +4,7 @@ import rawSubstanceConsumptionDataBasic from "./data/rawSubstanceConsumptionData
 import rawSubstanceConsumptionDataAtcNotFound from "./data/rawSubstanceConsumptionDataAtcNotFound.json";
 import atcVersionsByKeysData from "./data/atcVersionsByKeys.json";
 import calculationConsumptionSubstanceLevelBasic from "./data/calculationConsumptionSubstanceLevelBasic.json";
-import { ListGlassATCVersions } from "../../../../../entities/GlassATC";
+import { ListGlassATCVersions } from "../../../../../entities/GlassAtcVersionData";
 import { SubstanceConsumptionCalculated } from "../../../../../entities/data-entry/amc/SubstanceConsumptionCalculated";
 import { setupLoggerForTesting } from "../../../../../../utils/logger";
 
