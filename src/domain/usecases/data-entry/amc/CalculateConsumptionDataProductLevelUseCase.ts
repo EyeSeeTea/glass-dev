@@ -1,6 +1,10 @@
 import { Future, FutureData } from "../../../entities/Future";
 import { Id } from "../../../entities/Ref";
-import { createAtcVersionKey } from "../../../entities/GlassATC";
+import {
+    CODE_PRODUCT_NOT_HAVE_ATC,
+    COMB_CODE_PRODUCT_NOT_HAVE_ATC,
+    createAtcVersionKey,
+} from "../../../entities/GlassAtcVersionData";
 import { mapToImportSummary, readTemplate } from "../ImportBLTemplateEventProgram";
 import { ExcelRepository } from "../../../repositories/ExcelRepository";
 import { GlassATCRepository } from "../../../repositories/GlassATCRepository";
@@ -20,6 +24,8 @@ import { logger } from "../../../../utils/logger";
 const TEMPLATE_ID = "TRACKER_PROGRAM_GENERATED_v3";
 const IMPORT_SUMMARY_EVENT_TYPE = "event";
 const IMPORT_STRATEGY_CREATE_AND_UPDATE = "CREATE_AND_UPDATE";
+const AMR_GLASS_AMC_TEA_ATC = "aK1JpD14imM";
+const AMR_GLASS_AMC_TEA_COMBINATION = "mG49egdYK3G";
 
 export class CalculateConsumptionDataProductLevelUseCase {
     constructor(
@@ -48,8 +54,17 @@ export class CalculateConsumptionDataProductLevelUseCase {
                     atcVersionHistory: this.atcRepository.getAtcHistory(),
                 });
             })
-            .flatMap(result => {
-                const { productRegisterProgramMetadata, productDataTrackedEntities, atcVersionHistory } = result;
+            .flatMap(({ productRegisterProgramMetadata, productDataTrackedEntities, atcVersionHistory }) => {
+                const validProductDataTrackedEntitiesToCalculate = productDataTrackedEntities.filter(
+                    ({ attributes }) => {
+                        const productWithoutAtcCode = attributes.some(
+                            ({ id, value }) =>
+                                (id === AMR_GLASS_AMC_TEA_ATC && value === CODE_PRODUCT_NOT_HAVE_ATC) ||
+                                (id === AMR_GLASS_AMC_TEA_COMBINATION && value === COMB_CODE_PRODUCT_NOT_HAVE_ATC)
+                        );
+                        return !productWithoutAtcCode;
+                    }
+                );
                 const atcCurrentVersionInfo = atcVersionHistory.find(({ currentVersion }) => currentVersion);
                 if (!atcCurrentVersionInfo) {
                     logger.error(`Cannot find current version of ATC in version history.`);
@@ -65,7 +80,7 @@ export class CalculateConsumptionDataProductLevelUseCase {
                         orgUnitId,
                         period,
                         productRegisterProgramMetadata,
-                        productDataTrackedEntities,
+                        productDataTrackedEntities: validProductDataTrackedEntitiesToCalculate,
                         atcCurrentVersionData,
                         atcVersionKey,
                     }).flatMap(rawSubstanceConsumptionCalculatedData => {
@@ -106,7 +121,7 @@ export class CalculateConsumptionDataProductLevelUseCase {
                         return this.amcProductDataRepository
                             .importCalculations(
                                 IMPORT_STRATEGY_CREATE_AND_UPDATE,
-                                productDataTrackedEntities,
+                                validProductDataTrackedEntitiesToCalculate,
                                 rawSubstanceConsumptionCalculatedStageMetadata,
                                 rawSubstanceConsumptionCalculatedData,
                                 orgUnitId,

@@ -2,7 +2,12 @@ import _ from "lodash";
 import { logger } from "../../../../utils/logger";
 import { Id } from "../../../entities/Ref";
 import { Future, FutureData } from "../../../entities/Future";
-import { GlassATCVersion } from "../../../entities/GlassATC";
+import {
+    CODE_PRODUCT_NOT_HAVE_ATC,
+    COMB_CODE_PRODUCT_NOT_HAVE_ATC,
+    DEFAULT_SALT_CODE,
+    GlassAtcVersionData,
+} from "../../../entities/GlassAtcVersionData";
 import {
     AMC_RAW_SUBSTANCE_CONSUMPTION_CALCULATED_STAGE_ID,
     AMR_GLASS_AMC_TEA_PRODUCT_ID,
@@ -22,11 +27,12 @@ import {
     RAW_SUBSTANCE_CONSUMPTION_CALCULATED_KEYS,
     RawSubstanceConsumptionCalculated,
 } from "../../../entities/data-entry/amc/RawSubstanceConsumptionCalculated";
-import { SALT_MAPPING } from "../../../entities/data-entry/amc/Salt";
 import { getConsumptionDataProductLevel } from "./utils/getConsumptionDataProductLevel";
 
 const IMPORT_STRATEGY_UPDATE = "UPDATE";
 const IMPORT_STRATEGY_CREATE_AND_UPDATE = "CREATE_AND_UPDATE";
+const AMR_GLASS_AMC_TEA_ATC = "aK1JpD14imM";
+const AMR_GLASS_AMC_TEA_COMBINATION = "mG49egdYK3G";
 
 export class RecalculateConsumptionDataProductLevelForAllUseCase {
     constructor(private amcProductDataRepository: AMCProductDataRepository) {}
@@ -34,7 +40,7 @@ export class RecalculateConsumptionDataProductLevelForAllUseCase {
         orgUnitsIds: Id[],
         periods: string[],
         currentATCVersion: string,
-        currentATCData: GlassATCVersion,
+        currentATCData: GlassAtcVersionData,
         allowCreationIfNotExist: boolean
     ): FutureData<void> {
         logger.info(
@@ -71,7 +77,7 @@ export class RecalculateConsumptionDataProductLevelForAllUseCase {
         productRegisterProgramMetadata: ProductRegisterProgramMetadata,
         orgUnitId: Id,
         period: string,
-        atcCurrentVersionData: GlassATCVersion,
+        atcCurrentVersionData: GlassAtcVersionData,
         atcVersionKey: string,
         allowCreationIfNotExist: boolean
     ): FutureData<void> {
@@ -242,6 +248,16 @@ export class RecalculateConsumptionDataProductLevelForAllUseCase {
         return this.amcProductDataRepository
             .getAllProductRegisterAndRawProductConsumptionByPeriod(orgUnitId, period)
             .flatMap(productDataTrackedEntities => {
+                const validProductDataTrackedEntitiesToCalculate = productDataTrackedEntities.filter(
+                    ({ attributes }) => {
+                        const productWithoutAtcCode = attributes.some(
+                            ({ id, value }) =>
+                                (id === AMR_GLASS_AMC_TEA_ATC && value === CODE_PRODUCT_NOT_HAVE_ATC) ||
+                                (id === AMR_GLASS_AMC_TEA_COMBINATION && value === COMB_CODE_PRODUCT_NOT_HAVE_ATC)
+                        );
+                        return !productWithoutAtcCode;
+                    }
+                );
                 const rawSubstanceConsumptionCalculatedStageMetadata =
                     productRegisterProgramMetadata?.programStages.find(
                         ({ id }) => id === AMC_RAW_SUBSTANCE_CONSUMPTION_CALCULATED_STAGE_ID
@@ -256,7 +272,7 @@ export class RecalculateConsumptionDataProductLevelForAllUseCase {
                 const currentRawSubstanceConsumptionCalculatedByProductId: Record<
                     string,
                     RawSubstanceConsumptionCalculated[]
-                > = productDataTrackedEntities.reduce((acc, productDataTrackedEntity) => {
+                > = validProductDataTrackedEntitiesToCalculate.reduce((acc, productDataTrackedEntity) => {
                     const productId = productDataTrackedEntity.attributes.find(
                         ({ id }) => id === AMR_GLASS_AMC_TEA_PRODUCT_ID
                     )?.value;
@@ -275,7 +291,7 @@ export class RecalculateConsumptionDataProductLevelForAllUseCase {
                 }, {});
 
                 return Future.success({
-                    productDataTrackedEntities,
+                    productDataTrackedEntities: validProductDataTrackedEntitiesToCalculate,
                     currentRawSubstanceConsumptionCalculatedByProductId,
                 });
             });
@@ -294,7 +310,7 @@ function linkEventIdToNewRawSubstanceConsumptionCalculated(
                 currentCalculatedData.atc_autocalculated === newCalulatedData.atc_autocalculated &&
                 currentCalculatedData.route_admin_autocalculated === newCalulatedData.route_admin_autocalculated &&
                 (currentCalculatedData.salt_autocalculated === newCalulatedData.salt_autocalculated ||
-                    SALT_MAPPING.default === newCalulatedData.salt_autocalculated) &&
+                    DEFAULT_SALT_CODE === newCalulatedData.salt_autocalculated) &&
                 currentCalculatedData.health_sector_autocalculated === newCalulatedData.health_sector_autocalculated &&
                 currentCalculatedData.health_level_autocalculated === newCalulatedData.health_level_autocalculated &&
                 currentCalculatedData.data_status_autocalculated === newCalulatedData.data_status_autocalculated
@@ -331,7 +347,7 @@ function getCurrentRawSubstanceConsumptionCalculated(
                                 [programStageDataElement.code]: programStageDataElement.optionSetValue
                                     ? programStageDataElement.optionSet.options.find(
                                           option => option.code === eventDataValue.value
-                                      )?.name
+                                      )?.code
                                     : eventDataValue.value,
                             };
                         case "NUMBER":
@@ -343,7 +359,7 @@ function getCurrentRawSubstanceConsumptionCalculated(
                                 [programStageDataElement.code]: programStageDataElement.optionSetValue
                                     ? programStageDataElement.optionSet.options.find(
                                           option => option.code === eventDataValue.value
-                                      )?.name
+                                      )?.code
                                     : parseFloat(eventDataValue.value),
                             };
                         default:

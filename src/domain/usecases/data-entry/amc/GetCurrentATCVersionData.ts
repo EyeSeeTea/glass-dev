@@ -1,14 +1,14 @@
 import { Future, FutureData } from "../../../entities/Future";
 import { logger } from "../../../../utils/logger";
 import { GlassATCRepository } from "../../../repositories/GlassATCRepository";
-import { GlassATCVersion, createAtcVersionKey } from "../../../entities/GlassATC";
+import { GlassAtcVersionData, createAtcVersionKey } from "../../../entities/GlassAtcVersionData";
 
 export class GetCurrentATCVersionData {
     constructor(private atcRepository: GlassATCRepository) {}
 
     public execute(): FutureData<{
         currentATCVersion: string;
-        currentATCData: GlassATCVersion;
+        currentATCData: GlassAtcVersionData;
     }> {
         logger.info("Getting current ATC version data");
         return this.atcRepository.getAtcHistory().flatMap(atcVersionHistory => {

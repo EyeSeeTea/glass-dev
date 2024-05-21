@@ -42,6 +42,8 @@ export const metadataQuery = {
             condition: true,
             displayName: true,
             program: { id: true },
+            programStage: { id: true },
+
             programRuleActions: { $owner: true },
         },
     },

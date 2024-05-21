@@ -36,10 +36,11 @@ export class ProgramRuleValidationForBLEventProgram {
     public getValidatedTeisAndEvents(
         programId: string,
         events?: D2TrackerEvent[],
-        teis?: D2TrackerTrackedEntity[] //For tracker programs only
+        teis?: D2TrackerTrackedEntity[], //For tracker programs only
+        currentProgramStage?: Id
     ): FutureData<ValidationResult> {
         return this.programRulesMetadataRepository.getMetadata(programId).flatMap(metadata => {
-            return this.getEventEffects(metadata, events, teis).flatMap(eventEffects => {
+            return this.getEventEffects(metadata, events, teis, currentProgramStage).flatMap(eventEffects => {
                 const actionsResult = this.getActions(eventEffects, metadata);
                 if (actionsResult.blockingErrors.length > 0) {
                     //If there are blocking errors, do not process further. return the errors.
@@ -307,7 +308,8 @@ export class ProgramRuleValidationForBLEventProgram {
     public getEventEffects(
         metadata: BulkLoadMetadata,
         events?: D2TrackerEvent[],
-        teis?: D2TrackerTrackedEntity[]
+        teis?: D2TrackerTrackedEntity[],
+        currentProgramStage?: Id
     ): FutureData<EventEffect[]> {
         const program = metadata.programs[0];
         if (program) {
@@ -317,7 +319,7 @@ export class ProgramRuleValidationForBLEventProgram {
                     else return Future.error("No events");
 
                 case "WITH_REGISTRATION":
-                    return this.getEventEffectsForTrackerProgram(teis, { program, metadata });
+                    return this.getEventEffectsForTrackerProgram(teis, { program, metadata }, currentProgramStage);
             }
         } else return Future.error("Unknown program");
     }
@@ -354,11 +356,14 @@ export class ProgramRuleValidationForBLEventProgram {
 
     private getEventEffectsForTrackerProgram(
         teis: D2TrackerTrackedEntity[] | undefined,
-        options: { program: Program; metadata: BulkLoadMetadata }
+        options: { program: Program; metadata: BulkLoadMetadata },
+        currentProgramStage?: Id
     ): FutureData<EventEffect[]> {
         const { program, metadata } = options;
 
-        const programRulesIds: Id[] = metadata.programRules.map(pr => pr.id);
+        const programRulesIds: Id[] = currentProgramStage
+            ? metadata.programRules.filter(pr => pr.programStage.id === currentProgramStage).map(pr => pr.id)
+            : metadata.programRules.map(pr => pr.id);
 
         const eventEffects = _(teis)
             .flatMap(tei => {
