@@ -2,7 +2,12 @@ import _ from "lodash";
 import { logger } from "../../../../utils/logger";
 import { Id } from "../../../entities/Ref";
 import { Future, FutureData } from "../../../entities/Future";
-import { DEFAULT_SALT_CODE, GlassAtcVersionData } from "../../../entities/GlassAtcVersionData";
+import {
+    CODE_PRODUCT_NOT_HAVE_ATC,
+    COMB_CODE_PRODUCT_NOT_HAVE_ATC,
+    DEFAULT_SALT_CODE,
+    GlassAtcVersionData,
+} from "../../../entities/GlassAtcVersionData";
 import {
     AMC_RAW_SUBSTANCE_CONSUMPTION_CALCULATED_STAGE_ID,
     AMR_GLASS_AMC_TEA_PRODUCT_ID,
@@ -26,6 +31,8 @@ import { getConsumptionDataProductLevel } from "./utils/getConsumptionDataProduc
 
 const IMPORT_STRATEGY_UPDATE = "UPDATE";
 const IMPORT_STRATEGY_CREATE_AND_UPDATE = "CREATE_AND_UPDATE";
+const AMR_GLASS_AMC_TEA_ATC = "aK1JpD14imM";
+const AMR_GLASS_AMC_TEA_COMBINATION = "mG49egdYK3G";
 
 export class RecalculateConsumptionDataProductLevelForAllUseCase {
     constructor(private amcProductDataRepository: AMCProductDataRepository) {}
@@ -241,6 +248,16 @@ export class RecalculateConsumptionDataProductLevelForAllUseCase {
         return this.amcProductDataRepository
             .getAllProductRegisterAndRawProductConsumptionByPeriod(orgUnitId, period)
             .flatMap(productDataTrackedEntities => {
+                const validProductDataTrackedEntitiesToCalculate = productDataTrackedEntities.filter(
+                    ({ attributes }) => {
+                        const productWithoutAtcCode = attributes.some(
+                            ({ id, value }) =>
+                                (id === AMR_GLASS_AMC_TEA_ATC && value === CODE_PRODUCT_NOT_HAVE_ATC) ||
+                                (id === AMR_GLASS_AMC_TEA_COMBINATION && value === COMB_CODE_PRODUCT_NOT_HAVE_ATC)
+                        );
+                        return !productWithoutAtcCode;
+                    }
+                );
                 const rawSubstanceConsumptionCalculatedStageMetadata =
                     productRegisterProgramMetadata?.programStages.find(
                         ({ id }) => id === AMC_RAW_SUBSTANCE_CONSUMPTION_CALCULATED_STAGE_ID
@@ -255,7 +272,7 @@ export class RecalculateConsumptionDataProductLevelForAllUseCase {
                 const currentRawSubstanceConsumptionCalculatedByProductId: Record<
                     string,
                     RawSubstanceConsumptionCalculated[]
-                > = productDataTrackedEntities.reduce((acc, productDataTrackedEntity) => {
+                > = validProductDataTrackedEntitiesToCalculate.reduce((acc, productDataTrackedEntity) => {
                     const productId = productDataTrackedEntity.attributes.find(
                         ({ id }) => id === AMR_GLASS_AMC_TEA_PRODUCT_ID
                     )?.value;
@@ -274,7 +291,7 @@ export class RecalculateConsumptionDataProductLevelForAllUseCase {
                 }, {});
 
                 return Future.success({
-                    productDataTrackedEntities,
+                    productDataTrackedEntities: validProductDataTrackedEntitiesToCalculate,
                     currentRawSubstanceConsumptionCalculatedByProductId,
                 });
             });

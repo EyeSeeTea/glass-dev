@@ -4,12 +4,12 @@
         "health_sector_manual": "PUB",
         "data_status_manual": 1,
         "health_level_manual": "C",
-        "packages": 50
+        "packages_manual": 50
     },
     {
         "AMR_GLASS_AMC_TEA_PRODUCT_ID": "P36",
         "data_status_manual": 3,
-        "packages": 96,
+        "packages_manual": 96,
         "health_sector_manual": "PUB",
         "health_level_manual": "C"
     },
@@ -18,26 +18,26 @@
         "data_status_manual": 3,
         "health_level_manual": "C",
         "health_sector_manual": "PUB",
-        "packages": 12
+        "packages_manual": 12
     },
     {
         "AMR_GLASS_AMC_TEA_PRODUCT_ID": "P36",
         "data_status_manual": 2,
         "health_level_manual": "C",
-        "packages": 73,
+        "packages_manual": 73,
         "health_sector_manual": "PUB"
     },
     {
         "AMR_GLASS_AMC_TEA_PRODUCT_ID": "P37",
         "data_status_manual": 1,
-        "packages": 45,
+        "packages_manual": 45,
         "health_level_manual": "C",
         "health_sector_manual": "PUB"
     },
     {
         "AMR_GLASS_AMC_TEA_PRODUCT_ID": "P37",
         "data_status_manual": 3,
-        "packages": 18,
+        "packages_manual": 18,
         "health_level_manual": "C",
         "health_sector_manual": "PUB"
     }

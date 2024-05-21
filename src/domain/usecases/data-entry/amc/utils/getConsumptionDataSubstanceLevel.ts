@@ -24,7 +24,9 @@ export function getConsumptionDataSubstanceLevel(params: {
         currentAtcVersionKey,
     } = params;
     if (!rawSubstanceConsumptionData) {
-        logger.error(`Cannot find Raw Substance Consumption Data for orgUnitsId ${orgUnitId} and period ${period}`);
+        logger.error(
+            `Cannot find Raw Substance Consumption Data for orgUnitsId ${orgUnitId} and period ${period} for calculations`
+        );
         return Future.error("Cannot find Raw Substance Consumption Data");
     }
 
