@@ -131,7 +131,7 @@ function calculateContentPerProduct(product: ProductRegistryAttributes, unitsDat
         AMR_GLASS_AMC_TEA_STRENGTH,
         AMR_GLASS_AMC_TEA_STRENGTH_UNIT,
         AMR_GLASS_AMC_TEA_CONC_VOLUME: maybeConcVolume,
-        AMR_AMC_TEA_VOLUME: maybeVolume,
+        AMR_GLASS_AMC_TEA_VOLUME: maybeVolume,
         AMR_GLASS_AMC_TEA_PACKSIZE,
     } = product;
 
@@ -350,11 +350,11 @@ function calculateDDDPerProductConsumptionPackages(
         )}`
     );
     if (dddPerPackage) {
-        const { AMR_GLASS_AMC_TEA_PRODUCT_ID, packages, health_sector_manual, health_level_manual } =
+        const { AMR_GLASS_AMC_TEA_PRODUCT_ID, packages_manual, health_sector_manual, health_level_manual } =
             productConsumption;
 
         // 4b - ddd_cons_product = ddd_per_pack × packages (in year, health_sector and health_level)
-        const dddConsumptionPackages = dddPerPackage.value * packages;
+        const dddConsumptionPackages = dddPerPackage.value * packages_manual;
         logger.debug(`DDD per product consumption packages: ${dddConsumptionPackages}`);
         return {
             AMR_GLASS_AMC_TEA_PRODUCT_ID,
@@ -387,7 +387,7 @@ function getTonnesPerProduct(
     );
 
     const { AMR_GLASS_AMC_TEA_PRODUCT_ID: teiIdProduct, AMR_GLASS_AMC_TEA_ATC } = product;
-    const { packages, health_sector_manual, health_level_manual } = productConsumption;
+    const { packages_manual, health_sector_manual, health_level_manual } = productConsumption;
 
     const { standarizedStrengthUnit: contentUnit } = content;
     // 5a
@@ -398,13 +398,13 @@ function getTonnesPerProduct(
     logger.debug(`Conversion factor used to calculate content_tonnes: ${conversionFactor}`);
 
     // 5b - content_tonnes = (content × conv_factor × packages in the year, health_sector and health_level) ÷ 1e6
-    logger.debug(`Content tonnes: ${(content.value * conversionFactor * packages) / 1e6}`);
+    logger.debug(`Content tonnes: ${(content.value * conversionFactor * packages_manual) / 1e6}`);
     return {
         AMR_GLASS_AMC_TEA_PRODUCT_ID: teiIdProduct,
         year: period,
         health_sector_manual,
         health_level_manual,
-        contentTonnes: (content.value * conversionFactor * packages) / 1e6,
+        contentTonnes: (content.value * conversionFactor * packages_manual) / 1e6,
     };
 }
 
@@ -464,7 +464,7 @@ function aggregateDataByAtcRouteAdminYearHealthSectorAndHealthLevel(
                         AMR_GLASS_AMC_TEA_ATC,
                         AMR_GLASS_AMC_TEA_ROUTE_ADMIN,
                     } = product;
-                    const { packages, data_status_manual, health_sector_manual, health_level_manual } =
+                    const { packages_manual, data_status_manual, health_sector_manual, health_level_manual } =
                         productConsumption;
 
                     // 5c, 6a, 7a, 8a
@@ -514,7 +514,7 @@ function aggregateDataByAtcRouteAdminYearHealthSectorAndHealthLevel(
                                   ...accWithThisId,
                                   tons_autocalculated:
                                       accWithThisId.tons_autocalculated + contentTonnesOfProduct.contentTonnes,
-                                  packages_autocalculated: accWithThisId.packages_autocalculated + packages,
+                                  packages_autocalculated: accWithThisId.packages_autocalculated + packages_manual,
                                   ddds_autocalculated:
                                       accWithThisId.ddds_autocalculated +
                                       dddPerProductConsumptionPackages.dddConsumptionPackages,
@@ -525,7 +525,7 @@ function aggregateDataByAtcRouteAdminYearHealthSectorAndHealthLevel(
                                   route_admin_autocalculated: AMR_GLASS_AMC_TEA_ROUTE_ADMIN,
                                   salt_autocalculated: AMR_GLASS_AMC_TEA_SALT,
                                   year: period,
-                                  packages_autocalculated: packages,
+                                  packages_autocalculated: packages_manual,
                                   tons_autocalculated: contentTonnesOfProduct.contentTonnes,
                                   ddds_autocalculated: dddPerProductConsumptionPackages.dddConsumptionPackages,
                                   data_status_autocalculated: data_status_manual,

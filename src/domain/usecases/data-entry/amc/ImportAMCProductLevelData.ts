@@ -22,11 +22,15 @@ import { CustomValidationsAMCProductData } from "./CustomValidationsAMCProductDa
 import { GlassATCDefaultRepository } from "../../../../data/repositories/GlassATCDefaultRepository";
 import moment from "moment";
 import { AMCProductDataRepository } from "../../../repositories/data-entry/AMCProductDataRepository";
+import { CODE_PRODUCT_NOT_HAVE_ATC, COMB_CODE_PRODUCT_NOT_HAVE_ATC } from "../../../entities/GlassAtcVersionData";
 
 export const AMC_PRODUCT_REGISTER_PROGRAM_ID = "G6ChA5zMW9n";
 export const AMC_RAW_PRODUCT_CONSUMPTION_STAGE_ID = "GmElQHKXLIE";
 export const AMC_RAW_PRODUCT_CONSUMPTION_CALCULATED_STAGE_ID = "q8cl5qllyjd";
 const AMR_GLASS_AMC_TET_PRODUCT_REGISTER = "uE6bIKLsGYW";
+const AMR_GLASS_AMC_TEA_ATC = "aK1JpD14imM";
+const AMR_GLASS_AMC_TEA_COMBINATION = "mG49egdYK3G";
+
 export class ImportAMCProductLevelData {
     constructor(
         private excelRepository: ExcelRepository,
@@ -66,7 +70,7 @@ export class ImportAMCProductLevelData {
                     if (!dataPackage) return Future.error("Cannot find data package");
 
                     if (action === "CREATE_AND_UPDATE") {
-                        return this.mapAMCProductDataToTrackedEntities(
+                        return this.getTrackedEntitiesFromAMCProductData(
                             dataPackage,
                             orgUnitId,
                             orgUnitName,
@@ -138,7 +142,7 @@ export class ImportAMCProductLevelData {
         });
     }
 
-    private mapAMCProductDataToTrackedEntities(
+    private getTrackedEntitiesFromAMCProductData(
         amcProductData: DataPackage,
         orgUnitId: Id,
         orgUnitName: string,
@@ -149,6 +153,12 @@ export class ImportAMCProductLevelData {
             .flatMap(metadata => {
                 if (amcProductData.type !== "trackerPrograms") return Future.error("Incorrect data package");
                 const trackedEntities = amcProductData.trackedEntityInstances.map(tei => {
+                    const productWithoutAtcCode = tei.attributeValues.some(
+                        ({ attribute, value }) =>
+                            (attribute.id === AMR_GLASS_AMC_TEA_ATC && value === CODE_PRODUCT_NOT_HAVE_ATC) ||
+                            (attribute.id === AMR_GLASS_AMC_TEA_COMBINATION && value === COMB_CODE_PRODUCT_NOT_HAVE_ATC)
+                    );
+
                     const attributes: D2TrackerEnrollmentAttribute[] = metadata.programAttributes.map(
                         (attr: {
                             id: string;
@@ -180,36 +190,40 @@ export class ImportAMCProductLevelData {
                         de => de.trackedEntityInstance === tei.id
                     );
 
-                    const events: D2TrackerEvent[] = currentDataEntryRows.map(dataEntry => {
-                        const rawProductConsumptionStageDataValues: { dataElement: string; value: string }[] =
-                            metadata.programStageDataElements.map((de: { id: string; name: string; code: string }) => {
-                                const currentDataElement = dataEntry.dataValues.find(
-                                    dataEntry => dataEntry.dataElement === de.id
-                                )?.value;
-                                return {
-                                    dataElement: de.id,
-                                    // @ts-ignore
-                                    value: currentDataElement ? currentDataElement : "",
-                                };
-                            });
+                    const events: D2TrackerEvent[] = productWithoutAtcCode
+                        ? []
+                        : currentDataEntryRows.map(dataEntry => {
+                              const rawProductConsumptionStageDataValues: { dataElement: string; value: string }[] =
+                                  metadata.programStageDataElements.map(
+                                      (de: { id: string; name: string; code: string }) => {
+                                          const currentDataElement = dataEntry.dataValues.find(
+                                              dataEntry => dataEntry.dataElement === de.id
+                                          )?.value;
+                                          return {
+                                              dataElement: de.id,
+                                              // @ts-ignore
+                                              value: currentDataElement ? currentDataElement : "",
+                                          };
+                                      }
+                                  );
 
-                        //Validation rule : Set to 1st Jan of corresponding year
-                        const occurredAt =
-                            moment(new Date(`${period}-01-01`))
-                                .toISOString()
-                                .split("T")
-                                .at(0) ?? period;
+                              //Validation rule : Set to 1st Jan of corresponding year
+                              const occurredAt =
+                                  moment(new Date(`${period}-01-01`))
+                                      .toISOString()
+                                      .split("T")
+                                      .at(0) ?? period;
 
-                        return {
-                            program: AMC_PRODUCT_REGISTER_PROGRAM_ID,
-                            event: "",
-                            programStage: AMC_RAW_PRODUCT_CONSUMPTION_STAGE_ID,
-                            orgUnit: dataEntry.orgUnit,
-                            dataValues: rawProductConsumptionStageDataValues,
-                            occurredAt: occurredAt,
-                            status: "COMPLETED",
-                        };
-                    });
+                              return {
+                                  program: AMC_PRODUCT_REGISTER_PROGRAM_ID,
+                                  event: "",
+                                  programStage: AMC_RAW_PRODUCT_CONSUMPTION_STAGE_ID,
+                                  orgUnit: dataEntry.orgUnit,
+                                  dataValues: rawProductConsumptionStageDataValues,
+                                  occurredAt: occurredAt,
+                                  status: "COMPLETED",
+                              };
+                          });
 
                     const enrollments: D2TrackerEnrollment[] = [
                         {

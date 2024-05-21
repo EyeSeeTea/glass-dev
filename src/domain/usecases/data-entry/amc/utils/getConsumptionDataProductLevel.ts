@@ -53,6 +53,13 @@ export function getConsumptionDataProductLevel(params: {
         );
     }
 
+    if (!productDataTrackedEntities) {
+        logger.error(
+            `Cannot find Product Register Data for orgUnitsId ${orgUnitId} and period ${period} for calculations`
+        );
+        return Future.error("Cannot find Product Register Data");
+    }
+
     const rawProductConsumptionStage = productRegisterProgramMetadata?.programStages.find(
         ({ id }) => id === AMC_RAW_PRODUCT_CONSUMPTION_STAGE_ID
     );

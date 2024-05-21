@@ -10,7 +10,7 @@ export type ProductRegistryAttributes = {
     AMR_GLASS_AMC_TEA_COMBINATION?: string;
     AMR_GLASS_AMC_TEA_ROUTE_ADMIN: RouteOfAdministrationCode;
     AMR_GLASS_AMC_TEA_SALT: SaltCode;
-    AMR_AMC_TEA_VOLUME: number;
+    AMR_GLASS_AMC_TEA_VOLUME: number;
 };
 
 export const PRODUCT_REGISTRY_ATTRIBUTES_KEYS = [
@@ -23,5 +23,5 @@ export const PRODUCT_REGISTRY_ATTRIBUTES_KEYS = [
     "AMR_GLASS_AMC_TEA_COMBINATION",
     "AMR_GLASS_AMC_TEA_ROUTE_ADMIN",
     "AMR_GLASS_AMC_TEA_SALT",
-    "AMR_AMC_TEA_VOLUME",
+    "AMR_GLASS_AMC_TEA_VOLUME",
 ];

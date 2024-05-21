@@ -16,6 +16,8 @@ export type GlassATCRecalculateDataInfo = {
 
 export const LAST_ATC_CODE_LEVEL = 5;
 export const DEFAULT_SALT_CODE = "XXXX";
+export const CODE_PRODUCT_NOT_HAVE_ATC = "Z99ZZ99";
+export const COMB_CODE_PRODUCT_NOT_HAVE_ATC = "Z99ZZ99_99";
 
 export type ATCCodeLevel5 = string;
 
