@@ -180,7 +180,6 @@ export class ImportAMCProductLevelData {
                             }
                             return {
                                 attribute: attr.id,
-                                // @ts-ignore
                                 value: currentAttrVal ? currentAttrVal : "",
                             };
                         }
@@ -201,7 +200,6 @@ export class ImportAMCProductLevelData {
                                           )?.value;
                                           return {
                                               dataElement: de.id,
-                                              // @ts-ignore
                                               value: currentDataElement ? currentDataElement : "",
                                           };
                                       }
