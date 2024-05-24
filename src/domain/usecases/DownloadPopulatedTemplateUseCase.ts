@@ -24,7 +24,6 @@ export class DownloadPopulatedTemplateUseCase implements UseCase {
     ): FutureData<File> {
         const startDateOfPeriod = moment(period).startOf("year");
         const endDateOfPeriod = moment(period).endOf("year");
-        const useCodesForMetadata = moduleName === "EGASP" ? true : false;
         const downloadRelationships = moduleName === "AMC" && fileType === "PRODUCT" ? true : false;
         const filterTEIEnrollmentDate = downloadRelationships;
 
@@ -40,7 +39,7 @@ export class DownloadPopulatedTemplateUseCase implements UseCase {
                 orgUnits: [orgUnit],
                 populate: true,
                 downloadRelationships,
-                useCodesForMetadata,
+                useCodesForMetadata: moduleName === "EGASP" || moduleName === "AMC",
                 downloadType,
                 populateStartDate: startDateOfPeriod,
                 populateEndDate: endDateOfPeriod,
