@@ -170,7 +170,7 @@ export class ImportAMCProductLevelData {
                         }) => {
                             const currentAttribute = tei.attributeValues.find(at => at.attribute.id === attr.id);
                             let currentAttrVal = attr.optionSetValue
-                                ? attr.optionSet.options.find(option => option.name === currentAttribute?.value)?.code
+                                ? attr.optionSet.options.find(option => option.code === currentAttribute?.value)?.code
                                 : currentAttribute?.value;
 
                             if (attr.valueType === "BOOLEAN") {
@@ -180,7 +180,6 @@ export class ImportAMCProductLevelData {
                             }
                             return {
                                 attribute: attr.id,
-                                // @ts-ignore
                                 value: currentAttrVal ? currentAttrVal : "",
                             };
                         }
@@ -201,7 +200,6 @@ export class ImportAMCProductLevelData {
                                           )?.value;
                                           return {
                                               dataElement: de.id,
-                                              // @ts-ignore
                                               value: currentDataElement ? currentDataElement : "",
                                           };
                                       }
