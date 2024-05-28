@@ -381,7 +381,7 @@ export class DownloadTemplateDefaultRepository implements DownloadTemplateReposi
                             attributeOptionCombo: true,
                             latitude: true,
                             longitude: true,
-                            trackedEntityInstance: true,
+                            trackedEntity: true,
                             programStage: true,
                         },
                         program: program,
