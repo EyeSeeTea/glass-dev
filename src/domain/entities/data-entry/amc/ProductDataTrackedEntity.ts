@@ -7,7 +7,7 @@ export type EventDataValue = {
 
 export type Event = {
     eventId: Id;
-    occurredAt: Id;
+    occurredAt: string;
     dataValues: EventDataValue[];
 };
 
@@ -22,6 +22,7 @@ export type ProductDataTrackedEntity = {
     trackedEntityId: Id;
     enrollmentId: Id;
     enrollmentStatus: Id;
+    enrolledAt: string;
     events: Event[];
     attributes: Attributes[];
 };
