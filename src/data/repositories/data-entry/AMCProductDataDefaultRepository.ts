@@ -278,7 +278,8 @@ export class AMCProductDataDefaultRepository implements AMCProductDataRepository
                         trackedEntityId: trackedEntity.trackedEntity,
                         enrollmentId: trackedEntity.enrollments[0].enrollment,
                         enrollmentStatus: trackedEntity.enrollments[0].status,
-                        events,
+                        enrolledAt: trackedEntity.enrollments[0].enrolledAt,
+                        events: events,
                         attributes: trackedEntity.attributes.map(({ attribute, valueType, value }) => ({
                             id: attribute,
                             valueType: valueType as string,
@@ -300,9 +301,14 @@ export class AMCProductDataDefaultRepository implements AMCProductDataRepository
         return rawSubstanceConsumptionCalculatedData
             .map(data => {
                 const productId = data.AMR_GLASS_AMC_TEA_PRODUCT_ID;
-                const productDataTrackedEntity = productDataTrackedEntities.find(productDataTrackedEntity =>
-                    productDataTrackedEntity.attributes.some(attribute => attribute.value === productId)
-                );
+                const productDataTrackedEntity = productDataTrackedEntities.find(productDataTrackedEntity => {
+                    const enrolledYear = new Date(productDataTrackedEntity.enrolledAt).getFullYear();
+                    return (
+                        productDataTrackedEntity.attributes.some(attribute => attribute.value === productId) &&
+                        enrolledYear === Number(period)
+                    );
+                });
+
                 if (productDataTrackedEntity) {
                     const dataValues: DataValue[] = rawSubstanceConsumptionCalculatedStageMetadata.dataElements.map(
                         ({ id, code, valueType, optionSetValue, optionSet }) => {
