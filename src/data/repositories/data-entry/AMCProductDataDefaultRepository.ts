@@ -101,10 +101,11 @@ export class AMCProductDataDefaultRepository implements AMCProductDataRepository
 
     getProductRegisterAndRawProductConsumptionByProductIds(
         orgUnitId: Id,
-        productIds: string[]
+        productIds: string[],
+        period: string
     ): FutureData<ProductDataTrackedEntity[]> {
         return Future.fromPromise(
-            this.getProductRegisterAndRawProductConsumptionByProductIdsAsync(orgUnitId, productIds)
+            this.getProductRegisterAndRawProductConsumptionByProductIdsAsync(orgUnitId, productIds, period)
         ).map(trackedEntities => {
             return this.mapFromTrackedEntitiesToProductData(trackedEntities);
         });
@@ -134,7 +135,8 @@ export class AMCProductDataDefaultRepository implements AMCProductDataRepository
 
     private async getProductRegisterAndRawProductConsumptionByProductIdsAsync(
         orgUnit: Id,
-        productIds: string[]
+        productIds: string[],
+        period: string
     ): Promise<D2TrackerTrackedEntity[]> {
         const trackedEntities: D2TrackerTrackedEntity[] = [];
         const pageSize = 250;
@@ -143,9 +145,18 @@ export class AMCProductDataDefaultRepository implements AMCProductDataRepository
         let result;
         const productIdsString = productIds.join(";");
         const filter = `${AMR_GLASS_AMC_TEA_PRODUCT_ID}:IN:${productIdsString}`;
+        const enrollmentEnrolledAfter = `${period}-1-1`;
+        const enrollmentEnrolledBefore = `${period}-12-31`;
 
         do {
-            result = await this.getTrackedEntitiesOfPage({ orgUnit, filter, page, pageSize });
+            result = await this.getTrackedEntitiesOfPage({
+                orgUnit,
+                filter,
+                page,
+                pageSize,
+                enrollmentEnrolledBefore,
+                enrollmentEnrolledAfter,
+            });
             trackedEntities.push(...result.instances);
             page++;
         } while (result.page < totalPages);
@@ -267,7 +278,8 @@ export class AMCProductDataDefaultRepository implements AMCProductDataRepository
                         trackedEntityId: trackedEntity.trackedEntity,
                         enrollmentId: trackedEntity.enrollments[0].enrollment,
                         enrollmentStatus: trackedEntity.enrollments[0].status,
-                        events,
+                        enrolledAt: trackedEntity.enrollments[0].enrolledAt,
+                        events: events,
                         attributes: trackedEntity.attributes.map(({ attribute, valueType, value }) => ({
                             id: attribute,
                             valueType: valueType as string,
@@ -289,9 +301,14 @@ export class AMCProductDataDefaultRepository implements AMCProductDataRepository
         return rawSubstanceConsumptionCalculatedData
             .map(data => {
                 const productId = data.AMR_GLASS_AMC_TEA_PRODUCT_ID;
-                const productDataTrackedEntity = productDataTrackedEntities.find(productDataTrackedEntity =>
-                    productDataTrackedEntity.attributes.some(attribute => attribute.value === productId)
-                );
+                const productDataTrackedEntity = productDataTrackedEntities.find(productDataTrackedEntity => {
+                    const enrolledYear = new Date(productDataTrackedEntity.enrolledAt).getFullYear();
+                    return (
+                        productDataTrackedEntity.attributes.some(attribute => attribute.value === productId) &&
+                        enrolledYear === Number(period)
+                    );
+                });
+
                 if (productDataTrackedEntity) {
                     const dataValues: DataValue[] = rawSubstanceConsumptionCalculatedStageMetadata.dataElements.map(
                         ({ id, code, valueType, optionSetValue, optionSet }) => {

@@ -49,7 +49,8 @@ export class CalculateConsumptionDataProductLevelUseCase {
                     productDataTrackedEntities:
                         this.amcProductDataRepository.getProductRegisterAndRawProductConsumptionByProductIds(
                             orgUnitId,
-                            productIds
+                            productIds,
+                            period
                         ),
                     atcVersionHistory: this.atcRepository.getAtcHistory(),
                 });

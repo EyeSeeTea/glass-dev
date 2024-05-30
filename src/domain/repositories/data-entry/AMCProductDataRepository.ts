@@ -23,7 +23,8 @@ export interface AMCProductDataRepository {
     getProductRegisterProgramMetadata(): FutureData<ProductRegisterProgramMetadata | undefined>;
     getProductRegisterAndRawProductConsumptionByProductIds(
         orgUnitId: Id,
-        productIds: string[]
+        productIds: string[],
+        period: string
     ): FutureData<ProductDataTrackedEntity[]>;
     getAllProductRegisterAndRawProductConsumptionByPeriod(
         orgUnitId: Id,
