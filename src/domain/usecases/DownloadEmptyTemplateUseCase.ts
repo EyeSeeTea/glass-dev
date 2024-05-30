@@ -22,7 +22,6 @@ export class DownloadEmptyTemplateUseCase implements UseCase {
         );
 
         const downloadRelationships = moduleName === "AMC" && fileType === "PRODUCT" ? true : false;
-        const useCodesForMetadata = moduleName === "EGASP" ? true : false;
         return this.metadataRepository.getClinicsAndLabsInOrgUnitId(orgUnit).flatMap(clinicsAndLabsOrgUnits => {
             const orgUnits = moduleName === "EGASP" ? clinicsAndLabsOrgUnits : [orgUnit];
             return Future.fromPromise(
@@ -32,7 +31,7 @@ export class DownloadEmptyTemplateUseCase implements UseCase {
                     orgUnits,
                     populate: false, //Do not download data for empty template
                     downloadRelationships,
-                    useCodesForMetadata,
+                    useCodesForMetadata: moduleName === "EGASP" || moduleName === "AMC",
                 })
             );
         });

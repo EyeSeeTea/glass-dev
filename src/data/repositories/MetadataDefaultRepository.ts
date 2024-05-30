@@ -12,6 +12,23 @@ import { Id } from "../../domain/entities/Base";
 const AMR_EGASP_Clinics = "lohCVAxPxMM";
 const AMR_EGASP_Labs = "KhLlLrKWPKu";
 
+type CodeRef = {
+    code: string;
+    id: Id;
+    shortName: string;
+};
+
+type MetadataIdReponse = {
+    system: {
+        id: Id;
+        rev: string;
+        version: string;
+        date: string;
+    };
+    trackedEntityAttributes?: CodeRef[];
+    programs?: CodeRef[];
+    dataElements?: CodeRef[];
+};
 export class MetadataDefaultRepository implements MetadataRepository {
     private api: D2Api;
 
@@ -21,6 +38,48 @@ export class MetadataDefaultRepository implements MetadataRepository {
 
     constructor(instance: Instance) {
         this.api = getD2APiFromInstance(instance);
+    }
+
+    getD2Ids(ids: string[]): FutureData<NamedRef[]> {
+        return apiToFuture(
+            this.api
+                .get<MetadataIdReponse>(`/metadata?filter=id:in:[${ids.join(",")}]&fields=id,code,shortName`)
+                .map(response => {
+                    if (response?.data) {
+                        console.debug("response", response);
+
+                        const deIds =
+                            response.data.dataElements?.map((idRef: any) => {
+                                return {
+                                    id: idRef.id,
+                                    name: `${idRef.shortName}(${idRef.code})`,
+                                };
+                            }) || [];
+
+                        const programIds =
+                            response.data.programs?.map((idRef: any) => {
+                                return {
+                                    id: idRef.id,
+                                    name: `${idRef.shortName}(${idRef.code})`,
+                                };
+                            }) || [];
+
+                        const teaIds =
+                            response.data.trackedEntityAttributes?.map((idRef: any) => {
+                                return {
+                                    id: idRef.id,
+                                    name: `${idRef.shortName}(${idRef.code})`,
+                                };
+                            }) || [];
+
+                        const parsedIds = deIds.concat(programIds).concat(teaIds);
+
+                        return parsedIds;
+                    } else {
+                        return [];
+                    }
+                })
+        );
     }
 
     getDataElementNames(dataElementIds: string[]): FutureData<NamedRef[]> {
