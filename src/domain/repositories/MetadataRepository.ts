@@ -6,6 +6,7 @@ import { CodedRef, NamedRef } from "../entities/Ref";
 
 export interface MetadataRepository {
     getDataElementNames(dataElementIds: string[]): FutureData<NamedRef[]>;
+    getD2Ids(ids: string[]): FutureData<NamedRef[]>;
     getOrgUnitsByCode(orgUnitCodes: string[]): FutureData<CodedRef[]>;
     getClinicOrLabNames(clinicLabIds: string[]): FutureData<{ id: string; name: string }[]>;
     getClinicsAndLabsInOrgUnitId(id: string): FutureData<Id[]>;
