@@ -95,7 +95,7 @@ function main() {
                     !data.uploadStatuses.includes("COMPLETED") &&
                     !data.uploadStatuses.includes("VALIDATED")
             );
-            console.debug(`All uploads with data corruption : ${JSON.stringify(corruptedAmrData)}`);
+            console.debug(`All uploads with data corruption : ${JSON.stringify(corruptedAmrData, null, 2)}`);
         },
     });
 
