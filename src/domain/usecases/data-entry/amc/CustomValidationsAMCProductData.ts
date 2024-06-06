@@ -13,9 +13,9 @@ const AMR_GLASS_AMC_TEA_ROUTE_ADMIN = "m4eyu3tO5IV";
 const AMR_GLASS_AMC_TEA_SALT = "K8wjLXjYFzf";
 const AMR_GLASS_AMC_TEA_PRODUCT_ID = "iasfoeU8veF";
 const atcLevel4WithOralROA1 = "A07AA";
-const atcLevel4WithOralROA2 = "P01AB";
-const atcLevel4WithOralROA3 = "J01XD";
-const atcLevel4WithOralROA4 = "J01XA";
+const atcLevel4WithOralOrRectalROA2 = "P01AB";
+const atcLevel4WithParenteralROA3 = "J01XD";
+const atcLevel4WithParenteralROA4 = "J01XA";
 const atcCodeWithSaltHippAndMand = "J01XX05";
 const atcCodeWithRoaOAndSaltDefault = "J01FA01";
 const CODE_PRODUCT_NOT_HAVE_ATC = "Z99ZZ99";
@@ -161,17 +161,34 @@ export class CustomValidationsAMCProductData {
                     } else {
                         const atcCodeByLevel = getAtcCodeByLevel(atcData, atcCode);
                         const atcCodeLevel4 = atcCodeByLevel?.level4;
+
+                        if (atcCodeLevel4 === atcLevel4WithOralROA1 && roa && roa !== "O") {
+                            curErrors.push({
+                                error: i18n.t(
+                                    `If ATC code is in ATC level ${atcCodeLevel4}, Route of administration must be oral`
+                                ),
+                                line: tei.trackedEntity ? parseInt(tei.trackedEntity) + 6 : -1,
+                            });
+                        }
+
+                        if (atcCodeLevel4 === atcLevel4WithOralOrRectalROA2 && roa && roa !== "O" && roa !== "R") {
+                            curErrors.push({
+                                error: i18n.t(
+                                    `If ATC code is in ATC level ${atcCodeLevel4}, Route of administration must be oral or rectal`
+                                ),
+                                line: tei.trackedEntity ? parseInt(tei.trackedEntity) + 6 : -1,
+                            });
+                        }
+
                         if (
-                            (atcCodeLevel4 === atcLevel4WithOralROA1 ||
-                                atcCodeLevel4 === atcLevel4WithOralROA2 ||
-                                atcCodeLevel4 === atcLevel4WithOralROA3 ||
-                                atcCodeLevel4 === atcLevel4WithOralROA4) &&
+                            (atcCodeLevel4 === atcLevel4WithParenteralROA3 ||
+                                atcCodeLevel4 === atcLevel4WithParenteralROA4) &&
                             roa &&
-                            roa !== "O"
+                            roa !== "P"
                         ) {
                             curErrors.push({
                                 error: i18n.t(
-                                    `If ATC code in ATC levels 4 A07AA and P01AB, Route of administration must be oral`
+                                    `If ATC code is in ATC level ${atcCodeLevel4}, Route of administration must be parenteral`
                                 ),
                                 line: tei.trackedEntity ? parseInt(tei.trackedEntity) + 6 : -1,
                             });
