@@ -165,7 +165,7 @@ export class CustomValidationsAMCProductData {
                         if (atcCodeLevel4 === atcLevel4WithOralROA1 && roa && roa !== "O") {
                             curErrors.push({
                                 error: i18n.t(
-                                    `If ATC code is in ATC level ${atcCodeLevel4}, Route of administration must be oral`
+                                    `If ATC code ${atcCode} is in ATC level ${atcCodeLevel4}, Route of administration must be oral`
                                 ),
                                 line: tei.trackedEntity ? parseInt(tei.trackedEntity) + 6 : -1,
                             });
@@ -174,7 +174,7 @@ export class CustomValidationsAMCProductData {
                         if (atcCodeLevel4 === atcLevel4WithOralOrRectalROA2 && roa && roa !== "O" && roa !== "R") {
                             curErrors.push({
                                 error: i18n.t(
-                                    `If ATC code is in ATC level ${atcCodeLevel4}, Route of administration must be oral or rectal`
+                                    `If ATC code ${atcCode} is in ATC level ${atcCodeLevel4}, Route of administration must be oral or rectal`
                                 ),
                                 line: tei.trackedEntity ? parseInt(tei.trackedEntity) + 6 : -1,
                             });
@@ -188,7 +188,7 @@ export class CustomValidationsAMCProductData {
                         ) {
                             curErrors.push({
                                 error: i18n.t(
-                                    `If ATC code is in ATC level ${atcCodeLevel4}, Route of administration must be parenteral`
+                                    `If ATC code ${atcCode} is in ATC level ${atcCodeLevel4}, Route of administration must be parenteral`
                                 ),
                                 line: tei.trackedEntity ? parseInt(tei.trackedEntity) + 6 : -1,
                             });
@@ -197,7 +197,7 @@ export class CustomValidationsAMCProductData {
                         if (validATCCode === atcCodeWithSaltHippAndMand && salt && salt !== "HIPP" && salt !== "MAND") {
                             curErrors.push({
                                 error: i18n.t(
-                                    `If ATC code is ${atcCodeWithSaltHippAndMand}, salt must be either HIPP or MAND`
+                                    `If ATC code ${atcCode} is ${atcCodeWithSaltHippAndMand}, salt must be either HIPP or MAND`
                                 ),
                                 line: tei.trackedEntity ? parseInt(tei.trackedEntity) + 6 : -1,
                             });
