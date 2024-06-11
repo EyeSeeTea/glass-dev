@@ -1,27 +1,35 @@
-import React from "react";
+import React, { useCallback } from "react";
 import { Button, Typography } from "@material-ui/core";
 import styled from "styled-components";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { ImportSummary } from "../../../domain/entities/data-entry/ImportSummary";
 import InfoIcon from "@material-ui/icons/Info";
+import { EffectFn } from "../../hooks/use-callback-effect";
 
 interface SupportButtonsProps {
-    changeStep: (step: number) => void;
     primaryFileImportSummary: ImportSummary | undefined;
+    onCancelUpload: EffectFn<[event: React.MouseEvent<HTMLButtonElement, MouseEvent>]>;
 }
 
 interface ContentWrapperProps {
     isVisible: boolean;
 }
 
-export const SupportButtons: React.FC<SupportButtonsProps> = ({ changeStep, primaryFileImportSummary }) => {
-    const onHelpClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+export const SupportButtons: React.FC<SupportButtonsProps> = ({ primaryFileImportSummary, onCancelUpload }) => {
+    const onHelpClick = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault();
         const helpWidgetButton = document.querySelector(
             ".feedback-btn.feedback-init-btn.feedback-btn-bottom"
         ) as HTMLElement | null;
         helpWidgetButton?.click();
-    };
+    }, []);
+
+    const handleCancelUpload = useCallback(
+        (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+            onCancelUpload(event);
+        },
+        [onCancelUpload]
+    );
 
     return (
         <ContentWrapper
@@ -49,12 +57,12 @@ export const SupportButtons: React.FC<SupportButtonsProps> = ({ changeStep, prim
                 <Button
                     variant="contained"
                     color="primary"
-                    onClick={() => changeStep(1)}
+                    onClick={handleCancelUpload}
                     disabled={
                         primaryFileImportSummary && primaryFileImportSummary.blockingErrors.length > 0 ? false : true
                     }
                 >
-                    {i18n.t("Upload New Data Files")}
+                    {i18n.t("Cancel upload")}
                 </Button>
                 <HelperWrapper>
                     <InfoIcon fontSize={"small"} color="disabled" />
