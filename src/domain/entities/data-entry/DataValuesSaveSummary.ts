@@ -14,6 +14,7 @@ export interface DataValuesSaveSummary {
     conflicts?: Array<{
         object: Id;
         value: string;
+        indexes?: Array<number>;
     }>;
     importTime: Date;
 }
