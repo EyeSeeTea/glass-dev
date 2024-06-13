@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import { Backdrop, Button, CircularProgress, Typography } from "@material-ui/core";
 import { BlockingErrors } from "./BlockingErrors";
 import styled from "styled-components";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
 import { NonBlockingWarnings } from "./NonBlockingWarnings";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
+import CloudDownload from "@material-ui/icons/CloudDownload";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { useAppContext } from "../../contexts/app-context";
 import { useCurrentModuleContext } from "../../contexts/current-module-context";
@@ -48,6 +49,28 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
     const changeType = (fileType: string) => {
         setFileType(fileType);
     };
+
+    const downloadErrorsClick = useCallback(() => {
+        const csvContent = [
+            Object.keys(primaryFileImportSummary?.blockingErrors[0] ?? {}).join(","),
+            ...(primaryFileImportSummary?.blockingErrors.map(
+                ({ error, count, lines }) => `"${error}",${count},"${lines?.join(";")}"`
+            ) ?? []),
+        ].join("\n");
+
+        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8," });
+        const downloadSimulateAnchor = document.createElement("a");
+        downloadSimulateAnchor.href = URL.createObjectURL(blob);
+        downloadSimulateAnchor.download = `${currentModuleAccess.moduleName}-${currentOrgUnitAccess.orgUnitCode}-${currentPeriod}-ERRORS.csv`;
+        // simulate link click
+        document.body.appendChild(downloadSimulateAnchor);
+        downloadSimulateAnchor.click();
+    }, [
+        currentModuleAccess.moduleName,
+        currentOrgUnitAccess.orgUnitCode,
+        currentPeriod,
+        primaryFileImportSummary?.blockingErrors,
+    ]);
 
     const continueClick = () => {
         if (primaryFile && moduleProperties.get(currentModuleAccess.moduleName)?.isDryRunReq) {
@@ -345,18 +368,32 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
             )}
             <div className="bottom">
                 <SupportButtons changeStep={changeStep} primaryFileImportSummary={primaryFileImportSummary} />
-                <Button
-                    variant="contained"
-                    color="primary"
-                    endIcon={<ChevronRightIcon />}
-                    onClick={continueClick}
-                    disableElevation
-                    disabled={
-                        primaryFileImportSummary && primaryFileImportSummary.blockingErrors.length > 0 ? true : false
-                    }
-                >
-                    {i18n.t("Continue")}
-                </Button>
+                <div className="right">
+                    {primaryFileImportSummary && primaryFileImportSummary.blockingErrors.length > 0 && (
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            endIcon={<CloudDownload />}
+                            onClick={downloadErrorsClick}
+                        >
+                            {i18n.t("Download Errors as CSV")}
+                        </Button>
+                    )}
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        endIcon={<ChevronRightIcon />}
+                        onClick={continueClick}
+                        disableElevation
+                        disabled={
+                            primaryFileImportSummary && primaryFileImportSummary.blockingErrors.length > 0
+                                ? true
+                                : false
+                        }
+                    >
+                        {i18n.t("Continue")}
+                    </Button>
+                </div>
             </div>
         </ContentWrapper>
     );
@@ -425,6 +462,11 @@ const ContentWrapper = styled.div`
         display: flex;
         align-items: flex-start;
         justify-content: space-between;
+    }
+    .right {
+        display: flex;
+        align-items: flex-end;
+        gap: 20px;
     }
 `;
 
