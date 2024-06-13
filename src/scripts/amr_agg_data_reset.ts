@@ -1,6 +1,7 @@
 import { command, run, string, option } from "cmd-ts";
 import path from "path";
 import { D2Api } from "../types/d2-api";
+import fs from "fs";
 
 function main() {
     const cmd = command({
@@ -54,21 +55,18 @@ function main() {
                 `${dataSetValues.dataValues.length} data values found for period ${period} and org unit ${orgUnitId}`
             );
 
-            const updatedDataValues = dataSetValues.dataValues.map(dataValue => {
-                return {
-                    ...dataValue,
-                    value: "",
-                };
-            });
+            const updatedDataValues = {
+                dataValues: dataSetValues.dataValues.map(dataValue => {
+                    return {
+                        ...dataValue,
+                        value: "",
+                    };
+                }),
+            };
 
-            //5. Delete all data values for given country and period.
-            const deleteStatus = await api.dataValues
-                .postSetAsync({ importStrategy: "DELETE" }, { dataValues: updatedDataValues })
-                .getData();
-
-            if (deleteStatus.status === "ERROR")
-                throw new Error(`The following ERROR occured during reset : ${deleteStatus.message}`);
-            else console.debug(`Data values reset for period ${period} and org unit ${orgUnitId}`);
+            //5.  Create a json object with data values for given country and period with empty values
+            const updateJson = JSON.stringify(updatedDataValues, null, 2);
+            fs.writeFileSync(`AMR_AGG_reset_${orgUnitId}_${period}.json`, updateJson);
         },
     });
 
