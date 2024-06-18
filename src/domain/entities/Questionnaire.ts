@@ -43,7 +43,7 @@ export type Question =
     | DateQuestion
     | SingleCheckQuestion;
 
-export type ValidationErrorMessage = "This value cannot be higher than the value provided in question 5.";
+export type ValidationErrorMessage = string;
 
 export interface QuestionBase {
     id: Id;
@@ -110,6 +110,7 @@ interface RuleToggleSectionsVisibility {
 interface RuleSectionValuesHigherThan {
     type: "sectionValuesHigherThan";
     dataElementCodesLowerToHigher: Dictionary<Code>;
+    errorMessage?: string;
 }
 
 export class QuestionnarieM {
@@ -144,7 +145,18 @@ export class QuestionnarieM {
                         ...questionnaireAcc,
                         sections: questionnaireAcc.sections.map((section): QuestionnaireSection => {
                             return rule.sectionCodes.includes(section.code)
-                                ? { ...section, isVisible: areRuleSectionsVisible }
+                                ? {
+                                      ...section,
+                                      isVisible: areRuleSectionsVisible,
+                                      questions: areRuleSectionsVisible
+                                          ? section.questions
+                                          : section.questions.map(question => {
+                                                return {
+                                                    ...question,
+                                                    value: undefined,
+                                                };
+                                            }),
+                                  }
                                 : section;
                         }),
                     };
@@ -183,13 +195,24 @@ export class QuestionnarieM {
                 if (parseFloat(questionWithHigherValue?.value as string) < parseFloat(question?.value as string)) {
                     return {
                         ...question,
-                        validationError: "This value cannot be higher than the value provided in question 5.",
+                        validationError: question.validationError
+                            ? rule.errorMessage && !question.validationError.includes(rule.errorMessage)
+                                ? question.validationError.concat(`; ${rule.errorMessage}`)
+                                : question.validationError
+                            : rule.errorMessage,
+                    };
+                } else {
+                    return {
+                        ...question,
+                        validationError:
+                            question.validationError?.replace(`${rule.errorMessage}`, "").trim().replace(/;$/, "") ??
+                            undefined,
                     };
                 }
             }
             return {
                 ...question,
-                validationError: undefined,
+                validationError: question.validationError ?? undefined,
             };
         });
     }
