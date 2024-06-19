@@ -1,3 +1,4 @@
+import { Maybe } from "../../../../types/utils";
 import { AmName, AwrName, RouteOfAdministrationCode, SaltCode } from "../../GlassAtcVersionData";
 import { Id } from "../../Ref";
 
@@ -12,11 +13,11 @@ export type SubstanceConsumptionCalculated = {
     data_status_autocalculated: number;
     health_sector_autocalculated: string;
     health_level_autocalculated: string;
-    am_class: AmName;
-    atc2: string;
-    atc3: string;
-    atc4: string;
-    aware: AwrName;
+    am_class: Maybe<AmName>;
+    atc2: Maybe<string>;
+    atc3: Maybe<string>;
+    atc4: Maybe<string>;
+    aware: Maybe<AwrName>;
     period: string;
     orgUnitId: Id;
     report_date: string;
