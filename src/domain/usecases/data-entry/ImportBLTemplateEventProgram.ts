@@ -63,7 +63,6 @@ export class ImportBLTemplateEventProgram {
                             return this.buildEventsPayload(
                                 dataPackage,
                                 action,
-                                period,
                                 eventListFileId,
                                 calculatedEventListFileId
                             ).flatMap(events => {
@@ -206,7 +205,6 @@ export class ImportBLTemplateEventProgram {
     private buildEventsPayload(
         dataPackage: DataPackage,
         action: ImportStrategy,
-        dataSubmissionPeriod: string,
         eventListFileId: string | undefined,
         calculatedEventListFileId?: string
     ): FutureData<D2TrackerEvent[]> {
@@ -216,7 +214,7 @@ export class ImportBLTemplateEventProgram {
                     ({ id, orgUnit, period, attribute, dataValues, dataForm, coordinate }, index) => {
                         const occurredAt =
                             dataForm === AMC_RAW_SUBSTANCE_CONSUMPTION_PROGRAM_ID
-                                ? moment(new Date(`${dataSubmissionPeriod}-01-01`))
+                                ? moment(new Date(`${period.split("-").at(0)}-01-01`))
                                       .toISOString()
                                       .split("T")
                                       .at(0) ?? period
