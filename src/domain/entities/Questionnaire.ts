@@ -43,7 +43,7 @@ export type Question =
     | DateQuestion
     | SingleCheckQuestion;
 
-export type ValidationErrorMessage = "This value cannot be higher than the value provided in question 5.";
+export type ValidationErrorMessage = string;
 
 export interface QuestionBase {
     id: Id;
@@ -99,7 +99,11 @@ export interface QuestionOption extends NamedRef {
     code?: string;
 }
 
-export type QuestionnaireRule = RuleToggleSectionsVisibility | RuleSectionValuesHigherThan;
+export type QuestionnaireRule =
+    | RuleToggleSectionsVisibility
+    | RuleSectionValuesHigherThan
+    | RuleQuestionValueLessThanConst
+    | RuleQuestionValueDoubleOfAnother;
 
 interface RuleToggleSectionsVisibility {
     type: "setSectionsVisibility";
@@ -110,8 +114,22 @@ interface RuleToggleSectionsVisibility {
 interface RuleSectionValuesHigherThan {
     type: "sectionValuesHigherThan";
     dataElementCodesLowerToHigher: Dictionary<Code>;
+    errorMessage: string;
 }
 
+interface RuleQuestionValueLessThanConst {
+    type: "questionValueLessThanConst";
+    dataElementCode: Code;
+    constValue: number;
+    errorMessage: string;
+}
+
+interface RuleQuestionValueDoubleOfAnother {
+    type: "questionValueDoubleOfAnother";
+    dataElementCode: Code;
+    doubleDataElementCode: Code;
+    errorMessage: string;
+}
 export class QuestionnarieM {
     static setAsComplete(questionnarie: Questionnaire, value: boolean): Questionnaire {
         return { ...questionnarie, isCompleted: value };
@@ -144,7 +162,18 @@ export class QuestionnarieM {
                         ...questionnaireAcc,
                         sections: questionnaireAcc.sections.map((section): QuestionnaireSection => {
                             return rule.sectionCodes.includes(section.code)
-                                ? { ...section, isVisible: areRuleSectionsVisible }
+                                ? {
+                                      ...section,
+                                      isVisible: areRuleSectionsVisible,
+                                      questions: areRuleSectionsVisible
+                                          ? section.questions
+                                          : section.questions.map(question => {
+                                                return {
+                                                    ...question,
+                                                    value: undefined,
+                                                };
+                                            }),
+                                  }
                                 : section;
                         }),
                     };
@@ -160,6 +189,28 @@ export class QuestionnarieM {
                                     rule,
                                     section.questions
                                 ),
+                            };
+                        }),
+                    };
+                }
+                case "questionValueLessThanConst": {
+                    return {
+                        ...questionnaireAcc,
+                        sections: questionnaireAcc.sections.map((section): QuestionnaireSection => {
+                            return {
+                                ...section,
+                                questions: this.applyRuleQuestionValueLessThan(rule, section.questions),
+                            };
+                        }),
+                    };
+                }
+                case "questionValueDoubleOfAnother": {
+                    return {
+                        ...questionnaireAcc,
+                        sections: questionnaireAcc.sections.map((section): QuestionnaireSection => {
+                            return {
+                                ...section,
+                                questions: this.applyRuleQuestionValueDoubleOfAnother(rule, section.questions),
                             };
                         }),
                     };
@@ -183,15 +234,75 @@ export class QuestionnarieM {
                 if (parseFloat(questionWithHigherValue?.value as string) < parseFloat(question?.value as string)) {
                     return {
                         ...question,
-                        validationError: "This value cannot be higher than the value provided in question 5.",
+                        validationError: this.addValidationError(question, rule.errorMessage),
+                    };
+                } else {
+                    return {
+                        ...question,
+                        validationError: this.removeValidationError(question, rule.errorMessage),
                     };
                 }
             }
             return {
                 ...question,
-                validationError: undefined,
+                validationError: question.validationError ?? undefined,
             };
         });
+    }
+    private static applyRuleQuestionValueLessThan(
+        rule: RuleQuestionValueLessThanConst,
+        questions: Question[]
+    ): Question[] {
+        return questions.map(question => {
+            if (question.code === rule.dataElementCode) {
+                if (parseFloat(question.value as string) < rule.constValue) {
+                    return {
+                        ...question,
+                        validationError: this.addValidationError(question, rule.errorMessage),
+                    };
+                } else {
+                    return {
+                        ...question,
+                        validationError: this.removeValidationError(question, rule.errorMessage),
+                    };
+                }
+            } else return question;
+        });
+    }
+
+    private static applyRuleQuestionValueDoubleOfAnother(
+        rule: RuleQuestionValueDoubleOfAnother,
+        questions: Question[]
+    ): Question[] {
+        return questions.map(question => {
+            if (question.code === rule.dataElementCode) {
+                const anotherQuestion = questions.find(q => q.code === rule.doubleDataElementCode);
+
+                if (2 * parseFloat(question.value as string) > parseFloat(anotherQuestion?.value as string)) {
+                    return {
+                        ...question,
+                        validationError: this.addValidationError(question, rule.errorMessage),
+                    };
+                } else {
+                    return {
+                        ...question,
+                        validationError: this.removeValidationError(question, rule.errorMessage),
+                    };
+                }
+            } else return question;
+        });
+    }
+
+    private static addValidationError(question: Question, errorMessage: string): string {
+        return question.validationError
+            ? !question.validationError.includes(errorMessage)
+                ? question.validationError.concat(`; ${errorMessage}`)
+                : question.validationError
+            : errorMessage;
+    }
+
+    private static removeValidationError(question: Question, errorMessage: string): string | undefined {
+        return question.validationError?.replace(`${errorMessage}`, "").trim().replace(/;$/, "") ?? undefined;
     }
 }
 
