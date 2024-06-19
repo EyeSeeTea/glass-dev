@@ -367,12 +367,15 @@ export class AMCSubstanceDataDefaultRepository implements AMCSubstanceDataReposi
         return Future.sequential(
             chunkedSubstanceIds.flatMap(substanceIdsChunk => {
                 const substanceIdsString = substanceIdsChunk.join(";");
+
+                // TODO: change pageSize to skipPaging:true when new version of d2-api
                 return apiToFuture(
                     this.api.tracker.events.get({
                         fields: eventFields,
                         program: AMC_RAW_SUBSTANCE_CONSUMPTION_PROGRAM_ID,
                         orgUnit: orgUnitId,
                         event: substanceIdsString,
+                        pageSize: substanceIdsChunk.length,
                     })
                 ).flatMap((eventsResponse: TrackerEventsResponse) => {
                     return Future.success(eventsResponse.instances);

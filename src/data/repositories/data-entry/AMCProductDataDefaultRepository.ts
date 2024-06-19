@@ -157,6 +157,8 @@ export class AMCProductDataDefaultRepository implements AMCProductDataRepository
             chunkedProductIds.flatMap(productIdsChunk => {
                 const productIdsString = productIdsChunk.join(";");
                 const filter = `${AMR_GLASS_AMC_TEA_PRODUCT_ID}:IN:${productIdsString}`;
+
+                // TODO: change pageSize to skipPaging:true when new version of d2-api
                 return apiToFuture(
                     this.api.tracker.trackedEntities.get({
                         fields: trackedEntitiesFields,
@@ -166,6 +168,7 @@ export class AMCProductDataDefaultRepository implements AMCProductDataRepository
                         filter: filter,
                         enrollmentEnrolledAfter: enrollmentEnrolledAfter,
                         enrollmentEnrolledBefore: enrollmentEnrolledBefore,
+                        pageSize: productIdsChunk.length,
                     })
                 ).flatMap((trackedEntitiesResponse: TrackedEntitiesGetResponse) => {
                     const productData = this.mapFromTrackedEntitiesToProductData(trackedEntitiesResponse.instances);
