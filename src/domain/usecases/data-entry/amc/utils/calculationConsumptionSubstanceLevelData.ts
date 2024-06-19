@@ -32,9 +32,6 @@ export function calculateConsumptionSubstanceLevelData(
 
             if (!atcVersionsByKeys[atc_version_manual]) {
                 logger.error(
-                    `ATC data not found for these version: ${atc_version_manual}. Calculated consumption data for this raw substance consumption data cannot be calculated.`
-                );
-                logger.debug(
                     `ATC data not found for these version: ${atc_version_manual}. Calculated consumption data for this raw substance consumption data cannot be calculated: ${JSON.stringify(
                         rawSubstanceConsumption
                     )}`
@@ -51,9 +48,6 @@ export function calculateConsumptionSubstanceLevelData(
 
             if (!dddStandarizedLatest) {
                 logger.error(
-                    `Data not calculated and moving to the next. ddd_value_latest and ddd_unit_latest could not be calculated.`
-                );
-                logger.debug(
                     `ddd_value_latest and ddd_unit_latest could not be calculated for ${JSON.stringify(
                         rawSubstanceConsumption
                     )}`
@@ -70,9 +64,6 @@ export function calculateConsumptionSubstanceLevelData(
 
             if (!dddStandarizedInRawSubstanceConsumption) {
                 logger.error(
-                    `Data not calculated and moving to the next. ddd_value_uploaded and ddd_unit_uploaded could not be calculated.`
-                );
-                logger.debug(
                     `ddd_value_uploaded and ddd_unit_uploaded could not be calculated for ${JSON.stringify(
                         rawSubstanceConsumption
                     )}`
@@ -102,13 +93,6 @@ export function calculateConsumptionSubstanceLevelData(
             const atcCodeByLevel = getAtcCodeByLevel(atcData, rawSubstanceConsumption.atc_manual);
             const aware = getAwareClass(awareClassData, rawSubstanceConsumption.atc_manual);
 
-            if (!atcCodeByLevel?.level2 || !atcCodeByLevel?.level3 || !atcCodeByLevel?.level4 || !am_class || !aware) {
-                logger.error(
-                    `Data not found. atc2: ${atcCodeByLevel?.level2}, atc3: ${atcCodeByLevel?.level3}, atc4: ${atcCodeByLevel?.level4}, am_class: ${am_class}, aware: ${aware}`
-                );
-                return;
-            }
-
             return {
                 period,
                 orgUnitId,
@@ -134,11 +118,6 @@ export function calculateConsumptionSubstanceLevelData(
 
     logger.success(
         `End of the calculation of consumption substance level data for organisation ${orgUnitId} and period ${period}`
-    );
-    logger.debug(
-        `End of the calculation of consumption substance level data for organisation ${orgUnitId} and period ${period}: results=${JSON.stringify(
-            calculatedConsumptionSubstanceLevelData
-        )}`
     );
     return calculatedConsumptionSubstanceLevelData;
 }
@@ -191,7 +170,6 @@ function getDDDsAdjust(
     // 3 - ratio_ddd = standardized_ddd_value_uploaded ÷ standardized_ddd_value_latest
     const ratioDDD = dddStandarizedInRawSubstanceConsumption / dddStandarizedLatest;
     // 4 - ddds_adjust = ddds × ratio_ddd
-    logger.debug(`Get ratio_ddd:  ${ratioDDD}`);
-    logger.debug(`Get ddds_adjust from ddds_manual: ${ddds_manual * ratioDDD}`);
+    logger.debug(`Get ratio_ddd: ${ratioDDD}. Get ddds_adjust from ddds_manual: ${ddds_manual * ratioDDD}`);
     return ddds_manual * ratioDDD;
 }
