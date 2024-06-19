@@ -244,7 +244,12 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
             ) {
                 if (primaryFile) {
                     compositionRoot.calculations
-                        .consumptionDataProductLevel(currentPeriod, currentOrgUnitAccess.orgUnitId, primaryFile)
+                        .consumptionDataProductLevel(
+                            currentPeriod,
+                            currentOrgUnitAccess.orgUnitId,
+                            primaryFile,
+                            currentModuleAccess.moduleName
+                        )
                         .run(
                             importSummary => {
                                 console.debug(importSummary);
