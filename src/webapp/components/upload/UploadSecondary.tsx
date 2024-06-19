@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 import { Button, CircularProgress } from "@material-ui/core";
 import styled from "styled-components";
 import i18n from "@eyeseetea/d2-ui-components/locales";
@@ -12,16 +12,19 @@ import { useAppContext } from "../../contexts/app-context";
 import { useCurrentDataSubmissionId } from "../../hooks/useCurrentDataSubmissionId";
 import { useCurrentModuleContext } from "../../contexts/current-module-context";
 import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context";
-import { useCallbackEffect } from "../../hooks/use-callback-effect";
+import { EffectFn, useCallbackEffect } from "../../hooks/use-callback-effect";
 import { useCurrentPeriodContext } from "../../contexts/current-period-context";
 import { moduleProperties } from "../../../domain/utils/ModuleProperties";
 
 interface UploadSecondaryProps {
     secondaryFile: File | null;
-    setSecondaryFile: React.Dispatch<React.SetStateAction<File | null>>;
+    setSecondaryFile: (maybeFile: File | null) => void;
     setHasSecondaryFile: React.Dispatch<React.SetStateAction<boolean>>;
     batchId: string;
     validate: (val: boolean) => void;
+    removeSecondaryFile: EffectFn<[event: React.MouseEvent<HTMLButtonElement, MouseEvent>]>;
+    isLoading: boolean;
+    setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export const UploadSecondary: React.FC<UploadSecondaryProps> = ({
@@ -30,6 +33,9 @@ export const UploadSecondary: React.FC<UploadSecondaryProps> = ({
     setSecondaryFile,
     setHasSecondaryFile,
     validate,
+    removeSecondaryFile,
+    isLoading,
+    setIsLoading,
 }) => {
     const { compositionRoot } = useAppContext();
 
@@ -42,8 +48,6 @@ export const UploadSecondary: React.FC<UploadSecondaryProps> = ({
 
     const { currentPeriod } = useCurrentPeriodContext();
     const snackbar = useSnackbar();
-
-    const [isLoading, setIsLoading] = useState(false);
     const secondaryFileUploadRef = useRef<DropzoneRef>(null);
 
     const dataSubmissionId = useCurrentDataSubmissionId(moduleId, moduleName, orgUnitId, currentPeriod);
@@ -59,32 +63,6 @@ export const UploadSecondary: React.FC<UploadSecondaryProps> = ({
     const openFileUploadDialog = useCallback(async () => {
         secondaryFileUploadRef.current?.openDialog();
     }, [secondaryFileUploadRef]);
-
-    const removeFiles = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-        event.preventDefault();
-        setIsLoading(true);
-        const sampleUploadId = localStorage.getItem("secondaryUploadId");
-        if (sampleUploadId) {
-            return compositionRoot.glassDocuments.deleteByUploadId(sampleUploadId).run(
-                () => {
-                    localStorage.removeItem("secondaryUploadId");
-                    setSecondaryFile(null);
-                    setHasSecondaryFile(false);
-                    setIsLoading(false);
-                },
-                errorMessage => {
-                    snackbar.error(errorMessage);
-                    setSecondaryFile(null);
-                    setIsLoading(false);
-                }
-            );
-        } else {
-            setSecondaryFile(null);
-            setIsLoading(false);
-        }
-    };
-
-    const removeFilesEffect = useCallbackEffect(removeFiles);
 
     const secondaryFileUpload = useCallback(
         (files: File[], rejections: FileRejection[]) => {
@@ -148,6 +126,7 @@ export const UploadSecondary: React.FC<UploadSecondaryProps> = ({
             orgUnitCode,
             orgUnitId,
             setHasSecondaryFile,
+            setIsLoading,
             setSecondaryFile,
             snackbar,
         ]
@@ -180,7 +159,7 @@ export const UploadSecondary: React.FC<UploadSecondaryProps> = ({
             {secondaryFile && (
                 <RemoveContainer>
                     {secondaryFile?.name} - {secondaryFile?.type}
-                    <StyledRemoveButton onClick={removeFilesEffect}>
+                    <StyledRemoveButton onClick={removeSecondaryFile}>
                         <CloseIcon />
                     </StyledRemoveButton>
                 </RemoveContainer>
