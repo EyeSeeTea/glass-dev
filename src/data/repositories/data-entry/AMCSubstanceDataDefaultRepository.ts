@@ -161,7 +161,7 @@ export class AMCSubstanceDataDefaultRepository implements AMCSubstanceDataReposi
                     });
                 });
             } else {
-                logger.error(`Substance level data: there are no events to be created`);
+                logger.error(`[${new Date().toISOString()}] Substance level data: there are no events to be created`);
                 return Future.error("There are no events to be created");
             }
         });
@@ -259,6 +259,7 @@ export class AMCSubstanceDataDefaultRepository implements AMCSubstanceDataReposi
 
                 if (Object.keys(consumptionData).length) {
                     return {
+                        id: substanceConsumptionDataEvent.event,
                         report_date: substanceConsumptionDataEvent.occurredAt,
                         ...consumptionData,
                     };

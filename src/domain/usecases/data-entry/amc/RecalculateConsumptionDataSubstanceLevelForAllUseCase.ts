@@ -29,9 +29,9 @@ export class RecalculateConsumptionDataSubstanceLevelForAllUseCase {
         allowCreationIfNotExist: boolean
     ): FutureData<void> {
         logger.info(
-            `Calculate consumption data of substance level for orgUnitsIds=${orgUnitsIds.join(
+            `[${new Date().toISOString()}] Calculate consumption data of substance level for orgUnitsIds=${orgUnitsIds.join(
                 ","
-            )} and periods=${periods.join(",")}`
+            )} and periods=${periods.join(",")}. Current ATC version ${currentATCVersion}`
         );
         return Future.sequential(
             orgUnitsIds.map(orgUnitId => {
@@ -57,7 +57,9 @@ export class RecalculateConsumptionDataSubstanceLevelForAllUseCase {
         currentATCData: GlassAtcVersionData,
         allowCreationIfNotExist: boolean
     ): FutureData<void> {
-        logger.info(`Calculating consumption data of substance level for orgUnitsId ${orgUnitId} and period ${period}`);
+        logger.info(
+            `[${new Date().toISOString()}] Calculating consumption data of substance level for orgUnitsId ${orgUnitId} and period ${period}`
+        );
         return this.getDataForRecalculations(orgUnitId, period).flatMap(
             ({ rawSubstanceConsumptionData, currentCalculatedConsumptionData }) => {
                 return getConsumptionDataSubstanceLevel({
@@ -70,7 +72,7 @@ export class RecalculateConsumptionDataSubstanceLevelForAllUseCase {
                 }).flatMap(newCalculatedConsumptionData => {
                     if (_.isEmpty(newCalculatedConsumptionData)) {
                         logger.error(
-                            `Substance level: there are no new calculated data to update current data for orgUnitId ${orgUnitId} and period ${period}`
+                            `[${new Date().toISOString()}] Substance level: there are no new calculated data to update current data for orgUnitId ${orgUnitId} and period ${period}`
                         );
                         return Future.success(undefined);
                     }
@@ -80,7 +82,7 @@ export class RecalculateConsumptionDataSubstanceLevelForAllUseCase {
                         (!currentCalculatedConsumptionData || _.isEmpty(currentCalculatedConsumptionData))
                     ) {
                         logger.error(
-                            `Substance level: there are no current calculated data to update for orgUnitId ${orgUnitId} and period ${period}`
+                            `[${new Date().toISOString()}] Substance level: there are no current calculated data to update for orgUnitId ${orgUnitId} and period ${period}`
                         );
                         return Future.success(undefined);
                     }
@@ -101,28 +103,23 @@ export class RecalculateConsumptionDataSubstanceLevelForAllUseCase {
 
                     if (eventIdsNoUpdated.length) {
                         logger.error(
-                            `Substance level: these events could not be updated events=${eventIdsNoUpdated.join(",")}`
+                            `[${new Date().toISOString()}] Substance level: these events could not be updated events=${eventIdsNoUpdated.join(
+                                ","
+                            )}`
                         );
                     }
 
-                    logger.debug(
-                        `Updating calculations of substance level events in DHIS2 for orgUnitId ${orgUnitId} and period ${period}: events=${eventIdsToUpdate.join(
+                    logger.info(
+                        `[${new Date().toISOString()}] Updating calculations of substance level events in DHIS2 for orgUnitId ${orgUnitId} and period ${period}: events=${eventIdsToUpdate.join(
                             ","
                         )}`
                     );
-                    logger.info(
-                        `Updating calculations of substance level for ${eventIdsToUpdate.length} events in DHIS2 for orgUnitId ${orgUnitId} and period ${period}`
-                    );
 
                     if (allowCreationIfNotExist && newCalculatedConsumptionDataWithoutIds.length) {
-                        logger.debug(
-                            `Creating calculated consumption data events in DHIS2 for orgUnitId ${orgUnitId} and period ${period}: events=${JSON.stringify(
+                        logger.info(
+                            `[${new Date().toISOString()}] Creating calculated consumption data events in DHIS2 for orgUnitId ${orgUnitId} and period ${period}: events=${JSON.stringify(
                                 newCalculatedConsumptionDataWithoutIds
                             )}`
-                        );
-
-                        logger.info(
-                            `Creating calculated consumption data for ${newCalculatedConsumptionDataWithoutIds.length} events in DHIS2 for orgUnitId ${orgUnitId} and period ${period}`
                         );
                     }
 
@@ -137,7 +134,7 @@ export class RecalculateConsumptionDataSubstanceLevelForAllUseCase {
                         .flatMap(({ response }) => {
                             if (response.status === "OK") {
                                 logger.success(
-                                    `Calculations of substance level updated for orgUnitId ${orgUnitId} and period ${period}: ${
+                                    `[${new Date().toISOString()}] Calculations of substance level updated for orgUnitId ${orgUnitId} and period ${period}: ${
                                         response.stats.updated
                                     } of ${response.stats.total} events updated${
                                         allowCreationIfNotExist
@@ -148,14 +145,14 @@ export class RecalculateConsumptionDataSubstanceLevelForAllUseCase {
                             }
                             if (response.status === "ERROR") {
                                 logger.error(
-                                    `Error updating calculations of substance level updated for orgUnitId ${orgUnitId} and period ${period}: ${JSON.stringify(
+                                    `[${new Date().toISOString()}] Error updating calculations of substance level updated for orgUnitId ${orgUnitId} and period ${period}: ${JSON.stringify(
                                         response.validationReport.errorReports
                                     )}`
                                 );
                             }
                             if (response.status === "WARNING") {
                                 logger.warn(
-                                    `Warning updating calculations of substance level updated for orgUnitId ${orgUnitId} and period ${period}: updated=${
+                                    `[${new Date().toISOString()}] Warning updating calculations of substance level updated for orgUnitId ${orgUnitId} and period ${period}: updated=${
                                         response.stats.updated
                                     }, ${allowCreationIfNotExist ? `created=${response.stats.created}, ` : ""} total=${
                                         response.stats.total
@@ -177,7 +174,7 @@ export class RecalculateConsumptionDataSubstanceLevelForAllUseCase {
         currentCalculatedConsumptionData: SubstanceConsumptionCalculated[] | undefined;
     }> {
         logger.info(
-            `Getting raw substance consumption data and current calculated consumption data for orgUnitId ${orgUnitId} and period ${period}`
+            `[${new Date().toISOString()}] Getting raw substance consumption data and current calculated consumption data for orgUnitId ${orgUnitId} and period ${period}`
         );
         return Future.joinObj({
             rawSubstanceConsumptionData: this.amcSubstanceDataRepository.getAllRawSubstanceConsumptionDataByByPeriod(

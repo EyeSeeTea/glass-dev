@@ -41,13 +41,13 @@ export class CalculateConsumptionDataProductLevelUseCase {
     public execute(period: string, orgUnitId: Id, file: File, moduleName: string): FutureData<ImportSummary> {
         return this.getProductIdsFromFile(file).flatMap(productIds => {
             logger.info(
-                `Calculating raw substance consumption data for the following products (total: ${
+                `[${new Date().toISOString()}] Calculating raw substance consumption data for the following products (total: ${
                     productIds.length
                 }): ${productIds.join(", ")}`
             );
             return this.glassModuleRepository.getByName(moduleName).flatMap(module => {
                 if (!module.chunkSizes?.productIds) {
-                    logger.error(`Cannot find product ids chunk size.`);
+                    logger.error(`[${new Date().toISOString()}] Cannot find product ids chunk size.`);
                     return Future.error("Cannot find product ids chunk size.");
                 }
 
@@ -76,7 +76,7 @@ export class CalculateConsumptionDataProductLevelUseCase {
                     const atcCurrentVersionInfo = atcVersionHistory.find(({ currentVersion }) => currentVersion);
                     if (!atcCurrentVersionInfo) {
                         logger.error(
-                            `Cannot find current version of ATC in version history: ${JSON.stringify(
+                            `[${new Date().toISOString()}] Cannot find current version of ATC in version history: ${JSON.stringify(
                                 atcVersionHistory
                             )}`
                         );
@@ -86,7 +86,7 @@ export class CalculateConsumptionDataProductLevelUseCase {
                         atcCurrentVersionInfo.year,
                         atcCurrentVersionInfo.version
                     );
-                    logger.info(`Current ATC version: ${atcVersionKey}`);
+                    logger.info(`[${new Date().toISOString()}] Current ATC version: ${atcVersionKey}`);
                     return this.atcRepository.getAtcVersion(atcVersionKey).flatMap(atcCurrentVersionData => {
                         return getConsumptionDataProductLevel({
                             orgUnitId,
@@ -98,7 +98,7 @@ export class CalculateConsumptionDataProductLevelUseCase {
                         }).flatMap(rawSubstanceConsumptionCalculatedData => {
                             if (_.isEmpty(rawSubstanceConsumptionCalculatedData)) {
                                 logger.error(
-                                    `Product level: there are no calculated data to import for orgUnitId ${orgUnitId} and period ${period}`
+                                    `[${new Date().toISOString()}] Product level: there are no calculated data to import for orgUnitId ${orgUnitId} and period ${period}`
                                 );
                                 const errorSummary: ImportSummary = {
                                     status: "ERROR",
@@ -121,14 +121,14 @@ export class CalculateConsumptionDataProductLevelUseCase {
 
                             if (!rawSubstanceConsumptionCalculatedStageMetadata) {
                                 logger.error(
-                                    `Cannot find Raw Substance Consumption Calculated program stage metadata with id ${AMC_RAW_SUBSTANCE_CONSUMPTION_CALCULATED_STAGE_ID}`
+                                    `[${new Date().toISOString()}] Cannot find Raw Substance Consumption Calculated program stage metadata with id ${AMC_RAW_SUBSTANCE_CONSUMPTION_CALCULATED_STAGE_ID}`
                                 );
                                 return Future.error(
                                     "Cannot find Raw Substance Consumption Calculated program stage metadata"
                                 );
                             }
                             logger.info(
-                                `Creating calculations of product level data as events for orgUnitId ${orgUnitId} and period ${period}`
+                                `[${new Date().toISOString()}] Creating calculations of product level data as events for orgUnitId ${orgUnitId} and period ${period}`
                             );
                             return this.amcProductDataRepository
                                 .importCalculations(
@@ -142,19 +142,21 @@ export class CalculateConsumptionDataProductLevelUseCase {
                                 .flatMap(response => {
                                     if (response.status === "OK") {
                                         logger.success(
-                                            `Calculations of product level created for orgUnitId ${orgUnitId} and period ${period}: ${response.stats.created} of ${response.stats.total} events created`
+                                            `[${new Date().toISOString()}] Calculations of product level created for orgUnitId ${orgUnitId} and period ${period}: ${
+                                                response.stats.created
+                                            } of ${response.stats.total} events created`
                                         );
                                     }
                                     if (response.status === "ERROR") {
                                         logger.error(
-                                            `Error creating calculations of product level for orgUnitId ${orgUnitId} and period ${period}: ${JSON.stringify(
+                                            `[${new Date().toISOString()}] Error creating calculations of product level for orgUnitId ${orgUnitId} and period ${period}: ${JSON.stringify(
                                                 response.validationReport.errorReports
                                             )}`
                                         );
                                     }
                                     if (response.status === "WARNING") {
                                         logger.warn(
-                                            `Warning creating calculations of product level updated for orgUnitId ${orgUnitId} and period ${period}: ${
+                                            `[${new Date().toISOString()}] Warning creating calculations of product level updated for orgUnitId ${orgUnitId} and period ${period}: ${
                                                 response.stats.created
                                             } of ${response.stats.total} events created and warning=${JSON.stringify(
                                                 response.validationReport.warningReports
@@ -183,7 +185,7 @@ export class CalculateConsumptionDataProductLevelUseCase {
                 .filter(t => t.id === TEMPLATE_ID)[0];
             return this.instanceRepository.getProgram(AMC_PRODUCT_REGISTER_PROGRAM_ID).flatMap(amcProgram => {
                 if (!amcTemplate) {
-                    logger.error(`Product level: cannot find template`);
+                    logger.error(`[${new Date().toISOString()}] Product level: cannot find template`);
                     return Future.error("Cannot find template");
                 }
 
@@ -195,12 +197,12 @@ export class CalculateConsumptionDataProductLevelUseCase {
                     AMC_PRODUCT_REGISTER_PROGRAM_ID
                 ).flatMap(amcProductData => {
                     if (!amcProductData) {
-                        logger.error(`Product level: cannot find data package`);
+                        logger.error(`[${new Date().toISOString()}] Product level: cannot find data package`);
                         return Future.error("Cannot find data package");
                     }
 
                     if (amcProductData.type !== "trackerPrograms") {
-                        logger.error(`Product level: incorrect data package`);
+                        logger.error(`[${new Date().toISOString()}] Product level: incorrect data package`);
                         return Future.error("Incorrect data package");
                     }
 
