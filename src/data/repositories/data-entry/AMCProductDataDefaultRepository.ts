@@ -94,7 +94,7 @@ export class AMCProductDataDefaultRepository implements AMCProductDataRepository
         if (!_.isEmpty(d2TrackerEvents)) {
             return importApiTracker(this.api, { events: d2TrackerEvents }, importStrategy);
         } else {
-            logger.error(`Product level data: there are no events to be created`);
+            logger.error(`[${new Date().toISOString()}] Product level data: there are no events to be created`);
             return Future.error("There are no events to be created");
         }
     }

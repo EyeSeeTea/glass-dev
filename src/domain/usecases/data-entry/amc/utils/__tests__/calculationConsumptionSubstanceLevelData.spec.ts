@@ -9,7 +9,7 @@ import { SubstanceConsumptionCalculated } from "../../../../../entities/data-ent
 import { setupLoggerForTesting } from "../../../../../../utils/logger";
 
 describe("Given calculate Consumption Substance Level Data function", () => {
-    beforeAll(() => setupLoggerForTesting());
+    beforeAll(async () => await setupLoggerForTesting());
 
     describe("When all ddds are assigned correctly", () => {
         it("Then should return correct solution", async () => {

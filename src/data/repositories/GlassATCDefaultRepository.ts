@@ -31,11 +31,11 @@ export class GlassATCDefaultRepository implements GlassATCRepository {
                 if (atcVersionDataStore) {
                     return Future.success(this.buildGlassAtcVersionDataWithCorrectNames(atcVersionDataStore));
                 }
-                logger.error(`ATC version ${atcVersionKey} not found`);
+                logger.error(`[${new Date().toISOString()}] ATC version ${atcVersionKey} not found`);
                 return Future.error(`ATC version ${atcVersionKey} not found`);
             });
         }
-        logger.error(`ATC version ${atcVersionKey} is not valid`);
+        logger.error(`[${new Date().toISOString()}] ATC version ${atcVersionKey} is not valid`);
         return Future.error(`ATC version ${atcVersionKey} is not valid`);
     }
 
@@ -45,7 +45,7 @@ export class GlassATCDefaultRepository implements GlassATCRepository {
             const atcCurrentVersionInfo = atcVersionHistory.find(({ currentVersion }) => currentVersion);
 
             if (!atcCurrentVersionInfo) {
-                logger.error(`Cannot find current version of ATC`);
+                logger.error(`[${new Date().toISOString()}] Cannot find current version of ATC`);
                 return Future.error("Cannot find current version of ATC");
             }
             const atcVersionKey = createAtcVersionKey(atcCurrentVersionInfo.year, atcCurrentVersionInfo.version);
@@ -64,7 +64,7 @@ export class GlassATCDefaultRepository implements GlassATCRepository {
                         [atcVersionKey]: this.getAtcVersion(atcVersionKey),
                     };
                 }
-                logger.error(`ATC version key not valid: ${atcVersionKey}`);
+                logger.error(`[${new Date().toISOString()}] ATC version key not valid: ${atcVersionKey}`);
                 return acc;
             }, {})
         );

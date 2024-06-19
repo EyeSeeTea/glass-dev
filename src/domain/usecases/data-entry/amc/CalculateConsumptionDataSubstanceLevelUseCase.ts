@@ -29,14 +29,14 @@ export class CalculateConsumptionDataSubstanceLevelUseCase {
     public execute(uploadId: Id, period: string, orgUnitId: Id, moduleName: string): FutureData<ImportSummary> {
         return this.getEventsIdsFromUploadId(uploadId).flatMap(substanceIds => {
             logger.info(
-                `Calculating consumption data in substance level for the following raw substance consumption data (total: ${
+                `[${new Date().toISOString()}] Calculating consumption data in substance level for the following raw substance consumption data (total: ${
                     substanceIds.length
                 }): ${substanceIds.join(", ")}`
             );
 
             return this.glassModuleRepository.getByName(moduleName).flatMap(module => {
                 if (!module.chunkSizes?.substanceIds) {
-                    logger.error(`Cannot find substance ids chunk size.`);
+                    logger.error(`[${new Date().toISOString()}] Cannot find substance ids chunk size.`);
                     return Future.error("Cannot find substance ids chunk size.");
                 }
 
@@ -56,7 +56,7 @@ export class CalculateConsumptionDataSubstanceLevelUseCase {
                     const atcCurrentVersionInfo = atcVersionHistory.find(({ currentVersion }) => currentVersion);
                     if (!atcCurrentVersionInfo) {
                         logger.error(
-                            `Cannot find current version of ATC in version history: ${JSON.stringify(
+                            `[${new Date().toISOString()}] Cannot find current version of ATC in version history: ${JSON.stringify(
                                 atcVersionHistory
                             )}`
                         );
@@ -66,7 +66,7 @@ export class CalculateConsumptionDataSubstanceLevelUseCase {
                         atcCurrentVersionInfo.year,
                         atcCurrentVersionInfo.version
                     );
-                    logger.info(`Current ATC version: ${currentAtcVersionKey}`);
+                    logger.info(`[${new Date().toISOString()}] Current ATC version: ${currentAtcVersionKey}`);
                     return this.atcRepository.getAtcVersion(currentAtcVersionKey).flatMap(atcCurrentVersionData => {
                         return getConsumptionDataSubstanceLevel({
                             orgUnitId,
@@ -78,7 +78,7 @@ export class CalculateConsumptionDataSubstanceLevelUseCase {
                         }).flatMap(calculatedConsumptionSubstanceLevelData => {
                             if (_.isEmpty(calculatedConsumptionSubstanceLevelData)) {
                                 logger.error(
-                                    `Substance level: there are no calculated data to import for orgUnitId ${orgUnitId} and period ${period}`
+                                    `[${new Date().toISOString()}] Substance level: there are no calculated data to import for orgUnitId ${orgUnitId} and period ${period}`
                                 );
                                 const errorSummary: ImportSummary = {
                                     status: "ERROR",
@@ -94,7 +94,7 @@ export class CalculateConsumptionDataSubstanceLevelUseCase {
                                 return Future.success(errorSummary);
                             }
                             logger.info(
-                                `Creating calculations of substance level data as events for orgUnitId ${orgUnitId} and period ${period}`
+                                `[${new Date().toISOString()}] Creating calculations of substance level data as events for orgUnitId ${orgUnitId} and period ${period}`
                             );
                             return this.amcSubstanceDataRepository
                                 .importCalculations(
@@ -106,19 +106,21 @@ export class CalculateConsumptionDataSubstanceLevelUseCase {
                                     const { response, eventIdLineNoMap } = result;
                                     if (response.status === "OK") {
                                         logger.success(
-                                            `Calculations of substance level created for orgUnitId ${orgUnitId} and period ${period}: ${response.stats.created} of ${response.stats.total} events created`
+                                            `[${new Date().toISOString()}] Calculations of substance level created for orgUnitId ${orgUnitId} and period ${period}: ${
+                                                response.stats.created
+                                            } of ${response.stats.total} events created`
                                         );
                                     }
                                     if (response.status === "ERROR") {
                                         logger.error(
-                                            `Error creating calculations of substance level for orgUnitId ${orgUnitId} and period ${period}: ${JSON.stringify(
+                                            `[${new Date().toISOString()}] Error creating calculations of substance level for orgUnitId ${orgUnitId} and period ${period}: ${JSON.stringify(
                                                 response.validationReport.errorReports
                                             )}`
                                         );
                                     }
                                     if (response.status === "WARNING") {
                                         logger.warn(
-                                            `Warning creating calculations of substance level updated for orgUnitId ${orgUnitId} and period ${period}: ${
+                                            `[${new Date().toISOString()}] Warning creating calculations of substance level updated for orgUnitId ${orgUnitId} and period ${period}: ${
                                                 response.stats.created
                                             } of ${response.stats.total} events created and warning=${JSON.stringify(
                                                 response.validationReport.warningReports
