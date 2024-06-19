@@ -100,11 +100,6 @@ msgstr ""
 msgid "Invalid choice was chosen"
 msgstr ""
 
-msgid ""
-"If ATC code in ATC levels 4 A07AA and P01AB, Route of administration must "
-"be oral"
-msgstr ""
-
 msgid "The AST results provided are not valid (they are all empty)"
 msgstr ""
 
@@ -595,7 +590,7 @@ msgstr ""
 msgid "App support ticket"
 msgstr ""
 
-msgid "Upload New Data Files"
+msgid "Cancel upload"
 msgstr ""
 
 msgid "Fix upload data"

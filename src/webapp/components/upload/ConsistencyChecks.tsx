@@ -16,6 +16,7 @@ import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context
 import { SupportButtons } from "./SupportButtons";
 import { moduleProperties } from "../../../domain/utils/ModuleProperties";
 import { useSnackbar } from "@eyeseetea/d2-ui-components";
+import { EffectFn } from "../../hooks/use-callback-effect";
 
 interface ConsistencyChecksProps {
     changeStep: (step: number) => void;
@@ -26,6 +27,8 @@ interface ConsistencyChecksProps {
     secondaryFileImportSummary: ImportSummary | undefined;
     setPrimaryFileImportSummary: React.Dispatch<React.SetStateAction<ImportSummary | undefined>>;
     setSecondaryFileImportSummary: React.Dispatch<React.SetStateAction<ImportSummary | undefined>>;
+    removePrimaryFile: EffectFn<[event: React.MouseEvent<HTMLButtonElement, MouseEvent>]>;
+    removeSecondaryFile: EffectFn<[event: React.MouseEvent<HTMLButtonElement, MouseEvent>]>;
 }
 
 export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
@@ -37,6 +40,8 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
     secondaryFileImportSummary,
     setPrimaryFileImportSummary,
     setSecondaryFileImportSummary,
+    removePrimaryFile,
+    removeSecondaryFile,
 }) => {
     const { compositionRoot } = useAppContext();
     const { currentModuleAccess } = useCurrentModuleContext();
@@ -312,6 +317,15 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
         }
     };
 
+    const onCancelUpload = useCallback(
+        (event: React.MouseEvent<HTMLButtonElement>) => {
+            primaryFile && removePrimaryFile(event);
+            secondaryFile && removeSecondaryFile(event);
+            changeStep(1);
+        },
+        [changeStep, primaryFile, removePrimaryFile, removeSecondaryFile, secondaryFile]
+    );
+
     return (
         <ContentWrapper>
             <Backdrop open={importLoading} style={{ color: "#fff", zIndex: 1 }}>
@@ -367,7 +381,7 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
                 secondaryFileImportSummary
             )}
             <div className="bottom">
-                <SupportButtons changeStep={changeStep} primaryFileImportSummary={primaryFileImportSummary} />
+                <SupportButtons primaryFileImportSummary={primaryFileImportSummary} onCancelUpload={onCancelUpload} />
                 <div className="right">
                     {primaryFileImportSummary && primaryFileImportSummary.blockingErrors.length > 0 && (
                         <Button
