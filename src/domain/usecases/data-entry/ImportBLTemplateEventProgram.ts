@@ -355,6 +355,7 @@ export const mapToImportSummary = (
         );
 
         const blockingErrorsByGroup = _(blockingErrorList).groupBy("error").value();
+        const eventIdsInBlockingErrors = Object.keys(_(blockingErrorList).groupBy("eventId").value());
 
         //Get list of any d2-Ids in error messages.
         const d2Ids = _(
@@ -362,10 +363,13 @@ export const mapToImportSummary = (
                 const errMsg = err[0];
 
                 //Error message type 2 contains  regex in format : {id}
-                const pattern = /([A-Za-z0-9]{11})/g;
-                const matches = errMsg.match(pattern);
+                const uuidPattern = /\b([A-Za-z0-9]{11})\b/g;
+                const uuidMatches = errMsg.match(uuidPattern);
+                const uuidMatchesWithoutEventId = uuidMatches?.filter(
+                    match => !eventIdsInBlockingErrors.includes(match)
+                );
 
-                if (matches) return matches;
+                if (uuidMatchesWithoutEventId) return uuidMatchesWithoutEventId;
             })
         )
             .compact()
@@ -374,7 +378,7 @@ export const mapToImportSummary = (
             .value();
 
         //Get list of DataElement Names in error messages.
-        return metadataRepository.getD2Ids(d2Ids).flatMap(d2IdsMap => {
+        return metadataRepository.getD2Ids(_.uniq(d2Ids)).flatMap(d2IdsMap => {
             const importSummary: ImportSummary = {
                 status: result.status === "OK" ? "SUCCESS" : result.status,
                 importCount: {
