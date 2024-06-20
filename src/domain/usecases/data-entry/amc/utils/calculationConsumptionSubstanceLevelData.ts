@@ -1,4 +1,4 @@
-import { MultipleLogContent, logger } from "../../../../../utils/logger";
+import { BatchLogContent, logger } from "../../../../../utils/logger";
 import {
     DEFAULT_SALT_CODE,
     GlassAtcVersionData,
@@ -25,7 +25,7 @@ export function calculateConsumptionSubstanceLevelData(
     logger.info(
         `[${new Date().toISOString()}] Starting the calculation of consumption substance level data for organisation ${orgUnitId} and period ${period}`
     );
-    let calculationLogs: MultipleLogContent = [];
+    let calculationLogs: BatchLogContent = [];
     const calculatedConsumptionSubstanceLevelData = rawSubstanceConsumptionData
         .map(rawSubstanceConsumption => {
             calculationLogs = [
@@ -171,7 +171,7 @@ export function calculateConsumptionSubstanceLevelData(
         })
         .filter(Boolean) as SubstanceConsumptionCalculated[];
 
-    logger.logMultiple(calculationLogs);
+    logger.batchLog(calculationLogs);
     logger.success(
         `[${new Date().toISOString()}] End of the calculation of consumption substance level data for organisation ${orgUnitId} and period ${period}`
     );
@@ -182,8 +182,8 @@ export function calculateConsumptionSubstanceLevelData(
 function getStandardizedDDD(
     rawSubstanceConsumptionData: RawSubstanceConsumptionData,
     atcVersion: GlassAtcVersionData | undefined
-): { result: number | undefined; logs: MultipleLogContent } {
-    let calculationLogs: MultipleLogContent = [];
+): { result: number | undefined; logs: BatchLogContent } {
+    let calculationLogs: BatchLogContent = [];
     const { atc_manual, salt_manual, route_admin_manual } = rawSubstanceConsumptionData;
     const dddData = atcVersion?.ddds;
     const dddChanges = atcVersion?.changes ? getDDDChanges(atcVersion?.changes) : [];
@@ -286,8 +286,8 @@ function getDDDsAdjust(
     rawSubstanceConsumptionData: RawSubstanceConsumptionData,
     dddStandarizedLatest: number,
     dddStandarizedInRawSubstanceConsumption: number
-): { result: number | undefined; logs: MultipleLogContent } {
-    const calculationLogs: MultipleLogContent = [];
+): { result: number | undefined; logs: BatchLogContent } {
+    const calculationLogs: BatchLogContent = [];
     const { ddds_manual } = rawSubstanceConsumptionData;
     // 3 - ratio_ddd = standardized_ddd_value_uploaded ÷ standardized_ddd_value_latest
     const ratioDDD = dddStandarizedInRawSubstanceConsumption / dddStandarizedLatest;
