@@ -1,4 +1,4 @@
-import { MultipleLogContent, logger } from "../../../../../utils/logger";
+import { BatchLogContent, logger } from "../../../../../utils/logger";
 import {
     ATCChangesData,
     ATCData,
@@ -62,7 +62,7 @@ export function calculateConsumptionProductLevelData(
     const awareClassData = atcClassification.aware_classification;
     const atcData = atcClassification.atcs;
 
-    let calculationLogs: MultipleLogContent = [];
+    let calculationLogs: BatchLogContent = [];
 
     const contentDDDPerProductAndDDDPerPackage: ContentDDDPerProductAndDDDPerPackage[] = teiInstancesData
         .map((product: ProductRegistryAttributes) => {
@@ -127,7 +127,7 @@ export function calculateConsumptionProductLevelData(
     );
 
     calculationLogs = [...calculationLogs, ...rawSubstanceConsumptionCalculated.logs];
-    logger.logMultiple(calculationLogs);
+    logger.batchLog(calculationLogs);
 
     logger.success(
         `[${new Date().toISOString()}] End of the calculation of consumption product level data for organisation ${orgUnitId} and period ${period}`
@@ -140,8 +140,8 @@ export function calculateConsumptionProductLevelData(
 function calculateContentPerProduct(
     product: ProductRegistryAttributes,
     unitsData: UnitsData[]
-): { result: Content | undefined; logs: MultipleLogContent } {
-    const calculationLogs: MultipleLogContent = [
+): { result: Content | undefined; logs: BatchLogContent } {
+    const calculationLogs: BatchLogContent = [
         {
             content: `[${new Date().toISOString()}]  Product ${
                 product.AMR_GLASS_AMC_TEA_PRODUCT_ID
@@ -219,7 +219,7 @@ function calculateDDDPerProduct(
     dddChanges: DDDChangesData[] | undefined,
     atcChanges: ATCChangesData[] | undefined,
     unitsData: UnitsData[]
-): { result: DDDPerProduct | undefined; logs: MultipleLogContent } {
+): { result: DDDPerProduct | undefined; logs: BatchLogContent } {
     if (product.AMR_GLASS_AMC_TEA_COMBINATION) {
         const codeCombinationData = dddCombinations?.find(
             ({ COMB_CODE, ATC5 }) =>
@@ -239,8 +239,8 @@ function getDDDOfProductFromDDDCombinationsTable(
     atcChanges: ATCChangesData[] | undefined,
     dddChanges: DDDChangesData[] | undefined,
     unitsData: UnitsData[]
-): { result: DDDPerProduct | undefined; logs: MultipleLogContent } {
-    let calculationLogs: MultipleLogContent = [];
+): { result: DDDPerProduct | undefined; logs: BatchLogContent } {
+    let calculationLogs: BatchLogContent = [];
 
     if (codeCombinationData) {
         calculationLogs = [
@@ -284,9 +284,9 @@ function getDDDOfProductFromDDDTable(
     atcChanges: ATCChangesData[] | undefined,
     dddChanges: DDDChangesData[] | undefined,
     unitsData: UnitsData[]
-): { result: DDDPerProduct | undefined; logs: MultipleLogContent } {
+): { result: DDDPerProduct | undefined; logs: BatchLogContent } {
     const { AMR_GLASS_AMC_TEA_ATC, AMR_GLASS_AMC_TEA_ROUTE_ADMIN, AMR_GLASS_AMC_TEA_SALT } = product;
-    let calculationLogs: MultipleLogContent = [
+    let calculationLogs: BatchLogContent = [
         {
             content: `[${new Date().toISOString()}] Product ${
                 product.AMR_GLASS_AMC_TEA_PRODUCT_ID
@@ -357,8 +357,8 @@ function getLatestDDDStandardized(
     atcChanges: ATCChangesData[] | undefined,
     dddChanges: DDDChangesData[] | undefined,
     unitsData: UnitsData[],
-    calculationLogs: MultipleLogContent
-): { result: DDDPerProduct | undefined; logs: MultipleLogContent } {
+    calculationLogs: BatchLogContent
+): { result: DDDPerProduct | undefined; logs: BatchLogContent } {
     const atcCode = getNewAtcCode(product.AMR_GLASS_AMC_TEA_ATC, atcChanges) || product.AMR_GLASS_AMC_TEA_ATC;
     calculationLogs = [
         ...calculationLogs,
@@ -434,8 +434,8 @@ function calculateDDDPerPackage(
     dddPerProduct: DDDPerProduct | undefined,
     conversionsIUToGramsData: ConversionsIUToGramsData[] | undefined,
     atcChanges: ATCChangesData[] | undefined
-): { result: DDDPerPackage | undefined; logs: MultipleLogContent } {
-    const calculationLogs: MultipleLogContent = [
+): { result: DDDPerPackage | undefined; logs: BatchLogContent } {
+    const calculationLogs: BatchLogContent = [
         {
             content: `[${new Date().toISOString()}] Product ${
                 product.AMR_GLASS_AMC_TEA_PRODUCT_ID
@@ -500,8 +500,8 @@ function calculateDDDPerProductConsumptionPackages(
     period: string,
     productConsumption: RawProductConsumption,
     dddPerPackage: DDDPerPackage | undefined
-): { result: DDDPerProductConsumptionPackages | undefined; logs: MultipleLogContent } {
-    const calculationLogs: MultipleLogContent = [
+): { result: DDDPerProductConsumptionPackages | undefined; logs: BatchLogContent } {
+    const calculationLogs: BatchLogContent = [
         {
             content: `[${new Date().toISOString()}] Product ${
                 productConsumption.AMR_GLASS_AMC_TEA_PRODUCT_ID
@@ -560,8 +560,8 @@ function getTonnesPerProduct(
     content: Content,
     conversionsIUToGramsData: ConversionsIUToGramsData[] | undefined,
     atcChanges: ATCChangesData[] | undefined
-): { result: ContentTonnesPerProduct; logs: MultipleLogContent } {
-    const calculationLogs: MultipleLogContent = [
+): { result: ContentTonnesPerProduct; logs: BatchLogContent } {
+    const calculationLogs: BatchLogContent = [
         {
             content: `[${new Date().toISOString()}]  Product ${
                 productConsumption.AMR_GLASS_AMC_TEA_PRODUCT_ID
@@ -616,8 +616,8 @@ function aggregateDataByAtcRouteAdminYearHealthSectorAndHealthLevel(
     atcData: ATCData[],
     atcChanges: ATCChangesData[] | undefined,
     atcVersion: string
-): { result: RawSubstanceConsumptionCalculated[]; logs: MultipleLogContent } {
-    let calculationLogs: MultipleLogContent = [];
+): { result: RawSubstanceConsumptionCalculated[]; logs: BatchLogContent } {
+    let calculationLogs: BatchLogContent = [];
 
     const rawSubstanceConsumptionCalculatedByKey = rawProductConsumptionData.reduce(
         (acc: Record<string, RawSubstanceConsumptionCalculated>, productConsumption: RawProductConsumption) => {

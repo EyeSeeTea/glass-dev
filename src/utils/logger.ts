@@ -1,4 +1,4 @@
-import { ConsoleLogger, ProgramLogger, initLogger, MultipleLogContent } from "@eyeseetea/d2-logger";
+import { ConsoleLogger, ProgramLogger, initLogger, BatchLogContent } from "@eyeseetea/d2-logger";
 import { Instance } from "../data/entities/Instance";
 import { Id } from "../domain/entities/Base";
 
@@ -8,7 +8,7 @@ const MESSAGE_DATA_ELEMENT = "BjUzF5E4eR8";
 const MESSAGE_TYPE_DATA_ELEMENT = "NpS5LoLuhgS";
 
 export let logger: ProgramLogger | ConsoleLogger;
-export type { MultipleLogContent };
+export type { BatchLogContent };
 
 export async function setupLogger(instance: Instance, options?: { isDebug?: boolean; orgUnitId?: Id }): Promise<void> {
     const { isDebug = false, orgUnitId } = options ?? {};
