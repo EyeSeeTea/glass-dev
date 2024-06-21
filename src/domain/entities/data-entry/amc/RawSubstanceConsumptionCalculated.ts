@@ -1,3 +1,4 @@
+import { Maybe } from "../../../../types/utils";
 import { AmName, AwrName, SaltCode, UnitCode } from "../../GlassAtcVersionData";
 import { Id } from "../../Ref";
 
@@ -53,11 +54,11 @@ export type RawSubstanceConsumptionCalculated = {
     packages_autocalculated: number;
     atc_version_autocalculated: string;
     ddds_autocalculated: number;
-    am_class: AmName;
-    atc2: string;
-    atc3: string;
-    atc4: string;
-    aware: AwrName;
+    am_class: Maybe<AmName>;
+    atc2: Maybe<string>;
+    atc3: Maybe<string>;
+    atc4: Maybe<string>;
+    aware: Maybe<AwrName>;
     orgUnitId: Id;
     eventId?: Id;
 };
