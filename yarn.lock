@@ -4139,10 +4139,10 @@
     react "^16.12.0"
     yargs "^14.0.0"
 
-"@eyeseetea/d2-logger@0.1.1":
-  version "0.1.1"
-  resolved "https://registry.yarnpkg.com/@eyeseetea/d2-logger/-/d2-logger-0.1.1.tgz#737938e93d8be0e7273078cd62bd8ce06bcbe285"
-  integrity sha512-EO4Sww/5DZyOa5kggc9SPFpxojd9ut9thAwczf3zWoV4qKdfb29CbpsebqCIr/4dr+kbvHjFcfjgZsSvqM8Z3g==
+"@eyeseetea/d2-logger@1.1.0":
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/@eyeseetea/d2-logger/-/d2-logger-1.1.0.tgz#9a78b5e5c624bfc7550c7cab019ab9321d17ded0"
+  integrity sha512-2abLQDoT0A9wAVt2h2vr8UcRqb5ygZrUrU51lT9Ljs/X1wgFuKM/fqghOe714xvieFmPc/6K3o3FfabQ0rSCCg==
   dependencies:
     "@babel/runtime" "^7.5.4"
     "@eyeseetea/d2-api" "1.14.0"
