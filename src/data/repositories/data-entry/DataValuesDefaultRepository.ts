@@ -30,7 +30,7 @@ export class DataValuesDefaultRepository implements DataValuesRepository {
         ).flatMap(response => {
             return apiToFuture(this.api.system.waitFor(response.response.jobType, response.response.id)).map(result => {
                 if (result) {
-                    return {
+                    const importStatus: DataValuesSaveSummary = {
                         status: result.status,
                         description: result.description,
                         importCount: {
@@ -39,11 +39,12 @@ export class DataValuesDefaultRepository implements DataValuesRepository {
                             ignored: result.importCount.ignored,
                             deleted: result.importCount.deleted,
                         },
-                        conficts: result.conflicts,
+                        conflicts: result.conflicts,
                         importTime: new Date(response.response.created),
                     };
+                    return importStatus;
                 } else {
-                    return {
+                    const errorStatus: DataValuesSaveSummary = {
                         status: "ERROR",
                         description: "An unexpected error has ocurred saving data values",
                         importCount: {
@@ -52,9 +53,11 @@ export class DataValuesDefaultRepository implements DataValuesRepository {
                             ignored: 0,
                             deleted: 0,
                         },
-                        conficts: [],
+                        conflicts: [],
                         importTime: new Date(response.response.created),
                     };
+
+                    return errorStatus;
                 }
             });
         });

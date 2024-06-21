@@ -17,6 +17,7 @@ import { includeBlockingErrors } from "../utils/includeBlockingErrors";
 import { mapDataValuesToImportSummary } from "../utils/mapDhis2Summary";
 import { SampleDataRepository } from "../../../repositories/data-entry/SampleDataRepository";
 import { SampleData } from "../../../entities/data-entry/amr-external/SampleData";
+import { checkDuplicateRowsSAMPLE } from "../utils/checkDuplicateRows";
 
 const AMR_AMR_DS_Input_files_Sample_DS_ID = "OcAB7oaC072";
 const AMR_BATCHID_CC_ID = "rEMx3WFeLcU";
@@ -56,6 +57,7 @@ export class ImportSampleFile {
                 const batchIdErrors = checkBatchId(risDataItems, batchId);
                 const yearErrors = checkYear(risDataItems, year);
                 const countryErrors = checkCountry(risDataItems, countryCode);
+                const duplicateRowErrors = checkDuplicateRowsSAMPLE(risDataItems);
 
                 const dataValues = risDataItems
                     .map(risData => {
@@ -119,6 +121,7 @@ export class ImportSampleFile {
                                         ...yearErrors,
                                         ...countryErrors,
                                         ...dhis2ValidationErrors,
+                                        ...duplicateRowErrors,
                                     ]);
 
                                     return summaryWithConsistencyBlokingErrors;
