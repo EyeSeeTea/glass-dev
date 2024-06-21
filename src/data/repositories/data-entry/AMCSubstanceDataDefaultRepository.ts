@@ -62,11 +62,18 @@ export class AMCSubstanceDataDefaultRepository implements AMCSubstanceDataReposi
 
     getRawSubstanceConsumptionDataByEventsIds(
         orgUnitId: Id,
-        eventsIds: Id[]
+        substanceIds: Id[],
+        substanceIdsChunkSize: number,
+        chunked?: boolean
     ): FutureData<RawSubstanceConsumptionData[] | undefined> {
         return Future.joinObj({
             rawSubstanceConsumptionProgram: this.getRawSubstanceConsumptionProgram(),
-            substanceConsumptionDataEvents: this.getRawSubstanceConsumptionDataD2EventsByIds(orgUnitId, eventsIds),
+            substanceConsumptionDataEvents: this.getRawSubstanceConsumptionDataD2EventsByIds(
+                orgUnitId,
+                substanceIds,
+                substanceIdsChunkSize,
+                chunked
+            ),
         }).map(({ rawSubstanceConsumptionProgram, substanceConsumptionDataEvents }) => {
             const programStageDataElements = rawSubstanceConsumptionProgram?.programStages.find(
                 ({ id }) => AMC_RAW_SUBSTANCE_CONSUMPTION_DATA_PROGRAM_STAGE_ID === id
@@ -154,7 +161,7 @@ export class AMCSubstanceDataDefaultRepository implements AMCSubstanceDataReposi
                     });
                 });
             } else {
-                logger.error(`Substance level data: there are no events to be created`);
+                logger.error(`[${new Date().toISOString()}] Substance level data: there are no events to be created`);
                 return Future.error("There are no events to be created");
             }
         });
@@ -252,6 +259,7 @@ export class AMCSubstanceDataDefaultRepository implements AMCSubstanceDataReposi
 
                 if (Object.keys(consumptionData).length) {
                     return {
+                        id: substanceConsumptionDataEvent.event,
                         report_date: substanceConsumptionDataEvent.occurredAt,
                         ...consumptionData,
                     };
@@ -331,10 +339,49 @@ export class AMCSubstanceDataDefaultRepository implements AMCSubstanceDataReposi
         ).map(response => response.objects[0] as D2Program | undefined);
     }
 
-    private getRawSubstanceConsumptionDataD2EventsByIds(orgUnitId: Id, eventsIds: Id[]): FutureData<D2TrackerEvent[]> {
-        return Future.fromPromise(this.getRawSubstanceConsumptionDataByEventsIdsAsync(orgUnitId, eventsIds)).map(
+    private getRawSubstanceConsumptionDataD2EventsByIds(
+        orgUnitId: Id,
+        substanceIds: Id[],
+        substanceIdsChunkSize: number,
+        chunked?: boolean
+    ): FutureData<D2TrackerEvent[]> {
+        if (chunked) {
+            return this.getRawSubstanceConsumptionDataByEventsIdsChunked(
+                orgUnitId,
+                substanceIds,
+                substanceIdsChunkSize
+            );
+        }
+        return Future.fromPromise(this.getRawSubstanceConsumptionDataByEventsIdsAsync(orgUnitId, substanceIds)).map(
             d2Events => d2Events
         );
+    }
+
+    private getRawSubstanceConsumptionDataByEventsIdsChunked(
+        orgUnitId: Id,
+        substanceIds: Id[],
+        substanceIdsChunkSize: number
+    ): FutureData<D2TrackerEvent[]> {
+        const chunkedSubstanceIds = _(substanceIds).chunk(substanceIdsChunkSize).value();
+
+        return Future.sequential(
+            chunkedSubstanceIds.flatMap(substanceIdsChunk => {
+                const substanceIdsString = substanceIdsChunk.join(";");
+
+                // TODO: change pageSize to skipPaging:true when new version of d2-api
+                return apiToFuture(
+                    this.api.tracker.events.get({
+                        fields: eventFields,
+                        program: AMC_RAW_SUBSTANCE_CONSUMPTION_PROGRAM_ID,
+                        orgUnit: orgUnitId,
+                        event: substanceIdsString,
+                        pageSize: substanceIdsChunk.length,
+                    })
+                ).flatMap((eventsResponse: TrackerEventsResponse) => {
+                    return Future.success(eventsResponse.instances);
+                });
+            })
+        ).flatMap(listOfEvents => Future.success(_(listOfEvents).flatten().value()));
     }
 
     private async getRawSubstanceConsumptionDataByEventsIdsAsync(

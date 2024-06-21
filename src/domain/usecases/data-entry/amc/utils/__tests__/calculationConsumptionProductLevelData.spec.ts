@@ -18,7 +18,7 @@ import { RawSubstanceConsumptionCalculated } from "../../../../../entities/data-
 import { setupLoggerForTesting } from "../../../../../../utils/logger";
 
 describe("Given calculate Consumption Product Level Data function", () => {
-    beforeAll(() => setupLoggerForTesting());
+    beforeAll(async () => await setupLoggerForTesting());
 
     describe("When product registry attributes has: strength unit from gram family (then content from gram family), no concentration volume and no volume, no combination codes, strength unit and ddd unit are the same", () => {
         it("Then should return correct solution", async () => {

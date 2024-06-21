@@ -1,4 +1,4 @@
-import { Logger } from "@eyeseetea/d2-logger";
+import { ConsoleLogger, ProgramLogger, initLogger, BatchLogContent } from "@eyeseetea/d2-logger";
 import { Instance } from "../data/entities/Instance";
 import { Id } from "../domain/entities/Base";
 
@@ -7,14 +7,15 @@ const LOGS_PROGRAM = "zARxYmOD18Z";
 const MESSAGE_DATA_ELEMENT = "BjUzF5E4eR8";
 const MESSAGE_TYPE_DATA_ELEMENT = "NpS5LoLuhgS";
 
-export let logger: Logger;
+export let logger: ProgramLogger | ConsoleLogger;
+export type { BatchLogContent };
 
 export async function setupLogger(instance: Instance, options?: { isDebug?: boolean; orgUnitId?: Id }): Promise<void> {
     const { isDebug = false, orgUnitId } = options ?? {};
 
-    const loggerInstance = new Logger();
-    await loggerInstance.init({
+    logger = await initLogger({
         type: "program",
+        debug: isDebug,
         baseUrl: instance.url,
         auth: instance.auth,
         programId: LOGS_PROGRAM,
@@ -23,15 +24,11 @@ export async function setupLogger(instance: Instance, options?: { isDebug?: bool
             messageId: MESSAGE_DATA_ELEMENT,
             messageTypeId: MESSAGE_TYPE_DATA_ELEMENT,
         },
-        debug: isDebug,
     });
-    logger = loggerInstance;
 }
 
-export function setupLoggerForTesting(): void {
-    const loggerInstance = new Logger();
-    loggerInstance.init({
+export async function setupLoggerForTesting(): Promise<void> {
+    logger = await initLogger({
         type: "console",
     });
-    logger = loggerInstance;
 }

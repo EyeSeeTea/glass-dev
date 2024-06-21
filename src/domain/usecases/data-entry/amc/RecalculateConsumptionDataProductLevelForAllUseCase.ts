@@ -44,15 +44,15 @@ export class RecalculateConsumptionDataProductLevelForAllUseCase {
         allowCreationIfNotExist: boolean
     ): FutureData<void> {
         logger.info(
-            `Calculate consumption data of product level for orgUnitsIds=${orgUnitsIds.join(
+            `[${new Date().toISOString()}] Calculate consumption data of product level for orgUnitsIds=${orgUnitsIds.join(
                 ","
-            )} and periods=${periods.join(",")}`
+            )} and periods=${periods.join(",")}. Current ATC version ${currentATCVersion}`
         );
         return this.amcProductDataRepository
             .getProductRegisterProgramMetadata()
             .flatMap(productRegisterProgramMetadata => {
                 if (!productRegisterProgramMetadata) {
-                    logger.error("Product register program metadata not found");
+                    logger.error(`[${new Date().toISOString()}] Product register program metadata not found`);
                     return Future.error("Product register program metadata not found");
                 }
                 return Future.sequential(
@@ -81,7 +81,9 @@ export class RecalculateConsumptionDataProductLevelForAllUseCase {
         atcVersionKey: string,
         allowCreationIfNotExist: boolean
     ): FutureData<void> {
-        logger.info(`Calculating consumption data of product level for orgUnitsId ${orgUnitId} and period ${period}`);
+        logger.info(
+            `[${new Date().toISOString()}] Calculating consumption data of product level for orgUnitsId ${orgUnitId} and period ${period}`
+        );
         return this.getTrackedEntitiesAndRawSubstanceConsumptionCalculatedEvents(
             productRegisterProgramMetadata,
             orgUnitId,
@@ -98,7 +100,7 @@ export class RecalculateConsumptionDataProductLevelForAllUseCase {
             }).flatMap(newRawSubstanceConsumptionCalculatedData => {
                 if (_.isEmpty(newRawSubstanceConsumptionCalculatedData)) {
                     logger.error(
-                        `Product level: there are no new calculated data to update current data for orgUnitId ${orgUnitId} and period ${period}`
+                        `[${new Date().toISOString()}] Product level: there are no new calculated data to update current data for orgUnitId ${orgUnitId} and period ${period}`
                     );
                     return Future.success(undefined);
                 }
@@ -111,7 +113,7 @@ export class RecalculateConsumptionDataProductLevelForAllUseCase {
                         ))
                 ) {
                     logger.error(
-                        `Product level: there are no current calculated data to update for orgUnitId ${orgUnitId} and period ${period}`
+                        `[${new Date().toISOString()}] Product level: there are no current calculated data to update for orgUnitId ${orgUnitId} and period ${period}`
                     );
                     return Future.success(undefined);
                 }
@@ -122,7 +124,7 @@ export class RecalculateConsumptionDataProductLevelForAllUseCase {
                     );
                 if (!rawSubstanceConsumptionCalculatedStageMetadata) {
                     logger.error(
-                        `Cannot find Raw Substance Consumption Calculated program stage metadata with id ${AMC_RAW_SUBSTANCE_CONSUMPTION_CALCULATED_STAGE_ID}`
+                        `[${new Date().toISOString()}] Cannot find Raw Substance Consumption Calculated program stage metadata with id ${AMC_RAW_SUBSTANCE_CONSUMPTION_CALCULATED_STAGE_ID}`
                     );
                     return Future.error("Cannot find Raw Substance Consumption Calculated program stage metadata");
                 }
@@ -157,32 +159,26 @@ export class RecalculateConsumptionDataProductLevelForAllUseCase {
 
                 if (eventIdsNoUpdated.length) {
                     logger.error(
-                        `Product level: these events could not be updated events=${eventIdsNoUpdated.join(",")}`
+                        `[${new Date().toISOString()}] Product level: these events could not be updated events=${eventIdsNoUpdated.join(
+                            ","
+                        )}`
                     );
                 }
 
-                logger.debug(
-                    `Updating calculations of product level events in DHIS2 for orgUnitId ${orgUnitId} and period ${period}: events=${eventIdsToUpdate.join(
+                logger.info(
+                    `[${new Date().toISOString()}] Updating calculations of product level events in DHIS2 for orgUnitId ${orgUnitId} and period ${period}: events=${eventIdsToUpdate.join(
                         ","
                     )}`
-                );
-
-                logger.info(
-                    `Updating calculations of product level for ${eventIdsToUpdate.length} events in DHIS2 for orgUnitId ${orgUnitId} and period ${period}`
                 );
 
                 const rawSubstanceConsumptionCalculatedDataToCreate =
                     newRawSubstanceConsumptionCalculatedDataWithIds.filter(({ eventId }) => eventId === undefined);
 
                 if (allowCreationIfNotExist && rawSubstanceConsumptionCalculatedDataToCreate.length) {
-                    logger.debug(
-                        `Creating Raw Substance Consumption Calculated data events in DHIS2 for orgUnitId ${orgUnitId} and period ${period}: events=${JSON.stringify(
+                    logger.info(
+                        `[${new Date().toISOString()}] Creating Raw Substance Consumption Calculated data events in DHIS2 for orgUnitId ${orgUnitId} and period ${period}: events=${JSON.stringify(
                             rawSubstanceConsumptionCalculatedDataToCreate
                         )}`
-                    );
-
-                    logger.info(
-                        `Creating Raw Substance Consumption Calculated data for ${rawSubstanceConsumptionCalculatedDataToCreate.length} events in DHIS2 for orgUnitId ${orgUnitId} and period ${period}`
                     );
                 }
 
@@ -203,7 +199,7 @@ export class RecalculateConsumptionDataProductLevelForAllUseCase {
                     .flatMap(response => {
                         if (response.status === "OK") {
                             logger.success(
-                                `Calculations of product level updated for orgUnitId ${orgUnitId} and period ${period}: ${
+                                `[${new Date().toISOString()}] Calculations of product level updated for orgUnitId ${orgUnitId} and period ${period}: ${
                                     response.stats.updated
                                 } of ${response.stats.total} events updated${
                                     allowCreationIfNotExist
@@ -214,14 +210,14 @@ export class RecalculateConsumptionDataProductLevelForAllUseCase {
                         }
                         if (response.status === "ERROR") {
                             logger.error(
-                                `Error updating calculations of product level updated for orgUnitId ${orgUnitId} and period ${period}: ${JSON.stringify(
+                                `[${new Date().toISOString()}] Error updating calculations of product level updated for orgUnitId ${orgUnitId} and period ${period}: ${JSON.stringify(
                                     response.validationReport.errorReports
                                 )}`
                             );
                         }
                         if (response.status === "WARNING") {
                             logger.warn(
-                                `Warning updating calculations of product level updated for orgUnitId ${orgUnitId} and period ${period}: updated=${
+                                `[${new Date().toISOString()}] Warning updating calculations of product level updated for orgUnitId ${orgUnitId} and period ${period}: updated=${
                                     response.stats.updated
                                 }, ${allowCreationIfNotExist ? `created=${response.stats.created}, ` : ""} total=${
                                     response.stats.total
@@ -243,7 +239,7 @@ export class RecalculateConsumptionDataProductLevelForAllUseCase {
         currentRawSubstanceConsumptionCalculatedByProductId: Record<string, RawSubstanceConsumptionCalculated[]>;
     }> {
         logger.info(
-            `Getting product data tracked entities and events in raw substance consumption calculated stage at product level data for period ${period} and organisation unit id ${orgUnitId}`
+            `[${new Date().toISOString()}] Getting product data tracked entities and events in raw substance consumption calculated stage at product level data for period ${period} and organisation unit id ${orgUnitId}`
         );
         return this.amcProductDataRepository
             .getAllProductRegisterAndRawProductConsumptionByPeriod(orgUnitId, period)
@@ -264,7 +260,7 @@ export class RecalculateConsumptionDataProductLevelForAllUseCase {
                     );
                 if (!rawSubstanceConsumptionCalculatedStageMetadata) {
                     logger.error(
-                        `Cannot find Raw Substance Consumption Calculated program stage metadata with id=${AMC_RAW_SUBSTANCE_CONSUMPTION_CALCULATED_STAGE_ID}`
+                        `[${new Date().toISOString()}] Cannot find Raw Substance Consumption Calculated program stage metadata with id=${AMC_RAW_SUBSTANCE_CONSUMPTION_CALCULATED_STAGE_ID}`
                     );
                     return Future.error("Cannot find Raw Substance Consumption Calculated program stage metadata");
                 }
