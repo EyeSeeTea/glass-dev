@@ -24,7 +24,9 @@ export interface AMCProductDataRepository {
     getProductRegisterAndRawProductConsumptionByProductIds(
         orgUnitId: Id,
         productIds: string[],
-        period: string
+        period: string,
+        productIdsChunkSize: number,
+        chunked?: boolean
     ): FutureData<ProductDataTrackedEntity[]>;
     getAllProductRegisterAndRawProductConsumptionByPeriod(
         orgUnitId: Id,

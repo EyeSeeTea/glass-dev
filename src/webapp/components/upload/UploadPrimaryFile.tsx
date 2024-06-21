@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 import { Button, CircularProgress } from "@material-ui/core";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import BackupIcon from "@material-ui/icons/Backup";
@@ -11,7 +11,7 @@ import { useAppContext } from "../../contexts/app-context";
 import { useCurrentDataSubmissionId } from "../../hooks/useCurrentDataSubmissionId";
 import { useCurrentModuleContext } from "../../contexts/current-module-context";
 import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context";
-import { useCallbackEffect } from "../../hooks/use-callback-effect";
+import { EffectFn, useCallbackEffect } from "../../hooks/use-callback-effect";
 import { useCurrentPeriodContext } from "../../contexts/current-period-context";
 import { moduleProperties } from "../../../domain/utils/ModuleProperties";
 interface UploadPrimaryFileProps {
@@ -19,6 +19,9 @@ interface UploadPrimaryFileProps {
     setPrimaryFile: React.Dispatch<React.SetStateAction<File | null>>;
     validate: (val: boolean) => void;
     batchId: string;
+    removePrimaryFile: EffectFn<[event: React.MouseEvent<HTMLButtonElement, MouseEvent>]>;
+    isLoading: boolean;
+    setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export const UploadPrimaryFile: React.FC<UploadPrimaryFileProps> = ({
@@ -26,6 +29,9 @@ export const UploadPrimaryFile: React.FC<UploadPrimaryFileProps> = ({
     setPrimaryFile,
     validate,
     batchId,
+    removePrimaryFile,
+    isLoading,
+    setIsLoading,
 }) => {
     const { compositionRoot } = useAppContext();
 
@@ -40,7 +46,6 @@ export const UploadPrimaryFile: React.FC<UploadPrimaryFileProps> = ({
     const { currentPeriod } = useCurrentPeriodContext();
     const snackbar = useSnackbar();
 
-    const [isLoading, setIsLoading] = useState(false);
     const primaryFileUploadRef = useRef<DropzoneRef>(null);
 
     const dataSubmissionId = useCurrentDataSubmissionId(moduleId, moduleName, orgUnitId, currentPeriod);
@@ -56,34 +61,6 @@ export const UploadPrimaryFile: React.FC<UploadPrimaryFileProps> = ({
             validate(false);
         }
     }, [primaryFile, validate]);
-
-    const removeFiles = useCallback(
-        (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-            event.preventDefault();
-            setIsLoading(true);
-            const primaryUploadId = localStorage.getItem("primaryUploadId");
-            if (primaryUploadId) {
-                return compositionRoot.glassDocuments.deleteByUploadId(primaryUploadId).run(
-                    () => {
-                        localStorage.removeItem("primaryUploadId");
-                        setPrimaryFile(null);
-                        setIsLoading(false);
-                    },
-                    errorMessage => {
-                        snackbar.error(errorMessage);
-                        setPrimaryFile(null);
-                        setIsLoading(false);
-                    }
-                );
-            } else {
-                setPrimaryFile(null);
-                setIsLoading(false);
-            }
-        },
-        [compositionRoot.glassDocuments, snackbar, setPrimaryFile]
-    );
-
-    const removeFilesEffect = useCallbackEffect(removeFiles);
 
     const primaryFileUpload = useCallback(
         (files: File[], rejections: FileRejection[]) => {
@@ -144,6 +121,7 @@ export const UploadPrimaryFile: React.FC<UploadPrimaryFileProps> = ({
             moduleName,
             orgUnitCode,
             orgUnitId,
+            setIsLoading,
             setPrimaryFile,
             snackbar,
         ]
@@ -173,7 +151,7 @@ export const UploadPrimaryFile: React.FC<UploadPrimaryFileProps> = ({
             {primaryFile && (
                 <RemoveContainer>
                     {primaryFile?.name} - {primaryFile?.type}
-                    <StyledRemoveButton onClick={removeFilesEffect}>
+                    <StyledRemoveButton onClick={removePrimaryFile}>
                         <CloseIcon />
                     </StyledRemoveButton>
                 </RemoveContainer>

@@ -3,13 +3,13 @@ import { calculateConsumptionSubstanceLevelData } from "../calculationConsumptio
 import rawSubstanceConsumptionDataBasic from "./data/rawSubstanceConsumptionDataBasic.json";
 import rawSubstanceConsumptionDataAtcNotFound from "./data/rawSubstanceConsumptionDataAtcNotFound.json";
 import atcVersionsByKeysData from "./data/atcVersionsByKeys.json";
-import calculationConsumptionSubstanceLevelBasic from "./data/calculationConsumptionSubstanceLevelBasic.json";
+import { calculationConsumptionSubstanceLevelBasic } from "./data/calculationConsumptionSubstanceLevelBasic";
 import { ListGlassATCVersions } from "../../../../../entities/GlassAtcVersionData";
 import { SubstanceConsumptionCalculated } from "../../../../../entities/data-entry/amc/SubstanceConsumptionCalculated";
 import { setupLoggerForTesting } from "../../../../../../utils/logger";
 
 describe("Given calculate Consumption Substance Level Data function", () => {
-    beforeAll(() => setupLoggerForTesting());
+    beforeAll(async () => await setupLoggerForTesting());
 
     describe("When all ddds are assigned correctly", () => {
         it("Then should return correct solution", async () => {
