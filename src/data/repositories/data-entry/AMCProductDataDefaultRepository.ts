@@ -94,7 +94,7 @@ export class AMCProductDataDefaultRepository implements AMCProductDataRepository
         if (!_.isEmpty(d2TrackerEvents)) {
             return importApiTracker(this.api, { events: d2TrackerEvents }, importStrategy);
         } else {
-            logger.error(`Product level data: there are no events to be created`);
+            logger.error(`[${new Date().toISOString()}] Product level data: there are no events to be created`);
             return Future.error("There are no events to be created");
         }
     }
@@ -102,8 +102,18 @@ export class AMCProductDataDefaultRepository implements AMCProductDataRepository
     getProductRegisterAndRawProductConsumptionByProductIds(
         orgUnitId: Id,
         productIds: string[],
-        period: string
+        period: string,
+        productIdsChunkSize: number,
+        chunked?: boolean
     ): FutureData<ProductDataTrackedEntity[]> {
+        if (chunked) {
+            return this.getProductRegisterAndRawProductConsumptionByProductIdsChunked(
+                orgUnitId,
+                productIds,
+                period,
+                productIdsChunkSize
+            );
+        }
         return Future.fromPromise(
             this.getProductRegisterAndRawProductConsumptionByProductIdsAsync(orgUnitId, productIds, period)
         ).map(trackedEntities => {
@@ -131,6 +141,41 @@ export class AMCProductDataDefaultRepository implements AMCProductDataRepository
         ).map(response => {
             return this.mapFromD2ProgramToProductRegisterProgramMetadata(response.objects[0]);
         });
+    }
+
+    private getProductRegisterAndRawProductConsumptionByProductIdsChunked(
+        orgUnit: Id,
+        productIds: string[],
+        period: string,
+        productIdsChunkSize: number
+    ): FutureData<ProductDataTrackedEntity[]> {
+        const chunkedProductIds = _(productIds).chunk(productIdsChunkSize).value();
+        const enrollmentEnrolledAfter = `${period}-1-1`;
+        const enrollmentEnrolledBefore = `${period}-12-31`;
+
+        return Future.sequential(
+            chunkedProductIds.flatMap(productIdsChunk => {
+                const productIdsString = productIdsChunk.join(";");
+                const filter = `${AMR_GLASS_AMC_TEA_PRODUCT_ID}:IN:${productIdsString}`;
+
+                // TODO: change pageSize to skipPaging:true when new version of d2-api
+                return apiToFuture(
+                    this.api.tracker.trackedEntities.get({
+                        fields: trackedEntitiesFields,
+                        program: AMC_PRODUCT_REGISTER_PROGRAM_ID,
+                        programStage: AMC_RAW_PRODUCT_CONSUMPTION_STAGE_ID,
+                        orgUnit: orgUnit,
+                        filter: filter,
+                        enrollmentEnrolledAfter: enrollmentEnrolledAfter,
+                        enrollmentEnrolledBefore: enrollmentEnrolledBefore,
+                        pageSize: productIdsChunk.length,
+                    })
+                ).flatMap((trackedEntitiesResponse: TrackedEntitiesGetResponse) => {
+                    const productData = this.mapFromTrackedEntitiesToProductData(trackedEntitiesResponse.instances);
+                    return Future.success(productData);
+                });
+            })
+        ).flatMap(listOfProductData => Future.success(_(listOfProductData).flatten().value()));
     }
 
     private async getProductRegisterAndRawProductConsumptionByProductIdsAsync(

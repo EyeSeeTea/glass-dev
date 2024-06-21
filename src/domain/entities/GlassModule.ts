@@ -12,6 +12,10 @@ interface ModuleUserGroups {
 }
 
 type DataSubmissionPeriodTypes = "YEARLY" | "QUARTERLY";
+export type ChunkSizes = {
+    productIds: number;
+    substanceIds: number;
+};
 
 export interface GlassModule {
     name: string;
@@ -41,6 +45,7 @@ export interface GlassModule {
     populateCurrentYearInHistory?: boolean;
     customDataColumns?: CustomDataColumns;
     lineLists?: LineListDetails[];
+    chunkSizes?: ChunkSizes;
 }
 
 export type LineListDetails = { id: Id; name?: string; programId: Id; programStageId?: Id };

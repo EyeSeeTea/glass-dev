@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import { Backdrop, Button, CircularProgress, Typography } from "@material-ui/core";
 import { BlockingErrors } from "./BlockingErrors";
 import styled from "styled-components";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
 import { NonBlockingWarnings } from "./NonBlockingWarnings";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
+import CloudDownload from "@material-ui/icons/CloudDownload";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { useAppContext } from "../../contexts/app-context";
 import { useCurrentModuleContext } from "../../contexts/current-module-context";
@@ -15,6 +16,7 @@ import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context
 import { SupportButtons } from "./SupportButtons";
 import { moduleProperties } from "../../../domain/utils/ModuleProperties";
 import { useSnackbar } from "@eyeseetea/d2-ui-components";
+import { EffectFn } from "../../hooks/use-callback-effect";
 
 interface ConsistencyChecksProps {
     changeStep: (step: number) => void;
@@ -25,6 +27,8 @@ interface ConsistencyChecksProps {
     secondaryFileImportSummary: ImportSummary | undefined;
     setPrimaryFileImportSummary: React.Dispatch<React.SetStateAction<ImportSummary | undefined>>;
     setSecondaryFileImportSummary: React.Dispatch<React.SetStateAction<ImportSummary | undefined>>;
+    removePrimaryFile: EffectFn<[event: React.MouseEvent<HTMLButtonElement, MouseEvent>]>;
+    removeSecondaryFile: EffectFn<[event: React.MouseEvent<HTMLButtonElement, MouseEvent>]>;
 }
 
 export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
@@ -36,6 +40,8 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
     secondaryFileImportSummary,
     setPrimaryFileImportSummary,
     setSecondaryFileImportSummary,
+    removePrimaryFile,
+    removeSecondaryFile,
 }) => {
     const { compositionRoot } = useAppContext();
     const { currentModuleAccess } = useCurrentModuleContext();
@@ -48,6 +54,28 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
     const changeType = (fileType: string) => {
         setFileType(fileType);
     };
+
+    const downloadErrorsClick = useCallback(() => {
+        const csvContent = [
+            Object.keys(primaryFileImportSummary?.blockingErrors[0] ?? {}).join(","),
+            ...(primaryFileImportSummary?.blockingErrors.map(
+                ({ error, count, lines }) => `"${error}",${count},"${lines?.join(";")}"`
+            ) ?? []),
+        ].join("\n");
+
+        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8," });
+        const downloadSimulateAnchor = document.createElement("a");
+        downloadSimulateAnchor.href = URL.createObjectURL(blob);
+        downloadSimulateAnchor.download = `${currentModuleAccess.moduleName}-${currentOrgUnitAccess.orgUnitCode}-${currentPeriod}-ERRORS.csv`;
+        // simulate link click
+        document.body.appendChild(downloadSimulateAnchor);
+        downloadSimulateAnchor.click();
+    }, [
+        currentModuleAccess.moduleName,
+        currentOrgUnitAccess.orgUnitCode,
+        currentPeriod,
+        primaryFileImportSummary?.blockingErrors,
+    ]);
 
     const continueClick = () => {
         if (primaryFile && moduleProperties.get(currentModuleAccess.moduleName)?.isDryRunReq) {
@@ -244,7 +272,12 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
             ) {
                 if (primaryFile) {
                     compositionRoot.calculations
-                        .consumptionDataProductLevel(currentPeriod, currentOrgUnitAccess.orgUnitId, primaryFile)
+                        .consumptionDataProductLevel(
+                            currentPeriod,
+                            currentOrgUnitAccess.orgUnitId,
+                            primaryFile,
+                            currentModuleAccess.moduleName
+                        )
                         .run(
                             importSummary => {
                                 console.debug(importSummary);
@@ -288,6 +321,15 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
             changeStep(3);
         }
     };
+
+    const onCancelUpload = useCallback(
+        (event: React.MouseEvent<HTMLButtonElement>) => {
+            primaryFile && removePrimaryFile(event);
+            secondaryFile && removeSecondaryFile(event);
+            changeStep(1);
+        },
+        [changeStep, primaryFile, removePrimaryFile, removeSecondaryFile, secondaryFile]
+    );
 
     return (
         <ContentWrapper>
@@ -344,19 +386,33 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
                 secondaryFileImportSummary
             )}
             <div className="bottom">
-                <SupportButtons changeStep={changeStep} primaryFileImportSummary={primaryFileImportSummary} />
-                <Button
-                    variant="contained"
-                    color="primary"
-                    endIcon={<ChevronRightIcon />}
-                    onClick={continueClick}
-                    disableElevation
-                    disabled={
-                        primaryFileImportSummary && primaryFileImportSummary.blockingErrors.length > 0 ? true : false
-                    }
-                >
-                    {i18n.t("Continue")}
-                </Button>
+                <SupportButtons primaryFileImportSummary={primaryFileImportSummary} onCancelUpload={onCancelUpload} />
+                <div className="right">
+                    {primaryFileImportSummary && primaryFileImportSummary.blockingErrors.length > 0 && (
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            endIcon={<CloudDownload />}
+                            onClick={downloadErrorsClick}
+                        >
+                            {i18n.t("Download Errors as CSV")}
+                        </Button>
+                    )}
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        endIcon={<ChevronRightIcon />}
+                        onClick={continueClick}
+                        disableElevation
+                        disabled={
+                            primaryFileImportSummary && primaryFileImportSummary.blockingErrors.length > 0
+                                ? true
+                                : false
+                        }
+                    >
+                        {i18n.t("Continue")}
+                    </Button>
+                </div>
             </div>
         </ContentWrapper>
     );
@@ -425,6 +481,11 @@ const ContentWrapper = styled.div`
         display: flex;
         align-items: flex-start;
         justify-content: space-between;
+    }
+    .right {
+        display: flex;
+        align-items: flex-end;
+        gap: 20px;
     }
 `;
 

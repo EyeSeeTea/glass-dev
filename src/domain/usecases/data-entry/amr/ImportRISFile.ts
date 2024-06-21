@@ -21,6 +21,7 @@ import {
 import { includeBlockingErrors } from "../utils/includeBlockingErrors";
 import { mapDataValuesToImportSummary } from "../utils/mapDhis2Summary";
 import { RISData } from "../../../entities/data-entry/amr-external/RISData";
+import { checkDuplicateRowsRIS } from "../utils/checkDuplicateRows";
 
 const AMR_AMR_DS_INPUT_FILES_RIS_DS_ID = "CeQPmXgrhHF";
 const AMR_DATA_PATHOGEN_ANTIBIOTIC_BATCHID_CC_ID = "S427AvQESbw";
@@ -74,6 +75,7 @@ export class ImportRISFile {
                 const yearErrors = checkYear(risDataItems, year);
                 const countryErrors = checkCountry(risDataItems, countryCode);
                 const blockingCategoryOptionErrors: { error: string; line: number }[] = [];
+                const duplicateRowErrors = checkDuplicateRowsRIS(risDataItems);
 
                 const dataValues = risDataItems
                     .map((risData, index) => {
@@ -126,6 +128,7 @@ export class ImportRISFile {
                     ...batchIdErrors,
                     ...yearErrors,
                     ...countryErrors,
+                    ...duplicateRowErrors,
                 ];
 
                 if (allBlockingErrors.length > 0) {

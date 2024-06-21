@@ -47,7 +47,9 @@ export function getConsumptionDataProductLevel(params: {
     } = params;
 
     if (!productRegisterProgramMetadata) {
-        logger.error(`Cannot find Product Register program metadata for orgUnitId ${orgUnitId} and period ${period}`);
+        logger.error(
+            `[${new Date().toISOString()}] Cannot find Product Register program metadata for orgUnitId ${orgUnitId} and period ${period}`
+        );
         return Future.error(
             `Cannot find Product Register program metadata for orgUnitId ${orgUnitId} and period ${period}`
         );
@@ -55,7 +57,7 @@ export function getConsumptionDataProductLevel(params: {
 
     if (!productDataTrackedEntities) {
         logger.error(
-            `Cannot find Product Register Data for orgUnitsId ${orgUnitId} and period ${period} for calculations`
+            `[${new Date().toISOString()}] Cannot find Product Register Data for orgUnitsId ${orgUnitId} and period ${period} for calculations`
         );
         return Future.error("Cannot find Product Register Data");
     }
@@ -66,7 +68,7 @@ export function getConsumptionDataProductLevel(params: {
 
     if (!rawProductConsumptionStage) {
         logger.error(
-            `Cannot find Raw Product Consumption program stage metadata for orgUnitId ${orgUnitId} and period ${period} with id ${AMC_RAW_PRODUCT_CONSUMPTION_STAGE_ID}`
+            `[${new Date().toISOString()}] Cannot find Raw Product Consumption program stage metadata for orgUnitId ${orgUnitId} and period ${period} with id ${AMC_RAW_PRODUCT_CONSUMPTION_STAGE_ID}`
         );
         return Future.error(
             `Cannot find Raw Product Consumption program stage metadata for orgUnitId ${orgUnitId} and period ${period} with id ${AMC_RAW_PRODUCT_CONSUMPTION_STAGE_ID}`

@@ -25,7 +25,7 @@ export function getConsumptionDataSubstanceLevel(params: {
     } = params;
     if (!rawSubstanceConsumptionData) {
         logger.error(
-            `Cannot find Raw Substance Consumption Data for orgUnitsId ${orgUnitId} and period ${period} for calculations`
+            `[${new Date().toISOString()}] Cannot find Raw Substance Consumption Data for orgUnitsId ${orgUnitId} and period ${period} for calculations`
         );
         return Future.error("Cannot find Raw Substance Consumption Data");
     }
@@ -38,7 +38,7 @@ export function getConsumptionDataSubstanceLevel(params: {
         const keysNotFound = atcVersionKeys.filter(key => !Object.keys(atcVersionsByKeys).includes(key));
         if (keysNotFound.length) {
             logger.error(
-                `ATC data not found for these versions: ${keysNotFound.join(
+                `[${new Date().toISOString()}] ATC data not found for these versions: ${keysNotFound.join(
                     ","
                 )}. Calculated consumption data for raw substance consumption data with these ATC versions manual will not be calculated.`
             );

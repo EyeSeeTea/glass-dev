@@ -12,7 +12,9 @@ export interface AMCSubstanceDataRepository {
     ): FutureData<{ isValid: boolean; rows: number; specimens: string[] }>;
     getRawSubstanceConsumptionDataByEventsIds(
         orgUnitId: Id,
-        eventsIds: Id[]
+        substanceIds: Id[],
+        substanceIdsChunkSize: number,
+        chunked?: boolean
     ): FutureData<RawSubstanceConsumptionData[] | undefined>;
     importCalculations(
         importStrategy: ImportStrategy,
