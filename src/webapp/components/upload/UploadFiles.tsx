@@ -24,17 +24,26 @@ import { Future } from "../../../domain/entities/Future";
 import { ImportSummary } from "../../../domain/entities/data-entry/ImportSummary";
 import { StyledLoaderContainer } from "./ConsistencyChecks";
 import { moduleProperties } from "../../../domain/utils/ModuleProperties";
+import { EffectFn } from "../../hooks/use-callback-effect";
 
 interface UploadFilesProps {
     changeStep: (step: number) => void;
     primaryFile: File | null;
     setPrimaryFile: React.Dispatch<React.SetStateAction<File | null>>;
     secondaryFile: File | null;
-    setSecondaryFile: React.Dispatch<React.SetStateAction<File | null>>;
+    setSecondaryFile: (maybeFile: File | null) => void;
     batchId: string;
     setBatchId: React.Dispatch<React.SetStateAction<string>>;
     setPrimaryFileImportSummary: React.Dispatch<React.SetStateAction<ImportSummary | undefined>>;
     setSecondaryFileImportSummary: React.Dispatch<React.SetStateAction<ImportSummary | undefined>>;
+    removePrimaryFile: EffectFn<[event: React.MouseEvent<HTMLButtonElement, MouseEvent>]>;
+    removeSecondaryFile: EffectFn<[event: React.MouseEvent<HTMLButtonElement, MouseEvent>]>;
+    hasSecondaryFile: boolean;
+    setHasSecondaryFile: React.Dispatch<React.SetStateAction<boolean>>;
+    isLoadingPrimary: boolean;
+    setIsLoadingSecondary: React.Dispatch<React.SetStateAction<boolean>>;
+    isLoadingSecondary: boolean;
+    setIsLoadingPrimary: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const UPLOADED_STATUS = "uploaded";
@@ -76,6 +85,14 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
     setBatchId,
     setPrimaryFileImportSummary,
     setSecondaryFileImportSummary,
+    removePrimaryFile,
+    removeSecondaryFile,
+    hasSecondaryFile,
+    setHasSecondaryFile,
+    isLoadingPrimary,
+    setIsLoadingPrimary,
+    isLoadingSecondary,
+    setIsLoadingSecondary,
 }) => {
     const { compositionRoot } = useAppContext();
     const snackbar = useSnackbar();
@@ -83,7 +100,6 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
     const [isPrimaryFileValid, setIsPrimaryFileValid] = useState(false);
     const [isSecondaryFileValid, setIsSecondaryFileValid] = useState(false);
     const [previousUploadsBatchIds, setPreviousUploadsBatchIds] = useState<string[]>([]);
-    const [hasSecondaryFile, setHasSecondaryFile] = useState<boolean>(secondaryFile ? true : false);
     const [importLoading, setImportLoading] = useState<boolean>(false);
     const [previousBatchIdsLoading, setPreviousBatchIdsLoading] = useState<boolean>(true);
     const [loading, setLoading] = useState<boolean>(false);
@@ -497,6 +513,9 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
                                 batchId={batchId}
                                 primaryFile={primaryFile}
                                 setPrimaryFile={setPrimaryFile}
+                                removePrimaryFile={removePrimaryFile}
+                                isLoading={isLoadingPrimary}
+                                setIsLoading={setIsLoadingPrimary}
                             />
                         ) : (
                             <UploadSecondary
@@ -505,6 +524,9 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
                                 secondaryFile={secondaryFile}
                                 setSecondaryFile={setSecondaryFile}
                                 setHasSecondaryFile={setHasSecondaryFile}
+                                removeSecondaryFile={removeSecondaryFile}
+                                isLoading={isLoadingSecondary}
+                                setIsLoading={setIsLoadingSecondary}
                             />
                         )}
                     </StyledSingleFileSelectContainer>
@@ -529,6 +551,9 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
                                     batchId={batchId}
                                     primaryFile={primaryFile}
                                     setPrimaryFile={setPrimaryFile}
+                                    removePrimaryFile={removePrimaryFile}
+                                    isLoading={isLoadingPrimary}
+                                    setIsLoading={setIsLoadingPrimary}
                                 />
                                 {moduleProperties.get(moduleName)?.isSecondaryFileApplicable && (
                                     <UploadSecondary
@@ -537,6 +562,9 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
                                         secondaryFile={secondaryFile}
                                         setSecondaryFile={setSecondaryFile}
                                         setHasSecondaryFile={setHasSecondaryFile}
+                                        removeSecondaryFile={removeSecondaryFile}
+                                        isLoading={isLoadingSecondary}
+                                        setIsLoading={setIsLoadingSecondary}
                                     />
                                 )}
                             </div>

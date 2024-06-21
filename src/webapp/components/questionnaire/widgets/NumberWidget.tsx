@@ -46,7 +46,7 @@ const NumberWidget: React.FC<NumberWidgetProps> = props => {
                 onChange={updateState}
                 value={stateValue || ""}
                 disabled={props.disabled}
-                error={validationError !== undefined}
+                error={validationError !== undefined && validationError.length > 0}
             />
             <ValidationErrorText>{validationError}</ValidationErrorText>
         </>

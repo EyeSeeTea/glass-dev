@@ -8,17 +8,35 @@ import { UploadFiles } from "./UploadFiles";
 import { ReviewDataSummary } from "./ReviewDataSummary";
 import { Completed } from "./Completed";
 import { ImportSummary } from "../../../domain/entities/data-entry/ImportSummary";
+import { useUploadContent } from "./useUploadContent";
+import { useSnackbar } from "@eyeseetea/d2-ui-components";
+import { EffectFn } from "../../hooks/use-callback-effect";
 
 interface UploadContentProps {
     resetWizard: boolean;
     setResetWizard: React.Dispatch<React.SetStateAction<boolean>>;
 }
 export const UploadContent: React.FC<UploadContentProps> = ({ resetWizard, setResetWizard }) => {
+    const {
+        errorMessage,
+        isLoadingPrimary,
+        setIsLoadingPrimary,
+        isLoadingSecondary,
+        setIsLoadingSecondary,
+        primaryFile,
+        setPrimaryFile,
+        removePrimaryFile,
+        secondaryFile,
+        setSecondaryFile,
+        removeSecondaryFile,
+        hasSecondaryFile,
+        setHasSecondaryFile,
+    } = useUploadContent();
+    const snackbar = useSnackbar();
+
     const [currentStep, setCurrentStep] = useState(1);
     const [completedSteps, setCompletedSteps] = useState<number[]>([]);
     const [batchId, setBatchId] = useState<string>("");
-    const [primaryFile, setPrimaryFile] = useState<File | null>(null);
-    const [secondaryFile, setSecondaryFile] = useState<File | null>(null);
     const [primaryFileImportSummary, setPrimaryFileImportSummary] = useState<ImportSummary | undefined>(undefined);
     const [secondaryFileImportSummary, setSecondaryImportSummary] = useState<ImportSummary | undefined>(undefined);
 
@@ -42,7 +60,13 @@ export const UploadContent: React.FC<UploadContentProps> = ({ resetWizard, setRe
             setSecondaryImportSummary(undefined);
             setResetWizard(false);
         }
-    }, [resetWizard, setResetWizard]);
+    }, [resetWizard, setPrimaryFile, setResetWizard, setSecondaryFile]);
+
+    useEffect(() => {
+        if (errorMessage) {
+            snackbar.error(errorMessage);
+        }
+    }, [errorMessage, snackbar]);
 
     return (
         <ContentWrapper>
@@ -65,7 +89,15 @@ export const UploadContent: React.FC<UploadContentProps> = ({ resetWizard, setRe
                     primaryFileImportSummary,
                     secondaryFileImportSummary,
                     setPrimaryFileImportSummary,
-                    setSecondaryImportSummary
+                    setSecondaryImportSummary,
+                    removePrimaryFile,
+                    removeSecondaryFile,
+                    hasSecondaryFile,
+                    setHasSecondaryFile,
+                    isLoadingPrimary,
+                    setIsLoadingPrimary,
+                    isLoadingSecondary,
+                    setIsLoadingSecondary
                 )}
         </ContentWrapper>
     );
@@ -79,11 +111,19 @@ const renderStep = (
     primaryFile: File | null,
     setPrimaryFile: React.Dispatch<React.SetStateAction<File | null>>,
     secondaryFile: File | null,
-    setSecondaryFile: React.Dispatch<React.SetStateAction<File | null>>,
+    setSecondaryFile: (maybeFile: File | null) => void,
     primaryFileImportSummary: ImportSummary | undefined,
     secondaryFileImportSummary: ImportSummary | undefined,
     setPrimaryFileImportSummary: React.Dispatch<React.SetStateAction<ImportSummary | undefined>>,
-    setSecondaryFileImportSummary: React.Dispatch<React.SetStateAction<ImportSummary | undefined>>
+    setSecondaryFileImportSummary: React.Dispatch<React.SetStateAction<ImportSummary | undefined>>,
+    removePrimaryFile: EffectFn<[event: React.MouseEvent<HTMLButtonElement, MouseEvent>]>,
+    removeSecondaryFile: EffectFn<[event: React.MouseEvent<HTMLButtonElement, MouseEvent>]>,
+    hasSecondaryFile: boolean,
+    setHasSecondaryFile: React.Dispatch<React.SetStateAction<boolean>>,
+    isLoadingPrimary: boolean,
+    setIsLoadingPrimary: React.Dispatch<React.SetStateAction<boolean>>,
+    isLoadingSecondary: boolean,
+    setIsLoadingSecondary: React.Dispatch<React.SetStateAction<boolean>>
 ) => {
     switch (step) {
         case 1:
@@ -98,6 +138,14 @@ const renderStep = (
                     setSecondaryFile={setSecondaryFile}
                     setPrimaryFileImportSummary={setPrimaryFileImportSummary}
                     setSecondaryFileImportSummary={setSecondaryFileImportSummary}
+                    removePrimaryFile={removePrimaryFile}
+                    removeSecondaryFile={removeSecondaryFile}
+                    hasSecondaryFile={hasSecondaryFile}
+                    setHasSecondaryFile={setHasSecondaryFile}
+                    isLoadingPrimary={isLoadingPrimary}
+                    setIsLoadingPrimary={setIsLoadingPrimary}
+                    isLoadingSecondary={isLoadingSecondary}
+                    setIsLoadingSecondary={setIsLoadingSecondary}
                 />
             );
         case 2:
@@ -112,6 +160,8 @@ const renderStep = (
                         secondaryFileImportSummary={secondaryFileImportSummary}
                         setPrimaryFileImportSummary={setPrimaryFileImportSummary}
                         setSecondaryFileImportSummary={setSecondaryFileImportSummary}
+                        removePrimaryFile={removePrimaryFile}
+                        removeSecondaryFile={removeSecondaryFile}
                     />
                 </>
             );
