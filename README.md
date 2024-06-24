@@ -82,6 +82,22 @@ To just run the script manually for development:
 $ yarn start-amc-recalculate --url "http[s]://HOST:PORT" --auth USERNAME:PASSWORD
 ```
 
+## AMR AGG data validation and reset scripts
+
+Due to 'Import Ignore' errors, there could be data corruption AMR Aggregate module.
+
+1. Run the following script, to detect if there are any errors. Ensure you have the URL and Auth credentails in your .env file and change the .env value based on your environment.
+
+```
+$ source .env && ts-node src/scripts/amr_agg_data_validation.ts --url $REACT_APP_DHIS2_BASE_URL --auth $REACT_APP_DHIS2_AUTH
+```
+
+2. Run the following script (with the period and org unit as parameters), to create a json with all valaues to be deleted. Import the json created using Import/Export app with "Delete" option selected.
+
+```
+$ source .env && ts-node src/scripts/amr_agg_data_reset.ts  --url $REACT_APP_DHIS2_BASE_URL --auth $REACT_APP_DHIS2_AUTH
+```
+
 ## Some development tips
 
 ### Structure
