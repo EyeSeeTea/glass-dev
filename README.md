@@ -92,7 +92,7 @@ Due to 'Import Ignore' errors, there could be data corruption AMR Aggregate modu
 $ source .env && ts-node src/scripts/amr_agg_data_validation.ts --url $REACT_APP_DHIS2_BASE_URL --auth $REACT_APP_DHIS2_AUTH
 ```
 
-2. Run the following script to delete any corrupted data identified in previous script. Pass the period and org unit as parameters:
+2. Run the following script (with the period and org unit as parameters), to create a json with all valaues to be deleted. Import the json created using Import/Export app with "Delete" option selected.
 
 ```
 $ source .env && ts-node src/scripts/amr_agg_data_reset.ts  --url $REACT_APP_DHIS2_BASE_URL --auth $REACT_APP_DHIS2_AUTH
