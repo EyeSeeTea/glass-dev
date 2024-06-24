@@ -1,19 +1,14 @@
 import { command, run, string, option } from "cmd-ts";
 import path from "path";
-import { D2Api } from "../types/d2-api";
 import fs from "fs";
+import { getApiUrlOptions, getD2ApiFromArgs } from "./common";
 
 function main() {
     const cmd = command({
         name: path.basename(__filename),
         description: "Show DHIS2 instance info",
         args: {
-            url: option({
-                type: string,
-                long: "dhis2-url",
-                short: "u",
-                description: "DHIS2 base URL. Example: http://USERNAME:PASSWORD@localhost:8080",
-            }),
+            ...getApiUrlOptions(),
             orgUnitId: option({
                 type: string,
                 long: "orgUnit",
@@ -26,7 +21,7 @@ function main() {
             }),
         },
         handler: async args => {
-            const api = new D2Api({ baseUrl: args.url });
+            const api = getD2ApiFromArgs(args);
 
             //1. Get Period for which to reset.
             if (!args.period) throw new Error("Period is required");
