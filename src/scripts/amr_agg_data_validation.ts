@@ -1,9 +1,8 @@
-import { command, run, string, option } from "cmd-ts";
+import { command, run } from "cmd-ts";
 import path from "path";
-import { D2Api } from "../types/d2-api";
 import _ from "lodash";
 import { DataStoreClient } from "../data/data-store/DataStoreClient";
-import { getInstance } from "./common";
+import { getApiUrlOptions, getD2ApiFromArgs, getInstance } from "./common";
 import { DataStoreKeys } from "../data/data-store/DataStoreKeys";
 import { GlassUploads } from "../domain/entities/GlassUploads";
 
@@ -12,15 +11,10 @@ function main() {
         name: path.basename(__filename),
         description: "Show DHIS2 instance info",
         args: {
-            url: option({
-                type: string,
-                long: "dhis2-url",
-                short: "u",
-                description: "DHIS2 base URL. Example: http://USERNAME:PASSWORD@localhost:8080",
-            }),
+            ...getApiUrlOptions(),
         },
         handler: async args => {
-            const api = new D2Api({ baseUrl: args.url });
+            const api = getD2ApiFromArgs(args);
             const instance = getInstance(args);
             const dataStoreClient = new DataStoreClient(instance);
 
