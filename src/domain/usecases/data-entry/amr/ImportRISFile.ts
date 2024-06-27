@@ -120,16 +120,19 @@ export class ImportRISFile {
                     .uniqBy("error")
                     .value();
 
-                const allBlockingErrors = [
-                    ...blockingCategoryOptionConsistencyErrors,
-                    ...pathogenAntibioticErrors,
-                    ...specimenPathogenErrors,
-                    ...astResultsErrors,
-                    ...batchIdErrors,
-                    ...yearErrors,
-                    ...countryErrors,
-                    ...duplicateRowErrors,
-                ];
+                const allBlockingErrors =
+                    action === "DELETE" //If delete, ignore consistency checks
+                        ? []
+                        : [
+                              ...blockingCategoryOptionConsistencyErrors,
+                              ...pathogenAntibioticErrors,
+                              ...specimenPathogenErrors,
+                              ...astResultsErrors,
+                              ...batchIdErrors,
+                              ...yearErrors,
+                              ...countryErrors,
+                              ...duplicateRowErrors,
+                          ];
 
                 if (allBlockingErrors.length > 0) {
                     const errorImportSummary: ImportSummary = {
@@ -177,7 +180,7 @@ export class ImportRISFile {
                                             rulesInstructions
                                         );
 
-                                        const importSummary = mapDataValuesToImportSummary(saveSummary);
+                                        const importSummary = mapDataValuesToImportSummary(saveSummary, action);
 
                                         const summaryWithConsistencyBlokingErrors = includeBlockingErrors(
                                             importSummary,
@@ -192,7 +195,7 @@ export class ImportRISFile {
                     }
                     //If dry-run, do not run validations
                     else {
-                        const importSummary = mapDataValuesToImportSummary(saveSummary);
+                        const importSummary = mapDataValuesToImportSummary(saveSummary, action);
 
                         const summaryWithConsistencyBlokingErrors = includeBlockingErrors(importSummary, [
                             ...allBlockingErrors,
