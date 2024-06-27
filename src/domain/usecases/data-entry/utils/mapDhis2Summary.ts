@@ -1,8 +1,11 @@
 import i18n from "@eyeseetea/d2-ui-components/locales";
-import { DataValuesSaveSummary } from "../../../entities/data-entry/DataValuesSaveSummary";
+import { DataValuesSaveSummary, ImportStrategy } from "../../../entities/data-entry/DataValuesSaveSummary";
 import { ImportSummary } from "../../../entities/data-entry/ImportSummary";
 
-export function mapDataValuesToImportSummary(dhis2Summary: DataValuesSaveSummary): ImportSummary {
+export function mapDataValuesToImportSummary(
+    dhis2Summary: DataValuesSaveSummary,
+    action: ImportStrategy
+): ImportSummary {
     const nonBlockingErrors =
         dhis2Summary.status === "WARNING"
             ? dhis2Summary.conflicts?.map(status => {
@@ -24,7 +27,7 @@ export function mapDataValuesToImportSummary(dhis2Summary: DataValuesSaveSummary
             : [];
 
     const ignoredErrors =
-        dhis2Summary.importCount.ignored > 0
+        action !== "DELETE" && dhis2Summary.importCount.ignored > 0 //If delete, ignore import ignored errors.
             ? dhis2Summary.conflicts && dhis2Summary.conflicts.length > 0
                 ? dhis2Summary.conflicts?.map(status => {
                       return {

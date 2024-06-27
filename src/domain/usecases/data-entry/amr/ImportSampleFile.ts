@@ -114,15 +114,23 @@ export class ImportSampleFile {
                                 .map(rulesInstructions => {
                                     const dhis2ValidationErrors = checkDhis2Validations(validations, rulesInstructions);
 
-                                    const importSummary = mapDataValuesToImportSummary(saveSummary);
+                                    const importSummary = mapDataValuesToImportSummary(saveSummary, action);
 
-                                    const summaryWithConsistencyBlokingErrors = includeBlockingErrors(importSummary, [
-                                        ...batchIdErrors,
-                                        ...yearErrors,
-                                        ...countryErrors,
-                                        ...dhis2ValidationErrors,
-                                        ...duplicateRowErrors,
-                                    ]);
+                                    const allBlockingErrors =
+                                        action === "DELETE" //If delete, ignore consistency checks
+                                            ? []
+                                            : [
+                                                  ...batchIdErrors,
+                                                  ...yearErrors,
+                                                  ...countryErrors,
+                                                  ...dhis2ValidationErrors,
+                                                  ...duplicateRowErrors,
+                                              ];
+
+                                    const summaryWithConsistencyBlokingErrors = includeBlockingErrors(
+                                        importSummary,
+                                        allBlockingErrors
+                                    );
 
                                     return summaryWithConsistencyBlokingErrors;
                                 });
