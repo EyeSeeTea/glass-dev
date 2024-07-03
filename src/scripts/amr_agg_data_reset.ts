@@ -19,6 +19,11 @@ function main() {
                 long: "period",
                 description: "The period to run amr-agg data reset for",
             }),
+            batchId: option({
+                type: string,
+                long: "batchId",
+                description: "The batchId/dataset to run amr-agg data reset for",
+            }),
         },
         handler: async args => {
             const api = getD2ApiFromArgs(args);
@@ -31,8 +36,21 @@ function main() {
             if (!args.orgUnitId) throw new Error("OrgUnit is required");
             const orgUnitId = args.orgUnitId;
 
-            //3. Set AMR-AGG dataset id.
+            //3. Get Batch Id to reset
+            if (!args.orgUnitId) throw new Error("OrgUnit is required");
+            const batchId = args.batchId;
+
+            //4. Set AMR-AGG dataset id.
             const dataSetId = "CeQPmXgrhHF";
+
+            //5.Get all category combination values for given batchId
+            const batchCC = await api.models.categoryOptionCombos
+                .get({
+                    fields: { id: true, name: true },
+                    filter: { identifiable: { token: batchId } },
+                    paging: false,
+                })
+                .getData();
 
             //4. Get all data values for given country and period.
             const dataSetValues = await api.dataValues
@@ -42,16 +60,22 @@ function main() {
                     period: [period],
                 })
                 .getData();
+            //4.b) Filter data values for given batchId
+            const filteredDataValues = dataSetValues.dataValues.filter(dv =>
+                batchCC.objects.map(coc => coc.id).includes(dv.attributeOptionCombo)
+            );
 
-            if (dataSetValues.dataValues.length === 0)
-                throw new Error(`No data values found for period ${period} and org unit ${orgUnitId}`);
+            if (filteredDataValues.length === 0)
+                throw new Error(
+                    `No data values found for period ${period},  org unit ${orgUnitId} and batchId ${batchId}`
+                );
 
             console.debug(
-                `${dataSetValues.dataValues.length} data values found for period ${period} and org unit ${orgUnitId}`
+                `${filteredDataValues.length} data values found for period ${period}, org unit ${orgUnitId} and batchId ${batchId}`
             );
 
             const updatedDataValues = {
-                dataValues: dataSetValues.dataValues.map(dataValue => {
+                dataValues: filteredDataValues.map(dataValue => {
                     return {
                         ...dataValue,
                         value: "",
