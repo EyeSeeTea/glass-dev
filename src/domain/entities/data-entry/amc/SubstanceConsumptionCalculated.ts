@@ -1,9 +1,9 @@
 import { Maybe } from "../../../../types/utils";
-import { AmName, AwrName, RouteOfAdministrationCode, SaltCode } from "../../GlassAtcVersionData";
+import { ATCCodeLevel5, AmName, AwrName, RouteOfAdministrationCode, SaltCode } from "../../GlassAtcVersionData";
 import { Id } from "../../Ref";
 
 export type SubstanceConsumptionCalculated = {
-    atc_autocalculated: string;
+    atc_autocalculated: ATCCodeLevel5;
     route_admin_autocalculated: RouteOfAdministrationCode;
     salt_autocalculated: SaltCode;
     packages_autocalculated: number;
