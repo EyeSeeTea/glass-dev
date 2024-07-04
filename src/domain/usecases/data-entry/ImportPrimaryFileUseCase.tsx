@@ -20,6 +20,7 @@ import { ImportAMCProductLevelData } from "./amc/ImportAMCProductLevelData";
 import { InstanceDefaultRepository } from "../../../data/repositories/InstanceDefaultRepository";
 import { GlassATCDefaultRepository } from "../../../data/repositories/GlassATCDefaultRepository";
 import { AMCProductDataRepository } from "../../repositories/data-entry/AMCProductDataRepository";
+import { AMCSubstanceDataRepository } from "../../repositories/data-entry/AMCSubstanceDataRepository";
 
 export class ImportPrimaryFileUseCase {
     constructor(
@@ -37,7 +38,8 @@ export class ImportPrimaryFileUseCase {
         private instanceRepository: InstanceDefaultRepository,
         private programRulesMetadataRepository: ProgramRulesMetadataRepository,
         private atcRepository: GlassATCDefaultRepository,
-        private amcProductRepository: AMCProductDataRepository
+        private amcProductRepository: AMCProductDataRepository,
+        private amcSubstanceDataRepository: AMCSubstanceDataRepository
     ) {}
 
     public execute(
@@ -50,7 +52,8 @@ export class ImportPrimaryFileUseCase {
         orgUnitName: string,
         countryCode: string,
         dryRun: boolean,
-        eventListId: string | undefined
+        eventListId: string | undefined,
+        calculatedEventListFileId?: string
     ): FutureData<ImportSummary> {
         switch (moduleName) {
             case "AMR": {
@@ -120,7 +123,8 @@ export class ImportPrimaryFileUseCase {
                     this.metadataRepository,
                     this.programRulesMetadataRepository,
                     this.atcRepository,
-                    this.amcProductRepository
+                    this.amcProductRepository,
+                    this.amcSubstanceDataRepository
                 );
 
                 return importAMCProductFile.importAMCProductFile(
@@ -130,7 +134,8 @@ export class ImportPrimaryFileUseCase {
                     orgUnitId,
                     orgUnitName,
                     moduleName,
-                    period
+                    period,
+                    calculatedEventListFileId
                 );
             }
             default: {
