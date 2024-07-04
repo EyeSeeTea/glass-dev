@@ -25,8 +25,6 @@ interface ReviewDataSummaryProps {
     secondaryFileImportSummary?: ImportSummary | undefined;
 }
 
-const COMPLETED_STATUS = "COMPLETED";
-
 export const ReviewDataSummary: React.FC<ReviewDataSummaryProps> = ({
     changeStep,
     primaryFileImportSummary,
@@ -103,7 +101,7 @@ export const ReviewDataSummary: React.FC<ReviewDataSummaryProps> = ({
         const secondaryUploadId = localStorage.getItem("secondaryUploadId");
         setIsLoading(true);
         if (primaryUploadId) {
-            return compositionRoot.glassUploads.setStatus({ id: primaryUploadId, status: COMPLETED_STATUS }).run(
+            return compositionRoot.glassUploads.setStatus({ id: primaryUploadId, status: "COMPLETED" }).run(
                 () => {
                     if (!secondaryUploadId) {
                         changeStep(4);
@@ -146,7 +144,7 @@ export const ReviewDataSummary: React.FC<ReviewDataSummaryProps> = ({
                         }
                     } else {
                         return compositionRoot.glassUploads
-                            .setStatus({ id: secondaryUploadId, status: COMPLETED_STATUS })
+                            .setStatus({ id: secondaryUploadId, status: "COMPLETED" })
                             .run(
                                 () => {
                                     changeStep(4);
@@ -165,7 +163,7 @@ export const ReviewDataSummary: React.FC<ReviewDataSummaryProps> = ({
                 }
             );
         } else if (secondaryUploadId) {
-            return compositionRoot.glassUploads.setStatus({ id: secondaryUploadId, status: COMPLETED_STATUS }).run(
+            return compositionRoot.glassUploads.setStatus({ id: secondaryUploadId, status: "COMPLETED" }).run(
                 () => {
                     if (
                         moduleProperties.get(currentModuleAccess.moduleName)?.completeStatusChange ===

@@ -27,9 +27,17 @@ export const getCompletedUploads = (upload: GlassUploadsState) => {
     }
 };
 
+export const getValidatedUploads = (upload: GlassUploadsState) => {
+    if (upload.kind === "loaded") {
+        return upload.data.filter((row: UploadsDataItem) => row.status.toLowerCase() === "validated");
+    }
+};
+
 function getNotCompletedUploads(upload: GlassUploadsState) {
     if (upload.kind === "loaded") {
-        return upload.data.filter((row: UploadsDataItem) => row.status.toLowerCase() !== "completed");
+        return upload.data.filter(
+            (row: UploadsDataItem) => row.status.toLowerCase() === "uploaded" || row.status.toLowerCase() === "imported"
+        );
     }
 }
 
@@ -54,6 +62,7 @@ export const ListOfDatasets: React.FC<ListOfDatasetsProps> = ({ setRefetchStatus
     const hasCurrentUserCaptureAccess = useGlassCaptureAccess();
 
     const completeUploads = getCompletedUploads(uploads);
+    const validatedUploads = getValidatedUploads(uploads);
     const incompleteUploads = getNotCompletedUploads(uploads);
 
     const dataSubmissionId = useCurrentDataSubmissionId(
@@ -105,10 +114,9 @@ export const ListOfDatasets: React.FC<ListOfDatasetsProps> = ({ setRefetchStatus
                         <StyledEmptyMessage
                             style={{
                                 display:
-                                    completeUploads &&
-                                    completeUploads.length === 0 &&
-                                    incompleteUploads &&
-                                    incompleteUploads.length === 0
+                                    completeUploads?.length === 0 &&
+                                    incompleteUploads?.length === 0 &&
+                                    validatedUploads?.length === 0
                                         ? "block"
                                         : "none",
                             }}
@@ -149,6 +157,14 @@ export const ListOfDatasets: React.FC<ListOfDatasetsProps> = ({ setRefetchStatus
                     <div>
                         <CircularProgress size={20} />
                     </div>
+                )}
+                {validatedUploads && validatedUploads.length > 0 && (
+                    <UploadsTable
+                        title={i18n.t("Validated Uploads, Review to complete")}
+                        items={validatedUploads}
+                        refreshUploads={refreshUploads}
+                        showComplete={true}
+                    />
                 )}
                 {incompleteUploads && incompleteUploads.length > 0 && (
                     <UploadsTable
