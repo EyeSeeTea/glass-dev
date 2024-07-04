@@ -13,6 +13,7 @@ type ModuleDetails = {
         title: string;
         description: string;
     };
+
     primaryFileType: string;
     secondaryUploadLabel?: string;
     secondaryFileType: string;

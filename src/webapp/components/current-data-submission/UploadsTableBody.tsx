@@ -5,6 +5,7 @@ import i18n from "@eyeseetea/d2-ui-components/locales";
 import dayjs from "dayjs";
 import { UploadsDataItem } from "../../entities/uploads";
 import { DeleteOutline } from "@material-ui/icons";
+import { CheckCircleOutline } from "@material-ui/icons";
 import { useAppContext } from "../../contexts/app-context";
 import { ConfirmationDialog, useSnackbar } from "@eyeseetea/d2-ui-components";
 import { CircularProgress } from "material-ui";
@@ -21,13 +22,17 @@ import { moduleProperties } from "../../../domain/utils/ModuleProperties";
 import { ImportSummaryErrors } from "../../../domain/entities/data-entry/ImportSummary";
 import { ImportSummaryErrorsDialog } from "../import-summary-errors-dialog/ImportSummaryErrorsDialog";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
+import { useQuestionnaires } from "./Questionnaires";
+import { useCurrentDataSubmissionId } from "../../hooks/useCurrentDataSubmissionId";
+import { useCurrentUserGroupsAccess } from "../../hooks/useCurrentUserGroupsAccess";
 
 export interface UploadsTableBodyProps {
     rows?: UploadsDataItem[];
     refreshUploads: React.Dispatch<React.SetStateAction<{}>>;
+    showComplete?: boolean;
 }
 
-export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refreshUploads }) => {
+export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refreshUploads, showComplete }) => {
     const { compositionRoot } = useAppContext();
     const snackbar = useSnackbar();
 
@@ -35,9 +40,11 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
     const {
         currentOrgUnitAccess: { orgUnitId, orgUnitName },
     } = useCurrentOrgUnitContext();
-    const [open, setOpen] = React.useState(false);
+    const [deleteOpen, setDeleteOpen] = React.useState(false);
+    const [completeOpen, setCompleteOpen] = React.useState(false);
     const [importSummaryErrorsToShow, setImportSummaryErrorsToShow] = React.useState<ImportSummaryErrors | null>(null);
     const [rowToDelete, setRowToDelete] = useState<UploadsDataItem>();
+    const [rowToComplete, setRowToComplete] = useState<UploadsDataItem>();
 
     const { currentPeriod } = useCurrentPeriodContext();
 
@@ -49,13 +56,31 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
         currentPeriod
     );
     const hasCurrentUserCaptureAccess = useGlassCaptureAccess();
+    const [questionnaires] = useQuestionnaires();
+    const dataSubmissionId = useCurrentDataSubmissionId(
+        currentModuleAccess.moduleId,
+        currentModuleAccess.moduleName,
+        currentOrgUnitAccess.orgUnitId,
+        currentPeriod
+    );
+    const { captureAccessGroup } = useCurrentUserGroupsAccess();
 
-    const showConfirmationDialog = (rowToDelete: UploadsDataItem) => {
+    const showDeleteConfirmationDialog = (rowToDelete: UploadsDataItem) => {
         setRowToDelete(rowToDelete);
-        setOpen(true);
+        setDeleteOpen(true);
     };
-    const hideConfirmationDialog = () => {
-        setOpen(false);
+
+    const showCompleteConfirmationDialog = (rowToComplete: UploadsDataItem) => {
+        setRowToComplete(rowToComplete);
+        setCompleteOpen(true);
+    };
+
+    const hideDeleteConfirmationDialog = () => {
+        setDeleteOpen(false);
+    };
+
+    const hideCompleteConfirmationDialog = () => {
+        setCompleteOpen(false);
     };
 
     const downloadFile = (fileId: string, fileName: string) => {
@@ -78,7 +103,7 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
     //2. Delete corresponding document from DHIS
     //3. Delete corresponding 'upload' and 'document' from Datastore
     const deleteDataset = () => {
-        hideConfirmationDialog();
+        hideDeleteConfirmationDialog();
         if (rowToDelete) {
             let primaryFileToDelete: UploadsDataItem | undefined, secondaryFileToDelete: UploadsDataItem | undefined;
             //For AMR, Ris file is mandatory, so there will be a ris file with given batch id.
@@ -203,7 +228,7 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                                                             () => {
                                                                 refreshUploads({}); //Trigger re-render of parent
                                                                 setLoading(false);
-                                                                hideConfirmationDialog();
+                                                                hideDeleteConfirmationDialog();
                                                             },
                                                             error => {
                                                                 snackbar.error("Error deleting file");
@@ -213,7 +238,7 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                                                 } else {
                                                     refreshUploads({}); //Trigger re-render of parent
                                                     setLoading(false);
-                                                    hideConfirmationDialog();
+                                                    hideDeleteConfirmationDialog();
                                                 }
                                             },
                                             error => {
@@ -286,7 +311,7 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                                                     () => {
                                                         refreshUploads({}); //Trigger re-render of parent
                                                         setLoading(false);
-                                                        hideConfirmationDialog();
+                                                        hideDeleteConfirmationDialog();
                                                         snackbar.info(message);
                                                     },
                                                     error => {
@@ -322,6 +347,164 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
         }
     };
 
+    const setCompleteStatus = useCallback(() => {
+        if (!rowToComplete) return;
+
+        let primaryFileToComplete: UploadsDataItem | undefined, secondaryFileToComplete: UploadsDataItem | undefined;
+
+        if (
+            moduleProperties.get(currentModuleAccess.moduleName)?.isSecondaryFileApplicable &&
+            moduleProperties.get(currentModuleAccess.moduleName)?.isSecondaryRelated
+        ) {
+            if (
+                rowToComplete.fileType.toLowerCase() ===
+                moduleProperties.get(currentModuleAccess.moduleName)?.primaryFileType.toLowerCase()
+            ) {
+                primaryFileToComplete = rowToComplete;
+                secondaryFileToComplete = rows
+                    ?.filter(sample => sample.correspondingRisUploadId === rowToComplete.id)
+                    ?.at(0);
+            } else {
+                secondaryFileToComplete = rowToComplete;
+                primaryFileToComplete = rows?.filter(ris => ris.id === rowToComplete.correspondingRisUploadId)?.at(0);
+            }
+        } else if (!moduleProperties.get(currentModuleAccess.moduleName)?.isSecondaryRelated) {
+            if (rowToComplete.fileType === moduleProperties.get(currentModuleAccess.moduleName)?.primaryFileType) {
+                primaryFileToComplete = rowToComplete;
+            } else {
+                secondaryFileToComplete = rowToComplete;
+            }
+        } else {
+            primaryFileToComplete = rowToComplete;
+            secondaryFileToComplete = undefined;
+        }
+
+        if (primaryFileToComplete) {
+            return compositionRoot.glassUploads.setStatus({ id: primaryFileToComplete.id, status: "COMPLETED" }).run(
+                () => {
+                    if (!secondaryFileToComplete) {
+                        //If Questionnaires are not applicable to a module, then set status as COMPLETE on
+                        //completion of dataset.
+                        if (
+                            moduleProperties.get(currentModuleAccess.moduleName)?.completeStatusChange === "DATASET" ||
+                            (moduleProperties.get(currentModuleAccess.moduleName)?.completeStatusChange ===
+                                "QUESTIONNAIRE_AND_DATASET" &&
+                                questionnaires?.every(q => q.isMandatory && q.isCompleted))
+                        ) {
+                            compositionRoot.glassDataSubmission.setStatus(dataSubmissionId, "COMPLETE").run(
+                                () => {
+                                    if (captureAccessGroup.kind === "loaded") {
+                                        const userGroupsIds = captureAccessGroup.data.map(cag => {
+                                            return cag.id;
+                                        });
+                                        const notificationText = `The data submission for ${currentModuleAccess.moduleName} module for year ${currentPeriod} and country ${currentOrgUnitAccess.orgUnitName} has changed to DATA TO BE APPROVED BY COUNTRY`;
+
+                                        compositionRoot.notifications
+                                            .send(
+                                                notificationText,
+                                                notificationText,
+                                                userGroupsIds,
+                                                currentOrgUnitAccess.orgUnitPath
+                                            )
+                                            .run(
+                                                () => {},
+                                                () => {}
+                                            );
+                                        setLoading(false);
+                                    }
+                                },
+                                error => {
+                                    console.debug(
+                                        "Error occurred when setting data submission status, error: " + error
+                                    );
+                                    setLoading(false);
+                                }
+                            );
+                        }
+                    } else {
+                        return compositionRoot.glassUploads
+                            .setStatus({ id: secondaryFileToComplete.id, status: "COMPLETED" })
+                            .run(
+                                () => {
+                                    setLoading(false);
+                                },
+                                errorMessage => {
+                                    snackbar.error(i18n.t(errorMessage));
+                                    setLoading(false);
+                                }
+                            );
+                    }
+                },
+                errorMessage => {
+                    snackbar.error(i18n.t(errorMessage));
+                    setLoading(false);
+                }
+            );
+        } else if (secondaryFileToComplete) {
+            return compositionRoot.glassUploads.setStatus({ id: secondaryFileToComplete.id, status: "COMPLETED" }).run(
+                () => {
+                    if (
+                        moduleProperties.get(currentModuleAccess.moduleName)?.completeStatusChange ===
+                            "QUESTIONNAIRE_AND_DATASET" &&
+                        questionnaires?.every(q => q.isMandatory && q.isCompleted)
+                    ) {
+                        compositionRoot.glassDataSubmission.setStatus(dataSubmissionId, "COMPLETE").run(
+                            () => {
+                                if (captureAccessGroup.kind === "loaded") {
+                                    const userGroupsIds = captureAccessGroup.data.map(cag => {
+                                        return cag.id;
+                                    });
+                                    const notificationText = `The data submission for ${currentModuleAccess.moduleName} module for year ${currentPeriod} and country ${currentOrgUnitAccess.orgUnitName} has changed to DATA TO BE APPROVED BY COUNTRY`;
+
+                                    compositionRoot.notifications
+                                        .send(
+                                            notificationText,
+                                            notificationText,
+                                            userGroupsIds,
+                                            currentOrgUnitAccess.orgUnitPath
+                                        )
+                                        .run(
+                                            () => {},
+                                            () => {}
+                                        );
+                                }
+                            },
+                            error => {
+                                console.debug("Error occurred when setting data submission status, error: " + error);
+                            }
+                        );
+                    }
+
+                    setLoading(false);
+                },
+                errorMessage => {
+                    snackbar.error(i18n.t(errorMessage));
+                    setLoading(false);
+                }
+            );
+        }
+    }, [
+        captureAccessGroup,
+        compositionRoot.glassDataSubmission,
+        compositionRoot.glassUploads,
+        compositionRoot.notifications,
+        currentModuleAccess.moduleName,
+        currentOrgUnitAccess.orgUnitName,
+        currentOrgUnitAccess.orgUnitPath,
+        currentPeriod,
+        dataSubmissionId,
+        questionnaires,
+        rowToComplete,
+        rows,
+        snackbar,
+    ]);
+
+    const completeDataset = () => {
+        hideCompleteConfirmationDialog();
+        setLoading(true);
+        setCompleteStatus();
+    };
+
     const handleShowImportSummaryErrors = useCallback((row: UploadsDataItem) => {
         if (row.importSummary) {
             setImportSummaryErrorsToShow(row.importSummary);
@@ -338,7 +521,10 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                                 <Backdrop open={loading} style={{ color: "#fff", zIndex: 1 }}>
                                     <StyledLoaderContainer>
                                         <CircularProgress color="#fff" size={50} />
-                                        <Typography variant="h6">{i18n.t("Deleting Files")}</Typography>
+                                        <Typography variant="h6">
+                                            {" "}
+                                            {rowToDelete ? i18n.t("Deleting Files") : i18n.t("Loading")}
+                                        </Typography>
                                         <Typography variant="h5">
                                             {i18n.t(
                                                 "This might take several minutes, do not refresh the page or press back."
@@ -347,12 +533,12 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                                     </StyledLoaderContainer>
                                 </Backdrop>
                                 <ConfirmationDialog
-                                    isOpen={open}
+                                    isOpen={deleteOpen}
                                     title={
                                         moduleProperties.get(currentModuleAccess.moduleName)?.deleteConfirmation.title
                                     }
                                     onSave={deleteDataset}
-                                    onCancel={hideConfirmationDialog}
+                                    onCancel={hideDeleteConfirmationDialog}
                                     saveText={i18n.t("Ok")}
                                     cancelText={i18n.t("Cancel")}
                                     fullWidth={true}
@@ -363,6 +549,28 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                                             {
                                                 moduleProperties.get(currentModuleAccess.moduleName)?.deleteConfirmation
                                                     .description
+                                            }
+                                        </Typography>
+                                    </DialogContent>
+                                </ConfirmationDialog>
+                                <ImportSummaryErrorsDialog
+                                    importSummaryErrorsToShow={importSummaryErrorsToShow}
+                                    onClose={() => setImportSummaryErrorsToShow(null)}
+                                />
+                                <ConfirmationDialog
+                                    isOpen={completeOpen}
+                                    title={"Review and complete upload"}
+                                    onSave={completeDataset}
+                                    onCancel={hideCompleteConfirmationDialog}
+                                    saveText={i18n.t("Complete")}
+                                    cancelText={i18n.t("Cancel")}
+                                    fullWidth={true}
+                                    disableEnforceFocus
+                                >
+                                    <DialogContent>
+                                        <Typography>
+                                            {
+                                                "Are you sure you want to complete this upload? Please review the validation reports before completing."
                                             }
                                         </Typography>
                                     </DialogContent>
@@ -399,7 +607,7 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                                     <Button
                                         onClick={e => {
                                             e.stopPropagation();
-                                            showConfirmationDialog(row);
+                                            showDeleteConfirmationDialog(row);
                                         }}
                                         disabled={
                                             !hasCurrentUserCaptureAccess ||
@@ -412,6 +620,26 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                                     <CircularProgress size={20} />
                                 )}
                             </TableCell>
+                            {showComplete && (
+                                <TableCell style={{ opacity: 0.5 }}>
+                                    {currentDataSubmissionStatus.kind === "loaded" ? (
+                                        <Button
+                                            onClick={e => {
+                                                e.stopPropagation();
+                                                showCompleteConfirmationDialog(row);
+                                            }}
+                                            disabled={
+                                                !hasCurrentUserCaptureAccess ||
+                                                !isEditModeStatus(currentDataSubmissionStatus.data.title)
+                                            }
+                                        >
+                                            <CheckCircleOutline />
+                                        </Button>
+                                    ) : (
+                                        <CircularProgress size={20} />
+                                    )}
+                                </TableCell>
+                            )}
                             <StyledCTACell className="cta">{row.importSummary && <ChevronRightIcon />}</StyledCTACell>
                         </TableRow>
                     ))}
