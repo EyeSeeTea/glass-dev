@@ -48,7 +48,7 @@ function main() {
                 //4. Get all data values for all countries and all periods
                 const dataSetValues = await api.dataValues
                     .getSet({
-                        dataSet: ["CeQPmXgrhHF"],
+                        dataSet: ["OcAB7oaC072"],
                         orgUnit: orgUnits.objects.map(ou => ou.id),
                         period: periods,
                     })
@@ -95,7 +95,7 @@ function main() {
                                                 ["orgUnit", orgUnitKey],
                                                 ["period", periodKey],
                                                 ["batchId", batchId],
-                                                ["fileType", "RIS"],
+                                                ["fileType", "SAMPLE"],
                                             ])
                                         )
                                         .toPromise();
@@ -118,6 +118,7 @@ function main() {
                                         orgUnitId: orgUnitKey,
                                         batchId: batchId,
                                         uploadStatuses: upload.map(u => u.status),
+                                        fileType: upload.map(u => u.fileType),
                                     };
                                 });
 
@@ -139,7 +140,7 @@ function main() {
                 );
                 console.debug(`All uploads with data corruption : ${JSON.stringify(corruptedAmrData, null, 2)}`);
             } catch (error) {
-                console.error(`Error thrown when validating AMR AGG RIS data: ${error}`);
+                console.error(`Error thrown when validating AMR AGG Sample data: ${error}`);
             }
         },
     });
