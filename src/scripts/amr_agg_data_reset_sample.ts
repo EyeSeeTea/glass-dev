@@ -41,7 +41,7 @@ function main() {
             const batchId = args.batchId;
 
             //4. Set AMR-AGG dataset id.
-            const dataSetId = "CeQPmXgrhHF";
+            const dataSetId = "OcAB7oaC072";
 
             try {
                 //5.Get all category combination values for given batchId
@@ -88,7 +88,7 @@ function main() {
                 const updateJson = JSON.stringify(updatedDataValues, null, 2);
                 fs.writeFileSync(`AMR_AGG_reset_${orgUnitId}_${period}.json`, updateJson);
             } catch (error) {
-                console.error(`Error thrown when resetting AMR AGG RIS data: ${error}`);
+                console.error(`Error thrown when resetting AMR AGG Sample data: ${error}`);
             }
         },
     });
