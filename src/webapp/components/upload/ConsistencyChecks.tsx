@@ -201,10 +201,7 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
                     }
                     const secondaryUploadId = localStorage.getItem("secondaryUploadId");
                     if (primaryUploadId) {
-                        if (
-                            importPrimaryFileSummary.blockingErrors.length === 0 ||
-                            importSecondaryFileSummary?.blockingErrors.length === 0
-                        ) {
+                        if (importPrimaryFileSummary.blockingErrors.length === 0) {
                             setUploadStatusAndSaveErrors(
                                 primaryUploadId,
                                 secondaryUploadId,
