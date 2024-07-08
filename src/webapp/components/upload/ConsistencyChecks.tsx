@@ -310,13 +310,15 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
                 moduleProperties.get(currentModuleAccess.moduleName)?.isCalculationRequired &&
                 (primaryFile || secondaryFile)
             ) {
-                if (primaryFile) {
+                const primaryUploadId = localStorage.getItem("primaryUploadId");
+                if (primaryFile && primaryUploadId) {
                     compositionRoot.calculations
                         .consumptionDataProductLevel(
                             currentPeriod,
                             currentOrgUnitAccess.orgUnitId,
                             primaryFile,
-                            currentModuleAccess.moduleName
+                            currentModuleAccess.moduleName,
+                            primaryUploadId
                         )
                         .run(
                             importSummary => {

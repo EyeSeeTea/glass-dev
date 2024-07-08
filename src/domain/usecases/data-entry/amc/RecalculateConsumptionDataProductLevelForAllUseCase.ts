@@ -28,6 +28,9 @@ import {
     RawSubstanceConsumptionCalculated,
 } from "../../../entities/data-entry/amc/RawSubstanceConsumptionCalculated";
 import { getConsumptionDataProductLevel } from "./utils/getConsumptionDataProductLevel";
+import { AMCSubstanceDataRepository } from "../../../repositories/data-entry/AMCSubstanceDataRepository";
+import { mapRawSubstanceCalculatedToSubstanceCalculated } from "./utils/mapRawSubstanceCalculatedToSubstanceCalculated";
+import { updateRecalculatedConsumptionData } from "./utils/updateRecalculatedConsumptionData";
 
 const IMPORT_STRATEGY_UPDATE = "UPDATE";
 const IMPORT_STRATEGY_CREATE_AND_UPDATE = "CREATE_AND_UPDATE";
@@ -35,7 +38,10 @@ const AMR_GLASS_AMC_TEA_ATC = "aK1JpD14imM";
 const AMR_GLASS_AMC_TEA_COMBINATION = "mG49egdYK3G";
 
 export class RecalculateConsumptionDataProductLevelForAllUseCase {
-    constructor(private amcProductDataRepository: AMCProductDataRepository) {}
+    constructor(
+        private amcProductDataRepository: AMCProductDataRepository,
+        private amcSubstanceDataRepository: AMCSubstanceDataRepository
+    ) {}
     public execute(
         orgUnitsIds: Id[],
         periods: string[],
@@ -170,7 +176,7 @@ export class RecalculateConsumptionDataProductLevelForAllUseCase {
                         ","
                     )}`
                 );
-
+                //
                 const rawSubstanceConsumptionCalculatedDataToCreate =
                     newRawSubstanceConsumptionCalculatedDataWithIds.filter(({ eventId }) => eventId === undefined);
 
@@ -182,17 +188,19 @@ export class RecalculateConsumptionDataProductLevelForAllUseCase {
                     );
                 }
 
+                const rawSubstanceConsumptionCalculatedDataToImport = allowCreationIfNotExist
+                    ? [
+                          ...rawSubstanceConsumptionCalculatedDataToUpdate,
+                          ...rawSubstanceConsumptionCalculatedDataToCreate,
+                      ]
+                    : rawSubstanceConsumptionCalculatedDataToUpdate;
+
                 return this.amcProductDataRepository
                     .importCalculations(
                         allowCreationIfNotExist ? IMPORT_STRATEGY_CREATE_AND_UPDATE : IMPORT_STRATEGY_UPDATE,
                         productDataTrackedEntities,
                         rawSubstanceConsumptionCalculatedStageMetadata,
-                        allowCreationIfNotExist
-                            ? [
-                                  ...rawSubstanceConsumptionCalculatedDataToUpdate,
-                                  ...rawSubstanceConsumptionCalculatedDataToCreate,
-                              ]
-                            : rawSubstanceConsumptionCalculatedDataToUpdate,
+                        rawSubstanceConsumptionCalculatedDataToImport,
                         orgUnitId,
                         period
                     )
@@ -207,6 +215,13 @@ export class RecalculateConsumptionDataProductLevelForAllUseCase {
                                         : ""
                                 }`
                             );
+
+                            return this.importSubstanceConsumptionCalculated(
+                                rawSubstanceConsumptionCalculatedDataToImport,
+                                orgUnitId,
+                                period,
+                                allowCreationIfNotExist
+                            );
                         }
                         if (response.status === "ERROR") {
                             logger.error(
@@ -215,6 +230,7 @@ export class RecalculateConsumptionDataProductLevelForAllUseCase {
                                 )}`
                             );
                         }
+
                         if (response.status === "WARNING") {
                             logger.warn(
                                 `[${new Date().toISOString()}] Warning updating calculations of product level updated for orgUnitId ${orgUnitId} and period ${period}: updated=${
@@ -223,7 +239,15 @@ export class RecalculateConsumptionDataProductLevelForAllUseCase {
                                     response.stats.total
                                 } and warning=${JSON.stringify(response.validationReport.warningReports)}`
                             );
+
+                            return this.importSubstanceConsumptionCalculated(
+                                rawSubstanceConsumptionCalculatedDataToImport,
+                                orgUnitId,
+                                period,
+                                allowCreationIfNotExist
+                            );
                         }
+
                         return Future.success(undefined);
                     });
             });
@@ -290,6 +314,31 @@ export class RecalculateConsumptionDataProductLevelForAllUseCase {
                     productDataTrackedEntities: validProductDataTrackedEntitiesToCalculate,
                     currentRawSubstanceConsumptionCalculatedByProductId,
                 });
+            });
+    }
+
+    private importSubstanceConsumptionCalculated(
+        rawSubstanceConsumptionCalculatedData: RawSubstanceConsumptionCalculated[],
+        orgUnitId: string,
+        period: string,
+        allowCreationIfNotExist: boolean
+    ): FutureData<void> {
+        const recalculatedSubstanceConsumptionData = mapRawSubstanceCalculatedToSubstanceCalculated(
+            rawSubstanceConsumptionCalculatedData,
+            period
+        );
+
+        return this.amcSubstanceDataRepository
+            .getAllCalculatedSubstanceConsumptionDataByByPeriod(orgUnitId, period)
+            .flatMap(currentCalculatedConsumptionData => {
+                return updateRecalculatedConsumptionData(
+                    orgUnitId,
+                    period,
+                    recalculatedSubstanceConsumptionData,
+                    currentCalculatedConsumptionData,
+                    this.amcSubstanceDataRepository,
+                    allowCreationIfNotExist
+                );
             });
     }
 }

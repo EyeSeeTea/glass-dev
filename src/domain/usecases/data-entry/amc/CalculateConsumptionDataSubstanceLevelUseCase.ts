@@ -120,7 +120,7 @@ export class CalculateConsumptionDataSubstanceLevelUseCase {
                                     }
                                     if (response.status === "WARNING") {
                                         logger.warn(
-                                            `[${new Date().toISOString()}] Warning creating calculations of substance level updated for orgUnitId ${orgUnitId} and period ${period}: ${
+                                            `[${new Date().toISOString()}] Warning creating calculations of substance level for orgUnitId ${orgUnitId} and period ${period}: ${
                                                 response.stats.created
                                             } of ${response.stats.total} events created and warning=${JSON.stringify(
                                                 response.validationReport.warningReports

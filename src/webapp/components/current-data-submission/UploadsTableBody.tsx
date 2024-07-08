@@ -138,7 +138,8 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                                               orgUnitName,
                                               primaryFileToDelete.countryCode,
                                               false,
-                                              primaryFileToDelete.eventListFileId
+                                              primaryFileToDelete.eventListFileId,
+                                              primaryFileToDelete.calculatedEventListFileId
                                           )
                                         : Future.success(undefined),
                                 deleteSecondaryFileSummary:
@@ -179,6 +180,14 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                                         } ${itemsDeleted} deleted for ${
                                             moduleProperties.get(currentModuleAccess.moduleName)?.primaryFileType
                                         } file`;
+
+                                        if (currentModuleAccess.moduleName === "AMC") {
+                                            message = `${
+                                                primaryFileToDelete?.rows || primaryFileToDelete?.records
+                                            } ${itemsDeleted} deleted for ${
+                                                moduleProperties.get(currentModuleAccess.moduleName)?.primaryFileType
+                                            } file and its corresponding calculated substance consumption data if any`;
+                                        }
 
                                         if (secondaryFileToDelete && deleteSecondaryFileSummary) {
                                             message =
