@@ -45,22 +45,38 @@ function main() {
 
             try {
                 //5.Get all category combination values for given batchId
+                console.debug(`Fetching all category combination options containing batch id : ${batchId}`);
                 const batchCC = await api.models.categoryOptionCombos
                     .get({
                         fields: { id: true, name: true },
                         filter: { identifiable: { token: batchId } },
                         paging: false,
                     })
-                    .getData();
+                    .getData()
+                    .catch(error => {
+                        console.error(
+                            `Error thrown when fetching category option combos for batchId : ${batchId}, error : ${error}`
+                        );
+                        throw error;
+                    });
 
                 //4. Get all data values for given country and period.
+                console.debug(
+                    `Fetching data values for AMR SAMPLE data set for country ${orgUnitId} and period ${period}`
+                );
                 const dataSetValues = await api.dataValues
                     .getSet({
                         dataSet: [dataSetId],
                         orgUnit: [orgUnitId],
                         period: [period],
                     })
-                    .getData();
+                    .getData()
+                    .catch(error => {
+                        console.error(
+                            `Error thrown when fetching data values for AMR RIS data set for country ${orgUnitId} and period ${period}, error : ${error}`
+                        );
+                        throw error;
+                    });
                 //4.b) Filter data values for given batchId
                 const filteredDataValues = dataSetValues.dataValues.filter(dv =>
                     batchCC.objects.map(coc => coc.id).includes(dv.attributeOptionCombo)
@@ -86,7 +102,7 @@ function main() {
 
                 //5.  Create a json object with data values for given country and period with empty values
                 const updateJson = JSON.stringify(updatedDataValues, null, 2);
-                fs.writeFileSync(`AMR_AGG_reset_${orgUnitId}_${period}.json`, updateJson);
+                fs.writeFileSync(`AMR_AGG_reset_${orgUnitId}_${period}_${batchId}_SAMPLE.json`, updateJson);
             } catch (error) {
                 console.error(`Error thrown when resetting AMR AGG Sample data: ${error}`);
             }
