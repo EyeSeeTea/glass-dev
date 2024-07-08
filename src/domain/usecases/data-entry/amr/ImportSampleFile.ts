@@ -1,7 +1,7 @@
 import { D2ValidationResponse } from "../../../../data/repositories/MetadataDefaultRepository";
 import { Future, FutureData } from "../../../entities/Future";
 import { ImportStrategy } from "../../../entities/data-entry/DataValuesSaveSummary";
-import { ImportSummary } from "../../../entities/data-entry/ImportSummary";
+import { ConsistencyError, ImportSummary } from "../../../entities/data-entry/ImportSummary";
 import { MetadataRepository } from "../../../repositories/MetadataRepository";
 import { DataValuesRepository } from "../../../repositories/data-entry/DataValuesRepository";
 import { checkBatchId } from "../utils/checkBatchId";
@@ -57,25 +57,28 @@ export class ImportSampleFile {
                 const batchIdErrors = checkBatchId(risDataItems, batchId);
                 const yearErrors = checkYear(risDataItems, year);
                 const countryErrors = checkCountry(risDataItems, countryCode);
+                const blockingCategoryOptionErrors: { error: string; line: number }[] = [];
                 const duplicateRowErrors = checkDuplicateRowsSAMPLE(risDataItems);
 
                 const dataValues = risDataItems
-                    .map(risData => {
+                    .map((risData, index) => {
                         return dataSet.dataElements.map(dataElement => {
                             const dataSetCategoryOptionValues = dataSet_CC.categories.map(category =>
                                 risData[category.code as keyof SampleData].toString()
                             );
 
-                            const { categoryOptionComboId: attributeOptionCombo } = getCategoryOptionComboByOptionCodes(
-                                dataSet_CC,
-                                dataSetCategoryOptionValues
-                            );
+                            const { categoryOptionComboId: attributeOptionCombo, error: aocBlockingError } =
+                                getCategoryOptionComboByOptionCodes(dataSet_CC, dataSetCategoryOptionValues);
 
-                            const { categoryOptionComboId: categoryOptionCombo } = getCategoryOptionComboByDataElement(
-                                dataElement,
-                                dataElement_CC,
-                                risData
-                            );
+                            if (aocBlockingError !== "")
+                                blockingCategoryOptionErrors.push({ error: aocBlockingError, line: index + 1 });
+
+                            const { categoryOptionComboId: categoryOptionCombo, error: ccoBlockingError } =
+                                getCategoryOptionComboByDataElement(dataElement, dataElement_CC, risData);
+
+                            if (ccoBlockingError !== "")
+                                blockingCategoryOptionErrors.push({ error: ccoBlockingError, line: index + 1 });
+
                             const value = risData[dataElement.code as keyof SampleData]?.toString() || "";
 
                             const dataValue = {
@@ -91,6 +94,41 @@ export class ImportSampleFile {
                         });
                     })
                     .flat();
+
+                const blockingCategoryOptionConsistencyErrors: ConsistencyError[] = _(
+                    blockingCategoryOptionErrors.map(error => {
+                        return { error: error.error, count: 1, lines: [error.line] };
+                    })
+                )
+                    .uniqBy("error")
+                    .value();
+
+                const allBlockingErrors =
+                    action === "DELETE" //If delete, ignore consistency checks
+                        ? []
+                        : [
+                              ...blockingCategoryOptionConsistencyErrors,
+                              ...batchIdErrors,
+                              ...yearErrors,
+                              ...countryErrors,
+                              ...duplicateRowErrors,
+                          ];
+
+                if (allBlockingErrors.length > 0) {
+                    const errorImportSummary: ImportSummary = {
+                        status: "ERROR",
+                        importCount: {
+                            imported: 0,
+                            updated: 0,
+                            ignored: 0,
+                            deleted: 0,
+                        },
+                        nonBlockingErrors: [],
+                        blockingErrors: allBlockingErrors,
+                    };
+
+                    return Future.success(errorImportSummary);
+                }
 
                 /* eslint-disable no-console */
                 console.log({ sampleFileDataValues: dataValues });
@@ -116,20 +154,14 @@ export class ImportSampleFile {
 
                                     const importSummary = mapDataValuesToImportSummary(saveSummary, action);
 
-                                    const allBlockingErrors =
+                                    const blockingErrorWithDHISValidation =
                                         action === "DELETE" //If delete, ignore consistency checks
                                             ? []
-                                            : [
-                                                  ...batchIdErrors,
-                                                  ...yearErrors,
-                                                  ...countryErrors,
-                                                  ...dhis2ValidationErrors,
-                                                  ...duplicateRowErrors,
-                                              ];
+                                            : [...allBlockingErrors, ...dhis2ValidationErrors];
 
                                     const summaryWithConsistencyBlokingErrors = includeBlockingErrors(
                                         importSummary,
-                                        allBlockingErrors
+                                        blockingErrorWithDHISValidation
                                     );
 
                                     return summaryWithConsistencyBlokingErrors;

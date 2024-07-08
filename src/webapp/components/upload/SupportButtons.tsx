@@ -8,6 +8,7 @@ import { EffectFn } from "../../hooks/use-callback-effect";
 
 interface SupportButtonsProps {
     primaryFileImportSummary: ImportSummary | undefined;
+    secondaryFileImportSummary: ImportSummary | undefined;
     onCancelUpload: EffectFn<[event: React.MouseEvent<HTMLButtonElement, MouseEvent>]>;
 }
 
@@ -15,7 +16,11 @@ interface ContentWrapperProps {
     isVisible: boolean;
 }
 
-export const SupportButtons: React.FC<SupportButtonsProps> = ({ primaryFileImportSummary, onCancelUpload }) => {
+export const SupportButtons: React.FC<SupportButtonsProps> = ({
+    primaryFileImportSummary,
+    secondaryFileImportSummary,
+    onCancelUpload,
+}) => {
     const onHelpClick = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault();
         const helpWidgetButton = document.querySelector(
@@ -33,7 +38,12 @@ export const SupportButtons: React.FC<SupportButtonsProps> = ({ primaryFileImpor
 
     return (
         <ContentWrapper
-            isVisible={(primaryFileImportSummary && primaryFileImportSummary.blockingErrors.length > 0) || false}
+            isVisible={
+                (primaryFileImportSummary && primaryFileImportSummary.blockingErrors.length > 0) ||
+                (secondaryFileImportSummary && secondaryFileImportSummary.blockingErrors.length > 0)
+                    ? true
+                    : false
+            }
         >
             <div>
                 <Button
@@ -41,7 +51,10 @@ export const SupportButtons: React.FC<SupportButtonsProps> = ({ primaryFileImpor
                     color="primary"
                     onClick={onHelpClick}
                     disabled={
-                        primaryFileImportSummary && primaryFileImportSummary.blockingErrors.length > 0 ? false : true
+                        (primaryFileImportSummary && primaryFileImportSummary.blockingErrors.length > 0) ||
+                        (secondaryFileImportSummary && secondaryFileImportSummary.blockingErrors.length > 0)
+                            ? false
+                            : true
                     }
                 >
                     {i18n.t("Submit Help Ticket")}
@@ -59,7 +72,10 @@ export const SupportButtons: React.FC<SupportButtonsProps> = ({ primaryFileImpor
                     color="primary"
                     onClick={handleCancelUpload}
                     disabled={
-                        primaryFileImportSummary && primaryFileImportSummary.blockingErrors.length > 0 ? false : true
+                        (primaryFileImportSummary && primaryFileImportSummary.blockingErrors.length > 0) ||
+                        (secondaryFileImportSummary && secondaryFileImportSummary.blockingErrors.length > 0)
+                            ? false
+                            : true
                     }
                 >
                     {i18n.t("Cancel upload")}

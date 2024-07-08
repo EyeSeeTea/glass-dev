@@ -160,8 +160,6 @@ const renderStep = (
                         secondaryFileImportSummary={secondaryFileImportSummary}
                         setPrimaryFileImportSummary={setPrimaryFileImportSummary}
                         setSecondaryFileImportSummary={setSecondaryFileImportSummary}
-                        removePrimaryFile={removePrimaryFile}
-                        removeSecondaryFile={removeSecondaryFile}
                     />
                 </>
             );

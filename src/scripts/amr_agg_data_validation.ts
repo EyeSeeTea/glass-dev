@@ -26,15 +26,24 @@ function main() {
             //1. Initialize all periods
             const periods = args.period ? [args.period] : ["2022", "2023"];
 
+            console.debug(`Run AMR AGG RIS data validation for URL ${args.url} and periods ${periods}`);
+
             try {
                 //2. Get all countries i.e org units of level 3.
+                console.debug(`Fetching all countries i.e. orgunits of level 3`);
+
                 const orgUnits = await api.models.organisationUnits
                     .get({
                         fields: { id: true, name: true, code: true },
                         filter: { level: { eq: "3" } },
                         paging: false,
                     })
-                    .getData();
+                    .getData()
+                    .catch(error => {
+                        console.error(`Error thrown when fetching countries : ${error}`);
+                        throw error;
+                    });
+
                 //2.b) Add Kosovo to the list of countries
                 orgUnits.objects.push({
                     id: "I8AMbKhxlj9",
@@ -46,15 +55,21 @@ function main() {
                 const batchIds = ["DS1", "DS2", "DS3", "DS4", "DS5", "DS6"];
 
                 //4. Get all data values for all countries and all periods
+                console.debug(`Fetching all data values for AMR RIS data set for all countries and periods`);
                 const dataSetValues = await api.dataValues
                     .getSet({
                         dataSet: ["CeQPmXgrhHF"],
                         orgUnit: orgUnits.objects.map(ou => ou.id),
                         period: periods,
                     })
-                    .getData();
+                    .getData()
+                    .catch(error => {
+                        console.error(`Error thrown when fetching data values for AMR RIS data set : ${error}`);
+                        throw error;
+                    });
 
                 //5. Get all category option combos for containing all batchIds
+                console.debug(`Fetching all category combination options containing batch ids `);
                 const allBatchIdCC = await Promise.all(
                     batchIds.map(async batchId => {
                         const batchCC = await api.models.categoryOptionCombos
@@ -63,7 +78,13 @@ function main() {
                                 filter: { identifiable: { token: batchId } },
                                 paging: false,
                             })
-                            .getData();
+                            .getData()
+                            .catch(error => {
+                                console.error(
+                                    `Error thrown when fetching category combination options containing batch id : ${batchId}, error : ${error}`
+                                );
+                                throw error;
+                            });
 
                         return batchCC.objects.map(coc => {
                             return {
@@ -87,6 +108,7 @@ function main() {
 
                                 const dataValuesByBatch = batchIds.map(async batchId => {
                                     //8. Get uploads for period, OU and batchId from datastore
+
                                     const upload = await dataStoreClient
                                         .getObjectsFilteredByProps<GlassUploads>(
                                             DataStoreKeys.UPLOADS,
@@ -98,7 +120,13 @@ function main() {
                                                 ["fileType", "RIS"],
                                             ])
                                         )
-                                        .toPromise();
+                                        .toPromise()
+                                        .catch(error => {
+                                            console.error(
+                                                `Error thrown when fetching uploads for period : ${periodKey}, OU : ${orgUnitKey}, batchId : ${batchId}, error : ${error}`
+                                            );
+                                            throw error;
+                                        });
 
                                     const currentBatchCC = allBatchIdCategoryCombos.filter(
                                         cc => cc.batchId === batchId
@@ -118,6 +146,7 @@ function main() {
                                         orgUnitId: orgUnitKey,
                                         batchId: batchId,
                                         uploadStatuses: upload.map(u => u.status),
+                                        fileType: upload.map(u => u.fileType),
                                     };
                                 });
 

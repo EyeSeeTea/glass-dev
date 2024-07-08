@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2024-06-21T20:57:02.640Z\n"
-"PO-Revision-Date: 2024-06-21T20:57:02.640Z\n"
+"POT-Creation-Date: 2024-07-06T15:56:43.747Z\n"
+"PO-Revision-Date: 2024-07-06T15:56:43.747Z\n"
 
 msgid "Template {{id}} not loaded"
 msgstr ""
@@ -540,6 +540,9 @@ msgid "Go to Validation Report"
 msgstr ""
 
 msgid "Thank you! your data for now is uploaded in our system"
+msgstr ""
+
+msgid "Failed to set upload status"
 msgstr ""
 
 msgid "Importing data and applying validation rules"
