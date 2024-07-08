@@ -21,6 +21,12 @@ import { ImportSummary } from "../../../entities/data-entry/ImportSummary";
 import { getConsumptionDataProductLevel } from "./utils/getConsumptionDataProductLevel";
 import { logger } from "../../../../utils/logger";
 import { GlassModuleRepository } from "../../../repositories/GlassModuleRepository";
+import { AMCSubstanceDataRepository } from "../../../repositories/data-entry/AMCSubstanceDataRepository";
+import { RawSubstanceConsumptionCalculated } from "../../../entities/data-entry/amc/RawSubstanceConsumptionCalculated";
+import { TrackerPostResponse } from "@eyeseetea/d2-api/api/tracker";
+import { mapRawSubstanceCalculatedToSubstanceCalculated } from "./utils/mapRawSubstanceCalculatedToSubstanceCalculated";
+import { GlassUploadsRepository } from "../../../repositories/GlassUploadsRepository";
+import { GlassDocumentsRepository } from "../../../repositories/GlassDocumentsRepository";
 
 const TEMPLATE_ID = "TRACKER_PROGRAM_GENERATED_v3";
 const IMPORT_SUMMARY_EVENT_TYPE = "event";
@@ -35,10 +41,19 @@ export class CalculateConsumptionDataProductLevelUseCase {
         private amcProductDataRepository: AMCProductDataRepository,
         private atcRepository: GlassATCRepository,
         private metadataRepository: MetadataRepository,
-        private glassModuleRepository: GlassModuleRepository
+        private glassModuleRepository: GlassModuleRepository,
+        private amcSubstanceDataRepository: AMCSubstanceDataRepository,
+        private glassUploadsRepository: GlassUploadsRepository,
+        private glassDocumentsRepository: GlassDocumentsRepository
     ) {}
 
-    public execute(period: string, orgUnitId: Id, file: File, moduleName: string): FutureData<ImportSummary> {
+    public execute(
+        period: string,
+        orgUnitId: Id,
+        file: File,
+        moduleName: string,
+        uploadId: Id
+    ): FutureData<ImportSummary> {
         return this.getProductIdsFromFile(file).flatMap(productIds => {
             logger.info(
                 `[${new Date().toISOString()}] Calculating raw substance consumption data for the following products (total: ${
@@ -139,32 +154,55 @@ export class CalculateConsumptionDataProductLevelUseCase {
                                     orgUnitId,
                                     period
                                 )
-                                .flatMap(response => {
-                                    if (response.status === "OK") {
+                                .flatMap(importProductResponse => {
+                                    if (importProductResponse.status === "OK") {
                                         logger.success(
                                             `[${new Date().toISOString()}] Calculations of product level created for orgUnitId ${orgUnitId} and period ${period}: ${
-                                                response.stats.created
-                                            } of ${response.stats.total} events created`
+                                                importProductResponse.stats.created
+                                            } of ${importProductResponse.stats.total} events created`
+                                        );
+
+                                        return this.importSubstanceConsumptionCalculated(
+                                            rawSubstanceConsumptionCalculatedData,
+                                            orgUnitId,
+                                            period,
+                                            importProductResponse,
+                                            uploadId,
+                                            moduleName
                                         );
                                     }
-                                    if (response.status === "ERROR") {
+
+                                    if (importProductResponse.status === "ERROR") {
                                         logger.error(
                                             `[${new Date().toISOString()}] Error creating calculations of product level for orgUnitId ${orgUnitId} and period ${period}: ${JSON.stringify(
-                                                response.validationReport.errorReports
+                                                importProductResponse.validationReport.errorReports
                                             )}`
                                         );
                                     }
-                                    if (response.status === "WARNING") {
+
+                                    if (importProductResponse.status === "WARNING") {
                                         logger.warn(
-                                            `[${new Date().toISOString()}] Warning creating calculations of product level updated for orgUnitId ${orgUnitId} and period ${period}: ${
-                                                response.stats.created
-                                            } of ${response.stats.total} events created and warning=${JSON.stringify(
-                                                response.validationReport.warningReports
+                                            `[${new Date().toISOString()}] Warning creating calculations of product level for orgUnitId ${orgUnitId} and period ${period}: ${
+                                                importProductResponse.stats.created
+                                            } of ${
+                                                importProductResponse.stats.total
+                                            } events created and warning=${JSON.stringify(
+                                                importProductResponse.validationReport.warningReports
                                             )}`
                                         );
+
+                                        return this.importSubstanceConsumptionCalculated(
+                                            rawSubstanceConsumptionCalculatedData,
+                                            orgUnitId,
+                                            period,
+                                            importProductResponse,
+                                            uploadId,
+                                            moduleName
+                                        );
                                     }
+
                                     return mapToImportSummary(
-                                        response,
+                                        importProductResponse,
                                         IMPORT_SUMMARY_EVENT_TYPE,
                                         this.metadataRepository
                                     ).flatMap(summary => {
@@ -218,5 +256,111 @@ export class CalculateConsumptionDataProductLevelUseCase {
                 });
             });
         });
+    }
+
+    private importSubstanceConsumptionCalculated(
+        rawSubstanceConsumptionCalculatedData: RawSubstanceConsumptionCalculated[],
+        orgUnitId: string,
+        period: string,
+        importProductResponse: TrackerPostResponse,
+        uploadId: Id,
+        moduleName: string
+    ): FutureData<ImportSummary> {
+        const calculatedConsumptionSubstanceLevelData = mapRawSubstanceCalculatedToSubstanceCalculated(
+            rawSubstanceConsumptionCalculatedData,
+            period
+        );
+
+        return this.amcSubstanceDataRepository
+            .importCalculations(IMPORT_STRATEGY_CREATE_AND_UPDATE, orgUnitId, calculatedConsumptionSubstanceLevelData)
+            .flatMap(importSubstancesResult => {
+                if (importSubstancesResult.response.status === "OK") {
+                    logger.success(
+                        `[${new Date().toISOString()}] Calculations of substance level created for orgUnitId ${orgUnitId} and period ${period}: ${
+                            importSubstancesResult.response.stats.created
+                        } of ${importSubstancesResult.response.stats.total} events created`
+                    );
+                }
+                if (importSubstancesResult.response.status === "ERROR") {
+                    logger.error(
+                        `[${new Date().toISOString()}] Error creating calculations of substance level for orgUnitId ${orgUnitId} and period ${period}: ${JSON.stringify(
+                            importSubstancesResult.response.validationReport.errorReports
+                        )}`
+                    );
+                }
+                if (importSubstancesResult.response.status === "WARNING") {
+                    logger.warn(
+                        `[${new Date().toISOString()}] Warning creating calculations of substance level for orgUnitId ${orgUnitId} and period ${period}: ${
+                            importSubstancesResult.response.stats.created
+                        } of ${importSubstancesResult.response.stats.total} events created and warning=${JSON.stringify(
+                            importSubstancesResult.response.validationReport.warningReports
+                        )}`
+                    );
+                }
+
+                return mapToImportSummary(
+                    importSubstancesResult.response,
+                    IMPORT_SUMMARY_EVENT_TYPE,
+                    this.metadataRepository,
+                    undefined,
+                    importSubstancesResult.eventIdLineNoMap
+                ).flatMap(importSubstancesSummary => {
+                    return this.uploadIdListFileAndSave(uploadId, importSubstancesSummary, moduleName).flatMap(
+                        importSubstancesSummaryImportSummary => {
+                            return mapToImportSummary(
+                                importProductResponse,
+                                IMPORT_SUMMARY_EVENT_TYPE,
+                                this.metadataRepository
+                            ).flatMap(importProductSummary => {
+                                return Future.success({
+                                    ...importSubstancesSummaryImportSummary,
+                                    importCount: {
+                                        imported:
+                                            importProductSummary.importSummary.importCount.imported +
+                                            importSubstancesSummaryImportSummary.importCount.imported,
+                                        updated:
+                                            importProductSummary.importSummary.importCount.updated +
+                                            importSubstancesSummaryImportSummary.importCount.updated,
+                                        ignored:
+                                            importProductSummary.importSummary.importCount.ignored +
+                                            importSubstancesSummaryImportSummary.importCount.ignored,
+                                        deleted:
+                                            importProductSummary.importSummary.importCount.deleted +
+                                            importSubstancesSummaryImportSummary.importCount.deleted,
+                                    },
+                                    nonBlockingErrors: [
+                                        ...importProductSummary.importSummary.nonBlockingErrors,
+                                        ...importSubstancesSummaryImportSummary.nonBlockingErrors,
+                                    ],
+                                    blockingErrors: [
+                                        ...importProductSummary.importSummary.blockingErrors,
+                                        ...importSubstancesSummaryImportSummary.blockingErrors,
+                                    ],
+                                });
+                            });
+                        }
+                    );
+                });
+            });
+    }
+
+    private uploadIdListFileAndSave(
+        uploadId: string,
+        summary: { importSummary: ImportSummary; eventIdList: string[] },
+        moduleName: string
+    ): FutureData<ImportSummary> {
+        if (summary.eventIdList.length > 0 && uploadId) {
+            const eventListBlob = new Blob([JSON.stringify(summary.eventIdList)], {
+                type: "text/plain",
+            });
+            const calculatedEventListFile = new File([eventListBlob], `${uploadId}_calculatedEventListFileId`);
+            return this.glassDocumentsRepository.save(calculatedEventListFile, moduleName).flatMap(fileId => {
+                return this.glassUploadsRepository.setCalculatedEventListFileId(uploadId, fileId).flatMap(() => {
+                    return Future.success(summary.importSummary);
+                });
+            });
+        } else {
+            return Future.success(summary.importSummary);
+        }
     }
 }

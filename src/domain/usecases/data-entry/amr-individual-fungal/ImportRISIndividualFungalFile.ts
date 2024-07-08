@@ -11,12 +11,12 @@ import { D2TrackerEnrollment, D2TrackerEnrollmentAttribute } from "@eyeseetea/d2
 import { D2TrackerEvent } from "@eyeseetea/d2-api/api/trackerEvents";
 import { mapToImportSummary, uploadIdListFileAndSave } from "../ImportBLTemplateEventProgram";
 import { MetadataRepository } from "../../../repositories/MetadataRepository";
-import { downloadIdsAndDeleteTrackedEntities } from "../amc/ImportAMCProductLevelData";
 import { CustomDataColumns } from "../../../entities/data-entry/amr-individual-fungal-external/RISIndividualFungalData";
 import moment from "moment";
 import { ValidationResult } from "../../../entities/program-rules/EventEffectTypes";
 import { ProgramRuleValidationForBLEventProgram } from "../../program-rules-processing/ProgramRuleValidationForBLEventProgram";
 import { ProgramRulesMetadataRepository } from "../../../repositories/program-rules/ProgramRulesMetadataRepository";
+import { downloadIdsAndDeleteTrackedEntities } from "../utils/downloadIdsAndDeleteTrackedEntities";
 
 export const AMRIProgramID = "mMAj6Gofe49";
 const AMR_GLASS_AMR_TET_PATIENT = "CcgnfemKr5U";
