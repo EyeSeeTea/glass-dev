@@ -182,9 +182,12 @@ export class ImportRISFile {
 
                                         const importSummary = mapDataValuesToImportSummary(saveSummary, action);
 
+                                        const blockingErrorsWithDHISValidation =
+                                            action === "DELETE" ? [] : [...allBlockingErrors, ...dhis2ValidationErrors];
+
                                         const summaryWithConsistencyBlokingErrors = includeBlockingErrors(
                                             importSummary,
-                                            [...allBlockingErrors, ...dhis2ValidationErrors]
+                                            blockingErrorsWithDHISValidation
                                         );
 
                                         summaryWithConsistencyBlokingErrors.importTime = saveSummary.importTime;

@@ -16,7 +16,6 @@ import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context
 import { SupportButtons } from "./SupportButtons";
 import { moduleProperties } from "../../../domain/utils/ModuleProperties";
 import { useSnackbar } from "@eyeseetea/d2-ui-components";
-import { EffectFn } from "../../hooks/use-callback-effect";
 
 interface ConsistencyChecksProps {
     changeStep: (step: number) => void;
@@ -27,8 +26,6 @@ interface ConsistencyChecksProps {
     secondaryFileImportSummary: ImportSummary | undefined;
     setPrimaryFileImportSummary: React.Dispatch<React.SetStateAction<ImportSummary | undefined>>;
     setSecondaryFileImportSummary: React.Dispatch<React.SetStateAction<ImportSummary | undefined>>;
-    removePrimaryFile: EffectFn<[event: React.MouseEvent<HTMLButtonElement, MouseEvent>]>;
-    removeSecondaryFile: EffectFn<[event: React.MouseEvent<HTMLButtonElement, MouseEvent>]>;
 }
 
 export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
@@ -40,8 +37,6 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
     secondaryFileImportSummary,
     setPrimaryFileImportSummary,
     setSecondaryFileImportSummary,
-    removePrimaryFile,
-    removeSecondaryFile,
 }) => {
     const { compositionRoot } = useAppContext();
     const { currentModuleAccess } = useCurrentModuleContext();
@@ -76,6 +71,84 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
         currentPeriod,
         primaryFileImportSummary?.blockingErrors,
     ]);
+
+    const setUploadStatus = (
+        primaryUploadId: string,
+        secondaryUploadId: string | null,
+        status: "VALIDATED" | "IMPORTED"
+    ) => {
+        compositionRoot.glassUploads
+            .setStatus({
+                id: primaryUploadId,
+                status: status,
+            })
+            .run(
+                () => {
+                    if (secondaryUploadId)
+                        compositionRoot.glassUploads
+                            .setStatus({
+                                id: secondaryUploadId,
+                                status: status,
+                            })
+                            .run(
+                                () => {
+                                    changeStep(3);
+                                    setImportLoading(false);
+                                },
+                                () => {
+                                    snackbar.error(i18n.t("Failed to set upload status"));
+                                    setImportLoading(false);
+                                }
+                            );
+                    else {
+                        changeStep(3);
+                        setImportLoading(false);
+                    }
+                },
+                () => {
+                    snackbar.error(i18n.t("Failed to set upload status"));
+                    setImportLoading(false);
+                }
+            );
+    };
+
+    const setUploadStatusAndSaveErrors = (
+        primaryUploadId: string,
+        secondaryUploadId: string | null,
+        status: "VALIDATED" | "IMPORTED",
+        importPrimaryFileSummary: ImportSummary | undefined,
+        importSecondaryFileSummary: ImportSummary | undefined
+    ) => {
+        const params = secondaryUploadId
+            ? {
+                  primaryUploadId,
+                  primaryImportSummaryErrors: {
+                      nonBlockingErrors: importPrimaryFileSummary?.nonBlockingErrors || [],
+                      blockingErrors: importPrimaryFileSummary?.blockingErrors || [],
+                  },
+                  secondaryUploadId,
+                  secondaryImportSummaryErrors: {
+                      nonBlockingErrors: importSecondaryFileSummary?.nonBlockingErrors || [],
+                      blockingErrors: importSecondaryFileSummary?.blockingErrors || [],
+                  },
+              }
+            : {
+                  primaryUploadId,
+                  primaryImportSummaryErrors: {
+                      nonBlockingErrors: importPrimaryFileSummary?.nonBlockingErrors || [],
+                      blockingErrors: importPrimaryFileSummary?.blockingErrors || [],
+                  },
+              };
+
+        compositionRoot.glassUploads.saveImportSummaryErrorsOfFiles(params).run(
+            () => {
+                setUploadStatus(primaryUploadId, secondaryUploadId, status);
+            },
+            () => {
+                setUploadStatus(primaryUploadId, secondaryUploadId, status);
+            }
+        );
+    };
 
     const continueClick = () => {
         if (primaryFile && moduleProperties.get(currentModuleAccess.moduleName)?.isDryRunReq) {
@@ -121,56 +194,23 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
                     if (importSecondaryFileSummary) {
                         setSecondaryFileImportSummary(importSecondaryFileSummary);
                     }
-
+                    const secondaryUploadId = localStorage.getItem("secondaryUploadId");
                     if (primaryUploadId) {
-                        const secondaryUploadId = localStorage.getItem("secondaryUploadId");
-
-                        const params = secondaryUploadId
-                            ? {
-                                  primaryUploadId,
-                                  primaryImportSummaryErrors: {
-                                      nonBlockingErrors: importPrimaryFileSummary?.nonBlockingErrors || [],
-                                      blockingErrors: importPrimaryFileSummary?.blockingErrors || [],
-                                  },
-                                  secondaryUploadId,
-                                  secondaryImportSummaryErrors: {
-                                      nonBlockingErrors: importSecondaryFileSummary?.nonBlockingErrors || [],
-                                      blockingErrors: importSecondaryFileSummary?.blockingErrors || [],
-                                  },
-                              }
-                            : {
-                                  primaryUploadId,
-                                  primaryImportSummaryErrors: {
-                                      nonBlockingErrors: importPrimaryFileSummary?.nonBlockingErrors || [],
-                                      blockingErrors: importPrimaryFileSummary?.blockingErrors || [],
-                                  },
-                              };
-
-                        compositionRoot.glassUploads.saveImportSummaryErrorsOfFiles(params).run(
-                            () => {},
-                            () => {}
-                        );
-                    }
-
-                    if (importPrimaryFileSummary.blockingErrors.length === 0 && primaryUploadId) {
-                        compositionRoot.glassUploads.setStatus({ id: primaryUploadId, status: "VALIDATED" }).run(
-                            () => {
-                                changeStep(3);
-                                setImportLoading(false);
-                            },
-                            () => {
-                                setImportLoading(false);
-                            }
-                        );
-                    } else {
-                        if (primaryUploadId) {
-                            compositionRoot.glassUploads.setStatus({ id: primaryUploadId, status: "IMPORTED" }).run(
-                                () => {
-                                    setImportLoading(false);
-                                },
-                                () => {
-                                    setImportLoading(false);
-                                }
+                        if (importPrimaryFileSummary.blockingErrors.length === 0) {
+                            setUploadStatusAndSaveErrors(
+                                primaryUploadId,
+                                secondaryUploadId,
+                                "VALIDATED",
+                                importPrimaryFileSummary,
+                                importSecondaryFileSummary
+                            );
+                        } else {
+                            setUploadStatusAndSaveErrors(
+                                primaryUploadId,
+                                secondaryUploadId,
+                                "IMPORTED",
+                                importPrimaryFileSummary,
+                                importSecondaryFileSummary
                             );
                         }
                     }
@@ -270,13 +310,15 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
                 moduleProperties.get(currentModuleAccess.moduleName)?.isCalculationRequired &&
                 (primaryFile || secondaryFile)
             ) {
-                if (primaryFile) {
+                const primaryUploadId = localStorage.getItem("primaryUploadId");
+                if (primaryFile && primaryUploadId) {
                     compositionRoot.calculations
                         .consumptionDataProductLevel(
                             currentPeriod,
                             currentOrgUnitAccess.orgUnitId,
                             primaryFile,
-                            currentModuleAccess.moduleName
+                            currentModuleAccess.moduleName,
+                            primaryUploadId
                         )
                         .run(
                             importSummary => {
@@ -323,12 +365,12 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
     };
 
     const onCancelUpload = useCallback(
-        (event: React.MouseEvent<HTMLButtonElement>) => {
-            primaryFile && removePrimaryFile(event);
-            secondaryFile && removeSecondaryFile(event);
+        (_event: React.MouseEvent<HTMLButtonElement>) => {
+            // primaryFile && removePrimaryFile(event);
+            // secondaryFile && removeSecondaryFile(event);
             changeStep(1);
         },
-        [changeStep, primaryFile, removePrimaryFile, removeSecondaryFile, secondaryFile]
+        [changeStep]
     );
 
     return (
@@ -386,7 +428,11 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
                 secondaryFileImportSummary
             )}
             <div className="bottom">
-                <SupportButtons primaryFileImportSummary={primaryFileImportSummary} onCancelUpload={onCancelUpload} />
+                <SupportButtons
+                    primaryFileImportSummary={primaryFileImportSummary}
+                    secondaryFileImportSummary={secondaryFileImportSummary}
+                    onCancelUpload={onCancelUpload}
+                />
                 <div className="right">
                     {primaryFileImportSummary && primaryFileImportSummary.blockingErrors.length > 0 && (
                         <Button
@@ -405,7 +451,8 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
                         onClick={continueClick}
                         disableElevation
                         disabled={
-                            primaryFileImportSummary && primaryFileImportSummary.blockingErrors.length > 0
+                            (primaryFileImportSummary && primaryFileImportSummary.blockingErrors.length > 0) ||
+                            (secondaryFileImportSummary && secondaryFileImportSummary.blockingErrors.length > 0)
                                 ? true
                                 : false
                         }

@@ -1,7 +1,7 @@
 {
     "name": "glass",
     "description": "DHIS2 Glass App",
-    "version": "1.6.7",
+    "version": "1.6.10",
     "license": "GPL-3.0",
     "author": "EyeSeeTea team",
     "homepage": ".",
@@ -116,8 +116,10 @@
         "script-example": "npx ts-node src/scripts/index.ts example getExample",
         "start-amc-recalculate": "npx ts-node src/scripts/cliAMC.ts  --debug",
         "build-amc-recalculate": "ncc build src/scripts/cliAMC.ts -m -o $npm_package_name-amc-recalculate-server && zip -r $npm_package_name-amc-recalculate-server.zip $npm_package_name-amc-recalculate-server && npx rimraf $npm_package_name-amc-recalculate-server/",
-        "amr-agg-data-validation": "source .env && ts-node src/scripts/amr_agg_data_validation.ts --url $REACT_APP_DHIS2_BASE_URL --auth $REACT_APP_DHIS2_AUTH",
-        "amr-agg-data-reset": "source .env && ts-node src/scripts/amr_agg_data_reset.ts  --url $REACT_APP_DHIS2_BASE_URL --auth $REACT_APP_DHIS2_AUTH"
+        "amr-agg-data-validation-ris": "source .env && npx ts-node src/scripts/amr_agg_data_validation.ts --url $REACT_APP_DHIS2_BASE_URL --auth $REACT_APP_DHIS2_AUTH",
+        "amr-agg-data-reset-ris": "source .env && npx ts-node src/scripts/amr_agg_data_reset.ts  --url $REACT_APP_DHIS2_BASE_URL --auth $REACT_APP_DHIS2_AUTH",
+        "amr-agg-data-validation-sample": "source .env && npx ts-node src/scripts/amr_agg_data_validation_sample.ts --url $REACT_APP_DHIS2_BASE_URL --auth $REACT_APP_DHIS2_AUTH",
+        "amr-agg-data-reset-sample": "source .env && npx ts-node src/scripts/amr_agg_data_reset_sample.ts  --url $REACT_APP_DHIS2_BASE_URL --auth $REACT_APP_DHIS2_AUTH"
     },
     "manifest.webapp": {
         "name": "glass",
