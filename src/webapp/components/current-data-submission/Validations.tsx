@@ -35,7 +35,7 @@ export const Validations: React.FC = () => {
     const fileTypeState = useFileTypeByDataSubmission();
 
     const downloadTemplate = useCallback(
-        (downloadType: DownloadType) => {
+        (downloadType: DownloadType, fileTypeStateData?: string) => {
             setIsLoading(true);
 
             if (fileTypeState.kind === "loaded") {
@@ -44,7 +44,7 @@ export const Validations: React.FC = () => {
                         currentModuleAccess.moduleName,
                         currentOrgUnitAccess.orgUnitId,
                         currentPeriod,
-                        fileTypeState.data ?? "",
+                        fileTypeStateData ?? "",
                         downloadType
                     )
                     .run(
@@ -53,7 +53,7 @@ export const Validations: React.FC = () => {
                             downloadSimulateAnchor.href = URL.createObjectURL(file);
                             const fileTypeName = moduleProperties.get(currentModuleAccess.moduleName)
                                 ?.isSingleFileTypePerSubmission
-                                ? `-${fileTypeState.data}`
+                                ? `-${fileTypeStateData || ""}`
                                 : "";
                             downloadSimulateAnchor.download = `${currentModuleAccess.moduleName}${fileTypeName}-${downloadType}-${currentOrgUnitAccess.orgUnitCode}-Populated.xlsx`;
                             // simulate link click
@@ -91,20 +91,40 @@ export const Validations: React.FC = () => {
             {moduleProperties.get(currentModuleAccess.moduleName)?.isDownloadDataAllowed && (
                 <>
                     <ContentLoader content={fileTypeState}>
-                        <DownloadButtonsWrapper>
-                            <DownloadButton
-                                title="Download submitted data"
-                                helperText="An excel file with all the submitted data in this dashboard"
-                                onClick={() => downloadTemplate("SUBMITTED")}
-                                disabled={fileTypeState.kind === "loaded" && !fileTypeState.data}
-                            />
-                            <DownloadButton
-                                title="Download calculated data"
-                                helperText="An excel file with all the calculated data in this dashboard"
-                                onClick={() => downloadTemplate("CALCULATED")}
-                                disabled={fileTypeState.kind === "loaded" && !fileTypeState.data}
-                            />
-                        </DownloadButtonsWrapper>
+                        {fileTypeState.kind === "loaded" && fileTypeState.data && (
+                            <DownloadButtonsWrapper>
+                                <DownloadButton
+                                    title={
+                                        moduleProperties.get(currentModuleAccess.moduleName)?.submittedDownloadLabel ||
+                                        "Download submitted data"
+                                    }
+                                    helperText="An excel file with all the submitted data in this dashboard"
+                                    onClick={() => downloadTemplate("SUBMITTED", fileTypeState.data)}
+                                />
+                                <DownloadButton
+                                    title={
+                                        (fileTypeState.data === "PRODUCT"
+                                            ? moduleProperties.get(currentModuleAccess.moduleName)
+                                                  ?.calculatedProductDownloadLabel
+                                            : moduleProperties.get(currentModuleAccess.moduleName)
+                                                  ?.calculatedSubstanceFileDownloadLabel) || "Download calculated data"
+                                    }
+                                    helperText="An excel file with all the calculated data in this dashboard"
+                                    onClick={() => downloadTemplate("CALCULATED", fileTypeState.data)}
+                                />
+                                {fileTypeState.data === "PRODUCT" && (
+                                    <DownloadButton
+                                        title={
+                                            moduleProperties.get(currentModuleAccess.moduleName)
+                                                ?.calculatedSubstanceFileDownloadLabel || "Download calculated data"
+                                        }
+                                        helperText="An excel file with all the calculated substance data"
+                                        onClick={() => downloadTemplate("CALCULATED", "SUBSTANCE")}
+                                        disabled={!fileTypeState.data}
+                                    />
+                                )}
+                            </DownloadButtonsWrapper>
+                        )}
                     </ContentLoader>
                 </>
             )}

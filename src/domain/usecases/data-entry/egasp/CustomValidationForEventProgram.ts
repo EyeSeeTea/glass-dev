@@ -7,9 +7,11 @@ import { D2TrackerEvent as Event } from "@eyeseetea/d2-api/api/trackerEvents";
 import { MetadataRepository } from "../../../repositories/MetadataRepository";
 import { AMC_RAW_SUBSTANCE_CONSUMPTION_PROGRAM_ID } from "../amc/ImportAMCSubstanceLevelData";
 import { EGASP_PROGRAM_ID } from "../../../../data/repositories/program-rule/ProgramRulesMetadataDefaultRepository";
+import { validateAtcVersion } from "../../../entities/GlassAtcVersionData";
 
 const EGASP_DATAELEMENT_ID = "KaS2YBRN8eH";
 const PATIENT_DATAELEMENT_ID = "aocFHBxcQa0";
+const ATC_VERSION_DATAELEMENT_ID = "aCuWz3HZ5Ti";
 export class CustomValidationForEventProgram {
     constructor(
         private dhis2EventsDefaultRepository: Dhis2EventsDefaultRepository,
@@ -21,7 +23,7 @@ export class CustomValidationForEventProgram {
         orgUnitName: string,
         period: string,
         programId: string
-    ): FutureData<any> {
+    ): FutureData<ValidationResult> {
         const checkClinics = programId === EGASP_PROGRAM_ID ? true : false;
         //1. Org unit validation
         return this.checkCountry(events, orgUnitId, orgUnitName, checkClinics).flatMap(orgUnitErrors => {
@@ -29,9 +31,24 @@ export class CustomValidationForEventProgram {
             const periodErrors = this.checkPeriod(events, period);
 
             if (programId === AMC_RAW_SUBSTANCE_CONSUMPTION_PROGRAM_ID) {
+                const initialErrors: ConsistencyError = { error: "", count: 0, lines: [] };
+                const atcVersionKeyError: ConsistencyError = events.reduce((acc, event) => {
+                    const atcVersionKey = event.dataValues.find(
+                        value => value.dataElement === ATC_VERSION_DATAELEMENT_ID
+                    );
+                    return atcVersionKey && validateAtcVersion(atcVersionKey?.value)
+                        ? acc
+                        : {
+                              ...acc,
+                              error: "ATC version manual has not the correct format (example: ATC-2024-v1)",
+                              count: acc?.count + 1,
+                              lines: [...(acc?.lines || []), parseInt(event.event)],
+                          };
+                }, initialErrors);
+
                 const results: ValidationResult = {
                     events: events,
-                    blockingErrors: [...orgUnitErrors, ...periodErrors],
+                    blockingErrors: [...orgUnitErrors, ...periodErrors, atcVersionKeyError],
                     nonBlockingErrors: [],
                 };
 

@@ -1,9 +1,9 @@
-import { RouteOfAdministrationCode, SaltCode } from "../../GlassAtcVersionData";
+import { ATCCodeLevel5, RouteOfAdministrationCode, SaltCode } from "../../GlassAtcVersionData";
 import { Id } from "../../Ref";
 
 export type RawSubstanceConsumptionData = {
     id: Id;
-    atc_manual: string;
+    atc_manual: ATCCodeLevel5;
     route_admin_manual: RouteOfAdministrationCode;
     salt_manual: SaltCode;
     packages_manual: number;
