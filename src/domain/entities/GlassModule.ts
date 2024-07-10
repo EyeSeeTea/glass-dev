@@ -17,6 +17,7 @@ export type ChunkSizes = {
     substanceIds: number;
 };
 
+export type PATHOGEN_ANTIBIOTIC_MAP = Record<string, string[]>;
 export interface GlassModule {
     name: string;
     color: string;
@@ -25,8 +26,7 @@ export interface GlassModule {
     questionnairesType?: QuestionnairesType;
     questionnaires: QuestionnaireConfig[];
     consistencyChecks?: {
-        specimenPathogen: Record<string, string[]>;
-        pathogenAntibiotic: Record<string, string[]>;
+        specimenPathogen: Record<string, PATHOGEN_ANTIBIOTIC_MAP[]>;
     };
     dashboards: {
         reportsMenu: string;
