@@ -27,19 +27,26 @@ export class RecalculateConsumptionDataSubstanceLevelForAllUseCase {
                 ","
             )} and periods=${periods.join(",")}. Current ATC version ${currentATCVersion}`
         );
+
         return Future.sequential(
             orgUnitsIds.map(orgUnitId => {
-                return Future.sequential(
-                    periods.map(period => {
-                        return this.calculateByOrgUnitAndPeriod(
-                            orgUnitId,
-                            period,
-                            currentATCVersion,
-                            currentATCData,
-                            allowCreationIfNotExist
-                        ).toVoid();
-                    })
-                ).toVoid();
+                return Future.fromPromise(new Promise(resolve => setTimeout(resolve, 1000))).flatMap(() => {
+                    console.debug(`Waiting 1 second... orgUnit: ${orgUnitId}`);
+                    return Future.sequential(
+                        periods.map(period => {
+                            return Future.fromPromise(new Promise(resolve => setTimeout(resolve, 1000))).flatMap(() => {
+                                console.debug(`Waiting 1 second... period: ${period}`);
+                                return this.calculateByOrgUnitAndPeriod(
+                                    orgUnitId,
+                                    period,
+                                    currentATCVersion,
+                                    currentATCData,
+                                    allowCreationIfNotExist
+                                ).toVoid();
+                            });
+                        })
+                    ).toVoid();
+                });
             })
         ).toVoid();
     }
@@ -56,6 +63,23 @@ export class RecalculateConsumptionDataSubstanceLevelForAllUseCase {
         );
         return this.getDataForRecalculations(orgUnitId, period).flatMap(
             ({ rawSubstanceConsumptionData, currentCalculatedConsumptionData }) => {
+                if (_.isEmpty(rawSubstanceConsumptionData)) {
+                    logger.info(
+                        `[${new Date().toISOString()}] Substance level: there are no raw substance consumption data for orgUnitId ${orgUnitId} and period ${period}`
+                    );
+                    return Future.success(undefined);
+                }
+
+                if (
+                    !allowCreationIfNotExist &&
+                    (!currentCalculatedConsumptionData || _.isEmpty(currentCalculatedConsumptionData))
+                ) {
+                    logger.info(
+                        `[${new Date().toISOString()}] Substance level: there are no current calculated data to update for orgUnitId ${orgUnitId} and period ${period}`
+                    );
+                    return Future.success(undefined);
+                }
+
                 return getConsumptionDataSubstanceLevel({
                     orgUnitId,
                     period,
@@ -67,16 +91,6 @@ export class RecalculateConsumptionDataSubstanceLevelForAllUseCase {
                     if (_.isEmpty(newCalculatedConsumptionData)) {
                         logger.error(
                             `[${new Date().toISOString()}] Substance level: there are no new calculated data to update current data for orgUnitId ${orgUnitId} and period ${period}`
-                        );
-                        return Future.success(undefined);
-                    }
-
-                    if (
-                        !allowCreationIfNotExist &&
-                        (!currentCalculatedConsumptionData || _.isEmpty(currentCalculatedConsumptionData))
-                    ) {
-                        logger.error(
-                            `[${new Date().toISOString()}] Substance level: there are no current calculated data to update for orgUnitId ${orgUnitId} and period ${period}`
                         );
                         return Future.success(undefined);
                     }
