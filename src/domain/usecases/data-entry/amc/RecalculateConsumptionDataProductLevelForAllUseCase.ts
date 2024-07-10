@@ -61,20 +61,29 @@ export class RecalculateConsumptionDataProductLevelForAllUseCase {
                     logger.error(`[${new Date().toISOString()}] Product register program metadata not found`);
                     return Future.error("Product register program metadata not found");
                 }
+
                 return Future.sequential(
                     orgUnitsIds.map(orgUnitId => {
-                        return Future.sequential(
-                            periods.map(period => {
-                                return this.calculateByOrgUnitAndPeriod(
-                                    productRegisterProgramMetadata,
-                                    orgUnitId,
-                                    period,
-                                    currentATCData,
-                                    currentATCVersion,
-                                    allowCreationIfNotExist
-                                ).toVoid();
-                            })
-                        ).toVoid();
+                        return Future.fromPromise(new Promise(resolve => setTimeout(resolve, 1000))).flatMap(() => {
+                            console.debug(`Waiting 1 second... orgUnit: ${orgUnitId}`);
+                            return Future.sequential(
+                                periods.map(period => {
+                                    return Future.fromPromise(
+                                        new Promise(resolve => setTimeout(resolve, 1000))
+                                    ).flatMap(() => {
+                                        console.debug(`Waiting 1 second... period: ${period}`);
+                                        return this.calculateByOrgUnitAndPeriod(
+                                            productRegisterProgramMetadata,
+                                            orgUnitId,
+                                            period,
+                                            currentATCData,
+                                            currentATCVersion,
+                                            allowCreationIfNotExist
+                                        ).toVoid();
+                                    });
+                                })
+                            ).toVoid();
+                        });
                     })
                 ).toVoid();
             });
@@ -96,6 +105,27 @@ export class RecalculateConsumptionDataProductLevelForAllUseCase {
             period
         ).flatMap(data => {
             const { productDataTrackedEntities, currentRawSubstanceConsumptionCalculatedByProductId } = data;
+
+            if (!productDataTrackedEntities || !productDataTrackedEntities?.length) {
+                logger.info(
+                    `[${new Date().toISOString()}] Product level: there are no product data for orgUnitId ${orgUnitId} and period ${period}`
+                );
+                return Future.success(undefined);
+            }
+
+            if (
+                !allowCreationIfNotExist &&
+                (_.isEmpty(currentRawSubstanceConsumptionCalculatedByProductId) ||
+                    Object.values(currentRawSubstanceConsumptionCalculatedByProductId || {}).every(
+                        rawSubstanceConsumptionCalculated => rawSubstanceConsumptionCalculated.length === 0
+                    ))
+            ) {
+                logger.info(
+                    `[${new Date().toISOString()}] Product level: there are no current calculated data to update for orgUnitId ${orgUnitId} and period ${period}`
+                );
+                return Future.success(undefined);
+            }
+
             return getConsumptionDataProductLevel({
                 orgUnitId,
                 period,
@@ -107,19 +137,6 @@ export class RecalculateConsumptionDataProductLevelForAllUseCase {
                 if (_.isEmpty(newRawSubstanceConsumptionCalculatedData)) {
                     logger.error(
                         `[${new Date().toISOString()}] Product level: there are no new calculated data to update current data for orgUnitId ${orgUnitId} and period ${period}`
-                    );
-                    return Future.success(undefined);
-                }
-
-                if (
-                    !allowCreationIfNotExist &&
-                    (_.isEmpty(currentRawSubstanceConsumptionCalculatedByProductId) ||
-                        Object.values(currentRawSubstanceConsumptionCalculatedByProductId || {}).every(
-                            rawSubstanceConsumptionCalculated => rawSubstanceConsumptionCalculated.length === 0
-                        ))
-                ) {
-                    logger.error(
-                        `[${new Date().toISOString()}] Product level: there are no current calculated data to update for orgUnitId ${orgUnitId} and period ${period}`
                     );
                     return Future.success(undefined);
                 }
