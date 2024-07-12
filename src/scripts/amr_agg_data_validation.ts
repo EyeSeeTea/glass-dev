@@ -21,15 +21,20 @@ function main() {
         handler: async args => {
             if (!process.env.REACT_APP_DHIS2_BASE_URL)
                 throw new Error("REACT_APP_DHIS2_BASE_URL  must be set in the .env file");
-
             if (!process.env.REACT_APP_DHIS2_AUTH)
-                throw new Error("REACT_APP_DHIS2_BASE_URL  must be set in the .env file");
+                throw new Error("REACT_APP_DHIS2_AUTH  must be set in the .env file");
+
+            const username = process.env.REACT_APP_DHIS2_AUTH.split(":")[0];
+            if (!username) throw new Error("Username is required");
+
+            const password = process.env.REACT_APP_DHIS2_AUTH.split(":")[1];
+            if (!password) throw new Error("Password is required");
 
             const envVars = {
                 url: process.env.REACT_APP_DHIS2_BASE_URL,
                 auth: {
-                    username: process.env.REACT_APP_DHIS2_AUTH.split(":")[0],
-                    password: process.env.REACT_APP_DHIS2_AUTH.split(":")[1],
+                    username: username,
+                    password: password,
                 },
             };
 
