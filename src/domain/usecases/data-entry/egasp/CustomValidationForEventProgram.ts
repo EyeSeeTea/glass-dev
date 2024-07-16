@@ -48,7 +48,10 @@ export class CustomValidationForEventProgram {
 
                 const results: ValidationResult = {
                     events: events,
-                    blockingErrors: [...orgUnitErrors, ...periodErrors, atcVersionKeyError],
+                    blockingErrors:
+                        !atcVersionKeyError.count && !atcVersionKeyError.error && !atcVersionKeyError.lines?.length
+                            ? [...orgUnitErrors, ...periodErrors]
+                            : [...orgUnitErrors, ...periodErrors, atcVersionKeyError],
                     nonBlockingErrors: [],
                 };
 
