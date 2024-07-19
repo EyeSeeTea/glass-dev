@@ -22,6 +22,10 @@ import { ExcelReader } from "../../utils/ExcelReader";
 import { InstanceRepository } from "../../repositories/InstanceRepository";
 import { AMC_RAW_SUBSTANCE_CONSUMPTION_PROGRAM_ID } from "./amc/ImportAMCSubstanceLevelData";
 import moment from "moment";
+import { GlassATCDefaultRepository } from "../../../data/repositories/GlassATCDefaultRepository";
+import { ListGlassATCLastVersionKeysByYear } from "../../entities/GlassAtcVersionData";
+
+const ATC_VERSION_DATA_ELEMENT_ID = "aCuWz3HZ5Ti";
 
 export class ImportBLTemplateEventProgram {
     constructor(
@@ -31,7 +35,8 @@ export class ImportBLTemplateEventProgram {
         private glassUploadsRepository: GlassUploadsRepository,
         private dhis2EventsDefaultRepository: Dhis2EventsDefaultRepository,
         private metadataRepository: MetadataRepository,
-        private programRulesMetadataRepository: ProgramRulesMetadataRepository
+        private programRulesMetadataRepository: ProgramRulesMetadataRepository,
+        private glassAtcRepository: GlassATCDefaultRepository
     ) {}
 
     public import(
@@ -63,6 +68,7 @@ export class ImportBLTemplateEventProgram {
                             return this.buildEventsPayload(
                                 dataPackage,
                                 action,
+                                programId,
                                 eventListFileId,
                                 calculatedEventListFileId
                             ).flatMap(events => {
@@ -136,64 +142,6 @@ export class ImportBLTemplateEventProgram {
         });
     }
 
-    private createAndUpdateEvents(
-        uploadIdLocalStorageName: string,
-        moduleName: string,
-        events: D2TrackerEvent[],
-        orgUnitId: string,
-        orgUnitName: string,
-        period: string,
-        programId: string
-    ): FutureData<ImportSummary> {
-        //Run validations on import only
-        return this.validateEvents(events, orgUnitId, orgUnitName, period, programId).flatMap(validatedEventResults => {
-            if (validatedEventResults.blockingErrors.length > 0) {
-                const errorSummary: ImportSummary = {
-                    status: "ERROR",
-                    importCount: {
-                        ignored: 0,
-                        imported: 0,
-                        deleted: 0,
-                        updated: 0,
-                    },
-                    nonBlockingErrors: validatedEventResults.nonBlockingErrors,
-                    blockingErrors: validatedEventResults.blockingErrors,
-                };
-                return Future.success(errorSummary);
-            } else {
-                const eventIdLineNoMap: { id: string; lineNo: number }[] = [];
-                const eventsWithId = (validatedEventResults.events || []).map(e => {
-                    const generatedId = generateId();
-                    eventIdLineNoMap.push({
-                        id: generatedId,
-                        lineNo: isNaN(parseInt(e.event)) ? 0 : parseInt(e.event),
-                    });
-                    e.event = generatedId;
-                    return e;
-                });
-                return this.dhis2EventsDefaultRepository
-                    .import({ events: eventsWithId }, "CREATE_AND_UPDATE")
-                    .flatMap(result => {
-                        return mapToImportSummary(
-                            result,
-                            "event",
-                            this.metadataRepository,
-                            validatedEventResults.nonBlockingErrors,
-                            eventIdLineNoMap
-                        ).flatMap(summary => {
-                            return uploadIdListFileAndSave(
-                                uploadIdLocalStorageName,
-                                summary,
-                                moduleName,
-                                this.glassDocumentsRepository,
-                                this.glassUploadsRepository
-                            );
-                        });
-                    });
-            }
-        });
-    }
-
     private deleteEvents(events: D2TrackerEvent[]): FutureData<ImportSummary> {
         return this.dhis2EventsDefaultRepository.import({ events }, "DELETE").flatMap(result => {
             return mapToImportSummary(result, "event", this.metadataRepository).flatMap(({ importSummary }) => {
@@ -205,36 +153,15 @@ export class ImportBLTemplateEventProgram {
     private buildEventsPayload(
         dataPackage: DataPackage,
         action: ImportStrategy,
+        programId: string,
         eventListFileId: string | undefined,
         calculatedEventListFileId?: string
     ): FutureData<D2TrackerEvent[]> {
         if (action === "CREATE_AND_UPDATE") {
-            return Future.success(
-                dataPackage.dataEntries.map(
-                    ({ id, orgUnit, period, attribute, dataValues, dataForm, coordinate }, index) => {
-                        const occurredAt =
-                            dataForm === AMC_RAW_SUBSTANCE_CONSUMPTION_PROGRAM_ID
-                                ? moment(new Date(`${period.split("-").at(0)}-01-01`))
-                                      .toISOString()
-                                      .split("T")
-                                      .at(0) ?? period
-                                : period;
-
-                        return {
-                            event: id || (index + 6).toString(),
-                            program: dataForm,
-                            status: "COMPLETED",
-                            orgUnit,
-                            occurredAt: occurredAt,
-                            attributeOptionCombo: attribute,
-                            dataValues: dataValues.map(el => {
-                                return { ...el, value: el.value.toString() };
-                            }),
-                            coordinate,
-                        };
-                    }
-                )
-            );
+            if (programId === AMC_RAW_SUBSTANCE_CONSUMPTION_PROGRAM_ID) {
+                return this.buildEventsPayloadForAMCSubstances(dataPackage);
+            }
+            return Future.success(this.mapDataPackageToD2TrackerEvents(dataPackage));
         } else if (action === "DELETE") {
             return Future.joinObj({
                 events: eventListFileId ? this.getEventsFromListFileId(eventListFileId) : Future.success([]),
@@ -246,6 +173,62 @@ export class ImportBLTemplateEventProgram {
             });
         }
         return Future.success([]);
+    }
+
+    buildEventsPayloadForAMCSubstances(dataPackage: DataPackage): FutureData<D2TrackerEvent[]> {
+        const atcVerionYears = dataPackage.dataEntries.reduce((acc: string[], dataEntry) => {
+            const atcVerionYear = dataEntry.dataValues.find(
+                ({ dataElement }) => dataElement === ATC_VERSION_DATA_ELEMENT_ID
+            )?.value;
+            return atcVerionYear ? [...acc, atcVerionYear.toString()] : acc;
+        }, []);
+
+        const uniqueAtcVerionYears = Array.from(new Set(atcVerionYears));
+
+        return this.glassAtcRepository
+            .getListOfLastAtcVersionsKeysByYears(uniqueAtcVerionYears)
+            .flatMap(atcVersionKeysByYear => {
+                return Future.success(this.mapDataPackageToD2TrackerEvents(dataPackage, atcVersionKeysByYear));
+            });
+    }
+
+    mapDataPackageToD2TrackerEvents(
+        dataPackage: DataPackage,
+        atcVersionKeysByYear?: ListGlassATCLastVersionKeysByYear
+    ): D2TrackerEvent[] {
+        return dataPackage.dataEntries.map(
+            ({ id, orgUnit, period, attribute, dataValues, dataForm, coordinate }, index) => {
+                const occurredAt =
+                    dataForm === AMC_RAW_SUBSTANCE_CONSUMPTION_PROGRAM_ID
+                        ? moment(new Date(`${period.split("-").at(0)}-01-01`))
+                              .toISOString()
+                              .split("T")
+                              .at(0) ?? period
+                        : period;
+
+                return {
+                    event: id || (index + 6).toString(),
+                    program: dataForm,
+                    status: "COMPLETED",
+                    orgUnit,
+                    occurredAt: occurredAt,
+                    attributeOptionCombo: attribute,
+                    dataValues: dataValues.map(el => {
+                        if (
+                            dataForm === AMC_RAW_SUBSTANCE_CONSUMPTION_PROGRAM_ID &&
+                            el.dataElement === ATC_VERSION_DATA_ELEMENT_ID &&
+                            atcVersionKeysByYear
+                        ) {
+                            const atcVersionKey = atcVersionKeysByYear[el.value.toString()];
+                            return { ...el, value: atcVersionKey ?? "" };
+                        }
+
+                        return { ...el, value: el.value.toString() };
+                    }),
+                    coordinate,
+                };
+            }
+        );
     }
 
     private getEventsFromListFileId(listFileId: string): FutureData<D2TrackerEvent[]> {
@@ -281,7 +264,8 @@ export class ImportBLTemplateEventProgram {
         //2. Run Custom EGASP Validations
         const customValidations = new CustomValidationForEventProgram(
             this.dhis2EventsDefaultRepository,
-            this.metadataRepository
+            this.metadataRepository,
+            this.glassAtcRepository
         );
 
         return Future.joinObj({

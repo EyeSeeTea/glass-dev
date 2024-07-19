@@ -39,7 +39,8 @@ export class ImportPrimaryFileUseCase {
         private programRulesMetadataRepository: ProgramRulesMetadataRepository,
         private atcRepository: GlassATCDefaultRepository,
         private amcProductRepository: AMCProductDataRepository,
-        private amcSubstanceDataRepository: AMCSubstanceDataRepository
+        private amcSubstanceDataRepository: AMCSubstanceDataRepository,
+        private glassAtcRepository: GlassATCDefaultRepository
     ) {}
 
     public execute(
@@ -74,7 +75,8 @@ export class ImportPrimaryFileUseCase {
                     this.glassUploadsRepository,
                     this.programRulesMetadataRepository,
                     this.metadataRepository,
-                    this.instanceRepository
+                    this.instanceRepository,
+                    this.glassAtcRepository
                 );
 
                 return importEGASPFile.importEGASPFile(
