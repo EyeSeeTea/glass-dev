@@ -1,6 +1,7 @@
 import { Maybe } from "../../../../types/utils";
 import {
     ATCCodeLevel5,
+    ATCVersionKey,
     AmName,
     AwrName,
     RouteOfAdministrationCode,
@@ -59,7 +60,7 @@ export type RawSubstanceConsumptionCalculated = {
     health_level_autocalculated: string;
     tons_autocalculated: number;
     packages_autocalculated: number;
-    atc_version_autocalculated: string;
+    atc_version_autocalculated: ATCVersionKey;
     ddds_autocalculated: number;
     am_class: Maybe<AmName>;
     atc2: Maybe<string>;

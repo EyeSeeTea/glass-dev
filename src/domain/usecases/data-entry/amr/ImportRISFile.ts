@@ -10,7 +10,6 @@ import { checkASTResults } from "../utils/checkASTResults";
 import { checkBatchId } from "../utils/checkBatchId";
 import { checkCountry } from "../utils/checkCountry";
 import { checkDhis2Validations } from "../utils/checkDhis2Validations";
-import { checkPathogenAntibiotic } from "../utils/checkPathogenAntibiotic";
 import { checkSpecimenPathogen } from "../utils/checkSpecimenPathogen";
 import { checkYear } from "../utils/checkYear";
 import {
@@ -62,14 +61,9 @@ export class ImportRISFile {
                 });
             })
             .flatMap(({ risDataItems, dataSet, dataSet_CC, dataElement_CC, orgUnits, module }) => {
-                const pathogenAntibioticErrors = module.consistencyChecks
-                    ? checkPathogenAntibiotic(risDataItems, module.consistencyChecks.pathogenAntibiotic)
-                    : [];
-
-                const specimenPathogenErrors = module.consistencyChecks
+                const specimenPathogenAntibioticErrors = module.consistencyChecks
                     ? checkSpecimenPathogen(risDataItems, module.consistencyChecks.specimenPathogen)
                     : [];
-
                 const astResultsErrors = checkASTResults(risDataItems);
                 const batchIdErrors = checkBatchId(risDataItems, batchId);
                 const yearErrors = checkYear(risDataItems, year);
@@ -125,8 +119,7 @@ export class ImportRISFile {
                         ? []
                         : [
                               ...blockingCategoryOptionConsistencyErrors,
-                              ...pathogenAntibioticErrors,
-                              ...specimenPathogenErrors,
+                              ...specimenPathogenAntibioticErrors,
                               ...astResultsErrors,
                               ...batchIdErrors,
                               ...yearErrors,

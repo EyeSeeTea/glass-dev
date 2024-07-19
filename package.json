@@ -1,7 +1,7 @@
 {
     "name": "glass",
     "description": "DHIS2 Glass App",
-    "version": "1.6.12",
+    "version": "1.6.14",
     "license": "GPL-3.0",
     "author": "EyeSeeTea team",
     "homepage": ".",
@@ -28,6 +28,7 @@
         "d2": "31.10.2",
         "d2-manifest": "1.0.0",
         "dayjs": "^1.11.7",
+        "dotenv": "^16.4.5",
         "excel4node": "^1.8.2",
         "fluture": "14.0.0",
         "font-awesome": "4.7.0",
@@ -116,10 +117,10 @@
         "script-example": "npx ts-node src/scripts/index.ts example getExample",
         "start-amc-recalculate": "npx ts-node src/scripts/cliAMC.ts  --debug",
         "build-amc-recalculate": "ncc build src/scripts/cliAMC.ts -m -o $npm_package_name-amc-recalculate-server && zip -r $npm_package_name-amc-recalculate-server.zip $npm_package_name-amc-recalculate-server && npx rimraf $npm_package_name-amc-recalculate-server/",
-        "amr-agg-data-validation-ris": "source .env && npx ts-node src/scripts/amr_agg_data_validation.ts --url $REACT_APP_DHIS2_BASE_URL --auth $REACT_APP_DHIS2_AUTH",
-        "amr-agg-data-reset-ris": "source .env && npx ts-node src/scripts/amr_agg_data_reset.ts  --url $REACT_APP_DHIS2_BASE_URL --auth $REACT_APP_DHIS2_AUTH",
-        "amr-agg-data-validation-sample": "source .env && npx ts-node src/scripts/amr_agg_data_validation_sample.ts --url $REACT_APP_DHIS2_BASE_URL --auth $REACT_APP_DHIS2_AUTH",
-        "amr-agg-data-reset-sample": "source .env && npx ts-node src/scripts/amr_agg_data_reset_sample.ts  --url $REACT_APP_DHIS2_BASE_URL --auth $REACT_APP_DHIS2_AUTH"
+        "amr-agg-data-validation-ris": "npx ts-node -r dotenv/config src/scripts/amr_agg_data_validation.ts",
+        "amr-agg-data-reset-ris": "npx ts-node -r dotenv/config src/scripts/amr_agg_data_reset.ts",
+        "amr-agg-data-validation-sample": "npx ts-node -r dotenv/config src/scripts/amr_agg_data_validation_sample.ts",
+        "amr-agg-data-reset-sample": "npx ts-node -r dotenv/config src/scripts/amr_agg_data_reset_sample.ts"
     },
     "manifest.webapp": {
         "name": "glass",

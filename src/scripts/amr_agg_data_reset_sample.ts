@@ -1,14 +1,13 @@
 import { command, run, string, option } from "cmd-ts";
 import path from "path";
 import fs from "fs";
-import { getApiUrlOptions, getD2ApiFromArgs } from "./common";
+import { getD2ApiFromArgs } from "./common";
 
 function main() {
     const cmd = command({
         name: path.basename(__filename),
         description: "Show DHIS2 instance info",
         args: {
-            ...getApiUrlOptions(),
             orgUnitId: option({
                 type: string,
                 long: "orgUnit",
@@ -26,7 +25,26 @@ function main() {
             }),
         },
         handler: async args => {
-            const api = getD2ApiFromArgs(args);
+            if (!process.env.REACT_APP_DHIS2_BASE_URL)
+                throw new Error("REACT_APP_DHIS2_BASE_URL  must be set in the .env file");
+
+            if (!process.env.REACT_APP_DHIS2_AUTH)
+                throw new Error("REACT_APP_DHIS2_BASE_URL  must be set in the .env file");
+
+            const username = process.env.REACT_APP_DHIS2_AUTH.split(":")[0] ?? "";
+            const password = process.env.REACT_APP_DHIS2_AUTH.split(":")[1] ?? "";
+
+            if (username === "" || password === "") {
+                throw new Error("REACT_APP_DHIS2_AUTH must be in the format 'username:password'");
+            }
+            const envVars = {
+                url: process.env.REACT_APP_DHIS2_BASE_URL,
+                auth: {
+                    username: username,
+                    password: password,
+                },
+            };
+            const api = getD2ApiFromArgs(envVars);
 
             //1. Get Period for which to reset.
             if (!args.period) throw new Error("Period is required");
