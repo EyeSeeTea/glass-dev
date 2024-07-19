@@ -9,6 +9,7 @@ import { Dhis2EventsDefaultRepository } from "../../../../data/repositories/Dhis
 import { MetadataRepository } from "../../../repositories/MetadataRepository";
 import { ImportBLTemplateEventProgram } from "../ImportBLTemplateEventProgram";
 import { ProgramRulesMetadataRepository } from "../../../repositories/program-rules/ProgramRulesMetadataRepository";
+import { GlassATCDefaultRepository } from "../../../../data/repositories/GlassATCDefaultRepository";
 
 export const AMC_RAW_SUBSTANCE_CONSUMPTION_PROGRAM_ID = "q8aSKr17J5S";
 export const AMC_SUBSTANCE_CALCULATED_CONSUMPTION_PROGRAM_ID = "eUmWZeKZNrg";
@@ -21,7 +22,8 @@ export class ImportAMCSubstanceLevelData {
         private glassUploadsRepository: GlassUploadsRepository,
         private dhis2EventsDefaultRepository: Dhis2EventsDefaultRepository,
         private metadataRepository: MetadataRepository,
-        private programRulesMetadataRepository: ProgramRulesMetadataRepository
+        private programRulesMetadataRepository: ProgramRulesMetadataRepository,
+        private glassAtcRepository: GlassATCDefaultRepository
     ) {}
 
     public import(
@@ -41,7 +43,8 @@ export class ImportAMCSubstanceLevelData {
             this.glassUploadsRepository,
             this.dhis2EventsDefaultRepository,
             this.metadataRepository,
-            this.programRulesMetadataRepository
+            this.programRulesMetadataRepository,
+            this.glassAtcRepository
         );
 
         return importBLTemplateEventProgram.import(

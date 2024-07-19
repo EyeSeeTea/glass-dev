@@ -70,8 +70,7 @@ export function calculateConsumptionSubstanceLevelData(
             );
 
             calculationLogs = [...calculationLogs, ...dddStandarizedLatest.logs];
-
-            if (!dddStandarizedLatest.result) {
+            if (!dddStandarizedLatest.result && dddStandarizedLatest.result !== 0) {
                 calculationLogs = [
                     ...calculationLogs,
                     {
@@ -102,7 +101,10 @@ export function calculateConsumptionSubstanceLevelData(
             );
             calculationLogs = [...calculationLogs, ...dddStandarizedInRawSubstanceConsumption.logs];
 
-            if (!dddStandarizedInRawSubstanceConsumption.result) {
+            if (
+                !dddStandarizedInRawSubstanceConsumption.result &&
+                dddStandarizedInRawSubstanceConsumption.result !== 0
+            ) {
                 calculationLogs = [
                     ...calculationLogs,
                     {

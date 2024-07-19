@@ -2,7 +2,7 @@ import { command, option, optional, run, string } from "cmd-ts";
 import path from "path";
 import _ from "lodash";
 import { DataStoreClient } from "../data/data-store/DataStoreClient";
-import { getApiUrlOptions, getD2ApiFromArgs, getInstance } from "./common";
+import { getD2ApiFromArgs, getInstance } from "./common";
 import { DataStoreKeys } from "../data/data-store/DataStoreKeys";
 import { GlassUploads } from "../domain/entities/GlassUploads";
 
@@ -11,7 +11,6 @@ function main() {
         name: path.basename(__filename),
         description: "Show DHIS2 instance info",
         args: {
-            ...getApiUrlOptions(),
             period: option({
                 type: optional(string),
                 long: "period",
@@ -19,14 +18,34 @@ function main() {
             }),
         },
         handler: async args => {
-            const api = getD2ApiFromArgs(args);
-            const instance = getInstance(args);
+            if (!process.env.REACT_APP_DHIS2_BASE_URL)
+                throw new Error("REACT_APP_DHIS2_BASE_URL  must be set in the .env file");
+
+            if (!process.env.REACT_APP_DHIS2_AUTH)
+                throw new Error("REACT_APP_DHIS2_BASE_URL  must be set in the .env file");
+
+            const username = process.env.REACT_APP_DHIS2_AUTH.split(":")[0] ?? "";
+            const password = process.env.REACT_APP_DHIS2_AUTH.split(":")[1] ?? "";
+
+            if (username === "" || password === "") {
+                throw new Error("REACT_APP_DHIS2_AUTH must be in the format 'username:password'");
+            }
+            const envVars = {
+                url: process.env.REACT_APP_DHIS2_BASE_URL,
+                auth: {
+                    username: username,
+                    password: password,
+                },
+            };
+
+            const api = getD2ApiFromArgs(envVars);
+            const instance = getInstance(envVars);
             const dataStoreClient = new DataStoreClient(instance);
 
             //1. Initialize all periods
             const periods = args.period ? [args.period] : ["2022", "2023"];
 
-            console.debug(`Run AMR AGG SAMPLE data validation for URL ${args.url} and periods ${periods}`);
+            console.debug(`Run AMR AGG SAMPLE data validation for URL ${envVars.url} and periods ${periods}`);
 
             try {
                 //2. Get all countries i.e org units of level 3.
@@ -96,6 +115,15 @@ function main() {
                 );
                 const allBatchIdCategoryCombos = allBatchIdCC.flat();
 
+                console.debug(`Fetching all datastore values for SAMPLE Uploads`);
+                const allUploads = await dataStoreClient
+                    .listCollection<GlassUploads>(DataStoreKeys.UPLOADS)
+                    .toPromise()
+                    .catch(error => {
+                        console.error(`Error thrown when fetching all uploads, error : ${error}`);
+                        throw error;
+                    });
+
                 //6. Group data values by orgUnit
                 const ouGroupedDataValues = _(dataSetValues.dataValues).groupBy("orgUnit");
                 const formattedResult = await Promise.all(
@@ -107,26 +135,15 @@ function main() {
                                 const country = orgUnits.objects.find(ou => ou.id === orgUnitKey)?.name;
 
                                 const dataValuesByBatch = batchIds.map(async batchId => {
-                                    //8. Get uploads for period, OU and batchId from datastore
-
-                                    const upload = await dataStoreClient
-                                        .getObjectsFilteredByProps<GlassUploads>(
-                                            DataStoreKeys.UPLOADS,
-                                            new Map<keyof GlassUploads, unknown>([
-                                                ["module", "AVnpk4xiXGG"],
-                                                ["orgUnit", orgUnitKey],
-                                                ["period", periodKey],
-                                                ["batchId", batchId],
-                                                ["fileType", "SAMPLE"],
-                                            ])
-                                        )
-                                        .toPromise()
-                                        .catch(error => {
-                                            console.error(
-                                                `Error thrown when fetching uploads for period : ${periodKey}, OU : ${orgUnitKey}, batchId : ${batchId}, error : ${error}`
-                                            );
-                                            throw error;
-                                        });
+                                    //8. Get upload for period, OU and batchId
+                                    const upload = allUploads.filter(
+                                        upload =>
+                                            upload.module === "AVnpk4xiXGG" &&
+                                            upload.orgUnit === orgUnitKey &&
+                                            upload.period === periodKey &&
+                                            upload.batchId === batchId &&
+                                            upload.fileType === "SAMPLE"
+                                    );
 
                                     const currentBatchCC = allBatchIdCategoryCombos.filter(
                                         cc => cc.batchId === batchId

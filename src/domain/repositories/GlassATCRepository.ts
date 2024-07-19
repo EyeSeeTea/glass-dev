@@ -1,8 +1,10 @@
 import { FutureData } from "../entities/Future";
 import {
+    ATCVersionKey,
     GlassATCHistory,
     GlassATCRecalculateDataInfo,
     GlassAtcVersionData,
+    ListGlassATCLastVersionKeysByYear,
     ListGlassATCVersions,
 } from "../entities/GlassAtcVersionData";
 
@@ -13,4 +15,6 @@ export interface GlassATCRepository {
     getListOfAtcVersionsByKeys(atcVersionKeys: string[]): FutureData<ListGlassATCVersions>;
     getRecalculateDataInfo(): FutureData<GlassATCRecalculateDataInfo | undefined>;
     disableRecalculations(): FutureData<void>;
+    getLastAtcVersionKeyYear(year: string): FutureData<ATCVersionKey>;
+    getListOfLastAtcVersionsKeysByYears(years: string[]): FutureData<ListGlassATCLastVersionKeysByYear>;
 }
