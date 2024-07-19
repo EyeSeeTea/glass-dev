@@ -31,11 +31,17 @@ function main() {
             if (!process.env.REACT_APP_DHIS2_AUTH)
                 throw new Error("REACT_APP_DHIS2_BASE_URL  must be set in the .env file");
 
+            const username = process.env.REACT_APP_DHIS2_AUTH.split(":")[0] ?? "";
+            const password = process.env.REACT_APP_DHIS2_AUTH.split(":")[1] ?? "";
+
+            if (username === "" || password === "") {
+                throw new Error("REACT_APP_DHIS2_AUTH must be in the format 'username:password'");
+            }
             const envVars = {
                 url: process.env.REACT_APP_DHIS2_BASE_URL,
                 auth: {
-                    username: process.env.REACT_APP_DHIS2_AUTH.split(":")[0],
-                    password: process.env.REACT_APP_DHIS2_AUTH.split(":")[1],
+                    username: username,
+                    password: password,
                 },
             };
 
