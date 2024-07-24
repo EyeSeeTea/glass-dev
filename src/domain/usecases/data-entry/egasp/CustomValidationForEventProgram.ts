@@ -8,7 +8,6 @@ import { MetadataRepository } from "../../../repositories/MetadataRepository";
 import { AMC_RAW_SUBSTANCE_CONSUMPTION_PROGRAM_ID } from "../amc/ImportAMCSubstanceLevelData";
 import { EGASP_PROGRAM_ID } from "../../../../data/repositories/program-rule/ProgramRulesMetadataDefaultRepository";
 import { validateAtcVersion } from "../../../entities/GlassAtcVersionData";
-import { GlassATCDefaultRepository } from "../../../../data/repositories/GlassATCDefaultRepository";
 
 const EGASP_DATAELEMENT_ID = "KaS2YBRN8eH";
 const PATIENT_DATAELEMENT_ID = "aocFHBxcQa0";
@@ -16,8 +15,7 @@ const ATC_VERSION_DATAELEMENT_ID = "aCuWz3HZ5Ti";
 export class CustomValidationForEventProgram {
     constructor(
         private dhis2EventsDefaultRepository: Dhis2EventsDefaultRepository,
-        private metadataRepository: MetadataRepository,
-        private glassAtcRepository: GlassATCDefaultRepository
+        private metadataRepository: MetadataRepository
     ) {}
     public getValidatedEvents(
         events: Event[],
