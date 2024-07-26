@@ -185,11 +185,19 @@ export class ImportBLTemplateEventProgram {
 
         const uniqueAtcVerionYears = Array.from(new Set(atcVerionYears));
 
-        return this.glassAtcRepository
-            .getListOfLastAtcVersionsKeysByYears(uniqueAtcVerionYears)
-            .flatMap(atcVersionKeysByYear => {
-                return Future.success(this.mapDataPackageToD2TrackerEvents(dataPackage, atcVersionKeysByYear));
-            });
+        return this.glassAtcRepository.getAtcHistory().flatMap(atcVersionHistory => {
+            const atcVersionHistoryYears = atcVersionHistory.map(atcHistory => atcHistory.year.toString());
+            const missingAtcVersionYearsInHistory = uniqueAtcVerionYears.filter(
+                year => !atcVersionHistoryYears.includes(year)
+            );
+            return this.glassAtcRepository
+                .getListOfLastAtcVersionsKeysByYears(
+                    uniqueAtcVerionYears.filter(year => !missingAtcVersionYearsInHistory.includes(year))
+                )
+                .flatMap(atcVersionKeysByYear => {
+                    return Future.success(this.mapDataPackageToD2TrackerEvents(dataPackage, atcVersionKeysByYear));
+                });
+        });
     }
 
     mapDataPackageToD2TrackerEvents(
@@ -216,10 +224,9 @@ export class ImportBLTemplateEventProgram {
                     dataValues: dataValues.map(el => {
                         if (
                             dataForm === AMC_RAW_SUBSTANCE_CONSUMPTION_PROGRAM_ID &&
-                            el.dataElement === ATC_VERSION_DATA_ELEMENT_ID &&
-                            atcVersionKeysByYear
+                            el.dataElement === ATC_VERSION_DATA_ELEMENT_ID
                         ) {
-                            const atcVersionKey = atcVersionKeysByYear[el.value.toString()];
+                            const atcVersionKey = atcVersionKeysByYear ? atcVersionKeysByYear[el.value.toString()] : "";
                             return { ...el, value: atcVersionKey ?? "" };
                         }
 
@@ -264,8 +271,7 @@ export class ImportBLTemplateEventProgram {
         //2. Run Custom EGASP Validations
         const customValidations = new CustomValidationForEventProgram(
             this.dhis2EventsDefaultRepository,
-            this.metadataRepository,
-            this.glassAtcRepository
+            this.metadataRepository
         );
 
         return Future.joinObj({
