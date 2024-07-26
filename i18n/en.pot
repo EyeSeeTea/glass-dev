@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2024-07-06T15:56:43.747Z\n"
-"PO-Revision-Date: 2024-07-06T15:56:43.747Z\n"
+"POT-Creation-Date: 2024-07-26T10:31:32.732Z\n"
+"PO-Revision-Date: 2024-07-26T10:31:32.732Z\n"
 
 msgid "Template {{id}} not loaded"
 msgstr ""
@@ -618,6 +618,9 @@ msgid "Download empty template"
 msgstr ""
 
 msgid "Multiple uploads not allowed, please select one file"
+msgstr ""
+
+msgid "Data submission id not found. Please try again"
 msgstr ""
 
 msgid "Error in file upload"
