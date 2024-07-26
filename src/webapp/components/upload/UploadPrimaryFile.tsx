@@ -73,6 +73,11 @@ export const UploadPrimaryFile: React.FC<UploadPrimaryFileProps> = ({
 
                     return compositionRoot.fileSubmission.validatePrimaryFile(uploadedPrimaryFile, moduleName).run(
                         primaryFileData => {
+                            if (!dataSubmissionId) {
+                                snackbar.error(i18n.t("Data submission id not found. Please try again"));
+                                setIsLoading(false);
+                            }
+
                             if (primaryFileData.isValid) {
                                 setPrimaryFile(uploadedPrimaryFile);
                                 const primaryFileType = moduleProperties.get(moduleName)?.primaryFileType;
