@@ -6,6 +6,7 @@ import { D2TrackerTrackedEntity } from "@eyeseetea/d2-api/api/trackerTrackedEnti
 import { GlassATCDefaultRepository } from "../../../../data/repositories/GlassATCDefaultRepository";
 import { GlassAtcVersionData, LAST_ATC_CODE_LEVEL, getAtcCodeByLevel } from "../../../entities/GlassAtcVersionData";
 import { AMCProductDataRepository } from "../../../repositories/data-entry/AMCProductDataRepository";
+import { OrgUnitAccess } from "../../../entities/User";
 
 const AMR_GLASS_AMC_TEA_ATC = "aK1JpD14imM";
 const AMR_GLASS_AMC_TEA_COMBINATION = "mG49egdYK3G";
@@ -20,6 +21,7 @@ const atcCodeWithSaltHippAndMand = "J01XX05";
 const atcCodeWithRoaOAndSaltDefault = "J01FA01";
 const CODE_PRODUCT_NOT_HAVE_ATC = "Z99ZZ99";
 const COMB_CODE_PRODUCT_NOT_HAVE_ATC = "Z99ZZ99_99";
+const AMR_GLASS_AMC_TEA_MANUFACTURER_COUNTRY = "OCSAMKIi1BD";
 
 export class CustomValidationsAMCProductData {
     constructor(
@@ -31,7 +33,8 @@ export class CustomValidationsAMCProductData {
         teis: D2TrackerTrackedEntity[],
         orgUnitId: string,
         orgUnitName: string,
-        period: string
+        period: string,
+        orgUnitsWithAccess: OrgUnitAccess[]
     ): FutureData<ValidationResult> {
         return this.atcRepository.getCurrentAtcVersion().flatMap(atcVersion => {
             return this.amcProductRepository
@@ -43,7 +46,8 @@ export class CustomValidationsAMCProductData {
                         orgUnitId,
                         orgUnitName,
                         period,
-                        atcVersion
+                        atcVersion,
+                        orgUnitsWithAccess
                     );
 
                     const dateErrors = this.checkSameEnrollmentDate(teis);
@@ -110,7 +114,8 @@ export class CustomValidationsAMCProductData {
         countryId: string,
         countryName: string,
         period: string,
-        atcVersion: GlassAtcVersionData
+        atcVersion: GlassAtcVersionData,
+        orgUnitsWithAccess: OrgUnitAccess[]
     ): ConsistencyError[] {
         const errors = _(
             teis.map(tei => {
@@ -125,6 +130,9 @@ export class CustomValidationsAMCProductData {
                 )?.value;
                 const roa = tei.attributes?.find(attr => attr.attribute === AMR_GLASS_AMC_TEA_ROUTE_ADMIN)?.value;
                 const salt = tei.attributes?.find(attr => attr.attribute === AMR_GLASS_AMC_TEA_SALT)?.value;
+                const manufacturerCountryId = tei.attributes?.find(
+                    attr => attr.attribute === AMR_GLASS_AMC_TEA_MANUFACTURER_COUNTRY
+                )?.value;
 
                 if (tei.orgUnit !== countryId) {
                     curErrors.push({
@@ -246,6 +254,17 @@ export class CustomValidationsAMCProductData {
                             line: tei.trackedEntity ? parseInt(tei.trackedEntity) + 6 : -1,
                         });
                     }
+                }
+
+                const productManufacturerCountry = orgUnitsWithAccess.find(
+                    orgUnit => orgUnit.orgUnitId === manufacturerCountryId
+                );
+
+                if (manufacturerCountryId && !productManufacturerCountry) {
+                    curErrors.push({
+                        error: i18n.t(`Manufacturer country code is incorrect: ${manufacturerCountryId}`),
+                        line: tei.trackedEntity ? parseInt(tei.trackedEntity) + 6 : -1,
+                    });
                 }
 
                 return curErrors;

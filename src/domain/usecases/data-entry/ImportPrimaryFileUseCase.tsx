@@ -21,6 +21,7 @@ import { InstanceDefaultRepository } from "../../../data/repositories/InstanceDe
 import { GlassATCDefaultRepository } from "../../../data/repositories/GlassATCDefaultRepository";
 import { AMCProductDataRepository } from "../../repositories/data-entry/AMCProductDataRepository";
 import { AMCSubstanceDataRepository } from "../../repositories/data-entry/AMCSubstanceDataRepository";
+import { OrgUnitAccess } from "../../entities/User";
 
 export class ImportPrimaryFileUseCase {
     constructor(
@@ -54,6 +55,7 @@ export class ImportPrimaryFileUseCase {
         countryCode: string,
         dryRun: boolean,
         eventListId: string | undefined,
+        orgUnitsWithAccess: OrgUnitAccess[],
         calculatedEventListFileId?: string
     ): FutureData<ImportSummary> {
         switch (moduleName) {
@@ -110,7 +112,8 @@ export class ImportPrimaryFileUseCase {
                         eventListId,
                         module.programs !== undefined ? module.programs.at(0) : undefined,
                         module.name,
-                        module.customDataColumns ? module.customDataColumns : []
+                        module.customDataColumns ? module.customDataColumns : [],
+                        orgUnitsWithAccess
                     );
                 });
             }
@@ -137,6 +140,7 @@ export class ImportPrimaryFileUseCase {
                     orgUnitName,
                     moduleName,
                     period,
+                    orgUnitsWithAccess,
                     calculatedEventListFileId
                 );
             }
