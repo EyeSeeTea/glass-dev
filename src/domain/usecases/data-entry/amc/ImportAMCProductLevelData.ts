@@ -25,6 +25,8 @@ import { CODE_PRODUCT_NOT_HAVE_ATC, COMB_CODE_PRODUCT_NOT_HAVE_ATC } from "../..
 import { AMCSubstanceDataRepository } from "../../../repositories/data-entry/AMCSubstanceDataRepository";
 import { downloadIdsAndDeleteTrackedEntities } from "../utils/downloadIdsAndDeleteTrackedEntities";
 import { getStringFromFile } from "../utils/fileToString";
+import { OrgUnitAccess } from "../../../entities/User";
+import { getTEAValueFromOrganisationUnitCountryEntry } from "../utils/getTEAValueFromOrganisationUnitCountryEntry";
 
 export const AMC_PRODUCT_REGISTER_PROGRAM_ID = "G6ChA5zMW9n";
 export const AMC_RAW_PRODUCT_CONSUMPTION_STAGE_ID = "GmElQHKXLIE";
@@ -55,6 +57,7 @@ export class ImportAMCProductLevelData {
         orgUnitName: string,
         moduleName: string,
         period: string,
+        orgUnitsWithAccess: OrgUnitAccess[],
         calculatedEventListFileId?: string
     ): FutureData<ImportSummary> {
         return this.excelRepository.loadTemplate(file, AMC_PRODUCT_REGISTER_PROGRAM_ID).flatMap(_templateId => {
@@ -78,14 +81,16 @@ export class ImportAMCProductLevelData {
                             dataPackage,
                             orgUnitId,
                             orgUnitName,
-                            period
+                            period,
+                            orgUnitsWithAccess
                         ).flatMap(entities => {
                             return this.validateTEIsAndEvents(
                                 entities,
                                 orgUnitId,
                                 orgUnitName,
                                 period,
-                                AMC_PRODUCT_REGISTER_PROGRAM_ID
+                                AMC_PRODUCT_REGISTER_PROGRAM_ID,
+                                orgUnitsWithAccess
                             ).flatMap(validationResults => {
                                 if (validationResults.blockingErrors.length > 0) {
                                     const errorSummary: ImportSummary = {
@@ -163,7 +168,8 @@ export class ImportAMCProductLevelData {
         amcProductData: DataPackage,
         orgUnitId: Id,
         orgUnitName: string,
-        period: string
+        period: string,
+        orgUnitsWithAccess: OrgUnitAccess[]
     ): FutureData<D2TrackerTrackedEntity[]> {
         return this.trackerRepository
             .getProgramMetadata(AMC_PRODUCT_REGISTER_PROGRAM_ID, AMC_RAW_PRODUCT_CONSUMPTION_STAGE_ID)
@@ -193,7 +199,13 @@ export class ImportAMCProductLevelData {
                             if (attr.valueType === "BOOLEAN") {
                                 currentAttrVal = currentAttrVal?.toLowerCase() === "yes" ? "true" : "false";
                             } else if (attr.valueType === "ORGANISATION_UNIT") {
-                                currentAttrVal = currentAttribute?.value;
+                                currentAttrVal = currentAttribute
+                                    ? getTEAValueFromOrganisationUnitCountryEntry(
+                                          orgUnitsWithAccess,
+                                          currentAttribute.value,
+                                          true
+                                      )
+                                    : "";
                             }
                             return {
                                 attribute: attr.id,
@@ -287,7 +299,8 @@ export class ImportAMCProductLevelData {
         orgUnitId: string,
         orgUnitName: string,
         period: string,
-        programId: string
+        programId: string,
+        orgUnitsWithAccess: OrgUnitAccess[]
     ): FutureData<ValidationResult> {
         //1. Before running validations, add ids to tei, enrollement and event so thier relationships can be processed.
         const teisWithId = teis?.map((tei, teiIndex) => {
@@ -318,7 +331,8 @@ export class ImportAMCProductLevelData {
                 teisWithId,
                 orgUnitId,
                 orgUnitName,
-                period
+                period,
+                orgUnitsWithAccess
             ),
         }).flatMap(({ programRuleValidationResults, customRuleValidationsResults }) => {
             //4. After processing, remove ids to tei, enrollement and events so that they can be imported
