@@ -274,16 +274,26 @@ export function getNewDddData(
 }
 
 export function getAmClass(amClassData: AmClassificationData, atcCode: ATCCodeLevel5): AmName | undefined {
-    const atcAwareCode = amClassData.atc_am_mapping.find(({ ATCS }) => {
-        return ATCS.some(atc => {
+    const atcAwareCodeFullyFound = amClassData.atc_am_mapping.find(({ ATCS }) =>
+        ATCS.some(atc => atcCode === atc)
+    )?.CODE;
+
+    if (atcAwareCodeFullyFound) {
+        return amClassData.classification.find(({ CODE }) => CODE === atcAwareCodeFullyFound)?.NAME;
+    }
+
+    const atcAwareCodeFoundByPrefix = amClassData.atc_am_mapping.find(({ ATCS }) =>
+        ATCS.some(atc => {
             if (atc.endsWith("*")) {
                 const prefix = atc.slice(0, -1);
                 return atcCode.startsWith(prefix);
             }
-            return atcCode === atc;
-        });
-    })?.CODE;
-    return amClassData.classification.find(({ CODE }) => CODE === atcAwareCode)?.NAME;
+        })
+    )?.CODE;
+
+    if (atcAwareCodeFoundByPrefix) {
+        return amClassData.classification.find(({ CODE }) => CODE === atcAwareCodeFoundByPrefix)?.NAME;
+    }
 }
 
 export function getAwareClass(awareClassData: AwareClassificationData, atcCode: ATCCodeLevel5): AwrName | undefined {
