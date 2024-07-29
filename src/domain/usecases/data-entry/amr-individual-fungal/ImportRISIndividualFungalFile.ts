@@ -17,6 +17,8 @@ import { ValidationResult } from "../../../entities/program-rules/EventEffectTyp
 import { ProgramRuleValidationForBLEventProgram } from "../../program-rules-processing/ProgramRuleValidationForBLEventProgram";
 import { ProgramRulesMetadataRepository } from "../../../repositories/program-rules/ProgramRulesMetadataRepository";
 import { downloadIdsAndDeleteTrackedEntities } from "../utils/downloadIdsAndDeleteTrackedEntities";
+import { OrgUnitAccess } from "../../../entities/User";
+import { getTEAValueFromOrganisationUnitCountryEntry } from "../utils/getTEAValueFromOrganisationUnitCountryEntry";
 
 export const AMRIProgramID = "mMAj6Gofe49";
 const AMR_GLASS_AMR_TET_PATIENT = "CcgnfemKr5U";
@@ -51,7 +53,8 @@ export class ImportRISIndividualFungalFile {
               }
             | undefined,
         moduleName: string,
-        dataColumns: CustomDataColumns
+        dataColumns: CustomDataColumns,
+        orgUnitsWithAccess: OrgUnitAccess[]
     ): FutureData<ImportSummary> {
         if (action === "CREATE_AND_UPDATE") {
             return this.risIndividualFungalRepository
@@ -82,7 +85,8 @@ export class ImportRISIndividualFungalFile {
                                 AMRIProgramIDl,
                                 AMRDataProgramStageIdl(),
                                 countryCode,
-                                period
+                                period,
+                                orgUnitsWithAccess
                             ).flatMap(entities => {
                                 return this.runProgramRuleValidations(
                                     AMRIProgramIDl,
@@ -275,15 +279,31 @@ export class ImportRISIndividualFungalFile {
         AMRIProgramIDl: string,
         AMRDataProgramStageIdl: string,
         countryCode: string,
-        period: string
+        period: string,
+        orgUnitsWithAccess: OrgUnitAccess[]
     ): FutureData<D2TrackerTrackedEntity[]> {
         return this.trackerRepository.getProgramMetadata(AMRIProgramIDl, AMRDataProgramStageIdl).flatMap(metadata => {
             const trackedEntities = individualFungalDataItems.map(dataItem => {
                 const attributes: D2TrackerEnrollmentAttribute[] = metadata.programAttributes.map(
-                    (attr: { id: string; name: string; code: string }) => {
+                    (attr: { id: string; name: string; code: string; valueType: string }) => {
+                        const currentAttribute = dataItem.find(item => item.key === attr.code);
+
+                        if (attr.valueType === "ORGANISATION_UNIT" && typeof currentAttribute?.value === "string") {
+                            return {
+                                attribute: attr.id,
+                                value: currentAttribute
+                                    ? getTEAValueFromOrganisationUnitCountryEntry(
+                                          orgUnitsWithAccess,
+                                          currentAttribute.value,
+                                          true
+                                      )
+                                    : "",
+                            };
+                        }
+
                         return {
                             attribute: attr.id,
-                            value: dataItem.find(item => item.key === attr.code)?.value ?? "",
+                            value: currentAttribute?.value ?? "",
                         };
                     }
                 );
