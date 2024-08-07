@@ -1,5 +1,13 @@
 import { Maybe } from "../../../../types/utils";
-import { AmName, AwrName, SaltCode, UnitCode } from "../../GlassAtcVersionData";
+import {
+    ATCCodeLevel5,
+    ATCVersionKey,
+    AmName,
+    AwrName,
+    RouteOfAdministrationCode,
+    SaltCode,
+    UnitCode,
+} from "../../GlassAtcVersionData";
 import { Id } from "../../Ref";
 
 export type Content = {
@@ -43,8 +51,8 @@ export type ContentTonnesPerProduct = {
 
 export type RawSubstanceConsumptionCalculated = {
     AMR_GLASS_AMC_TEA_PRODUCT_ID: string;
-    atc_autocalculated: string;
-    route_admin_autocalculated: string;
+    atc_autocalculated: ATCCodeLevel5;
+    route_admin_autocalculated: RouteOfAdministrationCode;
     salt_autocalculated: SaltCode;
     year: string;
     data_status_autocalculated: number;
@@ -52,7 +60,7 @@ export type RawSubstanceConsumptionCalculated = {
     health_level_autocalculated: string;
     tons_autocalculated: number;
     packages_autocalculated: number;
-    atc_version_autocalculated: string;
+    atc_version_autocalculated: ATCVersionKey;
     ddds_autocalculated: number;
     am_class: Maybe<AmName>;
     atc2: Maybe<string>;

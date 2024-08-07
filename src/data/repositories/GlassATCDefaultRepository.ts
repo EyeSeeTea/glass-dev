@@ -1,9 +1,12 @@
 import { Future, FutureData } from "../../domain/entities/Future";
 import {
+    ATCVersionKey,
     createAtcVersionKey,
+    getYearFromAtcVersionKey,
     GlassATCHistory,
     GlassATCRecalculateDataInfo,
     GlassAtcVersionData,
+    ListGlassATCLastVersionKeysByYear,
     ListGlassATCVersions,
     UnitCode,
     UnitName,
@@ -68,6 +71,47 @@ export class GlassATCDefaultRepository implements GlassATCRepository {
                 return acc;
             }, {})
         );
+    }
+
+    @cache()
+    getLastAtcVersionKeyYear(year: string): FutureData<ATCVersionKey> {
+        return this.getAtcHistory().flatMap(atcVersionHistory => {
+            const atcHistorySortedByLastVersionOfYear = atcVersionHistory
+                .filter(atcHistory => atcHistory.year.toString() === year)
+                .sort((atcHistoryA, atcHistoryB) => atcHistoryB.version - atcHistoryA.version);
+
+            const lastVersionOfYear = atcHistorySortedByLastVersionOfYear[0];
+
+            if (!lastVersionOfYear) {
+                return Future.error(`Cannot find an ATC version for the given year in ATCs history: ${year}`);
+            }
+            const atcVersionKey = createAtcVersionKey(lastVersionOfYear.year, lastVersionOfYear.version);
+
+            return this.getAtcVersion(atcVersionKey).flatMap(atcVersionData => {
+                if (!atcVersionData) {
+                    return Future.error("Cannot find an ATC version data for the given year");
+                }
+
+                return Future.success(atcVersionKey);
+            });
+        });
+    }
+
+    @cache()
+    getListOfLastAtcVersionsKeysByYears(years: string[]): FutureData<ListGlassATCLastVersionKeysByYear> {
+        return Future.sequential(years.map(year => this.getLastAtcVersionKeyYear(year))).flatMap(atcVersionKeys => {
+            const list = atcVersionKeys.reduce((acc, atcVersionKey) => {
+                const year = getYearFromAtcVersionKey(atcVersionKey);
+                return year
+                    ? {
+                          ...acc,
+                          [year]: atcVersionKey,
+                      }
+                    : acc;
+            }, {});
+
+            return Future.success(list);
+        });
     }
 
     getRecalculateDataInfo(): FutureData<GlassATCRecalculateDataInfo | undefined> {

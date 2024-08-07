@@ -1,14 +1,21 @@
 import { Maybe } from "../../../../types/utils";
-import { AmName, AwrName, RouteOfAdministrationCode, SaltCode } from "../../GlassAtcVersionData";
+import {
+    ATCCodeLevel5,
+    ATCVersionKey,
+    AmName,
+    AwrName,
+    RouteOfAdministrationCode,
+    SaltCode,
+} from "../../GlassAtcVersionData";
 import { Id } from "../../Ref";
 
 export type SubstanceConsumptionCalculated = {
-    atc_autocalculated: string;
+    atc_autocalculated: ATCCodeLevel5;
     route_admin_autocalculated: RouteOfAdministrationCode;
     salt_autocalculated: SaltCode;
     packages_autocalculated: number;
     ddds_autocalculated: number;
-    atc_version_autocalculated: string;
+    atc_version_autocalculated: ATCVersionKey;
     tons_autocalculated: number;
     data_status_autocalculated: number;
     health_sector_autocalculated: string;

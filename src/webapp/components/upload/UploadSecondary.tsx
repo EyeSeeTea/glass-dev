@@ -75,6 +75,11 @@ export const UploadSecondary: React.FC<UploadSecondaryProps> = ({
 
                     return compositionRoot.fileSubmission.validateSecondaryFile(uploadedSample, moduleName).run(
                         sampleData => {
+                            if (!dataSubmissionId) {
+                                snackbar.error(i18n.t("Data submission id not found. Please try again"));
+                                setIsLoading(false);
+                            }
+
                             if (sampleData.isValid) {
                                 setSecondaryFile(uploadedSample);
                                 const data = {

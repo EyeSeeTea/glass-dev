@@ -44,7 +44,6 @@ function main() {
                     password: password,
                 },
             };
-
             const api = getD2ApiFromArgs(envVars);
 
             //1. Get Period for which to reset.
@@ -60,11 +59,7 @@ function main() {
             const batchId = args.batchId;
 
             //4. Set AMR-AGG dataset id.
-            const dataSetId = "CeQPmXgrhHF";
-
-            console.debug(
-                `Run AMR AGG RIS data reset for URL ${envVars.url} and period ${period} and orgUnit ${orgUnitId} and batchId ${batchId}`
-            );
+            const dataSetId = "OcAB7oaC072";
 
             try {
                 //5.Get all category combination values for given batchId
@@ -85,7 +80,7 @@ function main() {
 
                 //4. Get all data values for given country and period.
                 console.debug(
-                    `Fetching data values for AMR RIS data set for country ${orgUnitId} and period ${period}`
+                    `Fetching data values for AMR SAMPLE data set for country ${orgUnitId} and period ${period}`
                 );
                 const dataSetValues = await api.dataValues
                     .getSet({
@@ -125,9 +120,9 @@ function main() {
 
                 //5.  Create a json object with data values for given country and period with empty values
                 const updateJson = JSON.stringify(updatedDataValues, null, 2);
-                fs.writeFileSync(`AMR_AGG_reset_${orgUnitId}_${period}_${batchId}_RIS.json`, updateJson);
+                fs.writeFileSync(`AMR_AGG_reset_${orgUnitId}_${period}_${batchId}_SAMPLE.json`, updateJson);
             } catch (error) {
-                console.error(`Error thrown when resetting AMR AGG RIS data: ${error}`);
+                console.error(`Error thrown when resetting AMR AGG Sample data: ${error}`);
             }
         },
     });
