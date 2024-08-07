@@ -167,6 +167,23 @@ export class AMCSubstanceDataDefaultRepository implements AMCSubstanceDataReposi
         });
     }
 
+    deleteCalculatedSubstanceConsumptionDataById(calculatedConsumptionIds: Id[]): FutureData<TrackerPostResponse> {
+        const d2EventsCalculatedConsumption: D2TrackerEvent[] = calculatedConsumptionIds.map(eventId => {
+            return {
+                event: eventId,
+                program: "",
+                status: "COMPLETED",
+                orgUnit: "",
+                occurredAt: "",
+                attributeOptionCombo: "",
+                dataValues: [],
+            };
+        });
+        return importApiTracker(this.api, { events: d2EventsCalculatedConsumption }, "DELETE").flatMap(response => {
+            return Future.success(response);
+        });
+    }
+
     private mapSubstanceConsumptionCalculatedToD2TrackerEvent(
         substanceConsumptionCalculated: SubstanceConsumptionCalculated[],
         calculatedConsumptionDataProgram: D2Program | undefined,

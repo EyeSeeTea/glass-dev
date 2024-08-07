@@ -66,7 +66,7 @@ async function main() {
                             amcProductDataRepository,
                             amcSubstanceDataRepository,
                             atcRepository,
-                            calculate: args.calculate,
+                            allowCreationIfNotExist: args.calculate,
                         });
                     } else {
                         logger.info(`AMC recalculations are disabled`);
@@ -113,10 +113,16 @@ export async function recalculateData(params: {
     amcProductDataRepository: AMCProductDataRepository;
     amcSubstanceDataRepository: AMCSubstanceDataRepository;
     atcRepository: GlassATCRepository;
-    calculate: boolean;
+    allowCreationIfNotExist: boolean;
 }): Promise<void> {
-    const { orgUnitsIds, periods, amcProductDataRepository, amcSubstanceDataRepository, atcRepository, calculate } =
-        params;
+    const {
+        orgUnitsIds,
+        periods,
+        amcProductDataRepository,
+        amcSubstanceDataRepository,
+        atcRepository,
+        allowCreationIfNotExist,
+    } = params;
     logger.info(
         `START - Recalculating AMC data for orgnanisations ${orgUnitsIds.join(",")} and periods ${periods.join(
             ","
@@ -127,12 +133,12 @@ export async function recalculateData(params: {
         .execute()
         .toPromise();
 
-    await new RecalculateConsumptionDataProductLevelForAllUseCase(amcProductDataRepository)
-        .execute(orgUnitsIds, periods, currentATCVersion, currentATCData, calculate)
+    await new RecalculateConsumptionDataProductLevelForAllUseCase(amcProductDataRepository, amcSubstanceDataRepository)
+        .execute(orgUnitsIds, periods, currentATCVersion, currentATCData, allowCreationIfNotExist)
         .toPromise();
 
     await new RecalculateConsumptionDataSubstanceLevelForAllUseCase(amcSubstanceDataRepository, atcRepository)
-        .execute(orgUnitsIds, periods, currentATCVersion, currentATCData, calculate)
+        .execute(orgUnitsIds, periods, currentATCVersion, currentATCData, allowCreationIfNotExist)
         .toPromise();
 
     logger.success(

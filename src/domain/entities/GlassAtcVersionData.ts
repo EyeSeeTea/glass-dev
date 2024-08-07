@@ -19,6 +19,8 @@ export const DEFAULT_SALT_CODE = "XXXX";
 export const CODE_PRODUCT_NOT_HAVE_ATC = "Z99ZZ99";
 export const COMB_CODE_PRODUCT_NOT_HAVE_ATC = "Z99ZZ99_99";
 
+export type ATCVersionKey = string;
+
 export type ATCCodeLevel5 = string;
 
 export type RouteOfAdministrationCode = string;
@@ -185,15 +187,22 @@ export type GlassAtcVersionData = AtcDddIndexData & {
     aware_classification: AwareClassificationData;
 };
 
-export type ListGlassATCVersions = Record<string, GlassAtcVersionData>;
+export type ListGlassATCVersions = Record<ATCVersionKey, GlassAtcVersionData>;
 
-export function validateAtcVersion(atcVersionKey: string): boolean {
+export type ListGlassATCLastVersionKeysByYear = Record<string, ATCVersionKey>;
+
+export function validateAtcVersion(atcVersionKey: ATCVersionKey): boolean {
     const pattern = /^ATC-\d{4}-v\d+$/;
     return pattern.test(atcVersionKey);
 }
 
-export function createAtcVersionKey(year: number, version: number): string {
+export function createAtcVersionKey(year: number, version: number): ATCVersionKey {
     return `ATC-${year.toString()}-v${version.toString()}`;
+}
+
+export function getYearFromAtcVersionKey(key: ATCVersionKey): number | undefined {
+    const year = key.split("-")[1];
+    if (year) return parseInt(year);
 }
 
 export function getDDDChanges(changesData: ATCAndDDDChangesData[]): DDDChangesData[] {
@@ -265,16 +274,26 @@ export function getNewDddData(
 }
 
 export function getAmClass(amClassData: AmClassificationData, atcCode: ATCCodeLevel5): AmName | undefined {
-    const atcAwareCode = amClassData.atc_am_mapping.find(({ ATCS }) => {
-        return ATCS.some(atc => {
+    const atcAwareCodeFullyFound = amClassData.atc_am_mapping.find(({ ATCS }) =>
+        ATCS.some(atc => atcCode === atc)
+    )?.CODE;
+
+    if (atcAwareCodeFullyFound) {
+        return amClassData.classification.find(({ CODE }) => CODE === atcAwareCodeFullyFound)?.NAME;
+    }
+
+    const atcAwareCodeFoundByPrefix = amClassData.atc_am_mapping.find(({ ATCS }) =>
+        ATCS.some(atc => {
             if (atc.endsWith("*")) {
                 const prefix = atc.slice(0, -1);
                 return atcCode.startsWith(prefix);
             }
-            return atcCode === atc;
-        });
-    })?.CODE;
-    return amClassData.classification.find(({ CODE }) => CODE === atcAwareCode)?.NAME;
+        })
+    )?.CODE;
+
+    if (atcAwareCodeFoundByPrefix) {
+        return amClassData.classification.find(({ CODE }) => CODE === atcAwareCodeFoundByPrefix)?.NAME;
+    }
 }
 
 export function getAwareClass(awareClassData: AwareClassificationData, atcCode: ATCCodeLevel5): AwrName | undefined {

@@ -12,7 +12,6 @@ import { Id } from "../../../entities/Ref";
 import { D2TrackerTrackedEntity } from "@eyeseetea/d2-api/api/trackerTrackedEntities";
 import { D2TrackerEnrollment, D2TrackerEnrollmentAttribute } from "@eyeseetea/d2-api/api/trackerEnrollments";
 import { D2TrackerEvent } from "@eyeseetea/d2-api/api/trackerEvents";
-import { getStringFromFile } from "../utils/fileToString";
 import { mapToImportSummary, readTemplate, uploadIdListFileAndSave } from "../ImportBLTemplateEventProgram";
 import { MetadataRepository } from "../../../repositories/MetadataRepository";
 import { ValidationResult } from "../../../entities/program-rules/EventEffectTypes";
@@ -23,6 +22,11 @@ import { GlassATCDefaultRepository } from "../../../../data/repositories/GlassAT
 import moment from "moment";
 import { AMCProductDataRepository } from "../../../repositories/data-entry/AMCProductDataRepository";
 import { CODE_PRODUCT_NOT_HAVE_ATC, COMB_CODE_PRODUCT_NOT_HAVE_ATC } from "../../../entities/GlassAtcVersionData";
+import { AMCSubstanceDataRepository } from "../../../repositories/data-entry/AMCSubstanceDataRepository";
+import { downloadIdsAndDeleteTrackedEntities } from "../utils/downloadIdsAndDeleteTrackedEntities";
+import { getStringFromFile } from "../utils/fileToString";
+import { OrgUnitAccess } from "../../../entities/User";
+import { getTEAValueFromOrganisationUnitCountryEntry } from "../utils/getTEAValueFromOrganisationUnitCountryEntry";
 
 export const AMC_PRODUCT_REGISTER_PROGRAM_ID = "G6ChA5zMW9n";
 export const AMC_RAW_PRODUCT_CONSUMPTION_STAGE_ID = "GmElQHKXLIE";
@@ -41,7 +45,8 @@ export class ImportAMCProductLevelData {
         private metadataRepository: MetadataRepository,
         private programRulesMetadataRepository: ProgramRulesMetadataRepository,
         private atcRepository: GlassATCDefaultRepository,
-        private amcProductRepository: AMCProductDataRepository
+        private amcProductRepository: AMCProductDataRepository,
+        private amcSubstanceDataRepository: AMCSubstanceDataRepository
     ) {}
 
     public importAMCProductFile(
@@ -51,7 +56,9 @@ export class ImportAMCProductLevelData {
         orgUnitId: string,
         orgUnitName: string,
         moduleName: string,
-        period: string
+        period: string,
+        orgUnitsWithAccess: OrgUnitAccess[],
+        calculatedEventListFileId?: string
     ): FutureData<ImportSummary> {
         return this.excelRepository.loadTemplate(file, AMC_PRODUCT_REGISTER_PROGRAM_ID).flatMap(_templateId => {
             const amcTemplate = _.values(templates)
@@ -74,14 +81,16 @@ export class ImportAMCProductLevelData {
                             dataPackage,
                             orgUnitId,
                             orgUnitName,
-                            period
+                            period,
+                            orgUnitsWithAccess
                         ).flatMap(entities => {
                             return this.validateTEIsAndEvents(
                                 entities,
                                 orgUnitId,
                                 orgUnitName,
                                 period,
-                                AMC_PRODUCT_REGISTER_PROGRAM_ID
+                                AMC_PRODUCT_REGISTER_PROGRAM_ID,
+                                orgUnitsWithAccess
                             ).flatMap(validationResults => {
                                 if (validationResults.blockingErrors.length > 0) {
                                     const errorSummary: ImportSummary = {
@@ -130,12 +139,25 @@ export class ImportAMCProductLevelData {
                         return downloadIdsAndDeleteTrackedEntities(
                             eventListId,
                             orgUnitId,
-                            action,
+                            "DELETE",
                             AMR_GLASS_AMC_TET_PRODUCT_REGISTER,
                             this.glassDocumentsRepository,
                             this.trackerRepository,
                             this.metadataRepository
-                        );
+                        ).flatMap(deleteProductSummary => {
+                            if (
+                                (deleteProductSummary.status === "SUCCESS" ||
+                                    deleteProductSummary.status === "WARNING") &&
+                                calculatedEventListFileId
+                            ) {
+                                return this.deleteCalculatedSubstanceConsumptionData(
+                                    deleteProductSummary,
+                                    calculatedEventListFileId
+                                );
+                            }
+
+                            return Future.success(deleteProductSummary);
+                        });
                     }
                 });
             });
@@ -146,7 +168,8 @@ export class ImportAMCProductLevelData {
         amcProductData: DataPackage,
         orgUnitId: Id,
         orgUnitName: string,
-        period: string
+        period: string,
+        orgUnitsWithAccess: OrgUnitAccess[]
     ): FutureData<D2TrackerTrackedEntity[]> {
         return this.trackerRepository
             .getProgramMetadata(AMC_PRODUCT_REGISTER_PROGRAM_ID, AMC_RAW_PRODUCT_CONSUMPTION_STAGE_ID)
@@ -176,7 +199,13 @@ export class ImportAMCProductLevelData {
                             if (attr.valueType === "BOOLEAN") {
                                 currentAttrVal = currentAttrVal?.toLowerCase() === "yes" ? "true" : "false";
                             } else if (attr.valueType === "ORGANISATION_UNIT") {
-                                currentAttrVal = currentAttribute?.value;
+                                currentAttrVal = currentAttribute
+                                    ? getTEAValueFromOrganisationUnitCountryEntry(
+                                          orgUnitsWithAccess,
+                                          currentAttribute.value,
+                                          true
+                                      )
+                                    : "";
                             }
                             return {
                                 attribute: attr.id,
@@ -270,7 +299,8 @@ export class ImportAMCProductLevelData {
         orgUnitId: string,
         orgUnitName: string,
         period: string,
-        programId: string
+        programId: string,
+        orgUnitsWithAccess: OrgUnitAccess[]
     ): FutureData<ValidationResult> {
         //1. Before running validations, add ids to tei, enrollement and event so thier relationships can be processed.
         const teisWithId = teis?.map((tei, teiIndex) => {
@@ -301,7 +331,8 @@ export class ImportAMCProductLevelData {
                 teisWithId,
                 orgUnitId,
                 orgUnitName,
-                period
+                period,
+                orgUnitsWithAccess
             ),
         }).flatMap(({ programRuleValidationResults, customRuleValidationsResults }) => {
             //4. After processing, remove ids to tei, enrollement and events so that they can be imported
@@ -335,50 +366,52 @@ export class ImportAMCProductLevelData {
             return Future.success(consolidatedValidationResults);
         });
     }
-}
-export const downloadIdsAndDeleteTrackedEntities = (
-    eventListId: string | undefined,
-    orgUnitId: string,
-    action: ImportStrategy,
-    trackedEntityType: string,
-    glassDocumentsRepository: GlassDocumentsRepository,
-    trackerRepository: TrackerRepository,
-    metadataRepository: MetadataRepository
-): FutureData<ImportSummary> => {
-    if (eventListId) {
-        return glassDocumentsRepository.download(eventListId).flatMap(file => {
-            return Future.fromPromise(getStringFromFile(file)).flatMap(_enrollments => {
-                const enrollmemtIdList: [] = JSON.parse(_enrollments);
-                const trackedEntities = enrollmemtIdList.map(id => {
-                    const trackedEntity: D2TrackerTrackedEntity = {
-                        orgUnit: orgUnitId,
-                        trackedEntity: id,
-                        trackedEntityType: trackedEntityType,
-                    };
-                    return trackedEntity;
-                });
-                return trackerRepository.import({ trackedEntities: trackedEntities }, action).flatMap(response => {
-                    return mapToImportSummary(response, "trackedEntity", metadataRepository).flatMap(
-                        ({ importSummary }) => {
-                            return Future.success(importSummary);
-                        }
-                    );
+
+    private deleteCalculatedSubstanceConsumptionData(
+        deleteProductSummary: ImportSummary,
+        calculatedSubstanceConsumptionListFileId: string
+    ) {
+        return this.glassDocumentsRepository
+            .download(calculatedSubstanceConsumptionListFileId)
+            .flatMap(eventListFile => {
+                return Future.fromPromise(getStringFromFile(eventListFile)).flatMap(_events => {
+                    const calculatedConsumptionIds: string[] = JSON.parse(_events);
+                    return this.amcSubstanceDataRepository
+                        .deleteCalculatedSubstanceConsumptionDataById(calculatedConsumptionIds)
+                        .flatMap(deleteCalculatedSubstanceConsumptionResponse => {
+                            return mapToImportSummary(
+                                deleteCalculatedSubstanceConsumptionResponse,
+                                "event",
+                                this.metadataRepository
+                            ).flatMap(deleteCalculatedSubstanceConsumptionSummary => {
+                                return Future.success({
+                                    ...deleteCalculatedSubstanceConsumptionSummary.importSummary,
+                                    importCount: {
+                                        imported:
+                                            deleteCalculatedSubstanceConsumptionSummary.importSummary.importCount
+                                                .imported + deleteProductSummary.importCount.imported,
+                                        updated:
+                                            deleteCalculatedSubstanceConsumptionSummary.importSummary.importCount
+                                                .updated + deleteProductSummary.importCount.updated,
+                                        ignored:
+                                            deleteCalculatedSubstanceConsumptionSummary.importSummary.importCount
+                                                .ignored + deleteProductSummary.importCount.ignored,
+                                        deleted:
+                                            deleteCalculatedSubstanceConsumptionSummary.importSummary.importCount
+                                                .deleted + deleteProductSummary.importCount.deleted,
+                                    },
+                                    nonBlockingErrors: [
+                                        ...deleteCalculatedSubstanceConsumptionSummary.importSummary.nonBlockingErrors,
+                                        ...deleteProductSummary.nonBlockingErrors,
+                                    ],
+                                    blockingErrors: [
+                                        ...deleteCalculatedSubstanceConsumptionSummary.importSummary.blockingErrors,
+                                        ...deleteProductSummary.blockingErrors,
+                                    ],
+                                });
+                            });
+                        });
                 });
             });
-        });
-    } else {
-        //No enrollments were created during import, so no events to delete.
-        const summary: ImportSummary = {
-            status: "SUCCESS",
-            importCount: {
-                ignored: 0,
-                imported: 0,
-                deleted: 0,
-                updated: 0,
-            },
-            nonBlockingErrors: [],
-            blockingErrors: [],
-        };
-        return Future.success(summary);
     }
-};
+}

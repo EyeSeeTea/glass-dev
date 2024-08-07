@@ -187,7 +187,9 @@ export function getCompositionRoot(instance: Instance) {
                 instanceRepository,
                 programRulesMetadataDefaultRepository,
                 atcRepository,
-                amcProductDataRepository
+                amcProductDataRepository,
+                amcSubstanceDataRepository,
+                glassAtcRepository
             ),
             validatePrimaryFile: new ValidatePrimaryFileUseCase(
                 risDataRepository,
@@ -205,7 +207,8 @@ export function getCompositionRoot(instance: Instance) {
                 glassDocumentsRepository,
                 glassUploadsRepository,
                 dhis2EventsDefaultRepository,
-                programRulesMetadataDefaultRepository
+                programRulesMetadataDefaultRepository,
+                glassAtcRepository
             ),
             validateSecondaryFile: new ValidateSampleFileUseCase(
                 sampleDataRepository,
@@ -277,7 +280,10 @@ export function getCompositionRoot(instance: Instance) {
                 amcProductDataRepository,
                 glassAtcRepository,
                 metadataRepository,
-                glassModuleRepository
+                glassModuleRepository,
+                amcSubstanceDataRepository,
+                glassUploadsRepository,
+                glassDocumentsRepository
             ),
             consumptionDataSubstanceLevel: new CalculateConsumptionDataSubstanceLevelUseCase(
                 glassUploadsRepository,

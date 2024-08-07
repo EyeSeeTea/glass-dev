@@ -20,6 +20,8 @@ import { ImportAMCProductLevelData } from "./amc/ImportAMCProductLevelData";
 import { InstanceDefaultRepository } from "../../../data/repositories/InstanceDefaultRepository";
 import { GlassATCDefaultRepository } from "../../../data/repositories/GlassATCDefaultRepository";
 import { AMCProductDataRepository } from "../../repositories/data-entry/AMCProductDataRepository";
+import { AMCSubstanceDataRepository } from "../../repositories/data-entry/AMCSubstanceDataRepository";
+import { OrgUnitAccess } from "../../entities/User";
 
 export class ImportPrimaryFileUseCase {
     constructor(
@@ -37,7 +39,9 @@ export class ImportPrimaryFileUseCase {
         private instanceRepository: InstanceDefaultRepository,
         private programRulesMetadataRepository: ProgramRulesMetadataRepository,
         private atcRepository: GlassATCDefaultRepository,
-        private amcProductRepository: AMCProductDataRepository
+        private amcProductRepository: AMCProductDataRepository,
+        private amcSubstanceDataRepository: AMCSubstanceDataRepository,
+        private glassAtcRepository: GlassATCDefaultRepository
     ) {}
 
     public execute(
@@ -50,7 +54,9 @@ export class ImportPrimaryFileUseCase {
         orgUnitName: string,
         countryCode: string,
         dryRun: boolean,
-        eventListId: string | undefined
+        eventListId: string | undefined,
+        orgUnitsWithAccess: OrgUnitAccess[],
+        calculatedEventListFileId?: string
     ): FutureData<ImportSummary> {
         switch (moduleName) {
             case "AMR": {
@@ -71,7 +77,8 @@ export class ImportPrimaryFileUseCase {
                     this.glassUploadsRepository,
                     this.programRulesMetadataRepository,
                     this.metadataRepository,
-                    this.instanceRepository
+                    this.instanceRepository,
+                    this.glassAtcRepository
                 );
 
                 return importEGASPFile.importEGASPFile(
@@ -105,7 +112,8 @@ export class ImportPrimaryFileUseCase {
                         eventListId,
                         module.programs !== undefined ? module.programs.at(0) : undefined,
                         module.name,
-                        module.customDataColumns ? module.customDataColumns : []
+                        module.customDataColumns ? module.customDataColumns : [],
+                        orgUnitsWithAccess
                     );
                 });
             }
@@ -120,7 +128,8 @@ export class ImportPrimaryFileUseCase {
                     this.metadataRepository,
                     this.programRulesMetadataRepository,
                     this.atcRepository,
-                    this.amcProductRepository
+                    this.amcProductRepository,
+                    this.amcSubstanceDataRepository
                 );
 
                 return importAMCProductFile.importAMCProductFile(
@@ -130,7 +139,9 @@ export class ImportPrimaryFileUseCase {
                     orgUnitId,
                     orgUnitName,
                     moduleName,
-                    period
+                    period,
+                    orgUnitsWithAccess,
+                    calculatedEventListFileId
                 );
             }
             default: {

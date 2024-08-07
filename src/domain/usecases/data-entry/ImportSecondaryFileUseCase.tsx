@@ -13,6 +13,7 @@ import { GlassDocumentsDefaultRepository } from "../../../data/repositories/Glas
 import { GlassUploadsRepository } from "../../repositories/GlassUploadsRepository";
 import { Dhis2EventsDefaultRepository } from "../../../data/repositories/Dhis2EventsDefaultRepository";
 import { ProgramRulesMetadataRepository } from "../../repositories/program-rules/ProgramRulesMetadataRepository";
+import { GlassATCDefaultRepository } from "../../../data/repositories/GlassATCDefaultRepository";
 
 export class ImportSecondaryFileUseCase implements UseCase {
     constructor(
@@ -24,7 +25,8 @@ export class ImportSecondaryFileUseCase implements UseCase {
         private glassDocumentsRepository: GlassDocumentsDefaultRepository,
         private glassUploadsRepository: GlassUploadsRepository,
         private dhis2EventsDefaultRepository: Dhis2EventsDefaultRepository,
-        private programRulesMetadataRepository: ProgramRulesMetadataRepository
+        private programRulesMetadataRepository: ProgramRulesMetadataRepository,
+        private glassAtcRepository: GlassATCDefaultRepository
     ) {}
 
     public execute(
@@ -59,7 +61,8 @@ export class ImportSecondaryFileUseCase implements UseCase {
                     this.glassUploadsRepository,
                     this.dhis2EventsDefaultRepository,
                     this.metadataRepository,
-                    this.programRulesMetadataRepository
+                    this.programRulesMetadataRepository,
+                    this.glassAtcRepository
                 );
                 return importRawSubstanceData.import(
                     inputFile,

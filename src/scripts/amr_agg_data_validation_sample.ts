@@ -5,7 +5,6 @@ import { DataStoreClient } from "../data/data-store/DataStoreClient";
 import { getD2ApiFromArgs, getInstance } from "./common";
 import { DataStoreKeys } from "../data/data-store/DataStoreKeys";
 import { GlassUploads } from "../domain/entities/GlassUploads";
-import "dotenv/config";
 
 function main() {
     const cmd = command({
@@ -46,7 +45,7 @@ function main() {
             //1. Initialize all periods
             const periods = args.period ? [args.period] : ["2022", "2023"];
 
-            console.debug(`Run AMR AGG RIS data validation for URL ${envVars.url} and periods ${periods}`);
+            console.debug(`Run AMR AGG SAMPLE data validation for URL ${envVars.url} and periods ${periods}`);
 
             try {
                 //2. Get all countries i.e org units of level 3.
@@ -75,16 +74,16 @@ function main() {
                 const batchIds = ["DS1", "DS2", "DS3", "DS4", "DS5", "DS6"];
 
                 //4. Get all data values for all countries and all periods
-                console.debug(`Fetching all data values for AMR RIS data set for all countries and periods`);
+                console.debug(`Fetching all data values for AMR SAMPLE data set for all countries and periods`);
                 const dataSetValues = await api.dataValues
                     .getSet({
-                        dataSet: ["CeQPmXgrhHF"],
+                        dataSet: ["OcAB7oaC072"],
                         orgUnit: orgUnits.objects.map(ou => ou.id),
                         period: periods,
                     })
                     .getData()
                     .catch(error => {
-                        console.error(`Error thrown when fetching data values for AMR RIS data set : ${error}`);
+                        console.error(`Error thrown when fetching data values for AMR SAMPLE data set : ${error}`);
                         throw error;
                     });
 
@@ -116,7 +115,7 @@ function main() {
                 );
                 const allBatchIdCategoryCombos = allBatchIdCC.flat();
 
-                console.debug(`Fetching all datastore values for RIS Uploads`);
+                console.debug(`Fetching all datastore values for SAMPLE Uploads`);
                 const allUploads = await dataStoreClient
                     .listCollection<GlassUploads>(DataStoreKeys.UPLOADS)
                     .toPromise()
@@ -136,14 +135,14 @@ function main() {
                                 const country = orgUnits.objects.find(ou => ou.id === orgUnitKey)?.name;
 
                                 const dataValuesByBatch = batchIds.map(async batchId => {
-                                    //8. Get uploads for period, OU and batchId from datastore
+                                    //8. Get upload for period, OU and batchId
                                     const upload = allUploads.filter(
                                         upload =>
                                             upload.module === "AVnpk4xiXGG" &&
                                             upload.orgUnit === orgUnitKey &&
                                             upload.period === periodKey &&
                                             upload.batchId === batchId &&
-                                            upload.fileType === "RIS"
+                                            upload.fileType === "SAMPLE"
                                     );
 
                                     const currentBatchCC = allBatchIdCategoryCombos.filter(
@@ -186,7 +185,7 @@ function main() {
                 );
                 console.debug(`All uploads with data corruption : ${JSON.stringify(corruptedAmrData, null, 2)}`);
             } catch (error) {
-                console.error(`Error thrown when validating AMR AGG RIS data: ${error}`);
+                console.error(`Error thrown when validating AMR AGG Sample data: ${error}`);
             }
         },
     });
