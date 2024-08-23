@@ -3,7 +3,12 @@ import { Box, FormControl, MenuItem, Select, Typography, InputLabel, withStyles,
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import { Dispatch, SetStateAction, useMemo } from "react";
-import { getLastNYears, getLastNYearsQuarters } from "../../../utils/currentPeriodHelper";
+import {
+    getCurrentYear,
+    getLastNYears,
+    getLastNYearsQuarters,
+    getRangeOfYears,
+} from "../../../utils/currentPeriodHelper";
 import { useCurrentModuleContext } from "../../contexts/current-module-context";
 import { useAppContext } from "../../contexts/app-context";
 
@@ -86,12 +91,18 @@ export const Filter: React.FC<FilterProps> = ({ year, setYear, status, setStatus
             return [...quarters, { label: "All", value: "All" }];
         } else {
             const addCurrentYear = currentModuleAccess.populateCurrentYearInHistory;
-            const years = getLastNYears(addCurrentYear).map(year => ({ label: year, value: year }));
-            return [...years, { label: "All", value: "All" }];
+            const years = currentModuleAccess.startPeriod
+                ? getRangeOfYears(
+                      addCurrentYear ? getCurrentYear() : getCurrentYear() - 1,
+                      currentModuleAccess.startPeriod
+                  )
+                : getLastNYears(addCurrentYear);
+            return [...years.map(year => ({ label: year, value: year })), { label: "All", value: "All" }];
         }
     }, [
         currentModuleAccess.moduleName,
         currentModuleAccess.populateCurrentYearInHistory,
+        currentModuleAccess.startPeriod,
         currentUser.quarterlyPeriodModules,
     ]);
 
