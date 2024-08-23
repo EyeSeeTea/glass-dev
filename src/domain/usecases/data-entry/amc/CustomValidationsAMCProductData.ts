@@ -6,7 +6,7 @@ import { D2TrackerTrackedEntity } from "@eyeseetea/d2-api/api/trackerTrackedEnti
 import { GlassATCDefaultRepository } from "../../../../data/repositories/GlassATCDefaultRepository";
 import { GlassAtcVersionData, LAST_ATC_CODE_LEVEL, getAtcCodeByLevel } from "../../../entities/GlassAtcVersionData";
 import { AMCProductDataRepository } from "../../../repositories/data-entry/AMCProductDataRepository";
-import { OrgUnitAccess } from "../../../entities/User";
+import { Country } from "../../../entities/Country";
 
 const AMR_GLASS_AMC_TEA_ATC = "aK1JpD14imM";
 const AMR_GLASS_AMC_TEA_COMBINATION = "mG49egdYK3G";
@@ -34,7 +34,7 @@ export class CustomValidationsAMCProductData {
         orgUnitId: string,
         orgUnitName: string,
         period: string,
-        orgUnitsWithAccess: OrgUnitAccess[]
+        allCountries: Country[]
     ): FutureData<ValidationResult> {
         return this.atcRepository.getCurrentAtcVersion().flatMap(atcVersion => {
             return this.amcProductRepository
@@ -47,7 +47,7 @@ export class CustomValidationsAMCProductData {
                         orgUnitName,
                         period,
                         atcVersion,
-                        orgUnitsWithAccess
+                        allCountries
                     );
 
                     const dateErrors = this.checkSameEnrollmentDate(teis);
@@ -115,7 +115,7 @@ export class CustomValidationsAMCProductData {
         countryName: string,
         period: string,
         atcVersion: GlassAtcVersionData,
-        orgUnitsWithAccess: OrgUnitAccess[]
+        allCountries: Country[]
     ): ConsistencyError[] {
         const errors = _(
             teis.map(tei => {
@@ -256,9 +256,7 @@ export class CustomValidationsAMCProductData {
                     }
                 }
 
-                const productManufacturerCountry = orgUnitsWithAccess.find(
-                    orgUnit => orgUnit.orgUnitId === manufacturerCountryId
-                );
+                const productManufacturerCountry = allCountries.find(country => country.id === manufacturerCountryId);
 
                 if (manufacturerCountryId && !productManufacturerCountry) {
                     curErrors.push({

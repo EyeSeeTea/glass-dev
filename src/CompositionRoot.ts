@@ -91,6 +91,8 @@ import { GetMultipleDashboardUseCase } from "./domain/usecases/GetMultipleDashbo
 import { DownloadAllDataButtonData } from "./domain/usecases/DownloadAllDataButtonData";
 import { DownloadEmptyTemplateUseCase } from "./domain/usecases/DownloadEmptyTemplateUseCase";
 import { DownloadPopulatedTemplateUseCase } from "./domain/usecases/DownloadPopulatedTemplateUseCase";
+import { CountryDefaultRepository } from "./data/repositories/CountryDefaultRepository";
+import { GetAllCountriesUseCase } from "./domain/usecases/GetAllCountriesUseCase";
 
 export function getCompositionRoot(instance: Instance) {
     const api = getD2APiFromInstance(instance);
@@ -127,6 +129,7 @@ export function getCompositionRoot(instance: Instance) {
     const glassAtcRepository = new GlassATCDefaultRepository(dataStoreClient);
     const atcRepository = new GlassATCDefaultRepository(dataStoreClient);
     const eventVisualizationRepository = new EventVisualizationAnalyticsDefaultRepository(api);
+    const countryRepository = new CountryDefaultRepository(api);
 
     return {
         instance: getExecute({
@@ -243,6 +246,7 @@ export function getCompositionRoot(instance: Instance) {
         }),
         countries: getExecute({
             getInformation: new GetCountryInformationUseCase(countryInformationRepository),
+            getAll: new GetAllCountriesUseCase(countryRepository),
         }),
         glassDashboard: getExecute({
             getDashboard: new GetDashboardUseCase(glassModuleRepository),
