@@ -1,13 +1,13 @@
-import { OrgUnitAccess } from "../../../entities/User";
+import { Country } from "../../../entities/Country";
 
 export function getTEAValueFromOrganisationUnitCountryEntry(
-    orgUnitsWithAccess: OrgUnitAccess[],
+    allCountries: Country[],
     attributeValue: string,
     useCode: boolean
 ): string {
     return (
-        orgUnitsWithAccess.find(orgUnit => {
-            return useCode ? orgUnit.orgUnitCode === attributeValue : orgUnit.orgUnitName === attributeValue;
-        })?.orgUnitId || attributeValue
+        allCountries.find(country => {
+            return useCode ? country.code === attributeValue : country.name === attributeValue;
+        })?.id || attributeValue
     );
 }
