@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: i18next-conv\n"
-"POT-Creation-Date: 2024-07-26T10:31:32.732Z\n"
+"POT-Creation-Date: 2024-08-07T18:05:19.338Z\n"
 "PO-Revision-Date: 2018-10-25T09:02:35.143Z\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -171,6 +171,9 @@ msgstr ""
 
 msgid ""
 "You can add up to 6 datasets to this submission with different BATCH IDS."
+msgstr ""
+
+msgid "Validated Uploads, Review to complete"
 msgstr ""
 
 msgid "Uploads with errors, or discarded"
@@ -361,7 +364,16 @@ msgstr ""
 msgid "Delete"
 msgstr ""
 
+msgid "Complete"
+msgstr ""
+
+msgid "Failed to set completed status"
+msgstr ""
+
 msgid "Deleting Files"
+msgstr ""
+
+msgid "Loading"
 msgstr ""
 
 msgid "This might take several minutes, do not refresh the page or press back."
@@ -608,9 +620,6 @@ msgid "Error fetching previous uploads."
 msgstr ""
 
 msgid "Choose a Dataset"
-msgstr ""
-
-msgid "Loading"
 msgstr ""
 
 msgid "Choose file type"

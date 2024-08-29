@@ -14,10 +14,17 @@ export interface UploadsTableProps {
     items?: UploadsDataItem[];
     className?: string;
     refreshUploads: React.Dispatch<React.SetStateAction<{}>>;
+    showComplete?: boolean;
 }
 
 // TODO: replace Table with MUI Datagrid
-export const UploadsTable: React.FC<UploadsTableProps> = ({ title, items, className, refreshUploads }) => {
+export const UploadsTable: React.FC<UploadsTableProps> = ({
+    title,
+    items,
+    className,
+    refreshUploads,
+    showComplete,
+}) => {
     const { currentModuleAccess } = useCurrentModuleContext();
     return (
         <ContentWrapper className={className}>
@@ -75,10 +82,11 @@ export const UploadsTable: React.FC<UploadsTableProps> = ({ title, items, classN
                             </TableCell>
                             <TableCell>{i18n.t("Download File")}</TableCell>
                             <TableCell>{i18n.t("Delete")}</TableCell>
+                            {showComplete && <TableCell>{i18n.t("Complete")}</TableCell>}
                         </TableRow>
                     </TableHead>
 
-                    <UploadsTableBody rows={items} refreshUploads={refreshUploads} />
+                    <UploadsTableBody rows={items} refreshUploads={refreshUploads} showComplete={showComplete} />
                 </Table>
             </TableContainer>
         </ContentWrapper>

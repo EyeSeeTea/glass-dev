@@ -94,7 +94,7 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
     isLoadingSecondary,
     setIsLoadingSecondary,
 }) => {
-    const { compositionRoot, currentUser } = useAppContext();
+    const { compositionRoot, allCountries } = useAppContext();
     const snackbar = useSnackbar();
     const [isValidated, setIsValidated] = useState(false);
     const [isPrimaryFileValid, setIsPrimaryFileValid] = useState(false);
@@ -238,7 +238,7 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
                     orgUnitCode,
                     true,
                     "",
-                    currentUser.userOrgUnitsAccess
+                    allCountries
                 ),
                 importSecondaryFileSummary: secondaryFile
                     ? compositionRoot.fileSubmission.secondaryFile(
@@ -377,7 +377,7 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
         orgUnitId,
         orgUnitName,
         orgUnitCode,
-        currentUser.userOrgUnitsAccess,
+        allCountries,
         setPrimaryFileImportSummary,
         changeStep,
         setSecondaryFileImportSummary,
