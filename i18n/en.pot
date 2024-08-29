@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2024-07-26T10:31:32.732Z\n"
-"PO-Revision-Date: 2024-07-26T10:31:32.732Z\n"
+"POT-Creation-Date: 2024-08-07T18:05:19.338Z\n"
+"PO-Revision-Date: 2024-08-07T18:05:19.338Z\n"
 
 msgid "Template {{id}} not loaded"
 msgstr ""
@@ -170,6 +170,9 @@ msgid "Add New Datasets"
 msgstr ""
 
 msgid "You can add up to 6 datasets to this submission with different BATCH IDS."
+msgstr ""
+
+msgid "Validated Uploads, Review to complete"
 msgstr ""
 
 msgid "Uploads with errors, or discarded"
@@ -359,7 +362,16 @@ msgstr ""
 msgid "Delete"
 msgstr ""
 
+msgid "Complete"
+msgstr ""
+
+msgid "Failed to set completed status"
+msgstr ""
+
 msgid "Deleting Files"
+msgstr ""
+
+msgid "Loading"
 msgstr ""
 
 msgid "This might take several minutes, do not refresh the page or press back."
@@ -606,9 +618,6 @@ msgid "Error fetching previous uploads."
 msgstr ""
 
 msgid "Choose a Dataset"
-msgstr ""
-
-msgid "Loading"
 msgstr ""
 
 msgid "Choose file type"

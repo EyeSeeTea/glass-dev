@@ -166,7 +166,7 @@ export const moduleProperties = new Map<string, ModuleDetails>([
         {
             isbatchReq: false,
             isQuestionnaireReq: true,
-            completeStatusChange: "DATASET",
+            completeStatusChange: "QUESTIONNAIRE",
             isSecondaryFileApplicable: false,
             isDryRunReq: false,
             importLoadingMsg: {
