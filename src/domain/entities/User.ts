@@ -22,6 +22,7 @@ export interface ModuleAccess {
     captureAccess: boolean;
     usergroups: UserGroup[];
     populateCurrentYearInHistory: boolean;
+    startPeriod?: number;
 }
 
 export interface UserAccessInfo {

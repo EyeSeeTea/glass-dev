@@ -3,7 +3,12 @@ import { useAppContext } from "../../../contexts/app-context";
 import { useCurrentOrgUnitContext } from "../../../contexts/current-orgUnit-context";
 import { useCurrentModuleContext } from "../../../contexts/current-module-context";
 import { useGlassDataSubmissionsByModuleAndOU } from "../../../hooks/useGlassDataSubmissionsByModuleAndOU";
-import { getLastNYears, getLastNYearsQuarters } from "../../../../utils/currentPeriodHelper";
+import {
+    getCurrentYear,
+    getLastNYears,
+    getLastNYearsQuarters,
+    getRangeOfYears,
+} from "../../../../utils/currentPeriodHelper";
 
 export function usePopulateDataSubmissionHistory() {
     const { compositionRoot } = useAppContext();
@@ -31,11 +36,22 @@ export function usePopulateDataSubmissionHistory() {
             } else {
                 //Check if Data Submissions history is populated
                 const addCurrentYear = currentModuleAccess.populateCurrentYearInHistory;
-                getLastNYears(addCurrentYear).forEach(year => {
-                    if (!dataSubmissions.data.find(ds => ds.period === year)) {
-                        years.push(year);
-                    }
-                });
+                if (currentModuleAccess.startPeriod) {
+                    const maxYear = addCurrentYear ? getCurrentYear() : getCurrentYear() - 1;
+                    const minYear = currentModuleAccess.startPeriod;
+
+                    getRangeOfYears(maxYear, minYear).forEach(year => {
+                        if (!dataSubmissions.data.find(ds => ds.period === year)) {
+                            years.push(year);
+                        }
+                    });
+                } else {
+                    getLastNYears(addCurrentYear).forEach(year => {
+                        if (!dataSubmissions.data.find(ds => ds.period === year)) {
+                            years.push(year);
+                        }
+                    });
+                }
             }
 
             if (years.length && currentModuleAccess.moduleId !== "" && currentOrgUnitAccess.orgUnitId !== "") {
@@ -55,6 +71,7 @@ export function usePopulateDataSubmissionHistory() {
         }
     }, [
         compositionRoot.glassDataSubmission,
+        currentModuleAccess,
         currentModuleAccess.moduleId,
         currentModuleAccess.moduleName,
         currentModuleAccess.populateCurrentYearInHistory,

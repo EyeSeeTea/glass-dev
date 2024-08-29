@@ -50,3 +50,7 @@ export const getLastNYearsQuarters = (n = 8) => {
 
     return years;
 };
+
+export const getRangeOfYears = (maxYear: number, minYear: number): string[] => {
+    return Array.from({ length: maxYear - minYear + 1 }, (_, i) => (maxYear - i).toString());
+};
