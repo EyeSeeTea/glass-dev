@@ -43,6 +43,7 @@ export interface GlassModule {
         programStageId: string;
     }[];
     populateCurrentYearInHistory?: boolean;
+    startPeriod?: number;
     customDataColumns?: CustomDataColumns;
     lineLists?: LineListDetails[];
     chunkSizes?: ChunkSizes;
