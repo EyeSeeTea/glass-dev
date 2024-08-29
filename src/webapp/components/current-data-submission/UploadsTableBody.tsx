@@ -30,7 +30,7 @@ export interface UploadsTableBodyProps {
 }
 
 export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refreshUploads, showComplete }) => {
-    const { compositionRoot, currentUser } = useAppContext();
+    const { compositionRoot, allCountries } = useAppContext();
     const snackbar = useSnackbar();
 
     const [loading, setLoading] = useState<boolean>(false);
@@ -153,7 +153,7 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                                               primaryFileToDelete.countryCode,
                                               false,
                                               primaryFileToDelete.eventListFileId,
-                                              currentUser.userOrgUnitsAccess,
+                                              allCountries,
                                               primaryFileToDelete.calculatedEventListFileId
                                           )
                                         : Future.success(undefined),

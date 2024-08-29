@@ -38,7 +38,7 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
     setPrimaryFileImportSummary,
     setSecondaryFileImportSummary,
 }) => {
-    const { compositionRoot, currentUser } = useAppContext();
+    const { compositionRoot, allCountries } = useAppContext();
     const { currentModuleAccess } = useCurrentModuleContext();
     const { currentOrgUnitAccess } = useCurrentOrgUnitContext();
     const [fileType, setFileType] = useState<string>("primary");
@@ -166,7 +166,7 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
                     currentOrgUnitAccess.orgUnitCode,
                     false,
                     "",
-                    currentUser.userOrgUnitsAccess
+                    allCountries
                 ),
                 importSecondaryFileSummary: secondaryFile
                     ? compositionRoot.fileSubmission.secondaryFile(

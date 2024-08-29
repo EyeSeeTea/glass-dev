@@ -17,8 +17,8 @@ import { ValidationResult } from "../../../entities/program-rules/EventEffectTyp
 import { ProgramRuleValidationForBLEventProgram } from "../../program-rules-processing/ProgramRuleValidationForBLEventProgram";
 import { ProgramRulesMetadataRepository } from "../../../repositories/program-rules/ProgramRulesMetadataRepository";
 import { downloadIdsAndDeleteTrackedEntities } from "../utils/downloadIdsAndDeleteTrackedEntities";
-import { OrgUnitAccess } from "../../../entities/User";
 import { getTEAValueFromOrganisationUnitCountryEntry } from "../utils/getTEAValueFromOrganisationUnitCountryEntry";
+import { Country } from "../../../entities/Country";
 
 export const AMRIProgramID = "mMAj6Gofe49";
 const AMR_GLASS_AMR_TET_PATIENT = "CcgnfemKr5U";
@@ -54,7 +54,7 @@ export class ImportRISIndividualFungalFile {
             | undefined,
         moduleName: string,
         dataColumns: CustomDataColumns,
-        orgUnitsWithAccess: OrgUnitAccess[]
+        allCountries: Country[]
     ): FutureData<ImportSummary> {
         if (action === "CREATE_AND_UPDATE") {
             return this.risIndividualFungalRepository
@@ -86,7 +86,7 @@ export class ImportRISIndividualFungalFile {
                                 AMRDataProgramStageIdl(),
                                 countryCode,
                                 period,
-                                orgUnitsWithAccess
+                                allCountries
                             ).flatMap(entities => {
                                 return this.runProgramRuleValidations(
                                     AMRIProgramIDl,
@@ -280,7 +280,7 @@ export class ImportRISIndividualFungalFile {
         AMRDataProgramStageIdl: string,
         countryCode: string,
         period: string,
-        orgUnitsWithAccess: OrgUnitAccess[]
+        allCountries: Country[]
     ): FutureData<D2TrackerTrackedEntity[]> {
         return this.trackerRepository.getProgramMetadata(AMRIProgramIDl, AMRDataProgramStageIdl).flatMap(metadata => {
             const trackedEntities = individualFungalDataItems.map(dataItem => {
@@ -293,7 +293,7 @@ export class ImportRISIndividualFungalFile {
                                 attribute: attr.id,
                                 value: currentAttribute
                                     ? getTEAValueFromOrganisationUnitCountryEntry(
-                                          orgUnitsWithAccess,
+                                          allCountries,
                                           currentAttribute.value,
                                           true
                                       )

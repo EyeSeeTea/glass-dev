@@ -55,6 +55,7 @@ export function getTestContext() {
         currentUser: getTestUser(),
         config: getTestConfig(),
         compositionRoot: getCompositionRoot(instance),
+        allCountries: [],
     };
 
     return { api, context };
