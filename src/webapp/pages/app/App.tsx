@@ -40,7 +40,7 @@ export const App: React.FC<AppProps> = React.memo(function App({ api, d2, instan
 
             setAppContext({ api, currentUser, compositionRoot, instance: instance, allCountries: allCountries ?? [] });
             // setShowShareButton(isShareButtonVisible);
-            initFeedbackTool(d2, appConfig);
+            if (process.env.NODE_ENV !== "production") initFeedbackTool(d2, appConfig);
             setLoading(false);
         }
         setup();
