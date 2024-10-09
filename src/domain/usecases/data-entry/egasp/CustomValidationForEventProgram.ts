@@ -95,7 +95,9 @@ export class CustomValidationForEventProgram {
         countryName: string,
         checkClinics: boolean
     ): FutureData<ConsistencyError[]> {
-        const clinicsInEvents = events.map(e => e.orgUnit);
+        const clinicsInEvents = _(events.map(e => e.orgUnit))
+            .uniq()
+            .value();
         return Future.joinObj({
             clinicsInCountry: checkClinics
                 ? this.metadataRepository.getClinicsAndLabsInOrgUnitId(countryId)
