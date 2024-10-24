@@ -413,8 +413,6 @@ export class ProgramRuleValidationForBLEventProgram {
 
         const enrollment = event.enrollmentId ? enrollmentsById[event.enrollmentId] : undefined;
 
-        console.debug(`Process event: ${event.eventId}`);
-
         const selectedEntity: TrackedEntityAttributeValuesMap | undefined = tei
             ? _(tei.attributes)
                   .map(attr => [attr.attribute, attr.value] as [Id, string])
@@ -505,10 +503,6 @@ export class ProgramRuleValidationForBLEventProgram {
             // Skip effect if there were errors (as the engine still returns a value)
             return undefined;
         }
-
-        console.debug(
-            _.compact(["Get effects[results]:", `eventId=${event.eventId}`, `ASSIGNs: ${effects.length}`]).join(" ")
-        );
 
         if (!_.isEmpty(effects)) {
             const eventEffect: EventEffect = {
