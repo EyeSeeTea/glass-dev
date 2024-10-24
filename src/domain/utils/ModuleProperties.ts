@@ -1,4 +1,4 @@
-type ModuleDetails = {
+export type ModuleDetails = {
     isbatchReq: boolean;
     isQuestionnaireReq: boolean;
     completeStatusChange: "QUESTIONNAIRE" | "DATASET" | "QUESTIONNAIRE_AND_DATASET";
@@ -33,7 +33,10 @@ type ModuleDetails = {
     submittedDownloadLabel?: string;
     calculatedProductDownloadLabel?: string;
     calculatedSubstanceFileDownloadLabel?: string;
+    hasAsyncDeletion?: boolean;
 };
+
+export const AMC_MODULE_NAME = "AMC";
 
 export const moduleProperties = new Map<string, ModuleDetails>([
     [
@@ -126,7 +129,7 @@ export const moduleProperties = new Map<string, ModuleDetails>([
         },
     ],
     [
-        "AMC",
+        AMC_MODULE_NAME,
         {
             isbatchReq: false,
             isQuestionnaireReq: true,
@@ -159,6 +162,7 @@ export const moduleProperties = new Map<string, ModuleDetails>([
             calculatedSubstanceFileDownloadLabel: "Download calculated substance data",
             downloadAllDataButtonReq: true,
             isMultiDashboard: true,
+            hasAsyncDeletion: true,
         },
     ],
     [
