@@ -225,14 +225,19 @@ function getArrayBufferOfFile(
 }
 
 function deleteUploadAndDocumentFromDatasoreAndDHIS2(
-    uploadId: Id,
+    upload: GlassUploads,
     repositories: {
         glassDocumentsRepository: GlassDocumentsRepository;
         glassUploadsRepository: GlassUploadsRepository;
     }
 ): FutureData<void> {
     const { glassDocumentsRepository, glassUploadsRepository } = repositories;
-    return new DeleteDocumentInfoByUploadIdUseCase(glassDocumentsRepository, glassUploadsRepository).execute(uploadId);
+    return new DeleteDocumentInfoByUploadIdUseCase(glassDocumentsRepository, glassUploadsRepository)
+        .execute(upload.id)
+        .flatMap(() => {
+            console.debug(`Upload and document ${upload.fileName} deleted in Datastore and from DHIS2 documents`);
+            return Future.success(undefined);
+        });
 }
 
 function deleteDatasetValuesOrEventsFromPrimaryFileInAMC(
@@ -436,21 +441,10 @@ function deleteUploadedDatasets(
                         console.debug(`Data from secondary file ${secondaryFileToDelete.fileName} deleted`);
                     }
 
-                    return deleteUploadAndDocumentFromDatasoreAndDHIS2(primaryFileToDelete.id, repositories).flatMap(
+                    return deleteUploadAndDocumentFromDatasoreAndDHIS2(primaryFileToDelete, repositories).flatMap(
                         () => {
-                            console.debug(
-                                `Upload and document ${primaryFileToDelete.fileName} deleted in Datastore and from DHIS2 documents`
-                            );
                             if (secondaryFileToDelete) {
-                                return deleteUploadAndDocumentFromDatasoreAndDHIS2(
-                                    secondaryFileToDelete.id,
-                                    repositories
-                                ).flatMap(() => {
-                                    console.debug(
-                                        `Upload and document ${secondaryFileToDelete.fileName} deleted in Datastore and from DHIS2 documents`
-                                    );
-                                    return Future.success(undefined);
-                                });
+                                return deleteUploadAndDocumentFromDatasoreAndDHIS2(secondaryFileToDelete, repositories);
                             } else {
                                 return Future.success(undefined);
                             }
@@ -458,11 +452,7 @@ function deleteUploadedDatasets(
                     );
                 });
             } else if (secondaryFileToDelete && secondaryArrayBuffer) {
-                if (
-                    secondaryFileToDelete &&
-                    secondaryFileToDelete.status.toLowerCase() !== UPLOADED_FILE_STATUS_LOWERCASE &&
-                    secondaryArrayBuffer
-                ) {
+                if (secondaryFileToDelete.status.toLowerCase() !== UPLOADED_FILE_STATUS_LOWERCASE) {
                     console.debug("Delete only secondary uploaded dataset");
                     return deleteDatasetValuesOrEventsFromSecondaryFileInAMC(
                         repositories,
@@ -477,31 +467,12 @@ function deleteUploadedDatasets(
                         }
 
                         if (deleteSecondaryFileSummary) {
-                            console.debug(`-> Data from secondary file ${secondaryFileToDelete.fileName} deleted`);
-                            return deleteUploadAndDocumentFromDatasoreAndDHIS2(
-                                secondaryFileToDelete.id,
-                                repositories
-                            ).flatMap(() => {
-                                console.debug(
-                                    `Upload and document ${secondaryFileToDelete.fileName} deleted in Datastore and from DHIS2 documents`
-                                );
-                                return Future.success(undefined);
-                            });
+                            console.debug(`Data from secondary file ${secondaryFileToDelete.fileName} deleted`);
+                            return deleteUploadAndDocumentFromDatasoreAndDHIS2(secondaryFileToDelete, repositories);
                         }
                     });
-                } else if (secondaryFileToDelete) {
-                    return deleteUploadAndDocumentFromDatasoreAndDHIS2(secondaryFileToDelete.id, repositories).flatMap(
-                        () => {
-                            console.debug(
-                                `Upload and document ${secondaryFileToDelete.fileName} deleted in Datastore and from DHIS2 documents`
-                            );
-                            return Future.success(undefined);
-                        }
-                    );
                 } else {
-                    return Future.error(
-                        `An error occured while deleting file, file not found. Upload selected to delete: ${uploadToDelete.id}`
-                    );
+                    return deleteUploadAndDocumentFromDatasoreAndDHIS2(secondaryFileToDelete, repositories);
                 }
             } else {
                 return Future.error(
