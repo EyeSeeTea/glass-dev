@@ -437,6 +437,7 @@ function deleteUploadedDatasets(
                 : Future.success(undefined),
         }).flatMap(({ primaryArrayBuffer, secondaryArrayBuffer }) => {
             if (primaryFileToDelete && primaryArrayBuffer) {
+                // TODO: when implemented for the other GLASS modules change this function, the rest is the same for all
                 return deleteDatasetValuesOrEventsInAMC(
                     primaryFileToDelete,
                     secondaryFileToDelete,
@@ -475,6 +476,7 @@ function deleteUploadedDatasets(
             } else if (secondaryFileToDelete && secondaryArrayBuffer) {
                 if (secondaryFileToDelete.status.toLowerCase() !== UPLOADED_FILE_STATUS_LOWERCASE) {
                     console.debug("Delete only secondary uploaded dataset");
+                    // TODO: when implemented for the other GLASS modules change this function, the rest is the same for all
                     return deleteDatasetValuesOrEventsFromSecondaryFileInAMC(
                         repositories,
                         secondaryArrayBuffer,
