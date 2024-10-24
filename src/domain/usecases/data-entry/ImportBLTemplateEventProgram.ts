@@ -1,3 +1,4 @@
+import _ from "lodash";
 import { Dhis2EventsDefaultRepository } from "../../../data/repositories/Dhis2EventsDefaultRepository";
 import { ImportStrategy } from "../../entities/data-entry/DataValuesSaveSummary";
 import { ConsistencyError, ImportSummary } from "../../entities/data-entry/ImportSummary";
@@ -22,10 +23,10 @@ import { ExcelReader } from "../../utils/ExcelReader";
 import { InstanceRepository } from "../../repositories/InstanceRepository";
 import { AMC_RAW_SUBSTANCE_CONSUMPTION_PROGRAM_ID } from "./amc/ImportAMCSubstanceLevelData";
 import moment from "moment";
-import { GlassATCDefaultRepository } from "../../../data/repositories/GlassATCDefaultRepository";
 import { ListGlassATCLastVersionKeysByYear } from "../../entities/GlassAtcVersionData";
+import { GlassATCRepository } from "../../repositories/GlassATCRepository";
 
-const ATC_VERSION_DATA_ELEMENT_ID = "aCuWz3HZ5Ti";
+export const ATC_VERSION_DATA_ELEMENT_ID = "aCuWz3HZ5Ti";
 
 export class ImportBLTemplateEventProgram {
     constructor(
@@ -36,7 +37,7 @@ export class ImportBLTemplateEventProgram {
         private dhis2EventsDefaultRepository: Dhis2EventsDefaultRepository,
         private metadataRepository: MetadataRepository,
         private programRulesMetadataRepository: ProgramRulesMetadataRepository,
-        private glassAtcRepository: GlassATCDefaultRepository
+        private glassAtcRepository: GlassATCRepository
     ) {}
 
     public import(
@@ -142,6 +143,7 @@ export class ImportBLTemplateEventProgram {
         });
     }
 
+    // NOTICE: check also DeleteAMCSubstanceLevelDataUseCase.ts that contains same code adapted for node environment
     private deleteEvents(events: D2TrackerEvent[]): FutureData<ImportSummary> {
         return this.dhis2EventsDefaultRepository.import({ events }, "DELETE").flatMap(result => {
             return mapToImportSummary(result, "event", this.metadataRepository).flatMap(({ importSummary }) => {

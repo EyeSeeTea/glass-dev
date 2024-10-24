@@ -1,4 +1,4 @@
-import i18n from "@eyeseetea/d2-ui-components/locales";
+import i18n from "../../../../locales";
 import { DataValuesSaveSummary, ImportStrategy } from "../../../entities/data-entry/DataValuesSaveSummary";
 import { ImportSummary } from "../../../entities/data-entry/ImportSummary";
 

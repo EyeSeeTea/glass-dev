@@ -18,10 +18,12 @@ import { useCurrentModuleContext } from "../../contexts/current-module-context";
 import { useGlassCaptureAccess } from "../../hooks/useGlassCaptureAccess";
 import { StyledLoaderContainer } from "../upload/ConsistencyChecks";
 import { useCurrentPeriodContext } from "../../contexts/current-period-context";
-import { moduleProperties } from "../../../domain/utils/ModuleProperties";
+import { AMC_MODULE_NAME, moduleProperties } from "../../../domain/utils/ModuleProperties";
 import { ImportSummaryErrors } from "../../../domain/entities/data-entry/ImportSummary";
 import { ImportSummaryErrorsDialog } from "../import-summary-errors-dialog/ImportSummaryErrorsDialog";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
+import { useGlassUploadsAsyncDeletions } from "../../hooks/useGlassUploadsAsyncDeletions";
+import { getPrimaryAndSecondaryFilesToDelete } from "../../utils/getPrimaryAndSecondaryFilesToDelete";
 
 export interface UploadsTableBodyProps {
     rows?: UploadsDataItem[];
@@ -53,6 +55,7 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
         currentPeriod
     );
     const hasCurrentUserCaptureAccess = useGlassCaptureAccess();
+    const { asyncDeletions: asyncDeletionsState, setToAsyncDeletion } = useGlassUploadsAsyncDeletions();
 
     const showDeleteConfirmationDialog = (rowToDelete: UploadsDataItem) => {
         setRowToDelete(rowToDelete);
@@ -87,43 +90,32 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
         );
     };
 
-    //Deleting a dataset completely has the following steps:
+    //Deleting a dataset completely has the following steps*:
     //1. Delete corresponsding datasetValue/event for each row in the file.
     //2. Delete corresponding document from DHIS
     //3. Delete corresponding 'upload' and 'document' from Datastore
+    //* If it's a file from AMC then is only set to async deletion in Datastore
     const deleteDataset = () => {
         hideDeleteConfirmationDialog();
-        if (rowToDelete) {
-            let primaryFileToDelete: UploadsDataItem | undefined, secondaryFileToDelete: UploadsDataItem | undefined;
-            //For AMR, Ris file is mandatory, so there will be a ris file with given batch id.
-            //Sample file is optional and could be absent
-            if (
-                moduleProperties.get(currentModuleAccess.moduleName)?.isSecondaryFileApplicable &&
-                moduleProperties.get(currentModuleAccess.moduleName)?.isSecondaryRelated
-            ) {
-                if (
-                    rowToDelete.fileType.toLowerCase() ===
-                    moduleProperties.get(currentModuleAccess.moduleName)?.primaryFileType.toLowerCase()
-                ) {
-                    primaryFileToDelete = rowToDelete;
-                    secondaryFileToDelete = rows
-                        ?.filter(sample => sample.correspondingRisUploadId === rowToDelete.id)
-                        ?.at(0);
-                } else {
-                    secondaryFileToDelete = rowToDelete;
-                    primaryFileToDelete = rows?.filter(ris => ris.id === rowToDelete.correspondingRisUploadId)?.at(0);
-                }
-            } else if (!moduleProperties.get(currentModuleAccess.moduleName)?.isSecondaryRelated) {
-                if (rowToDelete.fileType === moduleProperties.get(currentModuleAccess.moduleName)?.primaryFileType) {
-                    primaryFileToDelete = rowToDelete;
-                } else {
-                    secondaryFileToDelete = rowToDelete;
-                }
-            } else {
-                primaryFileToDelete = rowToDelete;
-                secondaryFileToDelete = undefined;
-            }
+        if (!rowToDelete || asyncDeletionsState.kind !== "loaded") return;
 
+        if (
+            moduleProperties.get(currentModuleAccess.moduleName)?.hasAsyncDeletion &&
+            currentModuleAccess.moduleName === AMC_MODULE_NAME
+        ) {
+            if (asyncDeletionsState.data.includes(rowToDelete.id)) return;
+
+            setToAsyncDeletion(rowToDelete.id);
+            refreshUploads({}); //Trigger re-render of parent
+            setLoading(false);
+            hideDeleteConfirmationDialog();
+        } else {
+            const { primaryFileToDelete, secondaryFileToDelete } = getPrimaryAndSecondaryFilesToDelete(
+                rowToDelete,
+                moduleProperties,
+                currentModuleAccess.moduleName,
+                rows
+            );
             if (primaryFileToDelete) {
                 setLoading(true);
                 Future.joinObj({
@@ -135,7 +127,7 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                     ({ primaryFileDownload, secondaryFileDownload }) => {
                         if (primaryFileToDelete) {
                             const primaryFile = new File([primaryFileDownload], primaryFileToDelete.fileName);
-                            //If the file is in uploaded status then, data vales have not been imported.
+                            //If the file is in uploaded status then, data values have not been imported.
                             //No need for deletion
 
                             Future.joinObj({
@@ -189,13 +181,11 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                                     if (deletePrimaryFileSummary) {
                                         const itemsDeleted =
                                             currentModuleAccess.moduleName === "AMC" ? "products" : "rows";
-
                                         let message = `${
                                             primaryFileToDelete?.rows || primaryFileToDelete?.records
                                         } ${itemsDeleted} deleted for ${
                                             moduleProperties.get(currentModuleAccess.moduleName)?.primaryFileType
                                         } file`;
-
                                         if (currentModuleAccess.moduleName === "AMC") {
                                             message = `${
                                                 primaryFileToDelete?.rows || primaryFileToDelete?.records
@@ -203,7 +193,6 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                                                 moduleProperties.get(currentModuleAccess.moduleName)?.primaryFileType
                                             } file and its corresponding calculated substance consumption data if any`;
                                         }
-
                                         if (secondaryFileToDelete && deleteSecondaryFileSummary) {
                                             message =
                                                 message +
@@ -214,7 +203,6 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                                                         ?.secondaryFileType
                                                 } file.`;
                                         }
-
                                         snackbar.info(message);
                                     }
                                     if (primaryFileToDelete) {
@@ -262,7 +250,6 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                         console.debug(
                             `Unable to find file/s : ${primaryFileToDelete?.fileName} , ${secondaryFileToDelete?.fileName} , error: ${error}`
                         );
-
                         snackbar.error(
                             `Unable to find file/s : ${primaryFileToDelete?.fileName} , ${secondaryFileToDelete?.fileName} , error: ${error}`
                         );
@@ -301,11 +288,9 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                                             setLoading(false);
                                             return;
                                         }
-
                                         if (secondaryFileToDelete && deleteSecondaryFileSummary) {
                                             const itemsDeleted =
                                                 currentModuleAccess.moduleName === "AMC" ? "substances" : "rows";
-
                                             const message = ` ${
                                                 secondaryFileToDelete.rows || secondaryFileToDelete.records
                                             } ${itemsDeleted} deleted for ${
@@ -491,7 +476,8 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                                 </Button>
                             </TableCell>
                             <TableCell style={{ opacity: 0.5 }}>
-                                {currentDataSubmissionStatus.kind === "loaded" ? (
+                                {currentDataSubmissionStatus.kind === "loaded" &&
+                                asyncDeletionsState.kind === "loaded" ? (
                                     <Button
                                         onClick={e => {
                                             e.stopPropagation();
@@ -499,10 +485,15 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                                         }}
                                         disabled={
                                             !hasCurrentUserCaptureAccess ||
-                                            !isEditModeStatus(currentDataSubmissionStatus.data.title)
+                                            !isEditModeStatus(currentDataSubmissionStatus.data.title) ||
+                                            asyncDeletionsState.data.includes(row.id)
                                         }
                                     >
-                                        <DeleteOutline />
+                                        {asyncDeletionsState.data.includes(row.id) ? (
+                                            i18n.t("Marked to be deleted")
+                                        ) : (
+                                            <DeleteOutline />
+                                        )}
                                     </Button>
                                 ) : (
                                     <CircularProgress size={20} />

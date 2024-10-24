@@ -93,6 +93,8 @@ import { DownloadEmptyTemplateUseCase } from "./domain/usecases/DownloadEmptyTem
 import { DownloadPopulatedTemplateUseCase } from "./domain/usecases/DownloadPopulatedTemplateUseCase";
 import { CountryDefaultRepository } from "./data/repositories/CountryDefaultRepository";
 import { GetAllCountriesUseCase } from "./domain/usecases/GetAllCountriesUseCase";
+import { SetToAsyncDeletionUseCase } from "./domain/usecases/SetToAsyncDeletionUseCase";
+import { GetAsyncDeletionsUseCase } from "./domain/usecases/GetAsyncDeletionsUseCase";
 
 export function getCompositionRoot(instance: Instance) {
     const api = getD2APiFromInstance(instance);
@@ -166,6 +168,8 @@ export function getCompositionRoot(instance: Instance) {
             setBatchId: new SetUploadBatchIdUseCase(glassUploadsRepository),
             saveImportSummaryErrorsOfFiles: new SaveImportSummaryErrorsOfFilesInUploadsUseCase(glassUploadsRepository),
             getCurrentDataSubmissionFileType: new GetUploadsByDataSubmissionUseCase(glassUploadsRepository),
+            setToAsyncDeletion: new SetToAsyncDeletionUseCase(glassUploadsRepository),
+            getAsyncDeletions: new GetAsyncDeletionsUseCase(glassUploadsRepository),
         }),
         glassDocuments: getExecute({
             getAll: new GetGlassDocumentsUseCase(glassDocumentsRepository),
@@ -180,7 +184,6 @@ export function getCompositionRoot(instance: Instance) {
                 risIndividualFungalRepository,
                 metadataRepository,
                 dataValuesRepository,
-                glassModuleRepository,
                 dhis2EventsDefaultRepository,
                 excelRepository,
                 glassDocumentsRepository,
