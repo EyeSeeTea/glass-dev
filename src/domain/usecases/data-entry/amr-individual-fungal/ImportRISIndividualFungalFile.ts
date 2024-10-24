@@ -319,9 +319,9 @@ export class ImportRISIndividualFungalFile {
                 const sampleDateStr =
                     AMRDataStage.find(de => de.dataElement === AMR_GLASS_AMR_DET_SAMPLE_DATE)?.value ??
                     `01-01-${period}`;
-                const sampleDate = moment(new Date(sampleDateStr)).toISOString().split("T").at(0) ?? period;
+                const sampleDate = moment(new Date(sampleDateStr)).toISOString()?.split("T").at(0) ?? period;
 
-                const createdAt = moment(new Date()).toISOString().split("T").at(0) ?? period;
+                const createdAt = moment(new Date()).toISOString()?.split("T").at(0) ?? period;
 
                 const events: D2TrackerEvent[] = [
                     {
