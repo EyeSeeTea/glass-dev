@@ -49,6 +49,9 @@ import { DeleteDocumentInfoByUploadIdUseCase } from "../domain/usecases/DeleteDo
 import { DeleteAMCProductLevelDataUseCase } from "../domain/usecases/data-entry/amc/DeleteAMCProductLevelDataUseCase";
 import { DeleteAMCSubstanceLevelDataUseCase } from "../domain/usecases/data-entry/amc/DeleteAMCSubstanceLevelDataUseCase";
 import { RemoveAsyncDeletionsUseCase } from "../domain/usecases/RemoveAsyncDeletionsUseCase";
+import { SendNotificationsUseCase } from "../domain/usecases/SendNotificationsUseCase";
+import { NotificationRepository } from "../domain/repositories/NotificationRepository";
+import { UsersRepository } from "../domain/repositories/UsersRepository";
 
 const UPLOADED_FILE_STATUS_LOWERCASE = "uploaded";
 const IMPORT_SUMMARY_STATUS_ERROR = "ERROR";
@@ -195,6 +198,24 @@ function removeAsyncDeletionsFromDatastore(
     glassUploadsRepository: GlassUploadsRepository
 ): FutureData<Id[]> {
     return new RemoveAsyncDeletionsUseCase(glassUploadsRepository).execute(uploadIdsToRemove);
+}
+
+function _sendNotification(
+    usergroupIds: Id[],
+    repositories: {
+        notificationRepository: NotificationRepository;
+        usersRepository: UsersRepository;
+    }
+): FutureData<void> {
+    const { notificationRepository, usersRepository } = repositories;
+    const notificationText = `The datasets marked for deletion have been successfully deleted.`;
+    const notOrgUnitPath = "";
+    return new SendNotificationsUseCase(notificationRepository, usersRepository).execute(
+        notificationText,
+        notificationText,
+        usergroupIds,
+        notOrgUnitPath
+    );
 }
 
 function getGlassModulesFromDatastore(glassModuleRepository: GlassModuleRepository): FutureData<GlassModule[]> {
