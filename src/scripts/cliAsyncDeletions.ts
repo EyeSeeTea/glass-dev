@@ -480,16 +480,17 @@ function deleteUploadedDatasets(
                         secondaryArrayBuffer,
                         secondaryFileToDelete.eventListFileId,
                         secondaryFileToDelete.calculatedEventListFileId
-                    ).map(deleteSecondaryFileSummary => {
-                        if (deleteSecondaryFileSummary?.status === IMPORT_SUMMARY_STATUS_ERROR) {
+                    ).flatMap(deleteSecondaryFileSummary => {
+                        if (
+                            deleteSecondaryFileSummary &&
+                            deleteSecondaryFileSummary.status !== IMPORT_SUMMARY_STATUS_ERROR
+                        ) {
+                            console.debug(`Data from secondary file ${secondaryFileToDelete.fileName} deleted`);
+                            return deleteUploadAndDocumentFromDatasoreAndDHIS2(secondaryFileToDelete, repositories);
+                        } else {
                             return Future.error(
                                 `An error occured while deleting the data exiting. Secondary file: ${secondaryFileToDelete?.fileName}`
                             );
-                        }
-
-                        if (deleteSecondaryFileSummary) {
-                            console.debug(`Data from secondary file ${secondaryFileToDelete.fileName} deleted`);
-                            return deleteUploadAndDocumentFromDatasoreAndDHIS2(secondaryFileToDelete, repositories);
                         }
                     });
                 } else {
