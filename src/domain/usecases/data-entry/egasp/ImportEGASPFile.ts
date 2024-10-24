@@ -8,9 +8,9 @@ import { GlassUploadsRepository } from "../../../repositories/GlassUploadsReposi
 import { ProgramRulesMetadataRepository } from "../../../repositories/program-rules/ProgramRulesMetadataRepository";
 import { MetadataRepository } from "../../../repositories/MetadataRepository";
 import { EGASP_PROGRAM_ID } from "../../../../data/repositories/program-rule/ProgramRulesMetadataDefaultRepository";
-import { InstanceDefaultRepository } from "../../../../data/repositories/InstanceDefaultRepository";
 import { ImportBLTemplateEventProgram } from "../ImportBLTemplateEventProgram";
-import { GlassATCDefaultRepository } from "../../../../data/repositories/GlassATCDefaultRepository";
+import { InstanceRepository } from "../../../repositories/InstanceRepository";
+import { GlassATCRepository } from "../../../repositories/GlassATCRepository";
 
 export class ImportEGASPFile {
     constructor(
@@ -21,8 +21,8 @@ export class ImportEGASPFile {
         private glassUploadsRepository: GlassUploadsRepository,
         private programRulesMetadataRepository: ProgramRulesMetadataRepository,
         private metadataRepository: MetadataRepository,
-        private instanceRepository: InstanceDefaultRepository,
-        private glassAtcRepository: GlassATCDefaultRepository
+        private instanceRepository: InstanceRepository,
+        private glassAtcRepository: GlassATCRepository
     ) {}
 
     public importEGASPFile(

@@ -15,6 +15,7 @@ export interface UploadsDataItem {
     uploadDate: string;
     dataSubmission: string;
     module: string;
+    orgUnit: string;
     records?: number; // TODO: Delete when no items in DataStore with records (because becomes rows)
     rows?: number;
     correspondingRisUploadId: string;

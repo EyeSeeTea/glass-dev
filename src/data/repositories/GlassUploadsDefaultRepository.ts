@@ -180,4 +180,28 @@ export class GlassUploadsDefaultRepository implements GlassUploadsRepository {
             }
         });
     }
+
+    setAsyncDeletion(uploadIdToDelete: Id): FutureData<Id> {
+        return this.dataStoreClient.listCollection<Id>(DataStoreKeys.ASYNC_DELETIONS).flatMap(asyncDeletionsArray => {
+            const newAsyncDeletions = [...asyncDeletionsArray, uploadIdToDelete];
+            return this.dataStoreClient.saveObject(DataStoreKeys.ASYNC_DELETIONS, newAsyncDeletions).flatMap(() => {
+                return Future.success(uploadIdToDelete);
+            });
+        });
+    }
+
+    getAsyncDeletions(): FutureData<Id[]> {
+        return this.dataStoreClient.listCollection<Id>(DataStoreKeys.ASYNC_DELETIONS);
+    }
+
+    removeAsyncDeletions(uploadIdToRemove: Id[]): FutureData<Id[]> {
+        return this.dataStoreClient.listCollection<Id>(DataStoreKeys.ASYNC_DELETIONS).flatMap(asyncDeletionsArray => {
+            const restAsyncDeletions = asyncDeletionsArray.filter(
+                uploadIdToBeDeleted => !uploadIdToRemove.includes(uploadIdToBeDeleted)
+            );
+            return this.dataStoreClient.saveObject(DataStoreKeys.ASYNC_DELETIONS, restAsyncDeletions).flatMap(() => {
+                return Future.success(uploadIdToRemove);
+            });
+        });
+    }
 }

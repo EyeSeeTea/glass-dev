@@ -1,3 +1,5 @@
+import { Future, FutureData } from "../../../entities/Future";
+
 export const getStringFromFile = (file: Blob): Promise<string> => {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -5,4 +7,8 @@ export const getStringFromFile = (file: Blob): Promise<string> => {
         reader.onload = () => resolve(String(reader.result));
         reader.onerror = error => reject(error);
     });
+};
+
+export const getStringFromFileBlob = (fileBlob: Blob): FutureData<string> => {
+    return Future.fromPromise(fileBlob.text());
 };
