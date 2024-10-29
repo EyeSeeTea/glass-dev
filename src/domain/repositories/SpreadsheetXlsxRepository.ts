@@ -1,6 +1,7 @@
 export type Async<Data> = Promise<Data>;
 export interface SpreadsheetDataSource {
     read(inputFile: File): Async<Spreadsheet>;
+    readFromArrayBuffer(arrayBuffer: ArrayBuffer, fileName?: string): Async<Spreadsheet>;
 }
 
 export interface Spreadsheet {

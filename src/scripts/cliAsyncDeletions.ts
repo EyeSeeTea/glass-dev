@@ -52,6 +52,7 @@ import { RemoveAsyncDeletionsUseCase } from "../domain/usecases/RemoveAsyncDelet
 import { SendNotificationsUseCase } from "../domain/usecases/SendNotificationsUseCase";
 import { NotificationRepository } from "../domain/repositories/NotificationRepository";
 import { UsersRepository } from "../domain/repositories/UsersRepository";
+import { DeleteRISFileUseCase } from "../domain/usecases/data-entry/amr/DeleteRISFileUseCase";
 
 const UPLOADED_FILE_STATUS_LOWERCASE = "uploaded";
 const IMPORT_SUMMARY_STATUS_ERROR = "ERROR";
@@ -220,6 +221,7 @@ function removeAsyncDeletionsFromDatastore(
     return new RemoveAsyncDeletionsUseCase(glassUploadsRepository).execute(uploadIdsToRemove);
 }
 
+// TODO: send notification to users
 function _sendNotification(
     usergroupIds: Id[],
     repositories: {
@@ -306,16 +308,24 @@ function deleteDatasetValuesOrEventsFromPrimaryFile(
     eventListId: string | undefined,
     calculatedEventListFileId?: string
 ): FutureData<ImportSummary> {
+    const {
+        glassDocumentsRepository,
+        metadataRepository,
+        excelRepository,
+        trackerRepository,
+        instanceRepository,
+        amcSubstanceDataRepository,
+        risDataRepository,
+        dataValuesRepository,
+    } = repositories;
+
     switch (currentModuleName) {
+        case "AMR": {
+            return new DeleteRISFileUseCase(risDataRepository, metadataRepository, dataValuesRepository).execute(
+                arrayBuffer
+            );
+        }
         case "AMC": {
-            const {
-                glassDocumentsRepository,
-                metadataRepository,
-                excelRepository,
-                trackerRepository,
-                instanceRepository,
-                amcSubstanceDataRepository,
-            } = repositories;
             return new DeleteAMCProductLevelDataUseCase(
                 excelRepository,
                 instanceRepository,
@@ -349,16 +359,17 @@ function deleteDatasetValuesOrEventsFromSecondaryFile(
     eventListId: string | undefined,
     calculatedEventListFileId?: string
 ): FutureData<ImportSummary> {
+    const {
+        metadataRepository,
+        excelRepository,
+        instanceRepository,
+        glassDocumentsRepository,
+        dhis2EventsDefaultRepository,
+        glassAtcRepository,
+    } = repositories;
+
     switch (currentModuleName) {
         case "AMC": {
-            const {
-                metadataRepository,
-                excelRepository,
-                instanceRepository,
-                glassDocumentsRepository,
-                dhis2EventsDefaultRepository,
-                glassAtcRepository,
-            } = repositories;
             return new DeleteAMCSubstanceLevelDataUseCase(
                 excelRepository,
                 instanceRepository,
