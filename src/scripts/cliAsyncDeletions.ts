@@ -13,7 +13,7 @@ import { GlassModule } from "../domain/entities/GlassModule";
 import { GlassModuleRepository } from "../domain/repositories/GlassModuleRepository";
 import { GlassUploads } from "../domain/entities/GlassUploads";
 import { GlassModuleDefaultRepository } from "../data/repositories/GlassModuleDefaultRepository";
-import { moduleProperties } from "../domain/utils/ModuleProperties";
+import { GlassModuleName, isGlassModuleName, moduleProperties } from "../domain/utils/ModuleProperties";
 import { getPrimaryAndSecondaryFilesToDelete } from "../webapp/utils/getPrimaryAndSecondaryFilesToDelete";
 import { DownloadDocumentUseCase } from "../domain/usecases/DownloadDocumentUseCase";
 import { GlassDocumentsRepository } from "../domain/repositories/GlassDocumentsRepository";
@@ -55,6 +55,7 @@ import { UsersRepository } from "../domain/repositories/UsersRepository";
 import { DeleteRISDatasetUseCase } from "../domain/usecases/data-entry/amr/DeleteRISDatasetUseCase";
 import { DeleteEGASPDatasetUseCase } from "../domain/usecases/data-entry/egasp/DeleteEGASPDatasetUseCase";
 import { DeleteRISIndividualFungalFileUseCase } from "../domain/usecases/data-entry/amr-individual-fungal/DeleteRISIndividualFungalFileUseCase";
+import { DeleteSampleFileUseCase } from "../domain/usecases/data-entry/amr/DeleteSampleFileUseCase";
 
 const UPLOADED_FILE_STATUS_LOWERCASE = "uploaded";
 const IMPORT_SUMMARY_STATUS_ERROR = "ERROR";
@@ -129,14 +130,14 @@ async function main() {
                                                 module => module.id === upload.module
                                             )?.name;
 
-                                            if (!moduleName) {
+                                            if (!isGlassModuleName(moduleName)) {
                                                 console.error(`Module name not found for upload ${upload.id}`);
                                                 throw new Error(`Module name not found for upload ${upload.id}`);
                                             }
 
                                             return {
                                                 ...upload,
-                                                moduleName: moduleName || "",
+                                                moduleName: moduleName,
                                             };
                                         });
 
@@ -210,7 +211,7 @@ async function main() {
     run(cmd, process.argv.slice(2));
 }
 
-type GlassUploadsWithModuleName = GlassUploads & { moduleName: string };
+type GlassUploadsWithModuleName = GlassUploads & { moduleName: GlassModuleName };
 
 function getAsyncDeletionsFromDatastore(glassUploadsRepository: GlassUploadsRepository): FutureData<Id[]> {
     return new GetAsyncDeletionsUseCase(glassUploadsRepository).execute();
@@ -286,7 +287,7 @@ function deleteUploadAndDocumentFromDatasoreAndDHIS2(
 }
 
 function deleteDatasetValuesOrEventsFromPrimaryUploaded(
-    currentModuleName: string,
+    currentModuleName: GlassModuleName,
     repositories: {
         glassDocumentsRepository: GlassDocumentsRepository;
         risDataRepository: RISDataRepository;
@@ -332,14 +333,11 @@ function deleteDatasetValuesOrEventsFromPrimaryUploaded(
                 calculatedEventListFileId
             );
         }
-        default: {
-            return Future.error(`Module ${currentModuleName} not found`);
-        }
     }
 }
 
 function deleteDatasetValuesOrEventsFromSecondaryUploaded(
-    currentModuleName: string,
+    currentModuleName: GlassModuleName,
     repositories: {
         sampleDataRepository: SampleDataRepository;
         metadataRepository: MetadataRepository;
@@ -357,6 +355,11 @@ function deleteDatasetValuesOrEventsFromSecondaryUploaded(
     calculatedEventListFileId?: string
 ): FutureData<ImportSummary> {
     switch (currentModuleName) {
+        case "AMR":
+        case "AMR - Individual": {
+            return new DeleteSampleFileUseCase(repositories).execute(arrayBuffer);
+        }
+
         case "AMC": {
             return new DeleteAMCSubstanceLevelDataUseCase(repositories).execute(
                 arrayBuffer,
@@ -365,7 +368,7 @@ function deleteDatasetValuesOrEventsFromSecondaryUploaded(
             );
         }
         default: {
-            return Future.error(`Module ${currentModuleName} not found`);
+            return Future.error(`Secondary upload async deletion for module ${currentModuleName} not found`);
         }
     }
 }
@@ -375,7 +378,7 @@ function deleteDatasetValuesOrEvents(
     secondaryFileToDelete: UploadsDataItem | undefined,
     primaryArrayBuffer: ArrayBuffer | undefined,
     secondaryArrayBuffer: ArrayBuffer | undefined,
-    currentModuleName: string,
+    currentModuleName: GlassModuleName,
     repositories: {
         sampleDataRepository: SampleDataRepository;
         metadataRepository: MetadataRepository;
