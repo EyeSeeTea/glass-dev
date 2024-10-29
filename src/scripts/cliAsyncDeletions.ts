@@ -1,7 +1,7 @@
 import { command, run } from "cmd-ts";
 import { Blob } from "buffer";
 
-import { getApiUrlOptions, getD2ApiFromArgs, getInstance } from "./common";
+import { getD2ApiFromArgs, getInstance } from "./common";
 import { DataStoreClient } from "../data/data-store/DataStoreClient";
 import { Id } from "../domain/entities/Ref";
 import { GetAsyncDeletionsUseCase } from "../domain/usecases/GetAsyncDeletionsUseCase";
@@ -61,13 +61,31 @@ async function main() {
         name: "Async deletions of uploaded files",
         description:
             "This script takes the ids of uploaded files that are in async-deletions in Datastore and deletes them",
-        args: {
-            ...getApiUrlOptions(),
-        },
-        handler: async args => {
+        args: {},
+        handler: async () => {
             try {
-                const api = getD2ApiFromArgs(args);
-                const instance = getInstance(args);
+                if (!process.env.REACT_APP_DHIS2_BASE_URL)
+                    throw new Error("REACT_APP_DHIS2_BASE_URL  must be set in the .env file");
+
+                if (!process.env.REACT_APP_DHIS2_AUTH)
+                    throw new Error("REACT_APP_DHIS2_BASE_URL  must be set in the .env file");
+
+                const username = process.env.REACT_APP_DHIS2_AUTH.split(":")[0] ?? "";
+                const password = process.env.REACT_APP_DHIS2_AUTH.split(":")[1] ?? "";
+
+                if (username === "" || password === "") {
+                    throw new Error("REACT_APP_DHIS2_AUTH must be in the format 'username:password'");
+                }
+                const envVars = {
+                    url: process.env.REACT_APP_DHIS2_BASE_URL,
+                    auth: {
+                        username: username,
+                        password: password,
+                    },
+                };
+
+                const api = getD2ApiFromArgs(envVars);
+                const instance = getInstance(envVars);
                 const dataStoreClient = new DataStoreClient(instance);
 
                 const instanceRepository = new InstanceDefaultRepository(instance, dataStoreClient);
@@ -87,6 +105,8 @@ async function main() {
                 const amcSubstanceDataRepository = new AMCSubstanceDataDefaultRepository(api);
                 const glassAtcRepository = new GlassATCDefaultRepository(dataStoreClient);
                 const atcRepository = new GlassATCDefaultRepository(dataStoreClient);
+
+                console.debug(`Running asynchronous deletion for URL ${envVars.url}`);
 
                 return getAsyncDeletionsFromDatastore(glassUploadsRepository).run(
                     uploadIdsToDelete => {
@@ -261,7 +281,8 @@ function deleteUploadAndDocumentFromDatasoreAndDHIS2(
         });
 }
 
-function deleteDatasetValuesOrEventsFromPrimaryFileInAMC(
+function deleteDatasetValuesOrEventsFromPrimaryFile(
+    currentModuleName: string,
     repositories: {
         glassDocumentsRepository: GlassDocumentsRepository;
         risDataRepository: RISDataRepository;
@@ -285,25 +306,33 @@ function deleteDatasetValuesOrEventsFromPrimaryFileInAMC(
     eventListId: string | undefined,
     calculatedEventListFileId?: string
 ): FutureData<ImportSummary> {
-    const {
-        glassDocumentsRepository,
-        metadataRepository,
-        excelRepository,
-        trackerRepository,
-        instanceRepository,
-        amcSubstanceDataRepository,
-    } = repositories;
-    return new DeleteAMCProductLevelDataUseCase(
-        excelRepository,
-        instanceRepository,
-        trackerRepository,
-        glassDocumentsRepository,
-        metadataRepository,
-        amcSubstanceDataRepository
-    ).execute(arrayBuffer, eventListId, orgUnitId, calculatedEventListFileId);
+    switch (currentModuleName) {
+        case "AMC": {
+            const {
+                glassDocumentsRepository,
+                metadataRepository,
+                excelRepository,
+                trackerRepository,
+                instanceRepository,
+                amcSubstanceDataRepository,
+            } = repositories;
+            return new DeleteAMCProductLevelDataUseCase(
+                excelRepository,
+                instanceRepository,
+                trackerRepository,
+                glassDocumentsRepository,
+                metadataRepository,
+                amcSubstanceDataRepository
+            ).execute(arrayBuffer, eventListId, orgUnitId, calculatedEventListFileId);
+        }
+        default: {
+            return Future.error(`Module ${currentModuleName} not found`);
+        }
+    }
 }
 
-function deleteDatasetValuesOrEventsFromSecondaryFileInAMC(
+function deleteDatasetValuesOrEventsFromSecondaryFile(
+    currentModuleName: string,
     repositories: {
         sampleDataRepository: SampleDataRepository;
         metadataRepository: MetadataRepository;
@@ -320,25 +349,32 @@ function deleteDatasetValuesOrEventsFromSecondaryFileInAMC(
     eventListId: string | undefined,
     calculatedEventListFileId?: string
 ): FutureData<ImportSummary> {
-    const {
-        metadataRepository,
-        excelRepository,
-        instanceRepository,
-        glassDocumentsRepository,
-        dhis2EventsDefaultRepository,
-        glassAtcRepository,
-    } = repositories;
-    return new DeleteAMCSubstanceLevelDataUseCase(
-        excelRepository,
-        instanceRepository,
-        glassDocumentsRepository,
-        dhis2EventsDefaultRepository,
-        metadataRepository,
-        glassAtcRepository
-    ).execute(arrayBuffer, eventListId, calculatedEventListFileId);
+    switch (currentModuleName) {
+        case "AMC": {
+            const {
+                metadataRepository,
+                excelRepository,
+                instanceRepository,
+                glassDocumentsRepository,
+                dhis2EventsDefaultRepository,
+                glassAtcRepository,
+            } = repositories;
+            return new DeleteAMCSubstanceLevelDataUseCase(
+                excelRepository,
+                instanceRepository,
+                glassDocumentsRepository,
+                dhis2EventsDefaultRepository,
+                metadataRepository,
+                glassAtcRepository
+            ).execute(arrayBuffer, eventListId, calculatedEventListFileId);
+        }
+        default: {
+            return Future.error(`Module ${currentModuleName} not found`);
+        }
+    }
 }
 
-function deleteDatasetValuesOrEventsInAMC(
+function deleteDatasetValuesOrEvents(
     primaryFileToDelete: UploadsDataItem | undefined,
     secondaryFileToDelete: UploadsDataItem | undefined,
     primaryArrayBuffer: ArrayBuffer | undefined,
@@ -373,7 +409,8 @@ function deleteDatasetValuesOrEventsInAMC(
             primaryFileToDelete &&
             (primaryFileToDelete.status.toLowerCase() !== UPLOADED_FILE_STATUS_LOWERCASE ||
                 !moduleProperties.get(currentModuleName)?.isDryRunReq)
-                ? deleteDatasetValuesOrEventsFromPrimaryFileInAMC(
+                ? deleteDatasetValuesOrEventsFromPrimaryFile(
+                      currentModuleName,
                       repositories,
                       primaryArrayBuffer,
                       primaryFileToDelete.orgUnit,
@@ -385,7 +422,8 @@ function deleteDatasetValuesOrEventsInAMC(
             secondaryArrayBuffer &&
             secondaryFileToDelete &&
             secondaryFileToDelete.status.toLowerCase() !== UPLOADED_FILE_STATUS_LOWERCASE
-                ? deleteDatasetValuesOrEventsFromSecondaryFileInAMC(
+                ? deleteDatasetValuesOrEventsFromSecondaryFile(
+                      currentModuleName,
                       repositories,
                       secondaryArrayBuffer,
                       secondaryFileToDelete.eventListFileId
@@ -438,8 +476,7 @@ function deleteUploadedDatasets(
                     : Future.success(undefined),
             }).flatMap(({ primaryArrayBuffer, secondaryArrayBuffer }) => {
                 if (primaryFileToDelete && primaryArrayBuffer) {
-                    // TODO: when implemented for the other GLASS modules change this function, the rest is the same for all
-                    return deleteDatasetValuesOrEventsInAMC(
+                    return deleteDatasetValuesOrEvents(
                         primaryFileToDelete,
                         secondaryFileToDelete,
                         primaryArrayBuffer,
@@ -480,8 +517,8 @@ function deleteUploadedDatasets(
                 } else if (secondaryFileToDelete && secondaryArrayBuffer) {
                     if (secondaryFileToDelete.status.toLowerCase() !== UPLOADED_FILE_STATUS_LOWERCASE) {
                         console.debug("Delete only secondary uploaded dataset");
-                        // TODO: when implemented for the other GLASS modules change this function, the rest is the same for all
-                        return deleteDatasetValuesOrEventsFromSecondaryFileInAMC(
+                        return deleteDatasetValuesOrEventsFromSecondaryFile(
+                            uploadToDelete.moduleName,
                             repositories,
                             secondaryArrayBuffer,
                             secondaryFileToDelete.eventListFileId,
