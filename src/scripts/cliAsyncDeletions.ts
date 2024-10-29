@@ -52,7 +52,8 @@ import { RemoveAsyncDeletionsUseCase } from "../domain/usecases/RemoveAsyncDelet
 import { SendNotificationsUseCase } from "../domain/usecases/SendNotificationsUseCase";
 import { NotificationRepository } from "../domain/repositories/NotificationRepository";
 import { UsersRepository } from "../domain/repositories/UsersRepository";
-import { DeleteRISFileUseCase } from "../domain/usecases/data-entry/amr/DeleteRISFileUseCase";
+import { DeleteRISDatasetUseCase } from "../domain/usecases/data-entry/amr/DeleteRISDatasetUseCase";
+import { DeleteEGASPDatasetUseCase } from "../domain/usecases/data-entry/egasp/DeleteEGASPDatasetUseCase";
 
 const UPLOADED_FILE_STATUS_LOWERCASE = "uploaded";
 const IMPORT_SUMMARY_STATUS_ERROR = "ERROR";
@@ -283,7 +284,7 @@ function deleteUploadAndDocumentFromDatasoreAndDHIS2(
         });
 }
 
-function deleteDatasetValuesOrEventsFromPrimaryFile(
+function deleteDatasetValuesOrEventsFromPrimaryUploaded(
     currentModuleName: string,
     repositories: {
         glassDocumentsRepository: GlassDocumentsRepository;
@@ -308,32 +309,22 @@ function deleteDatasetValuesOrEventsFromPrimaryFile(
     eventListId: string | undefined,
     calculatedEventListFileId?: string
 ): FutureData<ImportSummary> {
-    const {
-        glassDocumentsRepository,
-        metadataRepository,
-        excelRepository,
-        trackerRepository,
-        instanceRepository,
-        amcSubstanceDataRepository,
-        risDataRepository,
-        dataValuesRepository,
-    } = repositories;
-
     switch (currentModuleName) {
         case "AMR": {
-            return new DeleteRISFileUseCase(risDataRepository, metadataRepository, dataValuesRepository).execute(
-                arrayBuffer
-            );
+            return new DeleteRISDatasetUseCase(repositories).execute(arrayBuffer);
         }
+
+        case "EGASP": {
+            return new DeleteEGASPDatasetUseCase(repositories).execute(arrayBuffer, eventListId);
+        }
+
         case "AMC": {
-            return new DeleteAMCProductLevelDataUseCase(
-                excelRepository,
-                instanceRepository,
-                trackerRepository,
-                glassDocumentsRepository,
-                metadataRepository,
-                amcSubstanceDataRepository
-            ).execute(arrayBuffer, eventListId, orgUnitId, calculatedEventListFileId);
+            return new DeleteAMCProductLevelDataUseCase(repositories).execute(
+                arrayBuffer,
+                eventListId,
+                orgUnitId,
+                calculatedEventListFileId
+            );
         }
         default: {
             return Future.error(`Module ${currentModuleName} not found`);
@@ -341,7 +332,7 @@ function deleteDatasetValuesOrEventsFromPrimaryFile(
     }
 }
 
-function deleteDatasetValuesOrEventsFromSecondaryFile(
+function deleteDatasetValuesOrEventsFromSecondaryUploaded(
     currentModuleName: string,
     repositories: {
         sampleDataRepository: SampleDataRepository;
@@ -359,25 +350,13 @@ function deleteDatasetValuesOrEventsFromSecondaryFile(
     eventListId: string | undefined,
     calculatedEventListFileId?: string
 ): FutureData<ImportSummary> {
-    const {
-        metadataRepository,
-        excelRepository,
-        instanceRepository,
-        glassDocumentsRepository,
-        dhis2EventsDefaultRepository,
-        glassAtcRepository,
-    } = repositories;
-
     switch (currentModuleName) {
         case "AMC": {
-            return new DeleteAMCSubstanceLevelDataUseCase(
-                excelRepository,
-                instanceRepository,
-                glassDocumentsRepository,
-                dhis2EventsDefaultRepository,
-                metadataRepository,
-                glassAtcRepository
-            ).execute(arrayBuffer, eventListId, calculatedEventListFileId);
+            return new DeleteAMCSubstanceLevelDataUseCase(repositories).execute(
+                arrayBuffer,
+                eventListId,
+                calculatedEventListFileId
+            );
         }
         default: {
             return Future.error(`Module ${currentModuleName} not found`);
@@ -420,7 +399,7 @@ function deleteDatasetValuesOrEvents(
             primaryFileToDelete &&
             (primaryFileToDelete.status.toLowerCase() !== UPLOADED_FILE_STATUS_LOWERCASE ||
                 !moduleProperties.get(currentModuleName)?.isDryRunReq)
-                ? deleteDatasetValuesOrEventsFromPrimaryFile(
+                ? deleteDatasetValuesOrEventsFromPrimaryUploaded(
                       currentModuleName,
                       repositories,
                       primaryArrayBuffer,
@@ -433,7 +412,7 @@ function deleteDatasetValuesOrEvents(
             secondaryArrayBuffer &&
             secondaryFileToDelete &&
             secondaryFileToDelete.status.toLowerCase() !== UPLOADED_FILE_STATUS_LOWERCASE
-                ? deleteDatasetValuesOrEventsFromSecondaryFile(
+                ? deleteDatasetValuesOrEventsFromSecondaryUploaded(
                       currentModuleName,
                       repositories,
                       secondaryArrayBuffer,
@@ -528,7 +507,7 @@ function deleteUploadedDatasets(
                 } else if (secondaryFileToDelete && secondaryArrayBuffer) {
                     if (secondaryFileToDelete.status.toLowerCase() !== UPLOADED_FILE_STATUS_LOWERCASE) {
                         console.debug("Delete only secondary uploaded dataset");
-                        return deleteDatasetValuesOrEventsFromSecondaryFile(
+                        return deleteDatasetValuesOrEventsFromSecondaryUploaded(
                             uploadToDelete.moduleName,
                             repositories,
                             secondaryArrayBuffer,
