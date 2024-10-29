@@ -37,4 +37,33 @@ export class SpreadsheetXlsxDataSource implements SpreadsheetDataSource {
             return { name: "", sheets: [] };
         }
     }
+
+    async readFromArrayBuffer(arrayBuffer: ArrayBuffer, fileName?: string): Async<Spreadsheet> {
+        try {
+            const workbook = XLSX.read(arrayBuffer, { cellDates: true });
+
+            const sheets = _(workbook.Sheets)
+                .toPairs()
+                .map(([sheetName, worksheet]): Sheet => {
+                    const headers = XLSX.utils.sheet_to_json<string[]>(worksheet, { header: 1, defval: "" })[0] || [];
+                    const rows = XLSX.utils.sheet_to_json<Row<string>>(worksheet, { raw: true, skipHidden: false });
+
+                    return {
+                        name: sheetName,
+                        headers,
+                        rows,
+                    };
+                })
+                .value();
+
+            const spreadsheet: Spreadsheet = {
+                name: fileName || "",
+                sheets,
+            };
+
+            return spreadsheet;
+        } catch (e) {
+            return { name: "", sheets: [] };
+        }
+    }
 }

@@ -15,7 +15,7 @@ import { InstanceRepository } from "../../../repositories/InstanceRepository";
 import { UseCase } from "../../../../CompositionRoot";
 import { AMC_PRODUCT_REGISTER_PROGRAM_ID, AMR_GLASS_AMC_TET_PRODUCT_REGISTER } from "./ImportAMCProductLevelData";
 
-// NOTICE: code adapted for node environment from importAMCProductFile.ts (only DELETE);
+// NOTICE: code adapted for node environment from ImportAMCProductLevelData.ts (only DELETE);
 export class DeleteAMCProductLevelDataUseCase implements UseCase {
     constructor(
         private excelRepository: ExcelRepository,
