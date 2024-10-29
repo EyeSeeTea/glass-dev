@@ -21,7 +21,7 @@ import { Country } from "../../../entities/Country";
 import i18n from "../../../../locales";
 
 export const AMRIProgramID = "mMAj6Gofe49";
-const AMR_GLASS_AMR_TET_PATIENT = "CcgnfemKr5U";
+export const AMR_GLASS_AMR_TET_PATIENT = "CcgnfemKr5U";
 export const AMRDataProgramStageId = "KCmWZD8qoAk";
 export const AMRCandidaProgramStageId = "ysGSonDq9Bc";
 
@@ -139,6 +139,7 @@ export class ImportRISIndividualFungalFile {
                     );
                 });
         } else {
+            // NOTICE: check also DeleteRISIndividualFungalFileUseCase.ts that contains same code adapted for node environment (only DELETE)
             return downloadIdsAndDeleteTrackedEntities(
                 eventListId,
                 orgUnit,
