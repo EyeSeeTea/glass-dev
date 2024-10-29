@@ -15,7 +15,7 @@ import { UseCase } from "../../../../CompositionRoot";
 import { AMR_AMR_DS_Input_files_Sample_DS_ID, AMR_BATCHID_CC_ID } from "./ImportSampleFile";
 
 // NOTICE: code adapted for node environment from ImportSampleFile.ts (only DELETE)
-export class DeleteSampleFileUseCase implements UseCase {
+export class DeleteSampleDatasetUseCase implements UseCase {
     constructor(
         private options: {
             sampleDataRepository: SampleDataRepository;
