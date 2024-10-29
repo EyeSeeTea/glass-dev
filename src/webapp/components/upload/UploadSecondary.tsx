@@ -78,6 +78,7 @@ export const UploadSecondary: React.FC<UploadSecondaryProps> = ({
                             if (!dataSubmissionId) {
                                 snackbar.error(i18n.t("Data submission id not found. Please try again"));
                                 setIsLoading(false);
+                                return;
                             }
 
                             if (sampleData.isValid) {
