@@ -18,7 +18,7 @@ import { useCurrentModuleContext } from "../../contexts/current-module-context";
 import { useGlassCaptureAccess } from "../../hooks/useGlassCaptureAccess";
 import { StyledLoaderContainer } from "../upload/ConsistencyChecks";
 import { useCurrentPeriodContext } from "../../contexts/current-period-context";
-import { AMC_MODULE_NAME, moduleProperties } from "../../../domain/utils/ModuleProperties";
+import { moduleProperties } from "../../../domain/utils/ModuleProperties";
 import { ImportSummaryErrors } from "../../../domain/entities/data-entry/ImportSummary";
 import { ImportSummaryErrorsDialog } from "../import-summary-errors-dialog/ImportSummaryErrorsDialog";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
@@ -94,15 +94,12 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
     //1. Delete corresponsding datasetValue/event for each row in the file.
     //2. Delete corresponding document from DHIS
     //3. Delete corresponding 'upload' and 'document' from Datastore
-    //* If it's a file from AMC then is only set to async deletion in Datastore
+    //* If it's a file from a GLASS module with property hasAsyncDeletion === true, then is only set to async deletion in Datastore
     const deleteDataset = () => {
         hideDeleteConfirmationDialog();
         if (!rowToDelete || asyncDeletionsState.kind !== "loaded") return;
 
-        if (
-            moduleProperties.get(currentModuleAccess.moduleName)?.hasAsyncDeletion &&
-            currentModuleAccess.moduleName === AMC_MODULE_NAME
-        ) {
+        if (moduleProperties.get(currentModuleAccess.moduleName)?.hasAsyncDeletion) {
             if (asyncDeletionsState.data.includes(rowToDelete.id)) return;
 
             setToAsyncDeletion(rowToDelete.id);
