@@ -54,6 +54,7 @@ import { NotificationRepository } from "../domain/repositories/NotificationRepos
 import { UsersRepository } from "../domain/repositories/UsersRepository";
 import { DeleteRISDatasetUseCase } from "../domain/usecases/data-entry/amr/DeleteRISDatasetUseCase";
 import { DeleteEGASPDatasetUseCase } from "../domain/usecases/data-entry/egasp/DeleteEGASPDatasetUseCase";
+import { DeleteRISIndividualFungalFileUseCase } from "../domain/usecases/data-entry/amr-individual-fungal/DeleteRISIndividualFungalFileUseCase";
 
 const UPLOADED_FILE_STATUS_LOWERCASE = "uploaded";
 const IMPORT_SUMMARY_STATUS_ERROR = "ERROR";
@@ -316,6 +317,11 @@ function deleteDatasetValuesOrEventsFromPrimaryUploaded(
 
         case "EGASP": {
             return new DeleteEGASPDatasetUseCase(repositories).execute(arrayBuffer, eventListId);
+        }
+
+        case "AMR - Individual":
+        case "AMR - Fungal": {
+            return new DeleteRISIndividualFungalFileUseCase(repositories).execute(orgUnitId, eventListId);
         }
 
         case "AMC": {
