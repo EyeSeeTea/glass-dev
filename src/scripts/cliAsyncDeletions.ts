@@ -55,7 +55,7 @@ import { UsersRepository } from "../domain/repositories/UsersRepository";
 import { DeleteRISDatasetUseCase } from "../domain/usecases/data-entry/amr/DeleteRISDatasetUseCase";
 import { DeleteEGASPDatasetUseCase } from "../domain/usecases/data-entry/egasp/DeleteEGASPDatasetUseCase";
 import { DeleteRISIndividualFungalFileUseCase } from "../domain/usecases/data-entry/amr-individual-fungal/DeleteRISIndividualFungalFileUseCase";
-import { DeleteSampleFileUseCase } from "../domain/usecases/data-entry/amr/DeleteSampleFileUseCase";
+import { DeleteSampleDatasetUseCase } from "../domain/usecases/data-entry/amr/DeleteSampleDatasetUseCase";
 
 const UPLOADED_FILE_STATUS_LOWERCASE = "uploaded";
 const IMPORT_SUMMARY_STATUS_ERROR = "ERROR";
@@ -357,7 +357,7 @@ function deleteDatasetValuesOrEventsFromSecondaryUploaded(
     switch (currentModuleName) {
         case "AMR":
         case "AMR - Individual": {
-            return new DeleteSampleFileUseCase(repositories).execute(arrayBuffer);
+            return new DeleteSampleDatasetUseCase(repositories).execute(arrayBuffer);
         }
 
         case "AMC": {

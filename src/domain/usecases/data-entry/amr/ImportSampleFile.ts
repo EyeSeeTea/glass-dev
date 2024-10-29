@@ -29,7 +29,7 @@ export class ImportSampleFile {
         private dataValuesRepository: DataValuesRepository
     ) {}
 
-    // NOTICE: check also DeleteSampleFileUseCase.ts that contains same code adapted for node environment (only DELETE)
+    // NOTICE: check also DeleteSampleDatasetUseCase.ts that contains same code adapted for node environment (only DELETE)
     public import(
         inputFile: File,
         batchId: string,
