@@ -129,6 +129,7 @@ export class ImportBLTemplateEventProgram {
                                     });
                                 } //action === "DELETE"
                                 else {
+                                    // NOTICE: check also DeleteBLTemplateEventProgram.ts that contains same code adapted for node environment (only DELETE)
                                     return this.deleteEvents(events);
                                 }
                             });
@@ -143,7 +144,6 @@ export class ImportBLTemplateEventProgram {
         });
     }
 
-    // NOTICE: check also DeleteAMCSubstanceLevelDataUseCase.ts that contains same code adapted for node environment
     private deleteEvents(events: D2TrackerEvent[]): FutureData<ImportSummary> {
         return this.dhis2EventsDefaultRepository.import({ events }, "DELETE").flatMap(result => {
             return mapToImportSummary(result, "event", this.metadataRepository).flatMap(({ importSummary }) => {

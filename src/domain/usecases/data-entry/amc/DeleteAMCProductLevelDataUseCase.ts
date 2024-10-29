@@ -15,15 +15,17 @@ import { InstanceRepository } from "../../../repositories/InstanceRepository";
 import { UseCase } from "../../../../CompositionRoot";
 import { AMC_PRODUCT_REGISTER_PROGRAM_ID, AMR_GLASS_AMC_TET_PRODUCT_REGISTER } from "./ImportAMCProductLevelData";
 
-// NOTICE: code adapted for node environment from ImportAMCProductLevelData.ts (only DELETE);
+// NOTICE: code adapted for node environment from ImportAMCProductLevelData.ts (only DELETE)
 export class DeleteAMCProductLevelDataUseCase implements UseCase {
     constructor(
-        private excelRepository: ExcelRepository,
-        private instanceRepository: InstanceRepository,
-        private trackerRepository: TrackerRepository,
-        private glassDocumentsRepository: GlassDocumentsRepository,
-        private metadataRepository: MetadataRepository,
-        private amcSubstanceDataRepository: AMCSubstanceDataRepository
+        private options: {
+            excelRepository: ExcelRepository;
+            instanceRepository: InstanceRepository;
+            trackerRepository: TrackerRepository;
+            glassDocumentsRepository: GlassDocumentsRepository;
+            metadataRepository: MetadataRepository;
+            amcSubstanceDataRepository: AMCSubstanceDataRepository;
+        }
     ) {}
 
     public execute(
@@ -32,49 +34,51 @@ export class DeleteAMCProductLevelDataUseCase implements UseCase {
         orgUnitId: string,
         calculatedEventListFileId?: string
     ): FutureData<ImportSummary> {
-        return this.excelRepository
+        return this.options.excelRepository
             .loadTemplateFromArrayBuffer(arrayBuffer, AMC_PRODUCT_REGISTER_PROGRAM_ID)
             .flatMap(_templateId => {
                 const amcTemplate = _.values(templates)
                     .map(TemplateClass => new TemplateClass())
                     .filter(t => t.id === "TRACKER_PROGRAM_GENERATED_v3")[0];
 
-                return this.instanceRepository.getProgram(AMC_PRODUCT_REGISTER_PROGRAM_ID).flatMap(amcProgram => {
-                    if (!amcTemplate) return Future.error("Cannot find template");
+                return this.options.instanceRepository
+                    .getProgram(AMC_PRODUCT_REGISTER_PROGRAM_ID)
+                    .flatMap(amcProgram => {
+                        if (!amcTemplate) return Future.error("Cannot find template");
 
-                    return readTemplate(
-                        amcTemplate,
-                        amcProgram,
-                        this.excelRepository,
-                        this.instanceRepository,
-                        AMC_PRODUCT_REGISTER_PROGRAM_ID
-                    ).flatMap(dataPackage => {
-                        if (!dataPackage) return Future.error("Cannot find data package");
+                        return readTemplate(
+                            amcTemplate,
+                            amcProgram,
+                            this.options.excelRepository,
+                            this.options.instanceRepository,
+                            AMC_PRODUCT_REGISTER_PROGRAM_ID
+                        ).flatMap(dataPackage => {
+                            if (!dataPackage) return Future.error("Cannot find data package");
 
-                        return downloadIdsAndDeleteTrackedEntitiesUsingFileBlob(
-                            eventListId,
-                            orgUnitId,
-                            "DELETE",
-                            AMR_GLASS_AMC_TET_PRODUCT_REGISTER,
-                            this.glassDocumentsRepository,
-                            this.trackerRepository,
-                            this.metadataRepository
-                        ).flatMap(deleteProductSummary => {
-                            if (
-                                (deleteProductSummary.status === "SUCCESS" ||
-                                    deleteProductSummary.status === "WARNING") &&
-                                calculatedEventListFileId
-                            ) {
-                                return this.deleteCalculatedSubstanceConsumptionData(
-                                    deleteProductSummary,
+                            return downloadIdsAndDeleteTrackedEntitiesUsingFileBlob(
+                                eventListId,
+                                orgUnitId,
+                                "DELETE",
+                                AMR_GLASS_AMC_TET_PRODUCT_REGISTER,
+                                this.options.glassDocumentsRepository,
+                                this.options.trackerRepository,
+                                this.options.metadataRepository
+                            ).flatMap(deleteProductSummary => {
+                                if (
+                                    (deleteProductSummary.status === "SUCCESS" ||
+                                        deleteProductSummary.status === "WARNING") &&
                                     calculatedEventListFileId
-                                );
-                            }
+                                ) {
+                                    return this.deleteCalculatedSubstanceConsumptionData(
+                                        deleteProductSummary,
+                                        calculatedEventListFileId
+                                    );
+                                }
 
-                            return Future.success(deleteProductSummary);
+                                return Future.success(deleteProductSummary);
+                            });
                         });
                     });
-                });
             });
     }
 
@@ -82,18 +86,18 @@ export class DeleteAMCProductLevelDataUseCase implements UseCase {
         deleteProductSummary: ImportSummary,
         calculatedSubstanceConsumptionListFileId: string
     ) {
-        return this.glassDocumentsRepository
+        return this.options.glassDocumentsRepository
             .download(calculatedSubstanceConsumptionListFileId)
             .flatMap(eventListFileBlob => {
                 return getStringFromFileBlob(eventListFileBlob).flatMap(_events => {
                     const calculatedConsumptionIds: string[] = JSON.parse(_events);
-                    return this.amcSubstanceDataRepository
+                    return this.options.amcSubstanceDataRepository
                         .deleteCalculatedSubstanceConsumptionDataById(calculatedConsumptionIds)
                         .flatMap(deleteCalculatedSubstanceConsumptionResponse => {
                             return mapToImportSummary(
                                 deleteCalculatedSubstanceConsumptionResponse,
                                 "event",
-                                this.metadataRepository
+                                this.options.metadataRepository
                             ).flatMap(deleteCalculatedSubstanceConsumptionSummary => {
                                 return Future.success({
                                     ...deleteCalculatedSubstanceConsumptionSummary.importSummary,

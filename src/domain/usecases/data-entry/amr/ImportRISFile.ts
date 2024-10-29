@@ -33,7 +33,7 @@ export class ImportRISFile {
         private moduleRepository: GlassModuleRepository
     ) {}
 
-    // NOTICE: check also DeleteRISFileUseCase.ts that contains same code adapted for node environment (only DELETE);
+    // NOTICE: check also DeleteRISDatasetUseCase.ts that contains same code adapted for node environment (only DELETE)
     public importRISFile(
         inputFile: File,
         batchId: string,

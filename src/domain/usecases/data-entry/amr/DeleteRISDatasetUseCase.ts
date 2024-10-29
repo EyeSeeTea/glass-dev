@@ -14,28 +14,30 @@ import { RISData } from "../../../entities/data-entry/amr-external/RISData";
 import { UseCase } from "../../../../CompositionRoot";
 import { AMR_AMR_DS_INPUT_FILES_RIS_DS_ID, AMR_DATA_PATHOGEN_ANTIBIOTIC_BATCHID_CC_ID } from "./ImportRISFile";
 
-// NOTICE: code adapted for node environment from ImportRISFile.ts (only DELETE);
-export class DeleteRISFileUseCase implements UseCase {
+// NOTICE: code adapted for node environment from ImportRISFile.ts (only DELETE)
+export class DeleteRISDatasetUseCase implements UseCase {
     constructor(
-        private risDataRepository: RISDataRepository,
-        private metadataRepository: MetadataRepository,
-        private dataValuesRepository: DataValuesRepository
+        private options: {
+            risDataRepository: RISDataRepository;
+            metadataRepository: MetadataRepository;
+            dataValuesRepository: DataValuesRepository;
+        }
     ) {}
 
     public execute(arrayBuffer: ArrayBuffer): FutureData<ImportSummary> {
-        return this.risDataRepository
+        return this.options.risDataRepository
             .getFromArayBuffer(arrayBuffer)
             .flatMap(risDataItems => {
                 return Future.joinObj({
                     risDataItems: Future.success(risDataItems),
-                    dataSet: this.metadataRepository.getDataSet(AMR_AMR_DS_INPUT_FILES_RIS_DS_ID),
-                    dataSet_CC: this.metadataRepository.getCategoryCombination(
+                    dataSet: this.options.metadataRepository.getDataSet(AMR_AMR_DS_INPUT_FILES_RIS_DS_ID),
+                    dataSet_CC: this.options.metadataRepository.getCategoryCombination(
                         AMR_DATA_PATHOGEN_ANTIBIOTIC_BATCHID_CC_ID
                     ),
-                    dataElement_CC: this.metadataRepository.getCategoryCombination(
+                    dataElement_CC: this.options.metadataRepository.getCategoryCombination(
                         AMR_SPECIMEN_GENDER_AGE_ORIGIN_CC_ID
                     ),
-                    orgUnits: this.metadataRepository.getOrgUnitsByCode([
+                    orgUnits: this.options.metadataRepository.getOrgUnitsByCode([
                         ...new Set(risDataItems.map(item => item.COUNTRY)),
                     ]),
                 });
@@ -78,7 +80,7 @@ export class DeleteRISFileUseCase implements UseCase {
                     })
                     .flat();
 
-                return this.dataValuesRepository.save(dataValues, "DELETE", false).map(saveSummary => {
+                return this.options.dataValuesRepository.save(dataValues, "DELETE", false).map(saveSummary => {
                     const importSummary = mapDataValuesToImportSummary(saveSummary, "DELETE");
 
                     const summaryWithConsistencyBlokingErrors = includeBlockingErrors(importSummary, []);
