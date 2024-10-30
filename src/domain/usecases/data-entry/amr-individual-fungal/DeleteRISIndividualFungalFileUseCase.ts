@@ -3,9 +3,12 @@ import { ImportSummary } from "../../../entities/data-entry/ImportSummary";
 import { GlassDocumentsRepository } from "../../../repositories/GlassDocumentsRepository";
 import { TrackerRepository } from "../../../repositories/TrackerRepository";
 import { MetadataRepository } from "../../../repositories/MetadataRepository";
-import { UseCase } from "../../../../CompositionRoot";
-import { AMR_GLASS_AMR_TET_PATIENT } from "./ImportRISIndividualFungalFile";
 import { downloadIdsAndDeleteTrackedEntitiesUsingFileBlob } from "../utils/downloadIdsAndDeleteTrackedEntities";
+import { UseCase } from "../../../../CompositionRoot";
+import { AMR_GLASS_AMR_TET_PATIENT, AMRIProgramID } from "./ImportRISIndividualFungalFile";
+import { Id } from "../../../entities/Ref";
+import { GlassUploadsRepository } from "../../../repositories/GlassUploadsRepository";
+import { GlassUploads } from "../../../entities/GlassUploads";
 
 // NOTICE: code adapted for node environment from ImportRISIndividualFungalFile.ts (only DELETE)
 export class DeleteRISIndividualFungalFileUseCase implements UseCase {
@@ -14,18 +17,21 @@ export class DeleteRISIndividualFungalFileUseCase implements UseCase {
             trackerRepository: TrackerRepository;
             glassDocumentsRepository: GlassDocumentsRepository;
             metadataRepository: MetadataRepository;
+            glassUploadsRepository: GlassUploadsRepository;
         }
     ) {}
 
-    public execute(orgUnitId: string, eventListId: string | undefined): FutureData<ImportSummary> {
+    public execute(upload: GlassUploads, programId: Id | undefined): FutureData<ImportSummary> {
+        const AMRIProgramIDl = programId || AMRIProgramID;
         return downloadIdsAndDeleteTrackedEntitiesUsingFileBlob(
-            eventListId,
-            orgUnitId,
+            upload,
+            AMRIProgramIDl,
             "DELETE",
             AMR_GLASS_AMR_TET_PATIENT,
             this.options.glassDocumentsRepository,
             this.options.trackerRepository,
-            this.options.metadataRepository
+            this.options.metadataRepository,
+            this.options.glassUploadsRepository
         );
     }
 }

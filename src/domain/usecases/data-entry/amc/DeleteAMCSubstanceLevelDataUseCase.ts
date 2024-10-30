@@ -7,7 +7,13 @@ import { MetadataRepository } from "../../../repositories/MetadataRepository";
 import { InstanceRepository } from "../../../repositories/InstanceRepository";
 import { UseCase } from "../../../../CompositionRoot";
 import { DeleteBLTemplateEventProgram } from "../DeleteBLTemplateEventProgram";
-import { AMC_RAW_SUBSTANCE_CONSUMPTION_PROGRAM_ID } from "./ImportAMCSubstanceLevelData";
+import {
+    AMC_RAW_SUBSTANCE_CONSUMPTION_PROGRAM_ID,
+    AMC_SUBSTANCE_CALCULATED_CONSUMPTION_PROGRAM_ID,
+} from "./ImportAMCSubstanceLevelData";
+import { GlassUploads } from "../../../entities/GlassUploads";
+import { GlassUploadsRepository } from "../../../repositories/GlassUploadsRepository";
+import { TrackerRepository } from "../../../repositories/TrackerRepository";
 
 export class DeleteAMCSubstanceLevelDataUseCase implements UseCase {
     constructor(
@@ -17,26 +23,26 @@ export class DeleteAMCSubstanceLevelDataUseCase implements UseCase {
             glassDocumentsRepository: GlassDocumentsRepository;
             metadataRepository: MetadataRepository;
             instanceRepository: InstanceRepository;
+            glassUploadsRepository: GlassUploadsRepository;
+            trackerRepository: TrackerRepository;
         }
     ) {}
-    public execute(
-        arrayBuffer: ArrayBuffer,
-        eventListFileId: string | undefined,
-        calculatedEventListFileId?: string
-    ): FutureData<ImportSummary> {
+    public execute(arrayBuffer: ArrayBuffer, upload: GlassUploads): FutureData<ImportSummary> {
         const deleteBLTemplateEventProgram = new DeleteBLTemplateEventProgram(
             this.options.excelRepository,
             this.options.instanceRepository,
             this.options.glassDocumentsRepository,
             this.options.dhis2EventsDefaultRepository,
-            this.options.metadataRepository
+            this.options.metadataRepository,
+            this.options.glassUploadsRepository,
+            this.options.trackerRepository
         );
 
         return deleteBLTemplateEventProgram.delete(
             arrayBuffer,
             AMC_RAW_SUBSTANCE_CONSUMPTION_PROGRAM_ID,
-            eventListFileId,
-            calculatedEventListFileId
+            upload,
+            AMC_SUBSTANCE_CALCULATED_CONSUMPTION_PROGRAM_ID
         );
     }
 }

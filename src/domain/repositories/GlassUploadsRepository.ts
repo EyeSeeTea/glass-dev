@@ -29,4 +29,6 @@ export interface GlassUploadsRepository {
     setAsyncDeletion(uploadIdToDelete: Id): FutureData<Id>;
     getAsyncDeletions(): FutureData<Id[]>;
     removeAsyncDeletions(uploadIdToRemove: Id[]): FutureData<Id[]>;
+    setEventListDataDeleted(id: string): FutureData<void>;
+    setCalculatedEventListDataDeleted(id: string): FutureData<void>;
 }
