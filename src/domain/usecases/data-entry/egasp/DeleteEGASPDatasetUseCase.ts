@@ -8,6 +8,9 @@ import { EGASP_PROGRAM_ID } from "../../../../data/repositories/program-rule/Pro
 import { InstanceRepository } from "../../../repositories/InstanceRepository";
 import { DeleteBLTemplateEventProgram } from "../DeleteBLTemplateEventProgram";
 import { UseCase } from "../../../../CompositionRoot";
+import { GlassUploads } from "../../../entities/GlassUploads";
+import { GlassUploadsRepository } from "../../../repositories/GlassUploadsRepository";
+import { TrackerRepository } from "../../../repositories/TrackerRepository";
 
 export class DeleteEGASPDatasetUseCase implements UseCase {
     constructor(
@@ -17,18 +20,22 @@ export class DeleteEGASPDatasetUseCase implements UseCase {
             glassDocumentsRepository: GlassDocumentsRepository;
             metadataRepository: MetadataRepository;
             instanceRepository: InstanceRepository;
+            glassUploadsRepository: GlassUploadsRepository;
+            trackerRepository: TrackerRepository;
         }
     ) {}
 
-    public execute(arrayBuffer: ArrayBuffer, eventListFileId: string | undefined): FutureData<ImportSummary> {
+    public execute(arrayBuffer: ArrayBuffer, upload: GlassUploads): FutureData<ImportSummary> {
         const deleteBLTemplateEventProgram = new DeleteBLTemplateEventProgram(
             this.options.excelRepository,
             this.options.instanceRepository,
             this.options.glassDocumentsRepository,
             this.options.dhis2EventsDefaultRepository,
-            this.options.metadataRepository
+            this.options.metadataRepository,
+            this.options.glassUploadsRepository,
+            this.options.trackerRepository
         );
 
-        return deleteBLTemplateEventProgram.delete(arrayBuffer, EGASP_PROGRAM_ID, eventListFileId);
+        return deleteBLTemplateEventProgram.delete(arrayBuffer, EGASP_PROGRAM_ID, upload);
     }
 }

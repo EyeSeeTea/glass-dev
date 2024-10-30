@@ -18,7 +18,6 @@ import { getPrimaryAndSecondaryFilesToDelete } from "../webapp/utils/getPrimaryA
 import { DownloadDocumentUseCase } from "../domain/usecases/DownloadDocumentUseCase";
 import { GlassDocumentsRepository } from "../domain/repositories/GlassDocumentsRepository";
 import { GlassDocumentsDefaultRepository } from "../data/repositories/GlassDocumentsDefaultRepository";
-import { UploadsDataItem } from "../webapp/entities/uploads";
 import { ImportSummary } from "../domain/entities/data-entry/ImportSummary";
 import { RISDataCSVDefaultRepository } from "../data/repositories/data-entry/RISDataCSVDefaultRepository";
 import { RISIndividualFungalDataCSVDefaultRepository } from "../data/repositories/data-entry/RISIndividualFungalDataCSVDefaultRepository";
@@ -146,7 +145,7 @@ async function main() {
                                         return Future.error(`Uploads to delete not found in Datastore`);
                                     }
 
-                                    return deleteUploadedDatasets(uploadsToDelete, allUploads, {
+                                    return deleteUploadedDatasets(uploadsToDelete, allUploads, glassModules, {
                                         sampleDataRepository,
                                         metadataRepository,
                                         dataValuesRepository,
@@ -287,7 +286,9 @@ function deleteUploadAndDocumentFromDatasoreAndDHIS2(
 }
 
 function deleteDatasetValuesOrEventsFromPrimaryUploaded(
-    currentModuleName: GlassModuleName,
+    currentModule: GlassModule,
+    upload: GlassUploads,
+    arrayBuffer: ArrayBuffer,
     repositories: {
         glassDocumentsRepository: GlassDocumentsRepository;
         risDataRepository: RISDataRepository;
@@ -305,39 +306,38 @@ function deleteDatasetValuesOrEventsFromPrimaryUploaded(
         amcProductRepository: AMCProductDataRepository;
         amcSubstanceDataRepository: AMCSubstanceDataRepository;
         glassAtcRepository: GlassATCRepository;
-    },
-    arrayBuffer: ArrayBuffer,
-    orgUnitId: string,
-    eventListId: string | undefined,
-    calculatedEventListFileId?: string
+    }
 ): FutureData<ImportSummary> {
+    const { name: currentModuleName } = currentModule;
     switch (currentModuleName) {
         case "AMR": {
             return new DeleteRISDatasetUseCase(repositories).execute(arrayBuffer);
         }
 
         case "EGASP": {
-            return new DeleteEGASPDatasetUseCase(repositories).execute(arrayBuffer, eventListId);
+            return new DeleteEGASPDatasetUseCase(repositories).execute(arrayBuffer, upload);
         }
 
         case "AMR - Individual":
         case "AMR - Fungal": {
-            return new DeleteRISIndividualFungalFileUseCase(repositories).execute(orgUnitId, eventListId);
+            const programId = currentModule.programs !== undefined ? currentModule.programs.at(0)?.id : undefined;
+            return new DeleteRISIndividualFungalFileUseCase(repositories).execute(upload, programId);
         }
 
         case "AMC": {
-            return new DeleteAMCProductLevelDataUseCase(repositories).execute(
-                arrayBuffer,
-                eventListId,
-                orgUnitId,
-                calculatedEventListFileId
-            );
+            return new DeleteAMCProductLevelDataUseCase(repositories).execute(arrayBuffer, upload);
+        }
+
+        default: {
+            return Future.error(`Primary upload async deletion for module ${currentModuleName} not found`);
         }
     }
 }
 
 function deleteDatasetValuesOrEventsFromSecondaryUploaded(
-    currentModuleName: GlassModuleName,
+    currentModule: GlassModule,
+    upload: GlassUploads,
+    arrayBuffer: ArrayBuffer,
     repositories: {
         sampleDataRepository: SampleDataRepository;
         metadataRepository: MetadataRepository;
@@ -349,11 +349,10 @@ function deleteDatasetValuesOrEventsFromSecondaryUploaded(
         dhis2EventsDefaultRepository: Dhis2EventsDefaultRepository;
         programRulesMetadataRepository: ProgramRulesMetadataRepository;
         glassAtcRepository: GlassATCRepository;
-    },
-    arrayBuffer: ArrayBuffer,
-    eventListId: string | undefined,
-    calculatedEventListFileId?: string
+        trackerRepository: TrackerRepository;
+    }
 ): FutureData<ImportSummary> {
+    const { name: currentModuleName } = currentModule;
     switch (currentModuleName) {
         case "AMR":
         case "AMR - Individual": {
@@ -361,11 +360,7 @@ function deleteDatasetValuesOrEventsFromSecondaryUploaded(
         }
 
         case "AMC": {
-            return new DeleteAMCSubstanceLevelDataUseCase(repositories).execute(
-                arrayBuffer,
-                eventListId,
-                calculatedEventListFileId
-            );
+            return new DeleteAMCSubstanceLevelDataUseCase(repositories).execute(arrayBuffer, upload);
         }
         default: {
             return Future.error(`Secondary upload async deletion for module ${currentModuleName} not found`);
@@ -374,11 +369,11 @@ function deleteDatasetValuesOrEventsFromSecondaryUploaded(
 }
 
 function deleteDatasetValuesOrEvents(
-    primaryFileToDelete: UploadsDataItem | undefined,
-    secondaryFileToDelete: UploadsDataItem | undefined,
+    primaryFileToDelete: GlassUploads | undefined,
+    secondaryFileToDelete: GlassUploads | undefined,
     primaryArrayBuffer: ArrayBuffer | undefined,
     secondaryArrayBuffer: ArrayBuffer | undefined,
-    currentModuleName: GlassModuleName,
+    currentModule: GlassModule,
     repositories: {
         sampleDataRepository: SampleDataRepository;
         metadataRepository: MetadataRepository;
@@ -402,6 +397,7 @@ function deleteDatasetValuesOrEvents(
     deletePrimaryFileSummary: ImportSummary | undefined;
     deleteSecondaryFileSummary: ImportSummary | undefined;
 }> {
+    const { name: currentModuleName } = currentModule;
     return Future.joinObj({
         deletePrimaryFileSummary:
             primaryArrayBuffer &&
@@ -409,12 +405,10 @@ function deleteDatasetValuesOrEvents(
             (primaryFileToDelete.status.toLowerCase() !== UPLOADED_FILE_STATUS_LOWERCASE ||
                 !moduleProperties.get(currentModuleName)?.isDryRunReq)
                 ? deleteDatasetValuesOrEventsFromPrimaryUploaded(
-                      currentModuleName,
-                      repositories,
+                      currentModule,
+                      primaryFileToDelete,
                       primaryArrayBuffer,
-                      primaryFileToDelete.orgUnit,
-                      primaryFileToDelete.eventListFileId,
-                      primaryFileToDelete.calculatedEventListFileId
+                      repositories
                   )
                 : Future.success(undefined),
         deleteSecondaryFileSummary:
@@ -422,10 +416,10 @@ function deleteDatasetValuesOrEvents(
             secondaryFileToDelete &&
             secondaryFileToDelete.status.toLowerCase() !== UPLOADED_FILE_STATUS_LOWERCASE
                 ? deleteDatasetValuesOrEventsFromSecondaryUploaded(
-                      currentModuleName,
-                      repositories,
+                      currentModule,
+                      secondaryFileToDelete,
                       secondaryArrayBuffer,
-                      secondaryFileToDelete.eventListFileId
+                      repositories
                   )
                 : Future.success(undefined),
     });
@@ -437,6 +431,7 @@ function deleteDatasetValuesOrEvents(
 function deleteUploadedDatasets(
     uploadsToDelete: GlassUploadsWithModuleName[],
     allUploads: GlassUploads[],
+    glassModules: GlassModule[],
     repositories: {
         sampleDataRepository: SampleDataRepository;
         metadataRepository: MetadataRepository;
@@ -466,6 +461,11 @@ function deleteUploadedDatasets(
                 allUploads
             );
 
+            const currentModule = glassModules.find(module => module.name === uploadToDelete.moduleName);
+            if (!currentModule) {
+                return Future.error(`Module ${uploadToDelete.moduleName} not found`);
+            }
+
             return Future.joinObj({
                 primaryArrayBuffer: primaryFileToDelete
                     ? getArrayBufferOfFile(primaryFileToDelete.fileId, repositories)
@@ -480,7 +480,7 @@ function deleteUploadedDatasets(
                         secondaryFileToDelete,
                         primaryArrayBuffer,
                         secondaryArrayBuffer,
-                        uploadToDelete.moduleName,
+                        currentModule,
                         repositories
                     ).flatMap(({ deletePrimaryFileSummary, deleteSecondaryFileSummary }) => {
                         if (
@@ -517,11 +517,10 @@ function deleteUploadedDatasets(
                     if (secondaryFileToDelete.status.toLowerCase() !== UPLOADED_FILE_STATUS_LOWERCASE) {
                         console.debug("Delete only secondary uploaded dataset");
                         return deleteDatasetValuesOrEventsFromSecondaryUploaded(
-                            uploadToDelete.moduleName,
-                            repositories,
+                            currentModule,
+                            secondaryFileToDelete,
                             secondaryArrayBuffer,
-                            secondaryFileToDelete.eventListFileId,
-                            secondaryFileToDelete.calculatedEventListFileId
+                            repositories
                         ).flatMap(deleteSecondaryFileSummary => {
                             if (
                                 deleteSecondaryFileSummary &&

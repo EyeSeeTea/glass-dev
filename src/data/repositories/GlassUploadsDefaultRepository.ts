@@ -46,6 +46,36 @@ export class GlassUploadsDefaultRepository implements GlassUploadsRepository {
         });
     }
 
+    setEventListDataDeleted(uploadId: string): FutureData<void> {
+        return this.dataStoreClient.listCollection<GlassUploads>(DataStoreKeys.UPLOADS).flatMap(uploads => {
+            const upload = uploads.find(el => el.id === uploadId);
+            if (upload) {
+                const restUploads = uploads.filter(upload => upload.id !== uploadId);
+                return this.dataStoreClient.saveObject(DataStoreKeys.UPLOADS, [
+                    ...restUploads,
+                    { ...upload, eventListDataDeleted: true },
+                ]);
+            } else {
+                return Future.error("Upload not found");
+            }
+        });
+    }
+
+    setCalculatedEventListDataDeleted(uploadId: string): FutureData<void> {
+        return this.dataStoreClient.listCollection<GlassUploads>(DataStoreKeys.UPLOADS).flatMap(uploads => {
+            const upload = uploads.find(el => el.id === uploadId);
+            if (upload) {
+                const restUploads = uploads.filter(upload => upload.id !== uploadId);
+                return this.dataStoreClient.saveObject(DataStoreKeys.UPLOADS, [
+                    ...restUploads,
+                    { ...upload, calculatedEventListDataDeleted: true },
+                ]);
+            } else {
+                return Future.error("Upload not found");
+            }
+        });
+    }
+
     delete(id: string): FutureData<{
         fileId: string;
         eventListFileId: string | undefined;

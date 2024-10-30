@@ -11,6 +11,10 @@ import * as templates from "../../entities/data-entry/program-templates";
 import { InstanceRepository } from "../../repositories/InstanceRepository";
 import { getStringFromFileBlob } from "./utils/fileToString";
 import { mapToImportSummary, readTemplate } from "./ImportBLTemplateEventProgram";
+import { GlassUploads } from "../../entities/GlassUploads";
+import { GlassUploadsRepository } from "../../repositories/GlassUploadsRepository";
+import { Id } from "../../entities/Ref";
+import { TrackerRepository } from "../../repositories/TrackerRepository";
 
 // NOTICE: code adapted for node environment from ImportBLTemplateEventProgram.ts (only DELETE)
 export class DeleteBLTemplateEventProgram {
@@ -19,14 +23,16 @@ export class DeleteBLTemplateEventProgram {
         private instanceRepository: InstanceRepository,
         private glassDocumentsRepository: GlassDocumentsRepository,
         private dhis2EventsDefaultRepository: Dhis2EventsDefaultRepository,
-        private metadataRepository: MetadataRepository
+        private metadataRepository: MetadataRepository,
+        private glassUploadsRepository: GlassUploadsRepository,
+        private trackerRepository: TrackerRepository
     ) {}
 
     public delete(
         arrayBuffer: ArrayBuffer,
         programId: string,
-        eventListFileId: string | undefined,
-        calculatedEventListFileId?: string
+        upload: GlassUploads,
+        calculatedProgramId?: Id
     ): FutureData<ImportSummary> {
         return this.excelRepository.loadTemplateFromArrayBuffer(arrayBuffer, programId).flatMap(_templateId => {
             const template = _.values(templates)
@@ -42,9 +48,39 @@ export class DeleteBLTemplateEventProgram {
                         programId
                     ).flatMap(dataPackage => {
                         if (dataPackage) {
-                            return this.buildEventsPayload(eventListFileId, calculatedEventListFileId).flatMap(
-                                events => {
-                                    return this.deleteEvents(events);
+                            return this.buildEventsPayload(upload, programId, calculatedProgramId).flatMap(
+                                ({ events, calculatedEvents }) => {
+                                    return this.deleteEvents(upload.id, events).flatMap(importSummary => {
+                                        return this.deleteCalculatedEvents(upload.id, calculatedEvents).flatMap(
+                                            importSummaryCalculatedEvents => {
+                                                return Future.success({
+                                                    ...importSummaryCalculatedEvents,
+                                                    importCount: {
+                                                        imported:
+                                                            importSummary.importCount.imported +
+                                                            importSummaryCalculatedEvents.importCount.imported,
+                                                        updated:
+                                                            importSummary.importCount.updated +
+                                                            importSummaryCalculatedEvents.importCount.updated,
+                                                        ignored:
+                                                            importSummary.importCount.ignored +
+                                                            importSummaryCalculatedEvents.importCount.ignored,
+                                                        deleted:
+                                                            importSummary.importCount.deleted +
+                                                            importSummaryCalculatedEvents.importCount.deleted,
+                                                    },
+                                                    nonBlockingErrors: [
+                                                        ...importSummary.nonBlockingErrors,
+                                                        ...importSummaryCalculatedEvents.nonBlockingErrors,
+                                                    ],
+                                                    blockingErrors: [
+                                                        ...importSummary.blockingErrors,
+                                                        ...importSummaryCalculatedEvents.blockingErrors,
+                                                    ],
+                                                });
+                                            }
+                                        );
+                                    });
                                 }
                             );
                         } else {
@@ -58,44 +94,115 @@ export class DeleteBLTemplateEventProgram {
         });
     }
 
-    private deleteEvents(events: D2TrackerEvent[]): FutureData<ImportSummary> {
+    private deleteEvents(uploadId: Id, events: D2TrackerEvent[]): FutureData<ImportSummary> {
+        if (!events.length) {
+            const summary: ImportSummary = {
+                status: "SUCCESS",
+                importCount: {
+                    ignored: 0,
+                    imported: 0,
+                    deleted: 0,
+                    updated: 0,
+                },
+                nonBlockingErrors: [],
+                blockingErrors: [],
+            };
+            return this.glassUploadsRepository.setEventListDataDeleted(uploadId).flatMap(() => {
+                return Future.success(summary);
+            });
+        }
+
         return this.dhis2EventsDefaultRepository.import({ events }, "DELETE").flatMap(result => {
             return mapToImportSummary(result, "event", this.metadataRepository).flatMap(({ importSummary }) => {
-                return Future.success(importSummary);
+                if (importSummary.status === "SUCCESS") {
+                    return this.glassUploadsRepository.setEventListDataDeleted(uploadId).flatMap(() => {
+                        return Future.success(importSummary);
+                    });
+                } else {
+                    return Future.success(importSummary);
+                }
+            });
+        });
+    }
+
+    private deleteCalculatedEvents(uploadId: Id, calculatedEvents: D2TrackerEvent[]): FutureData<ImportSummary> {
+        if (!calculatedEvents.length) {
+            const summary: ImportSummary = {
+                status: "SUCCESS",
+                importCount: {
+                    ignored: 0,
+                    imported: 0,
+                    deleted: 0,
+                    updated: 0,
+                },
+                nonBlockingErrors: [],
+                blockingErrors: [],
+            };
+            return this.glassUploadsRepository.setCalculatedEventListDataDeleted(uploadId).flatMap(() => {
+                return Future.success(summary);
+            });
+        }
+
+        return this.dhis2EventsDefaultRepository.import({ events: calculatedEvents }, "DELETE").flatMap(result => {
+            return mapToImportSummary(result, "event", this.metadataRepository).flatMap(({ importSummary }) => {
+                if (importSummary.status === "SUCCESS") {
+                    return this.glassUploadsRepository.setCalculatedEventListDataDeleted(uploadId).flatMap(() => {
+                        return Future.success(importSummary);
+                    });
+                } else {
+                    return Future.success(importSummary);
+                }
             });
         });
     }
 
     private buildEventsPayload(
-        eventListFileId: string | undefined,
-        calculatedEventListFileId?: string
-    ): FutureData<D2TrackerEvent[]> {
+        upload: GlassUploads,
+        programId: Id,
+        calculatedProgramId?: Id
+    ): FutureData<{
+        events: D2TrackerEvent[];
+        calculatedEvents: D2TrackerEvent[];
+    }> {
+        const { eventListFileId, eventListDataDeleted, calculatedEventListFileId, calculatedEventListDataDeleted } =
+            upload;
         return Future.joinObj({
-            events: eventListFileId ? this.getEventsFromListFileId(eventListFileId) : Future.success([]),
-            calculatedEvents: calculatedEventListFileId
-                ? this.getEventsFromListFileId(calculatedEventListFileId)
-                : Future.success([]),
+            events:
+                eventListFileId && !eventListDataDeleted
+                    ? this.getEventsFromListFileId(eventListFileId, programId)
+                    : Future.success([]),
+            calculatedEvents:
+                calculatedEventListFileId && !calculatedEventListDataDeleted && calculatedProgramId
+                    ? this.getEventsFromListFileId(calculatedEventListFileId, calculatedProgramId)
+                    : Future.success([]),
         }).flatMap(({ events, calculatedEvents }) => {
-            return Future.success([...events, ...calculatedEvents]);
+            return Future.success({
+                events: events,
+                calculatedEvents: calculatedEvents,
+            });
         });
     }
 
-    private getEventsFromListFileId(listFileId: string): FutureData<D2TrackerEvent[]> {
+    private getEventsFromListFileId(listFileId: string, programId: Id): FutureData<D2TrackerEvent[]> {
         return this.glassDocumentsRepository.download(listFileId).flatMap(eventListFileBlob => {
             return getStringFromFileBlob(eventListFileBlob).flatMap(_events => {
-                const eventIdList: string[] = JSON.parse(_events);
-                const events: D2TrackerEvent[] = eventIdList.map(eventId => {
-                    return {
-                        event: eventId,
-                        program: "",
-                        status: "COMPLETED",
-                        orgUnit: "",
-                        occurredAt: "",
-                        attributeOptionCombo: "",
-                        dataValues: [],
-                    };
-                });
-                return Future.success(events);
+                const eventIdList: Id[] = JSON.parse(_events);
+                return this.trackerRepository
+                    .getExistingEventsIdsByIds(eventIdList, programId)
+                    .flatMap(existingEventsIds => {
+                        const events: D2TrackerEvent[] = existingEventsIds.map(eventId => {
+                            return {
+                                event: eventId,
+                                program: "",
+                                status: "COMPLETED",
+                                orgUnit: "",
+                                occurredAt: "",
+                                attributeOptionCombo: "",
+                                dataValues: [],
+                            };
+                        });
+                        return Future.success(events);
+                    });
             });
         });
     }

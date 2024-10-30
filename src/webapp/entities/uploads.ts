@@ -22,4 +22,6 @@ export interface UploadsDataItem {
     eventListFileId?: string;
     calculatedEventListFileId?: string;
     importSummary?: ImportSummaryErrors;
+    eventListDataDeleted?: boolean;
+    calculatedEventListDataDeleted?: boolean;
 }
