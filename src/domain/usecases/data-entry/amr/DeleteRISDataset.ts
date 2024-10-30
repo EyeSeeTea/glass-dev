@@ -11,11 +11,10 @@ import {
 import { includeBlockingErrors } from "../utils/includeBlockingErrors";
 import { mapDataValuesToImportSummary } from "../utils/mapDhis2Summary";
 import { RISData } from "../../../entities/data-entry/amr-external/RISData";
-import { UseCase } from "../../../../CompositionRoot";
 import { AMR_AMR_DS_INPUT_FILES_RIS_DS_ID, AMR_DATA_PATHOGEN_ANTIBIOTIC_BATCHID_CC_ID } from "./ImportRISFile";
 
 // NOTICE: code adapted for node environment from ImportRISFile.ts (only DELETE)
-export class DeleteRISDatasetUseCase implements UseCase {
+export class DeleteRISDataset {
     constructor(
         private options: {
             risDataRepository: RISDataRepository;
@@ -24,7 +23,7 @@ export class DeleteRISDatasetUseCase implements UseCase {
         }
     ) {}
 
-    public execute(arrayBuffer: ArrayBuffer): FutureData<ImportSummary> {
+    public delete(arrayBuffer: ArrayBuffer): FutureData<ImportSummary> {
         return this.options.risDataRepository
             .getFromArayBuffer(arrayBuffer)
             .flatMap(risDataItems => {

@@ -24,6 +24,7 @@ import { ImportSummaryErrorsDialog } from "../import-summary-errors-dialog/Impor
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
 import { useGlassUploadsAsyncDeletions } from "../../hooks/useGlassUploadsAsyncDeletions";
 import { getPrimaryAndSecondaryFilesToDelete } from "../../utils/getPrimaryAndSecondaryFilesToDelete";
+import { useGlassModule } from "../../hooks/useGlassModule";
 
 export interface UploadsTableBodyProps {
     rows?: UploadsDataItem[];
@@ -32,13 +33,10 @@ export interface UploadsTableBodyProps {
 }
 
 export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refreshUploads, showComplete }) => {
-    const { compositionRoot, allCountries } = useAppContext();
+    const { compositionRoot } = useAppContext();
     const snackbar = useSnackbar();
 
     const [loading, setLoading] = useState<boolean>(false);
-    const {
-        currentOrgUnitAccess: { orgUnitId, orgUnitName },
-    } = useCurrentOrgUnitContext();
     const [deleteOpen, setDeleteOpen] = React.useState(false);
     const [completeOpen, setCompleteOpen] = React.useState(false);
     const [importSummaryErrorsToShow, setImportSummaryErrorsToShow] = React.useState<ImportSummaryErrors | null>(null);
@@ -56,6 +54,7 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
     );
     const hasCurrentUserCaptureAccess = useGlassCaptureAccess();
     const { asyncDeletions: asyncDeletionsState, setToAsyncDeletion } = useGlassUploadsAsyncDeletions();
+    const currentModule = useGlassModule();
 
     const showDeleteConfirmationDialog = (rowToDelete: UploadsDataItem) => {
         setRowToDelete(rowToDelete);
@@ -97,7 +96,7 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
     //* If it's a file from a GLASS module with property hasAsyncDeletion === true, then is only set to async deletion in Datastore
     const deleteDataset = () => {
         hideDeleteConfirmationDialog();
-        if (!rowToDelete || asyncDeletionsState.kind !== "loaded") return;
+        if (!rowToDelete || asyncDeletionsState.kind !== "loaded" || currentModule.kind !== "loaded") return;
 
         if (moduleProperties.get(currentModuleAccess.moduleName)?.hasAsyncDeletion) {
             if (asyncDeletionsState.data.includes(rowToDelete.id)) return;
@@ -116,14 +115,15 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
             if (primaryFileToDelete) {
                 setLoading(true);
                 Future.joinObj({
-                    primaryFileDownload: compositionRoot.glassDocuments.download(primaryFileToDelete.fileId),
-                    secondaryFileDownload: secondaryFileToDelete
-                        ? compositionRoot.glassDocuments.download(secondaryFileToDelete.fileId)
+                    primaryArrayBuffer: primaryFileToDelete
+                        ? compositionRoot.glassDocuments.downloadAsArrayBuffer(primaryFileToDelete.fileId)
+                        : Future.success(undefined),
+                    secondaryArrayBuffer: secondaryFileToDelete
+                        ? compositionRoot.glassDocuments.downloadAsArrayBuffer(secondaryFileToDelete.fileId)
                         : Future.success(undefined),
                 }).run(
-                    ({ primaryFileDownload, secondaryFileDownload }) => {
-                        if (primaryFileToDelete) {
-                            const primaryFile = new File([primaryFileDownload], primaryFileToDelete.fileName);
+                    ({ primaryArrayBuffer, secondaryArrayBuffer }) => {
+                        if (primaryFileToDelete && primaryArrayBuffer) {
                             //If the file is in uploaded status then, data values have not been imported.
                             //No need for deletion
 
@@ -131,36 +131,20 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                                 deletePrimaryFileSummary:
                                     primaryFileToDelete.status.toLowerCase() !== "uploaded" ||
                                     !moduleProperties.get(currentModuleAccess.moduleName)?.isDryRunReq
-                                        ? compositionRoot.fileSubmission.primaryFile(
-                                              currentModuleAccess.moduleName,
-                                              primaryFile,
-                                              primaryFileToDelete.batchId,
-                                              primaryFileToDelete.period,
-                                              "DELETE",
-                                              orgUnitId,
-                                              orgUnitName,
-                                              primaryFileToDelete.countryCode,
-                                              false,
-                                              primaryFileToDelete.eventListFileId,
-                                              allCountries,
-                                              primaryFileToDelete.calculatedEventListFileId
+                                        ? compositionRoot.fileSubmission.deletePrimaryFile(
+                                              currentModule.data,
+                                              primaryFileToDelete,
+                                              primaryArrayBuffer
                                           )
                                         : Future.success(undefined),
                                 deleteSecondaryFileSummary:
                                     secondaryFileToDelete &&
                                     secondaryFileToDelete.status.toLowerCase() !== "uploaded" &&
-                                    secondaryFileDownload
-                                        ? compositionRoot.fileSubmission.secondaryFile(
-                                              new File([secondaryFileDownload], secondaryFileToDelete.fileName),
-                                              secondaryFileToDelete.batchId,
-                                              currentModuleAccess.moduleName,
-                                              secondaryFileToDelete.period,
-                                              "DELETE",
-                                              orgUnitId,
-                                              orgUnitName,
-                                              secondaryFileToDelete.countryCode,
-                                              false,
-                                              secondaryFileToDelete.eventListFileId
+                                    secondaryArrayBuffer
+                                        ? compositionRoot.fileSubmission.deleteSecondaryFile(
+                                              currentModule.data,
+                                              secondaryFileToDelete,
+                                              secondaryArrayBuffer
                                           )
                                         : Future.success(undefined),
                             }).run(
@@ -255,27 +239,15 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                 );
             } else if (secondaryFileToDelete) {
                 setLoading(true);
-                compositionRoot.glassDocuments.download(secondaryFileToDelete.fileId).run(
-                    secondaryFileDownload => {
+                compositionRoot.glassDocuments.downloadAsArrayBuffer(secondaryFileToDelete.fileId).run(
+                    secondaryArrayBuffer => {
                         if (
                             secondaryFileToDelete &&
                             secondaryFileToDelete.status.toLowerCase() !== "uploaded" &&
-                            secondaryFileDownload
+                            secondaryArrayBuffer
                         ) {
                             compositionRoot.fileSubmission
-                                .secondaryFile(
-                                    new File([secondaryFileDownload], secondaryFileToDelete.fileName),
-                                    secondaryFileToDelete.batchId,
-                                    currentModuleAccess.moduleName,
-                                    secondaryFileToDelete.period,
-                                    "DELETE",
-                                    orgUnitId,
-                                    orgUnitName,
-                                    secondaryFileToDelete.countryCode,
-                                    false,
-                                    secondaryFileToDelete.eventListFileId,
-                                    secondaryFileToDelete.calculatedEventListFileId
-                                )
+                                .deleteSecondaryFile(currentModule.data, secondaryFileToDelete, secondaryArrayBuffer)
                                 .run(
                                     deleteSecondaryFileSummary => {
                                         if (deleteSecondaryFileSummary?.status === "ERROR") {
@@ -388,7 +360,7 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
 
     return (
         <>
-            {rows && (
+            {rows && currentModule.kind === "loaded" && (
                 <StyledTableBody>
                     <TableRow>
                         <TableCell style={{ border: "none", padding: 0 }}>

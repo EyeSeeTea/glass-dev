@@ -1,5 +1,4 @@
 import { command, run } from "cmd-ts";
-import { Blob } from "buffer";
 
 import { getD2ApiFromArgs, getInstance } from "./common";
 import { DataStoreClient } from "../data/data-store/DataStoreClient";
@@ -15,7 +14,6 @@ import { GlassUploads } from "../domain/entities/GlassUploads";
 import { GlassModuleDefaultRepository } from "../data/repositories/GlassModuleDefaultRepository";
 import { GlassModuleName, isGlassModuleName, moduleProperties } from "../domain/utils/ModuleProperties";
 import { getPrimaryAndSecondaryFilesToDelete } from "../webapp/utils/getPrimaryAndSecondaryFilesToDelete";
-import { DownloadDocumentUseCase } from "../domain/usecases/DownloadDocumentUseCase";
 import { GlassDocumentsRepository } from "../domain/repositories/GlassDocumentsRepository";
 import { GlassDocumentsDefaultRepository } from "../data/repositories/GlassDocumentsDefaultRepository";
 import { ImportSummary } from "../domain/entities/data-entry/ImportSummary";
@@ -45,16 +43,13 @@ import { MetadataDefaultRepository } from "../data/repositories/MetadataDefaultR
 import { ProgramRulesMetadataDefaultRepository } from "../data/repositories/program-rule/ProgramRulesMetadataDefaultRepository";
 import { TrackerDefaultRepository } from "../data/repositories/TrackerDefaultRepository";
 import { DeleteDocumentInfoByUploadIdUseCase } from "../domain/usecases/DeleteDocumentInfoByUploadIdUseCase";
-import { DeleteAMCProductLevelDataUseCase } from "../domain/usecases/data-entry/amc/DeleteAMCProductLevelDataUseCase";
-import { DeleteAMCSubstanceLevelDataUseCase } from "../domain/usecases/data-entry/amc/DeleteAMCSubstanceLevelDataUseCase";
 import { RemoveAsyncDeletionsUseCase } from "../domain/usecases/RemoveAsyncDeletionsUseCase";
 import { SendNotificationsUseCase } from "../domain/usecases/SendNotificationsUseCase";
 import { NotificationRepository } from "../domain/repositories/NotificationRepository";
 import { UsersRepository } from "../domain/repositories/UsersRepository";
-import { DeleteRISDatasetUseCase } from "../domain/usecases/data-entry/amr/DeleteRISDatasetUseCase";
-import { DeleteEGASPDatasetUseCase } from "../domain/usecases/data-entry/egasp/DeleteEGASPDatasetUseCase";
-import { DeleteRISIndividualFungalFileUseCase } from "../domain/usecases/data-entry/amr-individual-fungal/DeleteRISIndividualFungalFileUseCase";
-import { DeleteSampleDatasetUseCase } from "../domain/usecases/data-entry/amr/DeleteSampleDatasetUseCase";
+import { DeletePrimaryFileDataUseCase } from "../domain/usecases/data-entry/DeletePrimaryFileDataUseCase";
+import { DeleteSecondaryFileDataUseCase } from "../domain/usecases/data-entry/DeleteSecondaryFileDataUseCase";
+import { DownloadDocumentAsArrayBufferUseCase } from "../domain/usecases/DownloadDocumentAsArrayBufferUseCase";
 
 const UPLOADED_FILE_STATUS_LOWERCASE = "uploaded";
 const IMPORT_SUMMARY_STATUS_ERROR = "ERROR";
@@ -250,23 +245,11 @@ function getGlassUploadsDatastore(glassUploadsRepository: GlassUploadsRepository
     return new GetGlassUploadsUseCase(glassUploadsRepository).execute();
 }
 
-function fromBlobToArrayBuffer(blob: Blob): FutureData<ArrayBuffer> {
-    return Future.fromPromise(blob.arrayBuffer());
-}
-
-function downloadDocument(
-    fileId: Id,
-    repositories: { glassDocumentsRepository: GlassDocumentsRepository }
-): FutureData<Blob> {
-    const { glassDocumentsRepository } = repositories;
-    return new DownloadDocumentUseCase(glassDocumentsRepository).execute(fileId);
-}
-
 function getArrayBufferOfFile(
     fileId: Id,
     repositories: { glassDocumentsRepository: GlassDocumentsRepository }
 ): FutureData<ArrayBuffer> {
-    return downloadDocument(fileId, repositories).flatMap(blob => fromBlobToArrayBuffer(blob));
+    return new DownloadDocumentAsArrayBufferUseCase(repositories.glassDocumentsRepository).execute(fileId);
 }
 
 function deleteUploadAndDocumentFromDatasoreAndDHIS2(
@@ -290,48 +273,19 @@ function deleteDatasetValuesOrEventsFromPrimaryUploaded(
     upload: GlassUploads,
     arrayBuffer: ArrayBuffer,
     repositories: {
-        glassDocumentsRepository: GlassDocumentsRepository;
         risDataRepository: RISDataRepository;
-        risIndividualFungalRepository: RISIndividualFungalDataRepository;
         metadataRepository: MetadataRepository;
         dataValuesRepository: DataValuesRepository;
         dhis2EventsDefaultRepository: Dhis2EventsDefaultRepository;
         excelRepository: ExcelRepository;
+        glassDocumentsRepository: GlassDocumentsRepository;
+        instanceRepository: InstanceRepository;
         glassUploadsRepository: GlassUploadsRepository;
         trackerRepository: TrackerRepository;
-        glassModuleRepository: GlassModuleRepository;
-        instanceRepository: InstanceRepository;
-        programRulesMetadataRepository: ProgramRulesMetadataRepository;
-        atcRepository: GlassATCRepository;
-        amcProductRepository: AMCProductDataRepository;
         amcSubstanceDataRepository: AMCSubstanceDataRepository;
-        glassAtcRepository: GlassATCRepository;
     }
 ): FutureData<ImportSummary> {
-    const { name: currentModuleName } = currentModule;
-    switch (currentModuleName) {
-        case "AMR": {
-            return new DeleteRISDatasetUseCase(repositories).execute(arrayBuffer);
-        }
-
-        case "EGASP": {
-            return new DeleteEGASPDatasetUseCase(repositories).execute(arrayBuffer, upload);
-        }
-
-        case "AMR - Individual":
-        case "AMR - Fungal": {
-            const programId = currentModule.programs !== undefined ? currentModule.programs.at(0)?.id : undefined;
-            return new DeleteRISIndividualFungalFileUseCase(repositories).execute(upload, programId);
-        }
-
-        case "AMC": {
-            return new DeleteAMCProductLevelDataUseCase(repositories).execute(arrayBuffer, upload);
-        }
-
-        default: {
-            return Future.error(`Primary upload async deletion for module ${currentModuleName} not found`);
-        }
-    }
+    return new DeletePrimaryFileDataUseCase(repositories).execute(currentModule, upload, arrayBuffer);
 }
 
 function deleteDatasetValuesOrEventsFromSecondaryUploaded(
@@ -340,32 +294,17 @@ function deleteDatasetValuesOrEventsFromSecondaryUploaded(
     arrayBuffer: ArrayBuffer,
     repositories: {
         sampleDataRepository: SampleDataRepository;
-        metadataRepository: MetadataRepository;
         dataValuesRepository: DataValuesRepository;
-        excelRepository: ExcelRepository;
-        instanceRepository: InstanceRepository;
-        glassDocumentsRepository: GlassDocumentsRepository;
-        glassUploadsRepository: GlassUploadsRepository;
         dhis2EventsDefaultRepository: Dhis2EventsDefaultRepository;
-        programRulesMetadataRepository: ProgramRulesMetadataRepository;
-        glassAtcRepository: GlassATCRepository;
+        excelRepository: ExcelRepository;
+        glassDocumentsRepository: GlassDocumentsRepository;
+        metadataRepository: MetadataRepository;
+        instanceRepository: InstanceRepository;
+        glassUploadsRepository: GlassUploadsRepository;
         trackerRepository: TrackerRepository;
     }
 ): FutureData<ImportSummary> {
-    const { name: currentModuleName } = currentModule;
-    switch (currentModuleName) {
-        case "AMR":
-        case "AMR - Individual": {
-            return new DeleteSampleDatasetUseCase(repositories).execute(arrayBuffer);
-        }
-
-        case "AMC": {
-            return new DeleteAMCSubstanceLevelDataUseCase(repositories).execute(arrayBuffer, upload);
-        }
-        default: {
-            return Future.error(`Secondary upload async deletion for module ${currentModuleName} not found`);
-        }
-    }
+    return new DeleteSecondaryFileDataUseCase(repositories).execute(currentModule, upload, arrayBuffer);
 }
 
 function deleteDatasetValuesOrEvents(
