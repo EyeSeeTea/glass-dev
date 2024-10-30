@@ -11,11 +11,10 @@ import { includeBlockingErrors } from "../utils/includeBlockingErrors";
 import { mapDataValuesToImportSummary } from "../utils/mapDhis2Summary";
 import { SampleDataRepository } from "../../../repositories/data-entry/SampleDataRepository";
 import { SampleData } from "../../../entities/data-entry/amr-external/SampleData";
-import { UseCase } from "../../../../CompositionRoot";
 import { AMR_AMR_DS_Input_files_Sample_DS_ID, AMR_BATCHID_CC_ID } from "./ImportSampleFile";
 
 // NOTICE: code adapted for node environment from ImportSampleFile.ts (only DELETE)
-export class DeleteSampleDatasetUseCase implements UseCase {
+export class DeleteSampleDataset {
     constructor(
         private options: {
             sampleDataRepository: SampleDataRepository;
@@ -24,7 +23,7 @@ export class DeleteSampleDatasetUseCase implements UseCase {
         }
     ) {}
 
-    public execute(arrayBuffer: ArrayBuffer): FutureData<ImportSummary> {
+    public delete(arrayBuffer: ArrayBuffer): FutureData<ImportSummary> {
         return this.options.sampleDataRepository
             .getFromArayBuffer(arrayBuffer)
             .flatMap(risDataItems => {

@@ -4,14 +4,13 @@ import { GlassDocumentsRepository } from "../../../repositories/GlassDocumentsRe
 import { TrackerRepository } from "../../../repositories/TrackerRepository";
 import { MetadataRepository } from "../../../repositories/MetadataRepository";
 import { downloadIdsAndDeleteTrackedEntitiesUsingFileBlob } from "../utils/downloadIdsAndDeleteTrackedEntities";
-import { UseCase } from "../../../../CompositionRoot";
 import { AMR_GLASS_AMR_TET_PATIENT, AMRIProgramID } from "./ImportRISIndividualFungalFile";
 import { Id } from "../../../entities/Ref";
 import { GlassUploadsRepository } from "../../../repositories/GlassUploadsRepository";
 import { GlassUploads } from "../../../entities/GlassUploads";
 
 // NOTICE: code adapted for node environment from ImportRISIndividualFungalFile.ts (only DELETE)
-export class DeleteRISIndividualFungalFileUseCase implements UseCase {
+export class DeleteRISIndividualFungalFile {
     constructor(
         private options: {
             trackerRepository: TrackerRepository;
@@ -21,7 +20,7 @@ export class DeleteRISIndividualFungalFileUseCase implements UseCase {
         }
     ) {}
 
-    public execute(upload: GlassUploads, programId: Id | undefined): FutureData<ImportSummary> {
+    public delete(upload: GlassUploads, programId: Id | undefined): FutureData<ImportSummary> {
         const AMRIProgramIDl = programId || AMRIProgramID;
         return downloadIdsAndDeleteTrackedEntitiesUsingFileBlob(
             upload,

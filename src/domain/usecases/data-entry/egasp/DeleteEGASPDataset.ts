@@ -7,12 +7,11 @@ import { MetadataRepository } from "../../../repositories/MetadataRepository";
 import { EGASP_PROGRAM_ID } from "../../../../data/repositories/program-rule/ProgramRulesMetadataDefaultRepository";
 import { InstanceRepository } from "../../../repositories/InstanceRepository";
 import { DeleteBLTemplateEventProgram } from "../DeleteBLTemplateEventProgram";
-import { UseCase } from "../../../../CompositionRoot";
 import { GlassUploads } from "../../../entities/GlassUploads";
 import { GlassUploadsRepository } from "../../../repositories/GlassUploadsRepository";
 import { TrackerRepository } from "../../../repositories/TrackerRepository";
 
-export class DeleteEGASPDatasetUseCase implements UseCase {
+export class DeleteEGASPDataset {
     constructor(
         private options: {
             dhis2EventsDefaultRepository: Dhis2EventsDefaultRepository;
@@ -25,7 +24,7 @@ export class DeleteEGASPDatasetUseCase implements UseCase {
         }
     ) {}
 
-    public execute(arrayBuffer: ArrayBuffer, upload: GlassUploads): FutureData<ImportSummary> {
+    public delete(arrayBuffer: ArrayBuffer, upload: GlassUploads): FutureData<ImportSummary> {
         const deleteBLTemplateEventProgram = new DeleteBLTemplateEventProgram(
             this.options.excelRepository,
             this.options.instanceRepository,

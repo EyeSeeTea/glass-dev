@@ -12,7 +12,6 @@ import { AMCSubstanceDataRepository } from "../../../repositories/data-entry/AMC
 import { downloadIdsAndDeleteTrackedEntitiesUsingFileBlob } from "../utils/downloadIdsAndDeleteTrackedEntities";
 import { getStringFromFileBlob } from "../utils/fileToString";
 import { InstanceRepository } from "../../../repositories/InstanceRepository";
-import { UseCase } from "../../../../CompositionRoot";
 import { AMC_PRODUCT_REGISTER_PROGRAM_ID, AMR_GLASS_AMC_TET_PRODUCT_REGISTER } from "./ImportAMCProductLevelData";
 import { GlassUploadsRepository } from "../../../repositories/GlassUploadsRepository";
 import { GlassUploads } from "../../../entities/GlassUploads";
@@ -20,7 +19,7 @@ import { Id } from "../../../entities/Ref";
 import { AMC_SUBSTANCE_CALCULATED_CONSUMPTION_PROGRAM_ID } from "./ImportAMCSubstanceLevelData";
 
 // NOTICE: code adapted for node environment from ImportAMCProductLevelData.ts (only DELETE)
-export class DeleteAMCProductLevelDataUseCase implements UseCase {
+export class DeleteAMCProductLevelData {
     constructor(
         private options: {
             excelRepository: ExcelRepository;
@@ -33,7 +32,7 @@ export class DeleteAMCProductLevelDataUseCase implements UseCase {
         }
     ) {}
 
-    public execute(arrayBuffer: ArrayBuffer, upload: GlassUploads): FutureData<ImportSummary> {
+    public delete(arrayBuffer: ArrayBuffer, upload: GlassUploads): FutureData<ImportSummary> {
         const { id: uploadId, calculatedEventListFileId, calculatedEventListDataDeleted } = upload;
         return this.options.excelRepository
             .loadTemplateFromArrayBuffer(arrayBuffer, AMC_PRODUCT_REGISTER_PROGRAM_ID)

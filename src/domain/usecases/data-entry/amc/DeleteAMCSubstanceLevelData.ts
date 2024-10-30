@@ -5,7 +5,6 @@ import { ExcelRepository } from "../../../repositories/ExcelRepository";
 import { GlassDocumentsRepository } from "../../../repositories/GlassDocumentsRepository";
 import { MetadataRepository } from "../../../repositories/MetadataRepository";
 import { InstanceRepository } from "../../../repositories/InstanceRepository";
-import { UseCase } from "../../../../CompositionRoot";
 import { DeleteBLTemplateEventProgram } from "../DeleteBLTemplateEventProgram";
 import {
     AMC_RAW_SUBSTANCE_CONSUMPTION_PROGRAM_ID,
@@ -15,7 +14,7 @@ import { GlassUploads } from "../../../entities/GlassUploads";
 import { GlassUploadsRepository } from "../../../repositories/GlassUploadsRepository";
 import { TrackerRepository } from "../../../repositories/TrackerRepository";
 
-export class DeleteAMCSubstanceLevelDataUseCase implements UseCase {
+export class DeleteAMCSubstanceLevelData {
     constructor(
         private options: {
             dhis2EventsDefaultRepository: Dhis2EventsDefaultRepository;
@@ -27,7 +26,7 @@ export class DeleteAMCSubstanceLevelDataUseCase implements UseCase {
             trackerRepository: TrackerRepository;
         }
     ) {}
-    public execute(arrayBuffer: ArrayBuffer, upload: GlassUploads): FutureData<ImportSummary> {
+    public delete(arrayBuffer: ArrayBuffer, upload: GlassUploads): FutureData<ImportSummary> {
         const deleteBLTemplateEventProgram = new DeleteBLTemplateEventProgram(
             this.options.excelRepository,
             this.options.instanceRepository,

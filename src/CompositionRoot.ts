@@ -95,6 +95,9 @@ import { CountryDefaultRepository } from "./data/repositories/CountryDefaultRepo
 import { GetAllCountriesUseCase } from "./domain/usecases/GetAllCountriesUseCase";
 import { SetToAsyncDeletionUseCase } from "./domain/usecases/SetToAsyncDeletionUseCase";
 import { GetAsyncDeletionsUseCase } from "./domain/usecases/GetAsyncDeletionsUseCase";
+import { DeletePrimaryFileDataUseCase } from "./domain/usecases/data-entry/DeletePrimaryFileDataUseCase";
+import { DeleteSecondaryFileDataUseCase } from "./domain/usecases/data-entry/DeleteSecondaryFileDataUseCase";
+import { DownloadDocumentAsArrayBufferUseCase } from "./domain/usecases/DownloadDocumentAsArrayBufferUseCase";
 
 export function getCompositionRoot(instance: Instance) {
     const api = getD2APiFromInstance(instance);
@@ -176,6 +179,7 @@ export function getCompositionRoot(instance: Instance) {
             upload: new UploadDocumentUseCase(glassDocumentsRepository, glassUploadsRepository),
             deleteByUploadId: new DeleteDocumentInfoByUploadIdUseCase(glassDocumentsRepository, glassUploadsRepository),
             download: new DownloadDocumentUseCase(glassDocumentsRepository),
+            downloadAsArrayBuffer: new DownloadDocumentAsArrayBufferUseCase(glassDocumentsRepository),
             updateSecondaryFileWithPrimaryId: new UpdateSampleUploadWithRisIdUseCase(glassUploadsRepository),
         }),
         fileSubmission: getExecute({
@@ -234,6 +238,29 @@ export function getCompositionRoot(instance: Instance) {
                 egaspProgramRepository,
                 metadataRepository
             ),
+            deletePrimaryFile: new DeletePrimaryFileDataUseCase({
+                risDataRepository,
+                metadataRepository,
+                dataValuesRepository,
+                dhis2EventsDefaultRepository,
+                excelRepository,
+                glassDocumentsRepository,
+                instanceRepository,
+                glassUploadsRepository,
+                trackerRepository,
+                amcSubstanceDataRepository,
+            }),
+            deleteSecondaryFile: new DeleteSecondaryFileDataUseCase({
+                sampleDataRepository,
+                dataValuesRepository,
+                dhis2EventsDefaultRepository,
+                excelRepository,
+                glassDocumentsRepository,
+                metadataRepository,
+                instanceRepository,
+                glassUploadsRepository,
+                trackerRepository,
+            }),
         }),
         questionnaires: getExecute({
             get: new GetQuestionnaireUseCase(questionnaireD2Repository),
