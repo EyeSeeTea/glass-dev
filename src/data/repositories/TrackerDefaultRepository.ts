@@ -10,6 +10,7 @@ import { TrackerPostRequest, TrackerPostResponse } from "@eyeseetea/d2-api/api/t
 import { importApiTracker } from "./utils/importApiTracker";
 import { Id } from "../../domain/entities/Ref";
 
+const CHUNKED_SIZE = 100;
 export class TrackerDefaultRepository implements TrackerRepository {
     private api: D2Api;
 
@@ -22,7 +23,7 @@ export class TrackerDefaultRepository implements TrackerRepository {
     }
 
     getExistingTrackedEntitiesIdsByIds(trackEntitiesIds: Id[], programId: Id): FutureData<Id[]> {
-        const chunkedTrackEntitiesIds = _(trackEntitiesIds).chunk(100).value();
+        const chunkedTrackEntitiesIds = _(trackEntitiesIds).chunk(CHUNKED_SIZE).value();
         return Future.sequential(
             chunkedTrackEntitiesIds.flatMap(trackEntitiesIdsChunk => {
                 const trackEntitiesIdsString = trackEntitiesIdsChunk.join(";");
@@ -34,6 +35,7 @@ export class TrackerDefaultRepository implements TrackerRepository {
                         },
                         program: programId,
                         enrollmentEnrolledBefore: new Date().toISOString(),
+                        pageSize: CHUNKED_SIZE,
                     })
                 ).map(response => {
                     return _.compact(response.instances.map(instance => instance.trackedEntity));
@@ -43,7 +45,7 @@ export class TrackerDefaultRepository implements TrackerRepository {
     }
 
     getExistingEventsIdsByIds(eventIds: Id[], programId: Id): FutureData<Id[]> {
-        const chunkedEventIds = _(eventIds).chunk(100).value();
+        const chunkedEventIds = _(eventIds).chunk(CHUNKED_SIZE).value();
         return Future.sequential(
             chunkedEventIds.flatMap(eventIdsChunk => {
                 const eventIdsString = eventIdsChunk.join(";");
@@ -54,6 +56,7 @@ export class TrackerDefaultRepository implements TrackerRepository {
                             event: true,
                         },
                         program: programId,
+                        pageSize: CHUNKED_SIZE,
                     })
                 ).map(response => {
                     return response.instances.map(instance => instance.event);
