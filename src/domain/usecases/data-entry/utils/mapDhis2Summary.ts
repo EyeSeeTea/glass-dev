@@ -1,3 +1,5 @@
+import _ from "lodash";
+
 import i18n from "../../../../locales";
 import { DataValuesSaveSummary, ImportStrategy } from "../../../entities/data-entry/DataValuesSaveSummary";
 import { ImportSummary } from "../../../entities/data-entry/ImportSummary";
