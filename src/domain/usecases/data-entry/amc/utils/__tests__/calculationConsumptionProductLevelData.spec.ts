@@ -230,7 +230,7 @@ function verifyCalculationResult(result: RawSubstanceConsumptionCalculated[], ty
         expect(calculation.salt_autocalculated).toBe(expectedCalculation?.salt_autocalculated);
         expect(calculation.year).toBe(expectedCalculation?.year);
         expect(calculation.packages_autocalculated).toBe(expectedCalculation?.packages_autocalculated);
-        expect(calculation.tons_autocalculated).toBe(expectedCalculation?.tons_autocalculated);
+        expect(calculation.kilograms_autocalculated).toBe(expectedCalculation?.kilograms_autocalculated);
         expect(calculation.ddds_autocalculated).toBe(expectedCalculation?.ddds_autocalculated);
         expect(calculation.data_status_autocalculated).toBe(expectedCalculation?.data_status_autocalculated);
         expect(calculation.health_sector_autocalculated).toBe(expectedCalculation?.health_sector_autocalculated);

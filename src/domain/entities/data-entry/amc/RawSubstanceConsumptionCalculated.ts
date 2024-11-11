@@ -58,7 +58,7 @@ export type RawSubstanceConsumptionCalculated = {
     data_status_autocalculated: number;
     health_sector_autocalculated: string;
     health_level_autocalculated: string;
-    tons_autocalculated: number;
+    kilograms_autocalculated: number;
     packages_autocalculated: number;
     atc_version_autocalculated: ATCVersionKey;
     ddds_autocalculated: number;
@@ -78,7 +78,7 @@ export const RAW_SUBSTANCE_CONSUMPTION_CALCULATED_KEYS = [
     "route_admin_autocalculated",
     "salt_autocalculated",
     "packages_autocalculated",
-    "tons_autocalculated",
+    "kilograms_autocalculated",
     "atc_version_autocalculated",
     "data_status_autocalculated",
     "health_sector_autocalculated",

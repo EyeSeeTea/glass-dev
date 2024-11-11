@@ -10,7 +10,7 @@ import { Id } from "../domain/entities/Ref";
 import { apiToFuture } from "../utils/futures";
 
 const KOSOVO_ORG_UNIT_ID = "I8AMbKhxlj9";
-const AMR_GLASS_AMC_DET_TONS_AUTOCALCULATED = "Ow8jz1uWB1V";
+const OLD_AMR_GLASS_AMC_DET_TONS_AUTOCALCULATED = "Ow8jz1uWB1V";
 
 // PRODUCT LEVEL:
 const AMC_PRODUCT_REGISTER_PROGRAM_ID = "G6ChA5zMW9n";
@@ -128,7 +128,7 @@ function getAutocalculatedTonsValues(
                 return getAllD2EventsFromProgramByOrgUnit(api, orgUnitId, programId, programStageId).map(d2Events => {
                     return d2Events.map(d2Event => {
                         const dataValue = d2Event.dataValues.find(
-                            dataValue => dataValue.dataElement === AMR_GLASS_AMC_DET_TONS_AUTOCALCULATED
+                            dataValue => dataValue.dataElement === OLD_AMR_GLASS_AMC_DET_TONS_AUTOCALCULATED
                         );
                         return parseFloat(dataValue?.value ?? "0");
                     });

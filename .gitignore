@@ -45,3 +45,5 @@ cypress/fixtures/
 #script outputs
 src/scripts/products_max_min_calculated_tons.json
 src/scripts/substances_max_min_calculated_tons.json
+src/scripts/error_response_report.json
+
