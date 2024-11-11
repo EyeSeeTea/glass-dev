@@ -58,7 +58,7 @@ function main() {
                 return getD2TrackerEventsInPrograms(api).run(
                     d2TrackerEvents => {
                         const d2TrackerEventsWithKilogram = updateDataValueTonsToKilograms(d2TrackerEvents);
-                        if (importUpdates) {
+                        if (importUpdates && d2TrackerEvents.length > 0) {
                             console.debug(
                                 `Updated ${d2TrackerEventsWithKilogram.length} D2TrackerEvents from tonnes to kilograms. Next import them in DHIS2.`
                             );
