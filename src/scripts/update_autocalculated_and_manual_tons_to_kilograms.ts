@@ -2,6 +2,7 @@ import { boolean, command, flag, run } from "cmd-ts";
 import path from "path";
 import fs from "fs";
 import { D2TrackerEvent, TrackerEventsResponse } from "@eyeseetea/d2-api/api/trackerEvents";
+import _ from "lodash";
 
 import { getD2ApiFromArgs } from "./common";
 import { Future, FutureData } from "../domain/entities/Future";
@@ -43,6 +44,9 @@ function main() {
             if (username === "" || password === "") {
                 throw new Error("REACT_APP_DHIS2_AUTH must be in the format 'username:password'");
             }
+            console.debug(
+                `Update in AMC tonnes autocalculated from tonnes to kilograms in ${process.env.REACT_APP_DHIS2_BASE_URL}`
+            );
 
             const envVars = {
                 url: process.env.REACT_APP_DHIS2_BASE_URL,
@@ -149,7 +153,7 @@ function getD2TrackerEventsInPrograms(api: D2Api): FutureData<D2TrackerEvent[]> 
             });
         })
     ).map(values => {
-        return values.flat();
+        return _.flatten(values);
     });
 }
 
