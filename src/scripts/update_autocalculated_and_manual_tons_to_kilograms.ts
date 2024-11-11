@@ -88,6 +88,9 @@ function main() {
                                 error => console.error(`ERROR: ${error}.`)
                             );
                         } else {
+                            const d2TrackerEventsJSON = JSON.stringify(d2TrackerEventsWithKilogram, null, 2);
+                            const filePath = path.join(__dirname, `d2_tracker_events_updated.json`);
+                            fs.writeFileSync(filePath, d2TrackerEventsJSON);
                             console.debug(
                                 `Successfully updated ${d2TrackerEventsWithKilogram.length} D2TrackerEvents from tonnes to kilograms.`
                             );
