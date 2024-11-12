@@ -16,7 +16,7 @@ export type SubstanceConsumptionCalculated = {
     packages_autocalculated: number;
     ddds_autocalculated: number;
     atc_version_autocalculated: ATCVersionKey;
-    tons_autocalculated: number;
+    kilograms_autocalculated: number;
     data_status_autocalculated: number;
     health_sector_autocalculated: string;
     health_level_autocalculated: string;
@@ -38,7 +38,7 @@ export const SUBSTANCE_CONSUMPTION_CALCULATED_KEYS = [
     "packages_autocalculated",
     "ddds_autocalculated",
     "atc_version_autocalculated",
-    "tons_autocalculated",
+    "kilograms_autocalculated",
     "data_status_autocalculated",
     "health_sector_autocalculated",
     "health_level_autocalculated",

@@ -19,7 +19,7 @@ export function importApiTracker(
             request
         )
     ).flatMap(response => {
-        console.debug(response.response.jobType);
+        console.debug(response.response);
         return apiToFuture(api.system.waitFor("TRACKER_IMPORT_JOB", response.response.id)).map(result => {
             if (result) return result;
             else {
