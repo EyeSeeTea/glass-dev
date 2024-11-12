@@ -116,7 +116,7 @@ function linkEventIdToNewCalculatedConsumptionData(
                     (currentCalculatedData.salt_autocalculated === newCalulatedData.salt_autocalculated ||
                         DEFAULT_SALT_CODE === newCalulatedData.salt_autocalculated) &&
                     currentCalculatedData.packages_autocalculated === newCalulatedData.packages_autocalculated &&
-                    currentCalculatedData.tons_autocalculated === newCalulatedData.tons_autocalculated &&
+                    currentCalculatedData.kilograms_autocalculated === newCalulatedData.kilograms_autocalculated &&
                     currentCalculatedData.health_sector_autocalculated ===
                         newCalulatedData.health_sector_autocalculated &&
                     currentCalculatedData.health_level_autocalculated ===
