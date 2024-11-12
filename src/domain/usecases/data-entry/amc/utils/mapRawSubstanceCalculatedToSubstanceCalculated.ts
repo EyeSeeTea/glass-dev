@@ -19,7 +19,7 @@ export function mapRawSubstanceCalculatedToSubstanceCalculated(
             packages_autocalculated: rawSubstanceConsumptionCalculated.packages_autocalculated,
             ddds_autocalculated: rawSubstanceConsumptionCalculated.ddds_autocalculated,
             atc_version_autocalculated: rawSubstanceConsumptionCalculated.atc_version_autocalculated,
-            tons_autocalculated: rawSubstanceConsumptionCalculated.tons_autocalculated,
+            kilograms_autocalculated: rawSubstanceConsumptionCalculated.kilograms_autocalculated,
             data_status_autocalculated: rawSubstanceConsumptionCalculated.data_status_autocalculated,
             health_sector_autocalculated: rawSubstanceConsumptionCalculated.health_sector_autocalculated,
             health_level_autocalculated: rawSubstanceConsumptionCalculated.health_level_autocalculated,
