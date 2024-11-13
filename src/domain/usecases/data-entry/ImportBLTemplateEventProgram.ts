@@ -1,4 +1,5 @@
 import _ from "lodash";
+import moment from "moment";
 import { Dhis2EventsDefaultRepository } from "../../../data/repositories/Dhis2EventsDefaultRepository";
 import { ImportStrategy } from "../../entities/data-entry/DataValuesSaveSummary";
 import { ConsistencyError, ImportSummary } from "../../entities/data-entry/ImportSummary";
@@ -22,9 +23,8 @@ import { Template } from "../../entities/Template";
 import { ExcelReader } from "../../utils/ExcelReader";
 import { InstanceRepository } from "../../repositories/InstanceRepository";
 import { AMC_RAW_SUBSTANCE_CONSUMPTION_PROGRAM_ID } from "./amc/ImportAMCSubstanceLevelData";
-import moment from "moment";
-import { ListGlassATCLastVersionKeysByYear } from "../../entities/GlassAtcVersionData";
 import { GlassATCRepository } from "../../repositories/GlassATCRepository";
+import { ListGlassATCLastVersionKeysByYear } from "../../entities/GlassAtcVersionData";
 
 export const ATC_VERSION_DATA_ELEMENT_ID = "aCuWz3HZ5Ti";
 
@@ -208,13 +208,14 @@ export class ImportBLTemplateEventProgram {
     ): D2TrackerEvent[] {
         return dataPackage.dataEntries.map(
             ({ id, orgUnit, period, attribute, dataValues, dataForm, coordinate }, index) => {
+                console.debug({ id, orgUnit, period, attribute, dataValues, dataForm, coordinate }, index);
+
                 const occurredAt =
                     dataForm === AMC_RAW_SUBSTANCE_CONSUMPTION_PROGRAM_ID
-                        ? moment(new Date(`${period.split("-").at(0)}-01-01`))
-                              .toISOString()
-                              .split("T")
-                              .at(0) ?? period
+                        ? moment(new Date(new Date(period).getFullYear(), 0, 1)).format("YYYY-MM-DD") ?? period
                         : period;
+
+                console.debug(occurredAt);
 
                 return {
                     event: id || (index + 6).toString(),
