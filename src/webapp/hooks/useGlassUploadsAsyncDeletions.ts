@@ -8,7 +8,7 @@ export type GlassUploadsAsyncDeletionsState = GlassState<Id[]>;
 
 type State = {
     asyncDeletions: GlassUploadsAsyncDeletionsState;
-    setToAsyncDeletion: (uploadIdToDelete: Id) => void;
+    setToAsyncDeletions: (uploadIdsToDelete: Id[]) => void;
 };
 
 export function useGlassUploadsAsyncDeletions(): State {
@@ -30,9 +30,9 @@ export function useGlassUploadsAsyncDeletions(): State {
         getAsyncDeletions();
     }, [getAsyncDeletions]);
 
-    const setToAsyncDeletion = useCallback(
-        (uploadIdToDelete: Id) => {
-            compositionRoot.glassUploads.setToAsyncDeletion(uploadIdToDelete).run(
+    const setToAsyncDeletions = useCallback(
+        (uploadIdsToDelete: Id[]) => {
+            compositionRoot.glassUploads.setToAsyncDeletions(uploadIdsToDelete).run(
                 () => {
                     snackbar.info(`File marked to be deleted`);
                     getAsyncDeletions();
@@ -48,6 +48,6 @@ export function useGlassUploadsAsyncDeletions(): State {
 
     return {
         asyncDeletions,
-        setToAsyncDeletion,
+        setToAsyncDeletions,
     };
 }

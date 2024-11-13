@@ -93,7 +93,7 @@ import { DownloadEmptyTemplateUseCase } from "./domain/usecases/DownloadEmptyTem
 import { DownloadPopulatedTemplateUseCase } from "./domain/usecases/DownloadPopulatedTemplateUseCase";
 import { CountryDefaultRepository } from "./data/repositories/CountryDefaultRepository";
 import { GetAllCountriesUseCase } from "./domain/usecases/GetAllCountriesUseCase";
-import { SetToAsyncDeletionUseCase } from "./domain/usecases/SetToAsyncDeletionUseCase";
+import { SetToAsyncDeletionsUseCase } from "./domain/usecases/SetToAsyncDeletionsUseCase";
 import { GetAsyncDeletionsUseCase } from "./domain/usecases/GetAsyncDeletionsUseCase";
 import { DeletePrimaryFileDataUseCase } from "./domain/usecases/data-entry/DeletePrimaryFileDataUseCase";
 import { DeleteSecondaryFileDataUseCase } from "./domain/usecases/data-entry/DeleteSecondaryFileDataUseCase";
@@ -171,7 +171,7 @@ export function getCompositionRoot(instance: Instance) {
             setBatchId: new SetUploadBatchIdUseCase(glassUploadsRepository),
             saveImportSummaryErrorsOfFiles: new SaveImportSummaryErrorsOfFilesInUploadsUseCase(glassUploadsRepository),
             getCurrentDataSubmissionFileType: new GetUploadsByDataSubmissionUseCase(glassUploadsRepository),
-            setToAsyncDeletion: new SetToAsyncDeletionUseCase(glassUploadsRepository),
+            setToAsyncDeletions: new SetToAsyncDeletionsUseCase(glassUploadsRepository),
             getAsyncDeletions: new GetAsyncDeletionsUseCase(glassUploadsRepository),
         }),
         glassDocuments: getExecute({

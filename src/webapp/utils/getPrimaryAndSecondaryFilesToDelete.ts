@@ -13,12 +13,12 @@ export function getPrimaryAndSecondaryFilesToDelete(
     allUploads?: UploadsDataItem[]
 ): PrimaryAndSecondaryFilesToDelete {
     let primaryFileToDelete: UploadsDataItem | undefined, secondaryFileToDelete: UploadsDataItem | undefined;
-    //For AMR, Ris file is mandatory, so there will be a ris file with given batch id.
-    //Sample file is optional and could be absent
     if (
         moduleProperties.get(currentModuleName)?.isSecondaryFileApplicable &&
         moduleProperties.get(currentModuleName)?.isSecondaryRelated
     ) {
+        //For AMR, Ris file is mandatory, so there will be a ris file with given batch id.
+        //Sample file is optional and could be absent
         if (
             rowToDelete.fileType.toLowerCase() ===
             moduleProperties.get(currentModuleName)?.primaryFileType.toLowerCase()
