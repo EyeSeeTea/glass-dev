@@ -3,6 +3,7 @@ import { Backdrop, TableBody, TableCell, TableRow, Button, DialogContent, Typogr
 import styled from "styled-components";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import dayjs from "dayjs";
+import _ from "lodash";
 import { UploadsDataItem } from "../../entities/uploads";
 import { DeleteOutline } from "@material-ui/icons";
 import { CheckCircleOutline } from "@material-ui/icons";
@@ -25,6 +26,7 @@ import { glassColors } from "../../pages/app/themes/dhis2.theme";
 import { useGlassUploadsAsyncDeletions } from "../../hooks/useGlassUploadsAsyncDeletions";
 import { getPrimaryAndSecondaryFilesToDelete } from "../../utils/getPrimaryAndSecondaryFilesToDelete";
 import { useGlassModule } from "../../hooks/useGlassModule";
+import { Id } from "../../../domain/entities/Ref";
 
 export interface UploadsTableBodyProps {
     rows?: UploadsDataItem[];
@@ -53,7 +55,7 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
         currentPeriod
     );
     const hasCurrentUserCaptureAccess = useGlassCaptureAccess();
-    const { asyncDeletions: asyncDeletionsState, setToAsyncDeletion } = useGlassUploadsAsyncDeletions();
+    const { asyncDeletions: asyncDeletionsState, setToAsyncDeletions } = useGlassUploadsAsyncDeletions();
     const currentModule = useGlassModule();
 
     const showDeleteConfirmationDialog = (rowToDelete: UploadsDataItem) => {
@@ -89,6 +91,30 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
         );
     };
 
+    const getPrimaryAndSecondaryUploadIdsByUploadDataItem = useCallback(
+        (uploadDataItem: UploadsDataItem): Id[] => {
+            const { primaryFileToDelete, secondaryFileToDelete } = getPrimaryAndSecondaryFilesToDelete(
+                uploadDataItem,
+                moduleProperties,
+                currentModuleAccess.moduleName,
+                rows
+            );
+
+            return _.compact([primaryFileToDelete?.id, secondaryFileToDelete?.id]);
+        },
+        [currentModuleAccess.moduleName, rows]
+    );
+
+    const isAlreadyMarkedToBeDeleted = useCallback(
+        (uploadDataItem: UploadsDataItem): boolean => {
+            if (asyncDeletionsState.kind !== "loaded") return false;
+
+            const primaryAndSecondaryIdsToDelete = getPrimaryAndSecondaryUploadIdsByUploadDataItem(uploadDataItem);
+            return primaryAndSecondaryIdsToDelete.some(id => asyncDeletionsState.data.includes(id));
+        },
+        [asyncDeletionsState, getPrimaryAndSecondaryUploadIdsByUploadDataItem]
+    );
+
     //Deleting a dataset completely has the following steps*:
     //1. Delete corresponsding datasetValue/event for each row in the file.
     //2. Delete corresponding document from DHIS
@@ -99,9 +125,9 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
         if (!rowToDelete || asyncDeletionsState.kind !== "loaded" || currentModule.kind !== "loaded") return;
 
         if (moduleProperties.get(currentModuleAccess.moduleName)?.hasAsyncDeletion) {
-            if (asyncDeletionsState.data.includes(rowToDelete.id)) return;
+            if (isAlreadyMarkedToBeDeleted(rowToDelete)) return;
 
-            setToAsyncDeletion(rowToDelete.id);
+            setToAsyncDeletions([rowToDelete.id]);
             refreshUploads({}); //Trigger re-render of parent
             setLoading(false);
             hideDeleteConfirmationDialog();
@@ -455,10 +481,10 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                                         disabled={
                                             !hasCurrentUserCaptureAccess ||
                                             !isEditModeStatus(currentDataSubmissionStatus.data.title) ||
-                                            asyncDeletionsState.data.includes(row.id)
+                                            isAlreadyMarkedToBeDeleted(row)
                                         }
                                     >
-                                        {asyncDeletionsState.data.includes(row.id) ? (
+                                        {isAlreadyMarkedToBeDeleted(row) ? (
                                             i18n.t("Marked to be deleted")
                                         ) : (
                                             <DeleteOutline />

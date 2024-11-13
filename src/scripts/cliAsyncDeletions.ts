@@ -393,54 +393,57 @@ function deleteUploadedDatasets(
 ): FutureData<void> {
     return Future.sequential(
         uploadsToDelete.map(uploadToDelete => {
-            const { primaryFileToDelete, secondaryFileToDelete } = getPrimaryAndSecondaryFilesToDelete(
-                uploadToDelete,
-                moduleProperties,
-                uploadToDelete.moduleName,
-                allUploads
-            );
+            return Future.fromPromise(new Promise(resolve => setTimeout(resolve, 500))).flatMap(() => {
+                const { primaryFileToDelete, secondaryFileToDelete } = getPrimaryAndSecondaryFilesToDelete(
+                    uploadToDelete,
+                    moduleProperties,
+                    uploadToDelete.moduleName,
+                    allUploads
+                );
 
-            const currentModule = glassModules.find(module => module.name === uploadToDelete.moduleName);
-            if (!currentModule) {
-                return Future.error(`Module ${uploadToDelete.moduleName} not found`);
-            }
+                const currentModule = glassModules.find(module => module.name === uploadToDelete.moduleName);
+                if (!currentModule) {
+                    return Future.error(`Module ${uploadToDelete.moduleName} not found`);
+                }
 
-            return Future.joinObj({
-                primaryArrayBuffer: primaryFileToDelete
-                    ? getArrayBufferOfFile(primaryFileToDelete.fileId, repositories)
-                    : Future.success(undefined),
-                secondaryArrayBuffer: secondaryFileToDelete
-                    ? getArrayBufferOfFile(secondaryFileToDelete.fileId, repositories)
-                    : Future.success(undefined),
-            }).flatMap(({ primaryArrayBuffer, secondaryArrayBuffer }) => {
-                if (primaryFileToDelete && primaryArrayBuffer) {
-                    return deleteDatasetValuesOrEvents(
-                        primaryFileToDelete,
-                        secondaryFileToDelete,
-                        primaryArrayBuffer,
-                        secondaryArrayBuffer,
-                        currentModule,
-                        repositories
-                    ).flatMap(({ deletePrimaryFileSummary, deleteSecondaryFileSummary }) => {
-                        if (
-                            deletePrimaryFileSummary?.status === IMPORT_SUMMARY_STATUS_ERROR ||
-                            deleteSecondaryFileSummary?.status === IMPORT_SUMMARY_STATUS_ERROR
-                        ) {
-                            return Future.error(
-                                `An error occured while deleting the data exiting. Primary file: ${primaryFileToDelete.fileName}, secondary file: ${secondaryFileToDelete?.fileName}`
-                            );
-                        }
+                return Future.joinObj({
+                    primaryArrayBuffer: primaryFileToDelete
+                        ? getArrayBufferOfFile(primaryFileToDelete.fileId, repositories)
+                        : Future.success(undefined),
+                    secondaryArrayBuffer: secondaryFileToDelete
+                        ? getArrayBufferOfFile(secondaryFileToDelete.fileId, repositories)
+                        : Future.success(undefined),
+                }).flatMap(({ primaryArrayBuffer, secondaryArrayBuffer }) => {
+                    if (primaryFileToDelete && primaryArrayBuffer) {
+                        return deleteDatasetValuesOrEvents(
+                            primaryFileToDelete,
+                            secondaryFileToDelete,
+                            primaryArrayBuffer,
+                            secondaryArrayBuffer,
+                            currentModule,
+                            repositories
+                        ).flatMap(({ deletePrimaryFileSummary, deleteSecondaryFileSummary }) => {
+                            if (
+                                deletePrimaryFileSummary?.status === IMPORT_SUMMARY_STATUS_ERROR ||
+                                deleteSecondaryFileSummary?.status === IMPORT_SUMMARY_STATUS_ERROR
+                            ) {
+                                return Future.error(
+                                    `An error occured while deleting the data exiting. Primary file: ${primaryFileToDelete.fileName}, secondary file: ${secondaryFileToDelete?.fileName}`
+                                );
+                            }
 
-                        if (deletePrimaryFileSummary) {
-                            console.debug(`Data from primary file ${primaryFileToDelete.fileName} deleted`);
-                        }
+                            if (deletePrimaryFileSummary) {
+                                console.debug(`Data from primary file ${primaryFileToDelete.fileName} deleted`);
+                            }
 
-                        if (secondaryFileToDelete && deleteSecondaryFileSummary) {
-                            console.debug(`Data from secondary file ${secondaryFileToDelete.fileName} deleted`);
-                        }
+                            if (secondaryFileToDelete && deleteSecondaryFileSummary) {
+                                console.debug(`Data from secondary file ${secondaryFileToDelete.fileName} deleted`);
+                            }
 
-                        return deleteUploadAndDocumentFromDatasoreAndDHIS2(primaryFileToDelete, repositories).flatMap(
-                            () => {
+                            return deleteUploadAndDocumentFromDatasoreAndDHIS2(
+                                primaryFileToDelete,
+                                repositories
+                            ).flatMap(() => {
                                 if (secondaryFileToDelete) {
                                     return deleteUploadAndDocumentFromDatasoreAndDHIS2(
                                         secondaryFileToDelete,
@@ -449,38 +452,41 @@ function deleteUploadedDatasets(
                                 } else {
                                     return Future.success(undefined);
                                 }
-                            }
-                        );
-                    });
-                } else if (secondaryFileToDelete && secondaryArrayBuffer) {
-                    if (secondaryFileToDelete.status.toLowerCase() !== UPLOADED_FILE_STATUS_LOWERCASE) {
-                        console.debug("Delete only secondary uploaded dataset");
-                        return deleteDatasetValuesOrEventsFromSecondaryUploaded(
-                            currentModule,
-                            secondaryFileToDelete,
-                            secondaryArrayBuffer,
-                            repositories
-                        ).flatMap(deleteSecondaryFileSummary => {
-                            if (
-                                deleteSecondaryFileSummary &&
-                                deleteSecondaryFileSummary.status !== IMPORT_SUMMARY_STATUS_ERROR
-                            ) {
-                                console.debug(`Data from secondary file ${secondaryFileToDelete.fileName} deleted`);
-                                return deleteUploadAndDocumentFromDatasoreAndDHIS2(secondaryFileToDelete, repositories);
-                            } else {
-                                return Future.error(
-                                    `An error occured while deleting the data exiting. Secondary file: ${secondaryFileToDelete?.fileName}`
-                                );
-                            }
+                            });
                         });
+                    } else if (secondaryFileToDelete && secondaryArrayBuffer) {
+                        if (secondaryFileToDelete.status.toLowerCase() !== UPLOADED_FILE_STATUS_LOWERCASE) {
+                            console.debug("Delete only secondary uploaded dataset");
+                            return deleteDatasetValuesOrEventsFromSecondaryUploaded(
+                                currentModule,
+                                secondaryFileToDelete,
+                                secondaryArrayBuffer,
+                                repositories
+                            ).flatMap(deleteSecondaryFileSummary => {
+                                if (
+                                    deleteSecondaryFileSummary &&
+                                    deleteSecondaryFileSummary.status !== IMPORT_SUMMARY_STATUS_ERROR
+                                ) {
+                                    console.debug(`Data from secondary file ${secondaryFileToDelete.fileName} deleted`);
+                                    return deleteUploadAndDocumentFromDatasoreAndDHIS2(
+                                        secondaryFileToDelete,
+                                        repositories
+                                    );
+                                } else {
+                                    return Future.error(
+                                        `An error occured while deleting the data exiting. Secondary file: ${secondaryFileToDelete?.fileName}`
+                                    );
+                                }
+                            });
+                        } else {
+                            return deleteUploadAndDocumentFromDatasoreAndDHIS2(secondaryFileToDelete, repositories);
+                        }
                     } else {
-                        return deleteUploadAndDocumentFromDatasoreAndDHIS2(secondaryFileToDelete, repositories);
+                        return Future.error(
+                            `An error occured while deleting file, file not found. Upload selected to delete: ${uploadToDelete.id}`
+                        );
                     }
-                } else {
-                    return Future.error(
-                        `An error occured while deleting file, file not found. Upload selected to delete: ${uploadToDelete.id}`
-                    );
-                }
+                });
             });
         })
     ).toVoid();

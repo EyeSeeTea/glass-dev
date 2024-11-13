@@ -211,11 +211,11 @@ export class GlassUploadsDefaultRepository implements GlassUploadsRepository {
         });
     }
 
-    setAsyncDeletion(uploadIdToDelete: Id): FutureData<Id> {
+    setAsyncDeletions(uploadIdsToDelete: Id[]): FutureData<Id[]> {
         return this.dataStoreClient.listCollection<Id>(DataStoreKeys.ASYNC_DELETIONS).flatMap(asyncDeletionsArray => {
-            const newAsyncDeletions = [...asyncDeletionsArray, uploadIdToDelete];
+            const newAsyncDeletions = [...asyncDeletionsArray, ...uploadIdsToDelete];
             return this.dataStoreClient.saveObject(DataStoreKeys.ASYNC_DELETIONS, newAsyncDeletions).flatMap(() => {
-                return Future.success(uploadIdToDelete);
+                return Future.success(uploadIdsToDelete);
             });
         });
     }
