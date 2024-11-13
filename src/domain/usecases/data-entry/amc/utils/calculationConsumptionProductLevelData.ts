@@ -683,7 +683,7 @@ function aggregateDataByAtcRouteAdminYearHealthSectorAndHealthLevel(
 
                     const isAlreadyInTheAggregation =
                         accWithThisId &&
-                        (accWithThisId?.tons_autocalculated || accWithThisId?.tons_autocalculated === 0) &&
+                        (accWithThisId?.kilograms_autocalculated || accWithThisId?.kilograms_autocalculated === 0) &&
                         (accWithThisId?.packages_autocalculated || accWithThisId?.packages_autocalculated === 0) &&
                         (accWithThisId?.ddds_autocalculated || accWithThisId?.ddds_autocalculated === 0);
 
@@ -706,13 +706,13 @@ function aggregateDataByAtcRouteAdminYearHealthSectorAndHealthLevel(
                         ];
                     }
 
+                    const contentKilograms = contentTonnesOfProduct.result.contentTonnes * 1000;
                     return {
                         ...acc,
                         [id]: isAlreadyInTheAggregation
                             ? {
                                   ...accWithThisId,
-                                  tons_autocalculated:
-                                      accWithThisId.tons_autocalculated + contentTonnesOfProduct.result.contentTonnes,
+                                  kilograms_autocalculated: accWithThisId.kilograms_autocalculated + contentKilograms,
                                   packages_autocalculated: accWithThisId.packages_autocalculated + packages_manual,
                                   ddds_autocalculated:
                                       accWithThisId.ddds_autocalculated +
@@ -725,7 +725,7 @@ function aggregateDataByAtcRouteAdminYearHealthSectorAndHealthLevel(
                                   salt_autocalculated: AMR_GLASS_AMC_TEA_SALT,
                                   year: period,
                                   packages_autocalculated: packages_manual,
-                                  tons_autocalculated: contentTonnesOfProduct.result.contentTonnes,
+                                  kilograms_autocalculated: contentKilograms,
                                   ddds_autocalculated: dddPerProductConsumptionPackages.result.dddConsumptionPackages,
                                   data_status_autocalculated: data_status_manual,
                                   health_sector_autocalculated: health_sector_manual,

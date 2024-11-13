@@ -150,6 +150,7 @@ export function calculateConsumptionSubstanceLevelData(
             const atcCodeByLevel = getAtcCodeByLevel(atcData, rawSubstanceConsumption.atc_manual);
             const aware = getAwareClass(awareClassData, rawSubstanceConsumption.atc_manual);
 
+            const rawSubstanceConsumptionKilograms = rawSubstanceConsumption.tons_manual * 1000;
             return {
                 period,
                 orgUnitId,
@@ -160,7 +161,7 @@ export function calculateConsumptionSubstanceLevelData(
                 packages_autocalculated: rawSubstanceConsumption.packages_manual,
                 ddds_autocalculated: dddsAdjust.result,
                 atc_version_autocalculated: currentAtcVersionKey,
-                tons_autocalculated: rawSubstanceConsumption.tons_manual,
+                kilograms_autocalculated: rawSubstanceConsumptionKilograms,
                 data_status_autocalculated: rawSubstanceConsumption.data_status_manual,
                 health_sector_autocalculated: rawSubstanceConsumption.health_sector_manual,
                 health_level_autocalculated: rawSubstanceConsumption.health_level_manual,
