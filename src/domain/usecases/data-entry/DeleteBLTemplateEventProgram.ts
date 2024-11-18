@@ -51,35 +51,39 @@ export class DeleteBLTemplateEventProgram {
                             return this.buildEventsPayload(upload, programId, calculatedProgramId).flatMap(
                                 ({ events, calculatedEvents }) => {
                                     return this.deleteEvents(upload.id, events).flatMap(importSummary => {
-                                        return this.deleteCalculatedEvents(upload.id, calculatedEvents).flatMap(
-                                            importSummaryCalculatedEvents => {
-                                                return Future.success({
-                                                    ...importSummaryCalculatedEvents,
-                                                    importCount: {
-                                                        imported:
-                                                            importSummary.importCount.imported +
-                                                            importSummaryCalculatedEvents.importCount.imported,
-                                                        updated:
-                                                            importSummary.importCount.updated +
-                                                            importSummaryCalculatedEvents.importCount.updated,
-                                                        ignored:
-                                                            importSummary.importCount.ignored +
-                                                            importSummaryCalculatedEvents.importCount.ignored,
-                                                        deleted:
-                                                            importSummary.importCount.deleted +
-                                                            importSummaryCalculatedEvents.importCount.deleted,
-                                                    },
-                                                    nonBlockingErrors: [
-                                                        ...importSummary.nonBlockingErrors,
-                                                        ...importSummaryCalculatedEvents.nonBlockingErrors,
-                                                    ],
-                                                    blockingErrors: [
-                                                        ...importSummary.blockingErrors,
-                                                        ...importSummaryCalculatedEvents.blockingErrors,
-                                                    ],
-                                                });
-                                            }
-                                        );
+                                        if (importSummary.status === "SUCCESS") {
+                                            return this.deleteCalculatedEvents(upload.id, calculatedEvents).flatMap(
+                                                importSummaryCalculatedEvents => {
+                                                    return Future.success({
+                                                        ...importSummaryCalculatedEvents,
+                                                        importCount: {
+                                                            imported:
+                                                                importSummary.importCount.imported +
+                                                                importSummaryCalculatedEvents.importCount.imported,
+                                                            updated:
+                                                                importSummary.importCount.updated +
+                                                                importSummaryCalculatedEvents.importCount.updated,
+                                                            ignored:
+                                                                importSummary.importCount.ignored +
+                                                                importSummaryCalculatedEvents.importCount.ignored,
+                                                            deleted:
+                                                                importSummary.importCount.deleted +
+                                                                importSummaryCalculatedEvents.importCount.deleted,
+                                                        },
+                                                        nonBlockingErrors: [
+                                                            ...importSummary.nonBlockingErrors,
+                                                            ...importSummaryCalculatedEvents.nonBlockingErrors,
+                                                        ],
+                                                        blockingErrors: [
+                                                            ...importSummary.blockingErrors,
+                                                            ...importSummaryCalculatedEvents.blockingErrors,
+                                                        ],
+                                                    });
+                                                }
+                                            );
+                                        } else {
+                                            return Future.success(importSummary);
+                                        }
                                     });
                                 }
                             );
