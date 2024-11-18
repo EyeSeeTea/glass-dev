@@ -163,21 +163,6 @@ async function main() {
                                             console.debug(
                                                 `SUCCESS - Deleted all uploaded datasets marked for deletion: ${uploadIdsToDelete.length}`
                                             );
-                                            return removeAsyncDeletionsFromDatastore(
-                                                uploadIdsToDelete,
-                                                glassUploadsRepository
-                                            ).run(
-                                                () => {
-                                                    console.debug(
-                                                        `SUCCESS - Deleted async-deletions ids from Datastore ${uploadIdsToDelete}`
-                                                    );
-                                                },
-                                                error => {
-                                                    console.error(
-                                                        `ERROR - An error occured while deleting async-deletions ids from Datastore: ${error}`
-                                                    );
-                                                }
-                                            );
                                         },
                                         error => {
                                             console.error(`ERROR - An error occured while deleting: ${error}`);
@@ -285,6 +270,7 @@ function deleteDatasetValuesOrEventsFromPrimaryUploaded(
         amcSubstanceDataRepository: AMCSubstanceDataRepository;
     }
 ): FutureData<ImportSummary> {
+    console.debug(`Deleting data from primary file ${upload.id}`);
     return new DeletePrimaryFileDataUseCase(repositories).execute(currentModule, upload, arrayBuffer);
 }
 
@@ -304,6 +290,7 @@ function deleteDatasetValuesOrEventsFromSecondaryUploaded(
         trackerRepository: TrackerRepository;
     }
 ): FutureData<ImportSummary> {
+    console.debug(`Deleting data from secondary file ${upload.id}`);
     return new DeleteSecondaryFileDataUseCase(repositories).execute(currentModule, upload, arrayBuffer);
 }
 
@@ -448,9 +435,27 @@ function deleteUploadedDatasets(
                                     return deleteUploadAndDocumentFromDatasoreAndDHIS2(
                                         secondaryFileToDelete,
                                         repositories
-                                    );
+                                    ).flatMap(() => {
+                                        return removeAsyncDeletionsFromDatastore(
+                                            [primaryFileToDelete.id],
+                                            repositories.glassUploadsRepository
+                                        ).flatMap(() => {
+                                            console.debug(
+                                                `SUCCESS - Deleted async-deletions id from Datastore ${primaryFileToDelete.id}`
+                                            );
+                                            return Future.success(undefined);
+                                        });
+                                    });
                                 } else {
-                                    return Future.success(undefined);
+                                    return removeAsyncDeletionsFromDatastore(
+                                        [primaryFileToDelete.id],
+                                        repositories.glassUploadsRepository
+                                    ).flatMap(() => {
+                                        console.debug(
+                                            `SUCCESS - Deleted async-deletions id from Datastore ${primaryFileToDelete.id}`
+                                        );
+                                        return Future.success(undefined);
+                                    });
                                 }
                             });
                         });
@@ -471,7 +476,17 @@ function deleteUploadedDatasets(
                                     return deleteUploadAndDocumentFromDatasoreAndDHIS2(
                                         secondaryFileToDelete,
                                         repositories
-                                    );
+                                    ).flatMap(() => {
+                                        return removeAsyncDeletionsFromDatastore(
+                                            [secondaryFileToDelete.id],
+                                            repositories.glassUploadsRepository
+                                        ).flatMap(() => {
+                                            console.debug(
+                                                `SUCCESS - Deleted async-deletions id from Datastore ${secondaryFileToDelete.id}`
+                                            );
+                                            return Future.success(undefined);
+                                        });
+                                    });
                                 } else {
                                     return Future.error(
                                         `An error occured while deleting the data exiting. Secondary file: ${secondaryFileToDelete?.fileName}`
@@ -479,7 +494,20 @@ function deleteUploadedDatasets(
                                 }
                             });
                         } else {
-                            return deleteUploadAndDocumentFromDatasoreAndDHIS2(secondaryFileToDelete, repositories);
+                            return deleteUploadAndDocumentFromDatasoreAndDHIS2(
+                                secondaryFileToDelete,
+                                repositories
+                            ).flatMap(() => {
+                                return removeAsyncDeletionsFromDatastore(
+                                    [secondaryFileToDelete.id],
+                                    repositories.glassUploadsRepository
+                                ).flatMap(() => {
+                                    console.debug(
+                                        `SUCCESS - Deleted async-deletions id from Datastore ${secondaryFileToDelete.id}`
+                                    );
+                                    return Future.success(undefined);
+                                });
+                            });
                         }
                     } else {
                         return Future.error(
