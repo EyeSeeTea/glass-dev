@@ -76,6 +76,7 @@ export const UploadPrimaryFile: React.FC<UploadPrimaryFileProps> = ({
                             if (!dataSubmissionId) {
                                 snackbar.error(i18n.t("Data submission id not found. Please try again"));
                                 setIsLoading(false);
+                                return;
                             }
 
                             if (primaryFileData.isValid) {

@@ -1,4 +1,4 @@
-import i18n from "@eyeseetea/d2-ui-components/locales";
+import _ from "lodash";
 import { Sheet } from "../../domain/entities/Sheet";
 import { ExcelRepository, ExcelValue, ReadCellOptions } from "../../domain/repositories/ExcelRepository";
 import XLSX, {
@@ -19,6 +19,7 @@ import {
     AMC_SUBSTANCE_CALCULATED_CONSUMPTION_PROGRAM_ID,
 } from "../../domain/usecases/data-entry/amc/ImportAMCSubstanceLevelData";
 import { removeCharacters } from "./utils/string";
+import i18n from "../../locales";
 
 type RowWithCells = XLSX.Row & { _cells: XLSX.Cell[] };
 
@@ -47,6 +48,15 @@ export class ExcelPopulateDefaultRepository extends ExcelRepository {
         });
     }
 
+    public loadTemplateFromArrayBuffer(buffer: ArrayBuffer, programId: Id): FutureData<string> {
+        const templateId = getTemplateId(programId);
+        return Future.fromPromise(this.parseFromArrayBuffer(buffer)).map(workbook => {
+            const id = templateId;
+            this.workbooks[id] = workbook;
+            return id;
+        });
+    }
+
     public async toBlob(id: string): Promise<Blob> {
         const data = await this.toBuffer(id);
         return new Blob([data], {
@@ -62,6 +72,11 @@ export class ExcelPopulateDefaultRepository extends ExcelRepository {
     private async parseFile(file: Blob): Promise<ExcelWorkbook> {
         return XLSX.fromDataAsync(file);
     }
+
+    private async parseFromArrayBuffer(buffer: ArrayBuffer): Promise<ExcelWorkbook> {
+        return XLSX.fromDataAsync(buffer);
+    }
+
     public async findRelativeCell(id: string, location?: SheetRef, cellRef?: CellRef): Promise<CellRef | undefined> {
         const workbook = await this.getWorkbook(id);
 

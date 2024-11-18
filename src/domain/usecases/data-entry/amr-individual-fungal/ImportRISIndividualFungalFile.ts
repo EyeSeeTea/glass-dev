@@ -1,4 +1,3 @@
-import i18n from "@eyeseetea/d2-ui-components/locales";
 import { Future, FutureData } from "../../../entities/Future";
 import { ImportStrategy } from "../../../entities/data-entry/DataValuesSaveSummary";
 import { ConsistencyError, ImportSummary } from "../../../entities/data-entry/ImportSummary";
@@ -19,9 +18,10 @@ import { ProgramRulesMetadataRepository } from "../../../repositories/program-ru
 import { downloadIdsAndDeleteTrackedEntities } from "../utils/downloadIdsAndDeleteTrackedEntities";
 import { getTEAValueFromOrganisationUnitCountryEntry } from "../utils/getTEAValueFromOrganisationUnitCountryEntry";
 import { Country } from "../../../entities/Country";
+import i18n from "../../../../locales";
 
 export const AMRIProgramID = "mMAj6Gofe49";
-const AMR_GLASS_AMR_TET_PATIENT = "CcgnfemKr5U";
+export const AMR_GLASS_AMR_TET_PATIENT = "CcgnfemKr5U";
 export const AMRDataProgramStageId = "KCmWZD8qoAk";
 export const AMRCandidaProgramStageId = "ysGSonDq9Bc";
 
@@ -139,6 +139,7 @@ export class ImportRISIndividualFungalFile {
                     );
                 });
         } else {
+            // NOTICE: check also DeleteRISIndividualFungalFileUseCase.ts that contains same code adapted for node environment (only DELETE)
             return downloadIdsAndDeleteTrackedEntities(
                 eventListId,
                 orgUnit,

@@ -1,12 +1,12 @@
-import i18n from "@eyeseetea/d2-ui-components/locales";
 import { Future, FutureData } from "../../../entities/Future";
 import { ConsistencyError } from "../../../entities/data-entry/ImportSummary";
 import { ValidationResult } from "../../../entities/program-rules/EventEffectTypes";
 import { D2TrackerTrackedEntity } from "@eyeseetea/d2-api/api/trackerTrackedEntities";
-import { GlassATCDefaultRepository } from "../../../../data/repositories/GlassATCDefaultRepository";
 import { GlassAtcVersionData, LAST_ATC_CODE_LEVEL, getAtcCodeByLevel } from "../../../entities/GlassAtcVersionData";
 import { AMCProductDataRepository } from "../../../repositories/data-entry/AMCProductDataRepository";
 import { Country } from "../../../entities/Country";
+import { GlassATCRepository } from "../../../repositories/GlassATCRepository";
+import i18n from "../../../../locales";
 
 const AMR_GLASS_AMC_TEA_ATC = "aK1JpD14imM";
 const AMR_GLASS_AMC_TEA_COMBINATION = "mG49egdYK3G";
@@ -24,10 +24,7 @@ const COMB_CODE_PRODUCT_NOT_HAVE_ATC = "Z99ZZ99_99";
 const AMR_GLASS_AMC_TEA_MANUFACTURER_COUNTRY = "OCSAMKIi1BD";
 
 export class CustomValidationsAMCProductData {
-    constructor(
-        private atcRepository: GlassATCDefaultRepository,
-        private amcProductRepository: AMCProductDataRepository
-    ) {}
+    constructor(private atcRepository: GlassATCRepository, private amcProductRepository: AMCProductDataRepository) {}
     // private dhis2EventsDefaultRepository: Dhis2EventsDefaultRepository,
     public getValidatedEvents(
         teis: D2TrackerTrackedEntity[],

@@ -6,11 +6,11 @@ import { GlassUploadsRepository } from "../repositories/GlassUploadsRepository";
 export class DeleteDocumentInfoByUploadIdUseCase implements UseCase {
     constructor(
         private glassDocumentsRepository: GlassDocumentsRepository,
-        private GlassUploadsRepository: GlassUploadsRepository
+        private glassUploadsRepository: GlassUploadsRepository
     ) {}
 
     public execute(uploadId: string): FutureData<void> {
-        return this.GlassUploadsRepository.delete(uploadId).flatMap(uploadFileData => {
+        return this.glassUploadsRepository.delete(uploadId).flatMap(uploadFileData => {
             return this.glassDocumentsRepository.delete(uploadFileData.fileId).flatMap(id => {
                 return this.glassDocumentsRepository.deleteDocumentApi(id).flatMap(_data => {
                     return Future.joinObj({
