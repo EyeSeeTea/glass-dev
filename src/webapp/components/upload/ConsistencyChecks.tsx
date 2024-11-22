@@ -323,15 +323,31 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
                         )
                         .run(
                             importSummary => {
+                                if (importSummary.blockingErrors.length === 0) {
+                                    snackbar.success(i18n.t("Consumption data calculated successfully"));
+                                    compositionRoot.glassUploads
+                                        .setStatus({
+                                            id: primaryUploadId,
+                                            status: "VALIDATED",
+                                        })
+                                        .run(
+                                            () => {
+                                                changeStep(3);
+                                            },
+                                            () => {
+                                                snackbar.error(i18n.t("Failed to set upload status to VALIDATED"));
+                                            }
+                                        );
+                                } else {
+                                    snackbar.error(i18n.t("Failed to calculate consumption data"));
+                                }
                                 console.debug(importSummary);
                                 setImportLoading(false);
-                                changeStep(3);
                             },
                             error => {
                                 snackbar.error(error);
                                 setImportLoading(false);
                                 console.error(error);
-                                changeStep(3);
                             }
                         );
                 }
@@ -346,15 +362,29 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
                         )
                         .run(
                             importSummary => {
-                                console.debug(importSummary);
-                                setImportLoading(false);
-                                changeStep(3);
+                                if (importSummary.blockingErrors.length === 0) {
+                                    snackbar.success(i18n.t("Consumption data calculated successfully"));
+                                    compositionRoot.glassUploads
+                                        .setStatus({
+                                            id: secondaryUploadId,
+                                            status: "VALIDATED",
+                                        })
+                                        .run(
+                                            () => {
+                                                changeStep(3);
+                                            },
+                                            () => {
+                                                snackbar.error(i18n.t("Failed to set upload status to VALIDATED"));
+                                            }
+                                        );
+                                } else {
+                                    snackbar.error(i18n.t("Failed to calculate consumption data"));
+                                }
                             },
                             error => {
                                 snackbar.error(error);
                                 setImportLoading(false);
                                 console.error(error);
-                                changeStep(3);
                             }
                         );
                 }

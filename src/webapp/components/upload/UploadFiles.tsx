@@ -297,10 +297,15 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
                             !currentModuleProperties?.isDryRunReq &&
                             importPrimaryFileSummary.blockingErrors.length === 0
                         )
-                            compositionRoot.glassUploads.setStatus({ id: primaryUploadId, status: "VALIDATED" }).run(
-                                () => {},
-                                () => {}
-                            );
+                            compositionRoot.glassUploads
+                                .setStatus({
+                                    id: primaryUploadId,
+                                    status: moduleName === "AMC" ? "IMPORTED" : "VALIDATED",
+                                })
+                                .run(
+                                    () => {},
+                                    () => {}
+                                );
                     }
 
                     setImportLoading(false);
@@ -345,7 +350,10 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
                                 secondaryUploadId
                             )
                                 compositionRoot.glassUploads
-                                    .setStatus({ id: secondaryUploadId, status: "VALIDATED" })
+                                    .setStatus({
+                                        id: secondaryUploadId,
+                                        status: moduleName === "AMC" ? "IMPORTED" : "VALIDATED",
+                                    })
                                     .run(
                                         () => {},
                                         () => {}
