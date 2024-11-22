@@ -58,7 +58,7 @@ export const UploadsTable: React.FC<UploadsTableProps> = ({
                                             </Typography>
                                             <Typography variant="caption">
                                                 {i18n.t(
-                                                    "IMPORTED - The data has been imported, but validations(if applicable) were not run successfully, in Step 2"
+                                                    "IMPORTED - The data has been imported, but validations(if applicable) were not run successfully, in Step 2. In AMC the calculations have not been done."
                                                 )}
                                                 <br />
                                             </Typography>

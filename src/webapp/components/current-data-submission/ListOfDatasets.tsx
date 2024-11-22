@@ -41,6 +41,12 @@ function getNotCompletedUploads(upload: GlassUploadsState) {
     }
 }
 
+function getImportedUploads(upload: GlassUploadsState) {
+    if (upload.kind === "loaded") {
+        return upload.data.filter((row: UploadsDataItem) => row.status.toLowerCase() === "imported");
+    }
+}
+
 interface ListOfDatasetsProps {
     setRefetchStatus: Dispatch<SetStateAction<DataSubmissionStatusTypes | undefined>>;
 }
@@ -64,6 +70,7 @@ export const ListOfDatasets: React.FC<ListOfDatasetsProps> = ({ setRefetchStatus
     const completeUploads = getCompletedUploads(uploads);
     const validatedUploads = getValidatedUploads(uploads);
     const incompleteUploads = getNotCompletedUploads(uploads);
+    const importedUploads = getImportedUploads(uploads);
 
     const dataSubmissionId = useCurrentDataSubmissionId(
         moduleId,
@@ -125,9 +132,17 @@ export const ListOfDatasets: React.FC<ListOfDatasetsProps> = ({ setRefetchStatus
                         </StyledEmptyMessage>
                         {moduleProperties.get(moduleName)?.isSingleFileTypePerSubmission &&
                         completeUploads &&
-                        completeUploads.length > 0 ? (
+                        ((moduleName === "AMC" &&
+                            ((validatedUploads || []).length > 0 ||
+                                (importedUploads || []).length > 0 ||
+                                completeUploads.length > 0)) ||
+                            (moduleName !== "AMC" && completeUploads.length > 0)) ? (
                             <Typography>
-                                {i18n.t(`You can upload only one successful file for ${moduleName}.`)}
+                                {moduleName === "AMC"
+                                    ? i18n.t(
+                                          `You can upload data from only one file for ${moduleName}. Please, delete all COMPLETED, VALIDATED or IMPORTED files to upload a new one.`
+                                      )
+                                    : i18n.t(`You can upload only one successful file for ${moduleName}.`)}
                             </Typography>
                         ) : (
                             <Button
