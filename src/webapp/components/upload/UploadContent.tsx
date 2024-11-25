@@ -31,6 +31,7 @@ export const UploadContent: React.FC<UploadContentProps> = ({ resetWizard, setRe
         removeSecondaryFile,
         hasSecondaryFile,
         setHasSecondaryFile,
+        dataSubmissionId,
     } = useUploadContent();
     const snackbar = useSnackbar();
 
@@ -97,7 +98,8 @@ export const UploadContent: React.FC<UploadContentProps> = ({ resetWizard, setRe
                     isLoadingPrimary,
                     setIsLoadingPrimary,
                     isLoadingSecondary,
-                    setIsLoadingSecondary
+                    setIsLoadingSecondary,
+                    dataSubmissionId
                 )}
         </ContentWrapper>
     );
@@ -123,7 +125,8 @@ const renderStep = (
     isLoadingPrimary: boolean,
     setIsLoadingPrimary: React.Dispatch<React.SetStateAction<boolean>>,
     isLoadingSecondary: boolean,
-    setIsLoadingSecondary: React.Dispatch<React.SetStateAction<boolean>>
+    setIsLoadingSecondary: React.Dispatch<React.SetStateAction<boolean>>,
+    dataSubmissionId: string | undefined
 ) => {
     switch (step) {
         case 1:
@@ -146,6 +149,7 @@ const renderStep = (
                     setIsLoadingPrimary={setIsLoadingPrimary}
                     isLoadingSecondary={isLoadingSecondary}
                     setIsLoadingSecondary={setIsLoadingSecondary}
+                    dataSubmissionId={dataSubmissionId}
                 />
             );
         case 2:
