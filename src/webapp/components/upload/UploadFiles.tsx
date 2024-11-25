@@ -44,6 +44,7 @@ interface UploadFilesProps {
     setIsLoadingSecondary: React.Dispatch<React.SetStateAction<boolean>>;
     isLoadingSecondary: boolean;
     setIsLoadingPrimary: React.Dispatch<React.SetStateAction<boolean>>;
+    dataSubmissionId: string | undefined;
 }
 
 const UPLOADED_STATUS = "uploaded";
@@ -93,6 +94,7 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
     setIsLoadingPrimary,
     isLoadingSecondary,
     setIsLoadingSecondary,
+    dataSubmissionId,
 }) => {
     const { compositionRoot, allCountries } = useAppContext();
     const snackbar = useSnackbar();
@@ -468,7 +470,7 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
 
     return (
         <ContentWrapper>
-            <Backdrop open={loading} style={{ color: "#fff", zIndex: 1 }}>
+            <Backdrop open={loading || !dataSubmissionId} style={{ color: "#fff", zIndex: 1 }}>
                 <StyledLoaderContainer>
                     <CircularProgress color="inherit" size={50} />
                     <Typography variant="h6">{i18n.t("Loading")}</Typography>
@@ -526,6 +528,7 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
                                 removePrimaryFile={removePrimaryFile}
                                 isLoading={isLoadingPrimary}
                                 setIsLoading={setIsLoadingPrimary}
+                                dataSubmissionId={dataSubmissionId}
                             />
                         ) : (
                             <UploadSecondary
@@ -537,6 +540,7 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
                                 removeSecondaryFile={removeSecondaryFile}
                                 isLoading={isLoadingSecondary}
                                 setIsLoading={setIsLoadingSecondary}
+                                dataSubmissionId={dataSubmissionId}
                             />
                         )}
                     </StyledSingleFileSelectContainer>
@@ -564,6 +568,7 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
                                     removePrimaryFile={removePrimaryFile}
                                     isLoading={isLoadingPrimary}
                                     setIsLoading={setIsLoadingPrimary}
+                                    dataSubmissionId={dataSubmissionId}
                                 />
                                 {moduleProperties.get(moduleName)?.isSecondaryFileApplicable && (
                                     <UploadSecondary
@@ -575,6 +580,7 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
                                         removeSecondaryFile={removeSecondaryFile}
                                         isLoading={isLoadingSecondary}
                                         setIsLoading={setIsLoadingSecondary}
+                                        dataSubmissionId={dataSubmissionId}
                                     />
                                 )}
                             </div>
