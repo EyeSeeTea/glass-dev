@@ -317,7 +317,6 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
                         .consumptionDataProductLevel(
                             currentPeriod,
                             currentOrgUnitAccess.orgUnitId,
-                            primaryFile,
                             currentModuleAccess.moduleName,
                             primaryUploadId
                         )
