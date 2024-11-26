@@ -32,6 +32,8 @@ export const UploadContent: React.FC<UploadContentProps> = ({ resetWizard, setRe
         hasSecondaryFile,
         setHasSecondaryFile,
         dataSubmissionId,
+        isRunningCalculation,
+        setIsRunningCalculation,
     } = useUploadContent();
     const snackbar = useSnackbar();
 
@@ -99,7 +101,9 @@ export const UploadContent: React.FC<UploadContentProps> = ({ resetWizard, setRe
                     setIsLoadingPrimary,
                     isLoadingSecondary,
                     setIsLoadingSecondary,
-                    dataSubmissionId
+                    dataSubmissionId,
+                    isRunningCalculation,
+                    setIsRunningCalculation
                 )}
         </ContentWrapper>
     );
@@ -126,7 +130,9 @@ const renderStep = (
     setIsLoadingPrimary: React.Dispatch<React.SetStateAction<boolean>>,
     isLoadingSecondary: boolean,
     setIsLoadingSecondary: React.Dispatch<React.SetStateAction<boolean>>,
-    dataSubmissionId: string | undefined
+    dataSubmissionId: string | undefined,
+    isRunningCalculation: boolean,
+    setIsRunningCalculation: React.Dispatch<React.SetStateAction<boolean>>
 ) => {
     switch (step) {
         case 1:
@@ -164,6 +170,7 @@ const renderStep = (
                         secondaryFileImportSummary={secondaryFileImportSummary}
                         setPrimaryFileImportSummary={setPrimaryFileImportSummary}
                         setSecondaryFileImportSummary={setSecondaryFileImportSummary}
+                        setIsRunningCalculation={setIsRunningCalculation}
                     />
                 </>
             );
@@ -173,6 +180,9 @@ const renderStep = (
                     changeStep={changeStep}
                     primaryFileImportSummary={primaryFileImportSummary}
                     secondaryFileImportSummary={secondaryFileImportSummary}
+                    isRunningCalculation={isRunningCalculation}
+                    primaryFile={primaryFile}
+                    secondaryFile={secondaryFile}
                 />
             );
         case 4:

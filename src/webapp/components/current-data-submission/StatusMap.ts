@@ -38,6 +38,7 @@ export const statusMap = (module?: string) =>
                         : i18n.t("Please complete all mandatory questionnaires/uploads.")
                 }`,
                 isSubmissionStatus: false,
+                status: "NOT_COMPLETED",
             },
         ],
         [
@@ -77,6 +78,7 @@ export const statusMap = (module?: string) =>
                 actionReqText:
                     "Please click on 'Send submission' in Submission tab to submit after reviewing the data submission",
                 isSubmissionStatus: true,
+                status: "COMPLETE",
             },
         ],
         [
@@ -93,6 +95,7 @@ export const statusMap = (module?: string) =>
                 isActionRequired: false,
                 actionReqText: "",
                 isSubmissionStatus: false,
+                status: "PENDING_APPROVAL",
             },
         ],
         [
@@ -125,6 +128,7 @@ export const statusMap = (module?: string) =>
                 isActionRequired: false,
                 actionReqText: "",
                 isSubmissionStatus: false,
+                status: "APPROVED",
             },
         ],
         [
@@ -157,6 +161,7 @@ export const statusMap = (module?: string) =>
                     "Please re-complete the questionnaire correctly and ensure you have uploaded correct datasets, as your previous submisison was rejected by WHO."
                 ),
                 isSubmissionStatus: false,
+                status: "REJECTED",
             },
         ],
         [
@@ -181,6 +186,7 @@ export const statusMap = (module?: string) =>
                 isActionRequired: false,
                 actionReqText: "",
                 isSubmissionStatus: false,
+                status: "PENDING_UPDATE_APPROVAL",
             },
         ],
         [
@@ -220,6 +226,7 @@ export const statusMap = (module?: string) =>
                 actionReqText:
                     "Please complete all mandatory questionnaires and review datasets, then click on 'Send Submission' in the Submission tab to submit",
                 isSubmissionStatus: true,
+                status: "UPDATE_REQUEST_ACCEPTED",
             },
         ],
     ]);

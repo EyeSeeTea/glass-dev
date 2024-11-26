@@ -79,9 +79,16 @@ export const ListOfDatasets: React.FC<ListOfDatasetsProps> = ({ setRefetchStatus
         currentPeriod
     );
     const { captureAccessGroup } = useCurrentUserGroupsAccess();
+    const [isDatasetMarkAsCompleted, setIsDatasetMarkAsCompleted] = React.useState(false);
+
     useEffect(() => {
         if (
+            uploads.kind === "loaded" &&
+            dataSubmissionId &&
             completeUploads?.length === 0 &&
+            !isDatasetMarkAsCompleted &&
+            currentDataSubmissionStatus.kind === "loaded" &&
+            currentDataSubmissionStatus.data.status !== "NOT_COMPLETED" &&
             (moduleProperties.get(moduleName)?.completeStatusChange === "DATASET" ||
                 moduleProperties.get(moduleName)?.completeStatusChange === "QUESTIONNAIRE_AND_DATASET")
         ) {
@@ -102,6 +109,9 @@ export const ListOfDatasets: React.FC<ListOfDatasetsProps> = ({ setRefetchStatus
         currentOrgUnitAccess,
         currentPeriod,
         dataSubmissionId,
+        isDatasetMarkAsCompleted,
+        uploads.kind,
+        currentDataSubmissionStatus,
         setRefetchStatus,
         questionnaires,
     ]);
@@ -179,6 +189,8 @@ export const ListOfDatasets: React.FC<ListOfDatasetsProps> = ({ setRefetchStatus
                         items={validatedUploads}
                         refreshUploads={refreshUploads}
                         showComplete={true}
+                        setIsDatasetMarkAsCompleted={setIsDatasetMarkAsCompleted}
+                        setRefetchStatus={setRefetchStatus}
                     />
                 )}
                 {incompleteUploads && incompleteUploads.length > 0 && (
