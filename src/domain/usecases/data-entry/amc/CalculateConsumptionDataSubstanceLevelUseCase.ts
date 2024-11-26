@@ -34,7 +34,7 @@ export class CalculateConsumptionDataSubstanceLevelUseCase {
             }
 
             logger.info(
-                `[${new Date().toISOString()}] Calculating consumption data in substance level for the following raw substance consumption data (total: ${
+                `[${new Date().toISOString()}] Calculating consumption data in substance level in org unit ${orgUnitId} and period ${period} for the following raw substance consumption data (total: ${
                     substanceIds.length
                 }): ${substanceIds.join(", ")}`
             );
