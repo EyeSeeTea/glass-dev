@@ -84,6 +84,9 @@ export class ImportAMCProductLevelData {
                             period,
                             allCountries
                         ).flatMap(entities => {
+                            if (!entities.length)
+                                return Future.error("The file is empty or failed while reading the file.");
+
                             return this.validateTEIsAndEvents(
                                 entities,
                                 orgUnitId,

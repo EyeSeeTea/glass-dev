@@ -73,6 +73,9 @@ export class ImportBLTemplateEventProgram {
                                 calculatedEventListFileId
                             ).flatMap(events => {
                                 if (action === "CREATE_AND_UPDATE") {
+                                    if (!events.length)
+                                        return Future.error("The file is empty or failed while reading the file.");
+
                                     //Run validations on import only
                                     return this.validateEvents(
                                         events,

@@ -44,6 +44,11 @@ export class CalculateConsumptionDataProductLevelUseCase {
 
     public execute(period: string, orgUnitId: Id, moduleName: string, uploadId: Id): FutureData<ImportSummary> {
         return this.getIdsInListUpload(uploadId).flatMap(ids => {
+            if (!ids.length) {
+                logger.error(`[${new Date().toISOString()}] Products not found.`);
+                return Future.error("Products not found.");
+            }
+
             logger.info(
                 `[${new Date().toISOString()}] Calculating raw substance consumption data for the following products (total: ${
                     ids.length

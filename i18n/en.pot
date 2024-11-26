@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2024-11-22T13:19:11.465Z\n"
-"PO-Revision-Date: 2024-11-22T13:19:11.465Z\n"
+"POT-Creation-Date: 2024-11-26T07:14:25.414Z\n"
+"PO-Revision-Date: 2024-11-26T07:14:25.414Z\n"
 
 msgid "Template {{id}} not loaded"
 msgstr ""
@@ -345,7 +345,8 @@ msgstr ""
 
 msgid ""
 "IMPORTED - The data has been imported, but validations(if applicable) were "
-"not run successfully, in Step 2. In AMC the calculations have not been done."
+"not run successfully, in Step 2. In addition, in AMC the calculations have "
+"not been done yet or there has been some error in them."
 msgstr ""
 
 msgid ""
@@ -564,6 +565,9 @@ msgid "Failed to set upload status to VALIDATED"
 msgstr ""
 
 msgid "Failed to calculate consumption data"
+msgstr ""
+
+msgid "Failed to set upload status to IMPORTED"
 msgstr ""
 
 msgid "Importing data and applying validation rules"

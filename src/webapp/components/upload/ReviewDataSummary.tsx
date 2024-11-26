@@ -101,52 +101,133 @@ export const ReviewDataSummary: React.FC<ReviewDataSummaryProps> = ({
         const secondaryUploadId = localStorage.getItem("secondaryUploadId");
         setIsLoading(true);
         if (primaryUploadId) {
-            return compositionRoot.glassUploads.setStatus({ id: primaryUploadId, status: "COMPLETED" }).run(
-                () => {
-                    if (!secondaryUploadId) {
-                        changeStep(4);
-                        setIsLoading(false);
-                        //If Questionnaires are not applicable to a module, then set status as COMPLETE on
-                        //completion of dataset.
-                        if (
-                            moduleProperties.get(currentModuleAccess.moduleName)?.completeStatusChange === "DATASET" ||
-                            (moduleProperties.get(currentModuleAccess.moduleName)?.completeStatusChange ===
-                                "QUESTIONNAIRE_AND_DATASET" &&
-                                currentQuestionnaires?.every(q => q.isMandatory && q.isCompleted))
-                        ) {
-                            compositionRoot.glassDataSubmission.setStatus(currentDataSubmissionId, "COMPLETE").run(
-                                () => {
-                                    if (captureAccessGroup.kind === "loaded") {
-                                        const userGroupsIds = captureAccessGroup.data.map(cag => {
-                                            return cag.id;
-                                        });
-                                        const notificationText = `The data submission for ${currentModuleAccess.moduleName} module for year ${currentPeriod} and country ${currentOrgUnitAccess.orgUnitName} has changed to DATA TO BE APPROVED BY COUNTRY`;
-
-                                        compositionRoot.notifications
-                                            .send(
-                                                notificationText,
-                                                notificationText,
-                                                userGroupsIds,
-                                                currentOrgUnitAccess.orgUnitPath
-                                            )
+            return compositionRoot.glassUploads.getById(primaryUploadId).run(
+                primaryUpload => {
+                    if (
+                        (currentModuleAccess.moduleName === "AMC" && primaryUpload.status === "VALIDATED") ||
+                        currentModuleAccess.moduleName !== "AMC"
+                    ) {
+                        return compositionRoot.glassUploads.setStatus({ id: primaryUploadId, status: "COMPLETED" }).run(
+                            () => {
+                                if (!secondaryUploadId) {
+                                    changeStep(4);
+                                    setIsLoading(false);
+                                    //If Questionnaires are not applicable to a module, then set status as COMPLETE on
+                                    //completion of dataset.
+                                    if (
+                                        moduleProperties.get(currentModuleAccess.moduleName)?.completeStatusChange ===
+                                            "DATASET" ||
+                                        (moduleProperties.get(currentModuleAccess.moduleName)?.completeStatusChange ===
+                                            "QUESTIONNAIRE_AND_DATASET" &&
+                                            currentQuestionnaires?.every(q => q.isMandatory && q.isCompleted))
+                                    ) {
+                                        compositionRoot.glassDataSubmission
+                                            .setStatus(currentDataSubmissionId, "COMPLETE")
                                             .run(
-                                                () => {},
-                                                () => {}
+                                                () => {
+                                                    if (captureAccessGroup.kind === "loaded") {
+                                                        const userGroupsIds = captureAccessGroup.data.map(cag => {
+                                                            return cag.id;
+                                                        });
+                                                        const notificationText = `The data submission for ${currentModuleAccess.moduleName} module for year ${currentPeriod} and country ${currentOrgUnitAccess.orgUnitName} has changed to DATA TO BE APPROVED BY COUNTRY`;
+
+                                                        compositionRoot.notifications
+                                                            .send(
+                                                                notificationText,
+                                                                notificationText,
+                                                                userGroupsIds,
+                                                                currentOrgUnitAccess.orgUnitPath
+                                                            )
+                                                            .run(
+                                                                () => {},
+                                                                () => {}
+                                                            );
+                                                    }
+                                                },
+                                                error => {
+                                                    console.debug(
+                                                        "Error occurred when setting data submission status, error: " +
+                                                            error
+                                                    );
+                                                }
                                             );
                                     }
-                                },
-                                error => {
-                                    console.debug(
-                                        "Error occurred when setting data submission status, error: " + error
-                                    );
+                                } else {
+                                    return compositionRoot.glassUploads
+                                        .setStatus({ id: secondaryUploadId, status: "COMPLETED" })
+                                        .run(
+                                            () => {
+                                                changeStep(4);
+                                                setIsLoading(false);
+                                            },
+                                            errorMessage => {
+                                                snackbar.error(i18n.t(errorMessage));
+                                                setIsLoading(false);
+                                            }
+                                        );
                                 }
-                            );
-                        }
+                            },
+                            errorMessage => {
+                                snackbar.error(i18n.t(errorMessage));
+                                setIsLoading(false);
+                            }
+                        );
                     } else {
+                        changeStep(4);
+                        setIsLoading(false);
+                    }
+                },
+                error => {
+                    snackbar.error(error);
+                }
+            );
+        } else if (secondaryUploadId) {
+            return compositionRoot.glassUploads.getById(secondaryUploadId).run(
+                secondaryUpload => {
+                    if (
+                        (currentModuleAccess.moduleName === "AMC" && secondaryUpload.status === "VALIDATED") ||
+                        currentModuleAccess.moduleName !== "AMC"
+                    ) {
                         return compositionRoot.glassUploads
                             .setStatus({ id: secondaryUploadId, status: "COMPLETED" })
                             .run(
                                 () => {
+                                    if (
+                                        moduleProperties.get(currentModuleAccess.moduleName)?.completeStatusChange ===
+                                            "QUESTIONNAIRE_AND_DATASET" &&
+                                        currentQuestionnaires?.every(q => q.isMandatory && q.isCompleted)
+                                    ) {
+                                        compositionRoot.glassDataSubmission
+                                            .setStatus(currentDataSubmissionId, "COMPLETE")
+                                            .run(
+                                                () => {
+                                                    if (captureAccessGroup.kind === "loaded") {
+                                                        const userGroupsIds = captureAccessGroup.data.map(cag => {
+                                                            return cag.id;
+                                                        });
+                                                        const notificationText = `The data submission for ${currentModuleAccess.moduleName} module for year ${currentPeriod} and country ${currentOrgUnitAccess.orgUnitName} has changed to DATA TO BE APPROVED BY COUNTRY`;
+
+                                                        compositionRoot.notifications
+                                                            .send(
+                                                                notificationText,
+                                                                notificationText,
+                                                                userGroupsIds,
+                                                                currentOrgUnitAccess.orgUnitPath
+                                                            )
+                                                            .run(
+                                                                () => {},
+                                                                () => {}
+                                                            );
+                                                    }
+                                                },
+                                                error => {
+                                                    console.debug(
+                                                        "Error occurred when setting data submission status, error: " +
+                                                            error
+                                                    );
+                                                }
+                                            );
+                                    }
                                     changeStep(4);
                                     setIsLoading(false);
                                 },
@@ -155,53 +236,13 @@ export const ReviewDataSummary: React.FC<ReviewDataSummaryProps> = ({
                                     setIsLoading(false);
                                 }
                             );
+                    } else {
+                        changeStep(4);
+                        setIsLoading(false);
                     }
                 },
-                errorMessage => {
-                    snackbar.error(i18n.t(errorMessage));
-                    setIsLoading(false);
-                }
-            );
-        } else if (secondaryUploadId) {
-            return compositionRoot.glassUploads.setStatus({ id: secondaryUploadId, status: "COMPLETED" }).run(
-                () => {
-                    if (
-                        moduleProperties.get(currentModuleAccess.moduleName)?.completeStatusChange ===
-                            "QUESTIONNAIRE_AND_DATASET" &&
-                        currentQuestionnaires?.every(q => q.isMandatory && q.isCompleted)
-                    ) {
-                        compositionRoot.glassDataSubmission.setStatus(currentDataSubmissionId, "COMPLETE").run(
-                            () => {
-                                if (captureAccessGroup.kind === "loaded") {
-                                    const userGroupsIds = captureAccessGroup.data.map(cag => {
-                                        return cag.id;
-                                    });
-                                    const notificationText = `The data submission for ${currentModuleAccess.moduleName} module for year ${currentPeriod} and country ${currentOrgUnitAccess.orgUnitName} has changed to DATA TO BE APPROVED BY COUNTRY`;
-
-                                    compositionRoot.notifications
-                                        .send(
-                                            notificationText,
-                                            notificationText,
-                                            userGroupsIds,
-                                            currentOrgUnitAccess.orgUnitPath
-                                        )
-                                        .run(
-                                            () => {},
-                                            () => {}
-                                        );
-                                }
-                            },
-                            error => {
-                                console.debug("Error occurred when setting data submission status, error: " + error);
-                            }
-                        );
-                    }
-                    changeStep(4);
-                    setIsLoading(false);
-                },
-                errorMessage => {
-                    snackbar.error(i18n.t(errorMessage));
-                    setIsLoading(false);
+                error => {
+                    snackbar.error(error);
                 }
             );
         }

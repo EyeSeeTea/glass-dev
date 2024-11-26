@@ -93,6 +93,7 @@ import { DownloadEmptyTemplateUseCase } from "./domain/usecases/DownloadEmptyTem
 import { DownloadPopulatedTemplateUseCase } from "./domain/usecases/DownloadPopulatedTemplateUseCase";
 import { CountryDefaultRepository } from "./data/repositories/CountryDefaultRepository";
 import { GetAllCountriesUseCase } from "./domain/usecases/GetAllCountriesUseCase";
+import { GetGlassUploadByIdUseCase } from "./domain/usecases/GetGlassUploadByIdUseCase";
 
 export function getCompositionRoot(instance: Instance) {
     const api = getD2APiFromInstance(instance);
@@ -156,6 +157,7 @@ export function getCompositionRoot(instance: Instance) {
         }),
         glassUploads: getExecute({
             getAll: new GetGlassUploadsUseCase(glassUploadsRepository),
+            getById: new GetGlassUploadByIdUseCase(glassUploadsRepository),
             setStatus: new SetUploadStatusUseCase(glassUploadsRepository),
             getAMRUploadsForCurrentDataSubmission: new GetGlassUploadsByDataSubmissionUseCase(
                 glassUploadsRepository,
