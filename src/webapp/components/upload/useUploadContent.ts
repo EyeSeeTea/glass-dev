@@ -21,11 +21,12 @@ export type UploadContentState = {
     removePrimaryFile: EffectFn<[event: React.MouseEvent<HTMLButtonElement, MouseEvent>]>;
     removeSecondaryFile: EffectFn<[event: React.MouseEvent<HTMLButtonElement, MouseEvent>]>;
     dataSubmissionId: string | undefined;
+    isRunningCalculation: boolean;
+    setIsRunningCalculation: Dispatch<SetStateAction<boolean>>;
 };
 
 export function useUploadContent(): UploadContentState {
     const { compositionRoot } = useAppContext();
-
     const {
         currentModuleAccess: { moduleId, moduleName },
     } = useCurrentModuleContext();
@@ -42,6 +43,7 @@ export function useUploadContent(): UploadContentState {
     const [errorMessage, setErrorMessage] = useState<string>("");
     const [isLoadingPrimary, setIsLoadingPrimary] = useState<boolean>(false);
     const [isLoadingSecondary, setIsLoadingSecondary] = useState<boolean>(false);
+    const [isRunningCalculation, setIsRunningCalculation] = useState<boolean>(false);
 
     const onSetSecondaryFile = useCallback((maybeFile: File | null) => {
         setSecondaryFile(maybeFile);
@@ -118,5 +120,7 @@ export function useUploadContent(): UploadContentState {
         hasSecondaryFile,
         setHasSecondaryFile,
         dataSubmissionId,
+        isRunningCalculation,
+        setIsRunningCalculation,
     };
 }

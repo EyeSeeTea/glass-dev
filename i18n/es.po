@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: i18next-conv\n"
-"POT-Creation-Date: 2024-11-26T07:14:25.414Z\n"
+"POT-Creation-Date: 2024-11-26T16:33:01.224Z\n"
 "PO-Revision-Date: 2018-10-25T09:02:35.143Z\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -346,8 +346,7 @@ msgstr ""
 
 msgid ""
 "IMPORTED - The data has been imported, but validations(if applicable) were "
-"not run successfully, in Step 2. In addition, in AMC the calculations have "
-"not been done yet or there has been some error in them."
+"not run successfully, in Step 2."
 msgstr ""
 
 msgid ""
@@ -368,7 +367,7 @@ msgstr ""
 msgid "Complete"
 msgstr ""
 
-msgid "Failed to set completed status"
+msgid "Error occurred when setting data submission status to COMPLETED"
 msgstr ""
 
 msgid "Deleting Files"
@@ -560,16 +559,7 @@ msgstr ""
 msgid "Failed to set upload status"
 msgstr ""
 
-msgid "Consumption data calculated successfully"
-msgstr ""
-
-msgid "Failed to set upload status to VALIDATED"
-msgstr ""
-
 msgid "Failed to calculate consumption data"
-msgstr ""
-
-msgid "Failed to set upload status to IMPORTED"
 msgstr ""
 
 msgid "Importing data and applying validation rules"
