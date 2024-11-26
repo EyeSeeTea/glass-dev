@@ -339,14 +339,36 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
                                         );
                                 } else {
                                     snackbar.error(i18n.t("Failed to calculate consumption data"));
+                                    compositionRoot.glassUploads
+                                        .setStatus({
+                                            id: primaryUploadId,
+                                            status: "IMPORTED",
+                                        })
+                                        .run(
+                                            () => {},
+                                            () => {
+                                                snackbar.error(i18n.t("Failed to set upload status to IMPORTED"));
+                                            }
+                                        );
                                 }
                                 console.debug(importSummary);
                                 setImportLoading(false);
                             },
                             error => {
-                                snackbar.error(error);
+                                snackbar.error(`Failed to calculate consumption data: ${error}`);
                                 setImportLoading(false);
                                 console.error(error);
+                                compositionRoot.glassUploads
+                                    .setStatus({
+                                        id: primaryUploadId,
+                                        status: "IMPORTED",
+                                    })
+                                    .run(
+                                        () => {},
+                                        () => {
+                                            snackbar.error(i18n.t("Failed to set upload status to IMPORTED"));
+                                        }
+                                    );
                             }
                         );
                 }
@@ -378,12 +400,34 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
                                         );
                                 } else {
                                     snackbar.error(i18n.t("Failed to calculate consumption data"));
+                                    compositionRoot.glassUploads
+                                        .setStatus({
+                                            id: secondaryUploadId,
+                                            status: "IMPORTED",
+                                        })
+                                        .run(
+                                            () => {},
+                                            () => {
+                                                snackbar.error(i18n.t("Failed to set upload status to IMPORTED"));
+                                            }
+                                        );
                                 }
                             },
                             error => {
-                                snackbar.error(error);
+                                snackbar.error(`Failed to calculate consumption data: ${error}`);
                                 setImportLoading(false);
                                 console.error(error);
+                                compositionRoot.glassUploads
+                                    .setStatus({
+                                        id: secondaryUploadId,
+                                        status: "IMPORTED",
+                                    })
+                                    .run(
+                                        () => {},
+                                        () => {
+                                            snackbar.error(i18n.t("Failed to set upload status to IMPORTED"));
+                                        }
+                                    );
                             }
                         );
                 }

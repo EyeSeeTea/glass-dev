@@ -28,6 +28,11 @@ export class CalculateConsumptionDataSubstanceLevelUseCase {
 
     public execute(uploadId: Id, period: string, orgUnitId: Id, moduleName: string): FutureData<ImportSummary> {
         return this.getIdsInEventListUpload(uploadId).flatMap(substanceIds => {
+            if (!substanceIds.length) {
+                logger.error(`[${new Date().toISOString()}] Substances not found.`);
+                return Future.error("Substances not found.");
+            }
+
             logger.info(
                 `[${new Date().toISOString()}] Calculating consumption data in substance level for the following raw substance consumption data (total: ${
                     substanceIds.length
