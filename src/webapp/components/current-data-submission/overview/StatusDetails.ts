@@ -1,3 +1,5 @@
+import { DataSubmissionStatusTypes } from "../../../../domain/entities/GlassDataSubmission";
+
 export type StatusCTAs =
     | "Go to questionnaires"
     | "Display full status history"
@@ -26,4 +28,5 @@ export interface StatusDetails {
     isActionRequired: boolean;
     actionReqText: string;
     isSubmissionStatus: boolean;
+    status: DataSubmissionStatusTypes;
 }
