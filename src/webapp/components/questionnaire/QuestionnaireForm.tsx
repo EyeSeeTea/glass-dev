@@ -1,6 +1,6 @@
 import { useSnackbar } from "@eyeseetea/d2-ui-components";
-import { LinearProgress, makeStyles } from "@material-ui/core";
-import React, { useEffect, useState } from "react";
+import { Button, LinearProgress, makeStyles } from "@material-ui/core";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Id } from "../../../domain/entities/Base";
 import { Questionnaire, Question, QuestionnaireBase, QuestionnarieM } from "../../../domain/entities/Questionnaire";
 import { useAppContext } from "../../contexts/app-context";
@@ -28,6 +28,8 @@ export interface QuestionnarieFormProps {
 const QuestionnaireForm: React.FC<QuestionnarieFormProps> = props => {
     const { onBackClick, mode } = props;
     const [questionnaire, selector, actions, isSaving] = useQuestionnaire(props);
+    const { handleQuestionChange, saveQuestionnaire, disableSave } = useSaveQuestionnaire(props);
+
     const classes = useStyles();
     const disabled = questionnaire?.isCompleted ? true : mode === "show";
 
@@ -44,7 +46,6 @@ const QuestionnaireForm: React.FC<QuestionnarieFormProps> = props => {
     return (
         <FormWrapper>
             <PageHeader title={questionnaire.name} onBackClick={onBackClick} />
-
             <QuestionnaireActions
                 description={questionnaire.description}
                 isCompleted={questionnaire.isCompleted}
@@ -52,7 +53,6 @@ const QuestionnaireForm: React.FC<QuestionnarieFormProps> = props => {
                 mode={mode}
                 setAsCompleted={complete => setAsCompleted(complete)}
             />
-
             {questionnaire.sections.map(section => {
                 if (!section.isVisible) return null;
 
@@ -74,7 +74,7 @@ const QuestionnaireForm: React.FC<QuestionnarieFormProps> = props => {
                                         selector={selector}
                                         disabled={disabled}
                                         question={question}
-                                        setQuestion={actions.setQuestion}
+                                        handleQuestionChange={handleQuestionChange}
                                     />
                                 ))}
                             </TableBody>
@@ -82,6 +82,18 @@ const QuestionnaireForm: React.FC<QuestionnarieFormProps> = props => {
                     </div>
                 );
             })}
+
+            <ButtonContainer>
+                <Button
+                    className={classes.center}
+                    variant="contained"
+                    color="primary"
+                    onClick={saveQuestionnaire}
+                    disabled={disableSave}
+                >
+                    Save Questionnaire
+                </Button>
+            </ButtonContainer>
         </FormWrapper>
     );
 };
@@ -89,6 +101,63 @@ const QuestionnaireForm: React.FC<QuestionnarieFormProps> = props => {
 const FormWrapper = styled.div`
     gap: 0px;
 `;
+
+const ButtonContainer = styled.div`
+    padding: 8px;
+`;
+
+function useSaveQuestionnaire(options: QuestionnarieFormProps) {
+    const { compositionRoot } = useAppContext();
+    const snackbar = useSnackbar();
+    const [questionnaire, selector, actions] = useQuestionnaire(options);
+
+    const [questions, setQuestions] = useState<Question[]>([]);
+
+    const validationErrors = useMemo(() => {
+        return questionnaire?.sections.flatMap(section =>
+            _(section.questions)
+                .map(q => (q.validationError ? q.validationError : undefined))
+                .compact()
+                .value()
+        );
+    }, [questionnaire]);
+
+    const disableSave = _.isEmpty(questions) || !_.isEmpty(validationErrors);
+
+    const handleQuestionChange = useCallback(
+        (newQuestion: Question) => {
+            actions.setQuestion(newQuestion);
+
+            setQuestions(prevState => {
+                const index = prevState.findIndex(q => q.id === newQuestion.id);
+                if (index === -1) {
+                    return [...prevState, newQuestion];
+                }
+
+                return prevState.map(q => (q.id === newQuestion.id ? newQuestion : q));
+            });
+        },
+        [actions]
+    );
+
+    const saveQuestionnaire = useCallback(() => {
+        compositionRoot.questionnaires.saveResponse(selector, questions).run(
+            () => {
+                snackbar.success("Questionnaire saved successfully");
+            },
+            err => {
+                console.error(err);
+                snackbar.error(err);
+            }
+        );
+    }, [compositionRoot.questionnaires, questions, selector, snackbar]);
+
+    return {
+        handleQuestionChange,
+        saveQuestionnaire,
+        disableSave,
+    };
+}
 
 function useQuestionnaire(options: QuestionnarieFormProps) {
     const { compositionRoot } = useAppContext();
