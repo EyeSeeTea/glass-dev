@@ -2,7 +2,13 @@ import { useSnackbar } from "@eyeseetea/d2-ui-components";
 import { Button, LinearProgress, makeStyles } from "@material-ui/core";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Id } from "../../../domain/entities/Base";
-import { Questionnaire, Question, QuestionnaireBase, QuestionnarieM } from "../../../domain/entities/Questionnaire";
+import {
+    Questionnaire,
+    Question,
+    QuestionnaireBase,
+    QuestionnarieM,
+    QuestionnaireSelector,
+} from "../../../domain/entities/Questionnaire";
 import { useAppContext } from "../../contexts/app-context";
 // @ts-ignore
 import { DataTable, TableHead, DataTableRow, DataTableColumnHeader, TableBody } from "@dhis2/ui";
@@ -27,8 +33,21 @@ export interface QuestionnarieFormProps {
 
 const QuestionnaireForm: React.FC<QuestionnarieFormProps> = props => {
     const { onBackClick, mode } = props;
+    const [questions, setQuestions] = useState<Question[]>([]);
+
     const [questionnaire, selector, actions, isSaving] = useQuestionnaire(props);
-    const { handleQuestionChange, saveQuestionnaire, disableSave } = useSaveQuestionnaire(props);
+    const { saveQuestionnaire } = useSaveQuestionnaire(selector, questions);
+
+    const validationErrors = useMemo(() => {
+        return questionnaire?.sections.flatMap(section =>
+            _(section.questions)
+                .map(q => (q.validationError ? q.validationError : undefined))
+                .compact()
+                .value()
+        );
+    }, [questionnaire]);
+
+    const disableSave = _.isEmpty(questions) || !_.isEmpty(validationErrors);
 
     const classes = useStyles();
     const disabled = questionnaire?.isCompleted ? true : mode === "show";
@@ -40,6 +59,22 @@ const QuestionnaireForm: React.FC<QuestionnarieFormProps> = props => {
             },
         });
     };
+
+    const handleQuestionChange = useCallback(
+        (newQuestion: Question) => {
+            actions.setQuestion(newQuestion);
+
+            setQuestions(prevState => {
+                const index = prevState.findIndex(question => question.id === newQuestion.id);
+                if (index === -1) {
+                    return [...prevState, newQuestion];
+                }
+
+                return prevState.map(question => (question.id === newQuestion.id ? newQuestion : question));
+            });
+        },
+        [actions]
+    );
 
     if (!questionnaire) return <LinearProgress />;
 
@@ -106,42 +141,12 @@ const ButtonContainer = styled.div`
     padding: 8px;
 `;
 
-function useSaveQuestionnaire(options: QuestionnarieFormProps) {
+function useSaveQuestionnaire(questionnaire: QuestionnaireSelector, questions: Question[]) {
     const { compositionRoot } = useAppContext();
     const snackbar = useSnackbar();
-    const [questionnaire, selector, actions] = useQuestionnaire(options);
-
-    const [questions, setQuestions] = useState<Question[]>([]);
-
-    const validationErrors = useMemo(() => {
-        return questionnaire?.sections.flatMap(section =>
-            _(section.questions)
-                .map(q => (q.validationError ? q.validationError : undefined))
-                .compact()
-                .value()
-        );
-    }, [questionnaire]);
-
-    const disableSave = _.isEmpty(questions) || !_.isEmpty(validationErrors);
-
-    const handleQuestionChange = useCallback(
-        (newQuestion: Question) => {
-            actions.setQuestion(newQuestion);
-
-            setQuestions(prevState => {
-                const index = prevState.findIndex(q => q.id === newQuestion.id);
-                if (index === -1) {
-                    return [...prevState, newQuestion];
-                }
-
-                return prevState.map(q => (q.id === newQuestion.id ? newQuestion : q));
-            });
-        },
-        [actions]
-    );
 
     const saveQuestionnaire = useCallback(() => {
-        compositionRoot.questionnaires.saveResponse(selector, questions).run(
+        compositionRoot.questionnaires.saveResponse(questionnaire, questions).run(
             () => {
                 snackbar.success("Questionnaire saved successfully");
             },
@@ -150,12 +155,10 @@ function useSaveQuestionnaire(options: QuestionnarieFormProps) {
                 snackbar.error(err);
             }
         );
-    }, [compositionRoot.questionnaires, questions, selector, snackbar]);
+    }, [compositionRoot.questionnaires, questionnaire, questions, snackbar]);
 
     return {
-        handleQuestionChange,
         saveQuestionnaire,
-        disableSave,
     };
 }
 
