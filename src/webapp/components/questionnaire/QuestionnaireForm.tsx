@@ -33,21 +33,9 @@ export interface QuestionnarieFormProps {
 
 const QuestionnaireForm: React.FC<QuestionnarieFormProps> = props => {
     const { onBackClick, mode } = props;
-    const [questions, setQuestions] = useState<Question[]>([]);
 
     const [questionnaire, selector, actions, isSaving] = useQuestionnaire(props);
-    const { saveQuestionnaire } = useSaveQuestionnaire(selector, questions);
-
-    const validationErrors = useMemo(() => {
-        return questionnaire?.sections.flatMap(section =>
-            _(section.questions)
-                .map(q => (q.validationError ? q.validationError : undefined))
-                .compact()
-                .value()
-        );
-    }, [questionnaire]);
-
-    const disableSave = _.isEmpty(questions) || !_.isEmpty(validationErrors);
+    const { questionsToSave, setQuestionsToSave, saveQuestionnaire } = useSaveQuestionnaire(selector);
 
     const classes = useStyles();
     const disabled = questionnaire?.isCompleted ? true : mode === "show";
@@ -64,17 +52,28 @@ const QuestionnaireForm: React.FC<QuestionnarieFormProps> = props => {
         (newQuestion: Question) => {
             actions.setQuestion(newQuestion);
 
-            setQuestions(prevState => {
-                const index = prevState.findIndex(question => question.id === newQuestion.id);
-                if (index === -1) {
+            setQuestionsToSave(prevState => {
+                const existingQuestion = prevState.find(question => question.id === newQuestion.id);
+                if (!existingQuestion) {
                     return [...prevState, newQuestion];
                 }
 
                 return prevState.map(question => (question.id === newQuestion.id ? newQuestion : question));
             });
         },
-        [actions]
+        [actions, setQuestionsToSave]
     );
+
+    const validationErrors = useMemo(() => {
+        return questionnaire?.sections.flatMap(section =>
+            _(section.questions)
+                .map(question => (question.validationError ? question.validationError : undefined))
+                .compact()
+                .value()
+        );
+    }, [questionnaire]);
+
+    const disableSave = _.isEmpty(questionsToSave) || !_.isEmpty(validationErrors);
 
     if (!questionnaire) return <LinearProgress />;
 
@@ -141,13 +140,15 @@ const ButtonContainer = styled.div`
     padding: 8px;
 `;
 
-function useSaveQuestionnaire(questionnaire: QuestionnaireSelector, questions: Question[]) {
+function useSaveQuestionnaire(questionnaire: QuestionnaireSelector) {
     const { compositionRoot } = useAppContext();
     const snackbar = useSnackbar();
+    const [questionsToSave, setQuestionsToSave] = useState<Question[]>([]);
 
     const saveQuestionnaire = useCallback(() => {
-        compositionRoot.questionnaires.saveResponse(questionnaire, questions).run(
+        compositionRoot.questionnaires.saveResponse(questionnaire, questionsToSave).run(
             () => {
+                setQuestionsToSave([]);
                 snackbar.success("Questionnaire saved successfully");
             },
             err => {
@@ -155,10 +156,12 @@ function useSaveQuestionnaire(questionnaire: QuestionnaireSelector, questions: Q
                 snackbar.error(err);
             }
         );
-    }, [compositionRoot.questionnaires, questionnaire, questions, snackbar]);
+    }, [compositionRoot.questionnaires, questionnaire, questionsToSave, snackbar]);
 
     return {
-        saveQuestionnaire,
+        questionsToSave: questionsToSave,
+        saveQuestionnaire: saveQuestionnaire,
+        setQuestionsToSave: setQuestionsToSave,
     };
 }
 
