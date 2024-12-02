@@ -1,5 +1,5 @@
 import { useSnackbar } from "@eyeseetea/d2-ui-components";
-import { Button, LinearProgress, makeStyles } from "@material-ui/core";
+import { Button, CircularProgress, LinearProgress, makeStyles } from "@material-ui/core";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Id } from "../../../domain/entities/Base";
 import {
@@ -35,7 +35,8 @@ const QuestionnaireForm: React.FC<QuestionnarieFormProps> = props => {
     const { onBackClick, mode } = props;
 
     const [questionnaire, selector, actions, isSaving] = useQuestionnaire(props);
-    const { questionsToSave, setQuestionsToSave, saveQuestionnaire } = useSaveQuestionnaire(selector);
+    const { isSavingQuestionnaire, questionsToSave, setQuestionsToSave, saveQuestionnaire } =
+        useSaveQuestionnaire(selector);
 
     const classes = useStyles();
     const disabled = questionnaire?.isCompleted ? true : mode === "show";
@@ -73,7 +74,7 @@ const QuestionnaireForm: React.FC<QuestionnarieFormProps> = props => {
         );
     }, [questionnaire]);
 
-    const disableSave = _.isEmpty(questionsToSave) || !_.isEmpty(validationErrors);
+    const disableSave = _.isEmpty(questionsToSave) || !_.isEmpty(validationErrors) || isSavingQuestionnaire;
 
     if (!questionnaire) return <LinearProgress />;
 
@@ -118,7 +119,9 @@ const QuestionnaireForm: React.FC<QuestionnarieFormProps> = props => {
             })}
 
             <ButtonContainer>
-                <Button
+                {isSavingQuestionnaire && <CircularProgress size={22} />}
+
+                <StyledButton
                     className={classes.center}
                     variant="contained"
                     color="primary"
@@ -126,7 +129,7 @@ const QuestionnaireForm: React.FC<QuestionnarieFormProps> = props => {
                     disabled={disableSave}
                 >
                     Save Questionnaire
-                </Button>
+                </StyledButton>
             </ButtonContainer>
         </FormWrapper>
     );
@@ -137,28 +140,42 @@ const FormWrapper = styled.div`
 `;
 
 const ButtonContainer = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
     padding: 8px;
+`;
+
+const StyledButton = styled(Button)`
+    margin: 8px;
 `;
 
 function useSaveQuestionnaire(questionnaire: QuestionnaireSelector) {
     const { compositionRoot } = useAppContext();
     const snackbar = useSnackbar();
+    const [isSavingQuestionnaire, savingActions] = useBooleanState(false);
     const [questionsToSave, setQuestionsToSave] = useState<Question[]>([]);
 
     const saveQuestionnaire = useCallback(() => {
+        savingActions.enable();
+
         compositionRoot.questionnaires.saveResponse(questionnaire, questionsToSave).run(
             () => {
+                savingActions.disable();
                 setQuestionsToSave([]);
                 snackbar.success("Questionnaire saved successfully");
             },
             err => {
+                savingActions.disable();
                 console.error(err);
                 snackbar.error(err);
             }
         );
-    }, [compositionRoot.questionnaires, questionnaire, questionsToSave, snackbar]);
+    }, [compositionRoot.questionnaires, questionnaire, questionsToSave, savingActions, snackbar]);
 
     return {
+        isSavingQuestionnaire: isSavingQuestionnaire,
         questionsToSave: questionsToSave,
         saveQuestionnaire: saveQuestionnaire,
         setQuestionsToSave: setQuestionsToSave,
