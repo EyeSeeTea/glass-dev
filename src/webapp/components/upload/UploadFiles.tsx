@@ -44,6 +44,7 @@ interface UploadFilesProps {
     setIsLoadingSecondary: React.Dispatch<React.SetStateAction<boolean>>;
     isLoadingSecondary: boolean;
     setIsLoadingPrimary: React.Dispatch<React.SetStateAction<boolean>>;
+    dataSubmissionId: string | undefined;
 }
 
 const UPLOADED_STATUS = "uploaded";
@@ -93,6 +94,7 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
     setIsLoadingPrimary,
     isLoadingSecondary,
     setIsLoadingSecondary,
+    dataSubmissionId,
 }) => {
     const { compositionRoot, allCountries } = useAppContext();
     const snackbar = useSnackbar();
@@ -297,10 +299,15 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
                             !currentModuleProperties?.isDryRunReq &&
                             importPrimaryFileSummary.blockingErrors.length === 0
                         )
-                            compositionRoot.glassUploads.setStatus({ id: primaryUploadId, status: "VALIDATED" }).run(
-                                () => {},
-                                () => {}
-                            );
+                            compositionRoot.glassUploads
+                                .setStatus({
+                                    id: primaryUploadId,
+                                    status: moduleName === "AMC" ? "IMPORTED" : "VALIDATED",
+                                })
+                                .run(
+                                    () => {},
+                                    () => {}
+                                );
                     }
 
                     setImportLoading(false);
@@ -345,7 +352,10 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
                                 secondaryUploadId
                             )
                                 compositionRoot.glassUploads
-                                    .setStatus({ id: secondaryUploadId, status: "VALIDATED" })
+                                    .setStatus({
+                                        id: secondaryUploadId,
+                                        status: moduleName === "AMC" ? "IMPORTED" : "VALIDATED",
+                                    })
                                     .run(
                                         () => {},
                                         () => {}
@@ -460,7 +470,7 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
 
     return (
         <ContentWrapper>
-            <Backdrop open={loading} style={{ color: "#fff", zIndex: 1 }}>
+            <Backdrop open={loading || !dataSubmissionId} style={{ color: "#fff", zIndex: 1 }}>
                 <StyledLoaderContainer>
                     <CircularProgress color="inherit" size={50} />
                     <Typography variant="h6">{i18n.t("Loading")}</Typography>
@@ -518,6 +528,7 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
                                 removePrimaryFile={removePrimaryFile}
                                 isLoading={isLoadingPrimary}
                                 setIsLoading={setIsLoadingPrimary}
+                                dataSubmissionId={dataSubmissionId}
                             />
                         ) : (
                             <UploadSecondary
@@ -529,6 +540,7 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
                                 removeSecondaryFile={removeSecondaryFile}
                                 isLoading={isLoadingSecondary}
                                 setIsLoading={setIsLoadingSecondary}
+                                dataSubmissionId={dataSubmissionId}
                             />
                         )}
                     </StyledSingleFileSelectContainer>
@@ -556,6 +568,7 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
                                     removePrimaryFile={removePrimaryFile}
                                     isLoading={isLoadingPrimary}
                                     setIsLoading={setIsLoadingPrimary}
+                                    dataSubmissionId={dataSubmissionId}
                                 />
                                 {moduleProperties.get(moduleName)?.isSecondaryFileApplicable && (
                                     <UploadSecondary
@@ -567,6 +580,7 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
                                         removeSecondaryFile={removeSecondaryFile}
                                         isLoading={isLoadingSecondary}
                                         setIsLoading={setIsLoadingSecondary}
+                                        dataSubmissionId={dataSubmissionId}
                                     />
                                 )}
                             </div>
