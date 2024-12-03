@@ -346,7 +346,7 @@ msgstr ""
 
 msgid ""
 "IMPORTED - The data has been imported, but validations(if applicable) were "
-"not run successfully, in Step 2"
+"not run successfully, in Step 2."
 msgstr ""
 
 msgid ""
@@ -367,7 +367,7 @@ msgstr ""
 msgid "Complete"
 msgstr ""
 
-msgid "Failed to set completed status"
+msgid "Error occurred when setting data submission status to COMPLETED"
 msgstr ""
 
 msgid "Deleting Files"
@@ -560,6 +560,9 @@ msgid "Thank you! your data for now is uploaded in our system"
 msgstr ""
 
 msgid "Failed to set upload status"
+msgstr ""
+
+msgid "Failed to calculate consumption data"
 msgstr ""
 
 msgid "Importing data and applying validation rules"
