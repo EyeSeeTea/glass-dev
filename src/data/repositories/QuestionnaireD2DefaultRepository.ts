@@ -289,68 +289,70 @@ export class QuestionnaireD2DefaultRepository implements QuestionnaireRepository
     }
 
     private getDataValuesForQuestions(questionnaire: QuestionnaireSelector, questions: Question[]): D2DataValue[] {
-        return questions.flatMap(question => {
-            const { type } = question;
-            const { orgUnitId, year } = questionnaire;
+        return questions.flatMap(question => this.getDataValuesForQuestion(questionnaire, question));
+    }
 
-            const base = {
-                orgUnit: orgUnitId,
-                dataElement: question.id,
-                period: year.toString(),
-            };
+    private getDataValuesForQuestion(questionnaire: QuestionnaireSelector, question: Question): D2DataValue[] {
+        const { type } = question;
+        const { orgUnitId, year } = questionnaire;
 
-            switch (type) {
-                case "select":
-                    return question.options.map((option): D2DataValue => {
-                        const isSelected = question.value?.id === option.id;
-                        return {
-                            ...base,
-                            value: isSelected ? "true" : "",
-                            categoryOptionCombo: option.id,
-                            ...deleted(!isSelected),
-                        };
-                    });
-                case "boolean": {
-                    const strValue = question.value ? "true" : question.storeFalse ? "false" : "";
-                    return [
-                        {
-                            ...base,
-                            value: strValue,
-                            ...deleted(!strValue),
-                        },
-                    ];
-                }
-                case "number":
-                case "text":
-                    return [
-                        {
-                            ...base,
-                            value: question.value ?? "",
-                            ...deleted(!question.value),
-                        },
-                    ];
-                case "date":
-                    return [
-                        {
-                            ...base,
-                            value: question.value?.toISOString().split("T")?.at(0) ?? "",
-                            ...deleted(!question.value),
-                        },
-                    ];
-                case "singleCheck": {
-                    const strValue = question.value ? "true" : question.storeFalse ? "false" : "";
-                    return [
-                        {
-                            ...base,
-                            value: strValue,
-                            ...deleted(!strValue),
-                        },
-                    ];
-                }
-                default:
-                    assertUnreachable(type);
+        const base = {
+            orgUnit: orgUnitId,
+            dataElement: question.id,
+            period: year.toString(),
+        };
+
+        switch (type) {
+            case "select":
+                return question.options.map((option): D2DataValue => {
+                    const isSelected = question.value?.id === option.id;
+                    return {
+                        ...base,
+                        value: isSelected ? "true" : "",
+                        categoryOptionCombo: option.id,
+                        ...deleted(!isSelected),
+                    };
+                });
+            case "boolean": {
+                const strValue = question.value ? "true" : question.storeFalse ? "false" : "";
+                return [
+                    {
+                        ...base,
+                        value: strValue,
+                        ...deleted(!strValue),
+                    },
+                ];
             }
-        });
+            case "number":
+            case "text":
+                return [
+                    {
+                        ...base,
+                        value: question.value ?? "",
+                        ...deleted(!question.value),
+                    },
+                ];
+            case "date":
+                return [
+                    {
+                        ...base,
+                        value: question.value?.toISOString().split("T")?.at(0) ?? "",
+                        ...deleted(!question.value),
+                    },
+                ];
+            case "singleCheck": {
+                const strValue = question.value ? "true" : question.storeFalse ? "false" : "";
+                return [
+                    {
+                        ...base,
+                        value: strValue,
+                        ...deleted(!strValue),
+                    },
+                ];
+            }
+            default:
+                assertUnreachable(type);
+        }
     }
 
     private postDataValues(d2DataValues: D2DataValue[]): FutureData<void> {
