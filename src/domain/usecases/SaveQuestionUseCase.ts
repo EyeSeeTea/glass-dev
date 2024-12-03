@@ -2,9 +2,9 @@ import { Question, QuestionnaireSelector } from "../entities/Questionnaire";
 import { QuestionnaireRepository } from "../repositories/QuestionnaireRepository";
 
 export class SaveQuestionnaireResponseUseCase {
-    constructor(private questionnaireReposotory: QuestionnaireRepository) {}
+    constructor(private questionnaireRepository: QuestionnaireRepository) {}
 
-    execute(questionnaire: QuestionnaireSelector, question: Question) {
-        return this.questionnaireReposotory.saveResponse(questionnaire, question);
+    execute(questionnaire: QuestionnaireSelector, questions: Question[]) {
+        return this.questionnaireRepository.saveResponse(questionnaire, questions);
     }
 }
