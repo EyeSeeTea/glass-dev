@@ -20,6 +20,7 @@ import { useGlassModule } from "../../hooks/useGlassModule";
 import { useBooleanState } from "../../hooks/useBooleanState";
 import { QuestionnaireActions } from "./QuestionnaireActions";
 import { useGlassCaptureAccess } from "../../hooks/useGlassCaptureAccess";
+import i18n from "@eyeseetea/d2-ui-components/locales";
 
 export interface QuestionnarieFormProps {
     id: Id;
@@ -57,9 +58,9 @@ const QuestionnaireForm: React.FC<QuestionnarieFormProps> = props => {
                 const existingQuestion = prevState.find(question => question.id === newQuestion.id);
                 if (!existingQuestion) {
                     return [...prevState, newQuestion];
+                } else {
+                    return prevState.map(question => (question.id === newQuestion.id ? newQuestion : question));
                 }
-
-                return prevState.map(question => (question.id === newQuestion.id ? newQuestion : question));
             });
         },
         [actions, setQuestionsToSave]
@@ -128,7 +129,7 @@ const QuestionnaireForm: React.FC<QuestionnarieFormProps> = props => {
                     onClick={saveQuestionnaire}
                     disabled={disableSave}
                 >
-                    Save Questionnaire
+                    {i18n.t("Save Questionnaire")}
                 </StyledButton>
             </ButtonContainer>
         </FormWrapper>
@@ -157,22 +158,24 @@ function useSaveQuestionnaire(questionnaire: QuestionnaireSelector) {
     const [isSavingQuestionnaire, savingActions] = useBooleanState(false);
     const [questionsToSave, setQuestionsToSave] = useState<Question[]>([]);
 
-    const saveQuestionnaire = useCallback(() => {
-        savingActions.enable();
+    const saveQuestionnaire = useCallbackEffect(
+        useCallback(() => {
+            savingActions.enable();
 
-        compositionRoot.questionnaires.saveResponse(questionnaire, questionsToSave).run(
-            () => {
-                savingActions.disable();
-                setQuestionsToSave([]);
-                snackbar.success("Questionnaire saved successfully");
-            },
-            err => {
-                savingActions.disable();
-                console.error(err);
-                snackbar.error(err);
-            }
-        );
-    }, [compositionRoot.questionnaires, questionnaire, questionsToSave, savingActions, snackbar]);
+            return compositionRoot.questionnaires.saveResponse(questionnaire, questionsToSave).run(
+                () => {
+                    savingActions.disable();
+                    setQuestionsToSave([]);
+                    snackbar.success("Questionnaire saved successfully");
+                },
+                err => {
+                    savingActions.disable();
+                    console.error(err);
+                    snackbar.error(err);
+                }
+            );
+        }, [compositionRoot.questionnaires, questionnaire, questionsToSave, savingActions, snackbar])
+    );
 
     return {
         isSavingQuestionnaire: isSavingQuestionnaire,
