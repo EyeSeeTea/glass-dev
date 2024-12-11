@@ -3,7 +3,6 @@ import { ImportSummary } from "../../../entities/data-entry/ImportSummary";
 import { Future, FutureData } from "../../../entities/Future";
 import { ExcelRepository } from "../../../repositories/ExcelRepository";
 import * as templates from "../../../entities/data-entry/program-templates";
-import { InstanceDefaultRepository } from "../../../../data/repositories/InstanceDefaultRepository";
 import { DataPackage } from "../../../entities/data-entry/DataPackage";
 import { TrackerRepository } from "../../../repositories/TrackerRepository";
 import { GlassDocumentsRepository } from "../../../repositories/GlassDocumentsRepository";
@@ -18,7 +17,6 @@ import { ValidationResult } from "../../../entities/program-rules/EventEffectTyp
 import { ProgramRuleValidationForBLEventProgram } from "../../program-rules-processing/ProgramRuleValidationForBLEventProgram";
 import { ProgramRulesMetadataRepository } from "../../../repositories/program-rules/ProgramRulesMetadataRepository";
 import { CustomValidationsAMCProductData } from "./CustomValidationsAMCProductData";
-import { GlassATCDefaultRepository } from "../../../../data/repositories/GlassATCDefaultRepository";
 import moment from "moment";
 import { AMCProductDataRepository } from "../../../repositories/data-entry/AMCProductDataRepository";
 import { CODE_PRODUCT_NOT_HAVE_ATC, COMB_CODE_PRODUCT_NOT_HAVE_ATC } from "../../../entities/GlassAtcVersionData";
@@ -27,24 +25,26 @@ import { downloadIdsAndDeleteTrackedEntities } from "../utils/downloadIdsAndDele
 import { getStringFromFile } from "../utils/fileToString";
 import { getTEAValueFromOrganisationUnitCountryEntry } from "../utils/getTEAValueFromOrganisationUnitCountryEntry";
 import { Country } from "../../../entities/Country";
+import { InstanceRepository } from "../../../repositories/InstanceRepository";
+import { GlassATCRepository } from "../../../repositories/GlassATCRepository";
 
 export const AMC_PRODUCT_REGISTER_PROGRAM_ID = "G6ChA5zMW9n";
 export const AMC_RAW_PRODUCT_CONSUMPTION_STAGE_ID = "GmElQHKXLIE";
 export const AMC_RAW_PRODUCT_CONSUMPTION_CALCULATED_STAGE_ID = "q8cl5qllyjd";
-const AMR_GLASS_AMC_TET_PRODUCT_REGISTER = "uE6bIKLsGYW";
+export const AMR_GLASS_AMC_TET_PRODUCT_REGISTER = "uE6bIKLsGYW";
 const AMR_GLASS_AMC_TEA_ATC = "aK1JpD14imM";
 const AMR_GLASS_AMC_TEA_COMBINATION = "mG49egdYK3G";
 
 export class ImportAMCProductLevelData {
     constructor(
         private excelRepository: ExcelRepository,
-        private instanceRepository: InstanceDefaultRepository,
+        private instanceRepository: InstanceRepository,
         private trackerRepository: TrackerRepository,
         private glassDocumentsRepository: GlassDocumentsRepository,
         private glassUploadsRepository: GlassUploadsRepository,
         private metadataRepository: MetadataRepository,
         private programRulesMetadataRepository: ProgramRulesMetadataRepository,
-        private atcRepository: GlassATCDefaultRepository,
+        private atcRepository: GlassATCRepository,
         private amcProductRepository: AMCProductDataRepository,
         private amcSubstanceDataRepository: AMCSubstanceDataRepository
     ) {}
@@ -137,6 +137,7 @@ export class ImportAMCProductLevelData {
                             });
                         });
                     } else {
+                        // NOTICE: check also DeleteAMCProductLevelDataUseCase.ts that contains same code adapted for node environment
                         return downloadIdsAndDeleteTrackedEntities(
                             eventListId,
                             orgUnitId,

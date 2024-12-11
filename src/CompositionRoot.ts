@@ -93,6 +93,11 @@ import { DownloadEmptyTemplateUseCase } from "./domain/usecases/DownloadEmptyTem
 import { DownloadPopulatedTemplateUseCase } from "./domain/usecases/DownloadPopulatedTemplateUseCase";
 import { CountryDefaultRepository } from "./data/repositories/CountryDefaultRepository";
 import { GetAllCountriesUseCase } from "./domain/usecases/GetAllCountriesUseCase";
+import { SetToAsyncDeletionsUseCase } from "./domain/usecases/SetToAsyncDeletionsUseCase";
+import { GetAsyncDeletionsUseCase } from "./domain/usecases/GetAsyncDeletionsUseCase";
+import { DeletePrimaryFileDataUseCase } from "./domain/usecases/data-entry/DeletePrimaryFileDataUseCase";
+import { DeleteSecondaryFileDataUseCase } from "./domain/usecases/data-entry/DeleteSecondaryFileDataUseCase";
+import { DownloadDocumentAsArrayBufferUseCase } from "./domain/usecases/DownloadDocumentAsArrayBufferUseCase";
 import { GetGlassUploadByIdUseCase } from "./domain/usecases/GetGlassUploadByIdUseCase";
 
 export function getCompositionRoot(instance: Instance) {
@@ -168,12 +173,15 @@ export function getCompositionRoot(instance: Instance) {
             setBatchId: new SetUploadBatchIdUseCase(glassUploadsRepository),
             saveImportSummaryErrorsOfFiles: new SaveImportSummaryErrorsOfFilesInUploadsUseCase(glassUploadsRepository),
             getCurrentDataSubmissionFileType: new GetUploadsByDataSubmissionUseCase(glassUploadsRepository),
+            setToAsyncDeletions: new SetToAsyncDeletionsUseCase(glassUploadsRepository),
+            getAsyncDeletions: new GetAsyncDeletionsUseCase(glassUploadsRepository),
         }),
         glassDocuments: getExecute({
             getAll: new GetGlassDocumentsUseCase(glassDocumentsRepository),
             upload: new UploadDocumentUseCase(glassDocumentsRepository, glassUploadsRepository),
             deleteByUploadId: new DeleteDocumentInfoByUploadIdUseCase(glassDocumentsRepository, glassUploadsRepository),
             download: new DownloadDocumentUseCase(glassDocumentsRepository),
+            downloadAsArrayBuffer: new DownloadDocumentAsArrayBufferUseCase(glassDocumentsRepository),
             updateSecondaryFileWithPrimaryId: new UpdateSampleUploadWithRisIdUseCase(glassUploadsRepository),
         }),
         fileSubmission: getExecute({
@@ -182,7 +190,6 @@ export function getCompositionRoot(instance: Instance) {
                 risIndividualFungalRepository,
                 metadataRepository,
                 dataValuesRepository,
-                glassModuleRepository,
                 dhis2EventsDefaultRepository,
                 excelRepository,
                 glassDocumentsRepository,
@@ -233,6 +240,29 @@ export function getCompositionRoot(instance: Instance) {
                 egaspProgramRepository,
                 metadataRepository
             ),
+            deletePrimaryFile: new DeletePrimaryFileDataUseCase({
+                risDataRepository,
+                metadataRepository,
+                dataValuesRepository,
+                dhis2EventsDefaultRepository,
+                excelRepository,
+                glassDocumentsRepository,
+                instanceRepository,
+                glassUploadsRepository,
+                trackerRepository,
+                amcSubstanceDataRepository,
+            }),
+            deleteSecondaryFile: new DeleteSecondaryFileDataUseCase({
+                sampleDataRepository,
+                dataValuesRepository,
+                dhis2EventsDefaultRepository,
+                excelRepository,
+                glassDocumentsRepository,
+                metadataRepository,
+                instanceRepository,
+                glassUploadsRepository,
+                trackerRepository,
+            }),
         }),
         questionnaires: getExecute({
             get: new GetQuestionnaireUseCase(questionnaireD2Repository),

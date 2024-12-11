@@ -77,7 +77,10 @@ export const UploadSecondary: React.FC<UploadSecondaryProps> = ({
                             if (!dataSubmissionId) {
                                 snackbar.error(i18n.t("Data submission id not found. Please try again"));
                                 setIsLoading(false);
-                            } else if (sampleData.isValid) {
+                                return;
+                            }
+
+                            if (sampleData.isValid) {
                                 setSecondaryFile(uploadedSample);
                                 const data = {
                                     batchId,

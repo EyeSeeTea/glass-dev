@@ -377,6 +377,9 @@ msgstr ""
 msgid "This might take several minutes, do not refresh the page or press back."
 msgstr ""
 
+msgid "Marked to be deleted"
+msgstr ""
+
 msgid "Error downloading data"
 msgstr ""
 

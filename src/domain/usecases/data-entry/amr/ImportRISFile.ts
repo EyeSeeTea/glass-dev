@@ -22,8 +22,8 @@ import { mapDataValuesToImportSummary } from "../utils/mapDhis2Summary";
 import { RISData } from "../../../entities/data-entry/amr-external/RISData";
 import { checkDuplicateRowsRIS } from "../utils/checkDuplicateRows";
 
-const AMR_AMR_DS_INPUT_FILES_RIS_DS_ID = "CeQPmXgrhHF";
-const AMR_DATA_PATHOGEN_ANTIBIOTIC_BATCHID_CC_ID = "S427AvQESbw";
+export const AMR_AMR_DS_INPUT_FILES_RIS_DS_ID = "CeQPmXgrhHF";
+export const AMR_DATA_PATHOGEN_ANTIBIOTIC_BATCHID_CC_ID = "S427AvQESbw";
 
 export class ImportRISFile {
     constructor(
@@ -33,6 +33,7 @@ export class ImportRISFile {
         private moduleRepository: GlassModuleRepository
     ) {}
 
+    // NOTICE: check also DeleteRISDatasetUseCase.ts that contains same code adapted for node environment (only DELETE)
     public importRISFile(
         inputFile: File,
         batchId: string,
