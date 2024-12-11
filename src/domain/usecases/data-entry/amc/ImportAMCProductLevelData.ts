@@ -11,7 +11,7 @@ import { Id } from "../../../entities/Ref";
 import { D2TrackerTrackedEntity } from "@eyeseetea/d2-api/api/trackerTrackedEntities";
 import { D2TrackerEnrollment, D2TrackerEnrollmentAttribute } from "@eyeseetea/d2-api/api/trackerEnrollments";
 import { D2TrackerEvent } from "@eyeseetea/d2-api/api/trackerEvents";
-import { mapToImportSummary, readTemplate, uploadIdListFileAndSave } from "../ImportBLTemplateEventProgram";
+import { mapToImportSummary, readTemplate } from "../ImportBLTemplateEventProgram";
 import { MetadataRepository } from "../../../repositories/MetadataRepository";
 import { ValidationResult } from "../../../entities/program-rules/EventEffectTypes";
 import { ProgramRuleValidationForBLEventProgram } from "../../program-rules-processing/ProgramRuleValidationForBLEventProgram";
@@ -84,6 +84,9 @@ export class ImportAMCProductLevelData {
                             period,
                             allCountries
                         ).flatMap(entities => {
+                            if (!entities.length)
+                                return Future.error("The file is empty or failed while reading the file.");
+
                             return this.validateTEIsAndEvents(
                                 entities,
                                 orgUnitId,
@@ -124,12 +127,10 @@ export class ImportAMCProductLevelData {
                                             this.metadataRepository,
                                             validationResults.nonBlockingErrors
                                         ).flatMap(summary => {
-                                            return uploadIdListFileAndSave(
+                                            return this.uploadTeiIdListFileAndSave(
                                                 "primaryUploadId",
                                                 summary,
-                                                moduleName,
-                                                this.glassDocumentsRepository,
-                                                this.glassUploadsRepository
+                                                moduleName
                                             );
                                         });
                                     });
@@ -367,6 +368,29 @@ export class ImportAMCProductLevelData {
             return Future.success(consolidatedValidationResults);
         });
     }
+
+    private uploadTeiIdListFileAndSave = (
+        uploadIdLocalStorageName: string,
+        summary: { importSummary: ImportSummary; eventIdList: string[] },
+        moduleName: string
+    ): FutureData<ImportSummary> => {
+        const uploadId = localStorage.getItem(uploadIdLocalStorageName);
+        if (summary.eventIdList.length > 0 && uploadId) {
+            //Events were imported successfully, so create and uplaod a file with tei ids
+            // and associate it with the upload datastore object
+            const teisListBlob = new Blob([JSON.stringify(summary.eventIdList)], {
+                type: "text/plain",
+            });
+            const teiIdListFile = new File([teisListBlob], `${uploadId}_eventIdsFile`);
+            return this.glassDocumentsRepository.save(teiIdListFile, moduleName).flatMap(fileId => {
+                return this.glassUploadsRepository.setEventListFileId(uploadId, fileId).flatMap(() => {
+                    return Future.success(summary.importSummary);
+                });
+            });
+        } else {
+            return Future.success(summary.importSummary);
+        }
+    };
 
     private deleteCalculatedSubstanceConsumptionData(
         deleteProductSummary: ImportSummary,

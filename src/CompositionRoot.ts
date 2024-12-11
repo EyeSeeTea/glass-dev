@@ -98,6 +98,7 @@ import { GetAsyncDeletionsUseCase } from "./domain/usecases/GetAsyncDeletionsUse
 import { DeletePrimaryFileDataUseCase } from "./domain/usecases/data-entry/DeletePrimaryFileDataUseCase";
 import { DeleteSecondaryFileDataUseCase } from "./domain/usecases/data-entry/DeleteSecondaryFileDataUseCase";
 import { DownloadDocumentAsArrayBufferUseCase } from "./domain/usecases/DownloadDocumentAsArrayBufferUseCase";
+import { GetGlassUploadByIdUseCase } from "./domain/usecases/GetGlassUploadByIdUseCase";
 
 export function getCompositionRoot(instance: Instance) {
     const api = getD2APiFromInstance(instance);
@@ -161,6 +162,7 @@ export function getCompositionRoot(instance: Instance) {
         }),
         glassUploads: getExecute({
             getAll: new GetGlassUploadsUseCase(glassUploadsRepository),
+            getById: new GetGlassUploadByIdUseCase(glassUploadsRepository),
             setStatus: new SetUploadStatusUseCase(glassUploadsRepository),
             getAMRUploadsForCurrentDataSubmission: new GetGlassUploadsByDataSubmissionUseCase(
                 glassUploadsRepository,

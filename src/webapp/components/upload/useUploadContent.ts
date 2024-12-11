@@ -1,6 +1,10 @@
 import { Dispatch, SetStateAction, useCallback, useState } from "react";
 import { useAppContext } from "../../contexts/app-context";
 import { EffectFn, useCallbackEffect } from "../../hooks/use-callback-effect";
+import { useCurrentModuleContext } from "../../contexts/current-module-context";
+import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context";
+import { useCurrentPeriodContext } from "../../contexts/current-period-context";
+import { useCurrentDataSubmissionId } from "../../hooks/useCurrentDataSubmissionId";
 
 export type UploadContentState = {
     errorMessage: string;
@@ -16,16 +20,30 @@ export type UploadContentState = {
     setHasSecondaryFile: Dispatch<SetStateAction<boolean>>;
     removePrimaryFile: EffectFn<[event: React.MouseEvent<HTMLButtonElement, MouseEvent>]>;
     removeSecondaryFile: EffectFn<[event: React.MouseEvent<HTMLButtonElement, MouseEvent>]>;
+    dataSubmissionId: string | undefined;
+    isRunningCalculation: boolean;
+    setIsRunningCalculation: Dispatch<SetStateAction<boolean>>;
 };
 
 export function useUploadContent(): UploadContentState {
     const { compositionRoot } = useAppContext();
+    const {
+        currentModuleAccess: { moduleId, moduleName },
+    } = useCurrentModuleContext();
+    const {
+        currentOrgUnitAccess: { orgUnitId },
+    } = useCurrentOrgUnitContext();
+
+    const { currentPeriod } = useCurrentPeriodContext();
+    const dataSubmissionId = useCurrentDataSubmissionId(moduleId, moduleName, orgUnitId, currentPeriod);
+
     const [primaryFile, setPrimaryFile] = useState<File | null>(null);
     const [secondaryFile, setSecondaryFile] = useState<File | null>(null);
     const [hasSecondaryFile, setHasSecondaryFile] = useState<boolean>(false);
     const [errorMessage, setErrorMessage] = useState<string>("");
     const [isLoadingPrimary, setIsLoadingPrimary] = useState<boolean>(false);
     const [isLoadingSecondary, setIsLoadingSecondary] = useState<boolean>(false);
+    const [isRunningCalculation, setIsRunningCalculation] = useState<boolean>(false);
 
     const onSetSecondaryFile = useCallback((maybeFile: File | null) => {
         setSecondaryFile(maybeFile);
@@ -101,5 +119,8 @@ export function useUploadContent(): UploadContentState {
         removeSecondaryFile,
         hasSecondaryFile,
         setHasSecondaryFile,
+        dataSubmissionId,
+        isRunningCalculation,
+        setIsRunningCalculation,
     };
 }

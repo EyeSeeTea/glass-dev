@@ -101,7 +101,7 @@ export class AMCProductDataDefaultRepository implements AMCProductDataRepository
 
     getProductRegisterAndRawProductConsumptionByProductIds(
         orgUnitId: Id,
-        productIds: string[],
+        productIds: Id[],
         period: string,
         productIdsChunkSize: number,
         chunked?: boolean
@@ -156,7 +156,6 @@ export class AMCProductDataDefaultRepository implements AMCProductDataRepository
         return Future.sequential(
             chunkedProductIds.flatMap(productIdsChunk => {
                 const productIdsString = productIdsChunk.join(";");
-                const filter = `${AMR_GLASS_AMC_TEA_PRODUCT_ID}:IN:${productIdsString}`;
 
                 // TODO: change pageSize to skipPaging:true when new version of d2-api
                 return apiToFuture(
@@ -165,7 +164,7 @@ export class AMCProductDataDefaultRepository implements AMCProductDataRepository
                         program: AMC_PRODUCT_REGISTER_PROGRAM_ID,
                         programStage: AMC_RAW_PRODUCT_CONSUMPTION_STAGE_ID,
                         orgUnit: orgUnit,
-                        filter: filter,
+                        trackedEntity: productIdsString,
                         enrollmentEnrolledAfter: enrollmentEnrolledAfter,
                         enrollmentEnrolledBefore: enrollmentEnrolledBefore,
                         pageSize: productIdsChunk.length,
@@ -189,14 +188,13 @@ export class AMCProductDataDefaultRepository implements AMCProductDataRepository
         let page = 1;
         let result;
         const productIdsString = productIds.join(";");
-        const filter = `${AMR_GLASS_AMC_TEA_PRODUCT_ID}:IN:${productIdsString}`;
         const enrollmentEnrolledAfter = `${period}-1-1`;
         const enrollmentEnrolledBefore = `${period}-12-31`;
 
         do {
             result = await this.getTrackedEntitiesOfPage({
                 orgUnit,
-                filter,
+                trackedEntity: productIdsString,
                 page,
                 pageSize,
                 enrollmentEnrolledBefore,
@@ -249,7 +247,7 @@ export class AMCProductDataDefaultRepository implements AMCProductDataRepository
         orgUnit: Id;
         page: number;
         pageSize: number;
-        filter?: string;
+        trackedEntity?: string;
         totalPages?: boolean;
         enrollmentEnrolledAfter?: string;
         enrollmentEnrolledBefore?: string;

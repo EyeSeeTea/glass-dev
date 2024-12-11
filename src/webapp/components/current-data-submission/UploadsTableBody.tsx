@@ -27,14 +27,24 @@ import { useGlassUploadsAsyncDeletions } from "../../hooks/useGlassUploadsAsyncD
 import { getPrimaryAndSecondaryFilesToDelete } from "../../utils/getPrimaryAndSecondaryFilesToDelete";
 import { useGlassModule } from "../../hooks/useGlassModule";
 import { Id } from "../../../domain/entities/Ref";
+import { useQuestionnaires } from "./Questionnaires";
+import { DataSubmissionStatusTypes } from "../../../domain/entities/GlassDataSubmission";
 
 export interface UploadsTableBodyProps {
     rows?: UploadsDataItem[];
     refreshUploads: React.Dispatch<React.SetStateAction<{}>>;
     showComplete?: boolean;
+    setIsDatasetMarkAsCompleted?: React.Dispatch<React.SetStateAction<boolean>>;
+    setRefetchStatus?: React.Dispatch<React.SetStateAction<DataSubmissionStatusTypes | undefined>>;
 }
 
-export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refreshUploads, showComplete }) => {
+export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({
+    rows,
+    refreshUploads,
+    showComplete,
+    setIsDatasetMarkAsCompleted,
+    setRefetchStatus,
+}) => {
     const { compositionRoot } = useAppContext();
     const snackbar = useSnackbar();
 
@@ -57,6 +67,7 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
     const hasCurrentUserCaptureAccess = useGlassCaptureAccess();
     const { asyncDeletions: asyncDeletionsState, setToAsyncDeletions } = useGlassUploadsAsyncDeletions();
     const currentModule = useGlassModule();
+    const [questionnaires] = useQuestionnaires();
 
     const showDeleteConfirmationDialog = (rowToDelete: UploadsDataItem) => {
         setRowToDelete(rowToDelete);
@@ -186,6 +197,12 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                                         return;
                                     }
                                     if (deletePrimaryFileSummary) {
+                                        if (
+                                            primaryFileToDelete?.status === "COMPLETED" &&
+                                            setIsDatasetMarkAsCompleted
+                                        ) {
+                                            setIsDatasetMarkAsCompleted && setIsDatasetMarkAsCompleted(false);
+                                        }
                                         const itemsDeleted =
                                             currentModuleAccess.moduleName === "AMC" ? "products" : "rows";
                                         let message = `${
@@ -284,6 +301,13 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                                             return;
                                         }
                                         if (secondaryFileToDelete && deleteSecondaryFileSummary) {
+                                            if (
+                                                secondaryFileToDelete?.status === "COMPLETED" &&
+                                                setIsDatasetMarkAsCompleted
+                                            ) {
+                                                setIsDatasetMarkAsCompleted && setIsDatasetMarkAsCompleted(false);
+                                            }
+
                                             const itemsDeleted =
                                                 currentModuleAccess.moduleName === "AMC" ? "substances" : "rows";
                                             const message = ` ${
@@ -355,23 +379,57 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
     const setCompleteStatus = useCallback(() => {
         if (rowToComplete?.id) {
             setLoading(true);
-            compositionRoot.glassUploads
-                .setStatus({
-                    id: rowToComplete.id,
-                    status: "COMPLETED",
-                })
-                .run(
-                    () => {
+            return compositionRoot.glassUploads.setStatus({ id: rowToComplete.id, status: "COMPLETED" }).run(
+                () => {
+                    if (
+                        moduleProperties.get(currentModuleAccess.moduleName)?.completeStatusChange === "DATASET" ||
+                        (moduleProperties.get(currentModuleAccess.moduleName)?.completeStatusChange ===
+                            "QUESTIONNAIRE_AND_DATASET" &&
+                            questionnaires?.every(q => q.isMandatory && q.isCompleted))
+                    ) {
+                        return compositionRoot.glassDataSubmission
+                            .setStatus(rowToComplete.dataSubmission, "COMPLETE")
+                            .run(
+                                () => {
+                                    setIsDatasetMarkAsCompleted && setIsDatasetMarkAsCompleted(true);
+                                    setLoading(false);
+                                    refreshUploads({}); //Trigger re-render of parent
+                                    setRefetchStatus && setRefetchStatus("COMPLETE");
+                                },
+                                error => {
+                                    snackbar.error(
+                                        i18n.t("Error occurred when setting data submission status to COMPLETED")
+                                    );
+                                    console.debug(
+                                        "Error occurred when setting data submission status to COMPLETED: " + error
+                                    );
+                                    setLoading(false);
+                                    setIsDatasetMarkAsCompleted && setIsDatasetMarkAsCompleted(false);
+                                }
+                            );
+                    } else {
                         refreshUploads({}); //Trigger re-render of parent
                         setLoading(false);
-                    },
-                    () => {
-                        snackbar.error(i18n.t("Failed to set completed status"));
-                        setLoading(false);
+                        setIsDatasetMarkAsCompleted && setIsDatasetMarkAsCompleted(false);
                     }
-                );
+                },
+                errorMessage => {
+                    snackbar.error(i18n.t(errorMessage));
+                    setLoading(false);
+                    setIsDatasetMarkAsCompleted && setIsDatasetMarkAsCompleted(false);
+                }
+            );
         }
-    }, [compositionRoot.glassUploads, refreshUploads, rowToComplete, snackbar]);
+    }, [
+        compositionRoot,
+        currentModuleAccess.moduleName,
+        questionnaires,
+        refreshUploads,
+        rowToComplete,
+        setIsDatasetMarkAsCompleted,
+        setRefetchStatus,
+        snackbar,
+    ]);
 
     const completeDataset = () => {
         hideCompleteConfirmationDialog();
