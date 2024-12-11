@@ -1,3 +1,4 @@
+import { Maybe } from "../../../../types/utils";
 import { ATCCodeLevel5, RouteOfAdministrationCode, SaltCode } from "../../GlassAtcVersionData";
 import { Id } from "../../Ref";
 
@@ -9,8 +10,8 @@ export type RawSubstanceConsumptionData = {
     packages_manual: number;
     ddds_manual: number;
     atc_version_manual: string;
-    tons_manual: number;
-    data_status_manual: number;
+    tons_manual: Maybe<number>;
+    data_status_manual: Maybe<number>;
     health_sector_manual: string;
     health_level_manual: string;
     report_date: string;
