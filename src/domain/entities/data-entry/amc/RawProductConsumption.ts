@@ -1,6 +1,8 @@
+import { Maybe } from "../../../../types/utils";
+
 export type RawProductConsumption = {
     AMR_GLASS_AMC_TEA_PRODUCT_ID: string;
-    packages_manual: number;
+    packages_manual: Maybe<number>;
     data_status_manual: number;
     health_sector_manual: string;
     health_level_manual: string;

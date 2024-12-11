@@ -37,7 +37,7 @@ export type DDDPerProductConsumptionPackages = {
     year: string;
     health_sector_manual: string;
     health_level_manual: string;
-    dddConsumptionPackages: number;
+    dddConsumptionPackages: Maybe<number>;
     dddUnit: UnitCode;
 };
 
@@ -46,7 +46,7 @@ export type ContentTonnesPerProduct = {
     year: string;
     health_sector_manual: string;
     health_level_manual: string;
-    contentTonnes: number;
+    contentTonnes: Maybe<number>;
 };
 
 export type RawSubstanceConsumptionCalculated = {
@@ -58,10 +58,10 @@ export type RawSubstanceConsumptionCalculated = {
     data_status_autocalculated: number;
     health_sector_autocalculated: string;
     health_level_autocalculated: string;
-    kilograms_autocalculated: number;
-    packages_autocalculated: number;
+    kilograms_autocalculated: Maybe<number>;
+    packages_autocalculated: Maybe<number>;
     atc_version_autocalculated: ATCVersionKey;
-    ddds_autocalculated: number;
+    ddds_autocalculated: Maybe<number>;
     am_class: Maybe<AmName>;
     atc2: Maybe<string>;
     atc3: Maybe<string>;

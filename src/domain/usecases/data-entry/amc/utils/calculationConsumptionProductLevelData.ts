@@ -515,7 +515,7 @@ function calculateDDDPerProductConsumptionPackages(
             productConsumption;
 
         // 4b - ddd_cons_product = ddd_per_pack × packages (in year, health_sector and health_level)
-        const dddConsumptionPackages = dddPerPackage.value * packages_manual;
+        const dddConsumptionPackages = packages_manual ? dddPerPackage.value * packages_manual : undefined;
         return {
             result: {
                 AMR_GLASS_AMC_TEA_PRODUCT_ID,
@@ -530,7 +530,7 @@ function calculateDDDPerProductConsumptionPackages(
                 {
                     content: `[${new Date().toISOString()}]  Product ${
                         productConsumption.AMR_GLASS_AMC_TEA_PRODUCT_ID
-                    } - DDD per product consumption packages: ${dddConsumptionPackages}`,
+                    } - DDD per product consumption packages: ${dddConsumptionPackages} (# packages: ${packages_manual})`,
                     messageType: "Info",
                 },
             ],
@@ -587,7 +587,7 @@ function getTonnesPerProduct(
             year: period,
             health_sector_manual,
             health_level_manual,
-            contentTonnes: (content.value * conversionFactor * packages_manual) / 1e6,
+            contentTonnes: packages_manual ? (content.value * conversionFactor * packages_manual) / 1e6 : undefined,
         },
         logs: [
             ...calculationLogs,
@@ -595,7 +595,9 @@ function getTonnesPerProduct(
                 content: `[${new Date().toISOString()}]  Product ${
                     productConsumption.AMR_GLASS_AMC_TEA_PRODUCT_ID
                 } - Conversion factor used to calculate content_tonnes: ${conversionFactor}. Content tonnes: ${
-                    (content.value * conversionFactor * packages_manual) / 1e6
+                    packages_manual
+                        ? (content.value * conversionFactor * packages_manual) / 1e6
+                        : "Not packages manual defined"
                 }`,
                 messageType: "Debug",
             },
@@ -706,17 +708,24 @@ function aggregateDataByAtcRouteAdminYearHealthSectorAndHealthLevel(
                         ];
                     }
 
-                    const contentKilograms = contentTonnesOfProduct.result.contentTonnes * 1000;
+                    const contentKilograms = contentTonnesOfProduct.result.contentTonnes
+                        ? contentTonnesOfProduct.result.contentTonnes * 1000
+                        : undefined;
                     return {
                         ...acc,
                         [id]: isAlreadyInTheAggregation
                             ? {
                                   ...accWithThisId,
-                                  kilograms_autocalculated: accWithThisId.kilograms_autocalculated + contentKilograms,
-                                  packages_autocalculated: accWithThisId.packages_autocalculated + packages_manual,
-                                  ddds_autocalculated:
-                                      accWithThisId.ddds_autocalculated +
-                                      dddPerProductConsumptionPackages.result.dddConsumptionPackages,
+                                  kilograms_autocalculated: contentKilograms
+                                      ? (accWithThisId.kilograms_autocalculated || 0) + contentKilograms
+                                      : accWithThisId.kilograms_autocalculated,
+                                  packages_autocalculated: packages_manual
+                                      ? (accWithThisId.packages_autocalculated || 0) + packages_manual
+                                      : accWithThisId.packages_autocalculated,
+                                  ddds_autocalculated: dddPerProductConsumptionPackages.result.dddConsumptionPackages
+                                      ? (accWithThisId.ddds_autocalculated || 0) +
+                                        dddPerProductConsumptionPackages.result.dddConsumptionPackages
+                                      : accWithThisId.ddds_autocalculated,
                               }
                             : {
                                   AMR_GLASS_AMC_TEA_PRODUCT_ID,
