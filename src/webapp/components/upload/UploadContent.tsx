@@ -31,6 +31,9 @@ export const UploadContent: React.FC<UploadContentProps> = ({ resetWizard, setRe
         removeSecondaryFile,
         hasSecondaryFile,
         setHasSecondaryFile,
+        dataSubmissionId,
+        isRunningCalculation,
+        setIsRunningCalculation,
     } = useUploadContent();
     const snackbar = useSnackbar();
 
@@ -97,7 +100,10 @@ export const UploadContent: React.FC<UploadContentProps> = ({ resetWizard, setRe
                     isLoadingPrimary,
                     setIsLoadingPrimary,
                     isLoadingSecondary,
-                    setIsLoadingSecondary
+                    setIsLoadingSecondary,
+                    dataSubmissionId,
+                    isRunningCalculation,
+                    setIsRunningCalculation
                 )}
         </ContentWrapper>
     );
@@ -123,7 +129,10 @@ const renderStep = (
     isLoadingPrimary: boolean,
     setIsLoadingPrimary: React.Dispatch<React.SetStateAction<boolean>>,
     isLoadingSecondary: boolean,
-    setIsLoadingSecondary: React.Dispatch<React.SetStateAction<boolean>>
+    setIsLoadingSecondary: React.Dispatch<React.SetStateAction<boolean>>,
+    dataSubmissionId: string | undefined,
+    isRunningCalculation: boolean,
+    setIsRunningCalculation: React.Dispatch<React.SetStateAction<boolean>>
 ) => {
     switch (step) {
         case 1:
@@ -146,6 +155,7 @@ const renderStep = (
                     setIsLoadingPrimary={setIsLoadingPrimary}
                     isLoadingSecondary={isLoadingSecondary}
                     setIsLoadingSecondary={setIsLoadingSecondary}
+                    dataSubmissionId={dataSubmissionId}
                 />
             );
         case 2:
@@ -160,6 +170,7 @@ const renderStep = (
                         secondaryFileImportSummary={secondaryFileImportSummary}
                         setPrimaryFileImportSummary={setPrimaryFileImportSummary}
                         setSecondaryFileImportSummary={setSecondaryFileImportSummary}
+                        setIsRunningCalculation={setIsRunningCalculation}
                     />
                 </>
             );
@@ -169,6 +180,9 @@ const renderStep = (
                     changeStep={changeStep}
                     primaryFileImportSummary={primaryFileImportSummary}
                     secondaryFileImportSummary={secondaryFileImportSummary}
+                    isRunningCalculation={isRunningCalculation}
+                    primaryFile={primaryFile}
+                    secondaryFile={secondaryFile}
                 />
             );
         case 4:

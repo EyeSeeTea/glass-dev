@@ -8,6 +8,7 @@ import { UploadsDataItem } from "../../entities/uploads";
 import { useCurrentModuleContext } from "../../contexts/current-module-context";
 import { moduleProperties } from "../../../domain/utils/ModuleProperties";
 import { InfoOutlined } from "@material-ui/icons";
+import { DataSubmissionStatusTypes } from "../../../domain/entities/GlassDataSubmission";
 
 export interface UploadsTableProps {
     title: string;
@@ -15,6 +16,8 @@ export interface UploadsTableProps {
     className?: string;
     refreshUploads: React.Dispatch<React.SetStateAction<{}>>;
     showComplete?: boolean;
+    setIsDatasetMarkAsCompleted?: React.Dispatch<React.SetStateAction<boolean>>;
+    setRefetchStatus?: React.Dispatch<React.SetStateAction<DataSubmissionStatusTypes | undefined>>;
 }
 
 // TODO: replace Table with MUI Datagrid
@@ -24,6 +27,8 @@ export const UploadsTable: React.FC<UploadsTableProps> = ({
     className,
     refreshUploads,
     showComplete,
+    setIsDatasetMarkAsCompleted,
+    setRefetchStatus,
 }) => {
     const { currentModuleAccess } = useCurrentModuleContext();
     return (
@@ -58,7 +63,7 @@ export const UploadsTable: React.FC<UploadsTableProps> = ({
                                             </Typography>
                                             <Typography variant="caption">
                                                 {i18n.t(
-                                                    "IMPORTED - The data has been imported, but validations(if applicable) were not run successfully, in Step 2"
+                                                    "IMPORTED - The data has been imported, but validations(if applicable) were not run successfully, in Step 2."
                                                 )}
                                                 <br />
                                             </Typography>
@@ -86,7 +91,13 @@ export const UploadsTable: React.FC<UploadsTableProps> = ({
                         </TableRow>
                     </TableHead>
 
-                    <UploadsTableBody rows={items} refreshUploads={refreshUploads} showComplete={showComplete} />
+                    <UploadsTableBody
+                        rows={items}
+                        refreshUploads={refreshUploads}
+                        showComplete={showComplete}
+                        setIsDatasetMarkAsCompleted={setIsDatasetMarkAsCompleted}
+                        setRefetchStatus={setRefetchStatus}
+                    />
                 </Table>
             </TableContainer>
         </ContentWrapper>

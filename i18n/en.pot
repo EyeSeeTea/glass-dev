@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2024-10-23T10:09:11.819Z\n"
-"PO-Revision-Date: 2024-10-23T10:09:11.819Z\n"
+"POT-Creation-Date: 2024-11-26T16:33:01.224Z\n"
+"PO-Revision-Date: 2024-11-26T16:33:01.224Z\n"
 
 msgid "Template {{id}} not loaded"
 msgstr ""
@@ -345,7 +345,7 @@ msgstr ""
 
 msgid ""
 "IMPORTED - The data has been imported, but validations(if applicable) were "
-"not run successfully, in Step 2"
+"not run successfully, in Step 2."
 msgstr ""
 
 msgid ""
@@ -365,7 +365,7 @@ msgstr ""
 msgid "Complete"
 msgstr ""
 
-msgid "Failed to set completed status"
+msgid "Error occurred when setting data submission status to COMPLETED"
 msgstr ""
 
 msgid "Deleting Files"
@@ -558,6 +558,9 @@ msgid "Thank you! your data for now is uploaded in our system"
 msgstr ""
 
 msgid "Failed to set upload status"
+msgstr ""
+
+msgid "Failed to calculate consumption data"
 msgstr ""
 
 msgid "Importing data and applying validation rules"

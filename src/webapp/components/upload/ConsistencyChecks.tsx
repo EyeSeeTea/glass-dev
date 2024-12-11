@@ -26,6 +26,7 @@ interface ConsistencyChecksProps {
     secondaryFileImportSummary: ImportSummary | undefined;
     setPrimaryFileImportSummary: React.Dispatch<React.SetStateAction<ImportSummary | undefined>>;
     setSecondaryFileImportSummary: React.Dispatch<React.SetStateAction<ImportSummary | undefined>>;
+    setIsRunningCalculation: (value: boolean) => void;
 }
 
 export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
@@ -37,6 +38,7 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
     secondaryFileImportSummary,
     setPrimaryFileImportSummary,
     setSecondaryFileImportSummary,
+    setIsRunningCalculation,
 }) => {
     const { compositionRoot, allCountries } = useAppContext();
     const { currentModuleAccess } = useCurrentModuleContext();
@@ -149,6 +151,148 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
             }
         );
     };
+
+    const runCalculations = useCallback(
+        (primaryUploadId: string | null, secondaryUploadId: string | null) => {
+            if (primaryUploadId) {
+                setIsRunningCalculation(true);
+                compositionRoot.calculations
+                    .consumptionDataProductLevel(
+                        currentPeriod,
+                        currentOrgUnitAccess.orgUnitId,
+                        currentModuleAccess.moduleName,
+                        primaryUploadId
+                    )
+                    .run(
+                        importSummary => {
+                            if (importSummary.blockingErrors.length === 0) {
+                                // If calculation is successful, set the upload status to VALIDATED
+                                compositionRoot.glassUploads
+                                    .setStatus({
+                                        id: primaryUploadId,
+                                        status: "VALIDATED",
+                                    })
+                                    .run(
+                                        () => {},
+                                        () => {
+                                            console.error("Failed to set upload status to VALIDATED");
+                                        }
+                                    );
+                            } else {
+                                snackbar.error(i18n.t("Failed to calculate consumption data"));
+
+                                // If calculation fails, set the upload status to IMPORTED
+                                compositionRoot.glassUploads
+                                    .setStatus({
+                                        id: primaryUploadId,
+                                        status: "IMPORTED",
+                                    })
+                                    .run(
+                                        () => {},
+                                        () => {
+                                            console.error("Failed to set upload status to IMPORTED");
+                                        }
+                                    );
+                            }
+                            console.debug(importSummary);
+                            setImportLoading(false);
+                            setIsRunningCalculation(false);
+                        },
+                        error => {
+                            snackbar.error(`Failed to calculate consumption data: ${error}`);
+                            setImportLoading(false);
+                            setIsRunningCalculation(false);
+                            console.error(error);
+
+                            // If calculation fails, set the upload status to IMPORTED
+                            compositionRoot.glassUploads
+                                .setStatus({
+                                    id: primaryUploadId,
+                                    status: "IMPORTED",
+                                })
+                                .run(
+                                    () => {},
+                                    () => {
+                                        console.error("Failed to set upload status to IMPORTED");
+                                    }
+                                );
+                        }
+                    );
+            } else if (secondaryUploadId) {
+                setIsRunningCalculation(true);
+                compositionRoot.calculations
+                    .consumptionDataSubstanceLevel(
+                        secondaryUploadId,
+                        currentPeriod,
+                        currentOrgUnitAccess.orgUnitId,
+                        currentModuleAccess.moduleName
+                    )
+                    .run(
+                        importSummary => {
+                            if (importSummary.blockingErrors.length === 0) {
+                                // If calculation is successful, set the upload status to VALIDATED
+                                compositionRoot.glassUploads
+                                    .setStatus({
+                                        id: secondaryUploadId,
+                                        status: "VALIDATED",
+                                    })
+                                    .run(
+                                        () => {},
+                                        () => {
+                                            console.error("Failed to set upload status to VALIDATED");
+                                        }
+                                    );
+                            } else {
+                                snackbar.error(i18n.t("Failed to calculate consumption data"));
+
+                                // If calculation fails, set the upload status to IMPORTED
+                                compositionRoot.glassUploads
+                                    .setStatus({
+                                        id: secondaryUploadId,
+                                        status: "IMPORTED",
+                                    })
+                                    .run(
+                                        () => {},
+                                        () => {
+                                            console.error("Failed to set upload status to IMPORTED");
+                                        }
+                                    );
+                            }
+                            console.debug(importSummary);
+                            setImportLoading(false);
+                            setIsRunningCalculation(false);
+                        },
+                        error => {
+                            snackbar.error(`Failed to calculate consumption data: ${error}`);
+                            setImportLoading(false);
+                            setIsRunningCalculation(false);
+                            console.error(error);
+
+                            // If calculation fails, set the upload status to IMPORTED
+                            compositionRoot.glassUploads
+                                .setStatus({
+                                    id: secondaryUploadId,
+                                    status: "IMPORTED",
+                                })
+                                .run(
+                                    () => {},
+                                    () => {
+                                        console.error("Failed to set upload status to IMPORTED");
+                                    }
+                                );
+                        }
+                    );
+            }
+        },
+        [
+            compositionRoot,
+            currentModuleAccess.moduleName,
+            currentOrgUnitAccess.orgUnitId,
+            currentPeriod,
+            setIsRunningCalculation,
+            snackbar,
+        ]
+    );
 
     const continueClick = () => {
         if (primaryFile && moduleProperties.get(currentModuleAccess.moduleName)?.isDryRunReq) {
@@ -307,60 +451,15 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
                     }
                 );
         } else {
+            const primaryUploadId = primaryFile ? localStorage.getItem("primaryUploadId") : null;
+            const secondaryUploadId = secondaryFile ? localStorage.getItem("secondaryUploadId") : null;
             if (
                 moduleProperties.get(currentModuleAccess.moduleName)?.isCalculationRequired &&
-                (primaryFile || secondaryFile)
+                (primaryUploadId || secondaryUploadId)
             ) {
-                const primaryUploadId = localStorage.getItem("primaryUploadId");
-                if (primaryFile && primaryUploadId) {
-                    compositionRoot.calculations
-                        .consumptionDataProductLevel(
-                            currentPeriod,
-                            currentOrgUnitAccess.orgUnitId,
-                            primaryFile,
-                            currentModuleAccess.moduleName,
-                            primaryUploadId
-                        )
-                        .run(
-                            importSummary => {
-                                console.debug(importSummary);
-                                setImportLoading(false);
-                                changeStep(3);
-                            },
-                            error => {
-                                snackbar.error(error);
-                                setImportLoading(false);
-                                console.error(error);
-                                changeStep(3);
-                            }
-                        );
-                }
-                const secondaryUploadId = localStorage.getItem("secondaryUploadId");
-                if (secondaryUploadId) {
-                    compositionRoot.calculations
-                        .consumptionDataSubstanceLevel(
-                            secondaryUploadId,
-                            currentPeriod,
-                            currentOrgUnitAccess.orgUnitId,
-                            currentModuleAccess.moduleName
-                        )
-                        .run(
-                            importSummary => {
-                                console.debug(importSummary);
-                                setImportLoading(false);
-                                changeStep(3);
-                            },
-                            error => {
-                                snackbar.error(error);
-                                setImportLoading(false);
-                                console.error(error);
-                                changeStep(3);
-                            }
-                        );
-                }
-            } else {
-                changeStep(3);
+                runCalculations(primaryUploadId, secondaryUploadId);
             }
+
             changeStep(3);
         }
     };

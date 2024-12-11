@@ -15,6 +15,17 @@ export class GlassUploadsDefaultRepository implements GlassUploadsRepository {
         return this.dataStoreClient.listCollection<GlassUploads>(DataStoreKeys.UPLOADS);
     }
 
+    getById(uploadId: Id): FutureData<GlassUploads> {
+        return this.dataStoreClient.listCollection<GlassUploads>(DataStoreKeys.UPLOADS).flatMap(uploads => {
+            const upload = uploads?.find(upload => upload.id === uploadId);
+            if (upload) {
+                return Future.success(upload);
+            } else {
+                return Future.error("Upload does not exist");
+            }
+        });
+    }
+
     save(upload: GlassUploads): FutureData<void> {
         return this.dataStoreClient.listCollection(DataStoreKeys.UPLOADS).flatMap(uploads => {
             const newUploads = [...uploads, upload];
