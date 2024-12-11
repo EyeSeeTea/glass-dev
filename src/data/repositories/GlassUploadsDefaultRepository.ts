@@ -57,6 +57,36 @@ export class GlassUploadsDefaultRepository implements GlassUploadsRepository {
         });
     }
 
+    setEventListDataDeleted(uploadId: string): FutureData<void> {
+        return this.dataStoreClient.listCollection<GlassUploads>(DataStoreKeys.UPLOADS).flatMap(uploads => {
+            const upload = uploads.find(el => el.id === uploadId);
+            if (upload) {
+                const restUploads = uploads.filter(upload => upload.id !== uploadId);
+                return this.dataStoreClient.saveObject(DataStoreKeys.UPLOADS, [
+                    ...restUploads,
+                    { ...upload, eventListDataDeleted: true },
+                ]);
+            } else {
+                return Future.error("Upload not found");
+            }
+        });
+    }
+
+    setCalculatedEventListDataDeleted(uploadId: string): FutureData<void> {
+        return this.dataStoreClient.listCollection<GlassUploads>(DataStoreKeys.UPLOADS).flatMap(uploads => {
+            const upload = uploads.find(el => el.id === uploadId);
+            if (upload) {
+                const restUploads = uploads.filter(upload => upload.id !== uploadId);
+                return this.dataStoreClient.saveObject(DataStoreKeys.UPLOADS, [
+                    ...restUploads,
+                    { ...upload, calculatedEventListDataDeleted: true },
+                ]);
+            } else {
+                return Future.error("Upload not found");
+            }
+        });
+    }
+
     delete(id: string): FutureData<{
         fileId: string;
         eventListFileId: string | undefined;
@@ -189,6 +219,30 @@ export class GlassUploadsDefaultRepository implements GlassUploadsRepository {
             } else {
                 return Future.error("Upload does not exist");
             }
+        });
+    }
+
+    setAsyncDeletions(uploadIdsToDelete: Id[]): FutureData<Id[]> {
+        return this.dataStoreClient.listCollection<Id>(DataStoreKeys.ASYNC_DELETIONS).flatMap(asyncDeletionsArray => {
+            const newAsyncDeletions = [...asyncDeletionsArray, ...uploadIdsToDelete];
+            return this.dataStoreClient.saveObject(DataStoreKeys.ASYNC_DELETIONS, newAsyncDeletions).flatMap(() => {
+                return Future.success(uploadIdsToDelete);
+            });
+        });
+    }
+
+    getAsyncDeletions(): FutureData<Id[]> {
+        return this.dataStoreClient.listCollection<Id>(DataStoreKeys.ASYNC_DELETIONS);
+    }
+
+    removeAsyncDeletions(uploadIdToRemove: Id[]): FutureData<Id[]> {
+        return this.dataStoreClient.listCollection<Id>(DataStoreKeys.ASYNC_DELETIONS).flatMap(asyncDeletionsArray => {
+            const restAsyncDeletions = asyncDeletionsArray.filter(
+                uploadIdToBeDeleted => !uploadIdToRemove.includes(uploadIdToBeDeleted)
+            );
+            return this.dataStoreClient.saveObject(DataStoreKeys.ASYNC_DELETIONS, restAsyncDeletions).flatMap(() => {
+                return Future.success(uploadIdToRemove);
+            });
         });
     }
 }

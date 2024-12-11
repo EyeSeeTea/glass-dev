@@ -8,4 +8,5 @@ export const DataStoreKeys = {
     SIGNALS: "signals",
     ATC_CLASSIFICATION: "ATCs",
     AMC_RECALCULATION: "amc-recalculation",
+    ASYNC_DELETIONS: "async-deletions",
 };
