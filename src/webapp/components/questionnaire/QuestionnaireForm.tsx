@@ -1,5 +1,5 @@
 import { useSnackbar } from "@eyeseetea/d2-ui-components";
-import { Button, CircularProgress, LinearProgress, makeStyles } from "@material-ui/core";
+import { LinearProgress, makeStyles } from "@material-ui/core";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Id } from "../../../domain/entities/Base";
 import {
@@ -20,7 +20,6 @@ import { useGlassModule } from "../../hooks/useGlassModule";
 import { useBooleanState } from "../../hooks/useBooleanState";
 import { QuestionnaireActions } from "./QuestionnaireActions";
 import { useGlassCaptureAccess } from "../../hooks/useGlassCaptureAccess";
-import i18n from "@eyeseetea/d2-ui-components/locales";
 
 export interface QuestionnarieFormProps {
     id: Id;
@@ -88,6 +87,11 @@ const QuestionnaireForm: React.FC<QuestionnarieFormProps> = props => {
                 isSaving={isSaving}
                 mode={mode}
                 setAsCompleted={complete => setAsCompleted(complete)}
+                saveQuestionnaireActions={{
+                    saveQuestionnaire: saveQuestionnaire,
+                    disableSave: disableSave,
+                    isSavingQuestionnaire: isSavingQuestionnaire,
+                }}
             />
             {questionnaire.sections.map(section => {
                 if (!section.isVisible) return null;
@@ -118,38 +122,12 @@ const QuestionnaireForm: React.FC<QuestionnarieFormProps> = props => {
                     </div>
                 );
             })}
-
-            <ButtonContainer>
-                {isSavingQuestionnaire && <CircularProgress size={22} />}
-
-                <StyledButton
-                    className={classes.center}
-                    variant="contained"
-                    color="primary"
-                    onClick={saveQuestionnaire}
-                    disabled={disableSave}
-                >
-                    {i18n.t("Save Questionnaire")}
-                </StyledButton>
-            </ButtonContainer>
         </FormWrapper>
     );
 };
 
 const FormWrapper = styled.div`
     gap: 0px;
-`;
-
-const ButtonContainer = styled.div`
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    padding: 8px;
-`;
-
-const StyledButton = styled(Button)`
-    margin: 8px;
 `;
 
 function useSaveQuestionnaire(questionnaire: QuestionnaireSelector) {
