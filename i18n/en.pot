@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2024-12-03T14:21:14.299Z\n"
-"PO-Revision-Date: 2024-12-03T14:21:14.299Z\n"
+"POT-Creation-Date: 2024-12-12T19:21:44.978Z\n"
+"PO-Revision-Date: 2024-12-12T19:21:44.978Z\n"
 
 msgid "Template {{id}} not loaded"
 msgstr ""
@@ -518,13 +518,13 @@ msgstr ""
 msgid "You don't have read access to this page"
 msgstr ""
 
+msgid "Save Questionnaire"
+msgstr ""
+
 msgid "Set as incomplete"
 msgstr ""
 
 msgid "Set as completed"
-msgstr ""
-
-msgid "Save Questionnaire"
 msgstr ""
 
 msgid "HOME"
