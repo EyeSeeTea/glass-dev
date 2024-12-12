@@ -8,7 +8,8 @@
         "AMR_GLASS_AMC_TEA_ATC": "J01CE01",
         "AMR_GLASS_AMC_TEA_ROUTE_ADMIN": "P",
         "AMR_GLASS_AMC_TEA_SALT": "XXXX",
-        "AMR_GLASS_AMC_TEA_VOLUME": 1
+        "AMR_GLASS_AMC_TEA_VOLUME": 1,
+        "AMR_GLASS_AMC_TEA_COMBINATION": ""
     },
     {
         "AMR_GLASS_AMC_TEA_PRODUCT_ID": "P37",
@@ -19,6 +20,7 @@
         "AMR_GLASS_AMC_TEA_ATC": "J01CE01",
         "AMR_GLASS_AMC_TEA_ROUTE_ADMIN": "P",
         "AMR_GLASS_AMC_TEA_SALT": "XXXX",
-        "AMR_GLASS_AMC_TEA_VOLUME": 1
+        "AMR_GLASS_AMC_TEA_VOLUME": 1,
+        "AMR_GLASS_AMC_TEA_COMBINATION": ""
     }
 ]
