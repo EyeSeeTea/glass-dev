@@ -156,7 +156,10 @@ export class QuestionnarieM {
             switch (ruleType) {
                 case "setSectionsVisibility": {
                     const toggleQuestion = questionsByCode[rule.dataElementCode];
-                    const areRuleSectionsVisible = Boolean(toggleQuestion?.value);
+                    const areRuleSectionsVisible =
+                        toggleQuestion?.type === "select"
+                            ? toggleQuestion.value?.name === "Yes"
+                            : Boolean(toggleQuestion?.value);
 
                     return {
                         ...questionnaireAcc,
