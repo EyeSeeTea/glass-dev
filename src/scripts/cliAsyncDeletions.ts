@@ -66,7 +66,7 @@ async function main() {
                     throw new Error("REACT_APP_DHIS2_BASE_URL  must be set in the .env file");
 
                 if (!process.env.REACT_APP_DHIS2_AUTH)
-                    throw new Error("REACT_APP_DHIS2_BASE_URL  must be set in the .env file");
+                    throw new Error("REACT_APP_DHIS2_AUTH  must be set in the .env file");
 
                 const username = process.env.REACT_APP_DHIS2_AUTH.split(":")[0] ?? "";
                 const password = process.env.REACT_APP_DHIS2_AUTH.split(":")[1] ?? "";
