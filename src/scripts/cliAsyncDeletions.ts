@@ -1,4 +1,5 @@
 import { command, run } from "cmd-ts";
+import "dotenv/config";
 
 import { getD2ApiFromArgs, getInstance } from "./common";
 import { DataStoreClient } from "../data/data-store/DataStoreClient";
