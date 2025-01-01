@@ -1,4 +1,5 @@
 import { ImportSummaryErrors } from "./data-entry/ImportSummary";
+import { Id } from "./Ref";
 
 export interface GlassUploads {
     id: string;
@@ -15,11 +16,13 @@ export interface GlassUploads {
     uploadDate: string;
     dataSubmission: string;
     module: string;
-    orgUnit: string;
+    orgUnit: Id;
     records?: number;
     rows?: number;
     correspondingRisUploadId: string;
     eventListFileId?: string;
     calculatedEventListFileId?: string;
     importSummary?: ImportSummaryErrors;
+    eventListDataDeleted?: boolean;
+    calculatedEventListDataDeleted?: boolean;
 }

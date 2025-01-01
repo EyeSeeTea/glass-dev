@@ -102,6 +102,7 @@ export interface QuestionOption extends NamedRef {
 export type QuestionnaireRule =
     | RuleToggleSectionsVisibility
     | RuleSectionValuesHigherThan
+    | RuleSectionValuesHigherThanOrEqualTo
     | RuleQuestionValueLessThanConst
     | RuleQuestionValueDoubleOfAnother;
 
@@ -113,6 +114,12 @@ interface RuleToggleSectionsVisibility {
 
 interface RuleSectionValuesHigherThan {
     type: "sectionValuesHigherThan";
+    dataElementCodesLowerToHigher: Dictionary<Code>;
+    errorMessage: string;
+}
+
+interface RuleSectionValuesHigherThanOrEqualTo {
+    type: "sectionValuesHigherThanOrEqualTo";
     dataElementCodesLowerToHigher: Dictionary<Code>;
     errorMessage: string;
 }
@@ -156,7 +163,10 @@ export class QuestionnarieM {
             switch (ruleType) {
                 case "setSectionsVisibility": {
                     const toggleQuestion = questionsByCode[rule.dataElementCode];
-                    const areRuleSectionsVisible = Boolean(toggleQuestion?.value);
+                    const areRuleSectionsVisible =
+                        toggleQuestion?.type === "select"
+                            ? toggleQuestion.value?.name === "Yes"
+                            : Boolean(toggleQuestion?.value);
 
                     return {
                         ...questionnaireAcc,
@@ -193,6 +203,22 @@ export class QuestionnarieM {
                         }),
                     };
                 }
+                case "sectionValuesHigherThanOrEqualTo": {
+                    return {
+                        ...questionnaireAcc,
+                        sections: questionnaireAcc.sections.map((section): QuestionnaireSection => {
+                            return {
+                                ...section,
+                                questions: this.applyRuleSectionValuesHigherThan(
+                                    questionsByCode,
+                                    rule,
+                                    section.questions,
+                                    true
+                                ),
+                            };
+                        }),
+                    };
+                }
                 case "questionValueLessThanConst": {
                     return {
                         ...questionnaireAcc,
@@ -223,8 +249,9 @@ export class QuestionnarieM {
 
     private static applyRuleSectionValuesHigherThan(
         questionsByCode: Dictionary<Question>,
-        rule: RuleSectionValuesHigherThan,
-        questions: Question[]
+        rule: RuleSectionValuesHigherThan | RuleSectionValuesHigherThanOrEqualTo,
+        questions: Question[],
+        orEqualTo = false
     ): Question[] {
         return questions.map((question): Question => {
             const questionWithHigherValueCode = rule.dataElementCodesLowerToHigher[question.code];
@@ -232,6 +259,14 @@ export class QuestionnarieM {
             if (questionWithHigherValueCode) {
                 const questionWithHigherValue = questionsByCode[questionWithHigherValueCode];
                 if (parseFloat(questionWithHigherValue?.value as string) < parseFloat(question?.value as string)) {
+                    return {
+                        ...question,
+                        validationError: this.addValidationError(question, rule.errorMessage),
+                    };
+                } else if (
+                    orEqualTo &&
+                    parseFloat(questionWithHigherValue?.value as string) <= parseFloat(question?.value as string)
+                ) {
                     return {
                         ...question,
                         validationError: this.addValidationError(question, rule.errorMessage),

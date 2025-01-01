@@ -5,17 +5,12 @@ import {
     COMB_CODE_PRODUCT_NOT_HAVE_ATC,
     createAtcVersionKey,
 } from "../../../entities/GlassAtcVersionData";
-import { mapToImportSummary, readTemplate } from "../ImportBLTemplateEventProgram";
+import { mapToImportSummary } from "../ImportBLTemplateEventProgram";
 import { ExcelRepository } from "../../../repositories/ExcelRepository";
 import { GlassATCRepository } from "../../../repositories/GlassATCRepository";
 import { InstanceRepository } from "../../../repositories/InstanceRepository";
 import { AMCProductDataRepository } from "../../../repositories/data-entry/AMCProductDataRepository";
-import {
-    AMC_PRODUCT_REGISTER_PROGRAM_ID,
-    AMR_GLASS_AMC_TEA_PRODUCT_ID,
-    AMC_RAW_SUBSTANCE_CONSUMPTION_CALCULATED_STAGE_ID,
-} from "../../../../data/repositories/data-entry/AMCProductDataDefaultRepository";
-import * as templates from "../../../entities/data-entry/program-templates";
+import { AMC_RAW_SUBSTANCE_CONSUMPTION_CALCULATED_STAGE_ID } from "../../../../data/repositories/data-entry/AMCProductDataDefaultRepository";
 import { MetadataRepository } from "../../../repositories/MetadataRepository";
 import { ImportSummary } from "../../../entities/data-entry/ImportSummary";
 import { getConsumptionDataProductLevel } from "./utils/getConsumptionDataProductLevel";
@@ -27,8 +22,8 @@ import { TrackerPostResponse } from "@eyeseetea/d2-api/api/tracker";
 import { mapRawSubstanceCalculatedToSubstanceCalculated } from "./utils/mapRawSubstanceCalculatedToSubstanceCalculated";
 import { GlassUploadsRepository } from "../../../repositories/GlassUploadsRepository";
 import { GlassDocumentsRepository } from "../../../repositories/GlassDocumentsRepository";
+import { getStringFromFileBlob } from "../utils/fileToString";
 
-const TEMPLATE_ID = "TRACKER_PROGRAM_GENERATED_v3";
 const IMPORT_SUMMARY_EVENT_TYPE = "event";
 const IMPORT_STRATEGY_CREATE_AND_UPDATE = "CREATE_AND_UPDATE";
 const AMR_GLASS_AMC_TEA_ATC = "aK1JpD14imM";
@@ -47,18 +42,17 @@ export class CalculateConsumptionDataProductLevelUseCase {
         private glassDocumentsRepository: GlassDocumentsRepository
     ) {}
 
-    public execute(
-        period: string,
-        orgUnitId: Id,
-        file: File,
-        moduleName: string,
-        uploadId: Id
-    ): FutureData<ImportSummary> {
-        return this.getProductIdsFromFile(file).flatMap(productIds => {
+    public execute(period: string, orgUnitId: Id, moduleName: string, uploadId: Id): FutureData<ImportSummary> {
+        return this.getIdsInListUpload(uploadId).flatMap(ids => {
+            if (!ids.length) {
+                logger.error(`[${new Date().toISOString()}] Products not found.`);
+                return Future.error("Products not found.");
+            }
+
             logger.info(
-                `[${new Date().toISOString()}] Calculating raw substance consumption data for the following products (total: ${
-                    productIds.length
-                }): ${productIds.join(", ")}`
+                `[${new Date().toISOString()}] Calculating raw substance consumption data in org unit ${orgUnitId} and period ${period} for the following products (total: ${
+                    ids.length
+                }): ${ids.join(", ")}`
             );
             return this.glassModuleRepository.getByName(moduleName).flatMap(module => {
                 if (!module.chunkSizes?.productIds) {
@@ -71,7 +65,7 @@ export class CalculateConsumptionDataProductLevelUseCase {
                     productDataTrackedEntities:
                         this.amcProductDataRepository.getProductRegisterAndRawProductConsumptionByProductIds(
                             orgUnitId,
-                            productIds,
+                            ids,
                             period,
                             module.chunkSizes?.productIds,
                             true
@@ -216,45 +210,19 @@ export class CalculateConsumptionDataProductLevelUseCase {
         });
     }
 
-    private getProductIdsFromFile(file: File): FutureData<string[]> {
-        return this.excelRepository.loadTemplate(file, AMC_PRODUCT_REGISTER_PROGRAM_ID).flatMap(_templateId => {
-            const amcTemplate = _.values(templates)
-                .map(TemplateClass => new TemplateClass())
-                .filter(t => t.id === TEMPLATE_ID)[0];
-            return this.instanceRepository.getProgram(AMC_PRODUCT_REGISTER_PROGRAM_ID).flatMap(amcProgram => {
-                if (!amcTemplate) {
-                    logger.error(`[${new Date().toISOString()}] Product level: cannot find template`);
-                    return Future.error("Cannot find template");
-                }
-
-                return readTemplate(
-                    amcTemplate,
-                    amcProgram,
-                    this.excelRepository,
-                    this.instanceRepository,
-                    AMC_PRODUCT_REGISTER_PROGRAM_ID
-                ).flatMap(amcProductData => {
-                    if (!amcProductData) {
-                        logger.error(`[${new Date().toISOString()}] Product level: cannot find data package`);
-                        return Future.error("Cannot find data package");
-                    }
-
-                    if (amcProductData.type !== "trackerPrograms") {
-                        logger.error(`[${new Date().toISOString()}] Product level: incorrect data package`);
-                        return Future.error("Incorrect data package");
-                    }
-
-                    const productIds = amcProductData.trackedEntityInstances
-                        .map(({ attributeValues }) => {
-                            return attributeValues.find(
-                                ({ attribute }) => attribute.id === AMR_GLASS_AMC_TEA_PRODUCT_ID
-                            )?.value;
-                        })
-                        .filter(Boolean) as string[];
-
-                    return Future.success(productIds);
+    private getIdsInListUpload(uploadId: string): FutureData<Id[]> {
+        return this.glassUploadsRepository.getById(uploadId).flatMap(upload => {
+            if (!upload?.eventListFileId) {
+                logger.error(`[${new Date().toISOString()}] Cannot find upload with id ${uploadId}`);
+                return Future.error("Cannot find upload");
+            } else {
+                return this.glassDocumentsRepository.download(upload.eventListFileId).flatMap(listFileFileBlob => {
+                    return getStringFromFileBlob(listFileFileBlob).flatMap(idsList => {
+                        const ids: Id[] = JSON.parse(idsList);
+                        return Future.success(ids);
+                    });
                 });
-            });
+            }
         });
     }
 
@@ -305,46 +273,48 @@ export class CalculateConsumptionDataProductLevelUseCase {
                     undefined,
                     importSubstancesResult.eventIdLineNoMap
                 ).flatMap(importSubstancesSummary => {
-                    return this.uploadIdListFileAndSave(uploadId, importSubstancesSummary, moduleName).flatMap(
-                        importSubstancesSummaryImportSummary => {
-                            return mapToImportSummary(
-                                importProductResponse,
-                                IMPORT_SUMMARY_EVENT_TYPE,
-                                this.metadataRepository
-                            ).flatMap(importProductSummary => {
-                                return Future.success({
-                                    ...importSubstancesSummaryImportSummary,
-                                    importCount: {
-                                        imported:
-                                            importProductSummary.importSummary.importCount.imported +
-                                            importSubstancesSummaryImportSummary.importCount.imported,
-                                        updated:
-                                            importProductSummary.importSummary.importCount.updated +
-                                            importSubstancesSummaryImportSummary.importCount.updated,
-                                        ignored:
-                                            importProductSummary.importSummary.importCount.ignored +
-                                            importSubstancesSummaryImportSummary.importCount.ignored,
-                                        deleted:
-                                            importProductSummary.importSummary.importCount.deleted +
-                                            importSubstancesSummaryImportSummary.importCount.deleted,
-                                    },
-                                    nonBlockingErrors: [
-                                        ...importProductSummary.importSummary.nonBlockingErrors,
-                                        ...importSubstancesSummaryImportSummary.nonBlockingErrors,
-                                    ],
-                                    blockingErrors: [
-                                        ...importProductSummary.importSummary.blockingErrors,
-                                        ...importSubstancesSummaryImportSummary.blockingErrors,
-                                    ],
-                                });
+                    return this.uploadCalculatedIdListFileAndSave(
+                        uploadId,
+                        importSubstancesSummary,
+                        moduleName
+                    ).flatMap(importSubstancesSummaryImportSummary => {
+                        return mapToImportSummary(
+                            importProductResponse,
+                            IMPORT_SUMMARY_EVENT_TYPE,
+                            this.metadataRepository
+                        ).flatMap(importProductSummary => {
+                            return Future.success({
+                                ...importSubstancesSummaryImportSummary,
+                                importCount: {
+                                    imported:
+                                        importProductSummary.importSummary.importCount.imported +
+                                        importSubstancesSummaryImportSummary.importCount.imported,
+                                    updated:
+                                        importProductSummary.importSummary.importCount.updated +
+                                        importSubstancesSummaryImportSummary.importCount.updated,
+                                    ignored:
+                                        importProductSummary.importSummary.importCount.ignored +
+                                        importSubstancesSummaryImportSummary.importCount.ignored,
+                                    deleted:
+                                        importProductSummary.importSummary.importCount.deleted +
+                                        importSubstancesSummaryImportSummary.importCount.deleted,
+                                },
+                                nonBlockingErrors: [
+                                    ...importProductSummary.importSummary.nonBlockingErrors,
+                                    ...importSubstancesSummaryImportSummary.nonBlockingErrors,
+                                ],
+                                blockingErrors: [
+                                    ...importProductSummary.importSummary.blockingErrors,
+                                    ...importSubstancesSummaryImportSummary.blockingErrors,
+                                ],
                             });
-                        }
-                    );
+                        });
+                    });
                 });
             });
     }
 
-    private uploadIdListFileAndSave(
+    private uploadCalculatedIdListFileAndSave(
         uploadId: string,
         summary: { importSummary: ImportSummary; eventIdList: string[] },
         moduleName: string

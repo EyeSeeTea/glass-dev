@@ -1,7 +1,7 @@
 {
     "name": "glass",
     "description": "DHIS2 Glass App",
-    "version": "1.6.21",
+    "version": "1.6.23",
     "license": "GPL-3.0",
     "author": "EyeSeeTea team",
     "homepage": ".",
@@ -117,6 +117,8 @@
         "script-example": "npx ts-node src/scripts/index.ts example getExample",
         "start-amc-recalculate": "npx ts-node src/scripts/cliAMC.ts  --debug",
         "build-amc-recalculate": "ncc build src/scripts/cliAMC.ts -m -o $npm_package_name-amc-recalculate-server && zip -r $npm_package_name-amc-recalculate-server.zip $npm_package_name-amc-recalculate-server && npx rimraf $npm_package_name-amc-recalculate-server/",
+        "start-async-deletions": "npx ts-node -r dotenv/config src/scripts/cliAsyncDeletions.ts",
+        "build-async-deletions": "ncc build src/scripts/cliAsyncDeletions.ts -m -o $npm_package_name-async-deletions-server && zip -r $npm_package_name-async-deletions-server.zip $npm_package_name-async-deletions-server && npx rimraf $npm_package_name-async-deletions-server/",
         "amr-agg-data-validation-ris": "npx ts-node -r dotenv/config src/scripts/amr_agg_data_validation.ts",
         "amr-agg-data-reset-ris": "npx ts-node -r dotenv/config src/scripts/amr_agg_data_reset.ts",
         "amr-agg-data-validation-sample": "npx ts-node -r dotenv/config src/scripts/amr_agg_data_validation_sample.ts",

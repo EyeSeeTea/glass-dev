@@ -11,6 +11,7 @@ export interface ReadCellOptions {
 
 export abstract class ExcelRepository {
     public abstract loadTemplate(file: Blob, programId: Id): FutureData<string>;
+    public abstract loadTemplateFromArrayBuffer(buffer: ArrayBuffer, programId: Id): FutureData<string>;
     public abstract toBlob(id: string): Promise<Blob>;
     public abstract findRelativeCell(id: string, location?: SheetRef, cell?: CellRef): Promise<CellRef | undefined>;
     public abstract writeCell(id: string, cellRef: CellRef, value: ExcelValue): Promise<void>;

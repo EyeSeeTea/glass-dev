@@ -9,7 +9,6 @@ import { Dropzone, DropzoneRef } from "../dropzone/Dropzone";
 import { useSnackbar } from "@eyeseetea/d2-ui-components";
 import { RemoveContainer, StyledRemoveButton } from "./UploadFiles";
 import { useAppContext } from "../../contexts/app-context";
-import { useCurrentDataSubmissionId } from "../../hooks/useCurrentDataSubmissionId";
 import { useCurrentModuleContext } from "../../contexts/current-module-context";
 import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context";
 import { EffectFn, useCallbackEffect } from "../../hooks/use-callback-effect";
@@ -25,6 +24,7 @@ interface UploadSecondaryProps {
     removeSecondaryFile: EffectFn<[event: React.MouseEvent<HTMLButtonElement, MouseEvent>]>;
     isLoading: boolean;
     setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
+    dataSubmissionId: string | undefined;
 }
 
 export const UploadSecondary: React.FC<UploadSecondaryProps> = ({
@@ -36,6 +36,7 @@ export const UploadSecondary: React.FC<UploadSecondaryProps> = ({
     removeSecondaryFile,
     isLoading,
     setIsLoading,
+    dataSubmissionId,
 }) => {
     const { compositionRoot } = useAppContext();
 
@@ -49,8 +50,6 @@ export const UploadSecondary: React.FC<UploadSecondaryProps> = ({
     const { currentPeriod } = useCurrentPeriodContext();
     const snackbar = useSnackbar();
     const secondaryFileUploadRef = useRef<DropzoneRef>(null);
-
-    const dataSubmissionId = useCurrentDataSubmissionId(moduleId, moduleName, orgUnitId, currentPeriod);
 
     useEffect(() => {
         if (secondaryFile) {
@@ -78,6 +77,7 @@ export const UploadSecondary: React.FC<UploadSecondaryProps> = ({
                             if (!dataSubmissionId) {
                                 snackbar.error(i18n.t("Data submission id not found. Please try again"));
                                 setIsLoading(false);
+                                return;
                             }
 
                             if (sampleData.isValid) {
@@ -155,7 +155,7 @@ export const UploadSecondary: React.FC<UploadSecondaryProps> = ({
                     className="choose-file-button"
                     endIcon={<BackupIcon />}
                     onClick={openFileUploadDialog}
-                    disabled={secondaryFile === null ? false : true}
+                    disabled={!dataSubmissionId || (secondaryFile === null ? false : true)}
                 >
                     {i18n.t("Select file")}
                 </Button>

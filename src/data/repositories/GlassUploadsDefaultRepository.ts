@@ -15,6 +15,17 @@ export class GlassUploadsDefaultRepository implements GlassUploadsRepository {
         return this.dataStoreClient.listCollection<GlassUploads>(DataStoreKeys.UPLOADS);
     }
 
+    getById(uploadId: Id): FutureData<GlassUploads> {
+        return this.dataStoreClient.listCollection<GlassUploads>(DataStoreKeys.UPLOADS).flatMap(uploads => {
+            const upload = uploads?.find(upload => upload.id === uploadId);
+            if (upload) {
+                return Future.success(upload);
+            } else {
+                return Future.error("Upload does not exist");
+            }
+        });
+    }
+
     save(upload: GlassUploads): FutureData<void> {
         return this.dataStoreClient.listCollection(DataStoreKeys.UPLOADS).flatMap(uploads => {
             const newUploads = [...uploads, upload];
@@ -40,6 +51,36 @@ export class GlassUploadsDefaultRepository implements GlassUploadsRepository {
             if (upload) {
                 upload.batchId = batchId;
                 return this.dataStoreClient.saveObject(DataStoreKeys.UPLOADS, uploads);
+            } else {
+                return Future.error("Upload not found");
+            }
+        });
+    }
+
+    setEventListDataDeleted(uploadId: string): FutureData<void> {
+        return this.dataStoreClient.listCollection<GlassUploads>(DataStoreKeys.UPLOADS).flatMap(uploads => {
+            const upload = uploads.find(el => el.id === uploadId);
+            if (upload) {
+                const restUploads = uploads.filter(upload => upload.id !== uploadId);
+                return this.dataStoreClient.saveObject(DataStoreKeys.UPLOADS, [
+                    ...restUploads,
+                    { ...upload, eventListDataDeleted: true },
+                ]);
+            } else {
+                return Future.error("Upload not found");
+            }
+        });
+    }
+
+    setCalculatedEventListDataDeleted(uploadId: string): FutureData<void> {
+        return this.dataStoreClient.listCollection<GlassUploads>(DataStoreKeys.UPLOADS).flatMap(uploads => {
+            const upload = uploads.find(el => el.id === uploadId);
+            if (upload) {
+                const restUploads = uploads.filter(upload => upload.id !== uploadId);
+                return this.dataStoreClient.saveObject(DataStoreKeys.UPLOADS, [
+                    ...restUploads,
+                    { ...upload, calculatedEventListDataDeleted: true },
+                ]);
             } else {
                 return Future.error("Upload not found");
             }
@@ -178,6 +219,30 @@ export class GlassUploadsDefaultRepository implements GlassUploadsRepository {
             } else {
                 return Future.error("Upload does not exist");
             }
+        });
+    }
+
+    setAsyncDeletions(uploadIdsToDelete: Id[]): FutureData<Id[]> {
+        return this.dataStoreClient.listCollection<Id>(DataStoreKeys.ASYNC_DELETIONS).flatMap(asyncDeletionsArray => {
+            const newAsyncDeletions = [...asyncDeletionsArray, ...uploadIdsToDelete];
+            return this.dataStoreClient.saveObject(DataStoreKeys.ASYNC_DELETIONS, newAsyncDeletions).flatMap(() => {
+                return Future.success(uploadIdsToDelete);
+            });
+        });
+    }
+
+    getAsyncDeletions(): FutureData<Id[]> {
+        return this.dataStoreClient.listCollection<Id>(DataStoreKeys.ASYNC_DELETIONS);
+    }
+
+    removeAsyncDeletions(uploadIdToRemove: Id[]): FutureData<Id[]> {
+        return this.dataStoreClient.listCollection<Id>(DataStoreKeys.ASYNC_DELETIONS).flatMap(asyncDeletionsArray => {
+            const restAsyncDeletions = asyncDeletionsArray.filter(
+                uploadIdToBeDeleted => !uploadIdToRemove.includes(uploadIdToBeDeleted)
+            );
+            return this.dataStoreClient.saveObject(DataStoreKeys.ASYNC_DELETIONS, restAsyncDeletions).flatMap(() => {
+                return Future.success(uploadIdToRemove);
+            });
         });
     }
 }

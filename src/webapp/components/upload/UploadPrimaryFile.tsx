@@ -8,7 +8,6 @@ import { Dropzone, DropzoneRef } from "../dropzone/Dropzone";
 import { FileRejection } from "react-dropzone";
 import { RemoveContainer, StyledRemoveButton } from "./UploadFiles";
 import { useAppContext } from "../../contexts/app-context";
-import { useCurrentDataSubmissionId } from "../../hooks/useCurrentDataSubmissionId";
 import { useCurrentModuleContext } from "../../contexts/current-module-context";
 import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context";
 import { EffectFn, useCallbackEffect } from "../../hooks/use-callback-effect";
@@ -22,6 +21,7 @@ interface UploadPrimaryFileProps {
     removePrimaryFile: EffectFn<[event: React.MouseEvent<HTMLButtonElement, MouseEvent>]>;
     isLoading: boolean;
     setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
+    dataSubmissionId: string | undefined;
 }
 
 export const UploadPrimaryFile: React.FC<UploadPrimaryFileProps> = ({
@@ -32,6 +32,7 @@ export const UploadPrimaryFile: React.FC<UploadPrimaryFileProps> = ({
     removePrimaryFile,
     isLoading,
     setIsLoading,
+    dataSubmissionId,
 }) => {
     const { compositionRoot } = useAppContext();
 
@@ -47,8 +48,6 @@ export const UploadPrimaryFile: React.FC<UploadPrimaryFileProps> = ({
     const snackbar = useSnackbar();
 
     const primaryFileUploadRef = useRef<DropzoneRef>(null);
-
-    const dataSubmissionId = useCurrentDataSubmissionId(moduleId, moduleName, orgUnitId, currentPeriod);
 
     const openFileUploadDialog = useCallback(async () => {
         primaryFileUploadRef.current?.openDialog();
@@ -76,6 +75,7 @@ export const UploadPrimaryFile: React.FC<UploadPrimaryFileProps> = ({
                             if (!dataSubmissionId) {
                                 snackbar.error(i18n.t("Data submission id not found. Please try again"));
                                 setIsLoading(false);
+                                return;
                             }
 
                             if (primaryFileData.isValid) {
@@ -147,7 +147,7 @@ export const UploadPrimaryFile: React.FC<UploadPrimaryFileProps> = ({
                     className="choose-file-button"
                     endIcon={<BackupIcon />}
                     onClick={openFileUploadDialog}
-                    disabled={primaryFile === null ? false : true}
+                    disabled={!dataSubmissionId || (primaryFile === null ? false : true)}
                 >
                     {i18n.t("Select file")}
                 </Button>

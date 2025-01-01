@@ -3,6 +3,7 @@ import { Backdrop, TableBody, TableCell, TableRow, Button, DialogContent, Typogr
 import styled from "styled-components";
 import i18n from "@eyeseetea/d2-ui-components/locales";
 import dayjs from "dayjs";
+import _ from "lodash";
 import { UploadsDataItem } from "../../entities/uploads";
 import { DeleteOutline } from "@material-ui/icons";
 import { CheckCircleOutline } from "@material-ui/icons";
@@ -22,21 +23,32 @@ import { moduleProperties } from "../../../domain/utils/ModuleProperties";
 import { ImportSummaryErrors } from "../../../domain/entities/data-entry/ImportSummary";
 import { ImportSummaryErrorsDialog } from "../import-summary-errors-dialog/ImportSummaryErrorsDialog";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
+import { useGlassUploadsAsyncDeletions } from "../../hooks/useGlassUploadsAsyncDeletions";
+import { getPrimaryAndSecondaryFilesToDelete } from "../../utils/getPrimaryAndSecondaryFilesToDelete";
+import { useGlassModule } from "../../hooks/useGlassModule";
+import { Id } from "../../../domain/entities/Ref";
+import { useQuestionnaires } from "./Questionnaires";
+import { DataSubmissionStatusTypes } from "../../../domain/entities/GlassDataSubmission";
 
 export interface UploadsTableBodyProps {
     rows?: UploadsDataItem[];
     refreshUploads: React.Dispatch<React.SetStateAction<{}>>;
     showComplete?: boolean;
+    setIsDatasetMarkAsCompleted?: React.Dispatch<React.SetStateAction<boolean>>;
+    setRefetchStatus?: React.Dispatch<React.SetStateAction<DataSubmissionStatusTypes | undefined>>;
 }
 
-export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refreshUploads, showComplete }) => {
-    const { compositionRoot, allCountries } = useAppContext();
+export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({
+    rows,
+    refreshUploads,
+    showComplete,
+    setIsDatasetMarkAsCompleted,
+    setRefetchStatus,
+}) => {
+    const { compositionRoot } = useAppContext();
     const snackbar = useSnackbar();
 
     const [loading, setLoading] = useState<boolean>(false);
-    const {
-        currentOrgUnitAccess: { orgUnitId, orgUnitName },
-    } = useCurrentOrgUnitContext();
     const [deleteOpen, setDeleteOpen] = React.useState(false);
     const [completeOpen, setCompleteOpen] = React.useState(false);
     const [importSummaryErrorsToShow, setImportSummaryErrorsToShow] = React.useState<ImportSummaryErrors | null>(null);
@@ -53,6 +65,9 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
         currentPeriod
     );
     const hasCurrentUserCaptureAccess = useGlassCaptureAccess();
+    const { asyncDeletions: asyncDeletionsState, setToAsyncDeletions } = useGlassUploadsAsyncDeletions();
+    const currentModule = useGlassModule();
+    const [questionnaires] = useQuestionnaires();
 
     const showDeleteConfirmationDialog = (rowToDelete: UploadsDataItem) => {
         setRowToDelete(rowToDelete);
@@ -87,91 +102,86 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
         );
     };
 
-    //Deleting a dataset completely has the following steps:
+    const getPrimaryAndSecondaryUploadIdsByUploadDataItem = useCallback(
+        (uploadDataItem: UploadsDataItem): Id[] => {
+            const { primaryFileToDelete, secondaryFileToDelete } = getPrimaryAndSecondaryFilesToDelete(
+                uploadDataItem,
+                moduleProperties,
+                currentModuleAccess.moduleName,
+                rows
+            );
+
+            return _.compact([primaryFileToDelete?.id, secondaryFileToDelete?.id]);
+        },
+        [currentModuleAccess.moduleName, rows]
+    );
+
+    const isAlreadyMarkedToBeDeleted = useCallback(
+        (uploadDataItem: UploadsDataItem): boolean => {
+            if (asyncDeletionsState.kind !== "loaded") return false;
+
+            const primaryAndSecondaryIdsToDelete = getPrimaryAndSecondaryUploadIdsByUploadDataItem(uploadDataItem);
+            return primaryAndSecondaryIdsToDelete.some(id => asyncDeletionsState.data.includes(id));
+        },
+        [asyncDeletionsState, getPrimaryAndSecondaryUploadIdsByUploadDataItem]
+    );
+
+    //Deleting a dataset completely has the following steps*:
     //1. Delete corresponsding datasetValue/event for each row in the file.
     //2. Delete corresponding document from DHIS
     //3. Delete corresponding 'upload' and 'document' from Datastore
+    //* If it's a file from a GLASS module with property hasAsyncDeletion === true, then is only set to async deletion in Datastore
     const deleteDataset = () => {
         hideDeleteConfirmationDialog();
-        if (rowToDelete) {
-            let primaryFileToDelete: UploadsDataItem | undefined, secondaryFileToDelete: UploadsDataItem | undefined;
-            //For AMR, Ris file is mandatory, so there will be a ris file with given batch id.
-            //Sample file is optional and could be absent
-            if (
-                moduleProperties.get(currentModuleAccess.moduleName)?.isSecondaryFileApplicable &&
-                moduleProperties.get(currentModuleAccess.moduleName)?.isSecondaryRelated
-            ) {
-                if (
-                    rowToDelete.fileType.toLowerCase() ===
-                    moduleProperties.get(currentModuleAccess.moduleName)?.primaryFileType.toLowerCase()
-                ) {
-                    primaryFileToDelete = rowToDelete;
-                    secondaryFileToDelete = rows
-                        ?.filter(sample => sample.correspondingRisUploadId === rowToDelete.id)
-                        ?.at(0);
-                } else {
-                    secondaryFileToDelete = rowToDelete;
-                    primaryFileToDelete = rows?.filter(ris => ris.id === rowToDelete.correspondingRisUploadId)?.at(0);
-                }
-            } else if (!moduleProperties.get(currentModuleAccess.moduleName)?.isSecondaryRelated) {
-                if (rowToDelete.fileType === moduleProperties.get(currentModuleAccess.moduleName)?.primaryFileType) {
-                    primaryFileToDelete = rowToDelete;
-                } else {
-                    secondaryFileToDelete = rowToDelete;
-                }
-            } else {
-                primaryFileToDelete = rowToDelete;
-                secondaryFileToDelete = undefined;
-            }
+        if (!rowToDelete || asyncDeletionsState.kind !== "loaded" || currentModule.kind !== "loaded") return;
 
+        if (moduleProperties.get(currentModuleAccess.moduleName)?.hasAsyncDeletion) {
+            if (isAlreadyMarkedToBeDeleted(rowToDelete)) return;
+
+            setToAsyncDeletions([rowToDelete.id]);
+            refreshUploads({}); //Trigger re-render of parent
+            setLoading(false);
+            hideDeleteConfirmationDialog();
+        } else {
+            const { primaryFileToDelete, secondaryFileToDelete } = getPrimaryAndSecondaryFilesToDelete(
+                rowToDelete,
+                moduleProperties,
+                currentModuleAccess.moduleName,
+                rows
+            );
             if (primaryFileToDelete) {
                 setLoading(true);
                 Future.joinObj({
-                    primaryFileDownload: compositionRoot.glassDocuments.download(primaryFileToDelete.fileId),
-                    secondaryFileDownload: secondaryFileToDelete
-                        ? compositionRoot.glassDocuments.download(secondaryFileToDelete.fileId)
+                    primaryArrayBuffer: primaryFileToDelete
+                        ? compositionRoot.glassDocuments.downloadAsArrayBuffer(primaryFileToDelete.fileId)
+                        : Future.success(undefined),
+                    secondaryArrayBuffer: secondaryFileToDelete
+                        ? compositionRoot.glassDocuments.downloadAsArrayBuffer(secondaryFileToDelete.fileId)
                         : Future.success(undefined),
                 }).run(
-                    ({ primaryFileDownload, secondaryFileDownload }) => {
-                        if (primaryFileToDelete) {
-                            const primaryFile = new File([primaryFileDownload], primaryFileToDelete.fileName);
-                            //If the file is in uploaded status then, data vales have not been imported.
+                    ({ primaryArrayBuffer, secondaryArrayBuffer }) => {
+                        if (primaryFileToDelete && primaryArrayBuffer) {
+                            //If the file is in uploaded status then, data values have not been imported.
                             //No need for deletion
 
                             Future.joinObj({
                                 deletePrimaryFileSummary:
                                     primaryFileToDelete.status.toLowerCase() !== "uploaded" ||
                                     !moduleProperties.get(currentModuleAccess.moduleName)?.isDryRunReq
-                                        ? compositionRoot.fileSubmission.primaryFile(
-                                              currentModuleAccess.moduleName,
-                                              primaryFile,
-                                              primaryFileToDelete.batchId,
-                                              primaryFileToDelete.period,
-                                              "DELETE",
-                                              orgUnitId,
-                                              orgUnitName,
-                                              primaryFileToDelete.countryCode,
-                                              false,
-                                              primaryFileToDelete.eventListFileId,
-                                              allCountries,
-                                              primaryFileToDelete.calculatedEventListFileId
+                                        ? compositionRoot.fileSubmission.deletePrimaryFile(
+                                              currentModule.data,
+                                              primaryFileToDelete,
+                                              primaryArrayBuffer
                                           )
                                         : Future.success(undefined),
                                 deleteSecondaryFileSummary:
                                     secondaryFileToDelete &&
                                     secondaryFileToDelete.status.toLowerCase() !== "uploaded" &&
-                                    secondaryFileDownload
-                                        ? compositionRoot.fileSubmission.secondaryFile(
-                                              new File([secondaryFileDownload], secondaryFileToDelete.fileName),
-                                              secondaryFileToDelete.batchId,
-                                              currentModuleAccess.moduleName,
-                                              secondaryFileToDelete.period,
-                                              "DELETE",
-                                              orgUnitId,
-                                              orgUnitName,
-                                              secondaryFileToDelete.countryCode,
-                                              false,
-                                              secondaryFileToDelete.eventListFileId
+                                    secondaryArrayBuffer
+                                        ? compositionRoot.fileSubmission.deleteSecondaryFile(
+                                              currentModule.data,
+                                              secondaryFileToDelete,
+                                              secondaryArrayBuffer
                                           )
                                         : Future.success(undefined),
                             }).run(
@@ -187,15 +197,19 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                                         return;
                                     }
                                     if (deletePrimaryFileSummary) {
+                                        if (
+                                            primaryFileToDelete?.status === "COMPLETED" &&
+                                            setIsDatasetMarkAsCompleted
+                                        ) {
+                                            setIsDatasetMarkAsCompleted && setIsDatasetMarkAsCompleted(false);
+                                        }
                                         const itemsDeleted =
                                             currentModuleAccess.moduleName === "AMC" ? "products" : "rows";
-
                                         let message = `${
                                             primaryFileToDelete?.rows || primaryFileToDelete?.records
                                         } ${itemsDeleted} deleted for ${
                                             moduleProperties.get(currentModuleAccess.moduleName)?.primaryFileType
                                         } file`;
-
                                         if (currentModuleAccess.moduleName === "AMC") {
                                             message = `${
                                                 primaryFileToDelete?.rows || primaryFileToDelete?.records
@@ -203,7 +217,6 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                                                 moduleProperties.get(currentModuleAccess.moduleName)?.primaryFileType
                                             } file and its corresponding calculated substance consumption data if any`;
                                         }
-
                                         if (secondaryFileToDelete && deleteSecondaryFileSummary) {
                                             message =
                                                 message +
@@ -214,7 +227,6 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                                                         ?.secondaryFileType
                                                 } file.`;
                                         }
-
                                         snackbar.info(message);
                                     }
                                     if (primaryFileToDelete) {
@@ -262,7 +274,6 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                         console.debug(
                             `Unable to find file/s : ${primaryFileToDelete?.fileName} , ${secondaryFileToDelete?.fileName} , error: ${error}`
                         );
-
                         snackbar.error(
                             `Unable to find file/s : ${primaryFileToDelete?.fileName} , ${secondaryFileToDelete?.fileName} , error: ${error}`
                         );
@@ -271,27 +282,15 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                 );
             } else if (secondaryFileToDelete) {
                 setLoading(true);
-                compositionRoot.glassDocuments.download(secondaryFileToDelete.fileId).run(
-                    secondaryFileDownload => {
+                compositionRoot.glassDocuments.downloadAsArrayBuffer(secondaryFileToDelete.fileId).run(
+                    secondaryArrayBuffer => {
                         if (
                             secondaryFileToDelete &&
                             secondaryFileToDelete.status.toLowerCase() !== "uploaded" &&
-                            secondaryFileDownload
+                            secondaryArrayBuffer
                         ) {
                             compositionRoot.fileSubmission
-                                .secondaryFile(
-                                    new File([secondaryFileDownload], secondaryFileToDelete.fileName),
-                                    secondaryFileToDelete.batchId,
-                                    currentModuleAccess.moduleName,
-                                    secondaryFileToDelete.period,
-                                    "DELETE",
-                                    orgUnitId,
-                                    orgUnitName,
-                                    secondaryFileToDelete.countryCode,
-                                    false,
-                                    secondaryFileToDelete.eventListFileId,
-                                    secondaryFileToDelete.calculatedEventListFileId
-                                )
+                                .deleteSecondaryFile(currentModule.data, secondaryFileToDelete, secondaryArrayBuffer)
                                 .run(
                                     deleteSecondaryFileSummary => {
                                         if (deleteSecondaryFileSummary?.status === "ERROR") {
@@ -301,11 +300,16 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                                             setLoading(false);
                                             return;
                                         }
-
                                         if (secondaryFileToDelete && deleteSecondaryFileSummary) {
+                                            if (
+                                                secondaryFileToDelete?.status === "COMPLETED" &&
+                                                setIsDatasetMarkAsCompleted
+                                            ) {
+                                                setIsDatasetMarkAsCompleted && setIsDatasetMarkAsCompleted(false);
+                                            }
+
                                             const itemsDeleted =
                                                 currentModuleAccess.moduleName === "AMC" ? "substances" : "rows";
-
                                             const message = ` ${
                                                 secondaryFileToDelete.rows || secondaryFileToDelete.records
                                             } ${itemsDeleted} deleted for ${
@@ -375,23 +379,57 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
     const setCompleteStatus = useCallback(() => {
         if (rowToComplete?.id) {
             setLoading(true);
-            compositionRoot.glassUploads
-                .setStatus({
-                    id: rowToComplete.id,
-                    status: "COMPLETED",
-                })
-                .run(
-                    () => {
+            return compositionRoot.glassUploads.setStatus({ id: rowToComplete.id, status: "COMPLETED" }).run(
+                () => {
+                    if (
+                        moduleProperties.get(currentModuleAccess.moduleName)?.completeStatusChange === "DATASET" ||
+                        (moduleProperties.get(currentModuleAccess.moduleName)?.completeStatusChange ===
+                            "QUESTIONNAIRE_AND_DATASET" &&
+                            questionnaires?.every(q => q.isMandatory && q.isCompleted))
+                    ) {
+                        return compositionRoot.glassDataSubmission
+                            .setStatus(rowToComplete.dataSubmission, "COMPLETE")
+                            .run(
+                                () => {
+                                    setIsDatasetMarkAsCompleted && setIsDatasetMarkAsCompleted(true);
+                                    setLoading(false);
+                                    refreshUploads({}); //Trigger re-render of parent
+                                    setRefetchStatus && setRefetchStatus("COMPLETE");
+                                },
+                                error => {
+                                    snackbar.error(
+                                        i18n.t("Error occurred when setting data submission status to COMPLETED")
+                                    );
+                                    console.debug(
+                                        "Error occurred when setting data submission status to COMPLETED: " + error
+                                    );
+                                    setLoading(false);
+                                    setIsDatasetMarkAsCompleted && setIsDatasetMarkAsCompleted(false);
+                                }
+                            );
+                    } else {
                         refreshUploads({}); //Trigger re-render of parent
                         setLoading(false);
-                    },
-                    () => {
-                        snackbar.error(i18n.t("Failed to set completed status"));
-                        setLoading(false);
+                        setIsDatasetMarkAsCompleted && setIsDatasetMarkAsCompleted(false);
                     }
-                );
+                },
+                errorMessage => {
+                    snackbar.error(i18n.t(errorMessage));
+                    setLoading(false);
+                    setIsDatasetMarkAsCompleted && setIsDatasetMarkAsCompleted(false);
+                }
+            );
         }
-    }, [compositionRoot.glassUploads, refreshUploads, rowToComplete, snackbar]);
+    }, [
+        compositionRoot,
+        currentModuleAccess.moduleName,
+        questionnaires,
+        refreshUploads,
+        rowToComplete,
+        setIsDatasetMarkAsCompleted,
+        setRefetchStatus,
+        snackbar,
+    ]);
 
     const completeDataset = () => {
         hideCompleteConfirmationDialog();
@@ -406,7 +444,7 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
 
     return (
         <>
-            {rows && (
+            {rows && currentModule.kind === "loaded" && (
                 <StyledTableBody>
                     <TableRow>
                         <TableCell style={{ border: "none", padding: 0 }}>
@@ -491,7 +529,8 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                                 </Button>
                             </TableCell>
                             <TableCell style={{ opacity: 0.5 }}>
-                                {currentDataSubmissionStatus.kind === "loaded" ? (
+                                {currentDataSubmissionStatus.kind === "loaded" &&
+                                asyncDeletionsState.kind === "loaded" ? (
                                     <Button
                                         onClick={e => {
                                             e.stopPropagation();
@@ -499,10 +538,15 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({ rows, refres
                                         }}
                                         disabled={
                                             !hasCurrentUserCaptureAccess ||
-                                            !isEditModeStatus(currentDataSubmissionStatus.data.title)
+                                            !isEditModeStatus(currentDataSubmissionStatus.data.title) ||
+                                            isAlreadyMarkedToBeDeleted(row)
                                         }
                                     >
-                                        <DeleteOutline />
+                                        {isAlreadyMarkedToBeDeleted(row) ? (
+                                            i18n.t("Marked to be deleted")
+                                        ) : (
+                                            <DeleteOutline />
+                                        )}
                                     </Button>
                                 ) : (
                                     <CircularProgress size={20} />

@@ -1,3 +1,4 @@
+import { Maybe } from "../../../../types/utils";
 import { UnitCode, RouteOfAdministrationCode, SaltCode } from "../../GlassAtcVersionData";
 
 export type ProductRegistryAttributes = {
@@ -5,12 +6,12 @@ export type ProductRegistryAttributes = {
     AMR_GLASS_AMC_TEA_PACKSIZE: number;
     AMR_GLASS_AMC_TEA_STRENGTH: number;
     AMR_GLASS_AMC_TEA_STRENGTH_UNIT: UnitCode;
-    AMR_GLASS_AMC_TEA_CONC_VOLUME: number;
+    AMR_GLASS_AMC_TEA_CONC_VOLUME: Maybe<number>;
     AMR_GLASS_AMC_TEA_ATC: string;
-    AMR_GLASS_AMC_TEA_COMBINATION?: string;
+    AMR_GLASS_AMC_TEA_COMBINATION: Maybe<string>;
     AMR_GLASS_AMC_TEA_ROUTE_ADMIN: RouteOfAdministrationCode;
     AMR_GLASS_AMC_TEA_SALT: SaltCode;
-    AMR_GLASS_AMC_TEA_VOLUME: number;
+    AMR_GLASS_AMC_TEA_VOLUME: Maybe<number>;
 };
 
 export const PRODUCT_REGISTRY_ATTRIBUTES_KEYS = [
