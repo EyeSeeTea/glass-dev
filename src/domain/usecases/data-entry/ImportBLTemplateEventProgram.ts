@@ -1,3 +1,5 @@
+import _ from "lodash";
+import moment from "moment";
 import { Dhis2EventsDefaultRepository } from "../../../data/repositories/Dhis2EventsDefaultRepository";
 import { ImportStrategy } from "../../entities/data-entry/DataValuesSaveSummary";
 import { ConsistencyError, ImportSummary } from "../../entities/data-entry/ImportSummary";
@@ -21,11 +23,10 @@ import { Template } from "../../entities/Template";
 import { ExcelReader } from "../../utils/ExcelReader";
 import { InstanceRepository } from "../../repositories/InstanceRepository";
 import { AMC_RAW_SUBSTANCE_CONSUMPTION_PROGRAM_ID } from "./amc/ImportAMCSubstanceLevelData";
-import { GlassATCDefaultRepository } from "../../../data/repositories/GlassATCDefaultRepository";
+import { GlassATCRepository } from "../../repositories/GlassATCRepository";
 import { ListGlassATCLastVersionKeysByYear } from "../../entities/GlassAtcVersionData";
-import moment from "moment";
 
-const ATC_VERSION_DATA_ELEMENT_ID = "aCuWz3HZ5Ti";
+export const ATC_VERSION_DATA_ELEMENT_ID = "aCuWz3HZ5Ti";
 
 export class ImportBLTemplateEventProgram {
     constructor(
@@ -36,7 +37,7 @@ export class ImportBLTemplateEventProgram {
         private dhis2EventsDefaultRepository: Dhis2EventsDefaultRepository,
         private metadataRepository: MetadataRepository,
         private programRulesMetadataRepository: ProgramRulesMetadataRepository,
-        private glassAtcRepository: GlassATCDefaultRepository
+        private glassAtcRepository: GlassATCRepository
     ) {}
 
     public import(
@@ -73,6 +74,9 @@ export class ImportBLTemplateEventProgram {
                                 calculatedEventListFileId
                             ).flatMap(events => {
                                 if (action === "CREATE_AND_UPDATE") {
+                                    if (!events.length)
+                                        return Future.error("The file is empty or failed while reading the file.");
+
                                     //Run validations on import only
                                     return this.validateEvents(
                                         events,
@@ -128,6 +132,7 @@ export class ImportBLTemplateEventProgram {
                                     });
                                 } //action === "DELETE"
                                 else {
+                                    // NOTICE: check also DeleteBLTemplateEventProgram.ts that contains same code adapted for node environment (only DELETE)
                                     return this.deleteEvents(events);
                                 }
                             });

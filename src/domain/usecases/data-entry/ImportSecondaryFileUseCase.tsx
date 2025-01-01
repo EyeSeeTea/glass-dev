@@ -8,12 +8,12 @@ import { ImportStrategy } from "../../entities/data-entry/DataValuesSaveSummary"
 import { ImportSampleFile } from "./amr/ImportSampleFile";
 import { ImportAMCSubstanceLevelData } from "./amc/ImportAMCSubstanceLevelData";
 import { ExcelRepository } from "../../repositories/ExcelRepository";
-import { InstanceDefaultRepository } from "../../../data/repositories/InstanceDefaultRepository";
-import { GlassDocumentsDefaultRepository } from "../../../data/repositories/GlassDocumentsDefaultRepository";
 import { GlassUploadsRepository } from "../../repositories/GlassUploadsRepository";
 import { Dhis2EventsDefaultRepository } from "../../../data/repositories/Dhis2EventsDefaultRepository";
 import { ProgramRulesMetadataRepository } from "../../repositories/program-rules/ProgramRulesMetadataRepository";
-import { GlassATCDefaultRepository } from "../../../data/repositories/GlassATCDefaultRepository";
+import { GlassATCRepository } from "../../repositories/GlassATCRepository";
+import { GlassDocumentsRepository } from "../../repositories/GlassDocumentsRepository";
+import { InstanceRepository } from "../../repositories/InstanceRepository";
 
 export class ImportSecondaryFileUseCase implements UseCase {
     constructor(
@@ -21,12 +21,12 @@ export class ImportSecondaryFileUseCase implements UseCase {
         private metadataRepository: MetadataRepository,
         private dataValuesRepository: DataValuesRepository,
         private excelRepository: ExcelRepository,
-        private instanceRepository: InstanceDefaultRepository,
-        private glassDocumentsRepository: GlassDocumentsDefaultRepository,
+        private instanceRepository: InstanceRepository,
+        private glassDocumentsRepository: GlassDocumentsRepository,
         private glassUploadsRepository: GlassUploadsRepository,
         private dhis2EventsDefaultRepository: Dhis2EventsDefaultRepository,
         private programRulesMetadataRepository: ProgramRulesMetadataRepository,
-        private glassAtcRepository: GlassATCDefaultRepository
+        private glassAtcRepository: GlassATCRepository
     ) {}
 
     public execute(

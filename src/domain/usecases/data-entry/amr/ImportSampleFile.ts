@@ -19,8 +19,8 @@ import { SampleDataRepository } from "../../../repositories/data-entry/SampleDat
 import { SampleData } from "../../../entities/data-entry/amr-external/SampleData";
 import { checkDuplicateRowsSAMPLE } from "../utils/checkDuplicateRows";
 
-const AMR_AMR_DS_Input_files_Sample_DS_ID = "OcAB7oaC072";
-const AMR_BATCHID_CC_ID = "rEMx3WFeLcU";
+export const AMR_AMR_DS_Input_files_Sample_DS_ID = "OcAB7oaC072";
+export const AMR_BATCHID_CC_ID = "rEMx3WFeLcU";
 
 export class ImportSampleFile {
     constructor(
@@ -29,6 +29,7 @@ export class ImportSampleFile {
         private dataValuesRepository: DataValuesRepository
     ) {}
 
+    // NOTICE: check also DeleteSampleDatasetUseCase.ts that contains same code adapted for node environment (only DELETE)
     public import(
         inputFile: File,
         batchId: string,

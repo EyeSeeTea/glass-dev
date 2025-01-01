@@ -150,7 +150,9 @@ export function calculateConsumptionSubstanceLevelData(
             const atcCodeByLevel = getAtcCodeByLevel(atcData, rawSubstanceConsumption.atc_manual);
             const aware = getAwareClass(awareClassData, rawSubstanceConsumption.atc_manual);
 
-            const rawSubstanceConsumptionKilograms = rawSubstanceConsumption.tons_manual * 1000;
+            const rawSubstanceConsumptionKilograms = rawSubstanceConsumption.tons_manual
+                ? rawSubstanceConsumption.tons_manual * 1000
+                : undefined;
             return {
                 period,
                 orgUnitId,

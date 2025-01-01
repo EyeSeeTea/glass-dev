@@ -175,7 +175,7 @@ describe("Given calculate Consumption Product Level Data function", () => {
 });
 
 function givenProductRegistryAttributesByType(type?: string): ProductRegistryAttributes[] {
-    const productRegistryAttributesTypes = {
+    const productRegistryAttributesTypes: Record<string, ProductRegistryAttributes[]> = {
         basic: productRegistryAttributesBasic,
         no_atc_data: productRegistryAttributesBasic,
         conc_volume_and_volume: productRegistryAttributesConcVolumeAndVolume,
@@ -184,7 +184,7 @@ function givenProductRegistryAttributesByType(type?: string): ProductRegistryAtt
             productRegistryAttributesMillionInternationalUnitDifferentDDDUnit,
         no_combination_code_no_found_ddd: productRegistryAttributesNoCombCodeNoFoundDDD,
         wrong_strength_unit: productRegistryAttributesWrongStrengthUnit,
-    } as Record<string, ProductRegistryAttributes[]>;
+    };
 
     const productRegistryAttributes = type
         ? productRegistryAttributesTypes[type]

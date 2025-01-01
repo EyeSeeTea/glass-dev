@@ -3,7 +3,6 @@ import { ImportSummary } from "../../../entities/data-entry/ImportSummary";
 import { Future, FutureData } from "../../../entities/Future";
 import { ExcelRepository } from "../../../repositories/ExcelRepository";
 import * as templates from "../../../entities/data-entry/program-templates";
-import { InstanceDefaultRepository } from "../../../../data/repositories/InstanceDefaultRepository";
 import { DataPackage } from "../../../entities/data-entry/DataPackage";
 import { TrackerRepository } from "../../../repositories/TrackerRepository";
 import { GlassDocumentsRepository } from "../../../repositories/GlassDocumentsRepository";
@@ -12,13 +11,12 @@ import { Id } from "../../../entities/Ref";
 import { D2TrackerTrackedEntity } from "@eyeseetea/d2-api/api/trackerTrackedEntities";
 import { D2TrackerEnrollment, D2TrackerEnrollmentAttribute } from "@eyeseetea/d2-api/api/trackerEnrollments";
 import { D2TrackerEvent } from "@eyeseetea/d2-api/api/trackerEvents";
-import { mapToImportSummary, readTemplate, uploadIdListFileAndSave } from "../ImportBLTemplateEventProgram";
+import { mapToImportSummary, readTemplate } from "../ImportBLTemplateEventProgram";
 import { MetadataRepository } from "../../../repositories/MetadataRepository";
 import { ValidationResult } from "../../../entities/program-rules/EventEffectTypes";
 import { ProgramRuleValidationForBLEventProgram } from "../../program-rules-processing/ProgramRuleValidationForBLEventProgram";
 import { ProgramRulesMetadataRepository } from "../../../repositories/program-rules/ProgramRulesMetadataRepository";
 import { CustomValidationsAMCProductData } from "./CustomValidationsAMCProductData";
-import { GlassATCDefaultRepository } from "../../../../data/repositories/GlassATCDefaultRepository";
 import moment from "moment";
 import { AMCProductDataRepository } from "../../../repositories/data-entry/AMCProductDataRepository";
 import { CODE_PRODUCT_NOT_HAVE_ATC, COMB_CODE_PRODUCT_NOT_HAVE_ATC } from "../../../entities/GlassAtcVersionData";
@@ -27,24 +25,26 @@ import { downloadIdsAndDeleteTrackedEntities } from "../utils/downloadIdsAndDele
 import { getStringFromFile } from "../utils/fileToString";
 import { getTEAValueFromOrganisationUnitCountryEntry } from "../utils/getTEAValueFromOrganisationUnitCountryEntry";
 import { Country } from "../../../entities/Country";
+import { InstanceRepository } from "../../../repositories/InstanceRepository";
+import { GlassATCRepository } from "../../../repositories/GlassATCRepository";
 
 export const AMC_PRODUCT_REGISTER_PROGRAM_ID = "G6ChA5zMW9n";
 export const AMC_RAW_PRODUCT_CONSUMPTION_STAGE_ID = "GmElQHKXLIE";
 export const AMC_RAW_PRODUCT_CONSUMPTION_CALCULATED_STAGE_ID = "q8cl5qllyjd";
-const AMR_GLASS_AMC_TET_PRODUCT_REGISTER = "uE6bIKLsGYW";
+export const AMR_GLASS_AMC_TET_PRODUCT_REGISTER = "uE6bIKLsGYW";
 const AMR_GLASS_AMC_TEA_ATC = "aK1JpD14imM";
 const AMR_GLASS_AMC_TEA_COMBINATION = "mG49egdYK3G";
 
 export class ImportAMCProductLevelData {
     constructor(
         private excelRepository: ExcelRepository,
-        private instanceRepository: InstanceDefaultRepository,
+        private instanceRepository: InstanceRepository,
         private trackerRepository: TrackerRepository,
         private glassDocumentsRepository: GlassDocumentsRepository,
         private glassUploadsRepository: GlassUploadsRepository,
         private metadataRepository: MetadataRepository,
         private programRulesMetadataRepository: ProgramRulesMetadataRepository,
-        private atcRepository: GlassATCDefaultRepository,
+        private atcRepository: GlassATCRepository,
         private amcProductRepository: AMCProductDataRepository,
         private amcSubstanceDataRepository: AMCSubstanceDataRepository
     ) {}
@@ -84,6 +84,9 @@ export class ImportAMCProductLevelData {
                             period,
                             allCountries
                         ).flatMap(entities => {
+                            if (!entities.length)
+                                return Future.error("The file is empty or failed while reading the file.");
+
                             return this.validateTEIsAndEvents(
                                 entities,
                                 orgUnitId,
@@ -124,18 +127,17 @@ export class ImportAMCProductLevelData {
                                             this.metadataRepository,
                                             validationResults.nonBlockingErrors
                                         ).flatMap(summary => {
-                                            return uploadIdListFileAndSave(
+                                            return this.uploadTeiIdListFileAndSave(
                                                 "primaryUploadId",
                                                 summary,
-                                                moduleName,
-                                                this.glassDocumentsRepository,
-                                                this.glassUploadsRepository
+                                                moduleName
                                             );
                                         });
                                     });
                             });
                         });
                     } else {
+                        // NOTICE: check also DeleteAMCProductLevelDataUseCase.ts that contains same code adapted for node environment
                         return downloadIdsAndDeleteTrackedEntities(
                             eventListId,
                             orgUnitId,
@@ -366,6 +368,29 @@ export class ImportAMCProductLevelData {
             return Future.success(consolidatedValidationResults);
         });
     }
+
+    private uploadTeiIdListFileAndSave = (
+        uploadIdLocalStorageName: string,
+        summary: { importSummary: ImportSummary; eventIdList: string[] },
+        moduleName: string
+    ): FutureData<ImportSummary> => {
+        const uploadId = localStorage.getItem(uploadIdLocalStorageName);
+        if (summary.eventIdList.length > 0 && uploadId) {
+            //Events were imported successfully, so create and uplaod a file with tei ids
+            // and associate it with the upload datastore object
+            const teisListBlob = new Blob([JSON.stringify(summary.eventIdList)], {
+                type: "text/plain",
+            });
+            const teiIdListFile = new File([teisListBlob], `${uploadId}_eventIdsFile`);
+            return this.glassDocumentsRepository.save(teiIdListFile, moduleName).flatMap(fileId => {
+                return this.glassUploadsRepository.setEventListFileId(uploadId, fileId).flatMap(() => {
+                    return Future.success(summary.importSummary);
+                });
+            });
+        } else {
+            return Future.success(summary.importSummary);
+        }
+    };
 
     private deleteCalculatedSubstanceConsumptionData(
         deleteProductSummary: ImportSummary,

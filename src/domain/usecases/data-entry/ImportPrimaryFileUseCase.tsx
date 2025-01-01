@@ -10,18 +10,17 @@ import { ImportEGASPFile } from "./egasp/ImportEGASPFile";
 import { Dhis2EventsDefaultRepository } from "../../../data/repositories/Dhis2EventsDefaultRepository";
 import { ExcelRepository } from "../../repositories/ExcelRepository";
 import { GlassDocumentsRepository } from "../../repositories/GlassDocumentsRepository";
-import { GlassUploadsDefaultRepository } from "../../../data/repositories/GlassUploadsDefaultRepository";
 import { ProgramRulesMetadataRepository } from "../../repositories/program-rules/ProgramRulesMetadataRepository";
 import { ImportRISIndividualFungalFile } from "./amr-individual-fungal/ImportRISIndividualFungalFile";
 import { RISIndividualFungalDataRepository } from "../../repositories/data-entry/RISIndividualFungalDataRepository";
 import { TrackerRepository } from "../../repositories/TrackerRepository";
-import { GlassModuleDefaultRepository } from "../../../data/repositories/GlassModuleDefaultRepository";
 import { ImportAMCProductLevelData } from "./amc/ImportAMCProductLevelData";
-import { InstanceDefaultRepository } from "../../../data/repositories/InstanceDefaultRepository";
-import { GlassATCDefaultRepository } from "../../../data/repositories/GlassATCDefaultRepository";
 import { AMCProductDataRepository } from "../../repositories/data-entry/AMCProductDataRepository";
 import { AMCSubstanceDataRepository } from "../../repositories/data-entry/AMCSubstanceDataRepository";
 import { Country } from "../../entities/Country";
+import { GlassUploadsRepository } from "../../repositories/GlassUploadsRepository";
+import { InstanceRepository } from "../../repositories/InstanceRepository";
+import { GlassATCRepository } from "../../repositories/GlassATCRepository";
 
 export class ImportPrimaryFileUseCase {
     constructor(
@@ -29,19 +28,18 @@ export class ImportPrimaryFileUseCase {
         private risIndividualFungalRepository: RISIndividualFungalDataRepository,
         private metadataRepository: MetadataRepository,
         private dataValuesRepository: DataValuesRepository,
-        private moduleRepository: GlassModuleRepository,
         private dhis2EventsDefaultRepository: Dhis2EventsDefaultRepository,
         private excelRepository: ExcelRepository,
         private glassDocumentsRepository: GlassDocumentsRepository,
-        private glassUploadsRepository: GlassUploadsDefaultRepository,
+        private glassUploadsRepository: GlassUploadsRepository,
         private trackerRepository: TrackerRepository,
-        private glassModuleDefaultRepository: GlassModuleDefaultRepository,
-        private instanceRepository: InstanceDefaultRepository,
+        private glassModuleRepository: GlassModuleRepository,
+        private instanceRepository: InstanceRepository,
         private programRulesMetadataRepository: ProgramRulesMetadataRepository,
-        private atcRepository: GlassATCDefaultRepository,
+        private atcRepository: GlassATCRepository,
         private amcProductRepository: AMCProductDataRepository,
         private amcSubstanceDataRepository: AMCSubstanceDataRepository,
-        private glassAtcRepository: GlassATCDefaultRepository
+        private glassAtcRepository: GlassATCRepository
     ) {}
 
     public execute(
@@ -64,7 +62,7 @@ export class ImportPrimaryFileUseCase {
                     this.risDataRepository,
                     this.metadataRepository,
                     this.dataValuesRepository,
-                    this.moduleRepository
+                    this.glassModuleRepository
                 );
                 return importRISFile.importRISFile(inputFile, batchId, period, action, orgUnitId, countryCode, dryRun);
             }
@@ -102,7 +100,7 @@ export class ImportPrimaryFileUseCase {
                     this.metadataRepository,
                     this.programRulesMetadataRepository
                 );
-                return this.glassModuleDefaultRepository.getByName(moduleName).flatMap(module => {
+                return this.glassModuleRepository.getByName(moduleName).flatMap(module => {
                     return importRISIndividualFungalFile.importRISIndividualFungalFile(
                         inputFile,
                         action,

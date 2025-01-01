@@ -5,6 +5,7 @@ import { ImportSummaryErrors } from "../entities/data-entry/ImportSummary";
 
 export interface GlassUploadsRepository {
     getAll(): FutureData<GlassUploads[]>;
+    getById(uploadId: Id): FutureData<GlassUploads>;
     save(upload: GlassUploads): FutureData<void>;
     setStatus(id: string, status: string): FutureData<void>;
     setBatchId(id: string, batchId: string): FutureData<void>;
@@ -26,4 +27,9 @@ export interface GlassUploadsRepository {
     getUploadsByDataSubmission(dataSubmissionId: Id): FutureData<GlassUploads[]>;
     getEventListFileIdByUploadId(id: string): FutureData<string>;
     setCalculatedEventListFileId(uploadId: string, calculatedEventListFileId: string): FutureData<void>;
+    setAsyncDeletions(uploadIdsToDelete: Id[]): FutureData<Id[]>;
+    getAsyncDeletions(): FutureData<Id[]>;
+    removeAsyncDeletions(uploadIdToRemove: Id[]): FutureData<Id[]>;
+    setEventListDataDeleted(id: string): FutureData<void>;
+    setCalculatedEventListDataDeleted(id: string): FutureData<void>;
 }

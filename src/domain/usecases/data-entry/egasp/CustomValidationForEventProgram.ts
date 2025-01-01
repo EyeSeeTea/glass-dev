@@ -1,4 +1,3 @@
-import i18n from "@eyeseetea/d2-ui-components/locales";
 import { Dhis2EventsDefaultRepository } from "../../../../data/repositories/Dhis2EventsDefaultRepository";
 import { Future, FutureData } from "../../../entities/Future";
 import { ConsistencyError } from "../../../entities/data-entry/ImportSummary";
@@ -8,6 +7,7 @@ import { MetadataRepository } from "../../../repositories/MetadataRepository";
 import { AMC_RAW_SUBSTANCE_CONSUMPTION_PROGRAM_ID } from "../amc/ImportAMCSubstanceLevelData";
 import { EGASP_PROGRAM_ID } from "../../../../data/repositories/program-rule/ProgramRulesMetadataDefaultRepository";
 import { validateAtcVersion } from "../../../entities/GlassAtcVersionData";
+import i18n from "../../../../locales";
 
 const EGASP_DATAELEMENT_ID = "KaS2YBRN8eH";
 const PATIENT_DATAELEMENT_ID = "aocFHBxcQa0";
