@@ -179,8 +179,8 @@ export class QuestionnaireD2DefaultRepository implements QuestionnaireRepository
         }
     }
 
-    saveResponse(questionnaire: QuestionnaireSelector, question: Question): FutureData<void> {
-        const dataValues = this.getDataValuesForQuestion(questionnaire, question);
+    saveResponse(questionnaire: QuestionnaireSelector, questions: Question[]): FutureData<void> {
+        const dataValues = this.getDataValuesForQuestions(questionnaire, questions);
         return this.postDataValues(dataValues);
     }
 
@@ -286,6 +286,10 @@ export class QuestionnaireD2DefaultRepository implements QuestionnaireRepository
                 console.error("Unsupported data element", dataElement);
                 return null;
         }
+    }
+
+    private getDataValuesForQuestions(questionnaire: QuestionnaireSelector, questions: Question[]): D2DataValue[] {
+        return questions.flatMap(question => this.getDataValuesForQuestion(questionnaire, question));
     }
 
     private getDataValuesForQuestion(questionnaire: QuestionnaireSelector, question: Question): D2DataValue[] {

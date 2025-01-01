@@ -12,5 +12,5 @@ export interface QuestionnaireRepository {
     getProgramList(module: GlassModule, options: { orgUnitId: Id; year: string }): FutureData<QuestionnaireBase[]>;
     get(module: GlassModule, selector: QuestionnaireSelector, captureAccess: boolean): FutureData<Questionnaire>;
     setCompletion(questionnaire: QuestionnaireSelector, value: boolean): FutureData<void>;
-    saveResponse(questionnaire: QuestionnaireSelector, question: Question): FutureData<void>;
+    saveResponse(questionnaire: QuestionnaireSelector, questions: Question[]): FutureData<void>;
 }
