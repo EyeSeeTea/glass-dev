@@ -232,6 +232,7 @@ export class GlassUploadsDefaultRepository implements GlassUploadsRepository {
     }
 
     getAsyncDeletions(): FutureData<Id[]> {
+        console.debug(`getAsyncDeletions`);
         return this.dataStoreClient.listCollection<Id>(DataStoreKeys.ASYNC_DELETIONS);
     }
 

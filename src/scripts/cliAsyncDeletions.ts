@@ -194,6 +194,8 @@ async function main() {
 type GlassUploadsWithModuleName = GlassUploads & { moduleName: GlassModuleName };
 
 function getAsyncDeletionsFromDatastore(glassUploadsRepository: GlassUploadsRepository): FutureData<Id[]> {
+    console.debug(`getAsyncDeletionsFromDatastore`);
+
     return new GetAsyncDeletionsUseCase(glassUploadsRepository).execute();
 }
 
