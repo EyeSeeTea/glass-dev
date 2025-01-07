@@ -7,6 +7,8 @@ export class GetAsyncDeletionsUseCase implements UseCase {
     constructor(private glassUploadsRepository: GlassUploadsRepository) {}
 
     public execute(): FutureData<Id[]> {
+        console.debug(`GetAsyncDeletionsUseCase`);
+
         return this.glassUploadsRepository.getAsyncDeletions();
     }
 }
