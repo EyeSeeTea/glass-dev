@@ -11,9 +11,18 @@ import { apiToFuture } from "../../utils/futures";
 
 export class GlassDocumentsDefaultRepository implements GlassDocumentsRepository {
     private api: D2Api;
-
-    constructor(private dataStoreClient: DataStoreClient, instance: Instance) {
-        this.api = getD2APiFromInstance(instance);
+    private dataStoreClient: DataStoreClient;
+    constructor(dataStoreClient: DataStoreClient, instance?: Instance, api?: D2Api) {
+        if (api) {
+            // Use the provided api instance
+            this.api = api;
+        } else if (instance) {
+            // Fallback to instance if no api is provided
+            this.api = getD2APiFromInstance(instance);
+        } else {
+            throw new Error("Either 'api' or 'instance' must be provided.");
+        }
+        this.dataStoreClient = dataStoreClient;
     }
 
     @cache()

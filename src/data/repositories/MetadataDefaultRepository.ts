@@ -36,8 +36,16 @@ export class MetadataDefaultRepository implements MetadataRepository {
     // I've created here an manual in memory cache to avoid many requests
     private inmemoryCache: Record<string, unknown> = {};
 
-    constructor(instance: Instance) {
-        this.api = getD2APiFromInstance(instance);
+    constructor(instance?: Instance, api?: D2Api) {
+        if (api) {
+            // Use the provided api instance
+            this.api = api;
+        } else if (instance) {
+            // Fallback to instance if no api is provided
+            this.api = getD2APiFromInstance(instance);
+        } else {
+            throw new Error("Either 'api' or 'instance' must be provided.");
+        }
     }
 
     getD2Ids(ids: string[]): FutureData<NamedRef[]> {
