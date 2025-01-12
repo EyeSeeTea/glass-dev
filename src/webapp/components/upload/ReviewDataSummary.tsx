@@ -118,8 +118,6 @@ export const ReviewDataSummary: React.FC<ReviewDataSummaryProps> = ({
                             .run(
                                 () => {
                                     if (!secondaryUploadId) {
-                                        changeStep(4);
-                                        setIsLoading(false);
                                         //If Questionnaires are not applicable to a module, then set status as COMPLETE on
                                         //completion of dataset.
                                         if (
@@ -133,6 +131,8 @@ export const ReviewDataSummary: React.FC<ReviewDataSummaryProps> = ({
                                                 .setStatus(currentDataSubmissionId, "COMPLETE")
                                                 .run(
                                                     () => {
+                                                        changeStep(4);
+                                                        setIsLoading(false);
                                                         if (captureAccessGroup.kind === "loaded") {
                                                             const userGroupsIds = captureAccessGroup.data.map(cag => {
                                                                 return cag.id;
@@ -213,6 +213,8 @@ export const ReviewDataSummary: React.FC<ReviewDataSummaryProps> = ({
                                             .setStatus(currentDataSubmissionId, "COMPLETE")
                                             .run(
                                                 () => {
+                                                    changeStep(4);
+                                                    setIsLoading(false);
                                                     if (captureAccessGroup.kind === "loaded") {
                                                         const userGroupsIds = captureAccessGroup.data.map(cag => {
                                                             return cag.id;
@@ -233,15 +235,18 @@ export const ReviewDataSummary: React.FC<ReviewDataSummaryProps> = ({
                                                     }
                                                 },
                                                 error => {
+                                                    changeStep(4);
+                                                    setIsLoading(false);
                                                     console.debug(
                                                         "Error occurred when setting data submission status, error: " +
                                                             error
                                                     );
                                                 }
                                             );
+                                    } else {
+                                        changeStep(4);
+                                        setIsLoading(false);
                                     }
-                                    changeStep(4);
-                                    setIsLoading(false);
                                 },
                                 errorMessage => {
                                     snackbar.error(i18n.t(errorMessage));
