@@ -121,7 +121,8 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({
             if (asyncDeletionsState.kind !== "loaded") return false;
 
             const primaryAndSecondaryIdsToDelete = getPrimaryAndSecondaryUploadIdsByUploadDataItem(uploadDataItem);
-            return primaryAndSecondaryIdsToDelete.some(id => asyncDeletionsState.data.includes(id));
+            const asyncDeletionsIds = asyncDeletionsState.data.map(({ uploadId }) => uploadId);
+            return primaryAndSecondaryIdsToDelete.some(id => asyncDeletionsIds.includes(id));
         },
         [asyncDeletionsState, getPrimaryAndSecondaryUploadIdsByUploadDataItem]
     );
@@ -130,12 +131,18 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({
     //1. Delete corresponsding datasetValue/event for each row in the file.
     //2. Delete corresponding document from DHIS
     //3. Delete corresponding 'upload' and 'document' from Datastore
-    //* If it's a file from a GLASS module with property hasAsyncDeletion === true, then is only set to async deletion in Datastore
+    //* If it's a file from a GLASS module with property hasAsyncDeletion === true and the number of rows is greater than maxNumberOfRowsToSyncDeletion,
+    // then it is only set to async deletion in Datastore key
     const deleteDataset = () => {
         hideDeleteConfirmationDialog();
         if (!rowToDelete || asyncDeletionsState.kind !== "loaded" || currentModule.kind !== "loaded") return;
 
-        if (moduleProperties.get(currentModuleAccess.moduleName)?.hasAsyncDeletion) {
+        if (
+            moduleProperties.get(currentModuleAccess.moduleName)?.hasAsyncDeletion &&
+            currentModule.data.maxNumberOfRowsToSyncDeletion &&
+            rowToDelete?.rows &&
+            rowToDelete?.rows > (currentModule.data.maxNumberOfRowsToSyncDeletion || 0)
+        ) {
             if (isAlreadyMarkedToBeDeleted(rowToDelete)) return;
 
             setToAsyncDeletions([rowToDelete.id]);
@@ -539,11 +546,14 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({
                                         disabled={
                                             !hasCurrentUserCaptureAccess ||
                                             !isEditModeStatus(currentDataSubmissionStatus.data.title) ||
-                                            isAlreadyMarkedToBeDeleted(row)
+                                            isAlreadyMarkedToBeDeleted(row) ||
+                                            row.errorAsyncDeleting
                                         }
                                     >
                                         {isAlreadyMarkedToBeDeleted(row) ? (
                                             i18n.t("Marked to be deleted")
+                                        ) : row.errorAsyncDeleting ? (
+                                            i18n.t("There was an error deleting this file. Admin needs to check.")
                                         ) : (
                                             <DeleteOutline />
                                         )}
