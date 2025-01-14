@@ -127,6 +127,22 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({
         [asyncDeletionsState, getPrimaryAndSecondaryUploadIdsByUploadDataItem]
     );
 
+    const hasErrorAsyncDeleting = useCallback(
+        (uploadDataItem: UploadsDataItem): boolean => {
+            if (asyncDeletionsState.kind !== "loaded") return false;
+
+            const { primaryFileToDelete, secondaryFileToDelete } = getPrimaryAndSecondaryFilesToDelete(
+                uploadDataItem,
+                moduleProperties,
+                currentModuleAccess.moduleName,
+                rows
+            );
+
+            return (primaryFileToDelete?.errorAsyncDeleting || secondaryFileToDelete?.errorAsyncDeleting) ?? false;
+        },
+        [asyncDeletionsState.kind, currentModuleAccess.moduleName, rows]
+    );
+
     //Deleting a dataset completely has the following steps*:
     //1. Delete corresponsding datasetValue/event for each row in the file.
     //2. Delete corresponding document from DHIS
@@ -547,12 +563,12 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({
                                             !hasCurrentUserCaptureAccess ||
                                             !isEditModeStatus(currentDataSubmissionStatus.data.title) ||
                                             isAlreadyMarkedToBeDeleted(row) ||
-                                            row.errorAsyncDeleting
+                                            hasErrorAsyncDeleting(row)
                                         }
                                     >
                                         {isAlreadyMarkedToBeDeleted(row) ? (
                                             i18n.t("Marked to be deleted")
-                                        ) : row.errorAsyncDeleting ? (
+                                        ) : hasErrorAsyncDeleting(row) ? (
                                             i18n.t("There was an error deleting this file. Admin needs to check.")
                                         ) : (
                                             <DeleteOutline />
