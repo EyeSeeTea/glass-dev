@@ -3,8 +3,9 @@ import { GlassState } from "./State";
 import { useAppContext } from "../contexts/app-context";
 import { Id } from "../../domain/entities/Ref";
 import { useSnackbar } from "@eyeseetea/d2-ui-components";
+import { GlassAsyncDeletion } from "../../domain/entities/GlassAsyncDeletions";
 
-export type GlassUploadsAsyncDeletionsState = GlassState<Id[]>;
+export type GlassUploadsAsyncDeletionsState = GlassState<GlassAsyncDeletion[]>;
 
 type State = {
     asyncDeletions: GlassUploadsAsyncDeletionsState;

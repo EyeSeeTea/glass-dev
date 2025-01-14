@@ -24,4 +24,5 @@ export interface UploadsDataItem {
     importSummary?: ImportSummaryErrors;
     eventListDataDeleted?: boolean;
     calculatedEventListDataDeleted?: boolean;
+    errorAsyncDeleting?: boolean;
 }
