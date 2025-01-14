@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2024-12-12T19:21:44.978Z\n"
-"PO-Revision-Date: 2024-12-12T19:21:44.978Z\n"
+"POT-Creation-Date: 2025-01-14T08:47:22.801Z\n"
+"PO-Revision-Date: 2025-01-14T08:47:22.801Z\n"
 
 msgid "Template {{id}} not loaded"
 msgstr ""
@@ -378,6 +378,9 @@ msgid "This might take several minutes, do not refresh the page or press back."
 msgstr ""
 
 msgid "Marked to be deleted"
+msgstr ""
+
+msgid "There was an error deleting this file. Admin needs to check."
 msgstr ""
 
 msgid "Error downloading data"
