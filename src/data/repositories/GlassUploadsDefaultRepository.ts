@@ -226,7 +226,7 @@ export class GlassUploadsDefaultRepository implements GlassUploadsRepository {
         return this.dataStoreClient.listCollection<GlassUploads>(DataStoreKeys.UPLOADS).flatMap(uploads => {
             const filteredUploads = uploads?.filter(upload => ids.includes(upload.id));
             if (filteredUploads.length > 0) {
-                const updatedUploads = uploads.map(upload => ({
+                const updatedUploads = filteredUploads.map(upload => ({
                     ...upload,
                     errorAsyncDeleting: ids.includes(upload.id),
                 }));
