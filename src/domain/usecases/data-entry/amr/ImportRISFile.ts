@@ -136,6 +136,7 @@ export class ImportRISFile {
                             updated: 0,
                             ignored: 0,
                             deleted: 0,
+                            total: 0,
                         },
                         nonBlockingErrors: [],
                         blockingErrors: allBlockingErrors,

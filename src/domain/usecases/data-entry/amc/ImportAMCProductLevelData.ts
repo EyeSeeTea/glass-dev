@@ -103,6 +103,7 @@ export class ImportAMCProductLevelData {
                                             imported: 0,
                                             deleted: 0,
                                             updated: 0,
+                                            total: 0,
                                         },
                                         nonBlockingErrors: validationResults.nonBlockingErrors,
                                         blockingErrors: validationResults.blockingErrors,
@@ -424,6 +425,9 @@ export class ImportAMCProductLevelData {
                                         deleted:
                                             deleteCalculatedSubstanceConsumptionSummary.importSummary.importCount
                                                 .deleted + deleteProductSummary.importCount.deleted,
+                                        total:
+                                            deleteCalculatedSubstanceConsumptionSummary.importSummary.importCount
+                                                .total + deleteProductSummary.importCount.total,
                                     },
                                     nonBlockingErrors: [
                                         ...deleteCalculatedSubstanceConsumptionSummary.importSummary.nonBlockingErrors,

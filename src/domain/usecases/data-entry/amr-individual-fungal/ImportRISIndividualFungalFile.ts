@@ -101,6 +101,7 @@ export class ImportRISIndividualFungalFile {
                                                 imported: 0,
                                                 deleted: 0,
                                                 updated: 0,
+                                                total: 0,
                                             },
                                             nonBlockingErrors: validationResult.nonBlockingErrors,
                                             blockingErrors: validationResult.blockingErrors,
@@ -161,7 +162,7 @@ export class ImportRISIndividualFungalFile {
         const periodErrors = this.checkPeriod(risIndividualFungalDataItems, period);
         const summary: ImportSummary = {
             status: "ERROR",
-            importCount: { ignored: 0, imported: 0, deleted: 0, updated: 0 },
+            importCount: { ignored: 0, imported: 0, deleted: 0, updated: 0, total: 0 },
             nonBlockingErrors: [],
             blockingErrors: [...orgUnitErrors, ...periodErrors],
         };

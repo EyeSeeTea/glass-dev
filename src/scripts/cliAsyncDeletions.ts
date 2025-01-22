@@ -119,7 +119,7 @@ async function main() {
                 const glassAsyncDeletionsRepository = new GlassAsyncDeletionsDefaultRepository(dataStoreClient);
                 const glassGeneralInfoRepository = new GeneralInfoDefaultRepository(dataStoreClient, instance);
 
-                console.debug(`Running asynchronous deletion for URL ${envVars.url}`);
+                console.debug(`[${new Date().toISOString()}] Running asynchronous deletion for URL ${envVars.url}`);
                 return getMaxAttemptsForAsyncDeletionsFromDatastore(glassGeneralInfoRepository).run(
                     generalInfo => {
                         const maxAttemptsForAsyncDeletions =
@@ -138,7 +138,9 @@ async function main() {
 
                                     if (uploadsBeingDeleted.length > 0) {
                                         console.debug(
-                                            `There are ${uploadsBeingDeleted.length} uploads being deleted. Skipping deletion of these`
+                                            `[${new Date().toISOString()}] There are ${
+                                                uploadsBeingDeleted.length
+                                            } uploads being deleted. Skipping deletion of these`
                                         );
                                     }
 
@@ -149,7 +151,11 @@ async function main() {
                                     );
 
                                     console.debug(
-                                        `There are ${uploadsToDelete.length} uploaded datasets marked for deletion. ${uploadIdsToSetAsyncDeletionErrorStatus.length} of them have reached the maximum number of attempts and will be marked as error`
+                                        `[${new Date().toISOString()}] There are ${
+                                            uploadsToDelete.length
+                                        } uploaded datasets marked for deletion. ${
+                                            uploadIdsToSetAsyncDeletionErrorStatus.length
+                                        } of them have reached the maximum number of attempts and will be marked as error`
                                     );
 
                                     return deleteFromDatastoreAndSetDeletionErrorStatusToUploads(
@@ -184,7 +190,9 @@ async function main() {
 
                                                                 if (!isGlassModuleName(moduleName)) {
                                                                     console.error(
-                                                                        `Module name not found for upload ${upload.id}`
+                                                                        `[${new Date().toISOString()}] Module name not found for upload ${
+                                                                            upload.id
+                                                                        }`
                                                                     );
                                                                     throw new Error(
                                                                         `Module name not found for upload ${upload.id}`
@@ -200,7 +208,7 @@ async function main() {
 
                                                     if (uploadsToDelete.length === 0) {
                                                         console.error(
-                                                            `ERROR - Uploads to delete not found in Datastore`
+                                                            `[${new Date().toISOString()}] ERROR - Uploads to delete not found in Datastore`
                                                         );
                                                         return Future.error(`Uploads to delete not found in Datastore`);
                                                     }
@@ -234,39 +242,46 @@ async function main() {
                                                     ).run(
                                                         () => {
                                                             console.debug(
-                                                                `SUCCESS - Deleted all uploaded datasets marked for deletion with status PENDING.`
+                                                                `[${new Date().toISOString()}] SUCCESS - Deleted all uploaded datasets marked for deletion with status PENDING.`
                                                             );
                                                         },
                                                         error => {
                                                             console.error(
-                                                                `ERROR - An error occured while deleting: ${error}`
+                                                                `[${new Date().toISOString()}] ERROR - An error occured while deleting: ${error}`
                                                             );
                                                         }
                                                     );
                                                 },
                                                 error =>
                                                     console.error(
-                                                        `ERROR - Error while getting glass modules and all uploads from Datastore, and all countries: ${error}.`
+                                                        `[${new Date().toISOString()}] ERROR - Error while getting glass modules and all uploads from Datastore, and all countries: ${error}.`
                                                     )
                                             );
                                         },
                                         error =>
                                             console.error(
-                                                `ERROR - Error while setting errorAsyncDeleting in Datastore: ${error}.`
+                                                `[${new Date().toISOString()}] ERROR - Error while setting errorAsyncDeleting in Datastore: ${error}.`
                                             )
                                     );
                                 } else {
-                                    console.debug(`There is nothing marked for deletion`);
+                                    console.debug(`[${new Date().toISOString()}] There is nothing marked for deletion`);
                                 }
                             },
                             error =>
-                                console.error(`ERROR - Error while getting async deletions from Datastore: ${error}.`)
+                                console.error(
+                                    `[${new Date().toISOString()}] ERROR - Error while getting async deletions from Datastore: ${error}.`
+                                )
                         );
                     },
-                    error => console.error(`ERROR - Error while getting general info from Datastore: ${error}.`)
+                    error =>
+                        console.error(
+                            `[${new Date().toISOString()}] ERROR - Error while getting general info from Datastore: ${error}.`
+                        )
                 );
             } catch (e) {
-                console.error(`Async deletions have stopped with error: ${e}. Please, restart again.`);
+                console.error(
+                    `[${new Date().toISOString()}] Async deletions have stopped with error: ${e}. Please, restart again.`
+                );
                 process.exit(1);
             }
         },
@@ -292,7 +307,7 @@ function deleteFromDatastoreAndSetDeletionErrorStatusToUploads(
         return Future.success(undefined);
     } else {
         console.debug(
-            `Setting errorAsyncDeleting to uploads ${uploadIdsToSetAsyncDeletionErrorStatus.join(
+            `[${new Date().toISOString()}] Setting errorAsyncDeleting to uploads ${uploadIdsToSetAsyncDeletionErrorStatus.join(
                 ", "
             )} and removing from async-deletions in Datastore`
         );
@@ -402,7 +417,11 @@ function deleteUploadAndDocumentFromDatasoreAndDHIS2(
     return new DeleteDocumentInfoByUploadIdUseCase(glassDocumentsRepository, glassUploadsRepository)
         .execute(upload.id)
         .flatMap(() => {
-            console.debug(`Upload and document ${upload.fileName} deleted in Datastore and from DHIS2 documents`);
+            console.debug(
+                `[${new Date().toISOString()}] Upload and document ${
+                    upload.fileName
+                } deleted in Datastore and from DHIS2 documents`
+            );
             return Future.success(undefined);
         });
 }
@@ -424,7 +443,7 @@ function deleteDatasetValuesOrEventsFromPrimaryUploaded(
         amcSubstanceDataRepository: AMCSubstanceDataRepository;
     }
 ): FutureData<ImportSummary> {
-    console.debug(`Deleting data from primary file ${upload.id}`);
+    console.debug(`[${new Date().toISOString()}] Deleting data from primary file ${upload.id}`);
     return new DeletePrimaryFileDataUseCase(repositories).execute(currentModule, upload, arrayBuffer);
 }
 
@@ -444,7 +463,7 @@ function deleteDatasetValuesOrEventsFromSecondaryUploaded(
         trackerRepository: TrackerRepository;
     }
 ): FutureData<ImportSummary> {
-    console.debug(`Deleting data from secondary file ${upload.id}`);
+    console.debug(`[${new Date().toISOString()}] Deleting data from secondary file ${upload.id}`);
     return new DeleteSecondaryFileDataUseCase(repositories).execute(currentModule, upload, arrayBuffer);
 }
 
@@ -543,9 +562,16 @@ function deleteUploadedDatasets(
                 return isPendingDeletion(repositories.glassAsyncDeletionsRepository, uploadToDelete.id).flatMap(
                     isPending => {
                         if (!isPending) {
-                            console.debug(`Upload ${uploadToDelete.id} is not pending deletion`);
+                            console.debug(
+                                `[${new Date().toISOString()}] Upload ${uploadToDelete.id} is not pending deletion`
+                            );
                             return Future.success(undefined);
                         } else {
+                            console.debug(
+                                `[${new Date().toISOString()}] Deleting upload ${uploadToDelete.id} from module ${
+                                    uploadToDelete.moduleName
+                                }, org unit ${uploadToDelete.orgUnit} and period ${uploadToDelete.period}`
+                            );
                             return setAsyncDeletionsStatus(
                                 repositories.glassAsyncDeletionsRepository,
                                 [uploadToDelete.id],
@@ -569,7 +595,11 @@ function deleteUploadedDatasets(
                                         uploadToDelete,
                                         maxAttemptsForAsyncDeletions
                                     ).flatMap(() => {
-                                        console.error(`Module ${uploadToDelete.moduleName} not found`);
+                                        console.error(
+                                            `[${new Date().toISOString()}] Module ${
+                                                uploadToDelete.moduleName
+                                            } not found`
+                                        );
                                         return Future.error(`Module ${uploadToDelete.moduleName} not found`);
                                     });
                                 }
@@ -591,6 +621,22 @@ function deleteUploadedDatasets(
                                             currentModule,
                                             repositories
                                         ).flatMap(({ deletePrimaryFileSummary, deleteSecondaryFileSummary }) => {
+                                            if (deletePrimaryFileSummary) {
+                                                console.debug(
+                                                    `[${new Date().toISOString()}] Delete data from primary file summary: ${JSON.stringify(
+                                                        deletePrimaryFileSummary
+                                                    )}`
+                                                );
+                                            }
+
+                                            if (deleteSecondaryFileSummary) {
+                                                console.debug(
+                                                    `[${new Date().toISOString()}] Delete data from secondary file summary: ${JSON.stringify(
+                                                        deleteSecondaryFileSummary
+                                                    )}`
+                                                );
+                                            }
+
                                             if (
                                                 deletePrimaryFileSummary?.status === IMPORT_SUMMARY_STATUS_ERROR ||
                                                 deleteSecondaryFileSummary?.status === IMPORT_SUMMARY_STATUS_ERROR
@@ -602,7 +648,9 @@ function deleteUploadedDatasets(
                                                     maxAttemptsForAsyncDeletions
                                                 ).flatMap(() => {
                                                     console.error(
-                                                        `An error occured while deleting the data exiting. Primary file: ${primaryFileToDelete.fileName}, secondary file: ${secondaryFileToDelete?.fileName}`
+                                                        `[${new Date().toISOString()}] An error occured while deleting the data exiting. Primary file: ${
+                                                            primaryFileToDelete.fileName
+                                                        }, secondary file: ${secondaryFileToDelete?.fileName}`
                                                     );
                                                     return Future.error(
                                                         `An error occured while deleting the data exiting. Primary file: ${primaryFileToDelete.fileName}, secondary file: ${secondaryFileToDelete?.fileName}`
@@ -612,13 +660,17 @@ function deleteUploadedDatasets(
 
                                             if (deletePrimaryFileSummary) {
                                                 console.debug(
-                                                    `Data from primary file ${primaryFileToDelete.fileName} deleted`
+                                                    `[${new Date().toISOString()}] Data from primary file ${
+                                                        primaryFileToDelete.fileName
+                                                    } deleted`
                                                 );
                                             }
 
                                             if (secondaryFileToDelete && deleteSecondaryFileSummary) {
                                                 console.debug(
-                                                    `Data from secondary file ${secondaryFileToDelete.fileName} deleted`
+                                                    `[${new Date().toISOString()}] Data from secondary file ${
+                                                        secondaryFileToDelete.fileName
+                                                    } deleted`
                                                 );
                                             }
 
@@ -632,22 +684,26 @@ function deleteUploadedDatasets(
                                                         repositories
                                                     ).flatMap(() => {
                                                         return removeAsyncDeletionsFromDatastore(
-                                                            [primaryFileToDelete.id],
+                                                            [uploadToDelete.id],
                                                             repositories.glassAsyncDeletionsRepository
                                                         ).flatMap(() => {
                                                             console.debug(
-                                                                `SUCCESS - Deleted async-deletions id from Datastore ${primaryFileToDelete.id}`
+                                                                `[${new Date().toISOString()}] SUCCESS - Deleted async-deletions id from Datastore ${
+                                                                    uploadToDelete.id
+                                                                }`
                                                             );
                                                             return Future.success(undefined);
                                                         });
                                                     });
                                                 } else {
                                                     return removeAsyncDeletionsFromDatastore(
-                                                        [primaryFileToDelete.id],
+                                                        [uploadToDelete.id],
                                                         repositories.glassAsyncDeletionsRepository
                                                     ).flatMap(() => {
                                                         console.debug(
-                                                            `SUCCESS - Deleted async-deletions id from Datastore ${primaryFileToDelete.id}`
+                                                            `[${new Date().toISOString()}] SUCCESS - Deleted async-deletions id from Datastore ${
+                                                                uploadToDelete.id
+                                                            }`
                                                         );
                                                         return Future.success(undefined);
                                                     });
@@ -659,30 +715,43 @@ function deleteUploadedDatasets(
                                             secondaryFileToDelete.status.toLowerCase() !==
                                             UPLOADED_FILE_STATUS_LOWERCASE
                                         ) {
-                                            console.debug("Delete only secondary uploaded dataset");
+                                            console.debug(
+                                                `[${new Date().toISOString()}] Delete only secondary uploaded dataset`
+                                            );
                                             return deleteDatasetValuesOrEventsFromSecondaryUploaded(
                                                 currentModule,
                                                 secondaryFileToDelete,
                                                 secondaryArrayBuffer,
                                                 repositories
                                             ).flatMap(deleteSecondaryFileSummary => {
+                                                if (deleteSecondaryFileSummary) {
+                                                    console.debug(
+                                                        `[${new Date().toISOString()}] Delete data from secondary file summary: ${JSON.stringify(
+                                                            deleteSecondaryFileSummary
+                                                        )}`
+                                                    );
+                                                }
                                                 if (
                                                     deleteSecondaryFileSummary &&
                                                     deleteSecondaryFileSummary.status !== IMPORT_SUMMARY_STATUS_ERROR
                                                 ) {
                                                     console.debug(
-                                                        `Data from secondary file ${secondaryFileToDelete.fileName} deleted`
+                                                        `[${new Date().toISOString()}] Data from secondary file ${
+                                                            secondaryFileToDelete.fileName
+                                                        } deleted`
                                                     );
                                                     return deleteUploadAndDocumentFromDatasoreAndDHIS2(
                                                         secondaryFileToDelete,
                                                         repositories
                                                     ).flatMap(() => {
                                                         return removeAsyncDeletionsFromDatastore(
-                                                            [secondaryFileToDelete.id],
+                                                            [uploadToDelete.id],
                                                             repositories.glassAsyncDeletionsRepository
                                                         ).flatMap(() => {
                                                             console.debug(
-                                                                `SUCCESS - Deleted async-deletions id from Datastore ${secondaryFileToDelete.id}`
+                                                                `[${new Date().toISOString()}] SUCCESS - Deleted async-deletions id from Datastore ${
+                                                                    uploadToDelete.id
+                                                                }`
                                                             );
                                                             return Future.success(undefined);
                                                         });
@@ -695,7 +764,9 @@ function deleteUploadedDatasets(
                                                         maxAttemptsForAsyncDeletions
                                                     ).flatMap(() => {
                                                         console.error(
-                                                            `An error occured while deleting the data exiting. Secondary file: ${secondaryFileToDelete?.fileName}`
+                                                            `[${new Date().toISOString()}] An error occured while deleting the data exiting. Secondary file: ${
+                                                                secondaryFileToDelete?.fileName
+                                                            }`
                                                         );
                                                         return Future.error(
                                                             `An error occured while deleting the data exiting. Secondary file: ${secondaryFileToDelete?.fileName}`
@@ -709,11 +780,13 @@ function deleteUploadedDatasets(
                                                 repositories
                                             ).flatMap(() => {
                                                 return removeAsyncDeletionsFromDatastore(
-                                                    [secondaryFileToDelete.id],
+                                                    [uploadToDelete.id],
                                                     repositories.glassAsyncDeletionsRepository
                                                 ).flatMap(() => {
                                                     console.debug(
-                                                        `SUCCESS - Deleted async-deletions id from Datastore ${secondaryFileToDelete.id}`
+                                                        `[${new Date().toISOString()}] SUCCESS - Deleted async-deletions id from Datastore ${
+                                                            uploadToDelete.id
+                                                        }`
                                                     );
                                                     return Future.success(undefined);
                                                 });
@@ -727,7 +800,9 @@ function deleteUploadedDatasets(
                                             maxAttemptsForAsyncDeletions
                                         ).flatMap(() => {
                                             console.error(
-                                                `An error occured while deleting file, file not found. Upload selected to delete: ${uploadToDelete.id}`
+                                                `[${new Date().toISOString()}] An error occured while deleting file, file not found. Upload selected to delete: ${
+                                                    uploadToDelete.id
+                                                }`
                                             );
                                             return Future.error(
                                                 `An error occured while deleting file, file not found. Upload selected to delete: ${uploadToDelete.id}`

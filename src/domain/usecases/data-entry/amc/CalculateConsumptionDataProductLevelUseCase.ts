@@ -116,6 +116,7 @@ export class CalculateConsumptionDataProductLevelUseCase {
                                         imported: 0,
                                         deleted: 0,
                                         updated: 0,
+                                        total: 0,
                                     },
                                     nonBlockingErrors: [],
                                     blockingErrors: [],
@@ -298,6 +299,9 @@ export class CalculateConsumptionDataProductLevelUseCase {
                                     deleted:
                                         importProductSummary.importSummary.importCount.deleted +
                                         importSubstancesSummaryImportSummary.importCount.deleted,
+                                    total:
+                                        importProductSummary.importSummary.importCount.total +
+                                        importSubstancesSummaryImportSummary.importCount.total,
                                 },
                                 nonBlockingErrors: [
                                     ...importProductSummary.importSummary.nonBlockingErrors,
