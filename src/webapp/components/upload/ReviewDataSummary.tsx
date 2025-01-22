@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Button, CircularProgress, Typography } from "@material-ui/core";
+import { Backdrop, Button, CircularProgress, Typography } from "@material-ui/core";
 import styled from "styled-components";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
 import i18n from "@eyeseetea/d2-ui-components/locales";
@@ -18,6 +18,7 @@ import { useGetLastSuccessfulAnalyticsRunTime } from "../../hooks/useGetLastSucc
 import { Validations } from "../current-data-submission/Validations";
 import { useQuestionnaires } from "../current-data-submission/Questionnaires";
 import { QuestionnaireBase } from "../../../domain/entities/Questionnaire";
+import { StyledLoaderContainer } from "./ConsistencyChecks";
 
 interface ReviewDataSummaryProps {
     changeStep: (step: number) => void;
@@ -52,7 +53,6 @@ export const ReviewDataSummary: React.FC<ReviewDataSummaryProps> = ({
     );
     const { captureAccessGroup } = useCurrentUserGroupsAccess();
     const [isReportReady, setIsReportReady] = useState<boolean>(false);
-    const [currentDataSubmissionId, setCurrentDataSubmissionId] = useState<string>("");
     const [currentQuestionnaires, setCurrentQuestionnaires] = useState<QuestionnaireBase[]>();
 
     const [questionnaires] = useQuestionnaires();
@@ -64,10 +64,6 @@ export const ReviewDataSummary: React.FC<ReviewDataSummaryProps> = ({
     const { lastSuccessfulAnalyticsRunTime, setRefetch } = useGetLastSuccessfulAnalyticsRunTime();
 
     useEffect(() => {
-        if (dataSubmissionId !== "" && currentDataSubmissionId === "") {
-            setCurrentDataSubmissionId(dataSubmissionId);
-        }
-
         if (questionnaires && !currentQuestionnaires) {
             setCurrentQuestionnaires(questionnaires);
         }
@@ -88,7 +84,6 @@ export const ReviewDataSummary: React.FC<ReviewDataSummaryProps> = ({
         lastSuccessfulAnalyticsRunTime,
         primaryFileImportSummary?.importTime,
         dataSubmissionId,
-        currentDataSubmissionId,
         currentQuestionnaires,
         questionnaires,
     ]);
@@ -118,8 +113,6 @@ export const ReviewDataSummary: React.FC<ReviewDataSummaryProps> = ({
                             .run(
                                 () => {
                                     if (!secondaryUploadId) {
-                                        changeStep(4);
-                                        setIsLoading(false);
                                         //If Questionnaires are not applicable to a module, then set status as COMPLETE on
                                         //completion of dataset.
                                         if (
@@ -130,9 +123,11 @@ export const ReviewDataSummary: React.FC<ReviewDataSummaryProps> = ({
                                                 currentQuestionnaires?.every(q => q.isMandatory && q.isCompleted))
                                         ) {
                                             compositionRoot.glassDataSubmission
-                                                .setStatus(currentDataSubmissionId, "COMPLETE")
+                                                .setStatus(dataSubmissionId, "COMPLETE")
                                                 .run(
                                                     () => {
+                                                        changeStep(4);
+                                                        setIsLoading(false);
                                                         if (captureAccessGroup.kind === "loaded") {
                                                             const userGroupsIds = captureAccessGroup.data.map(cag => {
                                                                 return cag.id;
@@ -153,12 +148,17 @@ export const ReviewDataSummary: React.FC<ReviewDataSummaryProps> = ({
                                                         }
                                                     },
                                                     error => {
-                                                        console.debug(
-                                                            "Error occurred when setting data submission status, error: " +
-                                                                error
+                                                        snackbar.error(
+                                                            i18n.t(
+                                                                "Error occurred when setting data submission status, error: " +
+                                                                    error
+                                                            )
                                                         );
                                                     }
                                                 );
+                                        } else {
+                                            changeStep(4);
+                                            setIsLoading(false);
                                         }
                                     } else {
                                         return compositionRoot.glassUploads
@@ -209,39 +209,42 @@ export const ReviewDataSummary: React.FC<ReviewDataSummaryProps> = ({
                                             "QUESTIONNAIRE_AND_DATASET" &&
                                             currentQuestionnaires?.every(q => q.isMandatory && q.isCompleted))
                                     ) {
-                                        compositionRoot.glassDataSubmission
-                                            .setStatus(currentDataSubmissionId, "COMPLETE")
-                                            .run(
-                                                () => {
-                                                    if (captureAccessGroup.kind === "loaded") {
-                                                        const userGroupsIds = captureAccessGroup.data.map(cag => {
-                                                            return cag.id;
-                                                        });
-                                                        const notificationText = `The data submission for ${currentModuleAccess.moduleName} module for year ${currentPeriod} and country ${currentOrgUnitAccess.orgUnitName} has changed to DATA TO BE APPROVED BY COUNTRY`;
+                                        compositionRoot.glassDataSubmission.setStatus(dataSubmissionId, "COMPLETE").run(
+                                            () => {
+                                                changeStep(4);
+                                                setIsLoading(false);
+                                                if (captureAccessGroup.kind === "loaded") {
+                                                    const userGroupsIds = captureAccessGroup.data.map(cag => {
+                                                        return cag.id;
+                                                    });
+                                                    const notificationText = `The data submission for ${currentModuleAccess.moduleName} module for year ${currentPeriod} and country ${currentOrgUnitAccess.orgUnitName} has changed to DATA TO BE APPROVED BY COUNTRY`;
 
-                                                        compositionRoot.notifications
-                                                            .send(
-                                                                notificationText,
-                                                                notificationText,
-                                                                userGroupsIds,
-                                                                currentOrgUnitAccess.orgUnitPath
-                                                            )
-                                                            .run(
-                                                                () => {},
-                                                                () => {}
-                                                            );
-                                                    }
-                                                },
-                                                error => {
-                                                    console.debug(
-                                                        "Error occurred when setting data submission status, error: " +
-                                                            error
-                                                    );
+                                                    compositionRoot.notifications
+                                                        .send(
+                                                            notificationText,
+                                                            notificationText,
+                                                            userGroupsIds,
+                                                            currentOrgUnitAccess.orgUnitPath
+                                                        )
+                                                        .run(
+                                                            () => {},
+                                                            () => {}
+                                                        );
                                                 }
-                                            );
+                                            },
+                                            error => {
+                                                changeStep(4);
+                                                setIsLoading(false);
+                                                console.debug(
+                                                    "Error occurred when setting data submission status, error: " +
+                                                        error
+                                                );
+                                            }
+                                        );
+                                    } else {
+                                        changeStep(4);
+                                        setIsLoading(false);
                                     }
-                                    changeStep(4);
-                                    setIsLoading(false);
                                 },
                                 errorMessage => {
                                     snackbar.error(i18n.t(errorMessage));
@@ -259,25 +262,33 @@ export const ReviewDataSummary: React.FC<ReviewDataSummaryProps> = ({
             );
         }
     }, [
-        changeStep,
+        primaryFile,
+        secondaryFile,
         compositionRoot.glassUploads,
-        snackbar,
-        captureAccessGroup,
         compositionRoot.glassDataSubmission,
         compositionRoot.notifications,
         currentModuleAccess.moduleName,
-        currentOrgUnitAccess,
-        currentPeriod,
-        currentDataSubmissionId,
         currentQuestionnaires,
-        primaryFile,
-        secondaryFile,
+        dataSubmissionId,
+        changeStep,
+        captureAccessGroup,
+        currentPeriod,
+        currentOrgUnitAccess.orgUnitName,
+        currentOrgUnitAccess.orgUnitPath,
+        snackbar,
     ]);
 
     const goToFinalStepEffect = useCallbackEffect(goToFinalStep);
 
     return (
         <ContentWrapper>
+            <Backdrop open={isLoading || !dataSubmissionId} style={{ color: "#fff", zIndex: 1 }}>
+                <StyledLoaderContainer>
+                    <CircularProgress color="inherit" size={50} />
+                    <Typography variant="h6">{i18n.t("Loading")}</Typography>
+                </StyledLoaderContainer>
+            </Backdrop>
+
             {moduleProperties.get(currentModuleAccess.moduleName)?.isSecondaryFileApplicable &&
                 !moduleProperties.get(currentModuleAccess.moduleName)?.isSingleFileTypePerSubmission && (
                     <div className="toggles">
@@ -349,23 +360,19 @@ export const ReviewDataSummary: React.FC<ReviewDataSummaryProps> = ({
                 </SectionCard>
             </Section>
             <div className="bottom">
-                {isLoading ? (
-                    <CircularProgress size={25} />
-                ) : (
-                    <FlexWrapper>
-                        <Button
-                            variant="contained"
-                            color={"primary"}
-                            endIcon={<ChevronRightIcon />}
-                            onClick={goToFinalStepEffect}
-                            disableElevation
-                            disabled={isRunningCalculation}
-                        >
-                            {i18n.t("Continue")}
-                        </Button>
-                        {isRunningCalculation && <CircularProgress size={25} />}
-                    </FlexWrapper>
-                )}
+                <FlexWrapper>
+                    <Button
+                        variant="contained"
+                        color={"primary"}
+                        endIcon={<ChevronRightIcon />}
+                        onClick={goToFinalStepEffect}
+                        disableElevation
+                        disabled={isRunningCalculation}
+                    >
+                        {i18n.t("Continue")}
+                    </Button>
+                    {isRunningCalculation && <CircularProgress size={25} />}
+                </FlexWrapper>
             </div>
         </ContentWrapper>
     );
