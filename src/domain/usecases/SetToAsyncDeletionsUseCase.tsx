@@ -1,12 +1,12 @@
 import { UseCase } from "../../CompositionRoot";
 import { FutureData } from "../entities/Future";
 import { Id } from "../entities/Ref";
-import { GlassUploadsRepository } from "../repositories/GlassUploadsRepository";
+import { GlassAsyncDeletionsRepository } from "../repositories/GlassAsyncDeletionsRepository";
 
 export class SetToAsyncDeletionsUseCase implements UseCase {
-    constructor(private glassUploadsRepository: GlassUploadsRepository) {}
+    constructor(private glassAsyncDeletionsRepository: GlassAsyncDeletionsRepository) {}
 
-    public execute(uploadIdsToDelete: Id[]): FutureData<Id[]> {
-        return this.glassUploadsRepository.setAsyncDeletions(uploadIdsToDelete);
+    public execute(uploadIdsToDelete: Id[]): FutureData<void> {
+        return this.glassAsyncDeletionsRepository.setAsyncDeletions(uploadIdsToDelete);
     }
 }
