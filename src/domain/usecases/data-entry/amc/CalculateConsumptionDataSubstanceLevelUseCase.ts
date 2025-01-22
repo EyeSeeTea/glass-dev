@@ -92,6 +92,7 @@ export class CalculateConsumptionDataSubstanceLevelUseCase {
                                         imported: 0,
                                         deleted: 0,
                                         updated: 0,
+                                        total: 0,
                                     },
                                     nonBlockingErrors: [],
                                     blockingErrors: [],
