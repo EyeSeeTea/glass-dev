@@ -1,8 +1,8 @@
-import { D2TrackerEvent } from "@eyeseetea/d2-api/api/trackerEvents";
 import { Dhis2EventsDefaultRepository } from "../../data/repositories/Dhis2EventsDefaultRepository";
 import { SignalDefaultRepository } from "../../data/repositories/SignalDefaultRepository";
 import { Future, FutureData } from "../entities/Future";
 import { SignalStatusTypes } from "../entities/Signal";
+import { TrackerEvent } from "../entities/TrackedEntityInstance";
 import { EAR_PROGRAM_ID } from "./GetProgramQuestionnaireUseCase";
 
 export class DeleteSignalUseCase {
@@ -18,8 +18,8 @@ export class DeleteSignalUseCase {
         orgUnitId: string
     ): FutureData<void> {
         //1.Delete Event
-        const events: D2TrackerEvent[] = [];
-        const event: D2TrackerEvent = {
+        const events: TrackerEvent[] = [];
+        const event: TrackerEvent = {
             event: signalEventId,
             orgUnit: orgUnitId,
             program: EAR_PROGRAM_ID,
