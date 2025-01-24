@@ -1,10 +1,10 @@
-import { DataValue } from "@eyeseetea/d2-api/api/trackerEvents";
 import { Dhis2EventsDefaultRepository } from "../../data/repositories/Dhis2EventsDefaultRepository";
 import { Id } from "../entities/Base";
 
 import { Future, FutureData } from "../entities/Future";
 import { GlassModule } from "../entities/GlassModule";
 import { AMCDataQuestionnaire, QuestionnaireBase } from "../entities/Questionnaire";
+import { TrackerEventDataValue } from "../entities/TrackedEntityInstance";
 import { QuestionnaireRepository } from "../repositories/QuestionnaireRepository";
 import { amcQuestionMap } from "./ApplyAMCQuestionUpdationUseCase";
 
@@ -31,7 +31,7 @@ export class GetAMCQuestionnaireListUseCase {
                     //sub questionnaire details filled in.
                     const splitAMCQuestionnaires: QuestionnaireBase[] = events.map((e, index) => {
                         //Get selected Sub Questionnaires
-                        const selectedSQs: DataValue[] = e.dataValues.filter(
+                        const selectedSQs: TrackerEventDataValue[] = e.dataValues.filter(
                             dv => amcQuestionMap.some(qm => qm.id === dv.dataElement) && dv.value === "true"
                         );
 
