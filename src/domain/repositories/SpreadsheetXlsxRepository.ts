@@ -2,6 +2,7 @@ export type Async<Data> = Promise<Data>;
 export interface SpreadsheetDataSource {
     read(inputFile: File): Async<Spreadsheet>;
     readFromArrayBuffer(arrayBuffer: ArrayBuffer, fileName?: string): Async<Spreadsheet>;
+    encryptColumn(inputFile: File, rowCount: number): Async<File>;
 }
 
 export interface Spreadsheet {

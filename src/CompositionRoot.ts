@@ -99,6 +99,7 @@ import { DeletePrimaryFileDataUseCase } from "./domain/usecases/data-entry/Delet
 import { DeleteSecondaryFileDataUseCase } from "./domain/usecases/data-entry/DeleteSecondaryFileDataUseCase";
 import { DownloadDocumentAsArrayBufferUseCase } from "./domain/usecases/DownloadDocumentAsArrayBufferUseCase";
 import { GetGlassUploadByIdUseCase } from "./domain/usecases/GetGlassUploadByIdUseCase";
+import { EncryptFileUseCase } from "./domain/usecases/data-entry/EncryptFileUseCase";
 
 export function getCompositionRoot(instance: Instance) {
     const api = getD2APiFromInstance(instance);
@@ -263,6 +264,8 @@ export function getCompositionRoot(instance: Instance) {
                 glassUploadsRepository,
                 trackerRepository,
             }),
+
+            encryptFile: new EncryptFileUseCase(egaspDataRepository),
         }),
         questionnaires: getExecute({
             get: new GetQuestionnaireUseCase(questionnaireD2Repository),

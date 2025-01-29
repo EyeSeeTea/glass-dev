@@ -61,6 +61,53 @@ export const UploadPrimaryFile: React.FC<UploadPrimaryFileProps> = ({
         }
     }, [primaryFile, validate]);
 
+    const uploadDocument = useCallback(
+        (
+            primaryFileData: {
+                isValid: boolean;
+                rows: number;
+                specimens: string[];
+            },
+            uploadedPrimaryFile: File,
+            dataSubmission: string
+        ) => {
+            const primaryFileType = moduleProperties.get(moduleName)?.primaryFileType;
+            const data = {
+                batchId,
+                fileType: primaryFileType !== undefined ? primaryFileType : moduleName,
+                dataSubmission: dataSubmission,
+                moduleId,
+                moduleName,
+                period: currentPeriod.toString(),
+                orgUnitId: orgUnitId,
+                orgUnitCode: orgUnitCode,
+                rows: primaryFileData.rows,
+                specimens: primaryFileData.specimens,
+            };
+            return compositionRoot.glassDocuments.upload({ file: uploadedPrimaryFile, data }).run(
+                uploadId => {
+                    localStorage.setItem("primaryUploadId", uploadId);
+                    setIsLoading(false);
+                },
+                () => {
+                    snackbar.error(i18n.t("Error in file upload"));
+                    setIsLoading(false);
+                }
+            );
+        },
+        [
+            batchId,
+            compositionRoot.glassDocuments,
+            currentPeriod,
+            moduleId,
+            moduleName,
+            orgUnitCode,
+            orgUnitId,
+            setIsLoading,
+            snackbar,
+        ]
+    );
+
     const primaryFileUpload = useCallback(
         (files: File[], rejections: FileRejection[]) => {
             if (rejections.length > 0) {
@@ -79,30 +126,22 @@ export const UploadPrimaryFile: React.FC<UploadPrimaryFileProps> = ({
                             }
 
                             if (primaryFileData.isValid) {
-                                setPrimaryFile(uploadedPrimaryFile);
-                                const primaryFileType = moduleProperties.get(moduleName)?.primaryFileType;
-                                const data = {
-                                    batchId,
-                                    fileType: primaryFileType !== undefined ? primaryFileType : moduleName,
-                                    dataSubmission: dataSubmissionId,
-                                    moduleId,
-                                    moduleName,
-                                    period: currentPeriod.toString(),
-                                    orgUnitId: orgUnitId,
-                                    orgUnitCode: orgUnitCode,
-                                    rows: primaryFileData.rows,
-                                    specimens: primaryFileData.specimens,
-                                };
-                                return compositionRoot.glassDocuments.upload({ file: uploadedPrimaryFile, data }).run(
-                                    uploadId => {
-                                        localStorage.setItem("primaryUploadId", uploadId);
-                                        setIsLoading(false);
-                                    },
-                                    () => {
-                                        snackbar.error(i18n.t("Error in file upload"));
-                                        setIsLoading(false);
-                                    }
-                                );
+                                if (moduleName === "EGASP") {
+                                    return compositionRoot.fileSubmission
+                                        .encryptFile(uploadedPrimaryFile, primaryFileData.rows)
+                                        .run(
+                                            encryptedFile => {
+                                                setPrimaryFile(uploadedPrimaryFile);
+                                                return uploadDocument(primaryFileData, encryptedFile, dataSubmissionId);
+                                            },
+                                            error => {
+                                                snackbar.error("Error encryption Patient Id : " + error);
+                                            }
+                                        );
+                                } else {
+                                    setPrimaryFile(uploadedPrimaryFile);
+                                    return uploadDocument(primaryFileData, uploadedPrimaryFile, dataSubmissionId);
+                                }
                             } else {
                                 snackbar.error(i18n.t("Incorrect File Format. Please retry with a valid file"));
                                 setIsLoading(false);
@@ -117,18 +156,13 @@ export const UploadPrimaryFile: React.FC<UploadPrimaryFileProps> = ({
             }
         },
         [
-            batchId,
             compositionRoot.fileSubmission,
-            compositionRoot.glassDocuments,
-            currentPeriod,
             dataSubmissionId,
-            moduleId,
             moduleName,
-            orgUnitCode,
-            orgUnitId,
             setIsLoading,
             setPrimaryFile,
             snackbar,
+            uploadDocument,
         ]
     );
 

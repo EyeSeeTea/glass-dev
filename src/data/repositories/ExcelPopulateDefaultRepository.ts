@@ -315,9 +315,11 @@ function _getFormulaWithValidation(workbook: XLSX.Workbook, sheet: SheetWithVali
             return _.some(validations, value => value === true);
         });
 
+    console.log("addressMatch", addressMatch);
     if (!addressMatch) return defaultValue;
 
     const validation = sheet.dataValidation(addressMatch);
+    console.log("validation", validation);
     if (!validation || validation.type !== "list" || !validation.formula1) return defaultValue;
 
     const [sheetName, rangeAddress] = validation.formula1.replace(/^=/, "").split("!", 2);
@@ -331,6 +333,7 @@ function _getFormulaWithValidation(workbook: XLSX.Workbook, sheet: SheetWithVali
         .map(cell => [getValue(cell), cell.formula()])
         .fromPairs()
         .value();
+    console.log("formulaByValue", formulaByValue);
 
     return formulaByValue[String(value)] || defaultValue;
 }

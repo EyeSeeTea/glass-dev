@@ -25,6 +25,8 @@ import { InstanceRepository } from "../../repositories/InstanceRepository";
 import { AMC_RAW_SUBSTANCE_CONSUMPTION_PROGRAM_ID } from "./amc/ImportAMCSubstanceLevelData";
 import { GlassATCRepository } from "../../repositories/GlassATCRepository";
 import { ListGlassATCLastVersionKeysByYear } from "../../entities/GlassAtcVersionData";
+// import { EGASP_PROGRAM_ID } from "../../../data/repositories/program-rule/ProgramRulesMetadataDefaultRepository";
+// import sodium from "libsodium-wrappers";
 
 export const ATC_VERSION_DATA_ELEMENT_ID = "aCuWz3HZ5Ti";
 
@@ -235,7 +237,13 @@ export class ImportBLTemplateEventProgram {
                             const atcVersionKey = atcVersionKeysByYear ? atcVersionKeysByYear[el.value.toString()] : "";
                             return { ...el, value: atcVersionKey ?? "" };
                         }
+                        // else if (dataForm === EGASP_PROGRAM_ID && el.dataElement === PATIENT_DATAELEMENT_ID) {
+                        //     //For EGASP, encrypt the patient id
 
+                        //     const patientId = el.value.toString();
+                        //     const encryptedPatientId = this.encryptString(patientId);
+                        //     return { ...el, value: encryptedPatientId };
+                        // }
                         return { ...el, value: el.value.toString() };
                     }),
                     coordinate,

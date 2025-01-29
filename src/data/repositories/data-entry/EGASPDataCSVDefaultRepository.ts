@@ -25,4 +25,8 @@ export class EGASPDataCSVDefaultRepository implements EGASPDataRepository {
                 };
         });
     }
+
+    encrypt(file: File, rowCount: number): FutureData<File> {
+        return Future.fromPromise(new SpreadsheetXlsxDataSource().encryptColumn(file, rowCount));
+    }
 }
