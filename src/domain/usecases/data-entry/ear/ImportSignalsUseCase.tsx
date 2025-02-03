@@ -10,6 +10,7 @@ import { NotificationRepository } from "../../../repositories/NotificationReposi
 import { TrackerEvent, TrackerEventDataValue } from "../../../entities/TrackedEntityInstance";
 
 export const EAR_PROGRAM_ID = "SQe26z0smFP";
+export const EAR_PROGRAM_STAGE_ID = "Oic1c7maX1g";
 const EAR_CONFIDENTIAL_DATAELEMENT = "KycX5z7NLqU";
 export type SignalAction = "Save" | "Publish";
 
@@ -162,6 +163,7 @@ export class ImportSignalsUseCase {
                 orgUnit: orgUnitId,
                 orgUnitName,
                 program: EAR_PROGRAM_ID,
+                programStage: EAR_PROGRAM_STAGE_ID,
                 status: eventStatus,
                 occurredAt: new Date().toISOString().split("T")?.at(0) || "",
                 //@ts-ignore

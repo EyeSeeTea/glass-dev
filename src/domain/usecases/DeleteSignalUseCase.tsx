@@ -3,7 +3,7 @@ import { SignalDefaultRepository } from "../../data/repositories/SignalDefaultRe
 import { Future, FutureData } from "../entities/Future";
 import { SignalStatusTypes } from "../entities/Signal";
 import { TrackerEvent } from "../entities/TrackedEntityInstance";
-import { EAR_PROGRAM_ID } from "./GetProgramQuestionnaireUseCase";
+import { EAR_PROGRAM_ID, EAR_PROGRAM_STAGE } from "./GetProgramQuestionnaireUseCase";
 
 export class DeleteSignalUseCase {
     constructor(
@@ -23,6 +23,7 @@ export class DeleteSignalUseCase {
             event: signalEventId,
             orgUnit: orgUnitId,
             program: EAR_PROGRAM_ID,
+            programStage: EAR_PROGRAM_STAGE,
             status: status === "DRAFT" ? "ACTIVE" : "COMPLETED",
             occurredAt: "",
             dataValues: [],

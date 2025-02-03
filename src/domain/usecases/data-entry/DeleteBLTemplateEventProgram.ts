@@ -198,6 +198,7 @@ export class DeleteBLTemplateEventProgram {
                             return {
                                 event: eventId,
                                 program: "",
+                                programStage: "",
                                 status: "COMPLETED",
                                 orgUnit: "",
                                 occurredAt: "",

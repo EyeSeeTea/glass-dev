@@ -223,6 +223,7 @@ export class ImportBLTemplateEventProgram {
                 return {
                     event: id || (index + 6).toString(),
                     program: dataForm,
+                    programStage: "",
                     status: "COMPLETED",
                     orgUnit,
                     occurredAt: occurredAt,
@@ -252,6 +253,7 @@ export class ImportBLTemplateEventProgram {
                     return {
                         event: eventId,
                         program: "",
+                        programStage: "",
                         status: "COMPLETED",
                         orgUnit: "",
                         occurredAt: "",

@@ -261,6 +261,7 @@ export class ImportAMCProductLevelData {
                         {
                             orgUnit: tei.orgUnit.id,
                             program: AMC_PRODUCT_REGISTER_PROGRAM_ID,
+                            trackedEntity: "",
                             enrollment: "",
                             trackedEntityType: AMR_GLASS_AMC_TET_PRODUCT_REGISTER,
                             attributes: attributes,
