@@ -11,19 +11,10 @@ import {
     TrackerTrackedEntity,
 } from "../../../domain/entities/TrackedEntityInstance";
 import { D2TrackerEventToPost } from "@eyeseetea/d2-api/api/trackerEvents";
-import { D2TrackerEnrollment, D2TrackerEnrollmentToPost } from "@eyeseetea/d2-api/api/trackerEnrollments";
+import { D2TrackerEnrollmentToPost } from "@eyeseetea/d2-api/api/trackerEnrollments";
 import { D2TrackedEntityInstanceToPost } from "@eyeseetea/d2-api/api/trackerTrackedEntities";
 
 export function importApiTracker(
-    api: D2Api,
-    request: TrackerPostRequest,
-    action: ImportStrategy
-): FutureData<TrackerPostResponse> {
-    const d2Request = mapTrackerPostRequestToD2TrackerPostRequest(request);
-    return d2ImportApiTracker(api, d2Request, action);
-}
-
-export function d2ImportApiTracker(
     api: D2Api,
     request: D2TrackerPostRequest,
     action: ImportStrategy
@@ -64,16 +55,7 @@ function mapTrackerTrackedEntitiesToD2TrackerEnrollmentsToPost(
 ): D2TrackedEntityInstanceToPost[] {
     return trackerTrackedEntities.map(trackedEntity => ({
         ...trackedEntity,
-        relationships: [],
-        attributes: trackedEntity.attributes || [],
-        createdAtClient: trackedEntity.createdAtClient || "",
-        orgUnit: trackedEntity.orgUnit || "",
-        trackedEntity: trackedEntity.trackedEntity || "",
-        trackedEntityType: trackedEntity.trackedEntityType || "",
-        updatedAtClient: trackedEntity.updatedAtClient || "",
-        enrollments: mapTrackerEnrollmentsToD2TrackerEnrollmentsToPost(
-            trackedEntity.enrollments || []
-        ) as D2TrackerEnrollment[], // TODO: Change this cast type when it is fixed in d2-api. It should be D2TrackerEnrollmentToPost[]
+        enrollments: mapTrackerEnrollmentsToD2TrackerEnrollmentsToPost(trackedEntity.enrollments || []),
     }));
 }
 
@@ -82,14 +64,6 @@ function mapTrackerEnrollmentsToD2TrackerEnrollmentsToPost(
 ): D2TrackerEnrollmentToPost[] {
     return trackerEnrollments?.map(enrollment => ({
         ...enrollment,
-        enrolledAt: enrollment.enrolledAt || "",
-        createdAtClient: enrollment.createdAtClient || "",
-        updatedAtClient: enrollment.updatedAtClient || "",
-        program: enrollment.program || "",
-        programStage: enrollment.programStage || "",
-        enrollmentDate: enrollment.enrollmentDate || "",
-        incidentDate: enrollment.incidentDate || "",
-        createdAt: enrollment.createdAt || "",
         events: mapTrackerEventsToD2TrackerEventsToPost(enrollment.events || []),
     }));
 }
@@ -97,9 +71,5 @@ function mapTrackerEnrollmentsToD2TrackerEnrollmentsToPost(
 function mapTrackerEventsToD2TrackerEventsToPost(trackerEvents: TrackerEvent[]): D2TrackerEventToPost[] {
     return trackerEvents?.map(event => ({
         ...event,
-        program: event.program || "",
-        programStage: event.programStage || "",
-        scheduledAt: event.scheduledAt || "",
-        createdAt: event.createdAt || "",
     }));
 }

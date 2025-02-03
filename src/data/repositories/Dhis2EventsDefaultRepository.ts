@@ -98,6 +98,8 @@ export class Dhis2EventsDefaultRepository {
 }
 
 const eventFields = {
+    program: true,
+    programStage: true,
     event: true,
     dataValues: true,
     orgUnit: true,

@@ -23,7 +23,7 @@ import {
 import { ImportStrategy } from "../../../domain/entities/data-entry/DataValuesSaveSummary";
 import { logger } from "../../../utils/logger";
 import { TrackerPostResponse } from "@eyeseetea/d2-api/api/tracker";
-import { d2ImportApiTracker } from "../utils/importApiTracker";
+import { importApiTracker } from "../utils/importApiTracker";
 
 export const AMC_RAW_SUBSTANCE_CONSUMPTION_PROGRAM_ID = "q8aSKr17J5S";
 const AMC_CALCULATED_CONSUMPTION_DATA_PROGRAM_ID = "eUmWZeKZNrg";
@@ -159,7 +159,7 @@ export class AMCSubstanceDataDefaultRepository implements AMCSubstanceDataReposi
                     id: d2TrackerEvent.event,
                     lineNo: isNaN(parseInt(d2TrackerEvent.event)) ? 0 : parseInt(d2TrackerEvent.event),
                 }));
-                return d2ImportApiTracker(this.api, { events: d2TrackerEvents }, importStrategy).flatMap(response => {
+                return importApiTracker(this.api, { events: d2TrackerEvents }, importStrategy).flatMap(response => {
                     return Future.success({
                         response,
                         eventIdLineNoMap,
@@ -186,7 +186,7 @@ export class AMCSubstanceDataDefaultRepository implements AMCSubstanceDataReposi
                 scheduledAt: "",
             };
         });
-        return d2ImportApiTracker(this.api, { events: d2EventsCalculatedConsumption }, "DELETE").flatMap(response => {
+        return importApiTracker(this.api, { events: d2EventsCalculatedConsumption }, "DELETE").flatMap(response => {
             return Future.success(response);
         });
     }

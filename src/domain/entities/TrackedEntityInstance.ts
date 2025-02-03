@@ -64,8 +64,8 @@ type Username = string;
 export type TrackerEventDataValue = { dataElement: Id; value: string };
 
 export type TrackerEvent = {
-    program?: Id;
-    programStage?: Id;
+    program: Id;
+    programStage: Id;
     trackedEntity?: Id;
     orgUnit: Id;
     orgUnitName?: string;
@@ -88,6 +88,7 @@ export type TrackerEnrollment = {
     orgUnit: Id;
     program: Id;
     enrollment: Id;
+    trackedEntity: Id;
     trackedEntityType: Id;
     attributes: TrackerEnrollmentAttribute[];
     events: TrackerEvent[];

@@ -3,7 +3,7 @@ import { Future, FutureData } from "../../../entities/Future";
 import { Questionnaire } from "../../../entities/Questionnaire";
 import { Id } from "../../../entities/Ref";
 import { TrackerEvent, TrackerEventDataValue } from "../../../entities/TrackedEntityInstance";
-import { AMC_PROGRAM_ID } from "../../GetProgramQuestionnaireUseCase";
+import { AMC_PROGRAM_ID, AMC_QUESTIONNAIRE_PROGRAM_STAGE } from "../../GetProgramQuestionnaireUseCase";
 
 export const AMR_GLASS_AMC_DET_DS_PERIOD = "W4D5kpe1il2";
 export class ImportAMCQuestionnaireData {
@@ -80,9 +80,9 @@ export class ImportAMCQuestionnaireData {
                 event: "",
                 orgUnit: orgUnitId,
                 program: AMC_PROGRAM_ID,
+                programStage: AMC_QUESTIONNAIRE_PROGRAM_STAGE,
                 status: "ACTIVE",
                 occurredAt: new Date().toISOString().split("T")?.at(0) || "",
-                //@ts-ignore
                 dataValues: dataValues,
             };
             return Future.success(event);

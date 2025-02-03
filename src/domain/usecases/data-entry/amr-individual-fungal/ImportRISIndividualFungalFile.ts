@@ -342,6 +342,7 @@ export class ImportRISIndividualFungalFile {
                     {
                         orgUnit,
                         program: AMRIProgramIDl,
+                        trackedEntity: "",
                         enrollment: "",
                         trackedEntityType: AMR_GLASS_AMR_TET_PATIENT,
                         attributes: attributes,

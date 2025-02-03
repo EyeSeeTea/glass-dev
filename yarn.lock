@@ -4110,10 +4110,10 @@
     react "^16.12.0"
     yargs "^14.0.0"
 
-"@eyeseetea/d2-api@1.17.0-beta.4":
-  version "1.17.0-beta.4"
-  resolved "https://registry.yarnpkg.com/@eyeseetea/d2-api/-/d2-api-1.17.0-beta.4.tgz#10352f472a86430b4153b1bdc6f7f2279ce8675a"
-  integrity sha512-1NexOomGQUqg31QdFmSxKDfIUAVH9f9EyUkcEhWoOU6w+gveoSz8a87gp1cuC0s/KgBnf4mn9BczHtNKGz4YEQ==
+"@eyeseetea/d2-api@1.18.0-beta.1":
+  version "1.18.0-beta.1"
+  resolved "https://registry.yarnpkg.com/@eyeseetea/d2-api/-/d2-api-1.18.0-beta.1.tgz#9d99e21091bcf62e74988449a8cbf6ad18448bb7"
+  integrity sha512-PV3534gcPU3600T4xFWozs0upy3J5fg1lC3EYtEblMsqjkmUQFw00RVBAo0B/WcHth5fOVVkABc3jEKfMuWTSQ==
   dependencies:
     abort-controller "3.0.0"
     axios "1.6.4"
