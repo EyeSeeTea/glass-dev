@@ -3,19 +3,17 @@ import { Instance } from "../entities/Instance";
 import { ImportStrategy } from "../../domain/entities/data-entry/DataValuesSaveSummary";
 import { Future, FutureData } from "../../domain/entities/Future";
 import { EGASP_PROGRAM_ID } from "./program-rule/ProgramRulesMetadataDefaultRepository";
-import { D2TrackerEvent, TrackerEventsResponse } from "@eyeseetea/d2-api/api/trackerEvents";
+import { D2TrackerEventSchema, TrackerEventsResponse } from "@eyeseetea/d2-api/api/trackerEvents";
 import { TrackerPostResponse } from "@eyeseetea/d2-api/api/tracker";
-import { D2Api, Id } from "@eyeseetea/d2-api/2.34";
+import { D2Api, Id, SelectedPick } from "@eyeseetea/d2-api/2.34";
 import { apiToFuture } from "../../utils/futures";
 import { AMCDataQuestionnaire } from "../../domain/entities/Questionnaire";
 import { AMR_GLASS_AMC_DET_DS_PERIOD } from "../../domain/usecases/data-entry/amc/ImportAMCQuestionnaireData";
 import { trackerPostResponseDefaultError } from "./utils/TrackerPostResponseDefaultError";
+import { TrackerEvent, TrackerEventsPostRequest } from "../../domain/entities/TrackedEntityInstance";
+import { mapTrackerPostRequestToD2TrackerPostRequest } from "./utils/importApiTracker";
 
 export declare type EventStatus = "ACTIVE" | "COMPLETED" | "VISITED" | "SCHEDULED" | "OVERDUE" | "SKIPPED";
-
-export interface TrackerEventsPostRequest {
-    events: D2TrackerEvent[];
-}
 
 export class Dhis2EventsDefaultRepository {
     private api: D2Api;
@@ -24,10 +22,10 @@ export class Dhis2EventsDefaultRepository {
         this.api = getD2APiFromInstance(instance);
     }
 
-    getEGASPEvents(orgUnit: string, page: number): Promise<TrackerEventsResponse> {
+    getEGASPEvents(orgUnit: string, page: number): Promise<TrackerEventsResponse<typeof eventFields>> {
         return this.api.tracker.events
             .get({
-                fields: { $owner: true, event: true, dataValues: true, orgUnit: true, occurredAt: true },
+                fields: eventFields,
                 program: EGASP_PROGRAM_ID,
                 orgUnit,
                 ouMode: "DESCENDANTS",
@@ -52,12 +50,14 @@ export class Dhis2EventsDefaultRepository {
         return eventsByOU;
     }
 
-    getEGASPEventsByOrgUnit(orgUnit: string): FutureData<D2TrackerEvent[]> {
-        return Future.fromPromise(this.getEGASPEventsByOrgUnitAsync(orgUnit));
+    getEGASPEventsByOrgUnit(orgUnit: string): FutureData<TrackerEvent[]> {
+        return Future.fromPromise(this.getEGASPEventsByOrgUnitAsync(orgUnit) as Promise<TrackerEvent[]>);
     }
 
     import(events: TrackerEventsPostRequest, action: ImportStrategy): FutureData<TrackerPostResponse> {
-        return apiToFuture(this.api.tracker.postAsync({ importStrategy: action }, events)).flatMap(response => {
+        return apiToFuture(
+            this.api.tracker.postAsync({ importStrategy: action }, mapTrackerPostRequestToD2TrackerPostRequest(events))
+        ).flatMap(response => {
             return apiToFuture(this.api.system.waitFor("TRACKER_IMPORT_JOB", response.response.id)).flatMap(result => {
                 if (result) {
                     return Future.success(result);
@@ -68,7 +68,7 @@ export class Dhis2EventsDefaultRepository {
         });
     }
 
-    getEventById(id: Id): FutureData<D2TrackerEvent> {
+    getEventById(id: Id): FutureData<TrackerEvent> {
         return apiToFuture(
             this.api.tracker.events.getById(id, {
                 fields: {
@@ -83,7 +83,7 @@ export class Dhis2EventsDefaultRepository {
     getAMCDataQuestionnaireEvtsByOUAndPeriod(orgUnitId: Id, year: string): FutureData<D2TrackerEvent[]> {
         return apiToFuture(
             this.api.tracker.events.get({
-                fields: { $owner: true, event: true, dataValues: true, orgUnit: true, scheduledAt: true },
+                fields: eventFields,
                 program: AMCDataQuestionnaire,
                 orgUnit: orgUnitId,
             })
@@ -96,3 +96,16 @@ export class Dhis2EventsDefaultRepository {
         });
     }
 }
+
+const eventFields = {
+    program: true,
+    programStage: true,
+    event: true,
+    dataValues: true,
+    orgUnit: true,
+    occurredAt: true,
+    scheduledAt: true,
+    status: true,
+} as const;
+
+type D2TrackerEvent = SelectedPick<D2TrackerEventSchema, typeof eventFields>;

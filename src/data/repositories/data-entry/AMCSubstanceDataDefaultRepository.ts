@@ -1,17 +1,20 @@
 import _ from "lodash";
-import { D2Api, D2Program, D2ProgramStageDataElement } from "@eyeseetea/d2-api/2.34";
+import { D2Api, D2Program, D2ProgramStageDataElement, SelectedPick } from "@eyeseetea/d2-api/2.34";
 import { Future, FutureData } from "../../../domain/entities/Future";
 import { Id, generateId } from "../../../domain/entities/Ref";
 import { AMCSubstanceDataRepository } from "../../../domain/repositories/data-entry/AMCSubstanceDataRepository";
 import { SpreadsheetXlsxDataSource } from "../SpreadsheetXlsxDefaultRepository";
-import { D2TrackerEvent, DataValue, TrackerEventsResponse } from "@eyeseetea/d2-api/api/trackerEvents";
+import {
+    D2TrackerEventSchema,
+    D2TrackerEventToPost,
+    DataValue,
+    TrackerEventsResponse,
+} from "@eyeseetea/d2-api/api/trackerEvents";
 import { apiToFuture } from "../../../utils/futures";
 import {
     RAW_SUBSTANCE_CONSUMPTION_DATA_KEYS,
     RawSubstanceConsumptionData,
 } from "../../../domain/entities/data-entry/amc/RawSubstanceConsumptionData";
-import { TrackerPostResponse } from "@eyeseetea/d2-api/api/tracker";
-import { importApiTracker } from "../utils/importApiTracker";
 import {
     SUBSTANCE_CONSUMPTION_CALCULATED_KEYS,
     SubstanceConsumptionCalculated,
@@ -19,6 +22,8 @@ import {
 } from "../../../domain/entities/data-entry/amc/SubstanceConsumptionCalculated";
 import { ImportStrategy } from "../../../domain/entities/data-entry/DataValuesSaveSummary";
 import { logger } from "../../../utils/logger";
+import { TrackerPostResponse } from "@eyeseetea/d2-api/api/tracker";
+import { importApiTracker } from "../utils/importApiTracker";
 
 export const AMC_RAW_SUBSTANCE_CONSUMPTION_PROGRAM_ID = "q8aSKr17J5S";
 const AMC_CALCULATED_CONSUMPTION_DATA_PROGRAM_ID = "eUmWZeKZNrg";
@@ -168,7 +173,7 @@ export class AMCSubstanceDataDefaultRepository implements AMCSubstanceDataReposi
     }
 
     deleteCalculatedSubstanceConsumptionDataById(calculatedConsumptionIds: Id[]): FutureData<TrackerPostResponse> {
-        const d2EventsCalculatedConsumption: D2TrackerEvent[] = calculatedConsumptionIds.map(eventId => {
+        const d2EventsCalculatedConsumption: D2TrackerEventToPost[] = calculatedConsumptionIds.map(eventId => {
             return {
                 event: eventId,
                 program: "",
@@ -177,6 +182,8 @@ export class AMCSubstanceDataDefaultRepository implements AMCSubstanceDataReposi
                 occurredAt: "",
                 attributeOptionCombo: "",
                 dataValues: [],
+                programStage: "",
+                scheduledAt: "",
             };
         });
         return importApiTracker(this.api, { events: d2EventsCalculatedConsumption }, "DELETE").flatMap(response => {
@@ -188,15 +195,15 @@ export class AMCSubstanceDataDefaultRepository implements AMCSubstanceDataReposi
         substanceConsumptionCalculated: SubstanceConsumptionCalculated[],
         calculatedConsumptionDataProgram: D2Program | undefined,
         orgUnitId: Id
-    ): D2TrackerEvent[] | undefined {
+    ): D2TrackerEventToPost[] | undefined {
         const programStageDataElements = calculatedConsumptionDataProgram?.programStages
             .find(({ id }) => AMC_CALCULATED_CONSUMPTION_DATA_PROGRAM_STAGE_ID === id)
             ?.programStageDataElements.map(({ dataElement }) => dataElement);
 
         if (programStageDataElements) {
             return substanceConsumptionCalculated
-                .map(data => {
-                    const dataValues: DataValue[] = programStageDataElements.map(
+                .map((data): D2TrackerEventToPost => {
+                    const dataValues = programStageDataElements.map(
                         ({ id, code, valueType, optionSetValue, optionSet }) => {
                             const value = data[code.trim() as SubstanceConsumptionCalculatedKeys];
                             const dataValue = optionSetValue
@@ -221,7 +228,7 @@ export class AMCSubstanceDataDefaultRepository implements AMCSubstanceDataReposi
                         }
                     );
 
-                    return {
+                    const eventToPost: D2TrackerEventToPost = {
                         event: data.eventId ?? generateId(),
                         occurredAt: data.report_date,
                         status: "COMPLETED",
@@ -229,9 +236,12 @@ export class AMCSubstanceDataDefaultRepository implements AMCSubstanceDataReposi
                         programStage: AMC_CALCULATED_CONSUMPTION_DATA_PROGRAM_STAGE_ID,
                         orgUnit: orgUnitId,
                         dataValues,
+                        scheduledAt: data.report_date,
                     };
+
+                    return eventToPost;
                 })
-                .filter(Boolean) as D2TrackerEvent[];
+                .filter((event): event is D2TrackerEventToPost => Boolean(event));
         }
     }
 
@@ -394,7 +404,7 @@ export class AMCSubstanceDataDefaultRepository implements AMCSubstanceDataReposi
                         event: substanceIdsString,
                         pageSize: substanceIdsChunk.length,
                     })
-                ).flatMap((eventsResponse: TrackerEventsResponse) => {
+                ).flatMap((eventsResponse: TrackerEventsResponse<typeof eventFields>) => {
                     return Future.success(eventsResponse.instances);
                 });
             })
@@ -482,7 +492,7 @@ export class AMCSubstanceDataDefaultRepository implements AMCSubstanceDataReposi
         totalPages?: boolean;
         occurredAfter?: string;
         occurredBefore?: string;
-    }): Promise<TrackerEventsResponse> {
+    }): Promise<TrackerEventsResponse<typeof eventFields>> {
         return this.api.tracker.events
             .get({
                 fields: eventFields,
@@ -514,3 +524,5 @@ const eventFields = {
     dataValues: true,
     occurredAt: true,
 } as const;
+
+type D2TrackerEvent = SelectedPick<D2TrackerEventSchema, typeof eventFields>;
