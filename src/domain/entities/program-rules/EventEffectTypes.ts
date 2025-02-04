@@ -5,11 +5,14 @@ import {
     MetadataPick,
 } from "@eyeseetea/d2-api/2.34";
 import { Id } from "../Ref";
-import { TrackerEventsPostRequest } from "../../../data/repositories/Dhis2EventsDefaultRepository";
 import { ConsistencyError } from "../data-entry/ImportSummary";
-import { D2TrackerEvent as Event } from "@eyeseetea/d2-api/api/trackerEvents";
-import { D2TrackerEnrollment } from "@eyeseetea/d2-api/api/trackerEnrollments";
-import { D2TrackerTrackedEntity } from "@eyeseetea/d2-api/api/trackerTrackedEntities";
+import {
+    TrackerEnrollment,
+    TrackerEvent,
+    TrackerEventsPostRequest,
+    TrackerTrackedEntity,
+} from "../TrackedEntityInstance";
+
 export const metadataQuery = {
     programs: {
         fields: {
@@ -125,11 +128,11 @@ export interface IdNameCode {
 
 export interface EventEffect {
     program: Program;
-    event: Event;
-    events: Event[];
+    event: TrackerEvent;
+    events: TrackerEvent[];
     effects: RuleEffect[];
     orgUnit: OrgUnit;
-    tei?: D2TrackerTrackedEntity;
+    tei?: TrackerTrackedEntity;
 }
 
 export type UpdateAction = UpdateActionEvent | UpdateActionTeiAttribute;
@@ -140,8 +143,8 @@ export interface ActionResult {
 }
 
 export interface ValidationResult {
-    teis?: D2TrackerTrackedEntity[];
-    events?: Event[];
+    teis?: TrackerTrackedEntity[];
+    events?: TrackerEvent[];
     blockingErrors: ConsistencyError[];
     nonBlockingErrors: ConsistencyError[];
 }
@@ -173,7 +176,7 @@ export interface UpdateActionTeiAttribute {
 
 export type D2EventToPost = TrackerEventsPostRequest["events"][number];
 export type D2DataValueToPost = D2EventToPost["dataValues"][number];
-export declare type EventStatus = "ACTIVE" | "COMPLETED" | "VISITED" | "SCHEDULED" | "OVERDUE" | "SKIPPED";
+export declare type EventStatus = "ACTIVE" | "COMPLETED" | "VISITED" | "SCHEDULE" | "OVERDUE" | "SKIPPED";
 export interface ProgramRuleEvent {
     eventId: Id;
     programId?: Id;
@@ -271,7 +274,7 @@ export interface GetProgramRuleEffectsOptions {
     dataElements: DataElementsMap;
     selectedEntity?: TrackedEntityAttributeValuesMap | undefined;
     trackedEntityAttributes?: TrackedEntityAttributesMap | undefined;
-    selectedEnrollment?: D2TrackerEnrollment | undefined;
+    selectedEnrollment?: TrackerEnrollment | undefined;
     selectedOrgUnit: OrgUnit;
     optionSets: OptionSetsMap;
 }
