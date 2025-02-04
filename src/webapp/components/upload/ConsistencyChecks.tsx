@@ -363,7 +363,7 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
                 error => {
                     setPrimaryFileImportSummary({
                         status: "ERROR",
-                        importCount: { ignored: 0, imported: 0, deleted: 0, updated: 0 },
+                        importCount: { ignored: 0, imported: 0, deleted: 0, updated: 0, total: 0 },
                         nonBlockingErrors: [],
                         blockingErrors: [{ error: error, count: 1 }],
                     });
@@ -442,7 +442,7 @@ export const ConsistencyChecks: React.FC<ConsistencyChecksProps> = ({
                     error => {
                         setPrimaryFileImportSummary({
                             status: "ERROR",
-                            importCount: { ignored: 0, imported: 0, deleted: 0, updated: 0 },
+                            importCount: { ignored: 0, imported: 0, deleted: 0, updated: 0, total: 0 },
                             nonBlockingErrors: [],
                             blockingErrors: [{ error: error, count: 1 }],
                         });
