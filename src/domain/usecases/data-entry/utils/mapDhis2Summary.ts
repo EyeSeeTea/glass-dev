@@ -49,5 +49,20 @@ export function mapDataValuesToImportSummary(
 
     const status = finalBlockingErrors.length > 0 ? "ERROR" : nonBlockingErrors.length > 0 ? "WARNING" : "SUCCESS";
 
-    return { status, nonBlockingErrors, blockingErrors: finalBlockingErrors, importCount: dhis2Summary.importCount };
+    return {
+        status,
+        nonBlockingErrors,
+        blockingErrors: finalBlockingErrors,
+        importCount: {
+            imported: dhis2Summary.importCount.imported,
+            updated: dhis2Summary.importCount.updated,
+            ignored: dhis2Summary.importCount.ignored,
+            deleted: dhis2Summary.importCount.deleted,
+            total:
+                dhis2Summary.importCount.imported +
+                dhis2Summary.importCount.updated +
+                dhis2Summary.importCount.ignored +
+                dhis2Summary.importCount.deleted,
+        },
+    };
 }

@@ -69,6 +69,9 @@ export class DeleteBLTemplateEventProgram {
                                                             deleted:
                                                                 importSummary.importCount.deleted +
                                                                 importSummaryCalculatedEvents.importCount.deleted,
+                                                            total:
+                                                                importSummary.importCount.total +
+                                                                importSummaryCalculatedEvents.importCount.total,
                                                         },
                                                         nonBlockingErrors: [
                                                             ...importSummary.nonBlockingErrors,
@@ -107,6 +110,7 @@ export class DeleteBLTemplateEventProgram {
                     imported: 0,
                     deleted: 0,
                     updated: 0,
+                    total: 0,
                 },
                 nonBlockingErrors: [],
                 blockingErrors: [],
@@ -138,6 +142,7 @@ export class DeleteBLTemplateEventProgram {
                     imported: 0,
                     deleted: 0,
                     updated: 0,
+                    total: 0,
                 },
                 nonBlockingErrors: [],
                 blockingErrors: [],

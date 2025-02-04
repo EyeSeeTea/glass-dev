@@ -93,6 +93,7 @@ export class ImportBLTemplateEventProgram {
                                                     imported: 0,
                                                     deleted: 0,
                                                     updated: 0,
+                                                    total: 0,
                                                 },
                                                 nonBlockingErrors: validatedEventResults.nonBlockingErrors,
                                                 blockingErrors: validatedEventResults.blockingErrors,
@@ -380,6 +381,7 @@ export const mapToImportSummary = (
                     updated: result.stats.updated,
                     ignored: result.stats.ignored,
                     deleted: result.stats.deleted,
+                    total: result.stats.total,
                 },
                 blockingErrors: Object.entries(blockingErrorsByGroup).map(err => {
                     const errMsg = err[0];
@@ -417,7 +419,7 @@ export const mapToImportSummary = (
         return Future.success({
             importSummary: {
                 status: "ERROR",
-                importCount: { ignored: 0, imported: 0, deleted: 0, updated: 0 },
+                importCount: { ignored: 0, imported: 0, deleted: 0, updated: 0, total: 0 },
                 nonBlockingErrors: [],
                 blockingErrors: [{ error: result?.message ?? "An error occurred during import. ", count: 1 }],
             },

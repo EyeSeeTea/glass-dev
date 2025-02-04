@@ -134,6 +134,9 @@ export class DeleteAMCProductLevelData {
                                                 deleted:
                                                     deleteCalculatedSubstanceConsumptionSummary.importSummary
                                                         .importCount.deleted + deleteProductSummary.importCount.deleted,
+                                                total:
+                                                    deleteCalculatedSubstanceConsumptionSummary.importSummary
+                                                        .importCount.total + deleteProductSummary.importCount.total,
                                             },
                                             nonBlockingErrors: [
                                                 ...deleteCalculatedSubstanceConsumptionSummary.importSummary
