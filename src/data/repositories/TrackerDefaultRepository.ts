@@ -6,9 +6,10 @@ import { D2Api } from "@eyeseetea/d2-api/2.34";
 import { TrackerRepository } from "../../domain/repositories/TrackerRepository";
 import { ImportStrategy } from "../../domain/entities/data-entry/DataValuesSaveSummary";
 import { apiToFuture } from "../../utils/futures";
-import { TrackerPostRequest, TrackerPostResponse } from "@eyeseetea/d2-api/api/tracker";
+import { TrackerPostResponse } from "@eyeseetea/d2-api/api/tracker";
 import { importApiTracker } from "./utils/importApiTracker";
 import { Id } from "../../domain/entities/Ref";
+import { TrackerPostRequest } from "../../domain/entities/TrackedEntityInstance";
 
 const CHUNKED_SIZE = 100;
 export class TrackerDefaultRepository implements TrackerRepository {
@@ -30,12 +31,11 @@ export class TrackerDefaultRepository implements TrackerRepository {
                 return apiToFuture(
                     this.api.tracker.trackedEntities.get({
                         trackedEntity: trackEntitiesIdsString,
-                        fields: {
-                            trackedEntity: true,
-                        },
+                        fields: trackedEntitiesFields,
                         program: programId,
                         enrollmentEnrolledBefore: new Date().toISOString(),
                         pageSize: CHUNKED_SIZE,
+                        ouMode: "ALL",
                     })
                 ).map(response => {
                     return _.compact(response.instances.map(instance => instance.trackedEntity));
@@ -106,3 +106,7 @@ export class TrackerDefaultRepository implements TrackerRepository {
         });
     }
 }
+
+const trackedEntitiesFields = {
+    trackedEntity: true,
+} as const;

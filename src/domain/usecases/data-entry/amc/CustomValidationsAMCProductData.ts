@@ -1,12 +1,12 @@
 import { Future, FutureData } from "../../../entities/Future";
 import { ConsistencyError } from "../../../entities/data-entry/ImportSummary";
 import { ValidationResult } from "../../../entities/program-rules/EventEffectTypes";
-import { D2TrackerTrackedEntity } from "@eyeseetea/d2-api/api/trackerTrackedEntities";
 import { GlassAtcVersionData, LAST_ATC_CODE_LEVEL, getAtcCodeByLevel } from "../../../entities/GlassAtcVersionData";
 import { AMCProductDataRepository } from "../../../repositories/data-entry/AMCProductDataRepository";
 import { Country } from "../../../entities/Country";
 import { GlassATCRepository } from "../../../repositories/GlassATCRepository";
 import i18n from "../../../../locales";
+import { TrackerTrackedEntity } from "../../../entities/TrackedEntityInstance";
 
 const AMR_GLASS_AMC_TEA_ATC = "aK1JpD14imM";
 const AMR_GLASS_AMC_TEA_COMBINATION = "mG49egdYK3G";
@@ -27,7 +27,7 @@ export class CustomValidationsAMCProductData {
     constructor(private atcRepository: GlassATCRepository, private amcProductRepository: AMCProductDataRepository) {}
     // private dhis2EventsDefaultRepository: Dhis2EventsDefaultRepository,
     public getValidatedEvents(
-        teis: D2TrackerTrackedEntity[],
+        teis: TrackerTrackedEntity[],
         orgUnitId: string,
         orgUnitName: string,
         period: string,
@@ -60,7 +60,7 @@ export class CustomValidationsAMCProductData {
     }
 
     private checkUniqueProductIds(
-        teis: D2TrackerTrackedEntity[],
+        teis: TrackerTrackedEntity[],
         orgUnitId: string,
         existingProductIds: string[]
     ): ConsistencyError[] {
@@ -107,7 +107,7 @@ export class CustomValidationsAMCProductData {
     }
 
     private checkTEIAttributeValidations(
-        teis: D2TrackerTrackedEntity[],
+        teis: TrackerTrackedEntity[],
         countryId: string,
         countryName: string,
         period: string,
@@ -278,7 +278,7 @@ export class CustomValidationsAMCProductData {
         }));
     }
 
-    private checkSameEnrollmentDate(teis: D2TrackerTrackedEntity[]): ConsistencyError[] {
+    private checkSameEnrollmentDate(teis: TrackerTrackedEntity[]): ConsistencyError[] {
         const dateGroups = _(teis).groupBy("enrollments[0].enrolledAt").keys().value();
         if (dateGroups.length > 1) {
             return [

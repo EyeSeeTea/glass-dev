@@ -4,7 +4,9 @@ import { CaptureFormRepository } from "../repositories/CaptureFormRepository";
 import { amcQuestionMap } from "./ApplyAMCQuestionUpdationUseCase";
 
 export const EAR_PROGRAM_ID = "SQe26z0smFP";
+export const EAR_PROGRAM_STAGE = "Oic1c7maX1g";
 export const AMC_PROGRAM_ID = "qGG6BjULAaf";
+export const AMC_QUESTIONNAIRE_PROGRAM_STAGE = "eks1YEESEOK";
 export const AMC_DATA_Q_GENERAL_SECTION_TITLE = "Data General Questionnaire";
 
 export class GetProgramQuestionnaireUseCase {

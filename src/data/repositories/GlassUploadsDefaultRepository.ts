@@ -222,27 +222,20 @@ export class GlassUploadsDefaultRepository implements GlassUploadsRepository {
         });
     }
 
-    setAsyncDeletions(uploadIdsToDelete: Id[]): FutureData<Id[]> {
-        return this.dataStoreClient.listCollection<Id>(DataStoreKeys.ASYNC_DELETIONS).flatMap(asyncDeletionsArray => {
-            const newAsyncDeletions = [...asyncDeletionsArray, ...uploadIdsToDelete];
-            return this.dataStoreClient.saveObject(DataStoreKeys.ASYNC_DELETIONS, newAsyncDeletions).flatMap(() => {
-                return Future.success(uploadIdsToDelete);
-            });
-        });
-    }
+    setMultipleErrorAsyncDeleting(ids: Id[]): FutureData<void> {
+        return this.dataStoreClient.listCollection<GlassUploads>(DataStoreKeys.UPLOADS).flatMap(uploads => {
+            const filteredUploads = uploads?.filter(upload => ids.includes(upload.id));
+            if (filteredUploads.length > 0) {
+                const updatedUploads = filteredUploads.map(upload => ({
+                    ...upload,
+                    errorAsyncDeleting: ids.includes(upload.id),
+                }));
+                const restUploads = uploads.filter(upload => !ids.includes(upload.id));
 
-    getAsyncDeletions(): FutureData<Id[]> {
-        return this.dataStoreClient.listCollection<Id>(DataStoreKeys.ASYNC_DELETIONS);
-    }
-
-    removeAsyncDeletions(uploadIdToRemove: Id[]): FutureData<Id[]> {
-        return this.dataStoreClient.listCollection<Id>(DataStoreKeys.ASYNC_DELETIONS).flatMap(asyncDeletionsArray => {
-            const restAsyncDeletions = asyncDeletionsArray.filter(
-                uploadIdToBeDeleted => !uploadIdToRemove.includes(uploadIdToBeDeleted)
-            );
-            return this.dataStoreClient.saveObject(DataStoreKeys.ASYNC_DELETIONS, restAsyncDeletions).flatMap(() => {
-                return Future.success(uploadIdToRemove);
-            });
+                return this.dataStoreClient.saveObject(DataStoreKeys.UPLOADS, [...restUploads, ...updatedUploads]);
+            } else {
+                return Future.success(undefined);
+            }
         });
     }
 }

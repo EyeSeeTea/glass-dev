@@ -114,6 +114,7 @@ export class CountryInformationDefaultRepository implements CountryInformationRe
                     page: 1,
                     pageSize: 1,
                     filter: filterStr,
+                    ouMode: "SELECTED",
                 })
             ).map(response => response.instances[0])
         );

@@ -1,7 +1,7 @@
 {
     "name": "glass",
     "description": "DHIS2 Glass App",
-    "version": "1.6.23",
+    "version": "1.6.24",
     "license": "GPL-3.0",
     "author": "EyeSeeTea team",
     "homepage": ".",
@@ -15,7 +15,7 @@
         "@dhis2/d2-i18n-extract": "1.0.8",
         "@dhis2/d2-i18n-generate": "1.2.0",
         "@dhis2/ui": "6.12.0",
-        "@eyeseetea/d2-api": "1.13.2-beta.6",
+        "@eyeseetea/d2-api": "1.18.0-beta.1",
         "@eyeseetea/d2-logger": "1.1.0",
         "@eyeseetea/d2-ui-components": "2.6.11",
         "@eyeseetea/xlsx-populate": "4.1.0",
@@ -123,8 +123,7 @@
         "amr-agg-data-reset-ris": "npx ts-node -r dotenv/config src/scripts/amr_agg_data_reset.ts",
         "amr-agg-data-validation-sample": "npx ts-node -r dotenv/config src/scripts/amr_agg_data_validation_sample.ts",
         "amr-agg-data-reset-sample": "npx ts-node -r dotenv/config src/scripts/amr_agg_data_reset_sample.ts",
-        "get-max-min-amc-calculated-tons": "npx ts-node -r dotenv/config src/scripts/get_max_min_amc_calculated_tons.ts",
-        "update-tons-to-kilograms": "npx ts-node -r dotenv/config src/scripts/update_autocalculated_and_manual_tons_to_kilograms.ts"
+        "get-max-min-amc-calculated-tons": "npx ts-node -r dotenv/config src/scripts/get_max_min_amc_calculated_tons.ts"
     },
     "manifest.webapp": {
         "name": "glass",

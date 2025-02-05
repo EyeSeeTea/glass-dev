@@ -5,9 +5,6 @@ import { GlassDocumentsRepository } from "../../../repositories/GlassDocumentsRe
 import { GlassUploadsRepository } from "../../../repositories/GlassUploadsRepository";
 import { TrackerRepository } from "../../../repositories/TrackerRepository";
 import { RISIndividualFungalDataRepository } from "../../../repositories/data-entry/RISIndividualFungalDataRepository";
-import { D2TrackerTrackedEntity } from "@eyeseetea/d2-api/api/trackerTrackedEntities";
-import { D2TrackerEnrollment, D2TrackerEnrollmentAttribute } from "@eyeseetea/d2-api/api/trackerEnrollments";
-import { D2TrackerEvent } from "@eyeseetea/d2-api/api/trackerEvents";
 import { mapToImportSummary, uploadIdListFileAndSave } from "../ImportBLTemplateEventProgram";
 import { MetadataRepository } from "../../../repositories/MetadataRepository";
 import { CustomDataColumns } from "../../../entities/data-entry/amr-individual-fungal-external/RISIndividualFungalData";
@@ -19,6 +16,12 @@ import { downloadIdsAndDeleteTrackedEntities } from "../utils/downloadIdsAndDele
 import { getTEAValueFromOrganisationUnitCountryEntry } from "../utils/getTEAValueFromOrganisationUnitCountryEntry";
 import { Country } from "../../../entities/Country";
 import i18n from "../../../../locales";
+import {
+    TrackerEnrollment,
+    TrackerEvent,
+    TrackerTrackedEntity,
+    TrackerTrackedEntityAttribute,
+} from "../../../entities/TrackedEntityInstance";
 
 export const AMRIProgramID = "mMAj6Gofe49";
 export const AMR_GLASS_AMR_TET_PATIENT = "CcgnfemKr5U";
@@ -101,6 +104,7 @@ export class ImportRISIndividualFungalFile {
                                                 imported: 0,
                                                 deleted: 0,
                                                 updated: 0,
+                                                total: 0,
                                             },
                                             nonBlockingErrors: validationResult.nonBlockingErrors,
                                             blockingErrors: validationResult.blockingErrors,
@@ -161,7 +165,7 @@ export class ImportRISIndividualFungalFile {
         const periodErrors = this.checkPeriod(risIndividualFungalDataItems, period);
         const summary: ImportSummary = {
             status: "ERROR",
-            importCount: { ignored: 0, imported: 0, deleted: 0, updated: 0 },
+            importCount: { ignored: 0, imported: 0, deleted: 0, updated: 0, total: 0 },
             nonBlockingErrors: [],
             blockingErrors: [...orgUnitErrors, ...periodErrors],
         };
@@ -170,7 +174,7 @@ export class ImportRISIndividualFungalFile {
 
     private runProgramRuleValidations(
         programId: string,
-        teis: D2TrackerTrackedEntity[],
+        teis: TrackerTrackedEntity[],
         AMRDataProgramStageIdl: string
     ): FutureData<ValidationResult> {
         //1. Before running validations, add ids to tei, enrollement and event so thier relationships can be processed.
@@ -282,10 +286,10 @@ export class ImportRISIndividualFungalFile {
         countryCode: string,
         period: string,
         allCountries: Country[]
-    ): FutureData<D2TrackerTrackedEntity[]> {
+    ): FutureData<TrackerTrackedEntity[]> {
         return this.trackerRepository.getProgramMetadata(AMRIProgramIDl, AMRDataProgramStageIdl).flatMap(metadata => {
             const trackedEntities = individualFungalDataItems.map(dataItem => {
-                const attributes: D2TrackerEnrollmentAttribute[] = metadata.programAttributes.map(
+                const attributes: TrackerTrackedEntityAttribute[] = metadata.programAttributes.map(
                     (attr: { id: string; name: string; code: string; valueType: string }) => {
                         const currentAttribute = dataItem.find(item => item.key === attr.code);
 
@@ -324,7 +328,7 @@ export class ImportRISIndividualFungalFile {
 
                 const createdAt = moment(new Date()).toISOString()?.split("T").at(0) ?? period;
 
-                const events: D2TrackerEvent[] = [
+                const events: TrackerEvent[] = [
                     {
                         program: AMRIProgramIDl,
                         event: "",
@@ -335,14 +339,13 @@ export class ImportRISIndividualFungalFile {
                         status: "COMPLETED",
                     },
                 ];
-                const enrollments: D2TrackerEnrollment[] = [
+                const enrollments: TrackerEnrollment[] = [
                     {
                         orgUnit,
                         program: AMRIProgramIDl,
+                        trackedEntity: "",
                         enrollment: "",
                         trackedEntityType: AMR_GLASS_AMR_TET_PATIENT,
-                        notes: [],
-                        relationships: [],
                         attributes: attributes,
                         events: events,
                         enrolledAt: sampleDate,
@@ -359,7 +362,7 @@ export class ImportRISIndividualFungalFile {
                     },
                 ];
 
-                const entity: D2TrackerTrackedEntity = {
+                const entity: TrackerTrackedEntity = {
                     orgUnit,
                     trackedEntity: "",
                     trackedEntityType: AMR_GLASS_AMR_TET_PATIENT,

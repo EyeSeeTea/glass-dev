@@ -13,7 +13,6 @@ import { DataForm } from "../../entities/DataForm";
 import { ValidationResult } from "../../entities/program-rules/EventEffectTypes";
 import { generateId, Id } from "../../entities/Ref";
 import { DataPackage, DataPackageDataValue } from "../../entities/data-entry/DataPackage";
-import { D2TrackerEvent } from "@eyeseetea/d2-api/api/trackerEvents";
 import { getStringFromFile } from "./utils/fileToString";
 import { TrackerPostResponse } from "@eyeseetea/d2-api/api/tracker";
 import { ProgramRuleValidationForBLEventProgram } from "../program-rules-processing/ProgramRuleValidationForBLEventProgram";
@@ -25,6 +24,7 @@ import { InstanceRepository } from "../../repositories/InstanceRepository";
 import { AMC_RAW_SUBSTANCE_CONSUMPTION_PROGRAM_ID } from "./amc/ImportAMCSubstanceLevelData";
 import { GlassATCRepository } from "../../repositories/GlassATCRepository";
 import { ListGlassATCLastVersionKeysByYear } from "../../entities/GlassAtcVersionData";
+import { TrackerEvent } from "../../entities/TrackedEntityInstance";
 
 export const ATC_VERSION_DATA_ELEMENT_ID = "aCuWz3HZ5Ti";
 
@@ -93,6 +93,7 @@ export class ImportBLTemplateEventProgram {
                                                     imported: 0,
                                                     deleted: 0,
                                                     updated: 0,
+                                                    total: 0,
                                                 },
                                                 nonBlockingErrors: validatedEventResults.nonBlockingErrors,
                                                 blockingErrors: validatedEventResults.blockingErrors,
@@ -147,7 +148,7 @@ export class ImportBLTemplateEventProgram {
         });
     }
 
-    private deleteEvents(events: D2TrackerEvent[]): FutureData<ImportSummary> {
+    private deleteEvents(events: TrackerEvent[]): FutureData<ImportSummary> {
         return this.dhis2EventsDefaultRepository.import({ events }, "DELETE").flatMap(result => {
             return mapToImportSummary(result, "event", this.metadataRepository).flatMap(({ importSummary }) => {
                 return Future.success(importSummary);
@@ -161,7 +162,7 @@ export class ImportBLTemplateEventProgram {
         programId: string,
         eventListFileId: string | undefined,
         calculatedEventListFileId?: string
-    ): FutureData<D2TrackerEvent[]> {
+    ): FutureData<TrackerEvent[]> {
         if (action === "CREATE_AND_UPDATE") {
             if (programId === AMC_RAW_SUBSTANCE_CONSUMPTION_PROGRAM_ID) {
                 return this.buildEventsPayloadForAMCSubstances(dataPackage);
@@ -180,7 +181,7 @@ export class ImportBLTemplateEventProgram {
         return Future.success([]);
     }
 
-    buildEventsPayloadForAMCSubstances(dataPackage: DataPackage): FutureData<D2TrackerEvent[]> {
+    buildEventsPayloadForAMCSubstances(dataPackage: DataPackage): FutureData<TrackerEvent[]> {
         const atcVerionYears = dataPackage.dataEntries.reduce((acc: string[], dataEntry) => {
             const atcVerionYear = dataEntry.dataValues.find(
                 ({ dataElement }) => dataElement === ATC_VERSION_DATA_ELEMENT_ID
@@ -208,7 +209,7 @@ export class ImportBLTemplateEventProgram {
     mapDataPackageToD2TrackerEvents(
         dataPackage: DataPackage,
         atcVersionKeysByYear?: ListGlassATCLastVersionKeysByYear
-    ): D2TrackerEvent[] {
+    ): TrackerEvent[] {
         return dataPackage.dataEntries.map(
             ({ id, orgUnit, period, attribute, dataValues, dataForm, coordinate }, index) => {
                 console.debug({ id, orgUnit, period, attribute, dataValues, dataForm, coordinate }, index);
@@ -223,6 +224,7 @@ export class ImportBLTemplateEventProgram {
                 return {
                     event: id || (index + 6).toString(),
                     program: dataForm,
+                    programStage: "",
                     status: "COMPLETED",
                     orgUnit,
                     occurredAt: occurredAt,
@@ -244,14 +246,15 @@ export class ImportBLTemplateEventProgram {
         );
     }
 
-    private getEventsFromListFileId(listFileId: string): FutureData<D2TrackerEvent[]> {
+    private getEventsFromListFileId(listFileId: string): FutureData<TrackerEvent[]> {
         return this.glassDocumentsRepository.download(listFileId).flatMap(eventListFile => {
             return Future.fromPromise(getStringFromFile(eventListFile)).flatMap(_events => {
                 const eventIdList: string[] = JSON.parse(_events);
-                const events: D2TrackerEvent[] = eventIdList.map(eventId => {
+                const events: TrackerEvent[] = eventIdList.map(eventId => {
                     return {
                         event: eventId,
                         program: "",
+                        programStage: "",
                         status: "COMPLETED",
                         orgUnit: "",
                         occurredAt: "",
@@ -265,7 +268,7 @@ export class ImportBLTemplateEventProgram {
     }
 
     private validateEvents(
-        events: D2TrackerEvent[],
+        events: TrackerEvent[],
         orgUnitId: string,
         orgUnitName: string,
         period: string,
@@ -380,6 +383,7 @@ export const mapToImportSummary = (
                     updated: result.stats.updated,
                     ignored: result.stats.ignored,
                     deleted: result.stats.deleted,
+                    total: result.stats.total,
                 },
                 blockingErrors: Object.entries(blockingErrorsByGroup).map(err => {
                     const errMsg = err[0];
@@ -417,7 +421,7 @@ export const mapToImportSummary = (
         return Future.success({
             importSummary: {
                 status: "ERROR",
-                importCount: { ignored: 0, imported: 0, deleted: 0, updated: 0 },
+                importCount: { ignored: 0, imported: 0, deleted: 0, updated: 0, total: 0 },
                 nonBlockingErrors: [],
                 blockingErrors: [{ error: result?.message ?? "An error occurred during import. ", count: 1 }],
             },

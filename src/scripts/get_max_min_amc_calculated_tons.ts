@@ -1,11 +1,11 @@
 import { boolean, command, flag, run } from "cmd-ts";
 import path from "path";
 import fs from "fs";
-import { D2TrackerEvent, TrackerEventsResponse } from "@eyeseetea/d2-api/api/trackerEvents";
+import { D2TrackerEventSchema, TrackerEventsResponse } from "@eyeseetea/d2-api/api/trackerEvents";
 
 import { getD2ApiFromArgs } from "./common";
 import { Future, FutureData } from "../domain/entities/Future";
-import { D2Api } from "../types/d2-api";
+import { D2Api, SelectedPick } from "../types/d2-api";
 import { Id } from "../domain/entities/Ref";
 import { apiToFuture } from "../utils/futures";
 
@@ -220,13 +220,17 @@ function getEventsFromProgramByOrgUnitOfPage(
         pageSize: number;
         totalPages?: boolean;
     }
-): Promise<TrackerEventsResponse> {
+): Promise<TrackerEventsResponse<typeof eventFields>> {
     return api.tracker.events
         .get({
-            fields: {
-                dataValues: true,
-            },
+            fields: eventFields,
             ...params,
         })
         .getData();
 }
+
+const eventFields = {
+    dataValues: true,
+} as const;
+
+type D2TrackerEvent = SelectedPick<D2TrackerEventSchema, typeof eventFields>;

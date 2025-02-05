@@ -99,6 +99,7 @@ import { DeletePrimaryFileDataUseCase } from "./domain/usecases/data-entry/Delet
 import { DeleteSecondaryFileDataUseCase } from "./domain/usecases/data-entry/DeleteSecondaryFileDataUseCase";
 import { DownloadDocumentAsArrayBufferUseCase } from "./domain/usecases/DownloadDocumentAsArrayBufferUseCase";
 import { GetGlassUploadByIdUseCase } from "./domain/usecases/GetGlassUploadByIdUseCase";
+import { GlassAsyncDeletionsDefaultRepository } from "./data/repositories/GlassAsyncDeletionsDefaultRepository";
 
 export function getCompositionRoot(instance: Instance) {
     const api = getD2APiFromInstance(instance);
@@ -136,6 +137,7 @@ export function getCompositionRoot(instance: Instance) {
     const atcRepository = new GlassATCDefaultRepository(dataStoreClient);
     const eventVisualizationRepository = new EventVisualizationAnalyticsDefaultRepository(api);
     const countryRepository = new CountryDefaultRepository(api);
+    const glassAsyncDeletionsRepository = new GlassAsyncDeletionsDefaultRepository(dataStoreClient);
 
     return {
         instance: getExecute({
@@ -173,8 +175,8 @@ export function getCompositionRoot(instance: Instance) {
             setBatchId: new SetUploadBatchIdUseCase(glassUploadsRepository),
             saveImportSummaryErrorsOfFiles: new SaveImportSummaryErrorsOfFilesInUploadsUseCase(glassUploadsRepository),
             getCurrentDataSubmissionFileType: new GetUploadsByDataSubmissionUseCase(glassUploadsRepository),
-            setToAsyncDeletions: new SetToAsyncDeletionsUseCase(glassUploadsRepository),
-            getAsyncDeletions: new GetAsyncDeletionsUseCase(glassUploadsRepository),
+            setToAsyncDeletions: new SetToAsyncDeletionsUseCase(glassAsyncDeletionsRepository),
+            getAsyncDeletions: new GetAsyncDeletionsUseCase(glassAsyncDeletionsRepository),
         }),
         glassDocuments: getExecute({
             getAll: new GetGlassDocumentsUseCase(glassDocumentsRepository),
