@@ -104,6 +104,7 @@ import { GetAsyncUploadsUseCase } from "./domain/usecases/GetAsyncUploadsUseCase
 import { GlassAsyncUploadsDefaultRepository } from "./data/repositories/GlassAsyncUploadsDefaultRepository";
 import { SetAsyncUploadsUseCase } from "./domain/usecases/SetAsyncUploadsUseCase";
 import { RemoveAsyncUploadByIdUseCase } from "./domain/usecases/RemoveAsyncUploadByIdUseCase";
+import { RemoveAsyncUploadsUseCase } from "./domain/usecases/RemoveAsyncUploadsUseCase";
 
 export function getCompositionRoot(instance: Instance) {
     const api = getD2APiFromInstance(instance);
@@ -189,6 +190,10 @@ export function getCompositionRoot(instance: Instance) {
             getAsyncUploads: new GetAsyncUploadsUseCase(glassAsyncUploadsRepository),
             setToAsyncUploads: new SetAsyncUploadsUseCase({ glassAsyncUploadsRepository, glassUploadsRepository }),
             removeAsyncUploadById: new RemoveAsyncUploadByIdUseCase({
+                glassAsyncUploadsRepository,
+                glassUploadsRepository,
+            }),
+            removeAsyncUploads: new RemoveAsyncUploadsUseCase({
                 glassAsyncUploadsRepository,
                 glassUploadsRepository,
             }),

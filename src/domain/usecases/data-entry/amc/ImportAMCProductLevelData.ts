@@ -125,12 +125,9 @@ export class ImportAMCProductLevelData {
                                         action
                                     )
                                     .flatMap(response => {
-                                        return mapToImportSummary(
-                                            response,
-                                            "trackedEntity",
-                                            this.metadataRepository,
-                                            validationResults.nonBlockingErrors
-                                        ).flatMap(summary => {
+                                        return mapToImportSummary(response, "trackedEntity", this.metadataRepository, {
+                                            nonBlockingErrors: validationResults.nonBlockingErrors,
+                                        }).flatMap(summary => {
                                             return this.uploadTeiIdListFileAndSave(
                                                 "primaryUploadId",
                                                 summary,

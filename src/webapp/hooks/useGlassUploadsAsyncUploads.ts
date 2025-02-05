@@ -7,6 +7,7 @@ export type GlassUploadsAsyncUploadsState = GlassState<GlassAsyncUpload[]>;
 
 type State = {
     asyncUploads: GlassUploadsAsyncUploadsState;
+    refreshAsyncUploads: React.Dispatch<React.SetStateAction<{}>>;
 };
 
 export function useGlassUploadsAsyncUploads(): State {
@@ -15,6 +16,7 @@ export function useGlassUploadsAsyncUploads(): State {
     const [asyncUploads, setAsyncUploads] = React.useState<GlassUploadsAsyncUploadsState>({
         kind: "loading",
     });
+    const [shouldRefresh, refreshAsyncUploads] = React.useState({});
 
     const getAsyncUploads = useCallback(() => {
         compositionRoot.glassUploads.getAsyncUploads().run(
@@ -25,9 +27,10 @@ export function useGlassUploadsAsyncUploads(): State {
 
     React.useEffect(() => {
         getAsyncUploads();
-    }, [getAsyncUploads]);
+    }, [getAsyncUploads, shouldRefresh]);
 
     return {
         asyncUploads,
+        refreshAsyncUploads,
     };
 }

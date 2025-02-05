@@ -266,11 +266,23 @@ export class GlassUploadsDefaultRepository implements GlassUploadsRepository {
         return this.dataStoreClient.listCollection<GlassUploads>(DataStoreKeys.UPLOADS).flatMap(uploads => {
             const uploadFound = uploads?.find(upload => upload.id === uploadId);
             if (uploadFound) {
+                const mergedImportSummaryErrors: ImportSummaryErrors = importSummaries.reduce(
+                    (acc: ImportSummaryErrors, summary: ImportSummary) => {
+                        return {
+                            nonBlockingErrors: [...acc.nonBlockingErrors, ...summary.nonBlockingErrors],
+                            blockingErrors: [...acc.blockingErrors, ...summary.blockingErrors],
+                        };
+                    },
+                    { nonBlockingErrors: [], blockingErrors: [] }
+                );
+
                 const restUploads = uploads.filter(upload => upload.id !== uploadId);
-                return this.dataStoreClient.saveObject(DataStoreKeys.UPLOADS, [
-                    ...restUploads,
-                    { ...uploadFound, asyncImportSummaries: importSummaries },
-                ]);
+                const updatedUpload = {
+                    ...uploadFound,
+                    asyncImportSummaries: importSummaries,
+                    importSummary: mergedImportSummaryErrors,
+                };
+                return this.dataStoreClient.saveObject(DataStoreKeys.UPLOADS, [...restUploads, updatedUpload]);
             } else {
                 return Future.error("Upload does not exist");
             }

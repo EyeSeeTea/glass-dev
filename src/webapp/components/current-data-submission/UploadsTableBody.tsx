@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { Backdrop, TableBody, TableCell, TableRow, Button, DialogContent, Typography } from "@material-ui/core";
 import styled from "styled-components";
 import i18n from "@eyeseetea/d2-ui-components/locales";
@@ -29,11 +29,15 @@ import { useGlassModule } from "../../hooks/useGlassModule";
 import { Id } from "../../../domain/entities/Ref";
 import { useQuestionnaires } from "./Questionnaires";
 import { DataSubmissionStatusTypes } from "../../../domain/entities/GlassDataSubmission";
-import { useGlassUploadsAsyncUploads } from "../../hooks/useGlassUploadsAsyncUploads";
+import { GlassUploads } from "../../../domain/entities/GlassUploads";
+import { GlassAsyncUpload } from "../../../domain/entities/GlassAsyncUploads";
 
 export interface UploadsTableBodyProps {
     rows?: UploadsDataItem[];
+    allUploads?: GlassUploads[];
     refreshUploads: React.Dispatch<React.SetStateAction<{}>>;
+    refreshAsyncUploads: React.Dispatch<React.SetStateAction<{}>>;
+    asyncUploads: GlassAsyncUpload[];
     showComplete?: boolean;
     setIsDatasetMarkAsCompleted?: React.Dispatch<React.SetStateAction<boolean>>;
     setRefetchStatus?: React.Dispatch<React.SetStateAction<DataSubmissionStatusTypes | undefined>>;
@@ -41,7 +45,10 @@ export interface UploadsTableBodyProps {
 
 export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({
     rows,
+    allUploads,
     refreshUploads,
+    refreshAsyncUploads,
+    asyncUploads,
     showComplete,
     setIsDatasetMarkAsCompleted,
     setRefetchStatus,
@@ -69,7 +76,6 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({
     const { asyncDeletions: asyncDeletionsState, setToAsyncDeletions } = useGlassUploadsAsyncDeletions();
     const currentModule = useGlassModule();
     const [questionnaires] = useQuestionnaires();
-    const { asyncUploads } = useGlassUploadsAsyncUploads();
     const showDeleteConfirmationDialog = (rowToDelete: UploadsDataItem) => {
         setRowToDelete(rowToDelete);
         setDeleteOpen(true);
@@ -147,14 +153,12 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({
     const isSetToBeUploadedAsync = useCallback(
         (uploadDataItem: UploadsDataItem): boolean => {
             return (
-                (asyncUploads.kind === "loaded" &&
-                    asyncUploads.data.some(
-                        asyncUpload =>
-                            (asyncUpload.primaryUploadId === uploadDataItem.id ||
-                                asyncUpload.secondaryUploadId === uploadDataItem.id) &&
-                            asyncUpload.status === "PENDING"
-                    )) ??
-                false
+                asyncUploads.some(
+                    asyncUpload =>
+                        (asyncUpload.primaryUploadId === uploadDataItem.id ||
+                            asyncUpload.secondaryUploadId === uploadDataItem.id) &&
+                        asyncUpload.status === "PENDING"
+                ) ?? false
             );
         },
         [asyncUploads]
@@ -163,14 +167,12 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({
     const isCurrentlyBeingUploadedAsync = useCallback(
         (uploadDataItem: UploadsDataItem): boolean => {
             return (
-                (asyncUploads.kind === "loaded" &&
-                    asyncUploads.data.some(
-                        asyncUpload =>
-                            (asyncUpload.primaryUploadId === uploadDataItem.id ||
-                                asyncUpload.secondaryUploadId === uploadDataItem.id) &&
-                            asyncUpload.status === "UPLOADING"
-                    )) ??
-                false
+                asyncUploads.some(
+                    asyncUpload =>
+                        (asyncUpload.primaryUploadId === uploadDataItem.id ||
+                            asyncUpload.secondaryUploadId === uploadDataItem.id) &&
+                        asyncUpload.status === "UPLOADING"
+                ) ?? false
             );
         },
         [asyncUploads]
@@ -182,15 +184,8 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({
     //3. Delete corresponding 'upload' and 'document' from Datastore
     //* If it's a file from a GLASS module with property hasAsyncDeletion === true and the number of rows is greater than maxNumberOfRowsToSyncDeletion,
     // then it is only set to async deletion in Datastore key
-    const deleteDataset = () => {
-        hideDeleteConfirmationDialog();
-        if (
-            !rowToDelete ||
-            asyncDeletionsState.kind !== "loaded" ||
-            currentModule.kind !== "loaded" ||
-            isCurrentlyBeingUploadedAsync(rowToDelete)
-        )
-            return;
+    const deleteDataset = useCallback(() => {
+        if (!rowToDelete || asyncDeletionsState.kind !== "loaded" || currentModule.kind !== "loaded") return;
 
         if (
             moduleProperties.get(currentModuleAccess.moduleName)?.hasAsyncDeletion &&
@@ -202,6 +197,7 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({
 
             setToAsyncDeletions(rowToDelete.id);
             refreshUploads({}); //Trigger re-render of parent
+            refreshAsyncUploads({});
             setLoading(false);
             hideDeleteConfirmationDialog();
         } else {
@@ -300,6 +296,7 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({
                                                         .run(
                                                             () => {
                                                                 refreshUploads({}); //Trigger re-render of parent
+                                                                refreshAsyncUploads({});
                                                                 setLoading(false);
                                                                 hideDeleteConfirmationDialog();
                                                             },
@@ -312,6 +309,7 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({
                                                         );
                                                 } else {
                                                     refreshUploads({}); //Trigger re-render of parent
+                                                    refreshAsyncUploads({});
                                                     setLoading(false);
                                                     hideDeleteConfirmationDialog();
                                                 }
@@ -382,6 +380,7 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({
                                                 .run(
                                                     () => {
                                                         refreshUploads({}); //Trigger re-render of parent
+                                                        refreshAsyncUploads({});
                                                         setLoading(false);
                                                         hideDeleteConfirmationDialog();
                                                         snackbar.info(message);
@@ -404,6 +403,7 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({
                                 compositionRoot.glassDocuments.deleteByUploadId(secondaryFileToDelete.id).run(
                                     () => {
                                         refreshUploads({}); //Trigger re-render of parent
+                                        refreshAsyncUploads({});
                                         setLoading(false);
                                         hideDeleteConfirmationDialog();
                                         snackbar.info("Upload deleted successfully");
@@ -436,43 +436,138 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({
                 );
             }
         }
-    };
+    }, [
+        asyncDeletionsState,
+        compositionRoot,
+        currentModule,
+        currentModuleAccess.moduleName,
+        isAlreadyMarkedToBeDeleted,
+        refreshUploads,
+        refreshAsyncUploads,
+        rowToDelete,
+        rows,
+        setIsDatasetMarkAsCompleted,
+        setToAsyncDeletions,
+        snackbar,
+    ]);
+
+    const manageDeleteDataset = useCallback(() => {
+        hideDeleteConfirmationDialog();
+        if (
+            !rowToDelete ||
+            asyncDeletionsState.kind !== "loaded" ||
+            currentModule.kind !== "loaded" ||
+            isCurrentlyBeingUploadedAsync(rowToDelete)
+        )
+            return;
+
+        const isRowInAsyncUploads = isSetToBeUploadedAsync(rowToDelete);
+
+        if (isRowInAsyncUploads) {
+            compositionRoot.glassUploads.removeAsyncUploadById(rowToDelete.id).run(
+                () => {
+                    deleteDataset();
+                },
+                error => {
+                    snackbar.error(i18n.t("Error occurred when removing async uploads"));
+                    console.debug("Error occurred when removing async uploads: " + error);
+                }
+            );
+        } else {
+            deleteDataset();
+        }
+    }, [
+        asyncDeletionsState.kind,
+        compositionRoot.glassUploads,
+        currentModule.kind,
+        deleteDataset,
+        isCurrentlyBeingUploadedAsync,
+        isSetToBeUploadedAsync,
+        rowToDelete,
+        snackbar,
+    ]);
+
+    const uploadsMarkedToBeAsyncUpload = useMemo(() => {
+        return allUploads?.filter(upload => isSetToBeUploadedAsync(upload));
+    }, [allUploads, isSetToBeUploadedAsync]);
+
+    const setDataSubmissionAsCompleted = useCallback(
+        (row: UploadsDataItem) => {
+            return compositionRoot.glassDataSubmission.setStatus(row.dataSubmission, "COMPLETE").run(
+                () => {
+                    setIsDatasetMarkAsCompleted && setIsDatasetMarkAsCompleted(true);
+                    setLoading(false);
+                    refreshUploads({}); //Trigger re-render of parent
+                    refreshAsyncUploads({});
+                    setRefetchStatus && setRefetchStatus("COMPLETE");
+                },
+                error => {
+                    snackbar.error(i18n.t("Error occurred when setting data submission status to COMPLETED"));
+                    console.debug("Error occurred when setting data submission status to COMPLETED: " + error);
+                    setLoading(false);
+                    setIsDatasetMarkAsCompleted && setIsDatasetMarkAsCompleted(false);
+                }
+            );
+        },
+        [
+            compositionRoot.glassDataSubmission,
+            refreshUploads,
+            refreshAsyncUploads,
+            setIsDatasetMarkAsCompleted,
+            setRefetchStatus,
+            snackbar,
+        ]
+    );
 
     const setCompleteStatus = useCallback(() => {
         if (rowToComplete?.id) {
             setLoading(true);
             return compositionRoot.glassUploads.setStatus({ id: rowToComplete.id, status: "COMPLETED" }).run(
                 () => {
+                    const idsMarkedToBeAsyncUpload = uploadsMarkedToBeAsyncUpload?.map(upload => upload.id) || [];
                     if (
-                        moduleProperties.get(currentModuleAccess.moduleName)?.completeStatusChange === "DATASET" ||
-                        (moduleProperties.get(currentModuleAccess.moduleName)?.completeStatusChange ===
-                            "QUESTIONNAIRE_AND_DATASET" &&
-                            questionnaires?.every(q => q.isMandatory && q.isCompleted))
+                        moduleProperties.get(currentModuleAccess.moduleName)?.isSingleFileTypePerSubmission &&
+                        idsMarkedToBeAsyncUpload?.length > 0
                     ) {
-                        return compositionRoot.glassDataSubmission
-                            .setStatus(rowToComplete.dataSubmission, "COMPLETE")
-                            .run(
-                                () => {
-                                    setIsDatasetMarkAsCompleted && setIsDatasetMarkAsCompleted(true);
-                                    setLoading(false);
+                        return compositionRoot.glassUploads.removeAsyncUploads(idsMarkedToBeAsyncUpload).run(
+                            () => {
+                                if (
+                                    moduleProperties.get(currentModuleAccess.moduleName)?.completeStatusChange ===
+                                        "DATASET" ||
+                                    (moduleProperties.get(currentModuleAccess.moduleName)?.completeStatusChange ===
+                                        "QUESTIONNAIRE_AND_DATASET" &&
+                                        questionnaires?.every(q => q.isMandatory && q.isCompleted))
+                                ) {
+                                    setDataSubmissionAsCompleted(rowToComplete);
+                                } else {
                                     refreshUploads({}); //Trigger re-render of parent
-                                    setRefetchStatus && setRefetchStatus("COMPLETE");
-                                },
-                                error => {
-                                    snackbar.error(
-                                        i18n.t("Error occurred when setting data submission status to COMPLETED")
-                                    );
-                                    console.debug(
-                                        "Error occurred when setting data submission status to COMPLETED: " + error
-                                    );
+                                    refreshAsyncUploads({});
                                     setLoading(false);
                                     setIsDatasetMarkAsCompleted && setIsDatasetMarkAsCompleted(false);
                                 }
-                            );
+                            },
+                            error => {
+                                snackbar.error(error);
+                                setLoading(false);
+                                setIsDatasetMarkAsCompleted && setIsDatasetMarkAsCompleted(false);
+                                refreshUploads({}); //Trigger re-render of parent
+                                refreshAsyncUploads({});
+                            }
+                        );
                     } else {
-                        refreshUploads({}); //Trigger re-render of parent
-                        setLoading(false);
-                        setIsDatasetMarkAsCompleted && setIsDatasetMarkAsCompleted(false);
+                        if (
+                            moduleProperties.get(currentModuleAccess.moduleName)?.completeStatusChange === "DATASET" ||
+                            (moduleProperties.get(currentModuleAccess.moduleName)?.completeStatusChange ===
+                                "QUESTIONNAIRE_AND_DATASET" &&
+                                questionnaires?.every(q => q.isMandatory && q.isCompleted))
+                        ) {
+                            setDataSubmissionAsCompleted(rowToComplete);
+                        } else {
+                            refreshUploads({}); //Trigger re-render of parent
+                            refreshAsyncUploads({});
+                            setLoading(false);
+                            setIsDatasetMarkAsCompleted && setIsDatasetMarkAsCompleted(false);
+                        }
                     }
                 },
                 errorMessage => {
@@ -483,13 +578,15 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({
             );
         }
     }, [
-        compositionRoot,
+        compositionRoot.glassUploads,
         currentModuleAccess.moduleName,
         questionnaires,
         refreshUploads,
+        refreshAsyncUploads,
         rowToComplete,
+        uploadsMarkedToBeAsyncUpload,
+        setDataSubmissionAsCompleted,
         setIsDatasetMarkAsCompleted,
-        setRefetchStatus,
         snackbar,
     ]);
 
@@ -549,7 +646,7 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({
                                     title={
                                         moduleProperties.get(currentModuleAccess.moduleName)?.deleteConfirmation.title
                                     }
-                                    onSave={deleteDataset}
+                                    onSave={manageDeleteDataset}
                                     onCancel={hideDeleteConfirmationDialog}
                                     saveText={i18n.t("Ok")}
                                     cancelText={i18n.t("Cancel")}

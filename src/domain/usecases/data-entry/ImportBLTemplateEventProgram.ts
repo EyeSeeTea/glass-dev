@@ -117,8 +117,10 @@ export class ImportBLTemplateEventProgram {
                                                         result,
                                                         "event",
                                                         this.metadataRepository,
-                                                        validatedEventResults.nonBlockingErrors,
-                                                        eventIdLineNoMap
+                                                        {
+                                                            nonBlockingErrors: validatedEventResults.nonBlockingErrors,
+                                                            eventIdLineNoMap,
+                                                        }
                                                     ).flatMap(summary => {
                                                         return uploadIdListFileAndSave(
                                                             uploadIdLocalStorageName,
@@ -338,12 +340,17 @@ export const mapToImportSummary = (
     result: TrackerPostResponse,
     type: "event" | "trackedEntity",
     metadataRepository: MetadataRepository,
-    nonBlockingErrors?: ConsistencyError[],
-    eventIdLineNoMap?: { id: string; lineNo: number }[]
+    params?: {
+        nonBlockingErrors?: ConsistencyError[];
+        eventIdLineNoMap?: { id: string; lineNo: number }[];
+    }
 ): FutureData<{
     importSummary: ImportSummary;
     eventIdList: string[];
 }> => {
+    const nonBlockingErrors = params?.nonBlockingErrors;
+    const eventIdLineNoMap = params?.eventIdLineNoMap;
+
     if (result && result.validationReport && result.stats) {
         const blockingErrorList = _.compact(
             result.validationReport.errorReports.map(summary => {
