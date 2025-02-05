@@ -65,4 +65,30 @@ export class RISIndividualFungalDataCSVDefaultRepository implements RISIndividua
                 };
         });
     }
+
+    getFromBlob(dataColumns: CustomDataColumns, blob: Blob): FutureData<CustomDataColumns[]> {
+        return Future.fromPromise(new SpreadsheetXlsxDataSource().readFromBlob(blob)).map(spreadsheet => {
+            const sheet = spreadsheet.sheets[0]; //Only one sheet for AMR Individual & Fungal
+
+            const rows: CustomDataColumns[] =
+                sheet?.rows.map(row => {
+                    const data: CustomDataColumns = dataColumns.map(column => {
+                        if (column.type === "string")
+                            return {
+                                key: column.key,
+                                type: column.type,
+                                value: getTextValue(row, column.key),
+                            } as CustomDataElementString;
+                        else
+                            return {
+                                key: column.key,
+                                type: column.type,
+                                value: getNumberValue(row, column.key),
+                            } as CustomDataElementNumber;
+                    });
+                    return data;
+                }) || [];
+            return rows;
+        });
+    }
 }

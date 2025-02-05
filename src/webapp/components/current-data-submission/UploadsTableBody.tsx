@@ -29,6 +29,7 @@ import { useGlassModule } from "../../hooks/useGlassModule";
 import { Id } from "../../../domain/entities/Ref";
 import { useQuestionnaires } from "./Questionnaires";
 import { DataSubmissionStatusTypes } from "../../../domain/entities/GlassDataSubmission";
+import { useGlassUploadsAsyncUploads } from "../../hooks/useGlassUploadsAsyncUploads";
 
 export interface UploadsTableBodyProps {
     rows?: UploadsDataItem[];
@@ -68,7 +69,7 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({
     const { asyncDeletions: asyncDeletionsState, setToAsyncDeletions } = useGlassUploadsAsyncDeletions();
     const currentModule = useGlassModule();
     const [questionnaires] = useQuestionnaires();
-
+    const { asyncUploads } = useGlassUploadsAsyncUploads();
     const showDeleteConfirmationDialog = (rowToDelete: UploadsDataItem) => {
         setRowToDelete(rowToDelete);
         setDeleteOpen(true);
@@ -143,6 +144,38 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({
         [asyncDeletionsState.kind, currentModuleAccess.moduleName, rows]
     );
 
+    const isSetToBeUploadedAsync = useCallback(
+        (uploadDataItem: UploadsDataItem): boolean => {
+            return (
+                (asyncUploads.kind === "loaded" &&
+                    asyncUploads.data.some(
+                        asyncUpload =>
+                            (asyncUpload.primaryUploadId === uploadDataItem.id ||
+                                asyncUpload.secondaryUploadId === uploadDataItem.id) &&
+                            asyncUpload.status === "PENDING"
+                    )) ??
+                false
+            );
+        },
+        [asyncUploads]
+    );
+
+    const isCurrentlyBeingUploadedAsync = useCallback(
+        (uploadDataItem: UploadsDataItem): boolean => {
+            return (
+                (asyncUploads.kind === "loaded" &&
+                    asyncUploads.data.some(
+                        asyncUpload =>
+                            (asyncUpload.primaryUploadId === uploadDataItem.id ||
+                                asyncUpload.secondaryUploadId === uploadDataItem.id) &&
+                            asyncUpload.status === "UPLOADING"
+                    )) ??
+                false
+            );
+        },
+        [asyncUploads]
+    );
+
     //Deleting a dataset completely has the following steps*:
     //1. Delete corresponsding datasetValue/event for each row in the file.
     //2. Delete corresponding document from DHIS
@@ -151,7 +184,13 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({
     // then it is only set to async deletion in Datastore key
     const deleteDataset = () => {
         hideDeleteConfirmationDialog();
-        if (!rowToDelete || asyncDeletionsState.kind !== "loaded" || currentModule.kind !== "loaded") return;
+        if (
+            !rowToDelete ||
+            asyncDeletionsState.kind !== "loaded" ||
+            currentModule.kind !== "loaded" ||
+            isCurrentlyBeingUploadedAsync(rowToDelete)
+        )
+            return;
 
         if (
             moduleProperties.get(currentModuleAccess.moduleName)?.hasAsyncDeletion &&
@@ -161,7 +200,7 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({
         ) {
             if (isAlreadyMarkedToBeDeleted(rowToDelete)) return;
 
-            setToAsyncDeletions([rowToDelete.id]);
+            setToAsyncDeletions(rowToDelete.id);
             refreshUploads({}); //Trigger re-render of parent
             setLoading(false);
             hideDeleteConfirmationDialog();
@@ -465,6 +504,26 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({
         }
     }, []);
 
+    const isDeletedDisabled = useCallback(
+        (row: UploadsDataItem) => {
+            return (
+                currentDataSubmissionStatus.kind === "loaded" &&
+                (!hasCurrentUserCaptureAccess ||
+                    !isEditModeStatus(currentDataSubmissionStatus.data.title) ||
+                    isAlreadyMarkedToBeDeleted(row) ||
+                    hasErrorAsyncDeleting(row) ||
+                    isCurrentlyBeingUploadedAsync(row))
+            );
+        },
+        [
+            currentDataSubmissionStatus,
+            hasCurrentUserCaptureAccess,
+            hasErrorAsyncDeleting,
+            isAlreadyMarkedToBeDeleted,
+            isCurrentlyBeingUploadedAsync,
+        ]
+    );
+
     return (
         <>
             {rows && currentModule.kind === "loaded" && (
@@ -540,7 +599,13 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({
                             {moduleProperties.get(currentModuleAccess.moduleName)?.isbatchReq && (
                                 <TableCell style={{ opacity: 0.5 }}>{row.batchId}</TableCell>
                             )}
-                            <TableCell>{i18n.t(row.status).toUpperCase()}</TableCell>
+                            <TableCell>
+                                {isSetToBeUploadedAsync(row)
+                                    ? i18n.t("MARKED TO BE UPLOADED")
+                                    : isCurrentlyBeingUploadedAsync(row)
+                                    ? i18n.t("UPLOADING ASYNC IN PROGRESS")
+                                    : i18n.t(row.status).toUpperCase()}
+                            </TableCell>
                             <TableCell style={{ opacity: 0.5 }}>
                                 <Button
                                     onClick={event => {
@@ -559,12 +624,7 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({
                                             e.stopPropagation();
                                             showDeleteConfirmationDialog(row);
                                         }}
-                                        disabled={
-                                            !hasCurrentUserCaptureAccess ||
-                                            !isEditModeStatus(currentDataSubmissionStatus.data.title) ||
-                                            isAlreadyMarkedToBeDeleted(row) ||
-                                            hasErrorAsyncDeleting(row)
-                                        }
+                                        disabled={isDeletedDisabled(row)}
                                     >
                                         {isAlreadyMarkedToBeDeleted(row) ? (
                                             i18n.t("Marked to be deleted")

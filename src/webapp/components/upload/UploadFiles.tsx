@@ -25,6 +25,10 @@ import { ImportSummary } from "../../../domain/entities/data-entry/ImportSummary
 import { StyledLoaderContainer } from "./ConsistencyChecks";
 import { moduleProperties } from "../../../domain/utils/ModuleProperties";
 import { EffectFn } from "../../hooks/use-callback-effect";
+import { useHistory } from "react-router-dom";
+import { Maybe } from "../../../utils/ts-utils";
+import { Id } from "../../../domain/entities/Ref";
+import { useGlassModule } from "../../hooks/useGlassModule";
 
 interface UploadFilesProps {
     changeStep: (step: number) => void;
@@ -45,6 +49,10 @@ interface UploadFilesProps {
     isLoadingSecondary: boolean;
     setIsLoadingPrimary: React.Dispatch<React.SetStateAction<boolean>>;
     dataSubmissionId: string | undefined;
+    setPrimaryFileTotalRows: React.Dispatch<React.SetStateAction<Maybe<number>>>;
+    primaryFileTotalRows: Maybe<number>;
+    setSecondaryFileTotalRows: React.Dispatch<React.SetStateAction<Maybe<number>>>;
+    secondaryFileTotalRows: Maybe<number>;
 }
 
 const UPLOADED_STATUS = "uploaded";
@@ -95,9 +103,15 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
     isLoadingSecondary,
     setIsLoadingSecondary,
     dataSubmissionId,
+    setPrimaryFileTotalRows,
+    primaryFileTotalRows,
+    setSecondaryFileTotalRows,
+    secondaryFileTotalRows,
 }) => {
     const { compositionRoot, allCountries } = useAppContext();
     const snackbar = useSnackbar();
+    const history = useHistory();
+
     const [isValidated, setIsValidated] = useState(false);
     const [isPrimaryFileValid, setIsPrimaryFileValid] = useState(false);
     const [isSecondaryFileValid, setIsSecondaryFileValid] = useState(false);
@@ -112,6 +126,7 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
         currentOrgUnitAccess: { orgUnitId, orgUnitName, orgUnitCode },
     } = useCurrentOrgUnitContext();
     const { currentPeriod } = useCurrentPeriodContext();
+    const currentModule = useGlassModule();
 
     const currentModuleProperties = moduleProperties.get(moduleName);
     const [uploadFileType, setUploadFileType] = useState(
@@ -394,27 +409,93 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
         currentModuleProperties?.isDryRunReq,
     ]);
 
-    const continueClick = () => {
-        if (!hasSecondaryFile) {
-            localStorage.removeItem("secondaryUploadId");
-            uploadFileSubmissions();
-        } else if (!moduleProperties.get(moduleName)?.isSecondaryRelated) {
-            uploadFileSubmissions();
-        }
-        //update the secondary file with primary file upload id.
-        else {
-            setImportLoading(true);
-            const primaryUploadId = localStorage.getItem("primaryUploadId");
-            const secondaryUploadId = localStorage.getItem("secondaryUploadId");
-            if (secondaryUploadId && primaryUploadId)
+    const returnToDatasetsTab = useCallback(() => {
+        history.push(`/current-data-submission`);
+    }, [history]);
+
+    const setToAsyncUploads = useCallback(
+        (primaryUploadId: Maybe<Id>, secondaryUploadId: Maybe<Id>) => {
+            compositionRoot.glassUploads.setToAsyncUploads(primaryUploadId, secondaryUploadId).run(
+                () => {
+                    snackbar.info(`File marked to be uploaded asynchronously`);
+                    setImportLoading(false);
+                    localStorage.removeItem("primaryUploadId");
+                    localStorage.removeItem("secondaryUploadId");
+                    returnToDatasetsTab();
+                },
+                error => {
+                    snackbar.error(`Error setting file to be uploaded asynchronously, error : ${error} `);
+                    console.error(error);
+                    setImportLoading(false);
+                }
+            );
+        },
+        [compositionRoot.glassUploads, returnToDatasetsTab, snackbar]
+    );
+
+    const handleAsyncUploads = useCallback(() => {
+        const primaryUploadId = localStorage.getItem("primaryUploadId") ?? undefined;
+        const secondaryUploadId =
+            localStorage.getItem("secondaryUploadId") && hasSecondaryFile
+                ? localStorage.getItem("secondaryUploadId") ?? undefined
+                : undefined;
+
+        if (hasSecondaryFile && moduleProperties.get(moduleName)?.isSecondaryRelated) {
+            //AMR: update the secondary file with primary file upload id.
+            if (secondaryUploadId && primaryUploadId) {
+                setImportLoading(true);
                 compositionRoot.glassDocuments.updateSecondaryFileWithPrimaryId(secondaryUploadId, primaryUploadId).run(
                     () => {
-                        uploadFileSubmissions();
+                        setToAsyncUploads(primaryUploadId, secondaryUploadId);
                     },
-                    () => {
-                        console.debug("Error updating datastore");
+                    error => {
+                        snackbar.error(
+                            `Error updating ${moduleProperties.get(moduleName)?.secondaryUploadLabel} file with ${
+                                moduleProperties.get(moduleName)?.primaryUploadLabel
+                            } file, error : ${error} `
+                        );
+                        console.error(error);
+                        setImportLoading(false);
                     }
                 );
+            }
+        } else {
+            setToAsyncUploads(primaryUploadId, secondaryUploadId);
+        }
+    }, [compositionRoot.glassDocuments, hasSecondaryFile, moduleName, setToAsyncUploads, snackbar]);
+
+    const continueClick = () => {
+        if (
+            moduleProperties.get(moduleName)?.hasAsyncUploads &&
+            currentModule.kind === "loaded" &&
+            currentModule.data.maxNumberOfRowsToSyncUploads &&
+            ((primaryFileTotalRows && primaryFileTotalRows > currentModule.data.maxNumberOfRowsToSyncUploads) ||
+                (secondaryFileTotalRows && secondaryFileTotalRows > currentModule.data.maxNumberOfRowsToSyncUploads))
+        ) {
+            handleAsyncUploads();
+        } else {
+            if (!hasSecondaryFile) {
+                localStorage.removeItem("secondaryUploadId");
+                uploadFileSubmissions();
+            } else if (!moduleProperties.get(moduleName)?.isSecondaryRelated) {
+                uploadFileSubmissions();
+            } else {
+                //update the secondary file with primary file upload id.
+                setImportLoading(true);
+                const primaryUploadId = localStorage.getItem("primaryUploadId");
+                const secondaryUploadId = localStorage.getItem("secondaryUploadId");
+                if (secondaryUploadId && primaryUploadId)
+                    compositionRoot.glassDocuments
+                        .updateSecondaryFileWithPrimaryId(secondaryUploadId, primaryUploadId)
+                        .run(
+                            () => {
+                                uploadFileSubmissions();
+                            },
+                            () => {
+                                console.debug("Error updating datastore");
+                            }
+                        );
+            }
         }
     };
 
@@ -529,6 +610,7 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
                                 isLoading={isLoadingPrimary}
                                 setIsLoading={setIsLoadingPrimary}
                                 dataSubmissionId={dataSubmissionId}
+                                setPrimaryFileTotalRows={setPrimaryFileTotalRows}
                             />
                         ) : (
                             <UploadSecondary
@@ -541,6 +623,7 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
                                 isLoading={isLoadingSecondary}
                                 setIsLoading={setIsLoadingSecondary}
                                 dataSubmissionId={dataSubmissionId}
+                                setSecondaryFileTotalRows={setSecondaryFileTotalRows}
                             />
                         )}
                     </StyledSingleFileSelectContainer>
@@ -569,6 +652,7 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
                                     isLoading={isLoadingPrimary}
                                     setIsLoading={setIsLoadingPrimary}
                                     dataSubmissionId={dataSubmissionId}
+                                    setPrimaryFileTotalRows={setPrimaryFileTotalRows}
                                 />
                                 {moduleProperties.get(moduleName)?.isSecondaryFileApplicable && (
                                     <UploadSecondary
@@ -581,6 +665,7 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
                                         isLoading={isLoadingSecondary}
                                         setIsLoading={setIsLoadingSecondary}
                                         dataSubmissionId={dataSubmissionId}
+                                        setSecondaryFileTotalRows={setSecondaryFileTotalRows}
                                     />
                                 )}
                             </div>

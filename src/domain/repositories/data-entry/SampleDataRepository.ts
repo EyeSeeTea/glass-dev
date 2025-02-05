@@ -5,4 +5,5 @@ export interface SampleDataRepository {
     get(file: File): FutureData<SampleData[]>;
     validate(file: File): FutureData<{ isValid: boolean; rows: number }>;
     getFromArayBuffer(arrayBuffer: ArrayBuffer): FutureData<SampleData[]>;
+    getFromBlob(blob: Blob): FutureData<SampleData[]>;
 }

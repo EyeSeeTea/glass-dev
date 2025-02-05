@@ -63,6 +63,18 @@ export const UploadsTable: React.FC<UploadsTableProps> = ({
                                             </Typography>
                                             <Typography variant="caption">
                                                 {i18n.t(
+                                                    "MARKED TO BE UPLOADED - The file has been uploaded, but data has not been imported as data is waiting to be uploaded asynchronously."
+                                                )}
+                                                <br />
+                                            </Typography>
+                                            <Typography variant="caption">
+                                                {i18n.t(
+                                                    "UPLOADING ASYNC IN PROGRESS - The file has been uploaded, but the data has not been imported because it is being uploaded asynchronously."
+                                                )}
+                                                <br />
+                                            </Typography>
+                                            <Typography variant="caption">
+                                                {i18n.t(
                                                     "IMPORTED - The data has been imported, but validations(if applicable) were not run successfully, in Step 2."
                                                 )}
                                                 <br />

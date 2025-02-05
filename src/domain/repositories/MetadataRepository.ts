@@ -2,6 +2,7 @@ import { Id } from "../entities/Base";
 import { FutureData } from "../entities/Future";
 import { CategoryCombo } from "../entities/metadata/CategoryCombo";
 import { DataSet } from "../entities/metadata/DataSet";
+import { DataSetValidation } from "../entities/metadata/DataSetValidation";
 import { CodedRef, NamedRef } from "../entities/Ref";
 
 export interface MetadataRepository {
@@ -12,6 +13,11 @@ export interface MetadataRepository {
     getClinicsAndLabsInOrgUnitId(id: string): FutureData<Id[]>;
     getDataSet(id: string): FutureData<DataSet>;
     getCategoryCombination(id: string): FutureData<CategoryCombo>;
-    validateDataSet(dataset: string, period: string, orgUnit: string, AOCs: string[]): FutureData<unknown>;
+    getValidationsDataSet(
+        dataset: string,
+        period: string,
+        orgUnit: string,
+        attributeOptionCombos: string[]
+    ): FutureData<DataSetValidation[]>;
     getValidationRuleInstructions(ids: string[]): FutureData<{ id: string; instruction: string }[]>;
 }

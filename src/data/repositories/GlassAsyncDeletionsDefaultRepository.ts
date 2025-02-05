@@ -24,20 +24,31 @@ export class GlassAsyncDeletionsDefaultRepository implements GlassAsyncDeletions
             .map(asyncDeletionsArray => asyncDeletionsArray.find(asyncDeletion => asyncDeletion.uploadId === uploadId));
     }
 
-    setAsyncDeletions(uploadIdsToDelete: Id[]): FutureData<void> {
-        return this.dataStoreClient
-            .listCollection<GlassAsyncDeletion>(DataStoreKeys.ASYNC_DELETIONS)
-            .flatMap(asyncDeletionsArray => {
-                const newAsyncDeletions: GlassAsyncDeletion[] = [
-                    ...asyncDeletionsArray,
-                    ...uploadIdsToDelete.map(
-                        (id): GlassAsyncDeletion => ({ ...INITIAL_ASYNC_DELETION_STATE, uploadId: id })
-                    ),
-                ];
-                return this.dataStoreClient.saveObject(DataStoreKeys.ASYNC_DELETIONS, newAsyncDeletions).flatMap(() => {
-                    return Future.success(undefined);
-                });
+    setToAsyncDeletions(uploadIdToDelete: Id): FutureData<void> {
+        return this.getAsyncDeletions().flatMap(asyncDeletionsArray => {
+            const newAsyncDeletions: GlassAsyncDeletion[] = [
+                ...asyncDeletionsArray,
+                {
+                    ...INITIAL_ASYNC_DELETION_STATE,
+                    uploadId: uploadIdToDelete,
+                },
+            ];
+            return this.dataStoreClient.saveObject(DataStoreKeys.ASYNC_DELETIONS, newAsyncDeletions).flatMap(() => {
+                return Future.success(undefined);
             });
+        });
+    }
+
+    removeAsyncDeletionById(uploadIdToRemove: Id): FutureData<void> {
+        return this.getAsyncDeletions().flatMap(asyncDeletionsArray => {
+            const restAsyncDeletions: GlassAsyncDeletion[] = asyncDeletionsArray.filter(
+                uploadIdToBeDeleted => uploadIdToBeDeleted.uploadId !== uploadIdToRemove
+            );
+
+            return this.dataStoreClient.saveObject(DataStoreKeys.ASYNC_DELETIONS, restAsyncDeletions).flatMap(() => {
+                return Future.success(undefined);
+            });
+        });
     }
 
     removeAsyncDeletions(uploadIdToRemove: Id[]): FutureData<void> {

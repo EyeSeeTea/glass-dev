@@ -1,3 +1,4 @@
+import _ from "lodash";
 import { D2Api } from "@eyeseetea/d2-api/2.34";
 import { FutureData } from "../../../domain/entities/Future";
 import { ProgramRulesMetadataRepository } from "../../../domain/repositories/program-rules/ProgramRulesMetadataRepository";
