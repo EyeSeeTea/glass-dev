@@ -5,8 +5,9 @@ import { Id } from "../entities/Ref";
 export interface GlassAsyncDeletionsRepository {
     getAsyncDeletions(): FutureData<GlassAsyncDeletion[]>;
     getById(uploadId: Id): FutureData<GlassAsyncDeletion | undefined>;
-    setAsyncDeletions(uploadIdsToDelete: Id[]): FutureData<void>;
-    removeAsyncDeletions(uploadIdToRemove: Id[]): FutureData<void>;
+    setToAsyncDeletions(uploadIdToDelete: Id): FutureData<void>;
+    removeAsyncDeletionById(uploadIdToRemove: Id): FutureData<void>;
+    removeAsyncDeletions(uploadIdsToRemove: Id[]): FutureData<void>;
     setStatus(uploadIds: Id[], newStatus: GlassAsyncDeletionStatus): FutureData<void>;
     incrementAsyncDeletionAttemptsAndResetStatus(uploadId: Id): FutureData<void>;
 }

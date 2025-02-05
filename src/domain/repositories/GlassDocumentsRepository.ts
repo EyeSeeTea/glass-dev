@@ -7,4 +7,5 @@ export interface GlassDocumentsRepository {
     delete(id: string): FutureData<string>;
     download(id: string): FutureData<Blob>;
     deleteDocumentApi(id: string): FutureData<void>;
+    saveBuffer(fileBuffer: Buffer, fileName: string, module: string): FutureData<string>;
 }

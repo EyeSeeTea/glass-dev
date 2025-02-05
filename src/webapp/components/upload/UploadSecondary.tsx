@@ -14,10 +14,12 @@ import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context
 import { EffectFn, useCallbackEffect } from "../../hooks/use-callback-effect";
 import { useCurrentPeriodContext } from "../../contexts/current-period-context";
 import { moduleProperties } from "../../../domain/utils/ModuleProperties";
+import { Maybe } from "../../../utils/ts-utils";
 
 interface UploadSecondaryProps {
     secondaryFile: File | null;
     setSecondaryFile: (maybeFile: File | null) => void;
+    setSecondaryFileTotalRows: React.Dispatch<React.SetStateAction<Maybe<number>>>;
     setHasSecondaryFile: React.Dispatch<React.SetStateAction<boolean>>;
     batchId: string;
     validate: (val: boolean) => void;
@@ -31,6 +33,7 @@ export const UploadSecondary: React.FC<UploadSecondaryProps> = ({
     batchId,
     secondaryFile,
     setSecondaryFile,
+    setSecondaryFileTotalRows,
     setHasSecondaryFile,
     validate,
     removeSecondaryFile,
@@ -82,6 +85,7 @@ export const UploadSecondary: React.FC<UploadSecondaryProps> = ({
 
                             if (sampleData.isValid) {
                                 setSecondaryFile(uploadedSample);
+                                setSecondaryFileTotalRows(sampleData.rows);
                                 const data = {
                                     batchId,
                                     fileType: moduleProperties.get(moduleName)?.secondaryFileType ?? "",
@@ -133,6 +137,7 @@ export const UploadSecondary: React.FC<UploadSecondaryProps> = ({
             setHasSecondaryFile,
             setIsLoading,
             setSecondaryFile,
+            setSecondaryFileTotalRows,
             snackbar,
         ]
     );
