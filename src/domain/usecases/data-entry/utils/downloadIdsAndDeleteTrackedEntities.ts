@@ -1,4 +1,3 @@
-import { D2TrackerTrackedEntity } from "@eyeseetea/d2-api/api/trackerTrackedEntities";
 import { Future, FutureData } from "../../../entities/Future";
 import { ImportStrategy } from "../../../entities/data-entry/DataValuesSaveSummary";
 import { ImportSummary } from "../../../entities/data-entry/ImportSummary";
@@ -10,6 +9,7 @@ import { mapToImportSummary } from "../ImportBLTemplateEventProgram";
 import { Id } from "../../../entities/Ref";
 import { GlassUploadsRepository } from "../../../repositories/GlassUploadsRepository";
 import { GlassUploads } from "../../../entities/GlassUploads";
+import { TrackerTrackedEntity } from "../../../entities/TrackedEntityInstance";
 
 export const downloadIdsAndDeleteTrackedEntities = (
     eventListId: string | undefined,
@@ -25,10 +25,12 @@ export const downloadIdsAndDeleteTrackedEntities = (
             return Future.fromPromise(getStringFromFile(file)).flatMap(_enrollments => {
                 const enrollmemtIdList: [] = JSON.parse(_enrollments);
                 const trackedEntities = enrollmemtIdList.map(id => {
-                    const trackedEntity: D2TrackerTrackedEntity = {
+                    const trackedEntity: TrackerTrackedEntity = {
                         orgUnit: orgUnitId,
                         trackedEntity: id,
                         trackedEntityType: trackedEntityType,
+                        attributes: [],
+                        enrollments: [],
                     };
                     return trackedEntity;
                 });
@@ -50,6 +52,7 @@ export const downloadIdsAndDeleteTrackedEntities = (
                 imported: 0,
                 deleted: 0,
                 updated: 0,
+                total: 0,
             },
             nonBlockingErrors: [],
             blockingErrors: [],
@@ -86,6 +89,7 @@ export const downloadIdsAndDeleteTrackedEntitiesUsingFileBlob = (
                                         imported: 0,
                                         deleted: 0,
                                         updated: 0,
+                                        total: 0,
                                     },
                                     nonBlockingErrors: [],
                                     blockingErrors: [],
@@ -95,10 +99,12 @@ export const downloadIdsAndDeleteTrackedEntitiesUsingFileBlob = (
                         }
 
                         const trackedEntities = existingTrackedEntitiesIds.map(id => {
-                            const trackedEntity: D2TrackerTrackedEntity = {
+                            const trackedEntity: TrackerTrackedEntity = {
                                 orgUnit: orgUnitId,
                                 trackedEntity: id,
                                 trackedEntityType: trackedEntityType,
+                                attributes: [],
+                                enrollments: [],
                             };
                             return trackedEntity;
                         });
@@ -133,6 +139,7 @@ export const downloadIdsAndDeleteTrackedEntitiesUsingFileBlob = (
                     imported: 0,
                     deleted: 0,
                     updated: 0,
+                    total: 0,
                 },
                 nonBlockingErrors: [],
                 blockingErrors: [],

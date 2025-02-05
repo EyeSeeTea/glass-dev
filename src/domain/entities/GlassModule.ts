@@ -47,6 +47,7 @@ export interface GlassModule {
     customDataColumns?: CustomDataColumns;
     lineLists?: LineListDetails[];
     chunkSizes?: ChunkSizes;
+    maxNumberOfRowsToSyncDeletion?: number;
 }
 
 export type LineListDetails = { id: Id; name?: string; programId: Id; programStageId?: Id };

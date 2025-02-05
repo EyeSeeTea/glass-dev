@@ -2,12 +2,12 @@ import { Dhis2EventsDefaultRepository } from "../../../../data/repositories/Dhis
 import { Future, FutureData } from "../../../entities/Future";
 import { ConsistencyError } from "../../../entities/data-entry/ImportSummary";
 import { ValidationResult } from "../../../entities/program-rules/EventEffectTypes";
-import { D2TrackerEvent as Event } from "@eyeseetea/d2-api/api/trackerEvents";
 import { MetadataRepository } from "../../../repositories/MetadataRepository";
 import { AMC_RAW_SUBSTANCE_CONSUMPTION_PROGRAM_ID } from "../amc/ImportAMCSubstanceLevelData";
 import { EGASP_PROGRAM_ID } from "../../../../data/repositories/program-rule/ProgramRulesMetadataDefaultRepository";
 import { validateAtcVersion } from "../../../entities/GlassAtcVersionData";
 import i18n from "../../../../locales";
+import { TrackerEvent } from "../../../entities/TrackedEntityInstance";
 
 const EGASP_DATAELEMENT_ID = "KaS2YBRN8eH";
 const PATIENT_DATAELEMENT_ID = "aocFHBxcQa0";
@@ -18,7 +18,7 @@ export class CustomValidationForEventProgram {
         private metadataRepository: MetadataRepository
     ) {}
     public getValidatedEvents(
-        events: Event[],
+        events: TrackerEvent[],
         orgUnitId: string,
         orgUnitName: string,
         period: string,
@@ -90,7 +90,7 @@ export class CustomValidationForEventProgram {
     }
 
     private checkCountry(
-        events: Event[],
+        events: TrackerEvent[],
         countryId: string,
         countryName: string,
         checkClinics: boolean
@@ -144,7 +144,7 @@ export class CustomValidationForEventProgram {
         });
     }
 
-    private checkPeriod(events: Event[], period: string): ConsistencyError[] {
+    private checkPeriod(events: TrackerEvent[], period: string): ConsistencyError[] {
         const errors = _(
             events.map(event => {
                 const eventDate = new Date(event.occurredAt);
@@ -170,7 +170,7 @@ export class CustomValidationForEventProgram {
         }));
     }
 
-    private checkUniqueEgaspId(fileEvents: Event[], existingEvents: Event[]): ConsistencyError[] {
+    private checkUniqueEgaspId(fileEvents: TrackerEvent[], existingEvents: TrackerEvent[]): ConsistencyError[] {
         //1. Egasp ids of events in file.
         const fileEgaspIDs = fileEvents.map(event => {
             const egaspDataElement = event?.dataValues?.find(dv => dv.dataElement === EGASP_DATAELEMENT_ID);
@@ -220,7 +220,10 @@ export class CustomValidationForEventProgram {
         return errors;
     }
 
-    private checkUniquePatientIdAndDate(fileEvents: Event[], existingEvents: Event[]): ConsistencyError[] {
+    private checkUniquePatientIdAndDate(
+        fileEvents: TrackerEvent[],
+        existingEvents: TrackerEvent[]
+    ): ConsistencyError[] {
         //1. Patient ids of events in file.
         const filePatientIDs = fileEvents.map(event => {
             const patientDataElement = event.dataValues.find(dv => dv.dataElement === PATIENT_DATAELEMENT_ID);

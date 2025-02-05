@@ -55,3 +55,80 @@ export function isRelationshipValid(relationship: Relationship): boolean {
         relationship.toId
     );
 }
+
+// NOTICE: Workaround because the d2-api (DHIS2) tracker types have been coupled in the domain
+// TODO: Fix the coupling with DHIS2 tracker types in the domain: map DHIS2 tracker types to domain types in the data layer and remove these.
+type IsoDate = string;
+type Username = string;
+
+export type TrackerEventDataValue = { dataElement: Id; value: string };
+
+export type TrackerEvent = {
+    program: Id;
+    programStage: Id;
+    trackedEntity?: Id;
+    orgUnit: Id;
+    orgUnitName?: string;
+    event: Id;
+    enrollment?: Id;
+    dataValues: TrackerEventDataValue[];
+    occurredAt: IsoDate;
+    status: "ACTIVE" | "COMPLETED" | "VISITED" | "SCHEDULE" | "OVERDUE" | "SKIPPED";
+    attributeOptionCombo?: Id;
+    scheduledAt?: IsoDate;
+    createdAt?: IsoDate;
+};
+
+export type TrackerEnrollmentAttribute = {
+    attribute: string;
+    value: Date | string | number;
+};
+
+export type TrackerEnrollment = {
+    orgUnit: Id;
+    program: Id;
+    enrollment: Id;
+    trackedEntity: Id;
+    trackedEntityType: Id;
+    attributes: TrackerEnrollmentAttribute[];
+    events: TrackerEvent[];
+    enrolledAt: IsoDate;
+    occurredAt: IsoDate;
+    createdAt: IsoDate;
+    createdAtClient: IsoDate;
+    updatedAt: IsoDate;
+    updatedAtClient: IsoDate;
+    enrollmentDate?: IsoDate;
+    incidentDate?: IsoDate;
+    status: "ACTIVE" | "COMPLETED" | "CANCELLED";
+    orgUnitName: string;
+    followUp: boolean;
+    deleted: boolean;
+    storedBy: Username;
+    programStage?: Id;
+};
+
+export interface TrackerTrackedEntityAttribute {
+    attribute: Id;
+    value: string;
+}
+
+export type TrackerTrackedEntity = {
+    trackedEntity: Id;
+    trackedEntityType: Id;
+    orgUnit: string;
+    attributes: TrackerTrackedEntityAttribute[];
+    enrollments: TrackerEnrollment[];
+    createdAtClient?: IsoDate;
+    updatedAtClient?: IsoDate;
+};
+
+export interface TrackerEventsPostRequest {
+    events: TrackerEvent[];
+}
+
+export interface TrackerPostRequest {
+    trackedEntities?: TrackerTrackedEntity[];
+    enrollments?: TrackerEnrollment[];
+    events?: TrackerEvent[];
+}
