@@ -271,8 +271,9 @@ export class CalculateConsumptionDataProductLevelUseCase {
                     importSubstancesResult.response,
                     IMPORT_SUMMARY_EVENT_TYPE,
                     this.metadataRepository,
-                    undefined,
-                    importSubstancesResult.eventIdLineNoMap
+                    {
+                        eventIdLineNoMap: importSubstancesResult.eventIdLineNoMap,
+                    }
                 ).flatMap(importSubstancesSummary => {
                     return this.uploadCalculatedIdListFileAndSave(
                         uploadId,

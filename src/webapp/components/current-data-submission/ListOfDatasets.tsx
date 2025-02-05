@@ -71,7 +71,7 @@ export const ListOfDatasets: React.FC<ListOfDatasetsProps> = ({ setRefetchStatus
         currentPeriod
     );
     const { captureAccessGroup } = useCurrentUserGroupsAccess();
-    const { asyncUploads } = useGlassUploadsAsyncUploads();
+    const { asyncUploads, refreshAsyncUploads } = useGlassUploadsAsyncUploads();
     const [isDatasetMarkAsCompleted, setIsDatasetMarkAsCompleted] = React.useState(false);
 
     const uploadsToBeUploadAsync = useMemo(() => {
@@ -141,6 +141,8 @@ export const ListOfDatasets: React.FC<ListOfDatasetsProps> = ({ setRefetchStatus
                         title={i18n.t("Correct Uploads")}
                         items={completeUploads}
                         refreshUploads={refreshUploads}
+                        refreshAsyncUploads={refreshAsyncUploads}
+                        asyncUploads={asyncUploads.kind === "loaded" ? asyncUploads.data : []}
                     />
                 )}
                 {currentDataSubmissionStatus.kind === "loaded" ? (
@@ -206,6 +208,8 @@ export const ListOfDatasets: React.FC<ListOfDatasetsProps> = ({ setRefetchStatus
                         title={i18n.t("Uploads marked to be uploaded asynchronously")}
                         items={uploadsToBeUploadAsync}
                         refreshUploads={refreshUploads}
+                        refreshAsyncUploads={refreshAsyncUploads}
+                        asyncUploads={asyncUploads.kind === "loaded" ? asyncUploads.data : []}
                     />
                 )}
                 {validatedUploads && validatedUploads.length > 0 && (
@@ -216,6 +220,9 @@ export const ListOfDatasets: React.FC<ListOfDatasetsProps> = ({ setRefetchStatus
                         showComplete={true}
                         setIsDatasetMarkAsCompleted={setIsDatasetMarkAsCompleted}
                         setRefetchStatus={setRefetchStatus}
+                        allUploads={uploads.kind === "loaded" ? uploads.data : []}
+                        refreshAsyncUploads={refreshAsyncUploads}
+                        asyncUploads={asyncUploads.kind === "loaded" ? asyncUploads.data : []}
                     />
                 )}
                 {incompleteUploadsNotAsyncUploaded && incompleteUploadsNotAsyncUploaded.length > 0 && (
@@ -223,6 +230,8 @@ export const ListOfDatasets: React.FC<ListOfDatasetsProps> = ({ setRefetchStatus
                         title={i18n.t("Uploads with errors, or discarded")}
                         items={incompleteUploadsNotAsyncUploaded}
                         refreshUploads={refreshUploads}
+                        refreshAsyncUploads={refreshAsyncUploads}
+                        asyncUploads={asyncUploads.kind === "loaded" ? asyncUploads.data : []}
                     />
                 )}
             </ContentWrapper>

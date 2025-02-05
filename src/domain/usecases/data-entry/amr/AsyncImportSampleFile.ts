@@ -129,7 +129,7 @@ export class AsyncImportSampleFile {
                         blockingErrors: allBlockingErrors,
                     };
 
-                    return Future.success([errorImportSummary]);
+                    return this.saveAllImportSummaries(uploadId, [errorImportSummary]);
                 } else {
                     const chunkedDataValues = _(dataValues).chunk(uploadChunkSize).value();
 

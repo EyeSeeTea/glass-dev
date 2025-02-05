@@ -118,7 +118,7 @@ async function main() {
                                     console.debug(
                                         `[${new Date().toISOString()}] There are ${
                                             asyncUploads.length
-                                        } uploads marked for being uploaded. ${
+                                        } uploads marked for being imported. ${
                                             uploadIdsToSetAsyncUploadErrorStatus.length
                                         } of them have reached the maximum number of attempts and will be marked as error`
                                     );
@@ -155,12 +155,12 @@ async function main() {
                                                                 ).run(
                                                                     () => {
                                                                         console.debug(
-                                                                            `[${new Date().toISOString()}] SUCCESS - Uploaded all datasets marked for async uploading with status PENDING.`
+                                                                            `[${new Date().toISOString()}] SUCCESS - Imported all datasets marked for async importing with status PENDING.`
                                                                         );
                                                                     },
                                                                     error => {
                                                                         console.error(
-                                                                            `[${new Date().toISOString()}] ERROR - An error occured while uploading: ${error}`
+                                                                            `[${new Date().toISOString()}] ERROR - An error occured while importing: ${error}`
                                                                         );
                                                                     }
                                                                 );
@@ -338,13 +338,15 @@ function incrementAsyncUploadsOrDeleteIfMaxAttemptAndSetErrorStatus(
 function setFinalStatus(
     glassUploadsRepository: GlassUploadsRepository,
     uploadId: Id,
-    hasBlockingErrors: boolean
+    hasBlockingErrors: boolean,
+    hasImportedValues: boolean
 ): FutureData<void> {
     if (hasBlockingErrors) {
+        const status: GlassUploadsStatus = hasImportedValues ? "IMPORTED" : "UPLOADED";
         console.debug(
-            `[${new Date().toISOString()}] Setting status to IMPORTED for upload ${uploadId} with blocking errors`
+            `[${new Date().toISOString()}] Setting status to ${status} for upload ${uploadId} with blocking errors`
         );
-        return setUploadStatus(glassUploadsRepository, uploadId, "IMPORTED").flatMap(() => {
+        return setUploadStatus(glassUploadsRepository, uploadId, status).flatMap(() => {
             return Future.success(undefined);
         });
     } else {
@@ -431,7 +433,7 @@ function manageAsyncUploadPrimaryFile(
     allCountries: Country[]
 ): FutureData<void> {
     console.debug(
-        `[${new Date().toISOString()}] Uploading ${primaryUpload.id} from module ${module.name}, org unit ${
+        `[${new Date().toISOString()}] Importing ${primaryUpload.id} from module ${module.name}, org unit ${
             primaryUpload.orgUnit
         } and period ${primaryUpload.period}`
     );
@@ -453,22 +455,36 @@ function manageAsyncUploadPrimaryFile(
                 dataColumns: module.customDataColumns || [],
                 allCountries: allCountries,
             }).flatMap(importSummaries => {
-                console.debug(
-                    `[${new Date().toISOString()}] Uploaded data from ${primaryUpload.id} from module ${
-                        module.name
-                    }, org unit ${primaryUpload.orgUnit} and period ${primaryUpload.period}`
-                );
-
                 const hasBlockingErrors = importSummaries.some(summary => summary.blockingErrors.length > 0);
-                return setFinalStatus(repositories.glassUploadsRepository, primaryUpload.id, hasBlockingErrors).flatMap(
-                    () => {
-                        return removeAsyncUploadByIdFromDatastore(
-                            repositories.glassAsyncUploadsRepository,
-                            repositories.glassUploadsRepository,
-                            asyncUpload.primaryUploadId
-                        );
-                    }
-                );
+                const hasImportedValues = importSummaries.some(summary => summary.importCount.imported > 0);
+                if (hasImportedValues) {
+                    console.debug(
+                        `[${new Date().toISOString()}] Data has been imported from upload ${
+                            primaryUpload.id
+                        } from module ${module.name}, org unit ${primaryUpload.orgUnit} and period ${
+                            primaryUpload.period
+                        } ${hasBlockingErrors ? "with blocking errors" : "without blocking errors"}`
+                    );
+                } else {
+                    console.debug(
+                        `[${new Date().toISOString()}] Data NOT imported from upload ${primaryUpload.id} from module ${
+                            module.name
+                        }, org unit ${primaryUpload.orgUnit} and period ${primaryUpload.period} due to blocking errors`
+                    );
+                }
+
+                return setFinalStatus(
+                    repositories.glassUploadsRepository,
+                    primaryUpload.id,
+                    hasBlockingErrors,
+                    hasImportedValues
+                ).flatMap(() => {
+                    return removeAsyncUploadByIdFromDatastore(
+                        repositories.glassAsyncUploadsRepository,
+                        repositories.glassUploadsRepository,
+                        asyncUpload.primaryUploadId
+                    );
+                });
             });
         });
     });
@@ -488,7 +504,7 @@ function manageAsyncUploadSecondaryFile(
     module: GlassModule
 ): FutureData<void> {
     console.debug(
-        `[${new Date().toISOString()}] Uploading ${secondaryUpload.id} from module ${module.name}, org unit ${
+        `[${new Date().toISOString()}] Importing ${secondaryUpload.id} from module ${module.name}, org unit ${
             secondaryUpload.orgUnit
         } and period ${secondaryUpload.period}`
     );
@@ -512,6 +528,7 @@ function manageAsyncUploadSecondaryFile(
                 dryRun: applyDryRun,
             }).flatMap(importSummaries => {
                 const hasBlockingErrors = importSummaries.some(summary => summary.blockingErrors.length > 0);
+                const hasImportedValues = importSummaries.some(summary => summary.importCount.imported > 0);
 
                 if (applyDryRun && !hasBlockingErrors) {
                     return asyncSecondaryFileSubmission(repositories, {
@@ -524,18 +541,38 @@ function manageAsyncUploadSecondaryFile(
                         batchId: secondaryUpload.batchId,
                         dryRun: false,
                     }).flatMap(importSummaries => {
-                        console.debug(
-                            `[${new Date().toISOString()}] Uploaded data from ${secondaryUpload.id} from module ${
-                                module.name
-                            }, org unit ${secondaryUpload.orgUnit} and period ${secondaryUpload.period}`
+                        const hasBlockingErrorsWithoutDryRun = importSummaries.some(
+                            summary => summary.blockingErrors.length > 0
+                        );
+                        const hasImportedValuesWithoutDryRun = importSummaries.some(
+                            summary => summary.importCount.imported > 0
                         );
 
-                        const hasBlockingErrors = importSummaries.some(summary => summary.blockingErrors.length > 0);
+                        if (hasImportedValuesWithoutDryRun) {
+                            console.debug(
+                                `[${new Date().toISOString()}] Data has been imported from upload ${
+                                    secondaryUpload.id
+                                } from module ${module.name}, org unit ${secondaryUpload.orgUnit} and period ${
+                                    secondaryUpload.period
+                                } ${
+                                    hasBlockingErrorsWithoutDryRun ? "with blocking errors" : "without blocking errors"
+                                }`
+                            );
+                        } else {
+                            console.debug(
+                                `[${new Date().toISOString()}] Data NOT imported from upload ${
+                                    secondaryUpload.id
+                                } from module ${module.name}, org unit ${secondaryUpload.orgUnit} and period ${
+                                    secondaryUpload.period
+                                } due to blocking errors`
+                            );
+                        }
 
                         return setFinalStatus(
                             repositories.glassUploadsRepository,
                             secondaryUpload.id,
-                            hasBlockingErrors
+                            hasBlockingErrorsWithoutDryRun,
+                            hasImportedValuesWithoutDryRun
                         ).flatMap(() => {
                             return removeAsyncUploadByIdFromDatastore(
                                 repositories.glassAsyncUploadsRepository,
@@ -545,10 +582,28 @@ function manageAsyncUploadSecondaryFile(
                         });
                     });
                 } else {
+                    if (hasImportedValues) {
+                        console.debug(
+                            `[${new Date().toISOString()}] Data has been imported from upload ${
+                                secondaryUpload.id
+                            } from module ${module.name}, org unit ${secondaryUpload.orgUnit} and period ${
+                                secondaryUpload.period
+                            } ${hasBlockingErrors ? "with blocking errors" : "without blocking errors"}`
+                        );
+                    } else {
+                        console.debug(
+                            `[${new Date().toISOString()}] Data NOT imported from upload ${
+                                secondaryUpload.id
+                            } from module ${module.name}, org unit ${secondaryUpload.orgUnit} and period ${
+                                secondaryUpload.period
+                            } due to blocking errors`
+                        );
+                    }
                     return setFinalStatus(
                         repositories.glassUploadsRepository,
                         secondaryUpload.id,
-                        hasBlockingErrors
+                        hasBlockingErrors,
+                        hasImportedValues
                     ).flatMap(() => {
                         return removeAsyncUploadByIdFromDatastore(
                             repositories.glassAsyncUploadsRepository,
@@ -563,13 +618,13 @@ function manageAsyncUploadSecondaryFile(
 }
 
 // Async upload only for AMR - Individual and AMR - Fungal modules has the following steps:
-// 0. Check if the upload is status "PENDING" uploading and set status to "UPLOADING"
+// 0. Check if the upload is status "PENDING" importing and set status to "UPLOADING"
 // 1. Download the file from the Datastore
 // 2. Validate data and import chunked data to DHIS2
 // 3. Save all import summaries to Datastore uploads and Event List File Ids if apply
 // 4. Set status to "IMPORTED" if there are blocking errors or "VALIDATED" if there are not
 // 5. Remove upload from Datastore async-uploads
-// *If some error occurs while uploading the data, increment the attempts and set errorAsyncUploading in upload if max attempts reached
+// *If some error occurs while importing the data, increment the attempts and set errorAsyncUploading in upload if max attempts reached
 function uploadDatasets(
     repositories: {
         risIndividualFungalRepository: RISIndividualFungalDataRepository;
@@ -675,7 +730,7 @@ function uploadDatasets(
                     })
                     .flatMapError(error => {
                         console.error(
-                            `[${new Date().toISOString()}] ERROR - An error occured while uploading: ${error}. Incrementing attempts and setting errorAsyncUploading in upload.`
+                            `[${new Date().toISOString()}] ERROR - An error occured while importing: ${error}. Incrementing attempts and setting errorAsyncUploading in upload.`
                         );
                         return incrementAsyncUploadsOrDeleteIfMaxAttemptAndSetErrorStatus(
                             repositories.glassAsyncUploadsRepository,
@@ -688,7 +743,7 @@ function uploadDatasets(
                     });
             } catch (e) {
                 console.error(
-                    `[${new Date().toISOString()}] ERROR - An error occured while uploading: ${e}. Incrementing attempts and setting errorAsyncUploading in upload.`
+                    `[${new Date().toISOString()}] ERROR - An error occured while importing: ${e}. Incrementing attempts and setting errorAsyncUploading in upload.`
                 );
                 return incrementAsyncUploadsOrDeleteIfMaxAttemptAndSetErrorStatus(
                     repositories.glassAsyncUploadsRepository,
