@@ -4,7 +4,11 @@ import { Country } from "../../../entities/Country";
 import { Future, FutureData } from "../../../entities/Future";
 import { GlassModule } from "../../../entities/GlassModule";
 import { Id } from "../../../entities/Ref";
-import { ImportSummary } from "../../../entities/data-entry/ImportSummary";
+import {
+    ImportSummary,
+    ImportSummaryWithEventIdList,
+    MergedImportSummaryWithEventIdList,
+} from "../../../entities/data-entry/ImportSummary";
 import { CustomDataColumns } from "../../../entities/data-entry/amr-individual-fungal-external/RISIndividualFungalData";
 import { GlassDocumentsRepository } from "../../../repositories/GlassDocumentsRepository";
 import { GlassUploadsRepository } from "../../../repositories/GlassUploadsRepository";
@@ -159,37 +163,39 @@ export class AsyncImportRISIndividualFungalFile {
     }> {
         const chunkedTrackedEntities = _(trackedEntities).chunk(uploadChunkSize).value();
 
-        const $saveTrackedEntities: Future<
-            string,
-            {
-                importSummary: ImportSummary;
-                eventIdList: string[];
-            }
-        >[] = chunkedTrackedEntities.map(trackedEntitiesChunk => {
-            return this.repositories.trackerRepository
-                .import({ trackedEntities: trackedEntitiesChunk }, CREATE_AND_UPDATE)
-                .flatMap(response => {
-                    return mapToImportSummary(
-                        response,
-                        TRACKED_ENTITY_IMPORT_SUMMARY_TYPE,
-                        this.repositories.metadataRepository
-                    ).flatMap(importSummaryResult => {
-                        const hasBlockingErrors = importSummaryResult.importSummary.blockingErrors.length > 0;
+        const $saveTrackedEntities = chunkedTrackedEntities.map(trackedEntitiesChunk => {
+            return (
+                this.repositories.trackerRepository
+                    .import({ trackedEntities: trackedEntitiesChunk }, CREATE_AND_UPDATE)
+                    // .flatMapError(error => {
+                    //     console.error(`[${new Date().toISOString()}] Error importing RIS Individual File values: ${error}`);
+                    //     return Future.success(
+                    //         mapToImportSummary(
+                    //             trackerPostResponseDefaultError,
+                    //             TRACKED_ENTITY_IMPORT_SUMMARY_TYPE,
+                    //             this.repositories.metadataRepository
+                    //         )
+                    //     );
+                    // })
+                    .flatMap(response => {
+                        return mapToImportSummary(
+                            response,
+                            TRACKED_ENTITY_IMPORT_SUMMARY_TYPE,
+                            this.repositories.metadataRepository
+                        ).flatMap(importSummaryResult => {
+                            const hasBlockingErrors = importSummaryResult.importSummary.blockingErrors.length > 0;
 
-                        if (hasBlockingErrors) {
-                            // TODO: Change this cast to a proper type
-                            return Future.error(importSummaryResult) as unknown as Future<
-                                string,
-                                {
-                                    importSummary: ImportSummary;
-                                    eventIdList: string[];
-                                }
-                            >;
-                        } else {
-                            return Future.success(importSummaryResult);
-                        }
-                    });
-                });
+                            if (hasBlockingErrors) {
+                                return Future.error(importSummaryResult) as unknown as Future<
+                                    string,
+                                    ImportSummaryWithEventIdList
+                                >;
+                            } else {
+                                return Future.success(importSummaryResult);
+                            }
+                        });
+                    })
+            );
         });
 
         return Future.sequentialWithAccumulation($saveTrackedEntities, true).flatMap(result => {
@@ -202,13 +208,10 @@ export class AsyncImportRISIndividualFungalFile {
 
                 const accumulatedImportSummaries = result.data;
                 // TODO: Change this cast to a proper type
-                const errorImportData = result.error as unknown as {
-                    importSummary: ImportSummary;
-                    eventIdList: string[];
-                };
+                const errorImportSummary = result.error as unknown as ImportSummaryWithEventIdList;
                 const importSummariesWithMergedEventIdListWithErrorSummary = this.mergeImportSummaries([
                     ...accumulatedImportSummaries,
-                    errorImportData,
+                    errorImportSummary,
                 ]);
                 return Future.success(importSummariesWithMergedEventIdListWithErrorSummary);
             } else {
@@ -218,12 +221,7 @@ export class AsyncImportRISIndividualFungalFile {
         });
     }
 
-    private mergeImportSummaries(
-        importSummaries: {
-            importSummary: ImportSummary;
-            eventIdList: string[];
-        }[]
-    ) {
+    private mergeImportSummaries(importSummaries: ImportSummaryWithEventIdList[]): MergedImportSummaryWithEventIdList {
         const importSummariesWithMergedEventIdList = importSummaries.reduce(
             (
                 acc: {
