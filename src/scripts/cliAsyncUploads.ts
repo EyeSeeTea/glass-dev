@@ -528,7 +528,6 @@ function manageAsyncUploadSecondaryFile(
                 dryRun: applyDryRun,
             }).flatMap(importSummaries => {
                 const hasBlockingErrors = importSummaries.some(summary => summary.blockingErrors.length > 0);
-                const hasImportedValues = importSummaries.some(summary => summary.importCount.imported > 0);
 
                 if (applyDryRun && !hasBlockingErrors) {
                     return asyncSecondaryFileSubmission(repositories, {
@@ -582,6 +581,8 @@ function manageAsyncUploadSecondaryFile(
                         });
                     });
                 } else {
+                    const hasImportedValues = importSummaries.some(summary => summary.importCount.imported > 0);
+
                     if (hasImportedValues) {
                         console.debug(
                             `[${new Date().toISOString()}] Data has been imported from upload ${
