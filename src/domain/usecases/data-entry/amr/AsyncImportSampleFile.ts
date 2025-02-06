@@ -161,18 +161,29 @@ export class AsyncImportSampleFile {
             return this.repositories.dataValuesRepository
                 .save(dataValuesChunk, CREATE_AND_UPDATE, dryRun)
                 .flatMap(dataValuesSaveSummary => {
-                    return Future.success(mapDataValuesToImportSummary(dataValuesSaveSummary, CREATE_AND_UPDATE));
+                    const importSummary = mapDataValuesToImportSummary(dataValuesSaveSummary, CREATE_AND_UPDATE);
+                    const hasBlockingErrors = importSummary.blockingErrors.length > 0;
+                    if (hasBlockingErrors) {
+                        // TODO: Change this cast to a proper type
+                        return Future.error(importSummary) as unknown as Future<string, ImportSummary>;
+                    } else {
+                        return Future.success(importSummary);
+                    }
                 });
         });
 
-        return Future.sequentialWithAccumulation($saveDataValuesFutures).flatMap(result => {
+        return Future.sequentialWithAccumulation($saveDataValuesFutures, true).flatMap(result => {
             if (result.type === "error") {
                 console.error(
                     `[${new Date().toISOString()}] Error importing Individual Sample File data values: ${result.error}`
                 );
+                const accumulatedImportSummaries = result.data;
+                // TODO: Change this cast to a proper type
+                const errorImportSummary = result.error as unknown as ImportSummary;
+                return Future.success([...accumulatedImportSummaries, errorImportSummary]);
+            } else {
+                return Future.success(result.data);
             }
-
-            return Future.success(result.data);
         });
     }
 
