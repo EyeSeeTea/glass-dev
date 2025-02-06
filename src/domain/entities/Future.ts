@@ -121,7 +121,10 @@ export class Future<E, D> {
         return this.parallel(inputValues.map((value, index) => mapper(value, index)));
     }
 
-    static sequentialWithAccumulation<E, D>(futures: Array<Future<E, D>>): Future<E, SequentialAccumulatedData<E, D>> {
+    static sequentialWithAccumulation<E, D>(
+        futures: Array<Future<E, D>>,
+        stopOnError = false
+    ): Future<E, SequentialAccumulatedData<E, D>> {
         const processSequentially = (
             futures: Array<Future<E, D>>,
             accumulatedData: D[] = []
@@ -141,7 +144,11 @@ export class Future<E, D> {
                     return processSequentially(remainingFutures, [...accumulatedData, resultData]);
                 })
                 .flatMapError(error => {
-                    return Future.success({ type: "error", error: error, data: accumulatedData });
+                    if (stopOnError) {
+                        return Future.success({ type: "error", error: error, data: accumulatedData });
+                    } else {
+                        return processSequentially(remainingFutures, accumulatedData);
+                    }
                 });
         };
 
