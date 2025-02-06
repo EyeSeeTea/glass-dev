@@ -157,19 +157,49 @@ export class AsyncImportSampleFile {
     }
 
     private saveDataValuesByChunks(chunkedDataValues: DataValue[][], dryRun: boolean): FutureData<ImportSummary[]> {
-        const $saveDataValuesFutures: Future<string, ImportSummary>[] = chunkedDataValues.map(dataValuesChunk => {
-            return this.repositories.dataValuesRepository
-                .save(dataValuesChunk, CREATE_AND_UPDATE, dryRun)
-                .flatMap(dataValuesSaveSummary => {
-                    const importSummary = mapDataValuesToImportSummary(dataValuesSaveSummary, CREATE_AND_UPDATE);
-                    const hasBlockingErrors = importSummary.blockingErrors.length > 0;
-                    if (hasBlockingErrors) {
-                        // TODO: Change this cast to a proper type
-                        return Future.error(importSummary) as unknown as Future<string, ImportSummary>;
-                    } else {
-                        return Future.success(importSummary);
-                    }
-                });
+        const $saveDataValuesFutures = chunkedDataValues.map(dataValuesChunk => {
+            return (
+                this.repositories.dataValuesRepository
+                    .save(dataValuesChunk, CREATE_AND_UPDATE, dryRun)
+                    // .flatMapError(error => {
+                    //     console.error(
+                    //         `[${new Date().toISOString()}] Error importing Individual Sample File data values: ${error}`
+                    //     );
+                    //     const dataValuesSaveSummaryError: DataValuesSaveSummary = {
+                    //         status: "ERROR",
+                    //         description: error,
+                    //         importCount: {
+                    //             imported: 0,
+                    //             updated: 0,
+                    //             ignored: 0,
+                    //             deleted: 0,
+                    //         },
+                    //         conflicts: [
+                    //             {
+                    //                 object: "",
+                    //                 value: error,
+                    //             },
+                    //         ],
+                    //         importTime: new Date(),
+                    //     };
+
+                    //     const importSummaryError = mapDataValuesToImportSummary(
+                    //         dataValuesSaveSummaryError,
+                    //         CREATE_AND_UPDATE
+                    //     );
+                    //     return Future.success(importSummaryError);
+                    // })
+                    .flatMap(dataValuesSaveSummary => {
+                        const importSummary = mapDataValuesToImportSummary(dataValuesSaveSummary, CREATE_AND_UPDATE);
+                        const hasBlockingErrors = importSummary.blockingErrors.length > 0;
+                        if (hasBlockingErrors) {
+                            // TODO: Change this cast to a proper type
+                            return Future.error(importSummary) as unknown as Future<string, ImportSummary>;
+                        } else {
+                            return Future.success(importSummary);
+                        }
+                    })
+            );
         });
 
         return Future.sequentialWithAccumulation($saveDataValuesFutures, true).flatMap(result => {
