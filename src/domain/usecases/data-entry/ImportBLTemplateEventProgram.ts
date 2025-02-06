@@ -2,7 +2,7 @@ import _ from "lodash";
 import moment from "moment";
 import { Dhis2EventsDefaultRepository } from "../../../data/repositories/Dhis2EventsDefaultRepository";
 import { ImportStrategy } from "../../entities/data-entry/DataValuesSaveSummary";
-import { ConsistencyError, ImportSummary } from "../../entities/data-entry/ImportSummary";
+import { ConsistencyError, ImportSummary, ImportSummaryWithEventIdList } from "../../entities/data-entry/ImportSummary";
 import { Future, FutureData } from "../../entities/Future";
 import { ExcelRepository } from "../../repositories/ExcelRepository";
 import { GlassDocumentsRepository } from "../../repositories/GlassDocumentsRepository";
@@ -313,7 +313,7 @@ export class ImportBLTemplateEventProgram {
 
 export const uploadIdListFileAndSave = (
     uploadIdLocalStorageName: string,
-    summary: { importSummary: ImportSummary; eventIdList: string[] },
+    summary: ImportSummaryWithEventIdList,
     moduleName: string,
     glassDocumentsRepository: GlassDocumentsRepository,
     glassUploadsRepository: GlassUploadsRepository
@@ -344,10 +344,7 @@ export const mapToImportSummary = (
         nonBlockingErrors?: ConsistencyError[];
         eventIdLineNoMap?: { id: string; lineNo: number }[];
     }
-): FutureData<{
-    importSummary: ImportSummary;
-    eventIdList: string[];
-}> => {
+): FutureData<ImportSummaryWithEventIdList> => {
     const nonBlockingErrors = params?.nonBlockingErrors;
     const eventIdLineNoMap = params?.eventIdLineNoMap;
 
