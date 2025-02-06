@@ -17,7 +17,7 @@ import { getStringFromFile } from "./utils/fileToString";
 import { TrackerPostResponse } from "@eyeseetea/d2-api/api/tracker";
 import { ProgramRuleValidationForBLEventProgram } from "../program-rules-processing/ProgramRuleValidationForBLEventProgram";
 import { ProgramRulesMetadataRepository } from "../../repositories/program-rules/ProgramRulesMetadataRepository";
-import { CustomValidationForEventProgram } from "./egasp/CustomValidationForEventProgram";
+import { CustomValidationForEventProgram, PATIENT_DATAELEMENT_ID } from "./egasp/CustomValidationForEventProgram";
 import { Template } from "../../entities/Template";
 import { ExcelReader } from "../../utils/ExcelReader";
 import { InstanceRepository } from "../../repositories/InstanceRepository";
@@ -25,6 +25,9 @@ import { AMC_RAW_SUBSTANCE_CONSUMPTION_PROGRAM_ID } from "./amc/ImportAMCSubstan
 import { GlassATCRepository } from "../../repositories/GlassATCRepository";
 import { ListGlassATCLastVersionKeysByYear } from "../../entities/GlassAtcVersionData";
 import { TrackerEvent } from "../../entities/TrackedEntityInstance";
+import { EGASP_PROGRAM_ID } from "../../../data/repositories/program-rule/ProgramRulesMetadataDefaultRepository";
+import sodium from "libsodium-wrappers";
+import { EncryptionData } from "../../repositories/EncryptionRepository";
 
 export const ATC_VERSION_DATA_ELEMENT_ID = "aCuWz3HZ5Ti";
 
@@ -50,7 +53,8 @@ export class ImportBLTemplateEventProgram {
         period: string,
         programId: string,
         uploadIdLocalStorageName: string,
-        calculatedEventListFileId?: string
+        calculatedEventListFileId?: string,
+        encryptionData?: EncryptionData
     ): FutureData<ImportSummary> {
         return this.excelRepository.loadTemplate(file, programId).flatMap(_templateId => {
             const template = _.values(templates)
@@ -71,7 +75,8 @@ export class ImportBLTemplateEventProgram {
                                 action,
                                 programId,
                                 eventListFileId,
-                                calculatedEventListFileId
+                                calculatedEventListFileId,
+                                encryptionData
                             ).flatMap(events => {
                                 if (action === "CREATE_AND_UPDATE") {
                                     if (!events.length)
@@ -161,13 +166,14 @@ export class ImportBLTemplateEventProgram {
         action: ImportStrategy,
         programId: string,
         eventListFileId: string | undefined,
-        calculatedEventListFileId?: string
+        calculatedEventListFileId?: string,
+        encryptionData?: EncryptionData
     ): FutureData<TrackerEvent[]> {
         if (action === "CREATE_AND_UPDATE") {
             if (programId === AMC_RAW_SUBSTANCE_CONSUMPTION_PROGRAM_ID) {
                 return this.buildEventsPayloadForAMCSubstances(dataPackage);
             }
-            return Future.success(this.mapDataPackageToD2TrackerEvents(dataPackage));
+            return Future.success(this.mapDataPackageToD2TrackerEvents(dataPackage, undefined, encryptionData));
         } else if (action === "DELETE") {
             return Future.joinObj({
                 events: eventListFileId ? this.getEventsFromListFileId(eventListFileId) : Future.success([]),
@@ -208,7 +214,8 @@ export class ImportBLTemplateEventProgram {
 
     mapDataPackageToD2TrackerEvents(
         dataPackage: DataPackage,
-        atcVersionKeysByYear?: ListGlassATCLastVersionKeysByYear
+        atcVersionKeysByYear?: ListGlassATCLastVersionKeysByYear,
+        encryptionData?: EncryptionData
     ): TrackerEvent[] {
         return dataPackage.dataEntries.map(
             ({ id, orgUnit, period, attribute, dataValues, dataForm, coordinate }, index) => {
@@ -236,6 +243,16 @@ export class ImportBLTemplateEventProgram {
                         ) {
                             const atcVersionKey = atcVersionKeysByYear ? atcVersionKeysByYear[el.value.toString()] : "";
                             return { ...el, value: atcVersionKey ?? "" };
+                        } else if (dataForm === EGASP_PROGRAM_ID && el.dataElement === PATIENT_DATAELEMENT_ID) {
+                            //For EGASP, encrypt the patient id
+
+                            const patientId = el.value.toString();
+
+                            if (!encryptionData) {
+                                throw new Error("Encryption data is required for encrypting patient id, not found");
+                            }
+                            const encryptedPatientId = this.encryptString(encryptionData, patientId);
+                            return { ...el, value: encryptedPatientId };
                         }
 
                         return { ...el, value: el.value.toString() };
@@ -306,6 +323,15 @@ export class ImportBLTemplateEventProgram {
             };
             return Future.success(consolidatedValidationResults);
         });
+    }
+
+    private encryptString(encryptionData: EncryptionData, input: string): string {
+        const inputBytes = sodium.from_string(input);
+        const nonce = sodium.from_string(encryptionData.nonce);
+        const key = sodium.from_base64(encryptionData.key);
+        const encrypted = sodium.crypto_secretbox_easy(inputBytes, nonce, key);
+        const encryptedString = sodium.to_base64(nonce) + ":" + sodium.to_base64(encrypted);
+        return encryptedString;
     }
 }
 
