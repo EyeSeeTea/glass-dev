@@ -2,7 +2,7 @@ import { ConsoleLogger, ProgramLogger, initLogger, BatchLogContent } from "@eyes
 import { Instance } from "../data/entities/Instance";
 import { Id } from "../domain/entities/Base";
 
-const GLOBAL_ORG_UNIT = "H8RixfF8ugH";
+export const GLOBAL_ORG_UNIT = "H8RixfF8ugH";
 const LOGS_PROGRAM = "zARxYmOD18Z";
 const MESSAGE_DATA_ELEMENT = "BjUzF5E4eR8";
 const MESSAGE_TYPE_DATA_ELEMENT = "NpS5LoLuhgS";
