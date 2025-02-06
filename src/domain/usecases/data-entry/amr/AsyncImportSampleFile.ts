@@ -202,7 +202,9 @@ export class AsyncImportSampleFile {
             );
         });
 
-        return Future.sequentialWithAccumulation($saveDataValuesFutures, true).flatMap(result => {
+        return Future.sequentialWithAccumulation($saveDataValuesFutures, {
+            stopOnError: true,
+        }).flatMap(result => {
             if (result.type === "error") {
                 console.error(
                     `[${new Date().toISOString()}] Error importing Individual Sample File data values: ${result.error}`
