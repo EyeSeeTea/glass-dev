@@ -1,3 +1,5 @@
+import { Id } from "../Ref";
+
 export type ImportSummary = {
     status: "SUCCESS" | "ERROR" | "WARNING";
     importCount: {
@@ -31,4 +33,11 @@ export type BlockingError = {
 export type NonBlockingError = {
     type: "non-blocking";
     error: ConsistencyError;
+};
+
+export type ImportSummaryWithEventIdList = { importSummary: ImportSummary; eventIdList: Id[] };
+
+export type MergedImportSummaryWithEventIdList = {
+    allImportSummaries: ImportSummary[];
+    mergedEventIdList: Id[];
 };
