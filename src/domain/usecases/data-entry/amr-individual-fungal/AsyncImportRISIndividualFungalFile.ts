@@ -173,46 +173,81 @@ export class AsyncImportRISIndividualFungalFile {
                         response,
                         TRACKED_ENTITY_IMPORT_SUMMARY_TYPE,
                         this.repositories.metadataRepository
-                    );
+                    ).flatMap(importSummaryResult => {
+                        const hasBlockingErrors = importSummaryResult.importSummary.blockingErrors.length > 0;
+
+                        if (hasBlockingErrors) {
+                            // TODO: Change this cast to a proper type
+                            return Future.error(importSummaryResult) as unknown as Future<
+                                string,
+                                {
+                                    importSummary: ImportSummary;
+                                    eventIdList: string[];
+                                }
+                            >;
+                        } else {
+                            return Future.success(importSummaryResult);
+                        }
+                    });
                 });
         });
 
-        return Future.sequentialWithAccumulation($saveTrackedEntities).flatMap(result => {
+        return Future.sequentialWithAccumulation($saveTrackedEntities, true).flatMap(result => {
             if (result.type === "error") {
                 console.error(
                     `[${new Date().toISOString()}] Error importing tracked entities from file in module: ${glassModuleName}: ${
                         result.error
                     }`
                 );
+
+                const accumulatedImportSummaries = result.data;
+                // TODO: Change this cast to a proper type
+                const errorImportData = result.error as unknown as {
+                    importSummary: ImportSummary;
+                    eventIdList: string[];
+                };
+                const importSummariesWithMergedEventIdListWithErrorSummary = this.mergeImportSummaries([
+                    ...accumulatedImportSummaries,
+                    errorImportData,
+                ]);
+                return Future.success(importSummariesWithMergedEventIdListWithErrorSummary);
+            } else {
+                const importSummariesWithMergedEventIdList = this.mergeImportSummaries(result.data);
+                return Future.success(importSummariesWithMergedEventIdList);
             }
-
-            const importSummaries = result.data;
-
-            const importSummariesWithMergedEventIdList = importSummaries.reduce(
-                (
-                    acc: {
-                        allImportSummaries: ImportSummary[];
-                        mergedEventIdList: Id[];
-                    },
-                    data: {
-                        importSummary: ImportSummary;
-                        eventIdList: Id[];
-                    }
-                ) => {
-                    const { importSummary } = data;
-                    return {
-                        allImportSummaries: [...acc.allImportSummaries, importSummary],
-                        mergedEventIdList: [...acc.mergedEventIdList, ...data.eventIdList],
-                    };
-                },
-                {
-                    allImportSummaries: [],
-                    mergedEventIdList: [],
-                }
-            );
-
-            return Future.success(importSummariesWithMergedEventIdList);
         });
+    }
+
+    private mergeImportSummaries(
+        importSummaries: {
+            importSummary: ImportSummary;
+            eventIdList: string[];
+        }[]
+    ) {
+        const importSummariesWithMergedEventIdList = importSummaries.reduce(
+            (
+                acc: {
+                    allImportSummaries: ImportSummary[];
+                    mergedEventIdList: Id[];
+                },
+                data: {
+                    importSummary: ImportSummary;
+                    eventIdList: Id[];
+                }
+            ) => {
+                const { importSummary } = data;
+                return {
+                    allImportSummaries: [...acc.allImportSummaries, importSummary],
+                    mergedEventIdList: [...acc.mergedEventIdList, ...data.eventIdList],
+                };
+            },
+            {
+                allImportSummaries: [],
+                mergedEventIdList: [],
+            }
+        );
+
+        return importSummariesWithMergedEventIdList;
     }
 
     private uploadIdListFileAndSave(uploadId: Id, eventIdList: Id[], moduleName: string): FutureData<void> {
