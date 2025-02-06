@@ -164,63 +164,85 @@ export class AsyncImportRISIndividualFungalFile {
         const chunkedTrackedEntities = _(trackedEntities).chunk(uploadChunkSize).value();
 
         const $saveTrackedEntities = chunkedTrackedEntities.map(trackedEntitiesChunk => {
-            return (
-                this.repositories.trackerRepository
-                    .import({ trackedEntities: trackedEntitiesChunk }, CREATE_AND_UPDATE)
-                    // .flatMapError(error => {
-                    //     console.error(`[${new Date().toISOString()}] Error importing RIS Individual File values: ${error}`);
-                    //     return Future.success(
-                    //         mapToImportSummary(
-                    //             trackerPostResponseDefaultError,
-                    //             TRACKED_ENTITY_IMPORT_SUMMARY_TYPE,
-                    //             this.repositories.metadataRepository
-                    //         )
-                    //     );
-                    // })
-                    .flatMap(response => {
-                        return mapToImportSummary(
-                            response,
-                            TRACKED_ENTITY_IMPORT_SUMMARY_TYPE,
-                            this.repositories.metadataRepository
-                        ).flatMap(importSummaryResult => {
-                            const hasBlockingErrors = importSummaryResult.importSummary.blockingErrors.length > 0;
+            return this.repositories.trackerRepository
+                .import({ trackedEntities: trackedEntitiesChunk }, CREATE_AND_UPDATE)
+                .mapError(error => {
+                    console.error(`[${new Date().toISOString()}] Error importing RIS Individual File values: ${error}`);
+                    const errorImportSummary: ImportSummaryWithEventIdList = {
+                        importSummary: {
+                            status: "ERROR",
+                            importCount: { ignored: 0, imported: 0, deleted: 0, updated: 0, total: 0 },
+                            nonBlockingErrors: [],
+                            blockingErrors: [{ error: error, count: 1 }],
+                        },
+                        eventIdList: [],
+                    };
+                    return errorImportSummary;
+                })
+                .flatMap(response => {
+                    return mapToImportSummary(
+                        response,
+                        TRACKED_ENTITY_IMPORT_SUMMARY_TYPE,
+                        this.repositories.metadataRepository
+                    )
+                        .mapError(error => {
+                            console.error(
+                                `[${new Date().toISOString()}] Error importing RIS Individual File values: ${error}`
+                            );
 
-                            if (hasBlockingErrors) {
-                                return Future.error(importSummaryResult) as unknown as Future<
-                                    string,
-                                    ImportSummaryWithEventIdList
-                                >;
-                            } else {
-                                return Future.success(importSummaryResult);
+                            const errorImportSummary: ImportSummaryWithEventIdList = {
+                                importSummary: {
+                                    status: "ERROR",
+                                    importCount: { ignored: 0, imported: 0, deleted: 0, updated: 0, total: 0 },
+                                    nonBlockingErrors: [],
+                                    blockingErrors: [{ error: error, count: 1 }],
+                                },
+                                eventIdList: [],
+                            };
+                            return errorImportSummary;
+                        })
+                        .flatMap(
+                            (
+                                importSummaryResult
+                            ): Future<ImportSummaryWithEventIdList, ImportSummaryWithEventIdList> => {
+                                const hasBlockingErrors = importSummaryResult.importSummary.blockingErrors.length > 0;
+
+                                if (hasBlockingErrors) {
+                                    return Future.error(importSummaryResult);
+                                } else {
+                                    return Future.success(importSummaryResult);
+                                }
                             }
-                        });
-                    })
-            );
+                        );
+                });
         });
 
         return Future.sequentialWithAccumulation($saveTrackedEntities, {
             stopOnError: true,
-        }).flatMap(result => {
-            if (result.type === "error") {
-                console.error(
-                    `[${new Date().toISOString()}] Error importing tracked entities from file in module: ${glassModuleName}: ${
-                        result.error
-                    }`
-                );
+        })
+            .flatMap(result => {
+                if (result.type === "error") {
+                    const errorImportSummary = result.error;
+                    const messageErrors = errorImportSummary.importSummary.blockingErrors
+                        .map(error => error.error)
+                        .join(", ");
 
-                const accumulatedImportSummaries = result.data;
-                // TODO: Change this cast to a proper type
-                const errorImportSummary = result.error as unknown as ImportSummaryWithEventIdList;
-                const importSummariesWithMergedEventIdListWithErrorSummary = this.mergeImportSummaries([
-                    ...accumulatedImportSummaries,
-                    errorImportSummary,
-                ]);
-                return Future.success(importSummariesWithMergedEventIdListWithErrorSummary);
-            } else {
-                const importSummariesWithMergedEventIdList = this.mergeImportSummaries(result.data);
-                return Future.success(importSummariesWithMergedEventIdList);
-            }
-        });
+                    console.error(
+                        `[${new Date().toISOString()}] Error importing some tracked entities from file in module: ${glassModuleName}: ${messageErrors}`
+                    );
+
+                    const accumulatedImportSummaries = result.data;
+                    const importSummariesWithMergedEventIdListWithErrorSummary = this.mergeImportSummaries([
+                        ...accumulatedImportSummaries,
+                        errorImportSummary,
+                    ]);
+                    return Future.success(importSummariesWithMergedEventIdListWithErrorSummary);
+                } else {
+                    const importSummariesWithMergedEventIdList = this.mergeImportSummaries(result.data);
+                    return Future.success(importSummariesWithMergedEventIdList);
+                }
+            })
+            .mapError(() => "Internal error");
     }
 
     private mergeImportSummaries(importSummaries: ImportSummaryWithEventIdList[]): MergedImportSummaryWithEventIdList {

@@ -20,6 +20,7 @@ import { includeBlockingErrors } from "../utils/includeBlockingErrors";
 import { mapDataValuesToImportSummary } from "../utils/mapDhis2Summary";
 import { DataValue } from "../../../entities/data-entry/DataValue";
 import { GlassUploadsRepository } from "../../../repositories/GlassUploadsRepository";
+import { DataValuesSaveSummary } from "../../../entities/data-entry/DataValuesSaveSummary";
 
 const AMR_AMR_DS_Input_files_Sample_ID = "OcAB7oaC072";
 const AMR_BATCHID_CC_ID = "rEMx3WFeLcU";
@@ -158,65 +159,65 @@ export class AsyncImportSampleFile {
 
     private saveDataValuesByChunks(chunkedDataValues: DataValue[][], dryRun: boolean): FutureData<ImportSummary[]> {
         const $saveDataValuesFutures = chunkedDataValues.map(dataValuesChunk => {
-            return (
-                this.repositories.dataValuesRepository
-                    .save(dataValuesChunk, CREATE_AND_UPDATE, dryRun)
-                    // .flatMapError(error => {
-                    //     console.error(
-                    //         `[${new Date().toISOString()}] Error importing Individual Sample File data values: ${error}`
-                    //     );
-                    //     const dataValuesSaveSummaryError: DataValuesSaveSummary = {
-                    //         status: "ERROR",
-                    //         description: error,
-                    //         importCount: {
-                    //             imported: 0,
-                    //             updated: 0,
-                    //             ignored: 0,
-                    //             deleted: 0,
-                    //         },
-                    //         conflicts: [
-                    //             {
-                    //                 object: "",
-                    //                 value: error,
-                    //             },
-                    //         ],
-                    //         importTime: new Date(),
-                    //     };
+            return this.repositories.dataValuesRepository
+                .save(dataValuesChunk, CREATE_AND_UPDATE, dryRun)
+                .mapError(error => {
+                    console.error(
+                        `[${new Date().toISOString()}] Error importing Individual Sample File data values: ${error}`
+                    );
+                    const dataValuesSaveSummaryError: DataValuesSaveSummary = {
+                        status: "ERROR",
+                        description: error,
+                        importCount: {
+                            imported: 0,
+                            updated: 0,
+                            ignored: 0,
+                            deleted: 0,
+                        },
+                        conflicts: [
+                            {
+                                object: "",
+                                value: error,
+                            },
+                        ],
+                        importTime: new Date(),
+                    };
 
-                    //     const importSummaryError = mapDataValuesToImportSummary(
-                    //         dataValuesSaveSummaryError,
-                    //         CREATE_AND_UPDATE
-                    //     );
-                    //     return Future.success(importSummaryError);
-                    // })
-                    .flatMap(dataValuesSaveSummary => {
-                        const importSummary = mapDataValuesToImportSummary(dataValuesSaveSummary, CREATE_AND_UPDATE);
-                        const hasBlockingErrors = importSummary.blockingErrors.length > 0;
-                        if (hasBlockingErrors) {
-                            // TODO: Change this cast to a proper type
-                            return Future.error(importSummary) as unknown as Future<string, ImportSummary>;
-                        } else {
-                            return Future.success(importSummary);
-                        }
-                    })
-            );
+                    const importSummaryError = mapDataValuesToImportSummary(
+                        dataValuesSaveSummaryError,
+                        CREATE_AND_UPDATE
+                    );
+                    return importSummaryError;
+                })
+                .flatMap((dataValuesSaveSummary): Future<ImportSummary, ImportSummary> => {
+                    const importSummary = mapDataValuesToImportSummary(dataValuesSaveSummary, CREATE_AND_UPDATE);
+                    const hasBlockingErrors = importSummary.blockingErrors.length > 0;
+                    if (hasBlockingErrors) {
+                        return Future.error(importSummary);
+                    } else {
+                        return Future.success(importSummary);
+                    }
+                });
         });
 
         return Future.sequentialWithAccumulation($saveDataValuesFutures, {
             stopOnError: true,
-        }).flatMap(result => {
-            if (result.type === "error") {
-                console.error(
-                    `[${new Date().toISOString()}] Error importing Individual Sample File data values: ${result.error}`
-                );
-                const accumulatedImportSummaries = result.data;
-                // TODO: Change this cast to a proper type
-                const errorImportSummary = result.error as unknown as ImportSummary;
-                return Future.success([...accumulatedImportSummaries, errorImportSummary]);
-            } else {
-                return Future.success(result.data);
-            }
-        });
+        })
+            .flatMap(result => {
+                if (result.type === "error") {
+                    const errorImportSummary = result.error;
+                    const messageErrors = errorImportSummary.blockingErrors.map(error => error.error).join(", ");
+
+                    console.error(
+                        `[${new Date().toISOString()}] Error importing Individual Sample File data values: ${messageErrors}`
+                    );
+                    const accumulatedImportSummaries = result.data;
+                    return Future.success([...accumulatedImportSummaries, errorImportSummary]);
+                } else {
+                    return Future.success(result.data);
+                }
+            })
+            .mapError(() => "Internal error");
     }
 
     private getDataSetDHIS2ValidationErrors(
