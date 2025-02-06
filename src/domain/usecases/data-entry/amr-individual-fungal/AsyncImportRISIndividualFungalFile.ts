@@ -198,7 +198,9 @@ export class AsyncImportRISIndividualFungalFile {
             );
         });
 
-        return Future.sequentialWithAccumulation($saveTrackedEntities, true).flatMap(result => {
+        return Future.sequentialWithAccumulation($saveTrackedEntities, {
+            stopOnError: true,
+        }).flatMap(result => {
             if (result.type === "error") {
                 console.error(
                     `[${new Date().toISOString()}] Error importing tracked entities from file in module: ${glassModuleName}: ${
