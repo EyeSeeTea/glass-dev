@@ -1,8 +1,9 @@
 import { D2Api } from "../../types/d2-api";
-import { EncryptionData, EncryptionRepository } from "../../domain/repositories/EncryptionRepository";
+import { EncryptionRepository } from "../../domain/repositories/EncryptionRepository";
 import { Future, FutureData } from "../../domain/entities/Future";
 import { apiToFuture } from "../../utils/futures";
 import { GLOBAL_ORG_UNIT } from "../../utils/logger";
+import { EncryptionData } from "../../domain/entities/EncryptionData";
 
 const AMR_GLASS_EGASP_PRE_ENCRYPTION_KEY_PROGRAM_ID = "Q80III6DvQ0";
 const AMR_GLASS_EGASP_DET_SECERT_KEY = "xaeK6ke93aO";
