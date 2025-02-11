@@ -27,7 +27,7 @@ import { ListGlassATCLastVersionKeysByYear } from "../../entities/GlassAtcVersio
 import { TrackerEvent } from "../../entities/TrackedEntityInstance";
 import { EGASP_PROGRAM_ID } from "../../../data/repositories/program-rule/ProgramRulesMetadataDefaultRepository";
 import sodium from "libsodium-wrappers";
-import { EncryptionData } from "../../repositories/EncryptionRepository";
+import { EncryptionData } from "../../entities/EncryptionData";
 
 export const ATC_VERSION_DATA_ELEMENT_ID = "aCuWz3HZ5Ti";
 
