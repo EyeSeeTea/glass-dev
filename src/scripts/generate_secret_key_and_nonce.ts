@@ -14,8 +14,8 @@ function main() {
 
             console.debug(`Random Secret key: ${base64Key}`);
 
-            const randomNumber = Array.from({ length: 25 }, () => Math.floor(Math.random() * 10)).join("");
-            console.debug(`Random 25 digit number: ${randomNumber}`);
+            const randomNumber = Array.from({ length: 24 }, () => Math.floor(Math.random() * 10)).join("");
+            console.debug(`Random 24 digit number: ${randomNumber}`);
             return;
         },
     });
