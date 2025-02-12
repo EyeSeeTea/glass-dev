@@ -3,7 +3,7 @@ import { Country } from "../../entities/Country";
 import { CustomDataColumns } from "../../entities/data-entry/amr-individual-fungal-external/RISIndividualFungalData";
 import { ImportSummary } from "../../entities/data-entry/ImportSummary";
 import { Future, FutureData } from "../../entities/Future";
-import { GlassModule } from "../../entities/GlassModule";
+import { DEFAULT_ASYNC_UPLOAD_CHUNK_SIZE, GlassModule } from "../../entities/GlassModule";
 import { Id } from "../../entities/Ref";
 import { RISIndividualFungalDataRepository } from "../../repositories/data-entry/RISIndividualFungalDataRepository";
 import { GlassDocumentsRepository } from "../../repositories/GlassDocumentsRepository";
@@ -53,10 +53,8 @@ export class AsyncImportPrimaryFileUseCase {
         switch (glassModule.name) {
             case "AMR - Individual":
             case "AMR - Fungal": {
-                const uploadChunkSize = glassModule.asyncUploadChunkSizes?.primaryUpload;
-                if (!uploadChunkSize) {
-                    return Future.error(`Upload chunk size not defined for ${glassModule.name} module`);
-                }
+                const uploadChunkSize =
+                    glassModule.asyncUploadChunkSizes?.primaryUpload || DEFAULT_ASYNC_UPLOAD_CHUNK_SIZE;
 
                 const asyncImportRISIndividualFungalFile = new AsyncImportRISIndividualFungalFile(this.repositories);
                 return asyncImportRISIndividualFungalFile.asyncImportRISIndividualFungalFile({

@@ -1,6 +1,10 @@
 import _ from "lodash";
 import { Future, FutureData } from "../../../entities/Future";
-import { ConsistencyError, ImportSummary } from "../../../entities/data-entry/ImportSummary";
+import {
+    ConsistencyError,
+    getDefaultErrorImportSummary,
+    ImportSummary,
+} from "../../../entities/data-entry/ImportSummary";
 import { SampleDataRepository } from "../../../repositories/data-entry/SampleDataRepository";
 import { Id } from "../../../entities/Ref";
 import { MetadataRepository } from "../../../repositories/MetadataRepository";
@@ -20,7 +24,10 @@ import { includeBlockingErrors } from "../utils/includeBlockingErrors";
 import { mapDataValuesToImportSummary } from "../utils/mapDhis2Summary";
 import { DataValue } from "../../../entities/data-entry/DataValue";
 import { GlassUploadsRepository } from "../../../repositories/GlassUploadsRepository";
-import { DataValuesSaveSummary } from "../../../entities/data-entry/DataValuesSaveSummary";
+import {
+    DataValuesSaveSummary,
+    getDefaultErrorDataValuesSaveSummary,
+} from "../../../entities/data-entry/DataValuesSaveSummary";
 
 const AMR_AMR_DS_Input_files_Sample_ID = "OcAB7oaC072";
 const AMR_BATCHID_CC_ID = "rEMx3WFeLcU";
@@ -117,18 +124,9 @@ export class AsyncImportSampleFile {
                 ];
 
                 if (allBlockingErrors.length > 0) {
-                    const errorImportSummary: ImportSummary = {
-                        status: "ERROR",
-                        importCount: {
-                            imported: 0,
-                            updated: 0,
-                            ignored: 0,
-                            deleted: 0,
-                            total: 0,
-                        },
-                        nonBlockingErrors: [],
+                    const errorImportSummary: ImportSummary = getDefaultErrorImportSummary({
                         blockingErrors: allBlockingErrors,
-                    };
+                    });
 
                     return this.saveAllImportSummaries(uploadId, [errorImportSummary]);
                 } else {
@@ -165,23 +163,8 @@ export class AsyncImportSampleFile {
                     console.error(
                         `[${new Date().toISOString()}] Error importing Individual Sample File data values: ${error}`
                     );
-                    const dataValuesSaveSummaryError: DataValuesSaveSummary = {
-                        status: "ERROR",
-                        description: error,
-                        importCount: {
-                            imported: 0,
-                            updated: 0,
-                            ignored: 0,
-                            deleted: 0,
-                        },
-                        conflicts: [
-                            {
-                                object: "",
-                                value: error,
-                            },
-                        ],
-                        importTime: new Date(),
-                    };
+                    const dataValuesSaveSummaryError: DataValuesSaveSummary =
+                        getDefaultErrorDataValuesSaveSummary(error);
 
                     const importSummaryError = mapDataValuesToImportSummary(
                         dataValuesSaveSummaryError,
@@ -191,8 +174,8 @@ export class AsyncImportSampleFile {
                 })
                 .flatMap((dataValuesSaveSummary): Future<ImportSummary, ImportSummary> => {
                     const importSummary = mapDataValuesToImportSummary(dataValuesSaveSummary, CREATE_AND_UPDATE);
-                    const hasBlockingErrors = importSummary.blockingErrors.length > 0;
-                    if (hasBlockingErrors) {
+                    const hasErrorStatus = importSummary.status === "ERROR";
+                    if (hasErrorStatus) {
                         return Future.error(importSummary);
                     } else {
                         return Future.success(importSummary);

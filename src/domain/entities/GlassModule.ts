@@ -77,3 +77,5 @@ interface QuestionnaireConfig {
     mandatory?: boolean;
     rules?: QuestionnaireRule[];
 }
+
+export const DEFAULT_ASYNC_UPLOAD_CHUNK_SIZE = 100;
