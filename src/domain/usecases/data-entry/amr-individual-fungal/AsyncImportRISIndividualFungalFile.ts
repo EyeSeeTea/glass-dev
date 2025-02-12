@@ -5,6 +5,8 @@ import { Future, FutureData } from "../../../entities/Future";
 import { GlassModule } from "../../../entities/GlassModule";
 import { Id } from "../../../entities/Ref";
 import {
+    getDefaultErrorImportSummary,
+    getDefaultErrorImportSummaryWithEventIdList,
     ImportSummary,
     ImportSummaryWithEventIdList,
     MergedImportSummaryWithEventIdList,
@@ -101,18 +103,10 @@ export class AsyncImportRISIndividualFungalFile {
                                 ).flatMap(validationResult => {
                                     if (validationResult.blockingErrors.length > 0) {
                                         const errorSummaries: ImportSummary[] = [
-                                            {
-                                                status: "ERROR",
-                                                importCount: {
-                                                    ignored: 0,
-                                                    imported: 0,
-                                                    deleted: 0,
-                                                    updated: 0,
-                                                    total: 0,
-                                                },
+                                            getDefaultErrorImportSummary({
                                                 nonBlockingErrors: validationResult.nonBlockingErrors,
                                                 blockingErrors: validationResult.blockingErrors,
-                                            },
+                                            }),
                                         ];
                                         return this.saveAllImportSummaries(uploadId, errorSummaries);
                                     } else {
@@ -168,15 +162,11 @@ export class AsyncImportRISIndividualFungalFile {
                 .import({ trackedEntities: trackedEntitiesChunk }, CREATE_AND_UPDATE)
                 .mapError(error => {
                     console.error(`[${new Date().toISOString()}] Error importing RIS Individual File values: ${error}`);
-                    const errorImportSummary: ImportSummaryWithEventIdList = {
-                        importSummary: {
-                            status: "ERROR",
-                            importCount: { ignored: 0, imported: 0, deleted: 0, updated: 0, total: 0 },
-                            nonBlockingErrors: [],
+                    const errorImportSummary: ImportSummaryWithEventIdList =
+                        getDefaultErrorImportSummaryWithEventIdList({
                             blockingErrors: [{ error: error, count: 1 }],
-                        },
-                        eventIdList: [],
-                    };
+                        });
+
                     return errorImportSummary;
                 })
                 .flatMap(response => {
@@ -190,24 +180,19 @@ export class AsyncImportRISIndividualFungalFile {
                                 `[${new Date().toISOString()}] Error importing RIS Individual File values: ${error}`
                             );
 
-                            const errorImportSummary: ImportSummaryWithEventIdList = {
-                                importSummary: {
-                                    status: "ERROR",
-                                    importCount: { ignored: 0, imported: 0, deleted: 0, updated: 0, total: 0 },
-                                    nonBlockingErrors: [],
+                            const errorImportSummary: ImportSummaryWithEventIdList =
+                                getDefaultErrorImportSummaryWithEventIdList({
                                     blockingErrors: [{ error: error, count: 1 }],
-                                },
-                                eventIdList: [],
-                            };
+                                });
+
                             return errorImportSummary;
                         })
                         .flatMap(
                             (
                                 importSummaryResult
                             ): Future<ImportSummaryWithEventIdList, ImportSummaryWithEventIdList> => {
-                                const hasBlockingErrors = importSummaryResult.importSummary.blockingErrors.length > 0;
-
-                                if (hasBlockingErrors) {
+                                const hasErrorStatus = importSummaryResult.importSummary.status === "ERROR";
+                                if (hasErrorStatus) {
                                     return Future.error(importSummaryResult);
                                 } else {
                                     return Future.success(importSummaryResult);
