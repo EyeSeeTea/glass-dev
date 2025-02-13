@@ -77,9 +77,7 @@ export const ListOfDatasets: React.FC<ListOfDatasetsProps> = ({ setRefetchStatus
     const uploadsToBeUploadAsync = useMemo(() => {
         if (uploads.kind === "loaded" && asyncUploads.kind === "loaded") {
             return uploads.data.filter((row: UploadsDataItem) =>
-                asyncUploads.data?.some(
-                    asyncUpload => asyncUpload.primaryUploadId === row.id || asyncUpload.secondaryUploadId === row.id
-                )
+                asyncUploads.data?.some(asyncUpload => asyncUpload.uploadId === row.id)
             );
         } else {
             return [];

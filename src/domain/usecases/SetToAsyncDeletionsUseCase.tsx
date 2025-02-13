@@ -16,9 +16,7 @@ export class SetToAsyncDeletionsUseCase implements UseCase {
 
     public execute(uploadIdToDelete: Id): FutureData<void> {
         return this.repositories.glassAsyncUploadsRepository.getAsyncUploads().flatMap(asyncUploads => {
-            const isUploadInAsyncUploads = asyncUploads.find(
-                upload => upload.primaryUploadId === uploadIdToDelete || upload.secondaryUploadId === uploadIdToDelete
-            );
+            const isUploadInAsyncUploads = asyncUploads.find(upload => upload.uploadId === uploadIdToDelete);
 
             if (isUploadInAsyncUploads) {
                 return this.repositories.glassAsyncUploadsRepository
