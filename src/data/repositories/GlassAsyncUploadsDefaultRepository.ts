@@ -1,17 +1,14 @@
 import { Future, FutureData } from "../../domain/entities/Future";
-import { GlassAsyncUpload, GlassAsyncUploadStatus } from "../../domain/entities/GlassAsyncUploads";
+import {
+    GlassAsyncUpload,
+    GlassAsyncUploadStatus,
+    INITIAL_ASYNC_UPLOAD_STATE,
+} from "../../domain/entities/GlassAsyncUploads";
 import { Id } from "../../domain/entities/Ref";
 import { GlassAsyncUploadsRepository } from "../../domain/repositories/GlassAsyncUploadsRepository";
 import { Maybe } from "../../utils/ts-utils";
 import { DataStoreClient } from "../data-store/DataStoreClient";
 import { DataStoreKeys } from "../data-store/DataStoreKeys";
-
-const INITIAL_ASYNC_UPLOAD_STATE: GlassAsyncUpload = {
-    primaryUploadId: "",
-    secondaryUploadId: "",
-    attempts: 0,
-    status: "PENDING",
-};
 
 export class GlassAsyncUploadsDefaultRepository implements GlassAsyncUploadsRepository {
     constructor(private dataStoreClient: DataStoreClient) {}
@@ -22,27 +19,21 @@ export class GlassAsyncUploadsDefaultRepository implements GlassAsyncUploadsRepo
 
     getById(uploadId: Id): FutureData<GlassAsyncUpload | undefined> {
         return this.getAsyncUploads().map(asyncUploadsArray =>
-            asyncUploadsArray.find(
-                asyncUpload => asyncUpload.primaryUploadId === uploadId || asyncUpload.secondaryUploadId === uploadId
-            )
+            asyncUploadsArray.find(asyncUpload => asyncUpload.uploadId === uploadId)
         );
     }
 
     setStatus(uploadId: Id, newStatus: GlassAsyncUploadStatus): FutureData<void> {
         return this.getAsyncUploads().flatMap(asyncUploadsArray => {
             const newAsyncUploads: GlassAsyncUpload[] = asyncUploadsArray.map(asyncUpload => {
-                if (asyncUpload.primaryUploadId === uploadId || asyncUpload.secondaryUploadId === uploadId) {
-                    return {
-                        ...asyncUpload,
-                        status: newStatus,
-                    };
-                } else {
-                    return asyncUpload;
-                }
+                return asyncUpload.uploadId === uploadId
+                    ? {
+                          ...asyncUpload,
+                          status: newStatus,
+                      }
+                    : asyncUpload;
             });
-            return this.dataStoreClient.saveObject(DataStoreKeys.ASYNC_UPLOADS, newAsyncUploads).flatMap(() => {
-                return Future.success(undefined);
-            });
+            return this.dataStoreClient.saveObject(DataStoreKeys.ASYNC_UPLOADS, newAsyncUploads);
         });
     }
 
@@ -56,39 +47,33 @@ export class GlassAsyncUploadsDefaultRepository implements GlassAsyncUploadsRepo
                 ...asyncUploadsArray,
                 {
                     ...INITIAL_ASYNC_UPLOAD_STATE,
-                    primaryUploadId: primaryUploadId || INITIAL_ASYNC_UPLOAD_STATE.primaryUploadId,
-                    secondaryUploadId: secondaryUploadId || INITIAL_ASYNC_UPLOAD_STATE.secondaryUploadId,
+                    uploadId: primaryUploadId
+                        ? primaryUploadId
+                        : secondaryUploadId
+                        ? secondaryUploadId
+                        : INITIAL_ASYNC_UPLOAD_STATE.uploadId,
+                    type: primaryUploadId ? "primary" : "secondary",
                 },
             ];
-            return this.dataStoreClient.saveObject(DataStoreKeys.ASYNC_UPLOADS, newAsyncUploads).flatMap(() => {
-                return Future.success(undefined);
-            });
+            return this.dataStoreClient.saveObject(DataStoreKeys.ASYNC_UPLOADS, newAsyncUploads);
         });
     }
 
     removeAsyncUploadById(uploadIdToRemove: Id): FutureData<void> {
         return this.getAsyncUploads().flatMap(asyncUploadsArray => {
             const restAsyncUploads: GlassAsyncUpload[] = asyncUploadsArray.filter(
-                uploadIdToBeDeleted =>
-                    uploadIdToBeDeleted.primaryUploadId !== uploadIdToRemove &&
-                    uploadIdToBeDeleted.secondaryUploadId !== uploadIdToRemove
+                uploadToBeDeleted => uploadToBeDeleted.uploadId !== uploadIdToRemove
             );
-            return this.dataStoreClient.saveObject(DataStoreKeys.ASYNC_UPLOADS, restAsyncUploads).flatMap(() => {
-                return Future.success(undefined);
-            });
+            return this.dataStoreClient.saveObject(DataStoreKeys.ASYNC_UPLOADS, restAsyncUploads);
         });
     }
 
     removeAsyncUploads(uploadIdsToRemove: Id[]): FutureData<void> {
         return this.getAsyncUploads().flatMap(asyncUploadsArray => {
             const restAsyncUploads: GlassAsyncUpload[] = asyncUploadsArray.filter(
-                uploadIdToBeDeleted =>
-                    !uploadIdsToRemove.includes(uploadIdToBeDeleted.primaryUploadId) &&
-                    !uploadIdsToRemove.includes(uploadIdToBeDeleted.secondaryUploadId)
+                uploadToBeDeleted => !uploadIdsToRemove.includes(uploadToBeDeleted.uploadId)
             );
-            return this.dataStoreClient.saveObject(DataStoreKeys.ASYNC_UPLOADS, restAsyncUploads).flatMap(() => {
-                return Future.success(undefined);
-            });
+            return this.dataStoreClient.saveObject(DataStoreKeys.ASYNC_UPLOADS, restAsyncUploads);
         });
     }
 
@@ -96,15 +81,10 @@ export class GlassAsyncUploadsDefaultRepository implements GlassAsyncUploadsRepo
         return this.dataStoreClient
             .listCollection<GlassAsyncUpload>(DataStoreKeys.ASYNC_UPLOADS)
             .flatMap(asyncUploadsArray => {
-                const asyncUploadToUpdate = asyncUploadsArray.find(
-                    asyncUpload =>
-                        asyncUpload.primaryUploadId === uploadId || asyncUpload.secondaryUploadId === uploadId
-                );
+                const asyncUploadToUpdate = asyncUploadsArray.find(asyncUpload => asyncUpload.uploadId === uploadId);
                 if (asyncUploadToUpdate) {
                     const restAsyncUploads: GlassAsyncUpload[] = asyncUploadsArray.filter(
-                        uploadIdToBeUpdated =>
-                            uploadIdToBeUpdated.primaryUploadId !== uploadId &&
-                            uploadIdToBeUpdated.secondaryUploadId !== uploadId
+                        uploadIdToBeUpdated => uploadIdToBeUpdated.uploadId !== uploadId
                     );
                     const updatedAsyncUploads: GlassAsyncUpload[] = [
                         ...restAsyncUploads,
@@ -114,11 +94,7 @@ export class GlassAsyncUploadsDefaultRepository implements GlassAsyncUploadsRepo
                             status: "PENDING",
                         },
                     ];
-                    return this.dataStoreClient
-                        .saveObject(DataStoreKeys.ASYNC_UPLOADS, updatedAsyncUploads)
-                        .flatMap(() => {
-                            return Future.success(undefined);
-                        });
+                    return this.dataStoreClient.saveObject(DataStoreKeys.ASYNC_UPLOADS, updatedAsyncUploads);
                 } else {
                     return Future.success(undefined);
                 }

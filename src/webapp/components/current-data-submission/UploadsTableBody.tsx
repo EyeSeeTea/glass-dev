@@ -154,10 +154,7 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({
         (uploadDataItem: UploadsDataItem): boolean => {
             return (
                 asyncUploads.some(
-                    asyncUpload =>
-                        (asyncUpload.primaryUploadId === uploadDataItem.id ||
-                            asyncUpload.secondaryUploadId === uploadDataItem.id) &&
-                        asyncUpload.status === "PENDING"
+                    asyncUpload => asyncUpload.uploadId === uploadDataItem.id && asyncUpload.status === "PENDING"
                 ) ?? false
             );
         },
@@ -168,10 +165,7 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({
         (uploadDataItem: UploadsDataItem): boolean => {
             return (
                 asyncUploads.some(
-                    asyncUpload =>
-                        (asyncUpload.primaryUploadId === uploadDataItem.id ||
-                            asyncUpload.secondaryUploadId === uploadDataItem.id) &&
-                        asyncUpload.status === "UPLOADING"
+                    asyncUpload => asyncUpload.uploadId === uploadDataItem.id && asyncUpload.status === "UPLOADING"
                 ) ?? false
             );
         },

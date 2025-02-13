@@ -109,7 +109,7 @@ async function main() {
                                 if (asyncUploads && asyncUploads.length > 0) {
                                     const uploadIdsToSetAsyncUploadErrorStatus: Id[] = asyncUploads
                                         .filter(upload => upload.attempts >= maxAttemptsForAsyncUploads)
-                                        .flatMap(upload => [upload.primaryUploadId, upload.secondaryUploadId]);
+                                        .flatMap(upload => [upload.uploadId]);
 
                                     const uploadsToContinueAsyncUpload = asyncUploads.filter(
                                         upload => upload.attempts < maxAttemptsForAsyncUploads
@@ -311,27 +311,29 @@ function removeAsyncUploadByIdFromDatastore(
     );
 }
 
-// TODO: When error +1 attemp and change status to pending or delete but when execute error
 function incrementAsyncUploadsOrDeleteIfMaxAttemptAndSetErrorStatus(
     glassAsyncUploadsRepository: GlassAsyncUploadsRepository,
     glassUploadsRepository: GlassUploadsRepository,
     asyncUpload: GlassAsyncUpload,
     maxAttemptsForAsyncDeletions: number
 ): FutureData<void> {
-    const uploadId = asyncUpload.primaryUploadId ?? asyncUpload.secondaryUploadId;
     const nextAttempt = asyncUpload.attempts + 1;
     if (nextAttempt >= maxAttemptsForAsyncDeletions) {
         return removeAsyncUploadByIdFromDatastore(
             glassAsyncUploadsRepository,
             glassUploadsRepository,
-            uploadId
+            asyncUpload.uploadId
         ).flatMap(() => {
-            return setUploadStatus(glassUploadsRepository, uploadId, "UPLOADED").flatMap(() => {
-                return new SetMultipleUploadErrorAsyncUploadingUseCase(glassUploadsRepository).execute([uploadId]);
+            return setUploadStatus(glassUploadsRepository, asyncUpload.uploadId, "UPLOADED").flatMap(() => {
+                return new SetMultipleUploadErrorAsyncUploadingUseCase(glassUploadsRepository).execute([
+                    asyncUpload.uploadId,
+                ]);
             });
         });
     } else {
-        return new IncrementAsyncUploadAttemptsAndResetStatusUseCase(glassAsyncUploadsRepository).execute(uploadId);
+        return new IncrementAsyncUploadAttemptsAndResetStatusUseCase(glassAsyncUploadsRepository).execute(
+            asyncUpload.uploadId
+        );
     }
 }
 
@@ -438,56 +440,56 @@ function manageAsyncUploadPrimaryFile(
         } and period ${primaryUpload.period}`
     );
 
-    return setAsyncUploadStatus(
-        repositories.glassAsyncUploadsRepository,
-        asyncUpload.primaryUploadId,
-        "UPLOADING"
-    ).flatMap(() => {
-        return downloadBlob(repositories.glassDocumentsRepository, primaryUpload.fileId).flatMap(inputBlob => {
-            return asyncPrimaryFileSubmission(repositories, {
-                primaryUploadId: primaryUpload.id,
-                inputBlob: inputBlob,
-                glassModule: module,
-                orgUnitId: primaryUpload.orgUnit,
-                countryCode: primaryUpload.countryCode,
-                period: primaryUpload.period,
-                program: module.programs?.[0],
-                dataColumns: module.customDataColumns || [],
-                allCountries: allCountries,
-            }).flatMap(importSummaries => {
-                const hasBlockingErrors = importSummaries.some(summary => summary.blockingErrors.length > 0);
-                const hasImportedValues = importSummaries.some(summary => summary.importCount.imported > 0);
-                if (hasImportedValues) {
-                    console.debug(
-                        `[${new Date().toISOString()}] Data has been imported from upload ${
-                            primaryUpload.id
-                        } from module ${module.name}, org unit ${primaryUpload.orgUnit} and period ${
-                            primaryUpload.period
-                        } ${hasBlockingErrors ? "with blocking errors" : "without blocking errors"}`
-                    );
-                } else {
-                    console.debug(
-                        `[${new Date().toISOString()}] Data NOT imported from upload ${primaryUpload.id} from module ${
-                            module.name
-                        }, org unit ${primaryUpload.orgUnit} and period ${primaryUpload.period} due to blocking errors`
-                    );
-                }
+    return setAsyncUploadStatus(repositories.glassAsyncUploadsRepository, asyncUpload.uploadId, "UPLOADING").flatMap(
+        () => {
+            return downloadBlob(repositories.glassDocumentsRepository, primaryUpload.fileId).flatMap(inputBlob => {
+                return asyncPrimaryFileSubmission(repositories, {
+                    primaryUploadId: primaryUpload.id,
+                    inputBlob: inputBlob,
+                    glassModule: module,
+                    orgUnitId: primaryUpload.orgUnit,
+                    countryCode: primaryUpload.countryCode,
+                    period: primaryUpload.period,
+                    program: module.programs?.[0],
+                    dataColumns: module.customDataColumns || [],
+                    allCountries: allCountries,
+                }).flatMap(importSummaries => {
+                    const hasBlockingErrors = importSummaries.some(summary => summary.blockingErrors.length > 0);
+                    const hasImportedValues = importSummaries.some(summary => summary.importCount.imported > 0);
+                    if (hasImportedValues) {
+                        console.debug(
+                            `[${new Date().toISOString()}] Data has been imported from upload ${
+                                primaryUpload.id
+                            } from module ${module.name}, org unit ${primaryUpload.orgUnit} and period ${
+                                primaryUpload.period
+                            } ${hasBlockingErrors ? "with blocking errors" : "without blocking errors"}`
+                        );
+                    } else {
+                        console.debug(
+                            `[${new Date().toISOString()}] Data NOT imported from upload ${
+                                primaryUpload.id
+                            } from module ${module.name}, org unit ${primaryUpload.orgUnit} and period ${
+                                primaryUpload.period
+                            } due to blocking errors`
+                        );
+                    }
 
-                return setFinalStatus(
-                    repositories.glassUploadsRepository,
-                    primaryUpload.id,
-                    hasBlockingErrors,
-                    hasImportedValues
-                ).flatMap(() => {
-                    return removeAsyncUploadByIdFromDatastore(
-                        repositories.glassAsyncUploadsRepository,
+                    return setFinalStatus(
                         repositories.glassUploadsRepository,
-                        asyncUpload.primaryUploadId
-                    );
+                        primaryUpload.id,
+                        hasBlockingErrors,
+                        hasImportedValues
+                    ).flatMap(() => {
+                        return removeAsyncUploadByIdFromDatastore(
+                            repositories.glassAsyncUploadsRepository,
+                            repositories.glassUploadsRepository,
+                            asyncUpload.uploadId
+                        );
+                    });
                 });
             });
-        });
-    });
+        }
+    );
 }
 
 function manageAsyncUploadSecondaryFile(
@@ -509,53 +511,86 @@ function manageAsyncUploadSecondaryFile(
         } and period ${secondaryUpload.period}`
     );
 
-    return setAsyncUploadStatus(
-        repositories.glassAsyncUploadsRepository,
-        asyncUpload.secondaryUploadId,
-        "UPLOADING"
-    ).flatMap(() => {
-        return downloadBlob(repositories.glassDocumentsRepository, secondaryUpload.fileId).flatMap(inputBlob => {
-            const applyDryRun = module.name === "AMR - Individual";
+    return setAsyncUploadStatus(repositories.glassAsyncUploadsRepository, asyncUpload.uploadId, "UPLOADING").flatMap(
+        () => {
+            return downloadBlob(repositories.glassDocumentsRepository, secondaryUpload.fileId).flatMap(inputBlob => {
+                const applyDryRun = module.name === "AMR - Individual";
 
-            return asyncSecondaryFileSubmission(repositories, {
-                secondaryUploadId: secondaryUpload.id,
-                inputBlob: inputBlob,
-                glassModule: module,
-                orgUnitId: secondaryUpload.orgUnit,
-                countryCode: secondaryUpload.countryCode,
-                period: secondaryUpload.period,
-                batchId: secondaryUpload.batchId,
-                dryRun: applyDryRun,
-            }).flatMap(importSummaries => {
-                const hasBlockingErrors = importSummaries.some(summary => summary.blockingErrors.length > 0);
+                return asyncSecondaryFileSubmission(repositories, {
+                    secondaryUploadId: secondaryUpload.id,
+                    inputBlob: inputBlob,
+                    glassModule: module,
+                    orgUnitId: secondaryUpload.orgUnit,
+                    countryCode: secondaryUpload.countryCode,
+                    period: secondaryUpload.period,
+                    batchId: secondaryUpload.batchId,
+                    dryRun: applyDryRun,
+                }).flatMap(importSummaries => {
+                    const hasBlockingErrors = importSummaries.some(summary => summary.blockingErrors.length > 0);
 
-                if (applyDryRun && !hasBlockingErrors) {
-                    return asyncSecondaryFileSubmission(repositories, {
-                        secondaryUploadId: secondaryUpload.id,
-                        inputBlob: inputBlob,
-                        glassModule: module,
-                        orgUnitId: secondaryUpload.orgUnit,
-                        countryCode: secondaryUpload.countryCode,
-                        period: secondaryUpload.period,
-                        batchId: secondaryUpload.batchId,
-                        dryRun: false,
-                    }).flatMap(importSummaries => {
-                        const hasBlockingErrorsWithoutDryRun = importSummaries.some(
-                            summary => summary.blockingErrors.length > 0
-                        );
-                        const hasImportedValuesWithoutDryRun = importSummaries.some(
-                            summary => summary.importCount.imported > 0
-                        );
+                    if (applyDryRun && !hasBlockingErrors) {
+                        return asyncSecondaryFileSubmission(repositories, {
+                            secondaryUploadId: secondaryUpload.id,
+                            inputBlob: inputBlob,
+                            glassModule: module,
+                            orgUnitId: secondaryUpload.orgUnit,
+                            countryCode: secondaryUpload.countryCode,
+                            period: secondaryUpload.period,
+                            batchId: secondaryUpload.batchId,
+                            dryRun: false,
+                        }).flatMap(importSummaries => {
+                            const hasBlockingErrorsWithoutDryRun = importSummaries.some(
+                                summary => summary.blockingErrors.length > 0
+                            );
+                            const hasImportedValuesWithoutDryRun = importSummaries.some(
+                                summary => summary.importCount.imported > 0
+                            );
 
-                        if (hasImportedValuesWithoutDryRun) {
+                            if (hasImportedValuesWithoutDryRun) {
+                                console.debug(
+                                    `[${new Date().toISOString()}] Data has been imported from upload ${
+                                        secondaryUpload.id
+                                    } from module ${module.name}, org unit ${secondaryUpload.orgUnit} and period ${
+                                        secondaryUpload.period
+                                    } ${
+                                        hasBlockingErrorsWithoutDryRun
+                                            ? "with blocking errors"
+                                            : "without blocking errors"
+                                    }`
+                                );
+                            } else {
+                                console.debug(
+                                    `[${new Date().toISOString()}] Data NOT imported from upload ${
+                                        secondaryUpload.id
+                                    } from module ${module.name}, org unit ${secondaryUpload.orgUnit} and period ${
+                                        secondaryUpload.period
+                                    } due to blocking errors`
+                                );
+                            }
+
+                            return setFinalStatus(
+                                repositories.glassUploadsRepository,
+                                secondaryUpload.id,
+                                hasBlockingErrorsWithoutDryRun,
+                                hasImportedValuesWithoutDryRun
+                            ).flatMap(() => {
+                                return removeAsyncUploadByIdFromDatastore(
+                                    repositories.glassAsyncUploadsRepository,
+                                    repositories.glassUploadsRepository,
+                                    asyncUpload.uploadId
+                                );
+                            });
+                        });
+                    } else {
+                        const hasImportedValues = importSummaries.some(summary => summary.importCount.imported > 0);
+
+                        if (hasImportedValues) {
                             console.debug(
                                 `[${new Date().toISOString()}] Data has been imported from upload ${
                                     secondaryUpload.id
                                 } from module ${module.name}, org unit ${secondaryUpload.orgUnit} and period ${
                                     secondaryUpload.period
-                                } ${
-                                    hasBlockingErrorsWithoutDryRun ? "with blocking errors" : "without blocking errors"
-                                }`
+                                } ${hasBlockingErrors ? "with blocking errors" : "without blocking errors"}`
                             );
                         } else {
                             console.debug(
@@ -566,56 +601,23 @@ function manageAsyncUploadSecondaryFile(
                                 } due to blocking errors`
                             );
                         }
-
                         return setFinalStatus(
                             repositories.glassUploadsRepository,
                             secondaryUpload.id,
-                            hasBlockingErrorsWithoutDryRun,
-                            hasImportedValuesWithoutDryRun
+                            hasBlockingErrors,
+                            hasImportedValues
                         ).flatMap(() => {
                             return removeAsyncUploadByIdFromDatastore(
                                 repositories.glassAsyncUploadsRepository,
                                 repositories.glassUploadsRepository,
-                                asyncUpload.secondaryUploadId
+                                asyncUpload.uploadId
                             );
                         });
-                    });
-                } else {
-                    const hasImportedValues = importSummaries.some(summary => summary.importCount.imported > 0);
-
-                    if (hasImportedValues) {
-                        console.debug(
-                            `[${new Date().toISOString()}] Data has been imported from upload ${
-                                secondaryUpload.id
-                            } from module ${module.name}, org unit ${secondaryUpload.orgUnit} and period ${
-                                secondaryUpload.period
-                            } ${hasBlockingErrors ? "with blocking errors" : "without blocking errors"}`
-                        );
-                    } else {
-                        console.debug(
-                            `[${new Date().toISOString()}] Data NOT imported from upload ${
-                                secondaryUpload.id
-                            } from module ${module.name}, org unit ${secondaryUpload.orgUnit} and period ${
-                                secondaryUpload.period
-                            } due to blocking errors`
-                        );
                     }
-                    return setFinalStatus(
-                        repositories.glassUploadsRepository,
-                        secondaryUpload.id,
-                        hasBlockingErrors,
-                        hasImportedValues
-                    ).flatMap(() => {
-                        return removeAsyncUploadByIdFromDatastore(
-                            repositories.glassAsyncUploadsRepository,
-                            repositories.glassUploadsRepository,
-                            asyncUpload.secondaryUploadId
-                        );
-                    });
-                }
+                });
             });
-        });
-    });
+        }
+    );
 }
 
 // Async upload only for AMR - Individual and AMR - Fungal modules has the following steps:
@@ -648,86 +650,83 @@ function uploadDatasets(
             try {
                 return Future.fromPromise(new Promise(resolve => setTimeout(resolve, 500)))
                     .flatMap(() => {
-                        return isPendingUpload(
-                            repositories.glassAsyncUploadsRepository,
-                            asyncUpload.primaryUploadId
-                        ).flatMap(isPending => {
-                            if (isPending) {
-                                return Future.joinObj({
-                                    primaryUpload: asyncUpload.primaryUploadId
-                                        ? getUploadById(
-                                              repositories.glassUploadsRepository,
-                                              asyncUpload.primaryUploadId
-                                          )
-                                        : Future.success(undefined),
-                                    secondaryUpload: asyncUpload.secondaryUploadId
-                                        ? getUploadById(
-                                              repositories.glassUploadsRepository,
-                                              asyncUpload.secondaryUploadId
-                                          )
-                                        : Future.success(undefined),
-                                }).flatMap(({ primaryUpload, secondaryUpload }) => {
-                                    if (primaryUpload) {
-                                        const currentModule = glassModules.find(
-                                            module => module.id === primaryUpload.module
-                                        );
-
-                                        if (currentModule) {
-                                            return manageAsyncUploadPrimaryFile(
-                                                repositories,
-                                                primaryUpload,
-                                                asyncUpload,
-                                                currentModule,
-                                                allCountries
+                        return isPendingUpload(repositories.glassAsyncUploadsRepository, asyncUpload.uploadId).flatMap(
+                            isPending => {
+                                if (isPending) {
+                                    return Future.joinObj({
+                                        primaryUpload:
+                                            asyncUpload.type === "primary"
+                                                ? getUploadById(
+                                                      repositories.glassUploadsRepository,
+                                                      asyncUpload.uploadId
+                                                  )
+                                                : Future.success(undefined),
+                                        secondaryUpload:
+                                            asyncUpload.type === "secondary"
+                                                ? getUploadById(
+                                                      repositories.glassUploadsRepository,
+                                                      asyncUpload.uploadId
+                                                  )
+                                                : Future.success(undefined),
+                                    }).flatMap(({ primaryUpload, secondaryUpload }) => {
+                                        if (primaryUpload) {
+                                            const currentModule = glassModules.find(
+                                                module => module.id === primaryUpload.module
                                             );
+
+                                            if (currentModule) {
+                                                return manageAsyncUploadPrimaryFile(
+                                                    repositories,
+                                                    primaryUpload,
+                                                    asyncUpload,
+                                                    currentModule,
+                                                    allCountries
+                                                );
+                                            } else {
+                                                console.error(
+                                                    `[${new Date().toISOString()}] Module ${
+                                                        primaryUpload.module
+                                                    } not found`
+                                                );
+                                                return Future.error(`Module ${primaryUpload.module} not found`);
+                                            }
+                                        } else if (secondaryUpload) {
+                                            const currentModule = glassModules.find(
+                                                module => module.id === secondaryUpload.module
+                                            );
+
+                                            if (currentModule) {
+                                                return manageAsyncUploadSecondaryFile(
+                                                    repositories,
+                                                    secondaryUpload,
+                                                    asyncUpload,
+                                                    currentModule
+                                                );
+                                            } else {
+                                                console.error(
+                                                    `[${new Date().toISOString()}] Module ${
+                                                        secondaryUpload.module
+                                                    } not found`
+                                                );
+                                                return Future.error(`Module ${secondaryUpload.module} not found`);
+                                            }
                                         } else {
                                             console.error(
-                                                `[${new Date().toISOString()}] Module ${primaryUpload.module} not found`
+                                                `[${new Date().toISOString()}] Upload ${asyncUpload.uploadId} not found`
                                             );
-                                            return Future.error(`Module ${primaryUpload.module} not found`);
+                                            return Future.error(`Upload ${asyncUpload.uploadId} not found`);
                                         }
-                                    } else if (secondaryUpload) {
-                                        const currentModule = glassModules.find(
-                                            module => module.id === secondaryUpload.module
-                                        );
-
-                                        if (currentModule) {
-                                            return manageAsyncUploadSecondaryFile(
-                                                repositories,
-                                                secondaryUpload,
-                                                asyncUpload,
-                                                currentModule
-                                            );
-                                        } else {
-                                            console.error(
-                                                `[${new Date().toISOString()}] Module ${
-                                                    secondaryUpload.module
-                                                } not found`
-                                            );
-                                            return Future.error(`Module ${secondaryUpload.module} not found`);
-                                        }
-                                    } else {
-                                        console.error(
-                                            `[${new Date().toISOString()}] Upload ${
-                                                asyncUpload.primaryUploadId ?? asyncUpload.secondaryUploadId
-                                            } not found`
-                                        );
-                                        return Future.error(
-                                            `Upload ${
-                                                asyncUpload.primaryUploadId ?? asyncUpload.secondaryUploadId
-                                            } not found`
-                                        );
-                                    }
-                                });
-                            } else {
-                                console.debug(
-                                    `[${new Date().toISOString()}] Upload ${
-                                        asyncUpload.primaryUploadId ?? asyncUpload.secondaryUploadId
-                                    } is not pending deletion`
-                                );
-                                return Future.success(undefined);
+                                    });
+                                } else {
+                                    console.debug(
+                                        `[${new Date().toISOString()}] Upload ${
+                                            asyncUpload.uploadId
+                                        } is not pending deletion`
+                                    );
+                                    return Future.success(undefined);
+                                }
                             }
-                        });
+                        );
                     })
                     .flatMapError(error => {
                         console.error(
