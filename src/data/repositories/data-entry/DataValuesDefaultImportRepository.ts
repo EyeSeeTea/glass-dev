@@ -4,9 +4,9 @@ import { apiToFuture } from "../../../utils/futures";
 import { DataValue } from "../../../domain/entities/data-entry/DataValue";
 import { DataValuesSaveSummary, ImportStrategy } from "../../../domain/entities/data-entry/DataValuesSaveSummary";
 import { D2Api } from "@eyeseetea/d2-api/2.34";
+import { DataValuesImportRepository } from "../../../domain/repositories/data-entry/DataValuesImportRepository";
 
-
-export class DataValuesImportRepository {
+export class DataValuesDefaultImportRepository implements DataValuesImportRepository {
     private api: D2Api;
 
     constructor(api: D2Api) {
@@ -43,8 +43,7 @@ export class DataValuesImportRepository {
             console.time(uniquewaitForLabel);
 
             const result = await apiToFuture(
-                this.api.system.waitFor(postResponse.response.jobType, postResponse.response.id, {
-                })
+                this.api.system.waitFor(postResponse.response.jobType, postResponse.response.id, {})
             ).toPromise();
 
             waitForRetries++;
@@ -57,15 +56,13 @@ export class DataValuesImportRepository {
             }
 
             return this.processResult(result, postResponse.response.created);
-
-
         } catch (error) {
-            const errorMessage = `An error occurred while saving data values. Error: ${error instanceof Error ? error.message : error}`
+            const errorMessage = `An error occurred while saving data values. Error: ${
+                error instanceof Error ? error.message : error
+            }`;
             throw new Error(errorMessage);
-
         }
     }
-
 
     private processResult(result: any, createdDate: string): DataValuesSaveSummary {
         return {
@@ -97,5 +94,4 @@ export class DataValuesImportRepository {
             importTime: createdDate,
         };
     }
-
 }

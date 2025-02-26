@@ -9,27 +9,29 @@ import { GlassModuleRepository } from "../../../repositories/GlassModuleReposito
 import { MetadataRepository } from "../../../repositories/MetadataRepository";
 import { checkDhis2Validations } from "../utils/checkDhis2Validations";
 import { checkSpecimenPathogen } from "../utils/checkSpecimenPathogen";
-import { AMR_SPECIMEN_GENDER_AGE_ORIGIN_CC_ID, getCategoryOptionComboByDataElement, getCategoryOptionComboByOptionCodes } from "../utils/getCategoryOptionCombo";
+import {
+    AMR_SPECIMEN_GENDER_AGE_ORIGIN_CC_ID,
+    getCategoryOptionComboByDataElement,
+    getCategoryOptionComboByOptionCodes,
+} from "../utils/getCategoryOptionCombo";
 import { includeBlockingErrors } from "../utils/includeBlockingErrors";
 import { mapDataValuesToImportSummary } from "../utils/mapDhis2Summary";
-import _ from 'lodash';
+import _ from "lodash";
 
 import { SampleData } from "../../../entities/data-entry/amr-external/SampleData";
-import { DataValuesImportRepository } from "../../../../data/repositories/data-entry/DataValuesImportRepository";
+import { DataValuesDefaultImportRepository } from "../../../../data/repositories/data-entry/DataValuesDefaultImportRepository";
 import { RISData } from "../../../entities/data-entry/amr-external/RISData";
 import { ExternalData } from "../../../entities/data-entry/amr-external/ExternalData";
-
+import { DataValuesImportRepository } from "../../../repositories/data-entry/DataValuesImportRepository";
 
 export class AMRAggDataValuesImportHelper {
-
     protected static metadataCache: {
         dataElement_CC: CategoryCombo;
         module: GlassModule;
     } = {
-            dataElement_CC: {} as CategoryCombo,
-            module: {} as GlassModule,
-        };
-
+        dataElement_CC: {} as CategoryCombo,
+        module: {} as GlassModule,
+    };
 
     constructor(
         protected metadataRepository: MetadataRepository,
@@ -46,21 +48,19 @@ export class AMRAggDataValuesImportHelper {
         try {
             const [dataElement_CC, module] = await Promise.all([
                 this.metadataRepository.getCategoryCombination(AMR_SPECIMEN_GENDER_AGE_ORIGIN_CC_ID).toPromise(),
-                this.moduleRepository.getByName("AMR").toPromise()
+                this.moduleRepository.getByName("AMR").toPromise(),
             ]);
 
             AMRAggDataValuesImportHelper.metadataCache = {
                 dataElement_CC,
-                module
+                module,
             };
-            
         } catch (error) {
             // Provide more context in the error message
-            console.error('Error loading AMR metadata in AMRAggDataValuesImportHelper:', error);
+            console.error("Error loading AMR metadata in AMRAggDataValuesImportHelper:", error);
             throw error;
         }
     }
-
 
     protected async generateDataValues(
         dataItems: RISData[] | SampleData[],
@@ -68,7 +68,7 @@ export class AMRAggDataValuesImportHelper {
         dataSetAttrCombo: CategoryCombo,
         orgUnitId: string,
         maxConcurrent: 10
-    ): Promise<{ values: DataValue[], blockingErrors: ConsistencyError[] }> {
+    ): Promise<{ values: DataValue[]; blockingErrors: ConsistencyError[] }> {
         const blockingErrors: ConsistencyError[] = [];
         const values: DataValue[] = [];
         // const semaphore = new Semaphore(maxConcurrent);
@@ -81,26 +81,31 @@ export class AMRAggDataValuesImportHelper {
             try {
                 const [attributeOptionCombo, categoryOptionCombo] = await Promise.all([
                     this.getAttributeOptionComboId(data, dataSetAttrCombo, index, blockingErrors),
-                    this.getCategoryOptionComboId(data, dataElement, AMRAggDataValuesImportHelper.metadataCache.dataElement_CC, index, blockingErrors)
+                    this.getCategoryOptionComboId(
+                        data,
+                        dataElement,
+                        AMRAggDataValuesImportHelper.metadataCache.dataElement_CC,
+                        index,
+                        blockingErrors
+                    ),
                 ]);
-           
 
-            const value = data[dataElement.code as keyof ExternalData]?.toString() || "";
+                const value = data[dataElement.code as keyof ExternalData]?.toString() || "";
 
-            if (!value) {
-                throw new Error(`Invalid value for dataElement: ${dataElement.id} at index: ${index}`);
-            }
+                if (!value) {
+                    throw new Error(`Invalid value for dataElement: ${dataElement.id} at index: ${index}`);
+                }
 
-            return {
-                orgUnit: orgUnitId,
-                period: data.YEAR.toString(),
-                attributeOptionCombo,
-                dataElement: dataElement.id,
-                categoryOptionCombo,
-                value,
+                return {
+                    orgUnit: orgUnitId,
+                    period: data.YEAR.toString(),
+                    attributeOptionCombo,
+                    dataElement: dataElement.id,
+                    categoryOptionCombo,
+                    value,
                 };
             } catch (error) {
-                console.error("Error getting dataSetAttrCombo or getCategoryOptionComboId: ", error)
+                console.error("Error getting dataSetAttrCombo or getCategoryOptionComboId: ", error);
                 throw new Error("Error getting dataSetAttrCombo or getCategoryOptionComboId");
             }
         };
@@ -112,15 +117,17 @@ export class AMRAggDataValuesImportHelper {
                     const dataValue = await processDataElement(risData, dataElement, index);
                     values.push(dataValue);
                 } catch (error) {
-                    const errorMessage = `Error generating data value for dataElement: ${dataElement.id}. Reason: ${error instanceof Error ? error.message : String(error)}`;
+                    const errorMessage = `Error generating data value for dataElement: ${dataElement.id}. Reason: ${
+                        error instanceof Error ? error.message : String(error)
+                    }`;
                     blockingErrors.push({
                         error: errorMessage,
                         count: 1,
-                        lines: [risIndex + 1]
+                        lines: [risIndex + 1],
                     });
                     throw new Error(errorMessage);
                 } finally {
-                    // semaphore.release(); 
+                    // semaphore.release();
                 }
             });
             await Promise.all(dataElementPromises);
@@ -137,7 +144,7 @@ export class AMRAggDataValuesImportHelper {
         orgUnitId: string,
         errors: ConsistencyError[],
         dataValues: DataValue[],
-        action: ImportStrategy, 
+        action: ImportStrategy,
         dataSetId: string
     ): Promise<ImportSummary> {
         //const uniqueAOCs = _.uniq(dataValues.map(el => el.attributeOptionCombo || ""));
@@ -148,27 +155,42 @@ export class AMRAggDataValuesImportHelper {
         return finalSummary;
     }
 
-
-
-    protected getAttributeOptionComboId(data: RISData | SampleData, dataSet_attr_combo: CategoryCombo, index: number, blockingErrors: ConsistencyError[]): string {
+    protected getAttributeOptionComboId(
+        data: RISData | SampleData,
+        dataSet_attr_combo: CategoryCombo,
+        index: number,
+        blockingErrors: ConsistencyError[]
+    ): string {
         try {
-            const dataSetCategoryOptionValues = dataSet_attr_combo.categories.map(category => data[category.code as keyof typeof data]?.toString() || "");
-            const { categoryOptionComboId: attributeOptionComboId, error: aocBlockingError } = getCategoryOptionComboByOptionCodes(dataSet_attr_combo, dataSetCategoryOptionValues);
+            const dataSetCategoryOptionValues = dataSet_attr_combo.categories.map(
+                category => data[category.code as keyof typeof data]?.toString() || ""
+            );
+            const { categoryOptionComboId: attributeOptionComboId, error: aocBlockingError } =
+                getCategoryOptionComboByOptionCodes(dataSet_attr_combo, dataSetCategoryOptionValues);
 
             if (aocBlockingError !== "") {
                 blockingErrors.push({ error: aocBlockingError, count: 1, lines: [index + 1] });
             }
             return attributeOptionComboId;
         } catch (error) {
-            console.error("Error getting dataSetAttrCombo : ", error)
+            console.error("Error getting dataSetAttrCombo : ", error);
             throw new Error("Error getting dataSetAttrCombo ");
         }
-        
     }
 
-    protected getCategoryOptionComboId(data: RISData | SampleData, dataElement: DataElement, dataElement_CC: CategoryCombo, index: number, blockingErrors: ConsistencyError[]): string {
+    protected getCategoryOptionComboId(
+        data: RISData | SampleData,
+        dataElement: DataElement,
+        dataElement_CC: CategoryCombo,
+        index: number,
+        blockingErrors: ConsistencyError[]
+    ): string {
         try {
-            const { categoryOptionComboId, error: ccoBlockingError } = getCategoryOptionComboByDataElement(dataElement, dataElement_CC, data);
+            const { categoryOptionComboId, error: ccoBlockingError } = getCategoryOptionComboByDataElement(
+                dataElement,
+                dataElement_CC,
+                data
+            );
 
             if (ccoBlockingError !== "") {
                 blockingErrors.push({ error: ccoBlockingError, count: 1, lines: [index + 1] });
@@ -176,13 +198,16 @@ export class AMRAggDataValuesImportHelper {
 
             return categoryOptionComboId;
         } catch (error) {
-            console.error("Error getting  getCategoryOptionComboId: ", error)
+            console.error("Error getting  getCategoryOptionComboId: ", error);
             throw new Error("Error getting  getCategoryOptionComboId");
         }
     }
 
-
-    protected finalizeImportSummary(saveSummary: DataValuesSaveSummary, errors: ConsistencyError[], action: ImportStrategy): ImportSummary {
+    protected finalizeImportSummary(
+        saveSummary: DataValuesSaveSummary,
+        errors: ConsistencyError[],
+        action: ImportStrategy
+    ): ImportSummary {
         const importSummary = mapDataValuesToImportSummary(saveSummary, action);
         const finalErrors = action === "DELETE" ? [] : errors;
         const finalSummary = includeBlockingErrors(importSummary, finalErrors);
@@ -205,9 +230,9 @@ export class AMRAggDataValuesImportHelper {
             validationRuleViolations.map(ruleViolation => (ruleViolation as any)?.validationRule?.id)
         );
 
-        const rulesInstructions = await this.metadataRepository.getValidationRuleInstructions(validationRulesIds).toPromise();
+        const rulesInstructions = await this.metadataRepository
+            .getValidationRuleInstructions(validationRulesIds)
+            .toPromise();
         return checkDhis2Validations(validationResponse, rulesInstructions);
     }
-
-
 }
