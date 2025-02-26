@@ -895,7 +895,7 @@ async function main() {
     const startTime = Date.now();
     await initializeGlobals();
     const rootDirectory =
-        "C:/Users/odohertyd/OneDrive - World Health Organization/Documents/Python projects/HistoricalDataAMR_1";
+        "";
 
     try {
         await processDirectory(rootDirectory);
