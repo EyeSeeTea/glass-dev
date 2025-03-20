@@ -16,7 +16,8 @@ import {
     getNewAtcCodeRec,
     DDDData,
     getDDDForAtcVersion,
-    getStandardizedUnit, UnitsData,
+    getStandardizedUnit,
+    UnitsData,
 } from "../../../../entities/GlassAtcVersionData";
 import { Id } from "../../../../entities/Ref";
 import { RawSubstanceConsumptionData } from "../../../../entities/data-entry/amc/RawSubstanceConsumptionData";
@@ -35,7 +36,7 @@ export function calculateConsumptionSubstanceLevelData(
     let calculationLogs: BatchLogContent = [];
 
     const latestAtcVersionData = atcVersionsByKeys[currentAtcVersionKey];
-    if (latestAtcVersionData===undefined) {
+    if (latestAtcVersionData === undefined) {
         calculationLogs = [
             ...calculationLogs,
             {
@@ -65,9 +66,8 @@ export function calculateConsumptionSubstanceLevelData(
             ];
             const { atc_version_manual } = rawSubstanceConsumption;
 
-
-
-            if (atc_version_manual === currentAtcVersionKey) { // user atc version is identical ot the current atc version, just copy manual to autocalculated
+            if (atc_version_manual === currentAtcVersionKey) {
+                // user atc version is identical ot the current atc version, just copy manual to autocalculated
                 calculationLogs = [
                     ...calculationLogs,
                     {
@@ -113,7 +113,7 @@ export function calculateConsumptionSubstanceLevelData(
             }
 
             // atc_version_manual is different from current_atc_version, we need to adjust
-            const userAtcVersion = atcVersionsByKeys[atc_version_manual]
+            const userAtcVersion = atcVersionsByKeys[atc_version_manual];
             if (!userAtcVersion) {
                 calculationLogs = [
                     ...calculationLogs,
@@ -135,7 +135,9 @@ export function calculateConsumptionSubstanceLevelData(
                 {
                     content: `[${new Date().toISOString()}] Substance ${
                         rawSubstanceConsumption.id
-                    } - Getting atc_autocalculated for ${rawSubstanceConsumption.atc_manual} using version ${currentAtcVersionKey}.`,
+                    } - Getting atc_autocalculated for ${
+                        rawSubstanceConsumption.atc_manual
+                    } using version ${currentAtcVersionKey}.`,
                     messageType: "Info",
                 },
             ];
@@ -146,9 +148,9 @@ export function calculateConsumptionSubstanceLevelData(
                 calculationLogs = [
                     ...calculationLogs,
                     {
-                        content: `[${new Date().toISOString()}] Substance ${
-                            rawSubstanceConsumption.id
-                        } - atc_manual ${rawSubstanceConsumption.atc_manual} is not in the current version ${currentAtcVersionKey} and has no replacement.`,
+                        content: `[${new Date().toISOString()}] Substance ${rawSubstanceConsumption.id} - atc_manual ${
+                            rawSubstanceConsumption.atc_manual
+                        } is not in the current version ${currentAtcVersionKey} and has no replacement.`,
                         messageType: "Warn",
                     },
                 ];
@@ -197,9 +199,20 @@ export function calculateConsumptionSubstanceLevelData(
                 },
             ];
 
-            const oldDDD = getDDDForAtcVersion(rawSubstanceConsumption.atc_manual, rawSubstanceConsumption.route_admin_manual, rawSubstanceConsumption.salt_manual, userAtcVersion);
-            const newDDD = getDDDForAtcVersion(atcAutoCalc, rawSubstanceConsumption.route_admin_manual, rawSubstanceConsumption.salt_manual, latestAtcVersionData);
-            if (oldDDD === undefined || newDDD === undefined) { // No DDD for the old or new ATC codes
+            const oldDDD = getDDDForAtcVersion(
+                rawSubstanceConsumption.atc_manual,
+                rawSubstanceConsumption.route_admin_manual,
+                rawSubstanceConsumption.salt_manual,
+                userAtcVersion
+            );
+            const newDDD = getDDDForAtcVersion(
+                atcAutoCalc,
+                rawSubstanceConsumption.route_admin_manual,
+                rawSubstanceConsumption.salt_manual,
+                latestAtcVersionData
+            );
+            if (oldDDD === undefined || newDDD === undefined) {
+                // No DDD for the old or new ATC codes
                 const rawSubstanceConsumptionKilograms = rawSubstanceConsumption.tons_manual
                     ? rawSubstanceConsumption.tons_manual * 1000
                     : undefined;
@@ -245,12 +258,7 @@ export function calculateConsumptionSubstanceLevelData(
             }
 
             // Adjust the number of DDDs with ratio oldDDD and newDDD
-            const dddsAdjust = getDDDsAdjust2(
-                rawSubstanceConsumption,
-                oldDDD,
-                newDDD,
-                latestAtcVersionData
-            );
+            const dddsAdjust = getDDDsAdjust2(rawSubstanceConsumption, oldDDD, newDDD, latestAtcVersionData);
             calculationLogs = [...calculationLogs, ...dddsAdjust.logs];
 
             const rawSubstanceConsumptionKilograms = rawSubstanceConsumption.tons_manual
@@ -293,7 +301,6 @@ export function calculateConsumptionSubstanceLevelData(
 
     return calculatedConsumptionSubstanceLevelData;
 }
-
 
 function getStandardizedDDD(
     rawSubstanceConsumptionData: RawSubstanceConsumptionData,
@@ -456,11 +463,11 @@ function getDDDsAdjust2(
     }
     const { ddds_manual } = rawSubstanceConsumptionData;
     // 2 - check compatible units between oldDDD and newDDD
-    const oldDDDFam = atcVersion.units.find(({UNIT}: UnitsData) => {
-        return UNIT===oldDDD.DDD_UNIT;
+    const oldDDDFam = atcVersion.units.find(({ UNIT }: UnitsData) => {
+        return UNIT === oldDDD.DDD_UNIT;
     })?.UNIT;
-    const newDDDFam = atcVersion.units.find(({UNIT}: UnitsData) => {
-        return UNIT===newDDD.DDD_UNIT;
+    const newDDDFam = atcVersion.units.find(({ UNIT }: UnitsData) => {
+        return UNIT === newDDD.DDD_UNIT;
     });
 
     if (oldDDDFam !== newDDDFam) {

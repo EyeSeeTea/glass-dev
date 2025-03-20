@@ -1,5 +1,5 @@
 import { Id } from "./Ref";
-import {RawSubstanceConsumptionData} from "./data-entry/amc/RawSubstanceConsumptionData";
+import { RawSubstanceConsumptionData } from "./data-entry/amc/RawSubstanceConsumptionData";
 
 export type GlassATCHistory = {
     currentVersion: boolean;
@@ -278,18 +278,17 @@ export function getNewAtcCodeRec( // Todo: replace getNewAtcCode by this functio
     atcChanges: ATCChangesData[],
     currentAtcs: ATCData[]
 ): ATCCodeLevel5 | undefined {
-
     function findAtcCodeCurrent(atcCode: ATCCodeLevel5): string | undefined {
         const newAtc = atcChanges.find(({ PREVIOUS_ATC, CHANGE }) => {
             return CHANGE !== "SUPERSEDED" && PREVIOUS_ATC === atcCode;
         })?.NEW_ATC;
-        if (newAtc===undefined) {
+        if (newAtc === undefined) {
             return undefined;
         }
-        const foundAtcInCurrent = currentAtcs.find(({CODE} : ATCData) => {
-            return CODE===atcCode;
-        })?.CODE
-        if (foundAtcInCurrent===undefined) {
+        const foundAtcInCurrent = currentAtcs.find(({ CODE }: ATCData) => {
+            return CODE === atcCode;
+        })?.CODE;
+        if (foundAtcInCurrent === undefined) {
             return findAtcCodeCurrent(newAtc);
         } else {
             return foundAtcInCurrent;
@@ -314,11 +313,10 @@ export function getDDDForAtcVersion(
     saltCode: SaltCode,
     atcVersion: GlassAtcVersionData
 ) {
-    const ddds = atcVersion.ddds.filter(({ATC5, ROA, SALT}:DDDData)=> {
-        return ATC5===atcCode && ROA===roaCode && SALT===saltCode;
+    const ddds = atcVersion.ddds.filter(({ ATC5, ROA, SALT }: DDDData) => {
+        return ATC5 === atcCode && ROA === roaCode && SALT === saltCode;
     });
-    if (ddds.length === 0)
-        return undefined;
+    if (ddds.length === 0) return undefined;
     return ddds[0];
 }
 
