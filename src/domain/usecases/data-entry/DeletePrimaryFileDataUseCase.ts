@@ -40,6 +40,7 @@ export class DeletePrimaryFileDataUseCase implements UseCase {
         arrayBuffer: ArrayBuffer
     ): FutureData<ImportSummary> {
         const { name: currentModuleName } = currentModule;
+        console.log("DeletePrimaryFileDataUseCase");
         switch (currentModuleName) {
             case "AMR": {
                 return new DeleteRISDataset(this.options).delete(arrayBuffer);

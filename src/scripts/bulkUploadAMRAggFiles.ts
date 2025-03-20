@@ -5,7 +5,7 @@ import path from "path";
 
 import { DataStoreClient } from "../data/data-store/DataStoreClient";
 import { DataStoreKeys } from "../data/data-store/DataStoreKeys";
-import { DataValuesImportRepository } from "../data/repositories/data-entry/DataValuesImportRepository";
+import { DataValuesImportRepository } from "../data/repositories/data-entry/DataValuesDefaultImportRepository";
 import { RISDataCSVDefaultRepository } from "../data/repositories/data-entry/RISDataCSVDefaultRepository";
 import { SampleDataCSVDeafultRepository } from "../data/repositories/data-entry/SampleDataCSVDeafultRepository";
 import { GlassDataSubmissionsDefaultRepository } from "../data/repositories/GlassDataSubmissionDefaultRepository";
@@ -183,7 +183,7 @@ async function initializeGlobals() {
         sampleDataRepository,
         metadataRepository,
         dataValuesRepository,
-        moduleRepository    
+        moduleRepository
     );
 
     const elapsedSeconds = Math.floor((Date.now() - startTime) / 1000);
@@ -845,7 +845,7 @@ async function processDirectory(directoryPath: string): Promise<void> {
                     await processDirectory(filePath);
                 } else {
                     const fileName = path.basename(filePath);
-                    
+
                     let beforeDot;
                     if (fileName.includes(".")) {
                         beforeDot = fileName.split(".")[0];
@@ -894,8 +894,7 @@ async function processDirectory(directoryPath: string): Promise<void> {
 async function main() {
     const startTime = Date.now();
     await initializeGlobals();
-    const rootDirectory =
-        "";
+    const rootDirectory = "";
 
     try {
         await processDirectory(rootDirectory);

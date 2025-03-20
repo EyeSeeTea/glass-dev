@@ -6,6 +6,7 @@ export function apiToFuture<Data>(res: CancelableResponse<Data>): FutureData<Dat
         res.getData()
             .then(resolve)
             .catch(err => {
+                console.log(err);
                 const innerMessage = err?.response?.data?.message;
                 const message = err ? err.message : "Unknown error";
 

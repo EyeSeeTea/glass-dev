@@ -12,16 +12,8 @@ import { apiToFuture } from "../../utils/futures";
 export class GlassDocumentsDefaultRepository implements GlassDocumentsRepository {
     private api: D2Api;
     private dataStoreClient: DataStoreClient;
-    constructor(dataStoreClient: DataStoreClient, instance?: Instance, api?: D2Api) {
-        if (api) {
-            // Use the provided api instance
-            this.api = api;
-        } else if (instance) {
-            // Fallback to instance if no api is provided
-            this.api = getD2APiFromInstance(instance);
-        } else {
-            throw new Error("Either 'api' or 'instance' must be provided.");
-        }
+    constructor(dataStoreClient: DataStoreClient, instance: Instance) {
+        this.api = getD2APiFromInstance(instance);
         this.dataStoreClient = dataStoreClient;
     }
 
@@ -102,9 +94,25 @@ export class GlassDocumentsDefaultRepository implements GlassDocumentsRepository
     }
 
     download(id: string): FutureData<Blob> {
-        return apiToFuture(this.api.files.get(id));
+        console.log("GlassDocumentsDefaultRepository download file id : ", id);
+        try {
+            return apiToFuture(this.api.files.get(id));
+        } catch (error) {
+            if (error instanceof Error) {
+                console.error("Error downloading file with id:", id, error);
+                if (error.message.includes("fetch failed")) {
+                    throw new Error(
+                        `Network error: Failed to download file with id ${id}. Please check your internet connection and try again.`
+                    );
+                } else {
+                    throw new Error(`Failed to download file with id ${id}: ${error.message}`);
+                }
+            } else {
+                console.error("Unknown error downloading file with id:", id, error);
+                throw new Error(`Failed to download file with id ${id}: Unknown error`);
+            }
+        }
     }
-
     deleteDocumentApi(id: string): FutureData<void> {
         return apiToFuture(this.api.files.delete(id)).flatMap(response => {
             if (response.httpStatus === "OK") return Future.success(undefined);
