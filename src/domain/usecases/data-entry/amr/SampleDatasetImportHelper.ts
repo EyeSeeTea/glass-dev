@@ -7,25 +7,23 @@ import { SampleData } from "../../../entities/data-entry/amr-external/SampleData
 import { CategoryCombo } from "../../../entities/metadata/CategoryCombo";
 import { GlassModule } from "../../../entities/GlassModule";
 import { GlassModuleRepository } from "../../../repositories/GlassModuleRepository";
-import _ from 'lodash';
+import _ from "lodash";
 import { AMRAggDataValuesImportHelper } from "./AMRAggDataValuesImportHelper";
 import { DataSet } from "../../../entities/metadata/DataSet";
-import { DataValuesImportRepository } from "../../../../data/repositories/data-entry/DataValuesImportRepository";
+import { DataValuesImportRepository } from "../../../../data/repositories/data-entry/DataValuesDefaultImportRepository";
 
 const AMR_AMR_DS_Input_files_Sample_DS_ID = "OcAB7oaC072";
 const AMR_BATCHID_CC_ID = "rEMx3WFeLcU";
 
 export class SampleDatasetImportHelper extends AMRAggDataValuesImportHelper {
-
     private static sampleMetadataCache: {
         dataSet: DataSet;
-        dataSet_attr_combo: CategoryCombo ;
+        dataSet_attr_combo: CategoryCombo;
     } = {
-            ...AMRAggDataValuesImportHelper.metadataCache, 
-            dataSet: {} as DataSet,
-            dataSet_attr_combo: {} as CategoryCombo
-        };
-
+        ...AMRAggDataValuesImportHelper.metadataCache,
+        dataSet: {} as DataSet,
+        dataSet_attr_combo: {} as CategoryCombo,
+    };
 
     constructor(
         private sampleDataRepository: SampleDataRepository,
@@ -43,11 +41,15 @@ export class SampleDatasetImportHelper extends AMRAggDataValuesImportHelper {
         dataValuesRepository: DataValuesImportRepository,
         moduleRepository: GlassModuleRepository
     ): Promise<SampleDatasetImportHelper> {
-        const instance = new SampleDatasetImportHelper(sampleDataRepository, metadataRepository, dataValuesRepository, moduleRepository);
-        await instance.initializeCache(); 
+        const instance = new SampleDatasetImportHelper(
+            sampleDataRepository,
+            metadataRepository,
+            dataValuesRepository,
+            moduleRepository
+        );
+        await instance.initializeCache();
         return instance;
     }
-
 
     protected async initializeCache(): Promise<void> {
         await super.initializeCache();
@@ -61,12 +63,11 @@ export class SampleDatasetImportHelper extends AMRAggDataValuesImportHelper {
                 dataSet,
                 dataSet_attr_combo,
             };
-         } catch (error) {
-            console.error('Error loading sample metadata:', error);
-            throw error; 
+        } catch (error) {
+            console.error("Error loading sample metadata:", error);
+            throw error;
         }
     }
-
 
     public async importSampleDataValues(
         inputFile: File,
@@ -87,10 +88,10 @@ export class SampleDatasetImportHelper extends AMRAggDataValuesImportHelper {
                     sampleDataItems,
                     SampleDatasetImportHelper.sampleMetadataCache.dataSet,
                     SampleDatasetImportHelper.sampleMetadataCache.dataSet_attr_combo,
-                    orgUnitId, 
+                    orgUnitId,
                     10
                 ),
-                this.runPreImportConsistencyChecks(sampleDataItems, AMRAggDataValuesImportHelper.metadataCache.module)
+                this.runPreImportConsistencyChecks(sampleDataItems, AMRAggDataValuesImportHelper.metadataCache.module),
             ]);
 
             const { values, blockingErrors } = dataValuesResult;
@@ -103,7 +104,15 @@ export class SampleDatasetImportHelper extends AMRAggDataValuesImportHelper {
             // Save data values in DHIS2
             const saveSummary = await this.dataValuesRepository.save(values, action, dryRun);
             // Run post-save validations
-            const finalSummary = await this.runPostSaveValidations(saveSummary, year, orgUnitId, allBlockingErrors, values, action, AMR_AMR_DS_Input_files_Sample_DS_ID);
+            const finalSummary = await this.runPostSaveValidations(
+                saveSummary,
+                year,
+                orgUnitId,
+                allBlockingErrors,
+                values,
+                action,
+                AMR_AMR_DS_Input_files_Sample_DS_ID
+            );
             return finalSummary;
         } catch (error) {
             const errorMessage = `Error during SAMPLE data values import for file ${inputFile.name} : ${error}`;
@@ -112,9 +121,8 @@ export class SampleDatasetImportHelper extends AMRAggDataValuesImportHelper {
         }
     }
 
-
     //sync
-  /*  private async generateDataValues(
+    /*  private async generateDataValues(
         sampleDataItems: SampleData[],
         dataSet: DataSet,
         dataSet_attr_combo: CategoryCombo,
@@ -220,11 +228,9 @@ export class SampleDatasetImportHelper extends AMRAggDataValuesImportHelper {
     }
     */
 
-
-
     private async runPreImportConsistencyChecks(
         sampleDataItems: SampleData[],
-        module: GlassModule,
+        module: GlassModule
     ): Promise<ConsistencyError[]> {
         const errors: ConsistencyError[] = [];
 
@@ -237,9 +243,7 @@ export class SampleDatasetImportHelper extends AMRAggDataValuesImportHelper {
         const yearErrors = errors;
         const countryErrors = errors;
         const duplicateRowErrors = errors;
-        const allErrors = [...batchIdErrors, ...yearErrors, ...countryErrors, ...duplicateRowErrors]
+        const allErrors = [...batchIdErrors, ...yearErrors, ...countryErrors, ...duplicateRowErrors];
         return allErrors;
     }
-
-
 }

@@ -82,7 +82,7 @@ async function main() {
                         password: password,
                     },
                 };
-                console.log(envVars);
+
                 const api = getD2ApiFromArgs(envVars);
                 const instance = getInstance(envVars);
                 const dataStoreClient = new DataStoreClient(instance);
@@ -379,7 +379,6 @@ function deleteUploadedDatasets(
         amcSubstanceDataRepository: AMCSubstanceDataRepository;
     }
 ): FutureData<void> {
-    console.log(uploadsToDelete);
     return Future.sequential(
         uploadsToDelete.map(uploadToDelete => {
             return Future.fromPromise(new Promise(resolve => setTimeout(resolve, 500))).flatMap(() => {

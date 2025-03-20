@@ -1,0 +1,197 @@
+import { command, run, string, option } from "cmd-ts";
+import path from "path";
+import fs from "fs";
+import { getD2ApiFromArgs, getInstance } from "./common";
+import dotenv from "dotenv";
+import { GlassDataSubmissionsDefaultRepository } from "../data/repositories/GlassDataSubmissionDefaultRepository";
+import { DataStoreClient } from "../data/data-store/DataStoreClient";
+import { GetSpecificDataSubmissionUseCase } from "../domain/usecases/GetSpecificDataSubmissionUseCase";
+import { GlassDataSubmission } from "../domain/entities/GlassDataSubmission";
+import { Future, FutureData } from "../domain/entities/Future";
+import { moduleProperties } from "../domain/utils/ModuleProperties";
+import { MetadataDefaultRepository } from "../data/repositories/MetadataDefaultRepository";
+import { RISDataCSVDefaultRepository } from "../data/repositories/data-entry/RISDataCSVDefaultRepository";
+import { UploadDocumentUseCase } from "../domain/usecases/UploadDocumentUseCase";
+import { GlassDocumentsDefaultRepository } from "../data/repositories/GlassDocumentsDefaultRepository";
+import { GlassUploadsDefaultRepository } from "../data/repositories/GlassUploadsDefaultRepository";
+import { SetUploadStatusUseCase } from "../domain/usecases/SetUploadStatusUseCase";
+import { Instance } from "../data/entities/Instance";
+import { SampleDataCSVDeafultRepository } from "../data/repositories/data-entry/SampleDataCSVDeafultRepository";
+import { UpdateSampleUploadWithRisIdUseCase } from "../domain/usecases/UpdateSampleUploadWithRisIdUseCase";
+import { CodedRef } from "../domain/entities/Ref";
+import { SetDataSubmissionStatusUseCase } from "../domain/usecases/SetDataSubmissionStatusUseCase";
+import { DeleteDocumentInfoByUploadIdUseCase } from "../domain/usecases/DeleteDocumentInfoByUploadIdUseCase";
+dotenv.config();
+
+console.log("Base URL:", process.env.REACT_APP_DHIS2_BASE_URL);
+console.log("Auth:", process.env.REACT_APP_DHIS2_AUTH);
+console.log("REACT_APP_DHIS2_BASE_URL:", process.env.REACT_APP_DHIS2_BASE_URL);
+
+let instance: Instance;
+let dataStoreClient: DataStoreClient;
+let glassDocumentsRepository: GlassDocumentsDefaultRepository;
+let glassUploadsRepository: GlassUploadsDefaultRepository;
+
+//let orgUnits: CodedRef[] = [];
+let getSpecificDataSubmission: GetSpecificDataSubmissionUseCase;
+let glassDataSubmissionRepository: GlassDataSubmissionsDefaultRepository;
+let setSubmissionStatus: SetDataSubmissionStatusUseCase;
+let deleteDocumentInfoByUploadIdUseCase: DeleteDocumentInfoByUploadIdUseCase;
+
+const moduleName = "AMR";
+const moduleId = "AVnpk4xiXGG";
+
+// Initialize the global variables
+function initializeGlobals(envVars: any) {
+    instance = getInstance(envVars);
+    dataStoreClient = new DataStoreClient(instance);
+    glassDocumentsRepository = new GlassDocumentsDefaultRepository(dataStoreClient, instance);
+    glassUploadsRepository = new GlassUploadsDefaultRepository(dataStoreClient);
+    glassDataSubmissionRepository = new GlassDataSubmissionsDefaultRepository(dataStoreClient);
+    getSpecificDataSubmission = new GetSpecificDataSubmissionUseCase(glassDataSubmissionRepository);
+    setSubmissionStatus = new SetDataSubmissionStatusUseCase(glassDataSubmissionRepository);
+    deleteDocumentInfoByUploadIdUseCase = new DeleteDocumentInfoByUploadIdUseCase(
+        glassDocumentsRepository,
+        glassUploadsRepository
+    );
+}
+
+/*async function getOrgUnitIdFromCode(orgUnitCode: string) {
+    if (orgUnits.length === 0) {
+        orgUnits = await metadataRepository.getOrgUnitsByCode([orgUnitCode])
+            .toPromise().catch(error => {
+                console.error(`Error thrown when fetching all orgUnits, error : ${error}`);
+                throw error;
+            });
+    }
+    //console.log("getOrgUnitIdFromCode orgUnitId: ", orgUnitId);
+    return orgUnits.find(ou => ou.code === orgUnitCode)?.id || "";
+}*/
+
+const cmd = command({
+    name: path.basename(__filename),
+    description: "Delete Documents for a full period",
+    args: {
+        period: option({
+            type: string,
+            long: "period",
+            description: "The period ",
+        }),
+        //moduleId: option({
+        //    type: string,
+        //     long: "moduleId",
+        //    description: "The moduleId",
+        // })
+    },
+    handler: async args => {
+        if (!process.env.REACT_APP_DHIS2_BASE_URL)
+            throw new Error("REACT_APP_DHIS2_BASE_URL  must be set in the .env file");
+
+        if (!process.env.REACT_APP_DHIS2_AUTH)
+            throw new Error("REACT_APP_DHIS2_BASE_URL  must be set in the .env file");
+
+        const username = process.env.REACT_APP_DHIS2_AUTH.split(":")[0] ?? "";
+        const password = process.env.REACT_APP_DHIS2_AUTH.split(":")[1] ?? "";
+
+        if (username === "" || password === "") {
+            throw new Error("REACT_APP_DHIS2_AUTH must be in the format 'username:password'");
+        }
+        const envVars = {
+            url: process.env.REACT_APP_DHIS2_BASE_URL,
+            auth: {
+                username: username,
+                password: password,
+            },
+        };
+
+        const api = getD2ApiFromArgs(envVars);
+
+        initializeGlobals(envVars);
+
+        //1. Get Period for which to reset.
+        if (!args.period) throw new Error("Period is required");
+        const period = args.period;
+
+        //2. Get OrgUnit for which to reset.
+        // if (!args.moduleId) throw new Error("moduleId is required");
+        //const moduleId = args.moduleId;
+
+        //4. Set AMR-AGG dataset id.
+        // const dataSetId = "CeQPmXgrhHF";
+
+        try {
+            const orgUnits = await api.models.organisationUnits
+                .get({
+                    fields: { id: true, name: true, code: true },
+                    filter: { level: { eq: "3" } },
+                    paging: false,
+                })
+                .getData()
+                .catch(error => {
+                    console.error(`Error thrown when fetching countries : ${error}`);
+                    throw error; // Re-throwing here to be caught by the main try/catch
+                });
+
+            // Add Kosovo to the list of countries
+            orgUnits.objects.push({
+                id: "I8AMbKhxlj9",
+                name: "Kosovo",
+                code: "601624",
+            });
+
+            for (const orgUnit of orgUnits.objects) {
+                try {
+                    const orgUnitId = orgUnit.id;
+
+                    // Fetch data submission ID
+                    const dataSubmissionId = await getSpecificDataSubmission
+                        .execute(moduleId, moduleName, orgUnitId, period, false)
+                        .toPromise();
+
+                    if (!dataSubmissionId) {
+                        console.error(
+                            "Data submission id not found for OrgUnit: " + orgUnit.code + " and period: " + period
+                        );
+                        throw new Error(
+                            "Data submission ID not found for OrgUnit: " + orgUnit.code + " and period: " + period
+                        );
+                    }
+
+                    // Fetch uploads associated with the data submission
+                    const uploads = await glassUploadsRepository
+                        .getUploadsByDataSubmission(dataSubmissionId.id)
+                        .toPromise();
+
+                    console.info(
+                        `dataSubmissionId.id: ${dataSubmissionId.id} for module ${dataSubmissionId.module} for orgUnit: ${dataSubmissionId.orgUnit} for period ${dataSubmissionId.period}`
+                    );
+                    console.info("uploads: ", uploads);
+                    console.info("orgUnit code: ", orgUnit.code);
+
+                    // Delete uploads and associated documents
+                    for (const upload of uploads) {
+                        try {
+                            await glassUploadsRepository.delete(upload.id).toPromise();
+                            const id = await glassDocumentsRepository.delete(upload.fileId).toPromise();
+                            await glassDocumentsRepository.deleteDocumentApi(id).toPromise();
+                        } catch (deleteError) {
+                            console.error(
+                                `Error deleting upload or document for OrgUnit: ${orgUnitId}, Error: ${deleteError}`
+                            );
+                            throw deleteError;
+                        }
+                    }
+
+                    await setSubmissionStatus.execute(dataSubmissionId.id, "NOT_COMPLETED").toPromise();
+                } catch (innerError) {
+                    console.error(`Error processing OrgUnit: ${orgUnit.name}, Error: ${innerError}`);
+                    throw innerError;
+                }
+            }
+        } catch (error) {
+            console.error(`Error thrown while trying to delete Document: ${error}`);
+        }
+    },
+});
+
+run(cmd, process.argv.slice(2));

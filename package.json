@@ -4,10 +4,10 @@
     "version": "1.6.23",
     "license": "GPL-3.0",
     "author": "EyeSeeTea team",
-    "homepage": ".",
+    "homepage": "http://.",
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/EyeSeeTea/glass-dev.git"
+        "url": "git+https://github.com/dodwho/glass-dev.git"
     },
     "dependencies": {
         "@dhis2/app-runtime": "2.8.0",
@@ -72,6 +72,7 @@
         "babel-eslint": "10.1.0",
         "cmd-ts": "^0.7.0",
         "craco": "^0.0.3",
+        "cross-env": "^7.0.3",
         "cypress": "8.1.0",
         "cypress-xpath": "1.6.2",
         "eslint": "7.32.0",
@@ -90,6 +91,7 @@
         "jest": "27.5.1",
         "prettier": "2.6.1",
         "react-test-renderer": "17.0.2",
+        "shx": "^0.3.4",
         "ts-jest": "27.1.4",
         "ts-node": "10.7.0",
         "typescript": "4.6.3",
@@ -108,7 +110,7 @@
         "prettify": "prettier \"./**/*.{js,jsx,json,css,ts,tsx}\" --write",
         "extract-pot": "yarn d2-i18n-extract -p src/ -o i18n/",
         "localize": "yarn update-po && d2-i18n-generate -n glass -p ./i18n/ -o ./src/locales/",
-        "update-po": "yarn extract-pot && find i18n/ -name '*.po' -exec msgmerge --backup=off -U {} i18n/en.pot \\;",
+        "update-po": "yarn extract-pot",
         "manifest": "d2-manifest package.json build/manifest.webapp",
         "cy:verify": "cypress verify",
         "cy:e2e:open": "NODE_ENV=test CYPRESS_E2E=true cypress open",
@@ -141,5 +143,10 @@
                 "href": "*"
             }
         }
+    },
+    "main": ".eslintrc.js",
+    "keywords": [],
+    "bugs": {
+        "url": "https://github.com/EyeSeeTea/glass-dev/issues"
     }
 }
