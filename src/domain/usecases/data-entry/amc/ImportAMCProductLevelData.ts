@@ -1,5 +1,5 @@
 import { ImportStrategy } from "../../../entities/data-entry/DataValuesSaveSummary";
-import { ImportSummary } from "../../../entities/data-entry/ImportSummary";
+import { ImportSummary, ImportSummaryWithEventIdList } from "../../../entities/data-entry/ImportSummary";
 import { Future, FutureData } from "../../../entities/Future";
 import { ExcelRepository } from "../../../repositories/ExcelRepository";
 import * as templates from "../../../entities/data-entry/program-templates";
@@ -125,12 +125,9 @@ export class ImportAMCProductLevelData {
                                         action
                                     )
                                     .flatMap(response => {
-                                        return mapToImportSummary(
-                                            response,
-                                            "trackedEntity",
-                                            this.metadataRepository,
-                                            validationResults.nonBlockingErrors
-                                        ).flatMap(summary => {
+                                        return mapToImportSummary(response, "trackedEntity", this.metadataRepository, {
+                                            nonBlockingErrors: validationResults.nonBlockingErrors,
+                                        }).flatMap(summary => {
                                             return this.uploadTeiIdListFileAndSave(
                                                 "primaryUploadId",
                                                 summary,
@@ -374,7 +371,7 @@ export class ImportAMCProductLevelData {
 
     private uploadTeiIdListFileAndSave = (
         uploadIdLocalStorageName: string,
-        summary: { importSummary: ImportSummary; eventIdList: string[] },
+        summary: ImportSummaryWithEventIdList,
         moduleName: string
     ): FutureData<ImportSummary> => {
         const uploadId = localStorage.getItem(uploadIdLocalStorageName);
@@ -398,7 +395,7 @@ export class ImportAMCProductLevelData {
     private deleteCalculatedSubstanceConsumptionData(
         deleteProductSummary: ImportSummary,
         calculatedSubstanceConsumptionListFileId: string
-    ) {
+    ): FutureData<ImportSummary> {
         return this.glassDocumentsRepository
             .download(calculatedSubstanceConsumptionListFileId)
             .flatMap(eventListFile => {
@@ -412,7 +409,7 @@ export class ImportAMCProductLevelData {
                                 "event",
                                 this.metadataRepository
                             ).flatMap(deleteCalculatedSubstanceConsumptionSummary => {
-                                return Future.success({
+                                const importSummary: ImportSummary = {
                                     ...deleteCalculatedSubstanceConsumptionSummary.importSummary,
                                     importCount: {
                                         imported:
@@ -439,7 +436,8 @@ export class ImportAMCProductLevelData {
                                         ...deleteCalculatedSubstanceConsumptionSummary.importSummary.blockingErrors,
                                         ...deleteProductSummary.blockingErrors,
                                     ],
-                                });
+                                };
+                                return Future.success(importSummary);
                             });
                         });
                 });

@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: i18next-conv\n"
-"POT-Creation-Date: 2025-01-14T08:47:22.801Z\n"
+"POT-Creation-Date: 2025-02-05T15:58:56.508Z\n"
 "PO-Revision-Date: 2018-10-25T09:02:35.143Z\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -173,6 +173,9 @@ msgid ""
 "You can add up to 6 datasets to this submission with different BATCH IDS."
 msgstr ""
 
+msgid "Uploads marked to be uploaded asynchronously"
+msgstr ""
+
 msgid "Validated Uploads, Review to complete"
 msgstr ""
 
@@ -341,17 +344,28 @@ msgstr ""
 
 msgid ""
 "UPLOADED - The file has been uploaded, but data has not been imported as "
-"upload was discarded in Step 1 or due to errors in Step 2"
+"upload was discarded in Step 1, due to errors in Step 2 or errors in async "
+"uploads."
+msgstr ""
+
+msgid ""
+"MARKED TO BE UPLOADED - The file has been uploaded, but data has not been "
+"imported as data is waiting to be uploaded asynchronously."
+msgstr ""
+
+msgid ""
+"UPLOADING ASYNC IN PROGRESS - The file has been uploaded, but the data has "
+"not been imported because it is being uploaded asynchronously."
 msgstr ""
 
 msgid ""
 "IMPORTED - The data has been imported, but validations(if applicable) were "
-"not run successfully, in Step 2."
+"not run successfully in Step 2 or in async uploads."
 msgstr ""
 
 msgid ""
 "VALIDATED - The data has been imported and automatically validated, but the "
-"data was not reviewed by user in Step 3"
+"data was not reviewed by user in Step 3 or has been imported asynchronously."
 msgstr ""
 
 msgid ""
@@ -367,6 +381,9 @@ msgstr ""
 msgid "Complete"
 msgstr ""
 
+msgid "Error occurred when removing async uploads"
+msgstr ""
+
 msgid "Error occurred when setting data submission status to COMPLETED"
 msgstr ""
 
@@ -377,6 +394,12 @@ msgid "Loading"
 msgstr ""
 
 msgid "This might take several minutes, do not refresh the page or press back."
+msgstr ""
+
+msgid "MARKED TO BE UPLOADED"
+msgstr ""
+
+msgid "UPLOADING ASYNC IN PROGRESS"
 msgstr ""
 
 msgid "Marked to be deleted"

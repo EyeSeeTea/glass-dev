@@ -1,7 +1,7 @@
 import { Future, FutureData } from "../../domain/entities/Future";
-import { GlassUploads } from "../../domain/entities/GlassUploads";
+import { GlassUploads, GlassUploadsStatus } from "../../domain/entities/GlassUploads";
 import { Id } from "../../domain/entities/Ref";
-import { ImportSummaryErrors } from "../../domain/entities/data-entry/ImportSummary";
+import { ImportSummary, ImportSummaryErrors } from "../../domain/entities/data-entry/ImportSummary";
 import { GlassUploadsRepository } from "../../domain/repositories/GlassUploadsRepository";
 import { cache } from "../../utils/cache";
 import { DataStoreClient } from "../data-store/DataStoreClient";
@@ -33,12 +33,16 @@ export class GlassUploadsDefaultRepository implements GlassUploadsRepository {
         });
     }
 
-    setStatus(id: string, status: string): FutureData<void> {
+    setStatus(id: Id, status: GlassUploadsStatus): FutureData<void> {
         return this.dataStoreClient.listCollection<GlassUploads>(DataStoreKeys.UPLOADS).flatMap(uploads => {
-            const upload = uploads?.find(upload => upload.id === id);
-            if (upload) {
-                upload.status = status;
-                return this.dataStoreClient.saveObject(DataStoreKeys.UPLOADS, uploads);
+            const uploadFound = uploads?.find(upload => upload.id === id);
+            if (uploadFound) {
+                const restUploads = uploads.filter(upload => upload.id !== id);
+
+                return this.dataStoreClient.saveObject(DataStoreKeys.UPLOADS, [
+                    ...restUploads,
+                    { ...uploadFound, status: status },
+                ]);
             } else {
                 return Future.error("Upload does not exist");
             }
@@ -235,6 +239,52 @@ export class GlassUploadsDefaultRepository implements GlassUploadsRepository {
                 return this.dataStoreClient.saveObject(DataStoreKeys.UPLOADS, [...restUploads, ...updatedUploads]);
             } else {
                 return Future.success(undefined);
+            }
+        });
+    }
+
+    setMultipleErrorAsyncUploading(ids: Id[]): FutureData<void> {
+        return this.dataStoreClient.listCollection<GlassUploads>(DataStoreKeys.UPLOADS).flatMap(uploads => {
+            const filteredUploads = uploads?.filter(upload => ids.includes(upload.id));
+            if (filteredUploads.length > 0) {
+                const updatedUploads = filteredUploads.map(upload => ({
+                    ...upload,
+                    errorAsyncUploading: ids.includes(upload.id),
+                }));
+                const restUploads = uploads.filter(upload => !ids.includes(upload.id));
+
+                return this.dataStoreClient.saveObject(DataStoreKeys.UPLOADS, [...restUploads, ...updatedUploads]);
+            } else {
+                return Future.success(undefined);
+            }
+        });
+    }
+
+    saveImportSummaries(params: { uploadId: Id; importSummaries: ImportSummary[] }): FutureData<void> {
+        const { uploadId, importSummaries } = params;
+
+        return this.dataStoreClient.listCollection<GlassUploads>(DataStoreKeys.UPLOADS).flatMap(uploads => {
+            const uploadFound = uploads?.find(upload => upload.id === uploadId);
+            if (uploadFound) {
+                const mergedImportSummaryErrors: ImportSummaryErrors = importSummaries.reduce(
+                    (acc: ImportSummaryErrors, summary: ImportSummary) => {
+                        return {
+                            nonBlockingErrors: [...acc.nonBlockingErrors, ...summary.nonBlockingErrors],
+                            blockingErrors: [...acc.blockingErrors, ...summary.blockingErrors],
+                        };
+                    },
+                    { nonBlockingErrors: [], blockingErrors: [] }
+                );
+
+                const restUploads = uploads.filter(upload => upload.id !== uploadId);
+                const updatedUpload = {
+                    ...uploadFound,
+                    asyncImportSummaries: importSummaries,
+                    importSummary: mergedImportSummaryErrors,
+                };
+                return this.dataStoreClient.saveObject(DataStoreKeys.UPLOADS, [...restUploads, updatedUpload]);
+            } else {
+                return Future.error("Upload does not exist");
             }
         });
     }

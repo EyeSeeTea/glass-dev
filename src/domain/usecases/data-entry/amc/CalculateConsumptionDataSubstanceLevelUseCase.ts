@@ -2,7 +2,7 @@ import { logger } from "../../../../utils/logger";
 import { Future, FutureData } from "../../../entities/Future";
 import { CODE_PRODUCT_NOT_HAVE_ATC, createAtcVersionKey } from "../../../entities/GlassAtcVersionData";
 import { Id } from "../../../entities/Ref";
-import { ImportSummary } from "../../../entities/data-entry/ImportSummary";
+import { ImportSummary, ImportSummaryWithEventIdList } from "../../../entities/data-entry/ImportSummary";
 import { GlassATCRepository } from "../../../repositories/GlassATCRepository";
 import { GlassDocumentsRepository } from "../../../repositories/GlassDocumentsRepository";
 import { GlassModuleRepository } from "../../../repositories/GlassModuleRepository";
@@ -137,8 +137,9 @@ export class CalculateConsumptionDataSubstanceLevelUseCase {
                                         response,
                                         IMPORT_SUMMARY_EVENT_TYPE,
                                         this.metadataRepository,
-                                        undefined,
-                                        eventIdLineNoMap
+                                        {
+                                            eventIdLineNoMap,
+                                        }
                                     ).flatMap(summary =>
                                         this.uploadCalculatedEventListFileIdAndSaveInUploads(
                                             uploadId,
@@ -172,7 +173,7 @@ export class CalculateConsumptionDataSubstanceLevelUseCase {
 
     private uploadCalculatedEventListFileIdAndSaveInUploads(
         uploadId: string,
-        summary: { importSummary: ImportSummary; eventIdList: string[] },
+        summary: ImportSummaryWithEventIdList,
         moduleName: string
     ): FutureData<ImportSummary> {
         if (summary.eventIdList.length > 0 && uploadId) {

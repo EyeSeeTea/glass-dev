@@ -20,6 +20,13 @@ export class SampleDataCSVDeafultRepository implements SampleDataRepository {
         });
     }
 
+    getFromBlob(blob: Blob): FutureData<SampleData[]> {
+        return Future.fromPromise(new SpreadsheetXlsxDataSource().readFromBlob(blob)).map(spreadsheet => {
+            const sheet = spreadsheet.sheets[0]; //Only one sheet for AMR RIS
+            return this.mapSheetRowsToSampleData(sheet?.rows || []);
+        });
+    }
+
     private mapSheetRowsToSampleData(rows: Row<string>[]): SampleData[] {
         return rows.map(row => {
             return {

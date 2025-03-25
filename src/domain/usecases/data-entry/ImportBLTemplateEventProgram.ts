@@ -2,7 +2,7 @@ import _ from "lodash";
 import moment from "moment";
 import { Dhis2EventsDefaultRepository } from "../../../data/repositories/Dhis2EventsDefaultRepository";
 import { ImportStrategy } from "../../entities/data-entry/DataValuesSaveSummary";
-import { ConsistencyError, ImportSummary } from "../../entities/data-entry/ImportSummary";
+import { ConsistencyError, ImportSummary, ImportSummaryWithEventIdList } from "../../entities/data-entry/ImportSummary";
 import { Future, FutureData } from "../../entities/Future";
 import { ExcelRepository } from "../../repositories/ExcelRepository";
 import { GlassDocumentsRepository } from "../../repositories/GlassDocumentsRepository";
@@ -117,8 +117,10 @@ export class ImportBLTemplateEventProgram {
                                                         result,
                                                         "event",
                                                         this.metadataRepository,
-                                                        validatedEventResults.nonBlockingErrors,
-                                                        eventIdLineNoMap
+                                                        {
+                                                            nonBlockingErrors: validatedEventResults.nonBlockingErrors,
+                                                            eventIdLineNoMap,
+                                                        }
                                                     ).flatMap(summary => {
                                                         return uploadIdListFileAndSave(
                                                             uploadIdLocalStorageName,
@@ -311,7 +313,7 @@ export class ImportBLTemplateEventProgram {
 
 export const uploadIdListFileAndSave = (
     uploadIdLocalStorageName: string,
-    summary: { importSummary: ImportSummary; eventIdList: string[] },
+    summary: ImportSummaryWithEventIdList,
     moduleName: string,
     glassDocumentsRepository: GlassDocumentsRepository,
     glassUploadsRepository: GlassUploadsRepository
@@ -338,12 +340,14 @@ export const mapToImportSummary = (
     result: TrackerPostResponse,
     type: "event" | "trackedEntity",
     metadataRepository: MetadataRepository,
-    nonBlockingErrors?: ConsistencyError[],
-    eventIdLineNoMap?: { id: string; lineNo: number }[]
-): FutureData<{
-    importSummary: ImportSummary;
-    eventIdList: string[];
-}> => {
+    params?: {
+        nonBlockingErrors?: ConsistencyError[];
+        eventIdLineNoMap?: { id: string; lineNo: number }[];
+    }
+): FutureData<ImportSummaryWithEventIdList> => {
+    const nonBlockingErrors = params?.nonBlockingErrors;
+    const eventIdLineNoMap = params?.eventIdLineNoMap;
+
     if (result && result.validationReport && result.stats) {
         const blockingErrorList = _.compact(
             result.validationReport.errorReports.map(summary => {
@@ -375,48 +379,62 @@ export const mapToImportSummary = (
             .value();
 
         //Get list of DataElement Names in error messages.
-        return metadataRepository.getD2Ids(_.uniq(d2Ids)).flatMap(d2IdsMap => {
-            const importSummary: ImportSummary = {
-                status: result.status === "OK" ? "SUCCESS" : result.status,
-                importCount: {
-                    imported: result.stats.created,
-                    updated: result.stats.updated,
-                    ignored: result.stats.ignored,
-                    deleted: result.stats.deleted,
-                    total: result.stats.total,
-                },
-                blockingErrors: Object.entries(blockingErrorsByGroup).map(err => {
-                    const errMsg = err[0];
+        return metadataRepository
+            .getD2Ids(_.uniq(d2Ids))
+            .flatMap(d2IdsMap => {
+                const importSummary: ImportSummary = {
+                    status: result.status === "OK" ? "SUCCESS" : result.status,
+                    importCount: {
+                        imported: result.stats.created,
+                        updated: result.stats.updated,
+                        ignored: result.stats.ignored,
+                        deleted: result.stats.deleted,
+                        total: result.stats.total,
+                    },
+                    blockingErrors: Object.entries(blockingErrorsByGroup).map(err => {
+                        const errMsg = err[0];
 
-                    const parsedErrMsg = d2Ids.reduce((currentMessage, id) => {
-                        return currentMessage.includes(id)
-                            ? currentMessage.replace(
-                                  new RegExp(id, "g"),
-                                  d2IdsMap.find(ref => ref.id === id)?.name ?? id
-                              )
-                            : currentMessage;
-                    }, errMsg);
+                        const parsedErrMsg = d2Ids.reduce((currentMessage, id) => {
+                            return currentMessage.includes(id)
+                                ? currentMessage.replace(
+                                      new RegExp(id, "g"),
+                                      d2IdsMap.find(ref => ref.id === id)?.name ?? id
+                                  )
+                                : currentMessage;
+                        }, errMsg);
 
-                    const lines = err[1].flatMap(a => eventIdLineNoMap?.find(e => e.id === a.eventId)?.lineNo);
-                    return {
-                        error: parsedErrMsg,
-                        count: err[1].length,
-                        lines: _.compact(lines),
-                    };
-                }),
-                nonBlockingErrors: nonBlockingErrors ? nonBlockingErrors : [],
-                importTime: new Date(),
-            };
+                        const lines = err[1].flatMap(a => eventIdLineNoMap?.find(e => e.id === a.eventId)?.lineNo);
+                        return {
+                            error: parsedErrMsg,
+                            count: err[1].length,
+                            lines: _.compact(lines),
+                        };
+                    }),
+                    nonBlockingErrors: nonBlockingErrors ? nonBlockingErrors : [],
+                    importTime: new Date(),
+                };
 
-            const eventIdList =
-                result.status === "OK"
-                    ? type === "event"
-                        ? result.bundleReport.typeReportMap.EVENT.objectReports.map(report => report.uid)
-                        : result.bundleReport.typeReportMap.TRACKED_ENTITY.objectReports.map(report => report.uid)
-                    : [];
+                const eventIdList =
+                    result.status === "OK"
+                        ? type === "event"
+                            ? result.bundleReport.typeReportMap.EVENT.objectReports.map(report => report.uid)
+                            : result.bundleReport.typeReportMap.TRACKED_ENTITY.objectReports.map(report => report.uid)
+                        : [];
 
-            return Future.success({ importSummary, eventIdList: _.compact(eventIdList) });
-        });
+                return Future.success({ importSummary, eventIdList: _.compact(eventIdList) });
+            })
+            .flatMapError(error => {
+                const errorImportSummary: ImportSummaryWithEventIdList = {
+                    importSummary: {
+                        status: "ERROR",
+                        importCount: { ignored: 0, imported: 0, deleted: 0, updated: 0, total: 0 },
+                        nonBlockingErrors: [],
+                        blockingErrors: [{ error: error, count: 1 }],
+                    },
+                    eventIdList: [],
+                };
+                return Future.success(errorImportSummary);
+            });
     } else {
         return Future.success({
             importSummary: {
