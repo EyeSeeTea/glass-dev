@@ -17,3 +17,23 @@ export interface DataValuesSaveSummary {
     }>;
     importTime: Date;
 }
+
+export function getDefaultErrorDataValuesSaveSummary(error?: string): DataValuesSaveSummary {
+    return {
+        status: "ERROR",
+        description: error || "",
+        importCount: {
+            imported: 0,
+            updated: 0,
+            ignored: 0,
+            deleted: 0,
+        },
+        conflicts: [
+            {
+                object: "",
+                value: error || "",
+            },
+        ],
+        importTime: new Date(),
+    };
+}

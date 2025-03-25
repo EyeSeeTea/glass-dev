@@ -49,6 +49,6 @@ src/scripts/error_response_report.json
 src/scripts/d2_tracker_events_updated.json
 
 # unzip files
-glass-amc-recalculate-server
-glass-async-deletions-server
-
+/glass-amc-recalculate-server
+/glass-async-deletions-server
+/glass-async-uploads-server

@@ -1,4 +1,3 @@
-import { D2ValidationResponse } from "../../../../data/repositories/MetadataDefaultRepository";
 import { Future, FutureData } from "../../../entities/Future";
 import { ImportStrategy } from "../../../entities/data-entry/DataValuesSaveSummary";
 import { ConsistencyError, ImportSummary } from "../../../entities/data-entry/ImportSummary";
@@ -132,21 +131,21 @@ export class ImportSampleFile {
                     return Future.success(errorImportSummary);
                 }
 
-                /* eslint-disable no-console */
-                console.log({ sampleFileDataValues: dataValues });
-
                 const uniqueAOCs = _.uniq(dataValues.map(el => el.attributeOptionCombo || ""));
 
                 return this.dataValuesRepository.save(dataValues, action, dryRun).flatMap(saveSummary => {
                     return this.metadataRepository
-                        .validateDataSet(AMR_AMR_DS_Input_files_Sample_DS_ID, year.toString(), orgUnit, uniqueAOCs)
+                        .getValidationsDataSet(
+                            AMR_AMR_DS_Input_files_Sample_DS_ID,
+                            year.toString(),
+                            orgUnit,
+                            uniqueAOCs
+                        )
                         .flatMap(validationResponse => {
-                            const validations = validationResponse as D2ValidationResponse[];
+                            const validations = validationResponse;
 
                             const validationRulesIds: string[] = validations.flatMap(({ validationRuleViolations }) =>
-                                validationRuleViolations.map(
-                                    ruleViolation => (ruleViolation as any)?.validationRule?.id
-                                )
+                                validationRuleViolations.map(ruleViolation => ruleViolation?.validationRule?.id)
                             );
 
                             return this.metadataRepository

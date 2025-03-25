@@ -1,4 +1,4 @@
-import React, { useEffect, Dispatch, SetStateAction } from "react";
+import React, { useEffect, Dispatch, SetStateAction, useMemo } from "react";
 import styled from "styled-components";
 import { UploadsTable } from "./UploadsTable";
 import { GlassUploadsState } from "../../hooks/useGlassUploads";
@@ -20,6 +20,7 @@ import { useCurrentDataSubmissionId } from "../../hooks/useCurrentDataSubmission
 import { useCurrentUserGroupsAccess } from "../../hooks/useCurrentUserGroupsAccess";
 import { DataSubmissionStatusTypes } from "../../../domain/entities/GlassDataSubmission";
 import { useQuestionnaires } from "./Questionnaires";
+import { useGlassUploadsAsyncUploads } from "../../hooks/useGlassUploadsAsyncUploads";
 
 export const getCompletedUploads = (upload: GlassUploadsState) => {
     if (upload.kind === "loaded") {
@@ -32,14 +33,6 @@ export const getValidatedUploads = (upload: GlassUploadsState) => {
         return upload.data.filter((row: UploadsDataItem) => row.status.toLowerCase() === "validated");
     }
 };
-
-function getNotCompletedUploads(upload: GlassUploadsState) {
-    if (upload.kind === "loaded") {
-        return upload.data.filter(
-            (row: UploadsDataItem) => row.status.toLowerCase() === "uploaded" || row.status.toLowerCase() === "imported"
-        );
-    }
-}
 
 function getImportedUploads(upload: GlassUploadsState) {
     if (upload.kind === "loaded") {
@@ -69,7 +62,6 @@ export const ListOfDatasets: React.FC<ListOfDatasetsProps> = ({ setRefetchStatus
 
     const completeUploads = getCompletedUploads(uploads);
     const validatedUploads = getValidatedUploads(uploads);
-    const incompleteUploads = getNotCompletedUploads(uploads);
     const importedUploads = getImportedUploads(uploads);
 
     const dataSubmissionId = useCurrentDataSubmissionId(
@@ -79,7 +71,30 @@ export const ListOfDatasets: React.FC<ListOfDatasetsProps> = ({ setRefetchStatus
         currentPeriod
     );
     const { captureAccessGroup } = useCurrentUserGroupsAccess();
+    const { asyncUploads, refreshAsyncUploads } = useGlassUploadsAsyncUploads();
     const [isDatasetMarkAsCompleted, setIsDatasetMarkAsCompleted] = React.useState(false);
+
+    const uploadsToBeUploadAsync = useMemo(() => {
+        if (uploads.kind === "loaded" && asyncUploads.kind === "loaded") {
+            return uploads.data.filter((row: UploadsDataItem) =>
+                asyncUploads.data?.some(asyncUpload => asyncUpload.uploadId === row.id)
+            );
+        } else {
+            return [];
+        }
+    }, [asyncUploads, uploads]);
+
+    const incompleteUploadsNotAsyncUploaded = useMemo(() => {
+        if (uploads.kind === "loaded" && asyncUploads.kind === "loaded") {
+            return uploads.data.filter(
+                (row: UploadsDataItem) =>
+                    (row.status.toLowerCase() === "uploaded" || row.status.toLowerCase() === "imported") &&
+                    uploadsToBeUploadAsync?.every(asyncUpload => asyncUpload.id !== row.id)
+            );
+        } else {
+            return [];
+        }
+    }, [asyncUploads, uploads, uploadsToBeUploadAsync]);
 
     useEffect(() => {
         if (
@@ -124,6 +139,8 @@ export const ListOfDatasets: React.FC<ListOfDatasetsProps> = ({ setRefetchStatus
                         title={i18n.t("Correct Uploads")}
                         items={completeUploads}
                         refreshUploads={refreshUploads}
+                        refreshAsyncUploads={refreshAsyncUploads}
+                        asyncUploads={asyncUploads.kind === "loaded" ? asyncUploads.data : []}
                     />
                 )}
                 {currentDataSubmissionStatus.kind === "loaded" ? (
@@ -132,8 +149,9 @@ export const ListOfDatasets: React.FC<ListOfDatasetsProps> = ({ setRefetchStatus
                             style={{
                                 display:
                                     completeUploads?.length === 0 &&
-                                    incompleteUploads?.length === 0 &&
-                                    validatedUploads?.length === 0
+                                    incompleteUploadsNotAsyncUploaded?.length === 0 &&
+                                    validatedUploads?.length === 0 &&
+                                    uploadsToBeUploadAsync?.length === 0
                                         ? "block"
                                         : "none",
                             }}
@@ -183,6 +201,15 @@ export const ListOfDatasets: React.FC<ListOfDatasetsProps> = ({ setRefetchStatus
                         <CircularProgress size={20} />
                     </div>
                 )}
+                {uploadsToBeUploadAsync && uploadsToBeUploadAsync.length > 0 && (
+                    <UploadsTable
+                        title={i18n.t("Uploads marked to be uploaded asynchronously")}
+                        items={uploadsToBeUploadAsync}
+                        refreshUploads={refreshUploads}
+                        refreshAsyncUploads={refreshAsyncUploads}
+                        asyncUploads={asyncUploads.kind === "loaded" ? asyncUploads.data : []}
+                    />
+                )}
                 {validatedUploads && validatedUploads.length > 0 && (
                     <UploadsTable
                         title={i18n.t("Validated Uploads, Review to complete")}
@@ -191,13 +218,18 @@ export const ListOfDatasets: React.FC<ListOfDatasetsProps> = ({ setRefetchStatus
                         showComplete={true}
                         setIsDatasetMarkAsCompleted={setIsDatasetMarkAsCompleted}
                         setRefetchStatus={setRefetchStatus}
+                        allUploads={uploads.kind === "loaded" ? uploads.data : []}
+                        refreshAsyncUploads={refreshAsyncUploads}
+                        asyncUploads={asyncUploads.kind === "loaded" ? asyncUploads.data : []}
                     />
                 )}
-                {incompleteUploads && incompleteUploads.length > 0 && (
+                {incompleteUploadsNotAsyncUploaded && incompleteUploadsNotAsyncUploaded.length > 0 && (
                     <UploadsTable
                         title={i18n.t("Uploads with errors, or discarded")}
-                        items={incompleteUploads}
+                        items={incompleteUploadsNotAsyncUploaded}
                         refreshUploads={refreshUploads}
+                        refreshAsyncUploads={refreshAsyncUploads}
+                        asyncUploads={asyncUploads.kind === "loaded" ? asyncUploads.data : []}
                     />
                 )}
             </ContentWrapper>
