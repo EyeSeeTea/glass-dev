@@ -10,7 +10,7 @@ import i18n from "../../../../locales";
 import { TrackerEvent } from "../../../entities/TrackedEntityInstance";
 
 const EGASP_DATAELEMENT_ID = "KaS2YBRN8eH";
-const PATIENT_DATAELEMENT_ID = "aocFHBxcQa0";
+export const PATIENT_DATAELEMENT_ID = "aocFHBxcQa0";
 const ATC_VERSION_DATAELEMENT_ID = "aCuWz3HZ5Ti";
 export class CustomValidationForEventProgram {
     constructor(
