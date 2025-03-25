@@ -100,6 +100,7 @@ import { DeleteSecondaryFileDataUseCase } from "./domain/usecases/data-entry/Del
 import { DownloadDocumentAsArrayBufferUseCase } from "./domain/usecases/DownloadDocumentAsArrayBufferUseCase";
 import { GetGlassUploadByIdUseCase } from "./domain/usecases/GetGlassUploadByIdUseCase";
 import { GlassAsyncDeletionsDefaultRepository } from "./data/repositories/GlassAsyncDeletionsDefaultRepository";
+import { EncryptionDefaultRepository } from "./data/repositories/EncryptionDefaultRepository";
 import { GetAsyncUploadsUseCase } from "./domain/usecases/GetAsyncUploadsUseCase";
 import { GlassAsyncUploadsDefaultRepository } from "./data/repositories/GlassAsyncUploadsDefaultRepository";
 import { SetAsyncUploadsUseCase } from "./domain/usecases/SetAsyncUploadsUseCase";
@@ -143,6 +144,7 @@ export function getCompositionRoot(instance: Instance) {
     const eventVisualizationRepository = new EventVisualizationAnalyticsDefaultRepository(api);
     const countryRepository = new CountryDefaultRepository(api);
     const glassAsyncDeletionsRepository = new GlassAsyncDeletionsDefaultRepository(dataStoreClient);
+    const encryptionRepository = new EncryptionDefaultRepository(api);
     const glassAsyncUploadsRepository = new GlassAsyncUploadsDefaultRepository(dataStoreClient);
 
     return {
@@ -223,7 +225,8 @@ export function getCompositionRoot(instance: Instance) {
                 atcRepository,
                 amcProductDataRepository,
                 amcSubstanceDataRepository,
-                glassAtcRepository
+                glassAtcRepository,
+                encryptionRepository
             ),
             validatePrimaryFile: new ValidatePrimaryFileUseCase(
                 risDataRepository,

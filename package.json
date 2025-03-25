@@ -23,6 +23,7 @@
         "@material-ui/icons": "4.11.2",
         "@material-ui/lab": "4.0.0-alpha.60",
         "@material-ui/styles": "4.11.4",
+        "@types/libsodium-wrappers": "^0.7.14",
         "axios": "0.21.1",
         "classnames": "2.3.1",
         "d2": "31.10.2",
@@ -33,6 +34,8 @@
         "fluture": "14.0.0",
         "font-awesome": "4.7.0",
         "form-data": "^4.0.1",
+        "libsodium": "^0.7.15",
+        "libsodium-wrappers": "^0.7.15",
         "lodash": "4.17.21",
         "lodash.product": "^18.10.0",
         "postcss-rtl": "1.7.3",
@@ -126,7 +129,8 @@
         "amr-agg-data-reset-ris": "npx ts-node -r dotenv/config src/scripts/amr_agg_data_reset.ts",
         "amr-agg-data-validation-sample": "npx ts-node -r dotenv/config src/scripts/amr_agg_data_validation_sample.ts",
         "amr-agg-data-reset-sample": "npx ts-node -r dotenv/config src/scripts/amr_agg_data_reset_sample.ts",
-        "get-max-min-amc-calculated-tons": "npx ts-node -r dotenv/config src/scripts/get_max_min_amc_calculated_tons.ts"
+        "get-max-min-amc-calculated-tons": "npx ts-node -r dotenv/config src/scripts/get_max_min_amc_calculated_tons.ts",
+        "generate-secret-key-and-nonce": "npx ts-node src/scripts/generate_secret_key_and_nonce.ts"
     },
     "manifest.webapp": {
         "name": "glass",
