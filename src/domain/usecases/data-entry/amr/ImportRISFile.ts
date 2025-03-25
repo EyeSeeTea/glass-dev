@@ -1,4 +1,3 @@
-import { D2ValidationResponse } from "../../../../data/repositories/MetadataDefaultRepository";
 import { Future, FutureData } from "../../../entities/Future";
 import { ImportStrategy } from "../../../entities/data-entry/DataValuesSaveSummary";
 import { ConsistencyError, ImportSummary } from "../../../entities/data-entry/ImportSummary";
@@ -145,26 +144,24 @@ export class ImportRISFile {
                     return Future.success(errorImportSummary);
                 }
 
-                /* eslint-disable no-console */
-
-                console.log({ risInitialFileDataValues: dataValues });
-                console.log({ risFinalFileDataValues: dataValues });
-
                 const uniqueAOCs = _.uniq(dataValues.map(el => el.attributeOptionCombo || ""));
 
                 return this.dataValuesRepository.save(dataValues, action, dryRun).flatMap(saveSummary => {
                     //Run validations only on actual import
                     if (!dryRun) {
                         return this.metadataRepository
-                            .validateDataSet(AMR_AMR_DS_INPUT_FILES_RIS_DS_ID, year.toString(), orgUnit, uniqueAOCs)
+                            .getValidationsDataSet(
+                                AMR_AMR_DS_INPUT_FILES_RIS_DS_ID,
+                                year.toString(),
+                                orgUnit,
+                                uniqueAOCs
+                            )
                             .flatMap(validationResponse => {
-                                const validations = validationResponse as D2ValidationResponse[];
+                                const validations = validationResponse;
 
                                 const validationRulesIds: string[] = validations.flatMap(
                                     ({ validationRuleViolations }) =>
-                                        validationRuleViolations.map(
-                                            ruleViolation => (ruleViolation as any)?.validationRule?.id
-                                        )
+                                        validationRuleViolations.map(ruleViolation => ruleViolation?.validationRule?.id)
                                 );
 
                                 return this.metadataRepository

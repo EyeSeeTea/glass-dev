@@ -9,4 +9,5 @@ export const DataStoreKeys = {
     ATC_CLASSIFICATION: "ATCs",
     AMC_RECALCULATION: "amc-recalculation",
     ASYNC_DELETIONS: "async-deletions",
+    ASYNC_UPLOADS: "async-uploads",
 };

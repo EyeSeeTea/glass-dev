@@ -9,12 +9,17 @@ import { useCurrentModuleContext } from "../../contexts/current-module-context";
 import { moduleProperties } from "../../../domain/utils/ModuleProperties";
 import { InfoOutlined } from "@material-ui/icons";
 import { DataSubmissionStatusTypes } from "../../../domain/entities/GlassDataSubmission";
+import { GlassUploads } from "../../../domain/entities/GlassUploads";
+import { GlassAsyncUpload } from "../../../domain/entities/GlassAsyncUploads";
 
 export interface UploadsTableProps {
     title: string;
     items?: UploadsDataItem[];
+    allUploads?: GlassUploads[];
     className?: string;
     refreshUploads: React.Dispatch<React.SetStateAction<{}>>;
+    refreshAsyncUploads: React.Dispatch<React.SetStateAction<{}>>;
+    asyncUploads: GlassAsyncUpload[];
     showComplete?: boolean;
     setIsDatasetMarkAsCompleted?: React.Dispatch<React.SetStateAction<boolean>>;
     setRefetchStatus?: React.Dispatch<React.SetStateAction<DataSubmissionStatusTypes | undefined>>;
@@ -24,6 +29,9 @@ export interface UploadsTableProps {
 export const UploadsTable: React.FC<UploadsTableProps> = ({
     title,
     items,
+    allUploads,
+    refreshAsyncUploads,
+    asyncUploads,
     className,
     refreshUploads,
     showComplete,
@@ -57,19 +65,31 @@ export const UploadsTable: React.FC<UploadsTableProps> = ({
                                         <>
                                             <Typography variant="caption">
                                                 {i18n.t(
-                                                    "UPLOADED - The file has been uploaded, but data has not been imported as upload was discarded in Step 1 or due to errors in Step 2"
+                                                    "UPLOADED - The file has been uploaded, but data has not been imported as upload was discarded in Step 1, due to errors in Step 2 or errors in async uploads."
                                                 )}
                                                 <br />
                                             </Typography>
                                             <Typography variant="caption">
                                                 {i18n.t(
-                                                    "IMPORTED - The data has been imported, but validations(if applicable) were not run successfully, in Step 2."
+                                                    "MARKED TO BE UPLOADED - The file has been uploaded, but data has not been imported as data is waiting to be uploaded asynchronously."
                                                 )}
                                                 <br />
                                             </Typography>
                                             <Typography variant="caption">
                                                 {i18n.t(
-                                                    "VALIDATED - The data has been imported and automatically validated, but the data was not reviewed by user in Step 3"
+                                                    "UPLOADING ASYNC IN PROGRESS - The file has been uploaded, but the data has not been imported because it is being uploaded asynchronously."
+                                                )}
+                                                <br />
+                                            </Typography>
+                                            <Typography variant="caption">
+                                                {i18n.t(
+                                                    "IMPORTED - The data has been imported, but validations(if applicable) were not run successfully in Step 2 or in async uploads."
+                                                )}
+                                                <br />
+                                            </Typography>
+                                            <Typography variant="caption">
+                                                {i18n.t(
+                                                    "VALIDATED - The data has been imported and automatically validated, but the data was not reviewed by user in Step 3 or has been imported asynchronously."
                                                 )}
                                                 <br />
                                             </Typography>
@@ -97,6 +117,9 @@ export const UploadsTable: React.FC<UploadsTableProps> = ({
                         showComplete={showComplete}
                         setIsDatasetMarkAsCompleted={setIsDatasetMarkAsCompleted}
                         setRefetchStatus={setRefetchStatus}
+                        allUploads={allUploads}
+                        refreshAsyncUploads={refreshAsyncUploads}
+                        asyncUploads={asyncUploads}
                     />
                 </Table>
             </TableContainer>

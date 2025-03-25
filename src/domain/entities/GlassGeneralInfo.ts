@@ -3,4 +3,5 @@ export type GlassGeneralInfo = {
     enrolmentProgram: string;
     regionLevel: number;
     maxAttemptsForAsyncDeletions: number;
+    maxAttemptsForAsyncUploads: number;
 };
