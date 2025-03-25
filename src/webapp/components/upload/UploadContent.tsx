@@ -11,6 +11,7 @@ import { ImportSummary } from "../../../domain/entities/data-entry/ImportSummary
 import { useUploadContent } from "./useUploadContent";
 import { useSnackbar } from "@eyeseetea/d2-ui-components";
 import { EffectFn } from "../../hooks/use-callback-effect";
+import { Maybe } from "../../../utils/ts-utils";
 
 interface UploadContentProps {
     resetWizard: boolean;
@@ -34,6 +35,10 @@ export const UploadContent: React.FC<UploadContentProps> = ({ resetWizard, setRe
         dataSubmissionId,
         isRunningCalculation,
         setIsRunningCalculation,
+        setPrimaryFileTotalRows,
+        primaryFileTotalRows,
+        setSecondaryFileTotalRows,
+        secondaryFileTotalRows,
     } = useUploadContent();
     const snackbar = useSnackbar();
 
@@ -103,7 +108,11 @@ export const UploadContent: React.FC<UploadContentProps> = ({ resetWizard, setRe
                     setIsLoadingSecondary,
                     dataSubmissionId,
                     isRunningCalculation,
-                    setIsRunningCalculation
+                    setIsRunningCalculation,
+                    setPrimaryFileTotalRows,
+                    primaryFileTotalRows,
+                    setSecondaryFileTotalRows,
+                    secondaryFileTotalRows
                 )}
         </ContentWrapper>
     );
@@ -132,7 +141,11 @@ const renderStep = (
     setIsLoadingSecondary: React.Dispatch<React.SetStateAction<boolean>>,
     dataSubmissionId: string | undefined,
     isRunningCalculation: boolean,
-    setIsRunningCalculation: React.Dispatch<React.SetStateAction<boolean>>
+    setIsRunningCalculation: React.Dispatch<React.SetStateAction<boolean>>,
+    setPrimaryFileTotalRows: React.Dispatch<React.SetStateAction<Maybe<number>>>,
+    primaryFileTotalRows: Maybe<number>,
+    setSecondaryFileTotalRows: React.Dispatch<React.SetStateAction<Maybe<number>>>,
+    secondaryFileTotalRows: Maybe<number>
 ) => {
     switch (step) {
         case 1:
@@ -156,6 +169,10 @@ const renderStep = (
                     isLoadingSecondary={isLoadingSecondary}
                     setIsLoadingSecondary={setIsLoadingSecondary}
                     dataSubmissionId={dataSubmissionId}
+                    setPrimaryFileTotalRows={setPrimaryFileTotalRows}
+                    primaryFileTotalRows={primaryFileTotalRows}
+                    setSecondaryFileTotalRows={setSecondaryFileTotalRows}
+                    secondaryFileTotalRows={secondaryFileTotalRows}
                 />
             );
         case 2:

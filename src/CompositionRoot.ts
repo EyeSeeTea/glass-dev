@@ -101,6 +101,11 @@ import { DownloadDocumentAsArrayBufferUseCase } from "./domain/usecases/Download
 import { GetGlassUploadByIdUseCase } from "./domain/usecases/GetGlassUploadByIdUseCase";
 import { GlassAsyncDeletionsDefaultRepository } from "./data/repositories/GlassAsyncDeletionsDefaultRepository";
 import { EncryptionDefaultRepository } from "./data/repositories/EncryptionDefaultRepository";
+import { GetAsyncUploadsUseCase } from "./domain/usecases/GetAsyncUploadsUseCase";
+import { GlassAsyncUploadsDefaultRepository } from "./data/repositories/GlassAsyncUploadsDefaultRepository";
+import { SetAsyncUploadsUseCase } from "./domain/usecases/SetAsyncUploadsUseCase";
+import { RemoveAsyncUploadByIdUseCase } from "./domain/usecases/RemoveAsyncUploadByIdUseCase";
+import { RemoveAsyncUploadsUseCase } from "./domain/usecases/RemoveAsyncUploadsUseCase";
 
 export function getCompositionRoot(instance: Instance) {
     const api = getD2APiFromInstance(instance);
@@ -140,6 +145,7 @@ export function getCompositionRoot(instance: Instance) {
     const countryRepository = new CountryDefaultRepository(api);
     const glassAsyncDeletionsRepository = new GlassAsyncDeletionsDefaultRepository(dataStoreClient);
     const encryptionRepository = new EncryptionDefaultRepository(api);
+    const glassAsyncUploadsRepository = new GlassAsyncUploadsDefaultRepository(dataStoreClient);
 
     return {
         instance: getExecute({
@@ -177,8 +183,22 @@ export function getCompositionRoot(instance: Instance) {
             setBatchId: new SetUploadBatchIdUseCase(glassUploadsRepository),
             saveImportSummaryErrorsOfFiles: new SaveImportSummaryErrorsOfFilesInUploadsUseCase(glassUploadsRepository),
             getCurrentDataSubmissionFileType: new GetUploadsByDataSubmissionUseCase(glassUploadsRepository),
-            setToAsyncDeletions: new SetToAsyncDeletionsUseCase(glassAsyncDeletionsRepository),
+            setToAsyncDeletions: new SetToAsyncDeletionsUseCase({
+                glassAsyncDeletionsRepository,
+                glassAsyncUploadsRepository,
+                glassUploadsRepository,
+            }),
             getAsyncDeletions: new GetAsyncDeletionsUseCase(glassAsyncDeletionsRepository),
+            getAsyncUploads: new GetAsyncUploadsUseCase(glassAsyncUploadsRepository),
+            setToAsyncUploads: new SetAsyncUploadsUseCase({ glassAsyncUploadsRepository, glassUploadsRepository }),
+            removeAsyncUploadById: new RemoveAsyncUploadByIdUseCase({
+                glassAsyncUploadsRepository,
+                glassUploadsRepository,
+            }),
+            removeAsyncUploads: new RemoveAsyncUploadsUseCase({
+                glassAsyncUploadsRepository,
+                glassUploadsRepository,
+            }),
         }),
         glassDocuments: getExecute({
             getAll: new GetGlassDocumentsUseCase(glassDocumentsRepository),
