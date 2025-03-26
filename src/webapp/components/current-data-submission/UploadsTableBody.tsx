@@ -172,6 +172,13 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({
         [asyncUploads]
     );
 
+    const isInUploadedAsync = useCallback(
+        (uploadDataItem: UploadsDataItem): boolean => {
+            return asyncUploads.some(asyncUpload => asyncUpload.uploadId === uploadDataItem.id) ?? false;
+        },
+        [asyncUploads]
+    );
+
     //Deleting a dataset completely has the following steps*:
     //1. Delete corresponsding datasetValue/event for each row in the file.
     //2. Delete corresponding document from DHIS
@@ -248,6 +255,7 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({
                                         setLoading(false);
                                         return;
                                     }
+
                                     if (deletePrimaryFileSummary) {
                                         if (
                                             primaryFileToDelete?.status === "COMPLETED" &&
@@ -255,32 +263,39 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({
                                         ) {
                                             setIsDatasetMarkAsCompleted && setIsDatasetMarkAsCompleted(false);
                                         }
-                                        const itemsDeleted =
-                                            currentModuleAccess.moduleName === "AMC" ? "products" : "rows";
-                                        let message = `${
-                                            primaryFileToDelete?.rows || primaryFileToDelete?.records
-                                        } ${itemsDeleted} deleted for ${
-                                            moduleProperties.get(currentModuleAccess.moduleName)?.primaryFileType
-                                        } file`;
-                                        if (currentModuleAccess.moduleName === "AMC") {
-                                            message = `${
+
+                                        if (isInUploadedAsync(primaryFileToDelete)) {
+                                            snackbar.info("Upload cancelled");
+                                        } else {
+                                            const itemsDeleted =
+                                                currentModuleAccess.moduleName === "AMC" ? "products" : "rows";
+                                            let message = `${
                                                 primaryFileToDelete?.rows || primaryFileToDelete?.records
                                             } ${itemsDeleted} deleted for ${
                                                 moduleProperties.get(currentModuleAccess.moduleName)?.primaryFileType
-                                            } file and its corresponding calculated substance consumption data if any`;
-                                        }
-                                        if (secondaryFileToDelete && deleteSecondaryFileSummary) {
-                                            message =
-                                                message +
-                                                ` and ${
-                                                    secondaryFileToDelete.rows || secondaryFileToDelete.records
-                                                } rows deleted for ${
+                                            } file`;
+                                            if (currentModuleAccess.moduleName === "AMC") {
+                                                message = `${
+                                                    primaryFileToDelete?.rows || primaryFileToDelete?.records
+                                                } ${itemsDeleted} deleted for ${
                                                     moduleProperties.get(currentModuleAccess.moduleName)
-                                                        ?.secondaryFileType
-                                                } file.`;
+                                                        ?.primaryFileType
+                                                } file and its corresponding calculated substance consumption data if any`;
+                                            }
+                                            if (secondaryFileToDelete && deleteSecondaryFileSummary) {
+                                                message =
+                                                    message +
+                                                    ` and ${
+                                                        secondaryFileToDelete.rows || secondaryFileToDelete.records
+                                                    } rows deleted for ${
+                                                        moduleProperties.get(currentModuleAccess.moduleName)
+                                                            ?.secondaryFileType
+                                                    } file.`;
+                                            }
+                                            snackbar.info(message);
                                         }
-                                        snackbar.info(message);
                                     }
+
                                     if (primaryFileToDelete) {
                                         compositionRoot.glassDocuments.deleteByUploadId(primaryFileToDelete.id).run(
                                             () => {
@@ -443,6 +458,7 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({
         setIsDatasetMarkAsCompleted,
         setToAsyncDeletions,
         snackbar,
+        isInUploadedAsync,
     ]);
 
     const manageDeleteDataset = useCallback(() => {
