@@ -1,4 +1,5 @@
 import { ImportSummaryErrors } from "../../domain/entities/data-entry/ImportSummary";
+import { GlassUploadsStatus } from "../../domain/entities/GlassUploads";
 
 export interface UploadsDataItem {
     id: string;
@@ -11,7 +12,7 @@ export interface UploadsDataItem {
     outputLineNb: number;
     period: string;
     specimens: string[];
-    status: string;
+    status: GlassUploadsStatus;
     uploadDate: string;
     dataSubmission: string;
     module: string;
@@ -25,4 +26,5 @@ export interface UploadsDataItem {
     eventListDataDeleted?: boolean;
     calculatedEventListDataDeleted?: boolean;
     errorAsyncDeleting?: boolean;
+    errorAsyncUploading?: boolean;
 }

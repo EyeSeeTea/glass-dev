@@ -2,7 +2,7 @@ import _ from "lodash";
 import moment from "moment";
 import { Dhis2EventsDefaultRepository } from "../../../data/repositories/Dhis2EventsDefaultRepository";
 import { ImportStrategy } from "../../entities/data-entry/DataValuesSaveSummary";
-import { ConsistencyError, ImportSummary } from "../../entities/data-entry/ImportSummary";
+import { ConsistencyError, ImportSummary, ImportSummaryWithEventIdList } from "../../entities/data-entry/ImportSummary";
 import { Future, FutureData } from "../../entities/Future";
 import { ExcelRepository } from "../../repositories/ExcelRepository";
 import { GlassDocumentsRepository } from "../../repositories/GlassDocumentsRepository";
@@ -17,7 +17,7 @@ import { getStringFromFile } from "./utils/fileToString";
 import { TrackerPostResponse } from "@eyeseetea/d2-api/api/tracker";
 import { ProgramRuleValidationForBLEventProgram } from "../program-rules-processing/ProgramRuleValidationForBLEventProgram";
 import { ProgramRulesMetadataRepository } from "../../repositories/program-rules/ProgramRulesMetadataRepository";
-import { CustomValidationForEventProgram } from "./egasp/CustomValidationForEventProgram";
+import { CustomValidationForEventProgram, PATIENT_DATAELEMENT_ID } from "./egasp/CustomValidationForEventProgram";
 import { Template } from "../../entities/Template";
 import { ExcelReader } from "../../utils/ExcelReader";
 import { InstanceRepository } from "../../repositories/InstanceRepository";
@@ -25,6 +25,9 @@ import { AMC_RAW_SUBSTANCE_CONSUMPTION_PROGRAM_ID } from "./amc/ImportAMCSubstan
 import { GlassATCRepository } from "../../repositories/GlassATCRepository";
 import { ListGlassATCLastVersionKeysByYear } from "../../entities/GlassAtcVersionData";
 import { TrackerEvent } from "../../entities/TrackedEntityInstance";
+import { EGASP_PROGRAM_ID } from "../../../data/repositories/program-rule/ProgramRulesMetadataDefaultRepository";
+import sodium from "libsodium-wrappers";
+import { EncryptionData } from "../../entities/EncryptionData";
 
 export const ATC_VERSION_DATA_ELEMENT_ID = "aCuWz3HZ5Ti";
 
@@ -50,7 +53,8 @@ export class ImportBLTemplateEventProgram {
         period: string,
         programId: string,
         uploadIdLocalStorageName: string,
-        calculatedEventListFileId?: string
+        calculatedEventListFileId?: string,
+        encryptionData?: EncryptionData
     ): FutureData<ImportSummary> {
         return this.excelRepository.loadTemplate(file, programId).flatMap(_templateId => {
             const template = _.values(templates)
@@ -71,7 +75,8 @@ export class ImportBLTemplateEventProgram {
                                 action,
                                 programId,
                                 eventListFileId,
-                                calculatedEventListFileId
+                                calculatedEventListFileId,
+                                encryptionData
                             ).flatMap(events => {
                                 if (action === "CREATE_AND_UPDATE") {
                                     if (!events.length)
@@ -117,8 +122,10 @@ export class ImportBLTemplateEventProgram {
                                                         result,
                                                         "event",
                                                         this.metadataRepository,
-                                                        validatedEventResults.nonBlockingErrors,
-                                                        eventIdLineNoMap
+                                                        {
+                                                            nonBlockingErrors: validatedEventResults.nonBlockingErrors,
+                                                            eventIdLineNoMap,
+                                                        }
                                                     ).flatMap(summary => {
                                                         return uploadIdListFileAndSave(
                                                             uploadIdLocalStorageName,
@@ -161,13 +168,14 @@ export class ImportBLTemplateEventProgram {
         action: ImportStrategy,
         programId: string,
         eventListFileId: string | undefined,
-        calculatedEventListFileId?: string
+        calculatedEventListFileId?: string,
+        encryptionData?: EncryptionData
     ): FutureData<TrackerEvent[]> {
         if (action === "CREATE_AND_UPDATE") {
             if (programId === AMC_RAW_SUBSTANCE_CONSUMPTION_PROGRAM_ID) {
                 return this.buildEventsPayloadForAMCSubstances(dataPackage);
             }
-            return Future.success(this.mapDataPackageToD2TrackerEvents(dataPackage));
+            return Future.success(this.mapDataPackageToD2TrackerEvents(dataPackage, undefined, encryptionData));
         } else if (action === "DELETE") {
             return Future.joinObj({
                 events: eventListFileId ? this.getEventsFromListFileId(eventListFileId) : Future.success([]),
@@ -208,7 +216,8 @@ export class ImportBLTemplateEventProgram {
 
     mapDataPackageToD2TrackerEvents(
         dataPackage: DataPackage,
-        atcVersionKeysByYear?: ListGlassATCLastVersionKeysByYear
+        atcVersionKeysByYear?: ListGlassATCLastVersionKeysByYear,
+        encryptionData?: EncryptionData
     ): TrackerEvent[] {
         return dataPackage.dataEntries.map(
             ({ id, orgUnit, period, attribute, dataValues, dataForm, coordinate }, index) => {
@@ -236,6 +245,16 @@ export class ImportBLTemplateEventProgram {
                         ) {
                             const atcVersionKey = atcVersionKeysByYear ? atcVersionKeysByYear[el.value.toString()] : "";
                             return { ...el, value: atcVersionKey ?? "" };
+                        } else if (dataForm === EGASP_PROGRAM_ID && el.dataElement === PATIENT_DATAELEMENT_ID) {
+                            //For EGASP, encrypt the patient id
+
+                            const patientId = el.value.toString();
+
+                            if (!encryptionData) {
+                                throw new Error("Encryption data is required for encrypting patient id, not found");
+                            }
+                            const encryptedPatientId = this.encryptString(encryptionData, patientId);
+                            return { ...el, value: encryptedPatientId };
                         }
 
                         return { ...el, value: el.value.toString() };
@@ -307,11 +326,20 @@ export class ImportBLTemplateEventProgram {
             return Future.success(consolidatedValidationResults);
         });
     }
+
+    private encryptString(encryptionData: EncryptionData, input: string): string {
+        const inputBytes = sodium.from_string(input);
+        const nonce = sodium.from_string(encryptionData.nonce);
+        const key = sodium.from_base64(encryptionData.key);
+        const encrypted = sodium.crypto_secretbox_easy(inputBytes, nonce, key);
+        const encryptedString = sodium.to_base64(nonce) + ":" + sodium.to_base64(encrypted);
+        return encryptedString;
+    }
 }
 
 export const uploadIdListFileAndSave = (
     uploadIdLocalStorageName: string,
-    summary: { importSummary: ImportSummary; eventIdList: string[] },
+    summary: ImportSummaryWithEventIdList,
     moduleName: string,
     glassDocumentsRepository: GlassDocumentsRepository,
     glassUploadsRepository: GlassUploadsRepository
@@ -338,12 +366,14 @@ export const mapToImportSummary = (
     result: TrackerPostResponse,
     type: "event" | "trackedEntity",
     metadataRepository: MetadataRepository,
-    nonBlockingErrors?: ConsistencyError[],
-    eventIdLineNoMap?: { id: string; lineNo: number }[]
-): FutureData<{
-    importSummary: ImportSummary;
-    eventIdList: string[];
-}> => {
+    params?: {
+        nonBlockingErrors?: ConsistencyError[];
+        eventIdLineNoMap?: { id: string; lineNo: number }[];
+    }
+): FutureData<ImportSummaryWithEventIdList> => {
+    const nonBlockingErrors = params?.nonBlockingErrors;
+    const eventIdLineNoMap = params?.eventIdLineNoMap;
+
     if (result && result.validationReport && result.stats) {
         const blockingErrorList = _.compact(
             result.validationReport.errorReports.map(summary => {
@@ -375,48 +405,62 @@ export const mapToImportSummary = (
             .value();
 
         //Get list of DataElement Names in error messages.
-        return metadataRepository.getD2Ids(_.uniq(d2Ids)).flatMap(d2IdsMap => {
-            const importSummary: ImportSummary = {
-                status: result.status === "OK" ? "SUCCESS" : result.status,
-                importCount: {
-                    imported: result.stats.created,
-                    updated: result.stats.updated,
-                    ignored: result.stats.ignored,
-                    deleted: result.stats.deleted,
-                    total: result.stats.total,
-                },
-                blockingErrors: Object.entries(blockingErrorsByGroup).map(err => {
-                    const errMsg = err[0];
+        return metadataRepository
+            .getD2Ids(_.uniq(d2Ids))
+            .flatMap(d2IdsMap => {
+                const importSummary: ImportSummary = {
+                    status: result.status === "OK" ? "SUCCESS" : result.status,
+                    importCount: {
+                        imported: result.stats.created,
+                        updated: result.stats.updated,
+                        ignored: result.stats.ignored,
+                        deleted: result.stats.deleted,
+                        total: result.stats.total,
+                    },
+                    blockingErrors: Object.entries(blockingErrorsByGroup).map(err => {
+                        const errMsg = err[0];
 
-                    const parsedErrMsg = d2Ids.reduce((currentMessage, id) => {
-                        return currentMessage.includes(id)
-                            ? currentMessage.replace(
-                                  new RegExp(id, "g"),
-                                  d2IdsMap.find(ref => ref.id === id)?.name ?? id
-                              )
-                            : currentMessage;
-                    }, errMsg);
+                        const parsedErrMsg = d2Ids.reduce((currentMessage, id) => {
+                            return currentMessage.includes(id)
+                                ? currentMessage.replace(
+                                      new RegExp(id, "g"),
+                                      d2IdsMap.find(ref => ref.id === id)?.name ?? id
+                                  )
+                                : currentMessage;
+                        }, errMsg);
 
-                    const lines = err[1].flatMap(a => eventIdLineNoMap?.find(e => e.id === a.eventId)?.lineNo);
-                    return {
-                        error: parsedErrMsg,
-                        count: err[1].length,
-                        lines: _.compact(lines),
-                    };
-                }),
-                nonBlockingErrors: nonBlockingErrors ? nonBlockingErrors : [],
-                importTime: new Date(),
-            };
+                        const lines = err[1].flatMap(a => eventIdLineNoMap?.find(e => e.id === a.eventId)?.lineNo);
+                        return {
+                            error: parsedErrMsg,
+                            count: err[1].length,
+                            lines: _.compact(lines),
+                        };
+                    }),
+                    nonBlockingErrors: nonBlockingErrors ? nonBlockingErrors : [],
+                    importTime: new Date(),
+                };
 
-            const eventIdList =
-                result.status === "OK"
-                    ? type === "event"
-                        ? result.bundleReport.typeReportMap.EVENT.objectReports.map(report => report.uid)
-                        : result.bundleReport.typeReportMap.TRACKED_ENTITY.objectReports.map(report => report.uid)
-                    : [];
+                const eventIdList =
+                    result.status === "OK"
+                        ? type === "event"
+                            ? result.bundleReport.typeReportMap.EVENT.objectReports.map(report => report.uid)
+                            : result.bundleReport.typeReportMap.TRACKED_ENTITY.objectReports.map(report => report.uid)
+                        : [];
 
-            return Future.success({ importSummary, eventIdList: _.compact(eventIdList) });
-        });
+                return Future.success({ importSummary, eventIdList: _.compact(eventIdList) });
+            })
+            .flatMapError(error => {
+                const errorImportSummary: ImportSummaryWithEventIdList = {
+                    importSummary: {
+                        status: "ERROR",
+                        importCount: { ignored: 0, imported: 0, deleted: 0, updated: 0, total: 0 },
+                        nonBlockingErrors: [],
+                        blockingErrors: [{ error: error, count: 1 }],
+                    },
+                    eventIdList: [],
+                };
+                return Future.success(errorImportSummary);
+            });
     } else {
         return Future.success({
             importSummary: {

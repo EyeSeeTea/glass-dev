@@ -21,6 +21,7 @@ import { Country } from "../../entities/Country";
 import { GlassUploadsRepository } from "../../repositories/GlassUploadsRepository";
 import { InstanceRepository } from "../../repositories/InstanceRepository";
 import { GlassATCRepository } from "../../repositories/GlassATCRepository";
+import { EncryptionRepository } from "../../repositories/EncryptionRepository";
 
 export class ImportPrimaryFileUseCase {
     constructor(
@@ -39,7 +40,8 @@ export class ImportPrimaryFileUseCase {
         private atcRepository: GlassATCRepository,
         private amcProductRepository: AMCProductDataRepository,
         private amcSubstanceDataRepository: AMCSubstanceDataRepository,
-        private glassAtcRepository: GlassATCRepository
+        private glassAtcRepository: GlassATCRepository,
+        private encryptionRepository: EncryptionRepository
     ) {}
 
     public execute(
@@ -76,7 +78,8 @@ export class ImportPrimaryFileUseCase {
                     this.programRulesMetadataRepository,
                     this.metadataRepository,
                     this.instanceRepository,
-                    this.glassAtcRepository
+                    this.glassAtcRepository,
+                    this.encryptionRepository
                 );
 
                 return importEGASPFile.importEGASPFile(

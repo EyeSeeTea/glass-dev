@@ -14,6 +14,7 @@ import "./App.css";
 import { AppConfig } from "./AppConfig";
 import muiThemeLegacy from "./themes/dhis2-legacy.theme";
 import { muiTheme } from "./themes/dhis2.theme";
+import sodium from "libsodium-wrappers";
 
 export interface AppProps {
     api: D2Api;
@@ -28,6 +29,7 @@ export const App: React.FC<AppProps> = React.memo(function App({ api, d2, instan
 
     useEffect(() => {
         async function setup() {
+            await sodium.ready;
             const compositionRoot = getCompositionRoot(instance);
             const { data: currentUser } = await compositionRoot.instance.getCurrentUser().runAsync();
             const { data: allCountries } = await compositionRoot.countries.getAll().runAsync();

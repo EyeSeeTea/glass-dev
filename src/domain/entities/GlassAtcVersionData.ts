@@ -103,7 +103,7 @@ export type DDDChangesData = {
 
 export type ATCChangesData = {
     CATEGORY: "ATC";
-    CHANGE: string;
+    CHANGE: string; // TODO: Add what are the possible values
     INFO: string | null;
     NEW_ATC: ATCCodeLevel5;
     NEW_NAME: string | null;
@@ -261,6 +261,62 @@ export function getNewAtcCode(
     return atcChanges?.find(({ PREVIOUS_ATC, CHANGE }) => {
         return CHANGE !== "DELETED" && PREVIOUS_ATC === oldAtcCode;
     })?.NEW_ATC;
+}
+
+/**
+ * Get the corresponding ATC code in the current ATC version of an ATC code defined in an old ATC version.
+ *
+ * @param {ATCCodeLevel5} oldAtcCode - The old ATC code
+ * @param {ATCChangesData[]} AtcChanges - The list of ATC changes
+ * @param {ATCData[]} currentAtcs - The list of current ATC codes
+ *
+ * @return {ATCCodeLevel5 | undefined} - the current ATC code or undefined if no correspondance.
+ */
+export function getNewAtcCodeRec( // Todo: replace getNewAtcCode by this function
+    oldAtcCode: ATCCodeLevel5,
+    atcChanges: ATCChangesData[],
+    currentAtcs: ATCData[]
+): ATCCodeLevel5 | undefined {
+    function findAtcCodeCurrent(atcCode: ATCCodeLevel5): string | undefined {
+        const newAtc = atcChanges.find(({ PREVIOUS_ATC, CHANGE }) => {
+            return CHANGE !== "SUPERSEDED" && PREVIOUS_ATC === atcCode;
+        })?.NEW_ATC;
+        if (newAtc === undefined) {
+            return undefined;
+        }
+        const foundAtcInCurrent = currentAtcs.find(({ CODE }: ATCData) => {
+            return CODE === atcCode;
+        })?.CODE;
+        if (foundAtcInCurrent === undefined) {
+            return findAtcCodeCurrent(newAtc);
+        } else {
+            return foundAtcInCurrent;
+        }
+    }
+    return findAtcCodeCurrent(oldAtcCode);
+}
+
+/**
+ * Get the DDD for an ATC code, ROA code and SALT code based on an specific ATC version.
+ *
+ * @param {ATCCodeLevel5} oldCode - The ATC code
+ * @param {RouteOfAdministrationCode} roaCode - The ROA code
+ * @param {SaltCode} saltCode - The Salt code
+ * @param {GlassAtcVersionData} atcVersion - The ATC version
+ *
+ * @return {DDDData | undefined} - the corresponding DDD.
+ */
+export function getDDDForAtcVersion(
+    atcCode: ATCCodeLevel5,
+    roaCode: RouteOfAdministrationCode,
+    saltCode: SaltCode,
+    atcVersion: GlassAtcVersionData
+) {
+    const ddds = atcVersion.ddds.filter(({ ATC5, ROA, SALT }: DDDData) => {
+        return ATC5 === atcCode && ROA === roaCode && SALT === saltCode;
+    });
+    if (ddds.length === 0) return undefined;
+    return ddds[0];
 }
 
 export function getNewDddData(

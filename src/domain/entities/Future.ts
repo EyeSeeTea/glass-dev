@@ -120,7 +120,44 @@ export class Future<E, D> {
     static futureMap<T, E, D>(inputValues: T[], mapper: (value: T, index: number) => Future<E, D>): Future<E, D[]> {
         return this.parallel(inputValues.map((value, index) => mapper(value, index)));
     }
+
+    static sequentialWithAccumulation<E, D>(
+        futures: Array<Future<E, D>>,
+        options: { stopOnError?: boolean } = {}
+    ): Future<E, SequentialAccumulatedData<E, D>> {
+        const { stopOnError = false } = options;
+        const processSequentially = (
+            futures: Array<Future<E, D>>,
+            accumulatedData: D[] = []
+        ): Future<E, SequentialAccumulatedData<E, D>> => {
+            if (futures.length === 0) {
+                return Future.success({ type: "success", data: accumulatedData });
+            }
+
+            const [firstFuture, ...remainingFutures] = futures;
+
+            if (!firstFuture) {
+                return Future.success({ type: "success", data: accumulatedData });
+            }
+
+            return firstFuture
+                .flatMap(resultData => {
+                    return processSequentially(remainingFutures, [...accumulatedData, resultData]);
+                })
+                .flatMapError(error => {
+                    if (stopOnError) {
+                        return Future.success({ type: "error", error: error, data: accumulatedData });
+                    } else {
+                        return processSequentially(remainingFutures, accumulatedData);
+                    }
+                });
+        };
+
+        return processSequentially(futures);
+    }
 }
+
+type SequentialAccumulatedData<E, D> = { type: "success"; data: D[] } | { type: "error"; error: E; data: D[] };
 
 type JoinObj<Futures extends Record<string, Future<any, any>>> = Future<
     ExtractFutureError<Futures[keyof Futures]>,

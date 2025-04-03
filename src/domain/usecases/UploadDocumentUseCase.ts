@@ -1,6 +1,7 @@
 import { UseCase } from "../../CompositionRoot";
 import { generateUid } from "../../utils/uid";
 import { Future, FutureData } from "../entities/Future";
+import { GlassUploads } from "../entities/GlassUploads";
 import { GlassDocumentsRepository } from "../repositories/GlassDocumentsRepository";
 import { GlassUploadsRepository } from "../repositories/GlassUploadsRepository";
 
@@ -28,7 +29,7 @@ export class UploadDocumentUseCase implements UseCase {
 
     public execute({ file, data }: UploadType): FutureData<string> {
         return this.glassDocumentsRepository.save(file, data.moduleName).flatMap(fileId => {
-            const upload = {
+            const upload: GlassUploads = {
                 id: generateUid(),
                 batchId: data.batchId,
                 dataSubmission: data.dataSubmission,

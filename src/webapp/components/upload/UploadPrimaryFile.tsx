@@ -13,9 +13,11 @@ import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context
 import { EffectFn, useCallbackEffect } from "../../hooks/use-callback-effect";
 import { useCurrentPeriodContext } from "../../contexts/current-period-context";
 import { moduleProperties } from "../../../domain/utils/ModuleProperties";
+import { Maybe } from "../../../utils/ts-utils";
 interface UploadPrimaryFileProps {
     primaryFile: File | null;
     setPrimaryFile: React.Dispatch<React.SetStateAction<File | null>>;
+    setPrimaryFileTotalRows: React.Dispatch<React.SetStateAction<Maybe<number>>>;
     validate: (val: boolean) => void;
     batchId: string;
     removePrimaryFile: EffectFn<[event: React.MouseEvent<HTMLButtonElement, MouseEvent>]>;
@@ -27,6 +29,7 @@ interface UploadPrimaryFileProps {
 export const UploadPrimaryFile: React.FC<UploadPrimaryFileProps> = ({
     primaryFile,
     setPrimaryFile,
+    setPrimaryFileTotalRows,
     validate,
     batchId,
     removePrimaryFile,
@@ -80,6 +83,8 @@ export const UploadPrimaryFile: React.FC<UploadPrimaryFileProps> = ({
 
                             if (primaryFileData.isValid) {
                                 setPrimaryFile(uploadedPrimaryFile);
+                                setPrimaryFileTotalRows(primaryFileData.rows);
+
                                 const primaryFileType = moduleProperties.get(moduleName)?.primaryFileType;
                                 const data = {
                                     batchId,
@@ -128,6 +133,7 @@ export const UploadPrimaryFile: React.FC<UploadPrimaryFileProps> = ({
             orgUnitId,
             setIsLoading,
             setPrimaryFile,
+            setPrimaryFileTotalRows,
             snackbar,
         ]
     );

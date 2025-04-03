@@ -1,9 +1,10 @@
-import { D2ValidationResponse } from "../../../../data/repositories/MetadataDefaultRepository";
+import _ from "lodash";
 import i18n from "../../../../locales";
 import { ConsistencyError } from "../../../entities/data-entry/ImportSummary";
+import { DataSetValidation } from "../../../entities/metadata/DataSetValidation";
 
 export function checkDhis2Validations(
-    validations: D2ValidationResponse[],
+    validations: DataSetValidation[],
     rulesInstructions: { id: string; instruction: string }[]
 ): ConsistencyError[] {
     const errors = _(
