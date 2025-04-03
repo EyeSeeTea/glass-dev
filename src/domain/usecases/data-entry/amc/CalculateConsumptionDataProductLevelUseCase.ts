@@ -12,7 +12,7 @@ import { InstanceRepository } from "../../../repositories/InstanceRepository";
 import { AMCProductDataRepository } from "../../../repositories/data-entry/AMCProductDataRepository";
 import { AMC_RAW_SUBSTANCE_CONSUMPTION_CALCULATED_STAGE_ID } from "../../../../data/repositories/data-entry/AMCProductDataDefaultRepository";
 import { MetadataRepository } from "../../../repositories/MetadataRepository";
-import { ImportSummary } from "../../../entities/data-entry/ImportSummary";
+import { ImportSummary, ImportSummaryWithEventIdList } from "../../../entities/data-entry/ImportSummary";
 import { getConsumptionDataProductLevel } from "./utils/getConsumptionDataProductLevel";
 import { logger } from "../../../../utils/logger";
 import { GlassModuleRepository } from "../../../repositories/GlassModuleRepository";
@@ -271,8 +271,9 @@ export class CalculateConsumptionDataProductLevelUseCase {
                     importSubstancesResult.response,
                     IMPORT_SUMMARY_EVENT_TYPE,
                     this.metadataRepository,
-                    undefined,
-                    importSubstancesResult.eventIdLineNoMap
+                    {
+                        eventIdLineNoMap: importSubstancesResult.eventIdLineNoMap,
+                    }
                 ).flatMap(importSubstancesSummary => {
                     return this.uploadCalculatedIdListFileAndSave(
                         uploadId,
@@ -320,7 +321,7 @@ export class CalculateConsumptionDataProductLevelUseCase {
 
     private uploadCalculatedIdListFileAndSave(
         uploadId: string,
-        summary: { importSummary: ImportSummary; eventIdList: string[] },
+        summary: ImportSummaryWithEventIdList,
         moduleName: string
     ): FutureData<ImportSummary> {
         if (summary.eventIdList.length > 0 && uploadId) {

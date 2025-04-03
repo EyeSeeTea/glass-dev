@@ -9,11 +9,11 @@ import { GlassUploadsRepository } from "../domain/repositories/GlassUploadsRepos
 import { GlassUploadsDefaultRepository } from "../data/repositories/GlassUploadsDefaultRepository";
 import { GetGlassUploadsUseCase } from "../domain/usecases/GetGlassUploadsUseCase";
 import { Future, FutureData } from "../domain/entities/Future";
-import { GlassModule } from "../domain/entities/GlassModule";
+import { GlassModule, GlassModuleName, isGlassModuleName } from "../domain/entities/GlassModule";
 import { GlassModuleRepository } from "../domain/repositories/GlassModuleRepository";
 import { GlassUploads } from "../domain/entities/GlassUploads";
 import { GlassModuleDefaultRepository } from "../data/repositories/GlassModuleDefaultRepository";
-import { GlassModuleName, isGlassModuleName, moduleProperties } from "../domain/utils/ModuleProperties";
+import { moduleProperties } from "../domain/utils/ModuleProperties";
 import { getPrimaryAndSecondaryFilesToDelete } from "../webapp/utils/getPrimaryAndSecondaryFilesToDelete";
 import { GlassDocumentsRepository } from "../domain/repositories/GlassDocumentsRepository";
 import { GlassDocumentsDefaultRepository } from "../data/repositories/GlassDocumentsDefaultRepository";
@@ -44,7 +44,7 @@ import { MetadataDefaultRepository } from "../data/repositories/MetadataDefaultR
 import { ProgramRulesMetadataDefaultRepository } from "../data/repositories/program-rule/ProgramRulesMetadataDefaultRepository";
 import { TrackerDefaultRepository } from "../data/repositories/TrackerDefaultRepository";
 import { DeleteDocumentInfoByUploadIdUseCase } from "../domain/usecases/DeleteDocumentInfoByUploadIdUseCase";
-import { RemoveAsyncDeletionsUseCase } from "../domain/usecases/RemoveAsyncDeletionsUseCase";
+import { RemoveAsyncDeletionByIdUseCase } from "../domain/usecases/RemoveAsyncDeletionByIdUseCase";
 import { SendNotificationsUseCase } from "../domain/usecases/SendNotificationsUseCase";
 import { NotificationRepository } from "../domain/repositories/NotificationRepository";
 import { UsersRepository } from "../domain/repositories/UsersRepository";
@@ -62,6 +62,7 @@ import { SetMultipleUploadErrorAsyncDeletingUseCase } from "../domain/usecases/S
 import { IncrementAsyncDeletionAttemptsAndResetStatusUseCase } from "../domain/usecases/IncrementAsyncDeletionAttemptsAndResetStatusUseCase";
 import { SetAsyncDeletionsStatusUseCase } from "../domain/usecases/SetAsyncDeletionsStatusUseCase";
 import { GetAsyncDeletionByIdUseCase } from "../domain/usecases/GetAsyncDeletionByIdUseCase";
+import { RemoveAsyncDeletionsUseCase } from "../domain/usecases/RemoveAsyncDeletionsUseCase";
 
 const UPLOADED_FILE_STATUS_LOWERCASE = "uploaded";
 const IMPORT_SUMMARY_STATUS_ERROR = "ERROR";
@@ -330,6 +331,13 @@ function getAsyncDeletionsFromDatastore(
     return new GetAsyncDeletionsUseCase(glassAsyncDeletionsRepository).execute();
 }
 
+function removeAsyncDeletionByIdFromDatastore(
+    uploadIdToRemove: Id,
+    glassAsyncDeletionsRepository: GlassAsyncDeletionsRepository
+): FutureData<void> {
+    return new RemoveAsyncDeletionByIdUseCase(glassAsyncDeletionsRepository).execute(uploadIdToRemove);
+}
+
 function removeAsyncDeletionsFromDatastore(
     uploadIdsToRemove: Id[],
     glassAsyncDeletionsRepository: GlassAsyncDeletionsRepository
@@ -353,7 +361,7 @@ function incrementAsyncDeletionOrDeleteIfMaxAttemptAndSetErrorStatus(
 ): FutureData<void> {
     const nextAttempt = upload.attempts + 1;
     if (nextAttempt >= maxAttemptsForAsyncDeletions) {
-        return removeAsyncDeletionsFromDatastore([upload.id], glassAsyncDeletionsRepository).flatMap(() => {
+        return removeAsyncDeletionByIdFromDatastore(upload.id, glassAsyncDeletionsRepository).flatMap(() => {
             return new SetMultipleUploadErrorAsyncDeletingUseCase(glassUploadsRepository).execute([upload.id]);
         });
     } else {
@@ -683,8 +691,8 @@ function deleteUploadedDatasets(
                                                         secondaryFileToDelete,
                                                         repositories
                                                     ).flatMap(() => {
-                                                        return removeAsyncDeletionsFromDatastore(
-                                                            [uploadToDelete.id],
+                                                        return removeAsyncDeletionByIdFromDatastore(
+                                                            primaryFileToDelete.id,
                                                             repositories.glassAsyncDeletionsRepository
                                                         ).flatMap(() => {
                                                             console.debug(
@@ -696,8 +704,8 @@ function deleteUploadedDatasets(
                                                         });
                                                     });
                                                 } else {
-                                                    return removeAsyncDeletionsFromDatastore(
-                                                        [uploadToDelete.id],
+                                                    return removeAsyncDeletionByIdFromDatastore(
+                                                        primaryFileToDelete.id,
                                                         repositories.glassAsyncDeletionsRepository
                                                     ).flatMap(() => {
                                                         console.debug(
@@ -744,8 +752,8 @@ function deleteUploadedDatasets(
                                                         secondaryFileToDelete,
                                                         repositories
                                                     ).flatMap(() => {
-                                                        return removeAsyncDeletionsFromDatastore(
-                                                            [uploadToDelete.id],
+                                                        return removeAsyncDeletionByIdFromDatastore(
+                                                            secondaryFileToDelete.id,
                                                             repositories.glassAsyncDeletionsRepository
                                                         ).flatMap(() => {
                                                             console.debug(
@@ -779,8 +787,8 @@ function deleteUploadedDatasets(
                                                 secondaryFileToDelete,
                                                 repositories
                                             ).flatMap(() => {
-                                                return removeAsyncDeletionsFromDatastore(
-                                                    [uploadToDelete.id],
+                                                return removeAsyncDeletionByIdFromDatastore(
+                                                    secondaryFileToDelete.id,
                                                     repositories.glassAsyncDeletionsRepository
                                                 ).flatMap(() => {
                                                     console.debug(
