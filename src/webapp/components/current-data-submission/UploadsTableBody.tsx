@@ -128,7 +128,7 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({
             if (asyncDeletionsState.kind !== "loaded") return false;
 
             const primaryAndSecondaryIdsToDelete = getPrimaryAndSecondaryUploadIdsByUploadDataItem(uploadDataItem);
-            const asyncDeletionsIds = asyncDeletionsState.data.map(({ uploadId }) => uploadId);
+            const asyncDeletionsIds = asyncDeletionsState.data?.map(({ uploadId }) => uploadId);
             return primaryAndSecondaryIdsToDelete.some(id => asyncDeletionsIds.includes(id));
         },
         [asyncDeletionsState, getPrimaryAndSecondaryUploadIdsByUploadDataItem]
@@ -153,7 +153,7 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({
     const isSetToBeUploadedAsync = useCallback(
         (uploadDataItem: UploadsDataItem): boolean => {
             return (
-                asyncUploads.some(
+                asyncUploads?.some(
                     asyncUpload => asyncUpload.uploadId === uploadDataItem.id && asyncUpload.status === "PENDING"
                 ) ?? false
             );
@@ -164,7 +164,7 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({
     const isCurrentlyBeingUploadedAsync = useCallback(
         (uploadDataItem: UploadsDataItem): boolean => {
             return (
-                asyncUploads.some(
+                asyncUploads?.some(
                     asyncUpload => asyncUpload.uploadId === uploadDataItem.id && asyncUpload.status === "UPLOADING"
                 ) ?? false
             );
@@ -174,7 +174,7 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({
 
     const isInUploadedAsync = useCallback(
         (uploadDataItem: UploadsDataItem): boolean => {
-            return asyncUploads.some(asyncUpload => asyncUpload.uploadId === uploadDataItem.id) ?? false;
+            return asyncUploads?.some(asyncUpload => asyncUpload.uploadId === uploadDataItem.id) ?? false;
         },
         [asyncUploads]
     );

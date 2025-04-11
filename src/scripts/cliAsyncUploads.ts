@@ -106,7 +106,7 @@ async function main() {
 
                         return getAsyncUploadsFromDatastore(glassAsyncUploadsRepository).run(
                             asyncUploads => {
-                                if (asyncUploads && asyncUploads.length > 0) {
+                                if (asyncUploads && asyncUploads?.length > 0) {
                                     const uploadIdsToSetAsyncUploadErrorStatus: Id[] = asyncUploads
                                         .filter(upload => upload.attempts >= maxAttemptsForAsyncUploads)
                                         .flatMap(upload => [upload.uploadId]);
