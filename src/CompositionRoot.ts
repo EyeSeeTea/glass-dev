@@ -106,6 +106,8 @@ import { GlassAsyncUploadsDefaultRepository } from "./data/repositories/GlassAsy
 import { SetAsyncUploadsUseCase } from "./domain/usecases/SetAsyncUploadsUseCase";
 import { RemoveAsyncUploadByIdUseCase } from "./domain/usecases/RemoveAsyncUploadByIdUseCase";
 import { RemoveAsyncUploadsUseCase } from "./domain/usecases/RemoveAsyncUploadsUseCase";
+import { GetGeneralAMCQuestionnaireUseCase } from "./domain/usecases/amc-questionnaires/GetGeneralAMCQuestionnaireUseCase";
+import { GeneralAMCQuestionnaireD2Repository } from "./data/repositories/amc-questionnaires/GeneralAMCQuestionnaireD2Repository";
 
 export function getCompositionRoot(instance: Instance) {
     const api = getD2APiFromInstance(instance);
@@ -146,6 +148,7 @@ export function getCompositionRoot(instance: Instance) {
     const glassAsyncDeletionsRepository = new GlassAsyncDeletionsDefaultRepository(dataStoreClient);
     const encryptionRepository = new EncryptionDefaultRepository(api);
     const glassAsyncUploadsRepository = new GlassAsyncUploadsDefaultRepository(dataStoreClient);
+    const generalAMCQuestionnaireRepository = new GeneralAMCQuestionnaireD2Repository(api);
 
     return {
         instance: getExecute({
@@ -362,6 +365,10 @@ export function getCompositionRoot(instance: Instance) {
                 glassModuleRepository
             ),
             downloadAllData: new DownloadAllDataForModuleUseCase(eventVisualizationRepository),
+        }),
+
+        amcQuestionnaires: getExecute({
+            getGeneral: new GetGeneralAMCQuestionnaireUseCase(generalAMCQuestionnaireRepository),
         }),
     };
 }
