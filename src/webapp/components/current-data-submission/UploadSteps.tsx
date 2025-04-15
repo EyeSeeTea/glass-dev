@@ -14,6 +14,7 @@ import { useGlassCaptureAccess } from "../../hooks/useGlassCaptureAccess";
 import { isEditModeStatus } from "../../../utils/editModeStatus";
 import { moduleProperties } from "../../../domain/utils/ModuleProperties";
 import { Submission } from "./Submission";
+import { AMCQuestionnaires } from "./amc-questionnaires/AMCQuestionnaires";
 
 interface UploadStepsProps {
     moduleName: string;
@@ -87,7 +88,11 @@ const renderTypeContent = (
                 />
             );
         case 1:
-            return <Questionnaires setRefetchStatus={setRefetchStatus} />;
+            return moduleName === "AMC" ? (
+                <AMCQuestionnaires />
+            ) : (
+                <Questionnaires setRefetchStatus={setRefetchStatus} />
+            );
         case 2:
             return <ListOfDatasets setRefetchStatus={setRefetchStatus} />;
         case 3:
