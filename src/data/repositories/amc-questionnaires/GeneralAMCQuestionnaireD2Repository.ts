@@ -9,9 +9,9 @@ import { GeneralAMCQuestionnaireRepository } from "../../../domain/repositories/
 import { D2Api, SelectedPick, D2TrackerTrackedEntitySchema } from "../../../types/d2-api";
 import { apiToFuture } from "../../../utils/futures";
 import { assertOrError } from "../utils/AssertOrError";
-import { getSafeYesNoUnknownNAOptions } from "../../../domain/entities/amc-questionnaires/YesNoUnknownNAOptions";
-import { getSafeYesNoUnknownOptions } from "../../../domain/entities/amc-questionnaires/YesNoUnknownOptions";
-import { getSafeYesNoOptions } from "../../../domain/entities/amc-questionnaires/YesNoOptions";
+import { getSafeYesNoValue } from "../../../domain/entities/amc-questionnaires/YesNoOption";
+import { getSafeYesNoUnknownNAValue } from "../../../domain/entities/amc-questionnaires/YesNoUnknownNAOption";
+import { getSafeYesNoUnknownValue } from "../../../domain/entities/amc-questionnaires/YesNoUnknownOption";
 
 export const AMR_GLASS_PRO_AMC_DQ_PROGRAM_ID = "f9Jl9O4CYZf";
 
@@ -46,7 +46,7 @@ export class GeneralAMCQuestionnaireD2Repository implements GeneralAMCQuestionna
                 fields: trackedEntitiesFields,
             })
         )
-            .flatMap(response => assertOrError(response.instances[0], "Tracked entity"))
+            .flatMap(response => assertOrError(response.instances[0], "General AMC Questionnaire"))
             .flatMap(trackedEntity => {
                 const generalAMCQuestionnaire = this.mapTrackedEntityAttributesToGeneralAMCQuestionnaire(
                     trackedEntity,
@@ -72,14 +72,14 @@ export class GeneralAMCQuestionnaireD2Repository implements GeneralAMCQuestionna
 
         const fromMap = (key: keyof typeof generalAMCQuestionnaireCodes) => getValueFromMap(key, trackedEntity);
 
-        const isSameAsLastYear = getSafeYesNoUnknownNAOptions(fromMap("isSameAsLastYear"));
-        const shortageInPublicSector = getSafeYesNoUnknownOptions(fromMap("shortageInPublicSector"));
-        const shortageInPrivateSector = getSafeYesNoUnknownOptions(fromMap("shortageInPrivateSector"));
-        const antibacterials = getSafeYesNoOptions(mapYesNoNumberOptionsToString(fromMap("antibacterials")));
-        const antifungals = getSafeYesNoOptions(mapYesNoNumberOptionsToString(fromMap("antifungals")));
-        const antivirals = getSafeYesNoOptions(mapYesNoNumberOptionsToString(fromMap("antivirals")));
-        const antituberculosis = getSafeYesNoOptions(mapYesNoNumberOptionsToString(fromMap("antituberculosis")));
-        const antimalaria = getSafeYesNoOptions(mapYesNoNumberOptionsToString(fromMap("antimalaria")));
+        const isSameAsLastYear = getSafeYesNoUnknownNAValue(fromMap("isSameAsLastYear"));
+        const shortageInPublicSector = getSafeYesNoUnknownValue(fromMap("shortageInPublicSector"));
+        const shortageInPrivateSector = getSafeYesNoUnknownValue(fromMap("shortageInPrivateSector"));
+        const antibacterials = getSafeYesNoValue(mapYesNoNumberOptionsToString(fromMap("antibacterials")));
+        const antifungals = getSafeYesNoValue(mapYesNoNumberOptionsToString(fromMap("antifungals")));
+        const antivirals = getSafeYesNoValue(mapYesNoNumberOptionsToString(fromMap("antivirals")));
+        const antituberculosis = getSafeYesNoValue(mapYesNoNumberOptionsToString(fromMap("antituberculosis")));
+        const antimalaria = getSafeYesNoValue(mapYesNoNumberOptionsToString(fromMap("antimalaria")));
 
         if (
             !isSameAsLastYear ||
