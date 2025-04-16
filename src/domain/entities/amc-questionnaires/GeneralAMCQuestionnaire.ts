@@ -3,9 +3,9 @@ import { Maybe } from "../../../types/utils";
 import { Id } from "../Base";
 import { Struct } from "../generic/Struct";
 import { ValidationError, ValidationErrorKey } from "./ValidationError";
-import { YesNoOptions } from "./YesNoOptions";
-import { YesNoUnknownNAOptions } from "./YesNoUnknownNAOptions";
-import { YesNoUnknownOptions } from "./YesNoUnknownOptions";
+import { YesNoValue } from "./YesNoOption";
+import { YesNoUnknownNAValue } from "./YesNoUnknownNAOption";
+import { YesNoUnknownValue } from "./YesNoUnknownOption";
 import { Either } from "../generic/Either";
 
 export interface GeneralAMCQuestionnaireAttributes {
@@ -15,17 +15,17 @@ export interface GeneralAMCQuestionnaireAttributes {
     status: "ACTIVE" | "COMPLETED" | "CANCELLED";
     created?: Date;
     lastUpdated?: Date;
-    isSameAsLastYear: YesNoUnknownNAOptions;
-    shortageInPublicSector: YesNoUnknownOptions;
+    isSameAsLastYear: YesNoUnknownNAValue;
+    shortageInPublicSector: YesNoUnknownValue;
     detailOnShortageInPublicSector: Maybe<string>;
-    shortageInPrivateSector: YesNoUnknownOptions;
+    shortageInPrivateSector: YesNoUnknownValue;
     detailOnShortageInPrivateSector: Maybe<string>;
     generalComments: Maybe<string>;
-    antibacterials: YesNoOptions;
-    antifungals: YesNoOptions;
-    antivirals: YesNoOptions;
-    antituberculosis: YesNoOptions;
-    antimalaria: YesNoOptions;
+    antibacterials: YesNoValue;
+    antifungals: YesNoValue;
+    antivirals: YesNoValue;
+    antituberculosis: YesNoValue;
+    antimalaria: YesNoValue;
 }
 
 export class GeneralAMCQuestionnaire extends Struct<GeneralAMCQuestionnaireAttributes>() {
