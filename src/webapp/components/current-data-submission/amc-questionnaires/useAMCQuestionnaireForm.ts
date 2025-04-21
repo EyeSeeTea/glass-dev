@@ -11,6 +11,7 @@ import {
 import { FormState } from "../../form/presentation-entities/FormState";
 import { AMCQuestionnaireFormType } from "./presentation-entities/AMCQuestionnaireFormType";
 import { mapEntityToFormState } from "./mapEntityToFormState";
+import { ModalData } from "../../form/Form";
 
 export type GlobalMessage = {
     text: string;
@@ -41,6 +42,9 @@ type State = {
     handleFormChange: (updatedField: FormFieldState) => void;
     onPrimaryButtonClick: () => void;
     onCancelForm: () => void;
+    openModal: boolean;
+    modalData?: ModalData;
+    setOpenModal: (open: boolean) => void;
 };
 
 export function useAMCQuestionnaireForm(params: {
@@ -58,6 +62,8 @@ export function useAMCQuestionnaireForm(params: {
     const [formLabels, setFormLabels] = useState<FormLables>();
     const [isLoading, setIsLoading] = useState(false);
     const [questionnaireFormEntity, setQuestionnaireFormEntity] = useState<QuestionnaireFormEntity>();
+    const [openModal, setOpenModal] = useState(false);
+    const [modalData, setModalData] = useState<ModalData>();
 
     const isEditMode = useMemo(() => !!id, [id]);
 
@@ -130,5 +136,8 @@ export function useAMCQuestionnaireForm(params: {
         handleFormChange,
         onPrimaryButtonClick,
         onCancelForm,
+        openModal,
+        modalData,
+        setOpenModal,
     };
 }
