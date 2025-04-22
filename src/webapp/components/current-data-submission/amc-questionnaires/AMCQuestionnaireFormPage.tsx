@@ -19,7 +19,7 @@ export const AMCQuestionnaireFormPage: React.FC<AMCQuestionnaireFormPageProps> =
     const { formType, id, orgUnitId, period } = props;
 
     const snackbar = useSnackbar();
-    const { formLabels, globalMessage, formState, isLoading, handleFormChange, onPrimaryButtonClick, onCancelForm } =
+    const { formLabels, globalMessage, formState, isLoading, handleFormChange, onClickSave, onCancelForm } =
         useAMCQuestionnaireForm({ formType, id, orgUnitId, period });
 
     useEffect(() => {
@@ -36,7 +36,7 @@ export const AMCQuestionnaireFormPage: React.FC<AMCQuestionnaireFormPageProps> =
         <Form
             formState={formState.data}
             onFormChange={handleFormChange}
-            onSave={onPrimaryButtonClick}
+            onSave={onClickSave}
             onCancel={onCancelForm}
             errorLabels={formLabels?.errors}
         />

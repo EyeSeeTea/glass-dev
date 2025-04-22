@@ -1,4 +1,3 @@
-import moment from "moment";
 import {
     GeneralAMCQuestionnaire,
     GeneralAMCQuestionnaireAttributes,
@@ -6,33 +5,75 @@ import {
 import { Id } from "../../../domain/entities/Base";
 import { Future, FutureData } from "../../../domain/entities/Future";
 import { GeneralAMCQuestionnaireRepository } from "../../../domain/repositories/amc-questionnaires/GeneralAMCQuestionnaireRepository";
-import { D2Api, SelectedPick, D2TrackerTrackedEntitySchema } from "../../../types/d2-api";
+import {
+    D2Api,
+    SelectedPick,
+    D2TrackerTrackedEntitySchema,
+    D2TrackedEntityInstanceToPost,
+    AttributeToPost,
+    D2TrackerEnrollmentToPost,
+} from "../../../types/d2-api";
 import { apiToFuture } from "../../../utils/futures";
 import { assertOrError } from "../utils/AssertOrError";
 import { getSafeYesNoValue } from "../../../domain/entities/amc-questionnaires/YesNoOption";
 import { getSafeYesNoUnknownNAValue } from "../../../domain/entities/amc-questionnaires/YesNoUnknownNAOption";
 import { getSafeYesNoUnknownValue } from "../../../domain/entities/amc-questionnaires/YesNoUnknownOption";
-
-export const AMR_GLASS_PRO_AMC_DQ_PROGRAM_ID = "f9Jl9O4CYZf";
-
-export const generalAMCQuestionnaireCodes = {
-    isSameAsLastYear: "AMR_GLASS_AMC_TEA_SAME_PREV_YEAR",
-    shortageInPublicSector: "AMR_GLASS_AMC_TEA_SHORTAGE_PUB",
-    detailOnShortageInPublicSector: "AMR_GLASS_AMC_TEA_SHORTAGE_PUB_DESCR",
-    shortageInPrivateSector: "AMR_GLASS_AMC_TEA_SHORTAGE_PRV",
-    detailOnShortageInPrivateSector: "AMR_GLASS_AMC_TEA_SHORTAGE_PRV_DESCR",
-    generalComments: "AMR_GLASS_AMC_TEA_GEN_COMMENTS",
-    antibacterials: "AMR_GLASS_AMC_TEA_ATB",
-    antifungals: "AMR_GLASS_AMC_TEA_ATF",
-    antivirals: "AMR_GLASS_AMC_TEA_ATV",
-    antituberculosis: "AMR_GLASS_AMC_TEA_ATT",
-    antimalaria: "AMR_GLASS_AMC_TEA_ATM",
-} as const;
+import {
+    AMR_GLASS_PRO_AMC_DQ_PROGRAM_ID,
+    AMR_TET_AMC_DQuestionnaire_TRACKED_ENTITY_TYPE_ID,
+    codesByGeneralAMCQuestionnaire,
+    GeneralAMCQuestionnaireCode,
+    isStringInGeneralAMCQuestionnaireCodes,
+} from "./AMCQuestionnaireConstants";
+import { D2ProgramMetadata, getAMCQuestionnaireProgramMetadata } from "./getAMCQuestionnaireProgramMetadata";
+import { getCurrentTimeString, getISODateAsLocaleDateString } from "./dateTimeHelpers";
+import { importApiTracker } from "../utils/importApiTracker";
 
 export class GeneralAMCQuestionnaireD2Repository implements GeneralAMCQuestionnaireRepository {
     constructor(private api: D2Api) {}
 
     public get(id: Id, orgUnitId: Id, period: string): FutureData<GeneralAMCQuestionnaire> {
+        return this.getTracketEntityById(id, orgUnitId, period).flatMap((trackedEntity: D2TrackedEntity) => {
+            return this.mapTrackedEntityAttributesToGeneralAMCQuestionnaire(trackedEntity, orgUnitId, period).flatMap(
+                generalAMCQuestionnaire => {
+                    if (!generalAMCQuestionnaire) {
+                        return Future.error("General AMC Questionnaire not found");
+                    }
+
+                    return Future.success(generalAMCQuestionnaire);
+                }
+            );
+        });
+    }
+
+    public save(generalAMCQuestionnaire: GeneralAMCQuestionnaire): FutureData<Id> {
+        return getAMCQuestionnaireProgramMetadata(this.api).flatMap((programMetadata: D2ProgramMetadata) => {
+            return this.mapGeneralAMCQuestionnaireToTrackedEntity(generalAMCQuestionnaire, programMetadata).flatMap(
+                trackedEntity => {
+                    return importApiTracker(
+                        this.api,
+                        { trackedEntities: [trackedEntity] },
+                        "CREATE_AND_UPDATE"
+                    ).flatMap(saveResponse => {
+                        const generalAMCQuestionnaireId =
+                            saveResponse.bundleReport.typeReportMap.TRACKED_ENTITY.objectReports[0]?.uid;
+
+                        if (saveResponse.status === "ERROR" || !generalAMCQuestionnaireId) {
+                            return Future.error(
+                                `Error saving general AMC questionnaire: ${saveResponse.validationReport.errorReports
+                                    .map(e => e.message)
+                                    .join(", ")}`
+                            );
+                        } else {
+                            return Future.success(generalAMCQuestionnaireId);
+                        }
+                    });
+                }
+            );
+        });
+    }
+
+    private getTracketEntityById(id: Id, orgUnitId: Id, period: string): FutureData<D2TrackedEntity> {
         const enrollmentEnrolledAfter = `${period}-01-01`;
         const enrollmentEnrolledBefore = `${period}-12-31`;
         return apiToFuture(
@@ -45,20 +86,7 @@ export class GeneralAMCQuestionnaireD2Repository implements GeneralAMCQuestionna
                 enrollmentEnrolledBefore: enrollmentEnrolledBefore,
                 fields: trackedEntitiesFields,
             })
-        )
-            .flatMap(response => assertOrError(response.instances[0], "General AMC Questionnaire"))
-            .flatMap(trackedEntity => {
-                const generalAMCQuestionnaire = this.mapTrackedEntityAttributesToGeneralAMCQuestionnaire(
-                    trackedEntity,
-                    orgUnitId,
-                    period
-                );
-                if (!generalAMCQuestionnaire) {
-                    return Future.error("General AMC Questionnaire not found");
-                }
-
-                return generalAMCQuestionnaire;
-            });
+        ).flatMap(response => assertOrError(response.instances[0], "General AMC Questionnaire"));
     }
 
     private mapTrackedEntityAttributesToGeneralAMCQuestionnaire(
@@ -70,16 +98,16 @@ export class GeneralAMCQuestionnaireD2Repository implements GeneralAMCQuestionna
             return Future.error("Tracked entity not found");
         }
 
-        const fromMap = (key: keyof typeof generalAMCQuestionnaireCodes) => getValueFromMap(key, trackedEntity);
+        const fromMap = (key: keyof typeof codesByGeneralAMCQuestionnaire) => getValueFromMap(key, trackedEntity);
 
         const isSameAsLastYear = getSafeYesNoUnknownNAValue(fromMap("isSameAsLastYear"));
         const shortageInPublicSector = getSafeYesNoUnknownValue(fromMap("shortageInPublicSector"));
         const shortageInPrivateSector = getSafeYesNoUnknownValue(fromMap("shortageInPrivateSector"));
-        const antibacterials = getSafeYesNoValue(mapYesNoNumberOptionsToString(fromMap("antibacterials")));
-        const antifungals = getSafeYesNoValue(mapYesNoNumberOptionsToString(fromMap("antifungals")));
-        const antivirals = getSafeYesNoValue(mapYesNoNumberOptionsToString(fromMap("antivirals")));
-        const antituberculosis = getSafeYesNoValue(mapYesNoNumberOptionsToString(fromMap("antituberculosis")));
-        const antimalaria = getSafeYesNoValue(mapYesNoNumberOptionsToString(fromMap("antimalaria")));
+        const antibacterials = getSafeYesNoValue(fromMap("antibacterials"));
+        const antifungals = getSafeYesNoValue(fromMap("antifungals"));
+        const antivirals = getSafeYesNoValue(fromMap("antivirals"));
+        const antituberculosis = getSafeYesNoValue(fromMap("antituberculosis"));
+        const antimalaria = getSafeYesNoValue(fromMap("antimalaria"));
 
         if (
             !isSameAsLastYear ||
@@ -128,18 +156,137 @@ export class GeneralAMCQuestionnaireD2Repository implements GeneralAMCQuestionna
 
         return Future.success(validGeneralAMCQuestionnaire);
     }
+
+    private mapGeneralAMCQuestionnaireToTrackedEntity(
+        generalAMCQuestionnaire: GeneralAMCQuestionnaire,
+        programMetadata: D2ProgramMetadata
+    ): FutureData<D2TrackedEntityInstanceToPost> {
+        return this.getAttributesFromGeneralAMCQuestionnaire(generalAMCQuestionnaire, programMetadata).flatMap(
+            (attributes: AttributeToPost[]) => {
+                const isEditingTrackedEntity = generalAMCQuestionnaire.id !== "";
+
+                if (isEditingTrackedEntity) {
+                    return this.getTracketEntityById(
+                        generalAMCQuestionnaire.id,
+                        generalAMCQuestionnaire.orgUnitId,
+                        generalAMCQuestionnaire.period
+                    ).flatMap((oldTrackedEntity: D2TrackedEntity) => {
+                        const enrollment = oldTrackedEntity.enrollments?.[0];
+                        const eventsWithOcurredAtAndDataValues = enrollment?.events.filter(
+                            event => !!event.occurredAt && event.dataValues.length > 0
+                        );
+
+                        const trackedEntity: D2TrackedEntityInstanceToPost = {
+                            trackedEntity: generalAMCQuestionnaire.id,
+                            orgUnit: generalAMCQuestionnaire.orgUnitId,
+                            trackedEntityType: AMR_TET_AMC_DQuestionnaire_TRACKED_ENTITY_TYPE_ID,
+                            attributes: attributes,
+                            enrollments: [
+                                {
+                                    trackedEntity: generalAMCQuestionnaire.id,
+                                    orgUnit: generalAMCQuestionnaire.orgUnitId,
+                                    program: AMR_GLASS_PRO_AMC_DQ_PROGRAM_ID,
+                                    enrollment: enrollment?.enrollment ?? "",
+                                    status: generalAMCQuestionnaire.status,
+                                    attributes: attributes,
+                                    events: eventsWithOcurredAtAndDataValues ?? [],
+                                    enrolledAt: enrollment?.enrolledAt ?? getCurrentTimeString(),
+                                    occurredAt: enrollment?.occurredAt ?? getCurrentTimeString(),
+                                },
+                            ],
+                        };
+
+                        return Future.success(trackedEntity);
+                    });
+                } else {
+                    const enrollment: D2TrackerEnrollmentToPost = {
+                        trackedEntity: generalAMCQuestionnaire.id,
+                        orgUnit: generalAMCQuestionnaire.orgUnitId,
+                        program: AMR_GLASS_PRO_AMC_DQ_PROGRAM_ID,
+                        enrollment: "",
+                        trackedEntityType: AMR_TET_AMC_DQuestionnaire_TRACKED_ENTITY_TYPE_ID,
+                        attributes: attributes,
+                        events: [],
+                        enrolledAt: getCurrentTimeString(),
+                        occurredAt: getCurrentTimeString(),
+                        status: "ACTIVE",
+                    };
+
+                    const trackedEntity: D2TrackedEntityInstanceToPost = {
+                        trackedEntity: generalAMCQuestionnaire.id,
+                        orgUnit: generalAMCQuestionnaire.orgUnitId,
+                        trackedEntityType: AMR_TET_AMC_DQuestionnaire_TRACKED_ENTITY_TYPE_ID,
+                        attributes: attributes,
+                        createdAt: getCurrentTimeString(),
+                        updatedAt: getCurrentTimeString(),
+                        enrollments: [enrollment],
+                    };
+
+                    return Future.success(trackedEntity);
+                }
+            }
+        );
+    }
+
+    private getAttributesFromGeneralAMCQuestionnaire(
+        generalAMCQuestionnaire: GeneralAMCQuestionnaire,
+        programMetadata: D2ProgramMetadata
+    ): FutureData<AttributeToPost[]> {
+        const attributeValues: Record<GeneralAMCQuestionnaireCode, string> =
+            this.getValueFromGeneralAMCQuestionnaire(generalAMCQuestionnaire);
+
+        const programTrackedEntityAttributes = programMetadata.programTrackedEntityAttributes;
+        const invalidAttribute = programTrackedEntityAttributes.find(
+            attribute => !isStringInGeneralAMCQuestionnaireCodes(attribute.trackedEntityAttribute.code)
+        );
+
+        if (invalidAttribute) {
+            return Future.error(
+                `Attribute code not found in GeneralAMCQuestionnaireCodes: ${invalidAttribute.trackedEntityAttribute.code}`
+            );
+        }
+
+        const attributes: AttributeToPost[] = programTrackedEntityAttributes.reduce(
+            (acc: AttributeToPost[], attribute): AttributeToPost[] => {
+                if (isStringInGeneralAMCQuestionnaireCodes(attribute.trackedEntityAttribute.code)) {
+                    const typedCode: GeneralAMCQuestionnaireCode = attribute.trackedEntityAttribute.code;
+                    return [
+                        ...acc,
+                        {
+                            attribute: attribute.trackedEntityAttribute.id,
+                            value: attributeValues[typedCode],
+                        },
+                    ];
+                } else {
+                    return acc;
+                }
+            },
+            []
+        );
+        return Future.success(attributes);
+    }
+
+    private getValueFromGeneralAMCQuestionnaire(
+        generalAMCQuestionnaire: GeneralAMCQuestionnaire
+    ): Record<GeneralAMCQuestionnaireCode, string> {
+        return {
+            AMR_GLASS_AMC_TEA_SAME_PREV_YEAR: generalAMCQuestionnaire.isSameAsLastYear,
+            AMR_GLASS_AMC_TEA_SHORTAGE_PUB: generalAMCQuestionnaire.shortageInPublicSector,
+            AMR_GLASS_AMC_TEA_SHORTAGE_PUB_DESCR: generalAMCQuestionnaire.detailOnShortageInPublicSector ?? "",
+            AMR_GLASS_AMC_TEA_SHORTAGE_PRV: generalAMCQuestionnaire.shortageInPrivateSector,
+            AMR_GLASS_AMC_TEA_SHORTAGE_PRV_DESCR: generalAMCQuestionnaire.detailOnShortageInPrivateSector ?? "",
+            AMR_GLASS_AMC_TEA_GEN_COMMENTS: generalAMCQuestionnaire.generalComments ?? "",
+            AMR_GLASS_AMC_TEA_ATB: generalAMCQuestionnaire.antibacterials,
+            AMR_GLASS_AMC_TEA_ATF: generalAMCQuestionnaire.antifungals,
+            AMR_GLASS_AMC_TEA_ATV: generalAMCQuestionnaire.antivirals,
+            AMR_GLASS_AMC_TEA_ATT: generalAMCQuestionnaire.antituberculosis,
+            AMR_GLASS_AMC_TEA_ATM: generalAMCQuestionnaire.antimalaria,
+        };
+    }
 }
 
-function getValueFromMap(key: keyof typeof generalAMCQuestionnaireCodes, trackedEntity: D2TrackedEntity): string {
-    return trackedEntity.attributes?.find(a => a.code === generalAMCQuestionnaireCodes[key])?.value ?? "";
-}
-
-function getISODateAsLocaleDateString(date: string): Date {
-    return moment.utc(date).local().toDate();
-}
-
-function mapYesNoNumberOptionsToString(value: string): string {
-    return value === "1" ? "YES" : value === "0" ? "NO" : "";
+function getValueFromMap(key: keyof typeof codesByGeneralAMCQuestionnaire, trackedEntity: D2TrackedEntity): string {
+    return trackedEntity.attributes?.find(a => a.code === codesByGeneralAMCQuestionnaire[key])?.value ?? "";
 }
 
 const trackedEntitiesFields = {
@@ -151,9 +298,14 @@ const trackedEntitiesFields = {
         enrollment: true,
         status: true,
         enrolledAt: true,
+        occurredAt: true,
         events: {
+            enrollment: true,
             event: true,
             occurredAt: true,
+            orgUnit: true,
+            program: true,
+            programStage: true,
             dataValues: {
                 dataElement: true,
                 value: true,

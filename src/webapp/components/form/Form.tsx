@@ -26,6 +26,7 @@ export type FormProps = {
     openModal?: boolean;
     modalData?: ModalData;
     setOpenModal?: (show: boolean) => void;
+    onBackClick?: () => void;
 };
 
 export const Form: React.FC<FormProps> = React.memo(props => {
@@ -38,6 +39,7 @@ export const Form: React.FC<FormProps> = React.memo(props => {
         openModal = false,
         modalData,
         setOpenModal,
+        onBackClick,
     } = props;
     const { formLocalState, handleUpdateFormField } = useLocalForm(formState, onFormChange);
 
@@ -51,6 +53,7 @@ export const Form: React.FC<FormProps> = React.memo(props => {
                 saveLabel={formLocalState.saveButtonLabel}
                 cancelLabel={formLocalState.cancelButtonLabel}
                 disableSave={!formLocalState.isValid}
+                onBackClick={onBackClick}
             >
                 {formLocalState.sections.map(section => {
                     if (!section.isVisible) return null;

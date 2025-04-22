@@ -33,7 +33,7 @@ export const FormSection: React.FC<FormSectionProps> = React.memo(({ title, fiel
                           return (
                               <StyledDataTableRow key={field.id}>
                                   <DataTableCell width="60%">
-                                      <span>{field.text}</span>
+                                      <StyledTextField required={field.required || false}>{field.text}</StyledTextField>
                                   </DataTableCell>
 
                                   <DataTableCell>
@@ -62,5 +62,12 @@ const StyledDataTableRow = styled(DataTableRow)`
     td {
         background-color: inherit !important;
         vertical-align: middle;
+    }
+`;
+
+const StyledTextField = styled.span<{ required: boolean }>`
+    ::after {
+        content: ${props => (props.required ? "'*'" : "''")};
+        margin-inline-start: 4px;
     }
 `;
