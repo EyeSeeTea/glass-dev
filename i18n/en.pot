@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2025-04-15T15:39:43.111Z\n"
-"PO-Revision-Date: 2025-04-15T15:39:43.111Z\n"
+"POT-Creation-Date: 2025-04-22T08:11:20.784Z\n"
+"PO-Revision-Date: 2025-04-22T08:11:20.784Z\n"
 
 msgid "Template {{id}} not loaded"
 msgstr ""
@@ -484,6 +484,9 @@ msgstr ""
 msgid "status"
 msgstr ""
 
+msgid "Back"
+msgstr ""
+
 msgid "Indicates required"
 msgstr ""
 
@@ -536,9 +539,6 @@ msgid "Save Draft"
 msgstr ""
 
 msgid "Publish"
-msgstr ""
-
-msgid "Back"
 msgstr ""
 
 msgid "Help"
