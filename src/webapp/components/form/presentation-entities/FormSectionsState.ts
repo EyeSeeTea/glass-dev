@@ -1,4 +1,4 @@
-import { ValidationError } from "../../../../domain/entities/amc-questionnaires/ValidationError";
+import { ValidationError, ValidationErrorKey } from "../../../../domain/entities/amc-questionnaires/ValidationError";
 import { FormFieldState, isFieldInSection, updateFields, validateField } from "./FormFieldsState";
 
 import { FormRule } from "./FormRule";
@@ -83,6 +83,10 @@ export function setRequiredFieldsByFieldValueInSection(
                 ? {
                       ...field,
                       required: fieldValue === rule.fieldValue,
+                      errors:
+                          fieldValue !== rule.fieldValue
+                              ? field.errors.filter(error => error !== ValidationErrorKey.FIELD_IS_REQUIRED)
+                              : field.errors,
                   }
                 : field;
         });
