@@ -1,6 +1,7 @@
 import { AMCQuestionnaireQuestions } from "../../../../domain/entities/amc-questionnaires/AMCQuestionnaireQuestions";
 import { GeneralAMCQuestionId } from "../../../../domain/entities/amc-questionnaires/GeneralAMCQuestionnaire";
 import { getBooleanFromYesNoValue } from "../../../../domain/entities/amc-questionnaires/YesNoOption";
+import { YesNoUnknownValues } from "../../../../domain/entities/amc-questionnaires/YesNoUnknownOption";
 import i18n from "../../../../locales";
 import { AMCQuestionnaireOptionsContextState } from "../../../contexts/amc-questionnaire-options-context";
 import { getFieldIdFromIdsDictionary } from "../../form/presentation-entities/FormFieldsState";
@@ -84,7 +85,7 @@ export function mapGeneralAMCQuestionnaireToInitialFormState(params: {
                         type: "text",
                         value: questionnaireFormEntity?.entity?.detailOnShortageInPublicSector || "",
                         multiline: false,
-                        required: false,
+                        required: YesNoUnknownValues.YES === questionnaireFormEntity?.entity?.shortageInPublicSector,
                         text: fromQuestions("detailOnShortageInPublicSector"),
                     },
                 ],
@@ -114,7 +115,7 @@ export function mapGeneralAMCQuestionnaireToInitialFormState(params: {
                         type: "text",
                         value: questionnaireFormEntity?.entity?.detailOnShortageInPrivateSector || "",
                         multiline: false,
-                        required: false,
+                        required: YesNoUnknownValues.YES === questionnaireFormEntity?.entity?.shortageInPrivateSector,
                         text: fromQuestions("detailOnShortageInPrivateSector"),
                     },
                 ],
@@ -123,7 +124,7 @@ export function mapGeneralAMCQuestionnaireToInitialFormState(params: {
                 title: "General comments",
                 id: "general_comments_section",
                 isVisible: true,
-                required: true,
+                required: false,
                 fields: [
                     {
                         id: fromIdsDictionary("generalComments"),

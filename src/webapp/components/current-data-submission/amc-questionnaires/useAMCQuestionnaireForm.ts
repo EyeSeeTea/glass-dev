@@ -98,7 +98,7 @@ export function useAMCQuestionnaireForm(params: {
     }, [amcQuestions, compositionRoot.amcQuestionnaires, formState.kind]);
 
     useEffect(() => {
-        if (amcQuestions) {
+        if (amcQuestions && options) {
             if (id) {
                 switch (formType) {
                     case "general-questionnaire":
