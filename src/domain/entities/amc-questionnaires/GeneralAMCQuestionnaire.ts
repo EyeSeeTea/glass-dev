@@ -8,13 +8,16 @@ import { YesNoUnknownNAValue } from "./YesNoUnknownNAOption";
 import { YesNoUnknownValue } from "./YesNoUnknownOption";
 import { Either } from "../generic/Either";
 
-export interface GeneralAMCQuestionnaireAttributes {
+export type GeneralAMCQuestionnaireBaseAttributes = {
     id: Id;
     orgUnitId: Id;
     period: string;
     status: "ACTIVE" | "COMPLETED" | "CANCELLED";
     created?: Date;
     lastUpdated?: Date;
+};
+
+export type GeneralAMCQuestionnaireResponsesAttributes = {
     isSameAsLastYear: YesNoUnknownNAValue;
     shortageInPublicSector: YesNoUnknownValue;
     detailOnShortageInPublicSector: Maybe<string>;
@@ -26,7 +29,12 @@ export interface GeneralAMCQuestionnaireAttributes {
     antivirals: YesNoValue;
     antituberculosis: YesNoValue;
     antimalaria: YesNoValue;
-}
+};
+
+export type GeneralAMCQuestionId = keyof GeneralAMCQuestionnaireResponsesAttributes;
+
+export type GeneralAMCQuestionnaireAttributes = GeneralAMCQuestionnaireBaseAttributes &
+    GeneralAMCQuestionnaireResponsesAttributes;
 
 export class GeneralAMCQuestionnaire extends Struct<GeneralAMCQuestionnaireAttributes>() {
     static validateAndCreate(

@@ -114,6 +114,9 @@ import { YesNoUnknownOptionsD2Repository } from "./data/repositories/amc-questio
 import { YesNoUnknownNAOptionsD2Repository } from "./data/repositories/amc-questionnaires/YesNoUnknownNAOptionsD2Repository";
 import { GetYesNoUnknownOptionsUseCase } from "./domain/usecases/amc-questionnaires/GetYesNoUnknownOptionsUseCase";
 import { GetYesNoUnknownNAOptionsUseCase } from "./domain/usecases/amc-questionnaires/GetYesNoUnknownNAOptionsUseCase";
+import { QuestionsAMCQuestionnaireD2Repository } from "./data/repositories/amc-questionnaires/QuestionsAMCQuestionnaireD2Repository";
+import { GetQuestionsAMCQuestionnaireUseCase } from "./domain/usecases/amc-questionnaires/GetQuestionsAMCQuestionnaireUseCase";
+import { SaveGeneralAMCQuestionnaireUseCase } from "./domain/usecases/amc-questionnaires/SaveGeneralAMCQuestionnaireUseCase";
 
 export function getCompositionRoot(instance: Instance) {
     const api = getD2APiFromInstance(instance);
@@ -155,6 +158,7 @@ export function getCompositionRoot(instance: Instance) {
     const encryptionRepository = new EncryptionDefaultRepository(api);
     const glassAsyncUploadsRepository = new GlassAsyncUploadsDefaultRepository(dataStoreClient);
     const generalAMCQuestionnaireRepository = new GeneralAMCQuestionnaireD2Repository(api);
+    const questionsAMCQuestionnaireRepository = new QuestionsAMCQuestionnaireD2Repository(api);
     const yesNoOptionsRepository = new YesNoOptionsD2Repository(api);
     const yesNoUnknownOptionsRepository = new YesNoUnknownOptionsD2Repository(api);
     const yesNoUnknownNAOptionsRepository = new YesNoUnknownNAOptionsD2Repository(api);
@@ -378,6 +382,8 @@ export function getCompositionRoot(instance: Instance) {
 
         amcQuestionnaires: getExecute({
             getGeneral: new GetGeneralAMCQuestionnaireUseCase(generalAMCQuestionnaireRepository),
+            saveGeneral: new SaveGeneralAMCQuestionnaireUseCase(generalAMCQuestionnaireRepository),
+            getQuestions: new GetQuestionsAMCQuestionnaireUseCase(questionsAMCQuestionnaireRepository),
             getYesNoOptions: new GetYesNoOptionsUseCase(yesNoOptionsRepository),
             getYesNoUnknownOptions: new GetYesNoUnknownOptionsUseCase(yesNoUnknownOptionsRepository),
             getYesNoUnknownNAOptions: new GetYesNoUnknownNAOptionsUseCase(yesNoUnknownNAOptionsRepository),

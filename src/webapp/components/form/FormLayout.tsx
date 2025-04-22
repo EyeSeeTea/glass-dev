@@ -1,6 +1,6 @@
 import React from "react";
 import styled from "styled-components";
-import { Button } from "@material-ui/core";
+import { Button, Icon, IconButton, Typography } from "@material-ui/core";
 
 import i18n from "../../../locales";
 
@@ -13,17 +13,28 @@ type FormLayoutProps = {
     onSave: () => void;
     onCancel?: () => void;
     disableSave?: boolean;
+    onBackClick?: () => void;
 };
 
 export const FormLayout: React.FC<FormLayoutProps> = React.memo(
-    ({ title, subtitle, saveLabel, cancelLabel, children, onSave, onCancel, disableSave = false }) => {
+    ({ title, onBackClick, saveLabel, cancelLabel, children, onSave, onCancel, disableSave = false }) => {
         return (
             <StyledFormLayout>
                 <Header>
-                    <TitleContainer>
-                        {title && <Title>{title}</Title>}
-                        {subtitle && <Subtitle>{subtitle}</Subtitle>}
-                    </TitleContainer>
+                    {!!onBackClick && (
+                        <BackButton
+                            onClick={onBackClick}
+                            color="secondary"
+                            aria-label={i18n.t("Back")}
+                            data-test={"page-header-back"}
+                        >
+                            <Icon color="primary">arrow_back</Icon>
+                        </BackButton>
+                    )}
+
+                    <Title variant="h5" gutterBottom data-test={"page-header-title"}>
+                        {title}
+                    </Title>
 
                     <RequiredText>{i18n.t("Indicates required")}</RequiredText>
                 </Header>
@@ -32,11 +43,11 @@ export const FormLayout: React.FC<FormLayoutProps> = React.memo(
 
                 <Footer>
                     <ButtonsFooter>
-                        <Button onClick={onSave} disabled={disableSave}>
+                        <Button onClick={onSave} disabled={disableSave} variant="contained" color="primary">
                             {saveLabel || i18n.t("Save")}
                         </Button>
                         {onCancel && (
-                            <Button onClick={onCancel} variant="outlined" color="secondary">
+                            <Button onClick={onCancel} variant="text" color="primary">
                                 {cancelLabel || i18n.t("Cancel")}
                             </Button>
                         )}
@@ -54,6 +65,8 @@ const StyledFormLayout = styled.div`
 const Header = styled.div`
     display: flex;
     justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
 `;
 
 const Content = styled.div`
@@ -69,19 +82,9 @@ const ButtonsFooter = styled.div`
     gap: 16px;
 `;
 
-const TitleContainer = styled.div`
-    display: flex;
-    gap: 4px;
-`;
-
-const Title = styled.span`
-    font-size: 0.875rem;
-    font-weight: 700;
-`;
-
-const Subtitle = styled.span`
-    font-size: 0.875rem;
-    font-weight: 400;
+const Title = styled(Typography)`
+    display: inline-block;
+    font-weight: 300;
 `;
 
 const RequiredText = styled.span`
@@ -91,4 +94,9 @@ const RequiredText = styled.span`
         content: "*";
         margin-inline-end: 4px;
     }
+`;
+
+const BackButton = styled(IconButton)`
+    padding-top: 10px;
+    margin-bottom: 5x;
 `;

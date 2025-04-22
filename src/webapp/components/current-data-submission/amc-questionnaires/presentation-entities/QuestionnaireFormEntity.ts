@@ -2,6 +2,8 @@ import { GeneralAMCQuestionnaire } from "../../../../../domain/entities/amc-ques
 import { Maybe } from "../../../../../utils/ts-utils";
 import { AMCQuestionnaireFormType } from "./AMCQuestionnaireFormType";
 import { FormRule } from "../../../form/presentation-entities/FormRule";
+import { AMCQuestionnaireQuestions } from "../../../../../domain/entities/amc-questionnaires/AMCQuestionnaireQuestions";
+import { getGeneralAMCQuestionnaireFormEntity } from "../getGeneralAMCQuestionnaireFormEntity";
 
 export type FormLables = {
     errors: Record<string, string>;
@@ -10,6 +12,7 @@ export type FormLables = {
 type BaseFormData = {
     labels: FormLables;
     rules: FormRule[];
+    questions: AMCQuestionnaireQuestions;
     type: AMCQuestionnaireFormType;
 };
 
@@ -22,40 +25,9 @@ export type QuestionnaireFormEntity = GeneralAMCQuestionnaireFormEntity;
 
 export function getQuestionnaireFormEntity(
     type: QuestionnaireFormEntity["type"],
+    amcQuestions: AMCQuestionnaireQuestions,
     entity?: QuestionnaireFormEntity["entity"]
 ): QuestionnaireFormEntity {
     // TODO: when more questionnaire types are added, add them here with switch case
-    return getGeneralAMCQuestionnaireFormEntity(entity);
-}
-
-function getGeneralAMCQuestionnaireFormEntity(
-    entity?: Maybe<GeneralAMCQuestionnaire>
-): GeneralAMCQuestionnaireFormEntity {
-    const { rules, labels } = getGeneralAMCQuestionnaireFormLabelsRules();
-
-    return {
-        type: "general-questionnaire",
-        entity: entity,
-        rules: rules,
-        labels: labels,
-    };
-}
-
-function getGeneralAMCQuestionnaireFormLabelsRules(): { rules: FormRule[]; labels: FormLables } {
-    return {
-        labels: {
-            errors: {
-                field_is_required: "This field is required",
-            },
-        },
-        rules: [
-            // {
-            //     type: "mandatoryFieldsByFieldValue";
-            //     fieldId: string;
-            //     fieldValue: string | boolean | string[] | Date | Maybe<string> | null;
-            //     mandatoryFieldIds: string[];
-            //     sectionIdsWithMandatoryFields: string[];
-            // }
-        ],
-    };
+    return getGeneralAMCQuestionnaireFormEntity(amcQuestions, entity);
 }

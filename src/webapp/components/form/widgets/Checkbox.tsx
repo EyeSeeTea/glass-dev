@@ -26,7 +26,6 @@ export const Checkbox: React.FC<CheckboxProps> = React.memo(
         indeterminate = false,
         errorText = "",
         error = false,
-        required = false,
     }) => {
         const notifyChange = useCallback(
             (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -51,7 +50,7 @@ export const Checkbox: React.FC<CheckboxProps> = React.memo(
                     />
 
                     {label && (
-                        <Label className={required ? "required" : ""} htmlFor={id} disabled={disabled}>
+                        <Label htmlFor={id} disabled={disabled}>
                             {label}
                         </Label>
                     )}
@@ -80,13 +79,6 @@ const Label = styled(InputLabel)`
     display: inline-block;
     font-weight: 400;
     font-size: 0.938rem;
-    &.Mui-disabled {
-    }
-
-    &.required::after {
-        content: "*";
-        margin-inline-start: 4px;
-    }
 `;
 
 const StyledFormHelperText = styled(FormHelperText)<{ error?: boolean }>``;

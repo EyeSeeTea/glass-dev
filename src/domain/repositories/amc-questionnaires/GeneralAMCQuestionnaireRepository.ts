@@ -4,4 +4,5 @@ import { Id } from "../../entities/Ref";
 
 export interface GeneralAMCQuestionnaireRepository {
     get(id: Id, orgUnitId: Id, period: string): FutureData<GeneralAMCQuestionnaire>;
+    save(generalAMCQuestionnaire: GeneralAMCQuestionnaire): FutureData<Id>;
 }
