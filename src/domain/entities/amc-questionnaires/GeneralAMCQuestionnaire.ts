@@ -38,29 +38,29 @@ export type GeneralAMCQuestionnaireAttributes = GeneralAMCQuestionnaireBaseAttri
 
 export class GeneralAMCQuestionnaire extends Struct<GeneralAMCQuestionnaireAttributes>() {
     static validateAndCreate(
-        data: GeneralAMCQuestionnaireAttributes
+        attributes: GeneralAMCQuestionnaireAttributes
     ): Either<ValidationError[], GeneralAMCQuestionnaire> {
-        const errors = this.validate(data);
+        const errors = this.validate(attributes);
         if (errors.length > 0) {
             return Either.error(errors);
         }
-        return Either.success(new GeneralAMCQuestionnaire(data));
+        return Either.success(new GeneralAMCQuestionnaire(attributes));
     }
 
-    static validate(data: GeneralAMCQuestionnaireAttributes): ValidationError[] {
+    static validate(attributes: GeneralAMCQuestionnaireAttributes): ValidationError[] {
         return _.compact([
-            data.shortageInPublicSector === "YES" && !data.detailOnShortageInPublicSector?.trim()
+            attributes.shortageInPublicSector === "YES" && !attributes.detailOnShortageInPublicSector?.trim()
                 ? {
                       property: "detailOnShortageInPublicSector",
-                      value: data.detailOnShortageInPublicSector,
+                      value: attributes.detailOnShortageInPublicSector,
                       errors: [ValidationErrorKey.FIELD_IS_REQUIRED],
                   }
                 : null,
 
-            data.shortageInPrivateSector === "YES" && !data.detailOnShortageInPrivateSector?.trim()
+            attributes.shortageInPrivateSector === "YES" && !attributes.detailOnShortageInPrivateSector?.trim()
                 ? {
                       property: "detailOnShortageInPrivateSector",
-                      value: data.detailOnShortageInPrivateSector,
+                      value: attributes.detailOnShortageInPrivateSector,
                       errors: [ValidationErrorKey.FIELD_IS_REQUIRED],
                   }
                 : null,

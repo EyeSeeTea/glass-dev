@@ -142,19 +142,9 @@ export class GeneralAMCQuestionnaireD2Repository implements GeneralAMCQuestionna
             antimalaria: antimalaria,
         };
 
-        const generalAMCQuestionnaireValidation = GeneralAMCQuestionnaire.validateAndCreate(
-            generalAMCQuestionnaireAttributes
-        );
-        const validGeneralAMCQuestionnaire = generalAMCQuestionnaireValidation.match({
-            error: () => undefined,
-            success: generalAMCQuestionnaire => generalAMCQuestionnaire,
-        });
+        const generalAMCQuestionnaire = new GeneralAMCQuestionnaire(generalAMCQuestionnaireAttributes);
 
-        if (!validGeneralAMCQuestionnaire) {
-            return Future.error("General AMC Questionnaire validation failed");
-        }
-
-        return Future.success(validGeneralAMCQuestionnaire);
+        return Future.success(generalAMCQuestionnaire);
     }
 
     private mapGeneralAMCQuestionnaireToTrackedEntity(
@@ -166,38 +156,15 @@ export class GeneralAMCQuestionnaireD2Repository implements GeneralAMCQuestionna
                 const isEditingTrackedEntity = generalAMCQuestionnaire.id !== "";
 
                 if (isEditingTrackedEntity) {
-                    return this.getTracketEntityById(
-                        generalAMCQuestionnaire.id,
-                        generalAMCQuestionnaire.orgUnitId,
-                        generalAMCQuestionnaire.period
-                    ).flatMap((oldTrackedEntity: D2TrackedEntity) => {
-                        const enrollment = oldTrackedEntity.enrollments?.[0];
-                        const eventsWithOcurredAtAndDataValues = enrollment?.events.filter(
-                            event => !!event.occurredAt && event.dataValues.length > 0
-                        );
+                    const trackedEntity: D2TrackedEntityInstanceToPost = {
+                        trackedEntity: generalAMCQuestionnaire.id,
+                        orgUnit: generalAMCQuestionnaire.orgUnitId,
+                        trackedEntityType: AMR_TET_AMC_DQuestionnaire_TRACKED_ENTITY_TYPE_ID,
+                        attributes: attributes,
+                        enrollments: [],
+                    };
 
-                        const trackedEntity: D2TrackedEntityInstanceToPost = {
-                            trackedEntity: generalAMCQuestionnaire.id,
-                            orgUnit: generalAMCQuestionnaire.orgUnitId,
-                            trackedEntityType: AMR_TET_AMC_DQuestionnaire_TRACKED_ENTITY_TYPE_ID,
-                            attributes: attributes,
-                            enrollments: [
-                                {
-                                    trackedEntity: generalAMCQuestionnaire.id,
-                                    orgUnit: generalAMCQuestionnaire.orgUnitId,
-                                    program: AMR_GLASS_PRO_AMC_DQ_PROGRAM_ID,
-                                    enrollment: enrollment?.enrollment ?? "",
-                                    status: generalAMCQuestionnaire.status,
-                                    attributes: attributes,
-                                    events: eventsWithOcurredAtAndDataValues ?? [],
-                                    enrolledAt: enrollment?.enrolledAt ?? getCurrentTimeString(),
-                                    occurredAt: enrollment?.occurredAt ?? getCurrentTimeString(),
-                                },
-                            ],
-                        };
-
-                        return Future.success(trackedEntity);
-                    });
+                    return Future.success(trackedEntity);
                 } else {
                     const enrollment: D2TrackerEnrollmentToPost = {
                         trackedEntity: generalAMCQuestionnaire.id,
