@@ -1,4 +1,3 @@
-import { GeneralAMCQuestionnaire } from "../../../../../domain/entities/amc-questionnaires/GeneralAMCQuestionnaire";
 import { ValidationError } from "../../../../../domain/entities/amc-questionnaires/ValidationError";
 import { QuestionnaireFormEntity } from "../../../current-data-submission/amc-questionnaires/presentation-entities/QuestionnaireFormEntity";
 import { FormFieldState } from "../FormFieldsState";
@@ -25,7 +24,7 @@ export function updateAndValidateFormState(
         ? applyRulesInFormState(updatedForm, updatedField, questionnaireFormEntity.rules)
         : updatedForm;
 
-    const fieldValidationErrors = validateFormState(updatedFormWithRulesApplied, updatedField, questionnaireFormEntity);
+    const fieldValidationErrors = validateFormState(updatedFormWithRulesApplied, updatedField);
 
     const updatedFormStateWithErrors = updateFormStateWithFieldErrors(
         updatedFormWithRulesApplied,
@@ -39,24 +38,7 @@ export function updateAndValidateFormState(
     };
 }
 
-function validateFormState(
-    updatedForm: FormState,
-    updatedField: FormFieldState,
-    questionnaireFormEntity: QuestionnaireFormEntity
-): ValidationError[] {
+function validateFormState(updatedForm: FormState, updatedField: FormFieldState): ValidationError[] {
     const formValidationErrors = validateForm(updatedForm, updatedField);
-
-    switch (questionnaireFormEntity.type) {
-        case "general-questionnaire": {
-            if (questionnaireFormEntity.entity) {
-                const entityValidationErrors = GeneralAMCQuestionnaire.validate(questionnaireFormEntity.entity);
-                return [...formValidationErrors, ...entityValidationErrors];
-            } else {
-                return formValidationErrors;
-            }
-        }
-        default: {
-            return formValidationErrors;
-        }
-    }
+    return formValidationErrors;
 }
