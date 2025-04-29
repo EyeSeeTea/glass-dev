@@ -78,6 +78,7 @@ const QuestionnaireHeaderStyled = styled.div`
 
     .desc {
         margin-left: 14px;
+        white-space: pre-wrap;
     }
 
     .comp {
