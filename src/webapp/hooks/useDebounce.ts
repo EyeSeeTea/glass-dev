@@ -15,16 +15,3 @@ export function useDebounce<T>(value: T, delay = 300): T {
 
     return debouncedValue;
 }
-
-export function debounce<F extends (...args: any[]) => any>(func: F, delay: number) {
-    let timeout: ReturnType<typeof setTimeout> | null = null;
-
-    const debounced = (...args: Parameters<F>): void => {
-        if (timeout) {
-            clearTimeout(timeout);
-        }
-        timeout = setTimeout(() => func(...args), delay);
-    };
-
-    return debounced;
-}
