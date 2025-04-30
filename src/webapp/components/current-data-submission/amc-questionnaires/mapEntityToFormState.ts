@@ -8,13 +8,15 @@ export function mapEntityToFormState(params: {
     questionnaireFormEntity: QuestionnaireFormEntity;
     editMode?: boolean;
     options: AMCQuestionnaireOptionsContextState;
+    isViewOnlyMode?: boolean;
 }): FormState {
-    const { questionnaireFormEntity, editMode = false, options } = params;
+    const { questionnaireFormEntity, editMode = false, options, isViewOnlyMode = false } = params;
     // TODO: when more questionnaire types are added, add them here with switch case
     return mapGeneralAMCQuestionnaireToInitialFormState({
         questionnaireFormEntity: questionnaireFormEntity,
         editMode,
         options,
+        isViewOnlyMode,
     });
 }
 

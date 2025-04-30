@@ -14,10 +14,21 @@ type FormLayoutProps = {
     onCancel?: () => void;
     disableSave?: boolean;
     onBackClick?: () => void;
+    showFormButtons?: boolean;
 };
 
 export const FormLayout: React.FC<FormLayoutProps> = React.memo(
-    ({ title, onBackClick, saveLabel, cancelLabel, children, onSave, onCancel, disableSave = false }) => {
+    ({
+        title,
+        onBackClick,
+        saveLabel,
+        cancelLabel,
+        children,
+        onSave,
+        onCancel,
+        disableSave = false,
+        showFormButtons = true,
+    }) => {
         return (
             <StyledFormLayout>
                 <Header>
@@ -41,18 +52,20 @@ export const FormLayout: React.FC<FormLayoutProps> = React.memo(
 
                 <Content>{children}</Content>
 
-                <Footer>
-                    <ButtonsFooter>
-                        <Button onClick={onSave} disabled={disableSave} variant="contained" color="primary">
-                            {saveLabel || i18n.t("Save")}
-                        </Button>
-                        {onCancel && (
-                            <Button onClick={onCancel} variant="text" color="primary">
-                                {cancelLabel || i18n.t("Cancel")}
+                {showFormButtons ? (
+                    <Footer>
+                        <ButtonsFooter>
+                            <Button onClick={onSave} disabled={disableSave} variant="contained" color="primary">
+                                {saveLabel || i18n.t("Save")}
                             </Button>
-                        )}
-                    </ButtonsFooter>
-                </Footer>
+                            {onCancel && (
+                                <Button onClick={onCancel} variant="text" color="primary">
+                                    {cancelLabel || i18n.t("Cancel")}
+                                </Button>
+                            )}
+                        </ButtonsFooter>
+                    </Footer>
+                ) : null}
             </StyledFormLayout>
         );
     }

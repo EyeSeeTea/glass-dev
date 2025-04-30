@@ -59,8 +59,9 @@ export function useAMCQuestionnaireForm(params: {
     id?: Id;
     orgUnitId: Id;
     period: string;
+    isViewOnlyMode?: boolean;
 }): State {
-    const { formType, id, orgUnitId, period } = params;
+    const { formType, id, orgUnitId, period, isViewOnlyMode = false } = params;
 
     const { compositionRoot } = useAppContext();
     const options = useAMCQuestionnaireOptionsContext();
@@ -102,7 +103,7 @@ export function useAMCQuestionnaireForm(params: {
             if (id) {
                 switch (formType) {
                     case "general-questionnaire":
-                        compositionRoot.amcQuestionnaires.getGeneral(id, orgUnitId, period).run(
+                        compositionRoot.amcQuestionnaires.getGeneralById(id, orgUnitId, period).run(
                             generalAMCQuestionnaire => {
                                 const formEntity = getQuestionnaireFormEntity(
                                     formType,
@@ -117,6 +118,7 @@ export function useAMCQuestionnaireForm(params: {
                                         questionnaireFormEntity: formEntity,
                                         editMode: isEditMode,
                                         options: options,
+                                        isViewOnlyMode: isViewOnlyMode,
                                     }),
                                 });
                             },
@@ -142,11 +144,22 @@ export function useAMCQuestionnaireForm(params: {
                         questionnaireFormEntity: formEntity,
                         editMode: isEditMode,
                         options: options,
+                        isViewOnlyMode: isViewOnlyMode,
                     }),
                 });
             }
         }
-    }, [amcQuestions, compositionRoot.amcQuestionnaires, formType, id, isEditMode, options, orgUnitId, period]);
+    }, [
+        amcQuestions,
+        compositionRoot.amcQuestionnaires,
+        formType,
+        id,
+        isEditMode,
+        options,
+        orgUnitId,
+        period,
+        isViewOnlyMode,
+    ]);
 
     const handleFormChange = useCallback(
         (updatedField: FormFieldState) => {
