@@ -12,7 +12,7 @@ export function getSafeYesNoValue(value: unknown): YesNoValue | undefined {
 }
 
 export function getBooleanFromYesNoValue(value: YesNoValue): boolean {
-    return value === "1" ? true : false;
+    return value === "1";
 }
 
 export function getYesNoValueFromBoolean(value: boolean): YesNoValue {
