@@ -28,22 +28,51 @@ import {
 import { D2ProgramMetadata, getAMCQuestionnaireProgramMetadata } from "./getAMCQuestionnaireProgramMetadata";
 import { getCurrentTimeString, getISODateAsLocaleDateString } from "./dateTimeHelpers";
 import { importApiTracker } from "../utils/importApiTracker";
+import { Maybe } from "../../../types/utils";
 
 export class GeneralAMCQuestionnaireD2Repository implements GeneralAMCQuestionnaireRepository {
     constructor(private api: D2Api) {}
 
-    public get(id: Id, orgUnitId: Id, period: string): FutureData<GeneralAMCQuestionnaire> {
-        return this.getTrackedEntityById(id, orgUnitId, period).flatMap((trackedEntity: D2TrackedEntity) => {
-            return this.mapTrackedEntityAttributesToGeneralAMCQuestionnaire(trackedEntity, orgUnitId, period).flatMap(
-                generalAMCQuestionnaire => {
+    public getById(id: Id, orgUnitId: Id, period: string): FutureData<GeneralAMCQuestionnaire> {
+        return this.getTrackedEntity({ id: id, orgUnitId: orgUnitId, period: period })
+            .flatMap((maybeTrackedEntity: Maybe<D2TrackedEntity>) =>
+                assertOrError(maybeTrackedEntity, "General AMC Questionnaire")
+            )
+            .flatMap((trackedEntity: D2TrackedEntity) => {
+                return this.mapTrackedEntityAttributesToGeneralAMCQuestionnaire(
+                    trackedEntity,
+                    orgUnitId,
+                    period
+                ).flatMap(generalAMCQuestionnaire => {
                     if (!generalAMCQuestionnaire) {
                         return Future.error("General AMC Questionnaire not found");
                     }
 
                     return Future.success(generalAMCQuestionnaire);
+                });
+            });
+    }
+
+    public getByOrgUnitAndPeriod(orgUnitId: Id, period: string): FutureData<Maybe<GeneralAMCQuestionnaire>> {
+        return this.getTrackedEntity({ orgUnitId: orgUnitId, period: period }).flatMap(
+            (maybeTrackedEntity: Maybe<D2TrackedEntity>) => {
+                if (!maybeTrackedEntity) {
+                    return Future.success(undefined);
                 }
-            );
-        });
+
+                return this.mapTrackedEntityAttributesToGeneralAMCQuestionnaire(
+                    maybeTrackedEntity,
+                    orgUnitId,
+                    period
+                ).flatMap(generalAMCQuestionnaire => {
+                    if (!generalAMCQuestionnaire) {
+                        return Future.error("General AMC Questionnaire not found");
+                    }
+
+                    return Future.success(generalAMCQuestionnaire);
+                });
+            }
+        );
     }
 
     public save(generalAMCQuestionnaire: GeneralAMCQuestionnaire): FutureData<Id> {
@@ -73,7 +102,8 @@ export class GeneralAMCQuestionnaireD2Repository implements GeneralAMCQuestionna
         });
     }
 
-    private getTrackedEntityById(id: Id, orgUnitId: Id, period: string): FutureData<D2TrackedEntity> {
+    private getTrackedEntity(options: { id?: Id; orgUnitId: Id; period: string }): FutureData<Maybe<D2TrackedEntity>> {
+        const { id, orgUnitId, period } = options;
         const enrollmentEnrolledAfter = `${period}-01-01`;
         const enrollmentEnrolledBefore = `${period}-12-31`;
         return apiToFuture(
@@ -86,7 +116,14 @@ export class GeneralAMCQuestionnaireD2Repository implements GeneralAMCQuestionna
                 enrollmentEnrolledBefore: enrollmentEnrolledBefore,
                 fields: trackedEntitiesFields,
             })
-        ).flatMap(response => assertOrError(response.instances[0], "General AMC Questionnaire"));
+        ).flatMap(response => {
+            if (response.instances.length === 0) {
+                return Future.success(undefined);
+            }
+
+            const trackedEntity = response.instances[0];
+            return Future.success(trackedEntity);
+        });
     }
 
     private mapTrackedEntityAttributesToGeneralAMCQuestionnaire(

@@ -27,8 +27,9 @@ export function mapGeneralAMCQuestionnaireToInitialFormState(params: {
     questionnaireFormEntity: GeneralAMCQuestionnaireFormEntity;
     editMode: boolean;
     options: AMCQuestionnaireOptionsContextState;
+    isViewOnlyMode?: boolean;
 }): FormState {
-    const { questionnaireFormEntity, options } = params;
+    const { questionnaireFormEntity, options, isViewOnlyMode } = params;
 
     const fromIdsDictionary = (key: keyof typeof generalAMCQuestionnaireFieldIds) =>
         getFieldIdFromIdsDictionary(key, generalAMCQuestionnaireFieldIds);
@@ -57,6 +58,7 @@ export function mapGeneralAMCQuestionnaireToInitialFormState(params: {
                         required: true,
                         showIsRequired: true,
                         text: fromQuestions("isSameAsLastYear"),
+                        disabled: isViewOnlyMode,
                     },
                 ],
             },
@@ -77,6 +79,7 @@ export function mapGeneralAMCQuestionnaireToInitialFormState(params: {
                         required: true,
                         showIsRequired: true,
                         text: fromQuestions("shortageInPublicSector"),
+                        disabled: isViewOnlyMode,
                     },
                     {
                         id: fromIdsDictionary("detailOnShortageInPublicSector"),
@@ -87,6 +90,7 @@ export function mapGeneralAMCQuestionnaireToInitialFormState(params: {
                         multiline: false,
                         required: YesNoUnknownValues.YES === questionnaireFormEntity?.entity?.shortageInPublicSector,
                         text: fromQuestions("detailOnShortageInPublicSector"),
+                        disabled: isViewOnlyMode,
                     },
                 ],
             },
@@ -107,6 +111,7 @@ export function mapGeneralAMCQuestionnaireToInitialFormState(params: {
                         required: true,
                         showIsRequired: true,
                         text: fromQuestions("shortageInPrivateSector"),
+                        disabled: isViewOnlyMode,
                     },
                     {
                         id: fromIdsDictionary("detailOnShortageInPrivateSector"),
@@ -117,6 +122,7 @@ export function mapGeneralAMCQuestionnaireToInitialFormState(params: {
                         multiline: false,
                         required: YesNoUnknownValues.YES === questionnaireFormEntity?.entity?.shortageInPrivateSector,
                         text: fromQuestions("detailOnShortageInPrivateSector"),
+                        disabled: isViewOnlyMode,
                     },
                 ],
             },
@@ -135,6 +141,7 @@ export function mapGeneralAMCQuestionnaireToInitialFormState(params: {
                         multiline: false,
                         required: false,
                         text: fromQuestions("generalComments"),
+                        disabled: isViewOnlyMode,
                     },
                 ],
             },
@@ -155,6 +162,7 @@ export function mapGeneralAMCQuestionnaireToInitialFormState(params: {
                         required: true,
                         showIsRequired: true,
                         text: fromQuestions("antibacterials"),
+                        disabled: isViewOnlyMode,
                     },
                     {
                         id: fromIdsDictionary("antifungals"),
@@ -166,6 +174,7 @@ export function mapGeneralAMCQuestionnaireToInitialFormState(params: {
                         required: true,
                         showIsRequired: true,
                         text: fromQuestions("antifungals"),
+                        disabled: isViewOnlyMode,
                     },
                     {
                         id: fromIdsDictionary("antivirals"),
@@ -177,6 +186,7 @@ export function mapGeneralAMCQuestionnaireToInitialFormState(params: {
                         required: true,
                         showIsRequired: true,
                         text: fromQuestions("antivirals"),
+                        disabled: isViewOnlyMode,
                     },
                     {
                         id: fromIdsDictionary("antituberculosis"),
@@ -189,6 +199,7 @@ export function mapGeneralAMCQuestionnaireToInitialFormState(params: {
                         required: true,
                         showIsRequired: true,
                         text: fromQuestions("antituberculosis"),
+                        disabled: isViewOnlyMode,
                     },
                     {
                         id: fromIdsDictionary("antimalaria"),
@@ -200,6 +211,7 @@ export function mapGeneralAMCQuestionnaireToInitialFormState(params: {
                         required: true,
                         showIsRequired: true,
                         text: fromQuestions("antimalaria"),
+                        disabled: isViewOnlyMode,
                     },
                 ],
             },

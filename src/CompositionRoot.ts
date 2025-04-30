@@ -106,7 +106,7 @@ import { GlassAsyncUploadsDefaultRepository } from "./data/repositories/GlassAsy
 import { SetAsyncUploadsUseCase } from "./domain/usecases/SetAsyncUploadsUseCase";
 import { RemoveAsyncUploadByIdUseCase } from "./domain/usecases/RemoveAsyncUploadByIdUseCase";
 import { RemoveAsyncUploadsUseCase } from "./domain/usecases/RemoveAsyncUploadsUseCase";
-import { GetGeneralAMCQuestionnaireUseCase } from "./domain/usecases/amc-questionnaires/GetGeneralAMCQuestionnaireUseCase";
+import { GetGeneralAMCQuestionnaireByIdUseCase } from "./domain/usecases/amc-questionnaires/GetGeneralAMCQuestionnaireByIdUseCase";
 import { GeneralAMCQuestionnaireD2Repository } from "./data/repositories/amc-questionnaires/GeneralAMCQuestionnaireD2Repository";
 import { YesNoOptionsD2Repository } from "./data/repositories/amc-questionnaires/YesNoOptionsD2Repository";
 import { GetYesNoOptionsUseCase } from "./domain/usecases/amc-questionnaires/GetYesNoOptionsUseCase";
@@ -117,6 +117,7 @@ import { GetYesNoUnknownNAOptionsUseCase } from "./domain/usecases/amc-questionn
 import { QuestionsAMCQuestionnaireD2Repository } from "./data/repositories/amc-questionnaires/QuestionsAMCQuestionnaireD2Repository";
 import { GetQuestionsAMCQuestionnaireUseCase } from "./domain/usecases/amc-questionnaires/GetQuestionsAMCQuestionnaireUseCase";
 import { SaveGeneralAMCQuestionnaireUseCase } from "./domain/usecases/amc-questionnaires/SaveGeneralAMCQuestionnaireUseCase";
+import { GetGeneralAMCQuestionnaireByOrgUnitAndPeriodUseCase } from "./domain/usecases/amc-questionnaires/GetGeneralAMCQuestionnaireByOrgUnitAndPeriodUseCase";
 
 export function getCompositionRoot(instance: Instance) {
     const api = getD2APiFromInstance(instance);
@@ -381,7 +382,10 @@ export function getCompositionRoot(instance: Instance) {
         }),
 
         amcQuestionnaires: getExecute({
-            getGeneral: new GetGeneralAMCQuestionnaireUseCase(generalAMCQuestionnaireRepository),
+            getGeneralById: new GetGeneralAMCQuestionnaireByIdUseCase(generalAMCQuestionnaireRepository),
+            getGeneralByOrgUnitAndPeriod: new GetGeneralAMCQuestionnaireByOrgUnitAndPeriodUseCase(
+                generalAMCQuestionnaireRepository
+            ),
             saveGeneral: new SaveGeneralAMCQuestionnaireUseCase(generalAMCQuestionnaireRepository),
             getQuestions: new GetQuestionsAMCQuestionnaireUseCase(questionsAMCQuestionnaireRepository),
             getYesNoOptions: new GetYesNoOptionsUseCase(yesNoOptionsRepository),
