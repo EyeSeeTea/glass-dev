@@ -33,7 +33,7 @@ export class GeneralAMCQuestionnaireD2Repository implements GeneralAMCQuestionna
     constructor(private api: D2Api) {}
 
     public get(id: Id, orgUnitId: Id, period: string): FutureData<GeneralAMCQuestionnaire> {
-        return this.getTracketEntityById(id, orgUnitId, period).flatMap((trackedEntity: D2TrackedEntity) => {
+        return this.getTrackedEntityById(id, orgUnitId, period).flatMap((trackedEntity: D2TrackedEntity) => {
             return this.mapTrackedEntityAttributesToGeneralAMCQuestionnaire(trackedEntity, orgUnitId, period).flatMap(
                 generalAMCQuestionnaire => {
                     if (!generalAMCQuestionnaire) {
@@ -73,7 +73,7 @@ export class GeneralAMCQuestionnaireD2Repository implements GeneralAMCQuestionna
         });
     }
 
-    private getTracketEntityById(id: Id, orgUnitId: Id, period: string): FutureData<D2TrackedEntity> {
+    private getTrackedEntityById(id: Id, orgUnitId: Id, period: string): FutureData<D2TrackedEntity> {
         const enrollmentEnrolledAfter = `${period}-01-01`;
         const enrollmentEnrolledBefore = `${period}-12-31`;
         return apiToFuture(
