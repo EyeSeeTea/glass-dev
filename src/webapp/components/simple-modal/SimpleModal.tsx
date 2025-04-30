@@ -17,13 +17,7 @@ type SimpleModalProps = {
 export const SimpleModal: React.FC<SimpleModalProps> = React.memo(
     ({ alignFooterButtons, buttonDirection, children, footerButtons, closeLabel, open = false, onClose, title }) => {
         return (
-            <Modal
-                aria-labelledby={`modal-${title}`}
-                aria-describedby={`${title}-modal`}
-                open={open}
-                onClose={onClose}
-                hideBackdrop
-            >
+            <Modal aria-label={title} open={open} onClose={onClose} hideBackdrop>
                 <StyledCard variant="outlined">
                     <Title>{title}</Title>
 
