@@ -217,13 +217,16 @@ export class GeneralAMCQuestionnaireD2Repository implements GeneralAMCQuestionna
             (acc: AttributeToPost[], attribute): AttributeToPost[] => {
                 if (isStringInGeneralAMCQuestionnaireCodes(attribute.trackedEntityAttribute.code)) {
                     const typedCode: GeneralAMCQuestionnaireCode = attribute.trackedEntityAttribute.code;
-                    return [
-                        ...acc,
-                        {
-                            attribute: attribute.trackedEntityAttribute.id,
-                            value: attributeValues[typedCode],
-                        },
-                    ];
+                    const attributeValue = attributeValues[typedCode];
+                    return attributeValue !== undefined
+                        ? [
+                              ...acc,
+                              {
+                                  attribute: attribute.trackedEntityAttribute.id,
+                                  value: attributeValue,
+                              },
+                          ]
+                        : acc;
                 } else {
                     return acc;
                 }

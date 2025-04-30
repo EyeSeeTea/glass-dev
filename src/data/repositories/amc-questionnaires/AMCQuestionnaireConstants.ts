@@ -6,7 +6,7 @@ export const AMR_TET_AMC_DQuestionnaire_TRACKED_ENTITY_TYPE_ID = "W9nZpnHEGxQ";
 export const AMR_GLASS_AMC_AM_CLASS_QUESTIONNAIRE_CODE = "AMR_GLASS_AMC_DQ_AM";
 export const AMR_GLASS_AMC_AM_COMPONENT_QUESTIONNAIRE_CODE = "AMR_GLASS_AMC_DQ_NAT_COMP";
 
-export const codesByGeneralAMCQuestionnaire = {
+export const codesByGeneralAMCQuestionnaire: Record<GeneralAMCQuestionId, string> = {
     isSameAsLastYear: "AMR_GLASS_AMC_TEA_SAME_PREV_YEAR",
     shortageInPublicSector: "AMR_GLASS_AMC_TEA_SHORTAGE_PUB",
     detailOnShortageInPublicSector: "AMR_GLASS_AMC_TEA_SHORTAGE_PUB_DESCR",
