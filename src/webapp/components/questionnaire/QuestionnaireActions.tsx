@@ -62,9 +62,6 @@ export const QuestionnaireActions: React.FC<QuestionnaireHeaderProps> = props =>
                 </div>
             )}
 
-            <div className="head">
-                <span className="desc">{description}</span>
-            </div>
         </QuestionnaireHeaderStyled>
     );
 };
