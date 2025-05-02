@@ -1,4 +1,4 @@
-import { Option, OptionType, OptionValue } from "./Option";
+import { BooleanOption, OptionType, OptionValue } from "./Option";
 
 export const YesNoValues = {
     YES: "1",
@@ -9,7 +9,7 @@ export type YesNoValue = OptionValue<typeof YesNoValues>;
 
 export type YesNoOption = OptionType<YesNoValue>;
 
-export const yesNoOption = new Option(YesNoValues, {
+export const yesNoOption = new BooleanOption(YesNoValues, {
     toBoolean: value => value === "1",
     fromBoolean: value => (value ? YesNoValues.YES : YesNoValues.NO),
 });
