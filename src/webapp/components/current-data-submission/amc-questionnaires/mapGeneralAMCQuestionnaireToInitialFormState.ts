@@ -1,6 +1,6 @@
 import { AMCQuestionnaireQuestions } from "../../../../domain/entities/amc-questionnaires/AMCQuestionnaireQuestions";
 import { GeneralAMCQuestionId } from "../../../../domain/entities/amc-questionnaires/GeneralAMCQuestionnaire";
-import { getBooleanFromYesNoValue } from "../../../../domain/entities/amc-questionnaires/YesNoOption";
+import { yesNoOption } from "../../../../domain/entities/amc-questionnaires/YesNoOption";
 import { YesNoUnknownValues } from "../../../../domain/entities/amc-questionnaires/YesNoUnknownOption";
 import i18n from "../../../../locales";
 import { AMCQuestionnaireOptionsContextState } from "../../../contexts/amc-questionnaire-options-context";
@@ -158,7 +158,8 @@ export function mapGeneralAMCQuestionnaireToInitialFormState(params: {
                         type: "boolean",
                         label: i18n.t("Yes"),
                         value:
-                            getBooleanFromYesNoValue(questionnaireFormEntity?.entity?.antibacterials || "0") || false,
+                            yesNoOption.getBooleanFromValue(questionnaireFormEntity?.entity?.antibacterials || "0") ||
+                            false,
                         required: true,
                         showIsRequired: true,
                         text: fromQuestions("antibacterials"),
@@ -170,7 +171,9 @@ export function mapGeneralAMCQuestionnaireToInitialFormState(params: {
                         errors: [],
                         type: "boolean",
                         label: i18n.t("Yes"),
-                        value: getBooleanFromYesNoValue(questionnaireFormEntity?.entity?.antifungals || "0") || false,
+                        value:
+                            yesNoOption.getBooleanFromValue(questionnaireFormEntity?.entity?.antifungals || "0") ||
+                            false,
                         required: true,
                         showIsRequired: true,
                         text: fromQuestions("antifungals"),
@@ -182,7 +185,9 @@ export function mapGeneralAMCQuestionnaireToInitialFormState(params: {
                         errors: [],
                         type: "boolean",
                         label: i18n.t("Yes"),
-                        value: getBooleanFromYesNoValue(questionnaireFormEntity?.entity?.antivirals || "0") || false,
+                        value:
+                            yesNoOption.getBooleanFromValue(questionnaireFormEntity?.entity?.antivirals || "0") ||
+                            false,
                         required: true,
                         showIsRequired: true,
                         text: fromQuestions("antivirals"),
@@ -195,7 +200,8 @@ export function mapGeneralAMCQuestionnaireToInitialFormState(params: {
                         type: "boolean",
                         label: i18n.t("Yes"),
                         value:
-                            getBooleanFromYesNoValue(questionnaireFormEntity?.entity?.antituberculosis || "0") || false,
+                            yesNoOption.getBooleanFromValue(questionnaireFormEntity?.entity?.antituberculosis || "0") ||
+                            false,
                         required: true,
                         showIsRequired: true,
                         text: fromQuestions("antituberculosis"),
@@ -207,7 +213,9 @@ export function mapGeneralAMCQuestionnaireToInitialFormState(params: {
                         errors: [],
                         type: "boolean",
                         label: i18n.t("Yes"),
-                        value: getBooleanFromYesNoValue(questionnaireFormEntity?.entity?.antimalaria || "0") || false,
+                        value:
+                            yesNoOption.getBooleanFromValue(questionnaireFormEntity?.entity?.antimalaria || "0") ||
+                            false,
                         required: true,
                         showIsRequired: true,
                         text: fromQuestions("antimalaria"),
