@@ -3,7 +3,7 @@ import {
     GeneralAMCQuestionnaireAttributes,
     GeneralAMCQuestionnaireBaseAttributes,
 } from "../../../../domain/entities/amc-questionnaires/GeneralAMCQuestionnaire";
-import { getYesNoValueFromBoolean } from "../../../../domain/entities/amc-questionnaires/YesNoOption";
+import { yesNoOption } from "../../../../domain/entities/amc-questionnaires/YesNoOption";
 import { AMCQuestionnaireOptionsContextState } from "../../../contexts/amc-questionnaire-options-context";
 import {
     FormFieldState,
@@ -39,11 +39,11 @@ export function mapFormStateToGeneralAMCQuestionnaire(params: {
     )?.code;
     const detailOnShortageInPrivateSector = getStringFieldValue("detailOnShortageInPrivateSector", allFields);
     const generalComments = getStringFieldValue("generalComments", allFields);
-    const antibacterials = getYesNoValueFromBoolean(getBooleanFieldValue("antibacterials", allFields));
-    const antifungals = getYesNoValueFromBoolean(getBooleanFieldValue("antifungals", allFields));
-    const antivirals = getYesNoValueFromBoolean(getBooleanFieldValue("antivirals", allFields));
-    const antituberculosis = getYesNoValueFromBoolean(getBooleanFieldValue("antituberculosis", allFields));
-    const antimalaria = getYesNoValueFromBoolean(getBooleanFieldValue("antimalaria", allFields));
+    const antibacterials = yesNoOption.getValueFromBoolean(getBooleanFieldValue("antibacterials", allFields));
+    const antifungals = yesNoOption.getValueFromBoolean(getBooleanFieldValue("antifungals", allFields));
+    const antivirals = yesNoOption.getValueFromBoolean(getBooleanFieldValue("antivirals", allFields));
+    const antituberculosis = yesNoOption.getValueFromBoolean(getBooleanFieldValue("antituberculosis", allFields));
+    const antimalaria = yesNoOption.getValueFromBoolean(getBooleanFieldValue("antimalaria", allFields));
 
     if (
         !isSameAsLastYear ||

@@ -15,9 +15,9 @@ import {
 } from "../../../types/d2-api";
 import { apiToFuture } from "../../../utils/futures";
 import { assertOrError } from "../utils/AssertOrError";
-import { getSafeYesNoValue } from "../../../domain/entities/amc-questionnaires/YesNoOption";
-import { getSafeYesNoUnknownNAValue } from "../../../domain/entities/amc-questionnaires/YesNoUnknownNAOption";
-import { getSafeYesNoUnknownValue } from "../../../domain/entities/amc-questionnaires/YesNoUnknownOption";
+import { yesNoOption } from "../../../domain/entities/amc-questionnaires/YesNoOption";
+import { yesNoUnknownNAOption } from "../../../domain/entities/amc-questionnaires/YesNoUnknownNAOption";
+import { yesNoUnknownOption } from "../../../domain/entities/amc-questionnaires/YesNoUnknownOption";
 import {
     AMR_GLASS_PRO_AMC_DQ_PROGRAM_ID,
     AMR_TET_AMC_DQuestionnaire_TRACKED_ENTITY_TYPE_ID,
@@ -137,14 +137,14 @@ export class GeneralAMCQuestionnaireD2Repository implements GeneralAMCQuestionna
 
         const fromMap = (key: keyof typeof codesByGeneralAMCQuestionnaire) => getValueFromMap(key, trackedEntity);
 
-        const isSameAsLastYear = getSafeYesNoUnknownNAValue(fromMap("isSameAsLastYear"));
-        const shortageInPublicSector = getSafeYesNoUnknownValue(fromMap("shortageInPublicSector"));
-        const shortageInPrivateSector = getSafeYesNoUnknownValue(fromMap("shortageInPrivateSector"));
-        const antibacterials = getSafeYesNoValue(fromMap("antibacterials"));
-        const antifungals = getSafeYesNoValue(fromMap("antifungals"));
-        const antivirals = getSafeYesNoValue(fromMap("antivirals"));
-        const antituberculosis = getSafeYesNoValue(fromMap("antituberculosis"));
-        const antimalaria = getSafeYesNoValue(fromMap("antimalaria"));
+        const isSameAsLastYear = yesNoUnknownNAOption.getSafeValue(fromMap("isSameAsLastYear"));
+        const shortageInPublicSector = yesNoUnknownOption.getSafeValue(fromMap("shortageInPublicSector"));
+        const shortageInPrivateSector = yesNoUnknownOption.getSafeValue(fromMap("shortageInPrivateSector"));
+        const antibacterials = yesNoOption.getSafeValue(fromMap("antibacterials"));
+        const antifungals = yesNoOption.getSafeValue(fromMap("antifungals"));
+        const antivirals = yesNoOption.getSafeValue(fromMap("antivirals"));
+        const antituberculosis = yesNoOption.getSafeValue(fromMap("antituberculosis"));
+        const antimalaria = yesNoOption.getSafeValue(fromMap("antimalaria"));
 
         if (
             !isSameAsLastYear ||

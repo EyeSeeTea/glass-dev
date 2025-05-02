@@ -27,7 +27,7 @@ export function useGeneralAMCQuestionnaire(id: Id): GeneralAMCQuestionnaireState
     );
 
     useEffect(() => {
-        compositionRoot.amcQuestionnaires.getGeneral(id, currentOrgUnitAccess.orgUnitId, currentPeriod).run(
+        compositionRoot.amcQuestionnaires.getGeneralById(id, currentOrgUnitAccess.orgUnitId, currentPeriod).run(
             generalAMCQuestionnaireResponse => {
                 setGeneralAMCQuestionnaire(generalAMCQuestionnaireResponse);
                 setGlobalMessage({
