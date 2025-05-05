@@ -33,41 +33,37 @@ export class AMClassAMCQuestionnaire extends Struct<AMClassAMCQuestionnaireAttri
     }
 
     static validate(attributes: AMClassAMCQuestionnaireAttributes): ValidationError[] {
+        const requiredConditions = this.requiredFieldsCustomConditions(attributes);
+        return _.compact(
+            _.map(requiredConditions, (isRequired, key) => {
+                if (isRequired && !attributes[key as keyof AMClassAMCQuestionnaireResponsesAttributes]) {
+                    return {
+                        property: key,
+                        value: attributes[key as keyof AMClassAMCQuestionnaireAttributes],
+                        errors: [ValidationErrorKey.FIELD_IS_REQUIRED],
+                    };
+                }
+                return null;
+            })
+        );
+    }
+
+    static requiredFieldsCustomConditions(
+        attributes: Partial<AMClassAMCQuestionnaireAttributes>
+    ): Partial<Record<keyof AMClassAMCQuestionnaireAttributes, boolean>> {
         const isPublicOrPrivate =
             attributes.healthSector === HealthSectorValues.Public ||
             attributes.healthSector === HealthSectorValues.Private;
-        return _.compact([
-            isPublicOrPrivate &&
-            attributes.healthLevel === HealthLevelValues.Total &&
-            !attributes.estVolumeTotalHealthLevel?.trim()
-                ? {
-                      property: "estVolumeTotalHealthLevel",
-                      value: attributes.estVolumeTotalHealthLevel,
-                      errors: [ValidationErrorKey.FIELD_IS_REQUIRED],
-                  }
-                : null,
-
-            isPublicOrPrivate &&
-            (attributes.healthLevel === HealthLevelValues.Hospital ||
-                attributes.healthLevel === HealthLevelValues.HospitalAndCommunity) &&
-            !attributes.estVolumeHospitalHealthLevel?.trim()
-                ? {
-                      property: "estVolumeHospitalHealthLevel",
-                      value: attributes.estVolumeHospitalHealthLevel,
-                      errors: [ValidationErrorKey.FIELD_IS_REQUIRED],
-                  }
-                : null,
-
-            isPublicOrPrivate &&
-            (attributes.healthLevel === HealthLevelValues.Community ||
-                attributes.healthLevel === HealthLevelValues.HospitalAndCommunity) &&
-            !attributes.estVolumeCommunityHealthLevel?.trim()
-                ? {
-                      property: "estVolumeCommunityHealthLevel",
-                      value: attributes.estVolumeCommunityHealthLevel,
-                      errors: [ValidationErrorKey.FIELD_IS_REQUIRED],
-                  }
-                : null,
-        ]);
+        return {
+            estVolumeTotalHealthLevel: isPublicOrPrivate && attributes.healthLevel === HealthLevelValues.Total,
+            estVolumeHospitalHealthLevel:
+                isPublicOrPrivate &&
+                (attributes.healthLevel === HealthLevelValues.Hospital ||
+                    attributes.healthLevel === HealthLevelValues.HospitalAndCommunity),
+            estVolumeCommunityHealthLevel:
+                isPublicOrPrivate &&
+                (attributes.healthLevel === HealthLevelValues.Community ||
+                    attributes.healthLevel === HealthLevelValues.HospitalAndCommunity),
+        };
     }
 }
