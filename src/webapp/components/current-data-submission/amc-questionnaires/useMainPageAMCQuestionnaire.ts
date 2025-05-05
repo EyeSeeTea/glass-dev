@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
 import { Id } from "../../../../domain/entities/Ref";
-import { GeneralAMCQuestionnaire } from "../../../../domain/entities/amc-questionnaires/GeneralAMCQuestionnaire";
 import { useAppContext } from "../../../contexts/app-context";
 import { Maybe } from "../../../../utils/ts-utils";
 import { useCurrentOrgUnitContext } from "../../../contexts/current-orgUnit-context";
@@ -14,7 +13,6 @@ type GlobalMessage = {
 type MainPageAMCQuestionnaireState = {
     globalMessage?: GlobalMessage;
     isLoading: boolean;
-    generalAMCQuestionnaire?: GeneralAMCQuestionnaire;
     isEditMode: boolean;
     generalAMCQuestionnaireId: Maybe<Id>;
     onClickAddOrEdit: () => void;
