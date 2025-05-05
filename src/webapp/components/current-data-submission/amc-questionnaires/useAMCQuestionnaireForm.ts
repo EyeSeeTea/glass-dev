@@ -6,16 +6,16 @@ import { Maybe } from "../../../../utils/ts-utils";
 import {
     FormLables,
     getQuestionnaireFormEntity,
-    QuestionnaireFormEntity,
+    QuestionnaireFormEntityMap,
 } from "./presentation-entities/QuestionnaireFormEntity";
 import { FormState } from "../../form/presentation-entities/FormState";
 import { AMCQuestionnaireFormType } from "./presentation-entities/AMCQuestionnaireFormType";
-import { mapEntityToFormState } from "./mapEntityToFormState";
 import { ModalData } from "../../form/Form";
 import { AMCQuestionnaireQuestions } from "../../../../domain/entities/amc-questionnaires/AMCQuestionnaireQuestions";
 import { useAMCQuestionnaireOptionsContext } from "../../../contexts/amc-questionnaire-options-context";
 import { updateAndValidateFormState } from "../../form/presentation-entities/utils/updateAndValidateFormState";
-import { mapFormStateToEntity } from "./mapFormStateToEntity";
+import { GeneralAMCQuestionnaire } from "../../../../domain/entities/amc-questionnaires/GeneralAMCQuestionnaire";
+import { amcQuestionnaireMappers } from "./mappers";
 
 export type GlobalMessage = {
     text: string;
@@ -54,8 +54,8 @@ type State = {
     setOpenModal: (open: boolean) => void;
 };
 
-export function useAMCQuestionnaireForm(params: {
-    formType: AMCQuestionnaireFormType;
+export function useAMCQuestionnaireForm<T extends AMCQuestionnaireFormType>(params: {
+    formType: T;
     id?: Id;
     orgUnitId: Id;
     period: string;
@@ -70,7 +70,7 @@ export function useAMCQuestionnaireForm(params: {
     const [formState, setFormState] = useState<FormLoadState>({ kind: "loading" });
     const [formLabels, setFormLabels] = useState<FormLables>();
     const [isLoading, setIsLoading] = useState(false);
-    const [questionnaireFormEntity, setQuestionnaireFormEntity] = useState<QuestionnaireFormEntity>();
+    const [questionnaireFormEntity, setQuestionnaireFormEntity] = useState<QuestionnaireFormEntityMap[T]>();
     const [amcQuestions, setAMCQuestions] = useState<AMCQuestionnaireQuestions>();
     const [openModal, setOpenModal] = useState(false);
     const [modalData, setModalData] = useState<ModalData>();
@@ -114,7 +114,7 @@ export function useAMCQuestionnaireForm(params: {
                                 setFormLabels(formEntity.labels);
                                 setFormState({
                                     kind: "loaded",
-                                    data: mapEntityToFormState({
+                                    data: amcQuestionnaireMappers[formType].mapEntityToFormState({
                                         questionnaireFormEntity: formEntity,
                                         editMode: isEditMode,
                                         options: options,
@@ -140,7 +140,7 @@ export function useAMCQuestionnaireForm(params: {
                 setFormLabels(formEntity.labels);
                 setFormState({
                     kind: "loaded",
-                    data: mapEntityToFormState({
+                    data: amcQuestionnaireMappers[formType].mapEntityToFormState({
                         questionnaireFormEntity: formEntity,
                         editMode: isEditMode,
                         options: options,
@@ -186,7 +186,7 @@ export function useAMCQuestionnaireForm(params: {
         if (formState.kind !== "loaded" || !questionnaireFormEntity || !formState.data.isValid || !options) return;
 
         try {
-            const entity = mapFormStateToEntity({
+            const entity = amcQuestionnaireMappers[formType].mapFormStateToEntity({
                 formState: formState.data,
                 formEntity: questionnaireFormEntity,
                 orgUnitId,
@@ -206,7 +206,7 @@ export function useAMCQuestionnaireForm(params: {
             switch (formType) {
                 case "general-questionnaire":
                     setIsLoading(true);
-                    compositionRoot.amcQuestionnaires.saveGeneral(entity).run(
+                    compositionRoot.amcQuestionnaires.saveGeneral(entity as GeneralAMCQuestionnaire).run(
                         _generalQuestionnaireId => {
                             setIsLoading(false);
                         },

@@ -1,4 +1,5 @@
 import { GeneralAMCQuestionId } from "../../../domain/entities/amc-questionnaires/GeneralAMCQuestionnaire";
+import { AMClassAMCQuestionId } from "../../../domain/entities/amc-questionnaires/AMClassAMCQuestionnaire";
 import { Id } from "../../../domain/entities/Ref";
 
 export const AMR_GLASS_PRO_AMC_DQ_PROGRAM_ID = "f9Jl9O4CYZf";
@@ -39,4 +40,22 @@ export const generalAMCQuestionnaireByTEAIds: Record<Id, GeneralAMCQuestionId> =
     VLwzYm63c5Y: "antivirals",
     BZbWaqfCmuZ: "antituberculosis",
     PY1TmLpZU2u: "antimalaria",
+} as const;
+
+export const codesByAMClassAMCQuestionnaire: Record<AMClassAMCQuestionId, string> = {
+    antimicrobialClass: "AMR_GLASS_AMC_DE_AM_CLASS",
+    healthSector: "AMR_GLASS_AMC_DE_H_SECTOR",
+    healthLevel: "AMR_GLASS_AMC_DE_H_LEVEL",
+    estVolumeTotalHealthLevel: "AMR_GLASS_AMC_DE_VOL_TOTAL",
+    estVolumeHospitalHealthLevel: "AMR_GLASS_AMC_DE_VOL_HOSP",
+    estVolumeCommunityHealthLevel: "AMR_GLASS_AMC_DE_VOL_COMM",
+} as const;
+
+export const AMClassAMCQuestionnaireByTEAIds: Record<Id, AMClassAMCQuestionId> = {
+    EUh63YWEA62: "antimicrobialClass",
+    U51LiIT3mKk: "healthSector",
+    Fv9NNL4rmrm: "healthLevel",
+    pKR2EiIilTO: "estVolumeTotalHealthLevel",
+    NapA76XUInT: "estVolumeHospitalHealthLevel",
+    gAGTbAhWrgN: "estVolumeCommunityHealthLevel",
 } as const;

@@ -1,1 +1,1 @@
-export type AMCQuestionnaireFormType = "general-questionnaire";
+export type AMCQuestionnaireFormType = "general-questionnaire" | "am-class-questionnaire";

@@ -19,6 +19,12 @@ export const AMCQuestionnaires: React.FC<QuestionnairesProps> = () => {
                     orgUnitId={currentOrgUnitAccess.orgUnitId}
                     period={currentPeriod}
                 />
+                <AMCQuestionnaireFormPage
+                    formType="am-class-questionnaire"
+                    id={undefined}
+                    orgUnitId={currentOrgUnitAccess.orgUnitId}
+                    period={currentPeriod}
+                />
             </div>
         </AMCQuestionnaireOptionsContextProvider>
     );

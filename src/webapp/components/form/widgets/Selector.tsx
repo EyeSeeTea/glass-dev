@@ -1,6 +1,6 @@
 import React, { useCallback } from "react";
 import styled from "styled-components";
-import { Select, InputLabel, FormHelperText } from "@material-ui/core";
+import { Select, InputLabel, FormHelperText, MenuItem } from "@material-ui/core";
 import { IconChevronDown24, IconCross16 } from "@dhis2/ui";
 import { getLabelFromValue } from "./utils/selectorHelper";
 import { FormOption } from "../presentation-entities/FormOption";
@@ -100,7 +100,13 @@ export function Selector<Value extends string>({
                     }
                 }}
                 displayEmpty
-            />
+            >
+                {options.map(option => (
+                    <MenuItem key={option.value} value={option.value} disabled={option.disabled}>
+                        {option.label}
+                    </MenuItem>
+                ))}
+            </StyledSelect>
 
             <StyledFormHelperText id={`${id}-helper-text`} error={error && !!errorText}>
                 {error && !!errorText ? errorText : helperText}
