@@ -27,7 +27,30 @@ function getAMClassAMCQuestionnaireFormLabelsRules(): { rules: FormRule[]; label
             },
         },
         rules: [
-            // TODO: Add rules for AMClassAMCQuestionnaire
+            {
+                type: "requiredFieldsByCustomCondition",
+                fieldIds: ["healthSector", "healthLevel"],
+                condition: fields =>
+                    !!AMClassAMCQuestionnaire.requiredFieldsCustomConditions(fields)["estVolumeTotalHealthLevel"],
+                requiredFieldIds: ["estVolumeTotalHealthLevel"],
+                sectionIdsWithRequiredFields: ["general_section"],
+            },
+            {
+                type: "requiredFieldsByCustomCondition",
+                fieldIds: ["healthSector", "healthLevel"],
+                condition: fields =>
+                    !!AMClassAMCQuestionnaire.requiredFieldsCustomConditions(fields)["estVolumeHospitalHealthLevel"],
+                requiredFieldIds: ["estVolumeHospitalHealthLevel"],
+                sectionIdsWithRequiredFields: ["general_section"],
+            },
+            {
+                type: "requiredFieldsByCustomCondition",
+                fieldIds: ["healthSector", "healthLevel"],
+                condition: fields =>
+                    !!AMClassAMCQuestionnaire.requiredFieldsCustomConditions(fields)["estVolumeCommunityHealthLevel"],
+                requiredFieldIds: ["estVolumeCommunityHealthLevel"],
+                sectionIdsWithRequiredFields: ["general_section"],
+            },
         ],
     };
 }
