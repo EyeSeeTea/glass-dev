@@ -60,8 +60,10 @@ export function useAMCQuestionnaireForm(params: {
     orgUnitId: Id;
     period: string;
     isViewOnlyMode?: boolean;
+    onSave?: () => void;
+    onCancel?: () => void;
 }): State {
-    const { formType, id, orgUnitId, period, isViewOnlyMode = false } = params;
+    const { formType, id, orgUnitId, period, isViewOnlyMode = false, onSave, onCancel } = params;
 
     const { compositionRoot } = useAppContext();
     const options = useAMCQuestionnaireOptionsContext();
@@ -208,6 +210,7 @@ export function useAMCQuestionnaireForm(params: {
                     setIsLoading(true);
                     compositionRoot.amcQuestionnaires.saveGeneral(entity).run(
                         _generalQuestionnaireId => {
+                            onSave && onSave();
                             setIsLoading(false);
                         },
                         error => {
@@ -239,13 +242,18 @@ export function useAMCQuestionnaireForm(params: {
         formState,
         formType,
         isEditMode,
+        onSave,
         options,
         orgUnitId,
         period,
         questionnaireFormEntity,
     ]);
 
-    const onCancelForm = useCallback(() => {}, []);
+    const onCancelForm = useCallback(() => {
+        if (onCancel) {
+            onCancel();
+        }
+    }, [onCancel]);
 
     const onCopyForm = useCallback(() => {}, []);
 
