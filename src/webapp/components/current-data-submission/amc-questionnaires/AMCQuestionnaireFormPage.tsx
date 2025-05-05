@@ -13,16 +13,26 @@ type AMCQuestionnaireFormPageProps = {
     id?: Id;
     orgUnitId: Id;
     period: string;
+    onSave?: () => void;
+    onCancel?: () => void;
     isViewOnlyMode?: boolean;
     showFormButtons?: boolean;
 };
 
 export const AMCQuestionnaireFormPage: React.FC<AMCQuestionnaireFormPageProps> = React.memo(props => {
-    const { formType, id, orgUnitId, period, isViewOnlyMode = false, showFormButtons = true } = props;
+    const { formType, id, orgUnitId, period, onSave, onCancel, isViewOnlyMode = false, showFormButtons = true } = props;
 
     const snackbar = useSnackbar();
     const { formLabels, globalMessage, formState, isLoading, handleFormChange, onClickSave, onCancelForm } =
-        useAMCQuestionnaireForm({ formType, id, orgUnitId, period, isViewOnlyMode });
+        useAMCQuestionnaireForm({
+            formType: formType,
+            id: id,
+            orgUnitId: orgUnitId,
+            period: period,
+            isViewOnlyMode: isViewOnlyMode,
+            onSave: onSave,
+            onCancel: onCancel,
+        });
 
     useEffect(() => {
         if (!globalMessage) return;
