@@ -79,6 +79,7 @@ const Label = styled(InputLabel)`
     display: inline-block;
     font-weight: 400;
     font-size: 0.938rem;
+    color: #212934;
 `;
 
 const StyledFormHelperText = styled(FormHelperText)<{ error?: boolean }>``;

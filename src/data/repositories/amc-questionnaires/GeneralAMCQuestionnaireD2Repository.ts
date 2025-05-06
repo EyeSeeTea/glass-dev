@@ -26,7 +26,7 @@ import {
     isStringInGeneralAMCQuestionnaireCodes,
 } from "./AMCQuestionnaireConstants";
 import { D2ProgramMetadata, getAMCQuestionnaireProgramMetadata } from "./getAMCQuestionnaireProgramMetadata";
-import { getCurrentTimeString, getISODateAsLocaleDateString } from "./dateTimeHelpers";
+import { getISODateAsLocaleDateString, getIsoDateForPeriod } from "./dateTimeHelpers";
 import { importApiTracker } from "../utils/importApiTracker";
 import { Maybe } from "../../../types/utils";
 
@@ -211,8 +211,8 @@ export class GeneralAMCQuestionnaireD2Repository implements GeneralAMCQuestionna
                         trackedEntityType: AMR_TET_AMC_DQuestionnaire_TRACKED_ENTITY_TYPE_ID,
                         attributes: attributes,
                         events: [],
-                        enrolledAt: getCurrentTimeString(),
-                        occurredAt: getCurrentTimeString(),
+                        enrolledAt: getIsoDateForPeriod(generalAMCQuestionnaire.period),
+                        occurredAt: getIsoDateForPeriod(generalAMCQuestionnaire.period),
                         status: "ACTIVE",
                     };
 
@@ -221,8 +221,8 @@ export class GeneralAMCQuestionnaireD2Repository implements GeneralAMCQuestionna
                         orgUnit: generalAMCQuestionnaire.orgUnitId,
                         trackedEntityType: AMR_TET_AMC_DQuestionnaire_TRACKED_ENTITY_TYPE_ID,
                         attributes: attributes,
-                        createdAt: getCurrentTimeString(),
-                        updatedAt: getCurrentTimeString(),
+                        createdAt: getIsoDateForPeriod(generalAMCQuestionnaire.period),
+                        updatedAt: getIsoDateForPeriod(generalAMCQuestionnaire.period),
                         enrollments: [enrollment],
                     };
 
