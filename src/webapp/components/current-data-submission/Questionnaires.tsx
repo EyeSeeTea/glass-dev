@@ -204,7 +204,6 @@ export const Questionnaires: React.FC<QuestionnairesProps> = ({ setRefetchStatus
                     <QuestionnaireCard key={`${questionnaire.id}${questionnaire.name}`}>
                         <div className="head">
                             <h3 style={{ wordBreak: "break-all" }}>{questionnaire.name}</h3>
-                            <span className="desc">{questionnaire.description}</span>
                             <br />
                             {questionnaire.subQuestionnaires && questionnaire.subQuestionnaires.length > 0 && (
                                 <>
