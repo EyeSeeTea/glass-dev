@@ -122,12 +122,25 @@ const QuestionnaireForm: React.FC<QuestionnarieFormProps> = props => {
                     </div>
                 );
             })}
+                        <div className="desc-display">
+                            <span className="desc">{questionnaire.description}</span>
+                        </div>
         </FormWrapper>
+        
     );
 };
 
 const FormWrapper = styled.div`
     gap: 0px;
+
+    .desc {
+        margin-left: 14px;
+        white-space: pre-wrap;
+    }
+
+    .desc-display * {
+        display: block;
+    }
 `;
 
 function useSaveQuestionnaire(questionnaire: QuestionnaireSelector) {
