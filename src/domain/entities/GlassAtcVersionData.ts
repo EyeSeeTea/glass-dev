@@ -104,7 +104,7 @@ export type DDDChangesData = {
 
 export type ATCChangesData = {
     CATEGORY: "ATC";
-    CHANGE: string;
+    CHANGE: string; // TODO: Add what are the possible values
     INFO: string | null;
     NEW_ATC: ATCCodeLevel5;
     NEW_NAME: string | null;

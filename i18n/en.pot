@@ -5,8 +5,14 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2025-01-10T21:44:00.151Z\n"
-"PO-Revision-Date: 2025-01-10T21:44:00.154Z\n"
+"POT-Creation-Date: 2025-02-05T15:58:56.508Z\n"
+"PO-Revision-Date: 2025-02-05T15:58:56.508Z\n"
+
+msgid "Template {{id}} not loaded"
+msgstr ""
+
+msgid "Error saving registration status"
+msgstr ""
 
 msgid "Event id"
 msgstr ""
@@ -94,12 +100,6 @@ msgstr ""
 msgid "Invalid choice was chosen"
 msgstr ""
 
-msgid "Template {{id}} not loaded"
-msgstr ""
-
-msgid "Error saving registration status"
-msgstr ""
-
 msgid "The AST results provided are not valid (they are all empty)"
 msgstr ""
 
@@ -172,55 +172,13 @@ msgstr ""
 msgid "You can add up to 6 datasets to this submission with different BATCH IDS."
 msgstr ""
 
+msgid "Uploads marked to be uploaded asynchronously"
+msgstr ""
+
 msgid "Validated Uploads, Review to complete"
 msgstr ""
 
 msgid "Uploads with errors, or discarded"
-msgstr ""
-
-msgid "Go to questionnaires"
-msgstr ""
-
-msgid "Upload/Delete datasets"
-msgstr ""
-
-msgid "Go to submission"
-msgstr ""
-
-msgid "Full Status History"
-msgstr ""
-
-msgid "Done"
-msgstr ""
-
-msgid "From"
-msgstr ""
-
-msgid "To"
-msgstr ""
-
-msgid "Changed at"
-msgstr ""
-
-msgid "Error fetching questionnaires."
-msgstr ""
-
-msgid "Error fetching uploads."
-msgstr ""
-
-msgid "Current Status"
-msgstr ""
-
-msgid "Content"
-msgstr ""
-
-msgid "Mandatory"
-msgstr ""
-
-msgid "State"
-msgstr ""
-
-msgid "Data Submission status has errors..."
 msgstr ""
 
 msgid "There are no questionnaries for this module"
@@ -344,66 +302,6 @@ msgstr ""
 msgid "Send Submission"
 msgstr ""
 
-msgid "Uploaded"
-msgstr ""
-
-msgid "Period"
-msgstr ""
-
-msgid "Products/Substances"
-msgstr ""
-
-msgid "Rows"
-msgstr ""
-
-msgid "Batch ID"
-msgstr ""
-
-msgid "Status"
-msgstr ""
-
-msgid ""
-"UPLOADED - The file has been uploaded, but data has not been imported as "
-"upload was discarded in Step 1 or due to errors in Step 2"
-msgstr ""
-
-msgid ""
-"IMPORTED - The data has been imported, but validations(if applicable) were "
-"not run successfully, in Step 2."
-msgstr ""
-
-msgid ""
-"VALIDATED - The data has been imported and automatically validated, but the "
-"data was not reviewed by user in Step 3"
-msgstr ""
-
-msgid "COMPLETED - The data has been imported, validated and reviewed successfully."
-msgstr ""
-
-msgid "Download File"
-msgstr ""
-
-msgid "Delete"
-msgstr ""
-
-msgid "Complete"
-msgstr ""
-
-msgid "Error occurred when setting data submission status to COMPLETED"
-msgstr ""
-
-msgid "Deleting Files"
-msgstr ""
-
-msgid "Loading"
-msgstr ""
-
-msgid "This might take several minutes, do not refresh the page or press back."
-msgstr ""
-
-msgid "Marked to be deleted"
-msgstr ""
-
 msgid "Overview"
 msgstr ""
 
@@ -425,7 +323,135 @@ msgstr ""
 msgid "No Data uploaded..."
 msgstr ""
 
+msgid "Uploaded"
+msgstr ""
+
+msgid "Period"
+msgstr ""
+
+msgid "Products/Substances"
+msgstr ""
+
+msgid "Rows"
+msgstr ""
+
+msgid "Batch ID"
+msgstr ""
+
+msgid "Status"
+msgstr ""
+
+msgid ""
+"UPLOADED - The file has been uploaded, but data has not been imported as "
+"upload was discarded in Step 1, due to errors in Step 2 or errors in async "
+"uploads."
+msgstr ""
+
+msgid ""
+"MARKED TO BE UPLOADED - The file has been uploaded, but data has not been "
+"imported as data is waiting to be uploaded asynchronously."
+msgstr ""
+
+msgid ""
+"UPLOADING ASYNC IN PROGRESS - The file has been uploaded, but the data has "
+"not been imported because it is being uploaded asynchronously."
+msgstr ""
+
+msgid ""
+"IMPORTED - The data has been imported, but validations(if applicable) were "
+"not run successfully in Step 2 or in async uploads."
+msgstr ""
+
+msgid ""
+"VALIDATED - The data has been imported and automatically validated, but the "
+"data was not reviewed by user in Step 3 or has been imported asynchronously."
+msgstr ""
+
+msgid "COMPLETED - The data has been imported, validated and reviewed successfully."
+msgstr ""
+
+msgid "Download File"
+msgstr ""
+
+msgid "Delete"
+msgstr ""
+
+msgid "Complete"
+msgstr ""
+
+msgid "Error occurred when removing async uploads"
+msgstr ""
+
+msgid "Error occurred when setting data submission status to COMPLETED"
+msgstr ""
+
+msgid "Deleting Files"
+msgstr ""
+
+msgid "Loading"
+msgstr ""
+
+msgid "This might take several minutes, do not refresh the page or press back."
+msgstr ""
+
+msgid "MARKED TO BE UPLOADED"
+msgstr ""
+
+msgid "UPLOADING ASYNC IN PROGRESS"
+msgstr ""
+
+msgid "Marked to be deleted"
+msgstr ""
+
+msgid "There was an error deleting this file. Admin needs to check."
+msgstr ""
+
 msgid "Error downloading data"
+msgstr ""
+
+msgid "Go to questionnaires"
+msgstr ""
+
+msgid "Upload/Delete datasets"
+msgstr ""
+
+msgid "Go to submission"
+msgstr ""
+
+msgid "Full Status History"
+msgstr ""
+
+msgid "Done"
+msgstr ""
+
+msgid "From"
+msgstr ""
+
+msgid "To"
+msgstr ""
+
+msgid "Changed at"
+msgstr ""
+
+msgid "Error fetching questionnaires."
+msgstr ""
+
+msgid "Error fetching uploads."
+msgstr ""
+
+msgid "Current Status"
+msgstr ""
+
+msgid "Content"
+msgstr ""
+
+msgid "Mandatory"
+msgstr ""
+
+msgid "State"
+msgstr ""
+
+msgid "Data Submission status has errors..."
 msgstr ""
 
 msgid "File Type"

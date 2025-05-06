@@ -1,5 +1,5 @@
 import { ImportStrategy } from "../../../entities/data-entry/DataValuesSaveSummary";
-import { ImportSummary } from "../../../entities/data-entry/ImportSummary";
+import { ImportSummary, ImportSummaryWithEventIdList } from "../../../entities/data-entry/ImportSummary";
 import { Future, FutureData } from "../../../entities/Future";
 import { ExcelRepository } from "../../../repositories/ExcelRepository";
 import * as templates from "../../../entities/data-entry/program-templates";
@@ -8,9 +8,6 @@ import { TrackerRepository } from "../../../repositories/TrackerRepository";
 import { GlassDocumentsRepository } from "../../../repositories/GlassDocumentsRepository";
 import { GlassUploadsRepository } from "../../../repositories/GlassUploadsRepository";
 import { Id } from "../../../entities/Ref";
-import { D2TrackerTrackedEntity } from "@eyeseetea/d2-api/api/trackerTrackedEntities";
-import { D2TrackerEnrollment, D2TrackerEnrollmentAttribute } from "@eyeseetea/d2-api/api/trackerEnrollments";
-import { D2TrackerEvent } from "@eyeseetea/d2-api/api/trackerEvents";
 import { mapToImportSummary, readTemplate } from "../ImportBLTemplateEventProgram";
 import { MetadataRepository } from "../../../repositories/MetadataRepository";
 import { ValidationResult } from "../../../entities/program-rules/EventEffectTypes";
@@ -27,6 +24,12 @@ import { getTEAValueFromOrganisationUnitCountryEntry } from "../utils/getTEAValu
 import { Country } from "../../../entities/Country";
 import { InstanceRepository } from "../../../repositories/InstanceRepository";
 import { GlassATCRepository } from "../../../repositories/GlassATCRepository";
+import {
+    TrackerEnrollment,
+    TrackerEnrollmentAttribute,
+    TrackerEvent,
+    TrackerTrackedEntity,
+} from "../../../entities/TrackedEntityInstance";
 
 export const AMC_PRODUCT_REGISTER_PROGRAM_ID = "G6ChA5zMW9n";
 export const AMC_RAW_PRODUCT_CONSUMPTION_STAGE_ID = "GmElQHKXLIE";
@@ -103,6 +106,7 @@ export class ImportAMCProductLevelData {
                                             imported: 0,
                                             deleted: 0,
                                             updated: 0,
+                                            total: 0,
                                         },
                                         nonBlockingErrors: validationResults.nonBlockingErrors,
                                         blockingErrors: validationResults.blockingErrors,
@@ -121,12 +125,9 @@ export class ImportAMCProductLevelData {
                                         action
                                     )
                                     .flatMap(response => {
-                                        return mapToImportSummary(
-                                            response,
-                                            "trackedEntity",
-                                            this.metadataRepository,
-                                            validationResults.nonBlockingErrors
-                                        ).flatMap(summary => {
+                                        return mapToImportSummary(response, "trackedEntity", this.metadataRepository, {
+                                            nonBlockingErrors: validationResults.nonBlockingErrors,
+                                        }).flatMap(summary => {
                                             return this.uploadTeiIdListFileAndSave(
                                                 "primaryUploadId",
                                                 summary,
@@ -172,7 +173,7 @@ export class ImportAMCProductLevelData {
         orgUnitName: string,
         period: string,
         allCountries: Country[]
-    ): FutureData<D2TrackerTrackedEntity[]> {
+    ): FutureData<TrackerTrackedEntity[]> {
         return this.trackerRepository
             .getProgramMetadata(AMC_PRODUCT_REGISTER_PROGRAM_ID, AMC_RAW_PRODUCT_CONSUMPTION_STAGE_ID)
             .flatMap(metadata => {
@@ -184,7 +185,7 @@ export class ImportAMCProductLevelData {
                             (attribute.id === AMR_GLASS_AMC_TEA_COMBINATION && value === COMB_CODE_PRODUCT_NOT_HAVE_ATC)
                     );
 
-                    const attributes: D2TrackerEnrollmentAttribute[] = metadata.programAttributes.map(
+                    const attributes: TrackerEnrollmentAttribute[] = metadata.programAttributes.map(
                         (attr: {
                             id: string;
                             name: string;
@@ -220,7 +221,7 @@ export class ImportAMCProductLevelData {
                         de => de.trackedEntityInstance === tei.id
                     );
 
-                    const events: D2TrackerEvent[] = productWithoutAtcCode
+                    const events: TrackerEvent[] = productWithoutAtcCode
                         ? []
                         : currentDataEntryRows.map(dataEntry => {
                               const rawProductConsumptionStageDataValues: { dataElement: string; value: string }[] =
@@ -254,14 +255,13 @@ export class ImportAMCProductLevelData {
                               };
                           });
 
-                    const enrollments: D2TrackerEnrollment[] = [
+                    const enrollments: TrackerEnrollment[] = [
                         {
                             orgUnit: tei.orgUnit.id,
                             program: AMC_PRODUCT_REGISTER_PROGRAM_ID,
+                            trackedEntity: "",
                             enrollment: "",
                             trackedEntityType: AMR_GLASS_AMC_TET_PRODUCT_REGISTER,
-                            notes: [],
-                            relationships: [],
                             attributes: attributes,
                             events: events,
                             enrolledAt: tei.enrollment?.enrollmentDate ?? new Date().getTime().toString(),
@@ -277,7 +277,7 @@ export class ImportAMCProductLevelData {
                             storedBy: "",
                         },
                     ];
-                    const entity: D2TrackerTrackedEntity = {
+                    const entity: TrackerTrackedEntity = {
                         orgUnit: tei.orgUnit.id,
                         trackedEntity: "",
                         trackedEntityType: AMR_GLASS_AMC_TET_PRODUCT_REGISTER,
@@ -297,7 +297,7 @@ export class ImportAMCProductLevelData {
     }
 
     private validateTEIsAndEvents(
-        teis: D2TrackerTrackedEntity[],
+        teis: TrackerTrackedEntity[],
         orgUnitId: string,
         orgUnitName: string,
         period: string,
@@ -371,7 +371,7 @@ export class ImportAMCProductLevelData {
 
     private uploadTeiIdListFileAndSave = (
         uploadIdLocalStorageName: string,
-        summary: { importSummary: ImportSummary; eventIdList: string[] },
+        summary: ImportSummaryWithEventIdList,
         moduleName: string
     ): FutureData<ImportSummary> => {
         const uploadId = localStorage.getItem(uploadIdLocalStorageName);
@@ -395,7 +395,7 @@ export class ImportAMCProductLevelData {
     private deleteCalculatedSubstanceConsumptionData(
         deleteProductSummary: ImportSummary,
         calculatedSubstanceConsumptionListFileId: string
-    ) {
+    ): FutureData<ImportSummary> {
         return this.glassDocumentsRepository
             .download(calculatedSubstanceConsumptionListFileId)
             .flatMap(eventListFile => {
@@ -409,7 +409,7 @@ export class ImportAMCProductLevelData {
                                 "event",
                                 this.metadataRepository
                             ).flatMap(deleteCalculatedSubstanceConsumptionSummary => {
-                                return Future.success({
+                                const importSummary: ImportSummary = {
                                     ...deleteCalculatedSubstanceConsumptionSummary.importSummary,
                                     importCount: {
                                         imported:
@@ -424,6 +424,9 @@ export class ImportAMCProductLevelData {
                                         deleted:
                                             deleteCalculatedSubstanceConsumptionSummary.importSummary.importCount
                                                 .deleted + deleteProductSummary.importCount.deleted,
+                                        total:
+                                            deleteCalculatedSubstanceConsumptionSummary.importSummary.importCount
+                                                .total + deleteProductSummary.importCount.total,
                                     },
                                     nonBlockingErrors: [
                                         ...deleteCalculatedSubstanceConsumptionSummary.importSummary.nonBlockingErrors,
@@ -433,7 +436,8 @@ export class ImportAMCProductLevelData {
                                         ...deleteCalculatedSubstanceConsumptionSummary.importSummary.blockingErrors,
                                         ...deleteProductSummary.blockingErrors,
                                     ],
-                                });
+                                };
+                                return Future.success(importSummary);
                             });
                         });
                 });
