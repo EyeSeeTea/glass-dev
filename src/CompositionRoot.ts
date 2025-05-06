@@ -114,10 +114,18 @@ import { YesNoUnknownOptionsD2Repository } from "./data/repositories/amc-questio
 import { YesNoUnknownNAOptionsD2Repository } from "./data/repositories/amc-questionnaires/YesNoUnknownNAOptionsD2Repository";
 import { GetYesNoUnknownOptionsUseCase } from "./domain/usecases/amc-questionnaires/GetYesNoUnknownOptionsUseCase";
 import { GetYesNoUnknownNAOptionsUseCase } from "./domain/usecases/amc-questionnaires/GetYesNoUnknownNAOptionsUseCase";
+import { AntimicrobialClassOptionsD2Repository } from "./data/repositories/amc-questionnaires/AntimicrobialClassOptionsD2Repository";
+import { GetAntimicrobialClassOptionsUseCase } from "./domain/usecases/amc-questionnaires/GetAntimicrobialClassOptionsUseCase";
 import { QuestionsAMCQuestionnaireD2Repository } from "./data/repositories/amc-questionnaires/QuestionsAMCQuestionnaireD2Repository";
 import { GetQuestionsAMCQuestionnaireUseCase } from "./domain/usecases/amc-questionnaires/GetQuestionsAMCQuestionnaireUseCase";
 import { SaveGeneralAMCQuestionnaireUseCase } from "./domain/usecases/amc-questionnaires/SaveGeneralAMCQuestionnaireUseCase";
 import { GetGeneralAMCQuestionnaireByOrgUnitAndPeriodUseCase } from "./domain/usecases/amc-questionnaires/GetGeneralAMCQuestionnaireByOrgUnitAndPeriodUseCase";
+import { HealthLevelOptionsD2Repository } from "./data/repositories/amc-questionnaires/HealthLevelOptionsD2Repository";
+import { GetHealthLevelOptionsUseCase } from "./domain/usecases/amc-questionnaires/GetHealthLevelOptionsUseCase";
+import { HealthSectorOptionsD2Repository } from "./data/repositories/amc-questionnaires/HealthSectorOptionsD2Repository";
+import { GetHealthSectorOptionsUseCase } from "./domain/usecases/amc-questionnaires/GetHealthSectorOptionsUseCase";
+import { Proportion50to100OptionsD2Repository } from "./data/repositories/amc-questionnaires/Proportion50to100OptionsD2Repository";
+import { GetProportion50to100OptionsUseCase } from "./domain/usecases/amc-questionnaires/GetProportion50to100OptionsUseCase";
 
 export function getCompositionRoot(instance: Instance) {
     const api = getD2APiFromInstance(instance);
@@ -163,6 +171,10 @@ export function getCompositionRoot(instance: Instance) {
     const yesNoOptionsRepository = new YesNoOptionsD2Repository(api);
     const yesNoUnknownOptionsRepository = new YesNoUnknownOptionsD2Repository(api);
     const yesNoUnknownNAOptionsRepository = new YesNoUnknownNAOptionsD2Repository(api);
+    const antimicrobialClassOptionsRepository = new AntimicrobialClassOptionsD2Repository(api);
+    const healthLevelOptionsD2Repository = new HealthLevelOptionsD2Repository(api);
+    const healthSectorOptionsD2Repository = new HealthSectorOptionsD2Repository(api);
+    const proportion50to100OptionsD2Repository = new Proportion50to100OptionsD2Repository(api);
 
     return {
         instance: getExecute({
@@ -391,6 +403,10 @@ export function getCompositionRoot(instance: Instance) {
             getYesNoOptions: new GetYesNoOptionsUseCase(yesNoOptionsRepository),
             getYesNoUnknownOptions: new GetYesNoUnknownOptionsUseCase(yesNoUnknownOptionsRepository),
             getYesNoUnknownNAOptions: new GetYesNoUnknownNAOptionsUseCase(yesNoUnknownNAOptionsRepository),
+            getAntimicrobialClassOptions: new GetAntimicrobialClassOptionsUseCase(antimicrobialClassOptionsRepository),
+            getHealthLevelOptions: new GetHealthLevelOptionsUseCase(healthLevelOptionsD2Repository),
+            getHealthSectorOptions: new GetHealthSectorOptionsUseCase(healthSectorOptionsD2Repository),
+            getProportion50to100Options: new GetProportion50to100OptionsUseCase(proportion50to100OptionsD2Repository),
         }),
     };
 }

@@ -18,7 +18,9 @@ export function updateAndValidateFormState(
     const updatedForm = updateFormStateAndApplySideEffects(prevFormState, updatedField);
 
     const hasUpdatedFieldAnyRule =
-        questionnaireFormEntity.rules.filter(rule => rule.fieldId === updatedField.id).length > 0;
+        questionnaireFormEntity.rules.filter(rule =>
+            "fieldIds" in rule ? rule.fieldIds.includes(updatedField.id) : rule.fieldId === updatedField.id
+        ).length > 0;
 
     const updatedFormWithRulesApplied = hasUpdatedFieldAnyRule
         ? applyRulesInFormState(updatedForm, updatedField, questionnaireFormEntity.rules)

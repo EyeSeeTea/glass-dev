@@ -1,13 +1,122 @@
-import { AMCQuestionnaireQuestions } from "../../../../domain/entities/amc-questionnaires/AMCQuestionnaireQuestions";
-import { GeneralAMCQuestionId } from "../../../../domain/entities/amc-questionnaires/GeneralAMCQuestionnaire";
-import { getBooleanFromYesNoValue } from "../../../../domain/entities/amc-questionnaires/YesNoOption";
-import { YesNoUnknownValues } from "../../../../domain/entities/amc-questionnaires/YesNoUnknownOption";
-import i18n from "../../../../locales";
-import { AMCQuestionnaireOptionsContextState } from "../../../contexts/amc-questionnaire-options-context";
-import { getFieldIdFromIdsDictionary } from "../../form/presentation-entities/FormFieldsState";
-import { FormState } from "../../form/presentation-entities/FormState";
-import { mapToFormOptions } from "./mapEntityToFormState";
-import { GeneralAMCQuestionnaireFormEntity } from "./presentation-entities/QuestionnaireFormEntity";
+import {
+    GeneralAMCQuestionId,
+    GeneralAMCQuestionnaire,
+    GeneralAMCQuestionnaireAttributes,
+    GeneralAMCQuestionnaireBaseAttributes,
+} from "../../../../../domain/entities/amc-questionnaires/GeneralAMCQuestionnaire";
+import { yesNoOption } from "../../../../../domain/entities/amc-questionnaires/YesNoOption";
+import { YesNoUnknownValues } from "../../../../../domain/entities/amc-questionnaires/YesNoUnknownOption";
+import {
+    FormFieldState,
+    getAllFieldsFromSections,
+    getBooleanFieldValue,
+    getFieldIdFromIdsDictionary,
+    getStringFieldValue,
+} from "../../../form/presentation-entities/FormFieldsState";
+import { FormState } from "../../../form/presentation-entities/FormState";
+import { GeneralAMCQuestionnaireFormEntity } from "../presentation-entities/QuestionnaireFormEntity";
+import { MapToAMCQuestionnaireParams, MapToFormStateParams } from "./mapperTypes";
+import { getQuestionById, mapToFormOptions } from "./mapperUtils";
+import i18n from "../../../../../locales";
+
+export function mapFormStateToGeneralAMCQuestionnaire(
+    params: MapToAMCQuestionnaireParams<GeneralAMCQuestionnaireFormEntity>
+): GeneralAMCQuestionnaire {
+    const { formState, formEntity, options, period, orgUnitId, editMode } = params;
+    const baseAttributes = getGeneralAMCQuestionnaireBaseAttributes(formEntity, orgUnitId, period, editMode);
+
+    const allFields: FormFieldState[] = getAllFieldsFromSections(formState.sections);
+
+    const isSameAsLastYear = options.yesNoUnknownNAOptions.find(
+        option => option.code === getStringFieldValue("sameAsLastYear", allFields)
+    )?.code;
+    const shortageInPublicSector = options.yesNoUnknownOptions.find(
+        option => option.code === getStringFieldValue("shortageInPublicSector", allFields)
+    )?.code;
+    const detailOnShortageInPublicSector = getStringFieldValue("detailOnShortageInPublicSector", allFields);
+    const shortageInPrivateSector = options.yesNoUnknownOptions.find(
+        option => option.code === getStringFieldValue("shortageInPrivateSector", allFields)
+    )?.code;
+    const detailOnShortageInPrivateSector = getStringFieldValue("detailOnShortageInPrivateSector", allFields);
+    const generalComments = getStringFieldValue("generalComments", allFields);
+    const antibacterials = yesNoOption.getValueFromBoolean(getBooleanFieldValue("antibacterials", allFields));
+    const antifungals = yesNoOption.getValueFromBoolean(getBooleanFieldValue("antifungals", allFields));
+    const antivirals = yesNoOption.getValueFromBoolean(getBooleanFieldValue("antivirals", allFields));
+    const antituberculosis = yesNoOption.getValueFromBoolean(getBooleanFieldValue("antituberculosis", allFields));
+    const antimalaria = yesNoOption.getValueFromBoolean(getBooleanFieldValue("antimalaria", allFields));
+
+    if (
+        !isSameAsLastYear ||
+        !shortageInPublicSector ||
+        !shortageInPrivateSector ||
+        !antibacterials ||
+        !antifungals ||
+        !antivirals ||
+        !antituberculosis ||
+        !antimalaria
+    ) {
+        throw new Error("Missing required General AMC Questionnaire attributes");
+    }
+
+    const generalAMCQuestionnaireAttributes: GeneralAMCQuestionnaireAttributes = {
+        ...baseAttributes,
+        isSameAsLastYear: isSameAsLastYear,
+        shortageInPublicSector: shortageInPublicSector,
+        detailOnShortageInPublicSector: detailOnShortageInPublicSector,
+        shortageInPrivateSector: shortageInPrivateSector,
+        detailOnShortageInPrivateSector: detailOnShortageInPrivateSector,
+        generalComments: generalComments,
+        antibacterials: antibacterials,
+        antifungals: antifungals,
+        antivirals: antivirals,
+        antituberculosis: antituberculosis,
+        antimalaria: antimalaria,
+    };
+
+    const generalAMCQuestionnaireValidation = GeneralAMCQuestionnaire.validateAndCreate(
+        generalAMCQuestionnaireAttributes
+    );
+    const validGeneralAMCQuestionnaire = generalAMCQuestionnaireValidation.match({
+        error: () => undefined,
+        success: generalAMCQuestionnaire => generalAMCQuestionnaire,
+    });
+
+    if (!validGeneralAMCQuestionnaire) {
+        throw new Error("Invalid General AMC Questionnaire");
+    }
+
+    return validGeneralAMCQuestionnaire;
+}
+
+function getGeneralAMCQuestionnaireBaseAttributes(
+    formEntity: GeneralAMCQuestionnaireFormEntity,
+    orgUnitId: string,
+    period: string,
+    editMode: boolean
+): GeneralAMCQuestionnaireBaseAttributes {
+    if (editMode) {
+        if (!formEntity.entity) {
+            throw new Error("Form entity is not defined");
+        }
+        return {
+            id: formEntity.entity.id,
+            orgUnitId: formEntity.entity.orgUnitId,
+            period: formEntity.entity.period,
+            status: formEntity.entity.status,
+            created: formEntity.entity.created,
+            lastUpdated: new Date(),
+        };
+    } else {
+        return {
+            id: "",
+            orgUnitId: orgUnitId,
+            period: period,
+            status: "ACTIVE",
+            created: new Date(),
+            lastUpdated: new Date(),
+        };
+    }
+}
 
 export const generalAMCQuestionnaireFieldIds = {
     sameAsLastYear: "sameAsLastYear",
@@ -23,12 +132,9 @@ export const generalAMCQuestionnaireFieldIds = {
     antimalaria: "antimalaria",
 } as const;
 
-export function mapGeneralAMCQuestionnaireToInitialFormState(params: {
-    questionnaireFormEntity: GeneralAMCQuestionnaireFormEntity;
-    editMode: boolean;
-    options: AMCQuestionnaireOptionsContextState;
-    isViewOnlyMode?: boolean;
-}): FormState {
+export function mapGeneralAMCQuestionnaireToInitialFormState(
+    params: MapToFormStateParams<GeneralAMCQuestionnaireFormEntity>
+): FormState {
     const { questionnaireFormEntity, options, isViewOnlyMode } = params;
 
     const fromIdsDictionary = (key: keyof typeof generalAMCQuestionnaireFieldIds) =>
@@ -158,7 +264,8 @@ export function mapGeneralAMCQuestionnaireToInitialFormState(params: {
                         type: "boolean",
                         label: i18n.t("Yes"),
                         value:
-                            getBooleanFromYesNoValue(questionnaireFormEntity?.entity?.antibacterials || "0") || false,
+                            yesNoOption.getBooleanFromValue(questionnaireFormEntity?.entity?.antibacterials || "0") ||
+                            false,
                         required: true,
                         showIsRequired: true,
                         text: fromQuestions("antibacterials"),
@@ -170,7 +277,9 @@ export function mapGeneralAMCQuestionnaireToInitialFormState(params: {
                         errors: [],
                         type: "boolean",
                         label: i18n.t("Yes"),
-                        value: getBooleanFromYesNoValue(questionnaireFormEntity?.entity?.antifungals || "0") || false,
+                        value:
+                            yesNoOption.getBooleanFromValue(questionnaireFormEntity?.entity?.antifungals || "0") ||
+                            false,
                         required: true,
                         showIsRequired: true,
                         text: fromQuestions("antifungals"),
@@ -182,7 +291,9 @@ export function mapGeneralAMCQuestionnaireToInitialFormState(params: {
                         errors: [],
                         type: "boolean",
                         label: i18n.t("Yes"),
-                        value: getBooleanFromYesNoValue(questionnaireFormEntity?.entity?.antivirals || "0") || false,
+                        value:
+                            yesNoOption.getBooleanFromValue(questionnaireFormEntity?.entity?.antivirals || "0") ||
+                            false,
                         required: true,
                         showIsRequired: true,
                         text: fromQuestions("antivirals"),
@@ -195,7 +306,8 @@ export function mapGeneralAMCQuestionnaireToInitialFormState(params: {
                         type: "boolean",
                         label: i18n.t("Yes"),
                         value:
-                            getBooleanFromYesNoValue(questionnaireFormEntity?.entity?.antituberculosis || "0") || false,
+                            yesNoOption.getBooleanFromValue(questionnaireFormEntity?.entity?.antituberculosis || "0") ||
+                            false,
                         required: true,
                         showIsRequired: true,
                         text: fromQuestions("antituberculosis"),
@@ -207,7 +319,9 @@ export function mapGeneralAMCQuestionnaireToInitialFormState(params: {
                         errors: [],
                         type: "boolean",
                         label: i18n.t("Yes"),
-                        value: getBooleanFromYesNoValue(questionnaireFormEntity?.entity?.antimalaria || "0") || false,
+                        value:
+                            yesNoOption.getBooleanFromValue(questionnaireFormEntity?.entity?.antimalaria || "0") ||
+                            false,
                         required: true,
                         showIsRequired: true,
                         text: fromQuestions("antimalaria"),
@@ -217,8 +331,4 @@ export function mapGeneralAMCQuestionnaireToInitialFormState(params: {
             },
         ],
     };
-}
-
-function getQuestionById(id: GeneralAMCQuestionId, questions: AMCQuestionnaireQuestions): string {
-    return questions.find(question => question.id === id)?.text || "";
 }
