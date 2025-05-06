@@ -5,7 +5,6 @@ import path from "path";
 
 import { DataStoreClient } from "../data/data-store/DataStoreClient";
 import { DataStoreKeys } from "../data/data-store/DataStoreKeys";
-import { DataValuesImportRepository } from "../data/repositories/data-entry/DataValuesDefaultImportRepository";
 import { RISDataCSVDefaultRepository } from "../data/repositories/data-entry/RISDataCSVDefaultRepository";
 import { SampleDataCSVDeafultRepository } from "../data/repositories/data-entry/SampleDataCSVDeafultRepository";
 import { GlassDataSubmissionsDefaultRepository } from "../data/repositories/GlassDataSubmissionDefaultRepository";
@@ -28,6 +27,8 @@ import { moduleProperties } from "../domain/utils/ModuleProperties";
 
 import { generateUid } from "../utils/uid";
 import { getD2ApiFromArgs } from "./common";
+import { DataValuesDefaultImportRepository } from "../data/repositories/data-entry/DataValuesDefaultImportRepository";
+
 
 dotenv.config();
 console.log("Base URL:", process.env.REACT_APP_DHIS2_BASE_URL);
@@ -44,7 +45,7 @@ let sampleDataRepository: SampleDataCSVDeafultRepository;
 //let uploadDocumentsUseCase: UploadDocumentUseCase;
 let setUploadStatusUseCase: SetUploadStatusUseCase;
 let updateSecondaryFileWithPrimaryId: UpdateSampleUploadWithRisIdUseCase;
-let dataValuesRepository: DataValuesImportRepository;
+let dataValuesRepository: DataValuesDefaultImportRepository;
 //let importRISFile: ImportRISFile;
 //let importSampleFile: ImportSampleFile;
 let getSpecificDataSubmission: GetSpecificDataSubmissionUseCase;
@@ -146,7 +147,7 @@ async function initializeGlobals() {
 
     //DHIS2 backend (Do these have a shared authentication session?)
     metadataRepository = new MetadataDefaultRepository(undefined, api);
-    dataValuesRepository = new DataValuesImportRepository(api);
+    dataValuesRepository = new DataValuesDefaultImportRepository(api);
 
     //Reads the files
     sampleDataRepository = new SampleDataCSVDeafultRepository();

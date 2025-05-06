@@ -22,8 +22,8 @@ let dataStoreClient: DataStoreClient;
 let metadataRepository: MetadataDefaultRepository;
 let glassDocumentsRepository: GlassDocumentsDefaultRepository;
 let glassUploadsRepository: GlassUploadsDefaultRepository;
-const moduleName = "AMR";
-const moduleId = "AVnpk4xiXGG";
+//const moduleName = "AMR";
+//const moduleId = "AVnpk4xiXGG";
 
 let orgUnits: CodedRef[] = [];
 let getSpecificDataSubmission: GetSpecificDataSubmissionUseCase;
@@ -67,23 +67,28 @@ function main() {
             period: option({
                 type: string,
                 long: "period",
-                description: "The period to run amr-agg data reset for",
+                description: "The period",
             }),
             orgUnitCode: option({
                 type: string,
                 long: "orgUnitCode",
-                description: "The org unit code to run amr-agg data reset for",
+                description: "The org unit code ",
             }),
             batchId: option({
                 type: string,
                 long: "batchId",
-                description: "The batchId/dataset to run amr-agg data reset for",
+                description: "The batchId ",
             }),
-            /* docId: option({
+            moduleId: option({
                type: string,
-               long: "docId",
-               description: "The docId of the document to delete",
-           }),*/
+               long: "moduleId",
+               description: "The moduleId ",
+           }),
+           moduleName: option({
+            type: string,
+            long: "moduleName",
+            description: "The moduleName ",
+        }),
         },
         handler: async args => {
             if (!process.env.REACT_APP_DHIS2_BASE_URL)
@@ -119,8 +124,14 @@ function main() {
             const orgUnitCode = args.orgUnitCode;
 
             //3. Get Batch Id to reset
-            if (!args.batchId) throw new Error("batchId is required");
+           // if (!args.batchId) throw new Error("batchId is required");
             const batchId = args.batchId;
+
+            if (!args.moduleId) throw new Error("moduleId is required");
+            const moduleId = args.moduleId;
+
+            if (!args.moduleName) throw new Error("moduleName is required");
+            const moduleName = args.moduleName;
 
             //4. Set AMR-AGG dataset id.
             // const dataSetId = "CeQPmXgrhHF";
@@ -151,7 +162,11 @@ function main() {
                     .toPromise();
                 console.log(`uploads.length: ${uploads.length}`);
                 for (const upload of uploads) {
-                    if (upload.batchId === batchId) {
+                    if(moduleId === "AVnpk4xiXGG"){
+                        if (upload.batchId === batchId) {
+                            deleteDocumentInfoByUploadIdUseCase.execute(upload.id);
+                        }
+                    }else{
                         deleteDocumentInfoByUploadIdUseCase.execute(upload.id);
                     }
                 }

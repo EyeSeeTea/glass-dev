@@ -62,7 +62,7 @@ export const QuestionnaireActions: React.FC<QuestionnaireHeaderProps> = props =>
                 </div>
             )}
 
-            <div className="head">
+            <div className="desc">
                 <span className="desc">{description}</span>
             </div>
         </QuestionnaireHeaderStyled>
@@ -78,6 +78,7 @@ const QuestionnaireHeaderStyled = styled.div`
 
     .desc {
         margin-left: 14px;
+        white-space: pre-wrap;
     }
 
     .comp {
@@ -97,6 +98,7 @@ const QuestionnaireHeaderStyled = styled.div`
         text-align: right;
         margin-bottom: 15px;
     }
+
 `;
 
 const StyledButton = styled(Button)`
