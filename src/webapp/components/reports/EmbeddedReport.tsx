@@ -58,7 +58,7 @@ export const EmbeddedReport: React.FC<EmbeddedReportProps> = ({ dashboardId }) =
 };
 
 const styles = {
-    iframe: { width: "100%", border: 0, overflow: "hidden" },
+    iframe: { width: "100%", border: 0, overflow: "hidden", height: "80vh" },
     wrapperVisible: { width: "100%" },
     wrapperHidden: { visibility: "hidden", width: "100%" },
 };
