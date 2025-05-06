@@ -80,15 +80,15 @@ function main() {
                 description: "The batchId ",
             }),
             moduleId: option({
-               type: string,
-               long: "moduleId",
-               description: "The moduleId ",
-           }),
-           moduleName: option({
-            type: string,
-            long: "moduleName",
-            description: "The moduleName ",
-        }),
+                type: string,
+                long: "moduleId",
+                description: "The moduleId ",
+            }),
+            moduleName: option({
+                type: string,
+                long: "moduleName",
+                description: "The moduleName ",
+            }),
         },
         handler: async args => {
             if (!process.env.REACT_APP_DHIS2_BASE_URL)
@@ -124,7 +124,7 @@ function main() {
             const orgUnitCode = args.orgUnitCode;
 
             //3. Get Batch Id to reset
-           // if (!args.batchId) throw new Error("batchId is required");
+            // if (!args.batchId) throw new Error("batchId is required");
             const batchId = args.batchId;
 
             if (!args.moduleId) throw new Error("moduleId is required");
@@ -162,11 +162,11 @@ function main() {
                     .toPromise();
                 console.log(`uploads.length: ${uploads.length}`);
                 for (const upload of uploads) {
-                    if(moduleId === "AVnpk4xiXGG"){
+                    if (moduleId === "AVnpk4xiXGG") {
                         if (upload.batchId === batchId) {
                             deleteDocumentInfoByUploadIdUseCase.execute(upload.id);
                         }
-                    }else{
+                    } else {
                         deleteDocumentInfoByUploadIdUseCase.execute(upload.id);
                     }
                 }

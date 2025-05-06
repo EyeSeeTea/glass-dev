@@ -7,7 +7,7 @@ export class RemoveAsyncDeletionsUseCase implements UseCase {
     constructor(private glassUploadsRepository: GlassUploadsRepository) {}
 
     public execute(uploadIdsToRemove: Id[]): FutureData<Id[]> {
-        console.log('uploadIdsToRemove in RemoveAsyncDeletionsUseCase: ',uploadIdsToRemove);
+        console.log("uploadIdsToRemove in RemoveAsyncDeletionsUseCase: ", uploadIdsToRemove);
         return this.glassUploadsRepository.removeAsyncDeletions(uploadIdsToRemove);
     }
 }

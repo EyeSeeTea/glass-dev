@@ -41,7 +41,10 @@ export class TrackerDefaultRepository implements TrackerRepository {
                     if (response.instances && Array.isArray(response.instances)) {
                         return _.compact(response.instances.map(instance => instance.trackedEntity));
                     } else {
-                        console.error(`response.instances for trackedEntity  ${trackEntitiesIdsString} is undefined or not an array:` , response.instances);
+                        console.error(
+                            `response.instances for trackedEntity  ${trackEntitiesIdsString} is undefined or not an array:`,
+                            response.instances
+                        );
                         return [];
                     }
                 });
@@ -65,9 +68,12 @@ export class TrackerDefaultRepository implements TrackerRepository {
                     })
                 ).map(response => {
                     if (response.instances && Array.isArray(response.instances)) {
-                        return response.instances.map((instance: { event: string; }) => instance.event);
+                        return response.instances.map((instance: { event: string }) => instance.event);
                     } else {
-                        console.error(`response.instances for event ${eventIdsString}is undefined or not an array:`, response.instances);
+                        console.error(
+                            `response.instances for event ${eventIdsString}is undefined or not an array:`,
+                            response.instances
+                        );
                         return [];
                     }
                 });
