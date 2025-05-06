@@ -8,6 +8,7 @@ import { DataSet } from "../../domain/entities/metadata/DataSet";
 import { CodedRef, NamedRef } from "../../domain/entities/Ref";
 import { MetadataRepository } from "../../domain/repositories/MetadataRepository";
 import { Id } from "../../domain/entities/Base";
+import { DataSetValidation } from "../../domain/entities/metadata/DataSetValidation";
 
 const AMR_EGASP_Clinics = "lohCVAxPxMM";
 const AMR_EGASP_Labs = "KhLlLrKWPKu";
@@ -54,8 +55,6 @@ export class MetadataDefaultRepository implements MetadataRepository {
                 .get<MetadataIdReponse>(`/metadata?filter=id:in:[${ids.join(",")}]&fields=id,code,shortName`)
                 .map(response => {
                     if (response?.data) {
-                        console.debug("response", response);
-
                         const deIds =
                             response.data.dataElements?.map((idRef: any) => {
                                 return {
@@ -229,12 +228,17 @@ export class MetadataDefaultRepository implements MetadataRepository {
         };
     }
 
-    validateDataSet(dataset: string, period: string, orgUnit: string, AOCs: string[]): FutureData<unknown> {
+    getValidationsDataSet(
+        dataset: string,
+        period: string,
+        orgUnit: string,
+        attributeOptionCombos: string[]
+    ): FutureData<DataSetValidation[]> {
         return Future.parallel(
-            AOCs.map(aoc => {
+            attributeOptionCombos.map(aoc => {
                 return apiToFuture(
                     this.api
-                        .get(`/validation/dataSet/${dataset}?pe=${period}&ou=${orgUnit}&aoc=${aoc}`)
+                        .get<DataSetValidation>(`/validation/dataSet/${dataset}?pe=${period}&ou=${orgUnit}&aoc=${aoc}`)
                         .map(response => response.data)
                 );
             })
@@ -327,8 +331,3 @@ const categoryComboFields = {
 type D2CategoryCombo = MetadataPick<{
     categoryCombos: { fields: typeof categoryComboFields };
 }>["categoryCombos"][number];
-
-export type D2ValidationResponse = {
-    commentRequiredViolations: unknown[];
-    validationRuleViolations: unknown[];
-};

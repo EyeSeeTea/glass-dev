@@ -1,4 +1,3 @@
-import { D2TrackerEvent } from "@eyeseetea/d2-api/api/trackerEvents";
 import _ from "lodash";
 
 import { Dhis2EventsDefaultRepository } from "../../../data/repositories/Dhis2EventsDefaultRepository";
@@ -15,6 +14,7 @@ import { GlassUploads } from "../../entities/GlassUploads";
 import { GlassUploadsRepository } from "../../repositories/GlassUploadsRepository";
 import { Id } from "../../entities/Ref";
 import { TrackerRepository } from "../../repositories/TrackerRepository";
+import { TrackerEvent } from "../../entities/TrackedEntityInstance";
 
 // NOTICE: code adapted for node environment from ImportBLTemplateEventProgram.ts (only DELETE)
 export class DeleteBLTemplateEventProgram {
@@ -69,6 +69,9 @@ export class DeleteBLTemplateEventProgram {
                                                             deleted:
                                                                 importSummary.importCount.deleted +
                                                                 importSummaryCalculatedEvents.importCount.deleted,
+                                                            total:
+                                                                importSummary.importCount.total +
+                                                                importSummaryCalculatedEvents.importCount.total,
                                                         },
                                                         nonBlockingErrors: [
                                                             ...importSummary.nonBlockingErrors,
@@ -98,7 +101,7 @@ export class DeleteBLTemplateEventProgram {
         });
     }
 
-    private deleteEvents(uploadId: Id, events: D2TrackerEvent[]): FutureData<ImportSummary> {
+    private deleteEvents(uploadId: Id, events: TrackerEvent[]): FutureData<ImportSummary> {
         if (!events.length) {
             const summary: ImportSummary = {
                 status: "SUCCESS",
@@ -107,6 +110,7 @@ export class DeleteBLTemplateEventProgram {
                     imported: 0,
                     deleted: 0,
                     updated: 0,
+                    total: 0,
                 },
                 nonBlockingErrors: [],
                 blockingErrors: [],
@@ -129,7 +133,7 @@ export class DeleteBLTemplateEventProgram {
         });
     }
 
-    private deleteCalculatedEvents(uploadId: Id, calculatedEvents: D2TrackerEvent[]): FutureData<ImportSummary> {
+    private deleteCalculatedEvents(uploadId: Id, calculatedEvents: TrackerEvent[]): FutureData<ImportSummary> {
         if (!calculatedEvents.length) {
             const summary: ImportSummary = {
                 status: "SUCCESS",
@@ -138,6 +142,7 @@ export class DeleteBLTemplateEventProgram {
                     imported: 0,
                     deleted: 0,
                     updated: 0,
+                    total: 0,
                 },
                 nonBlockingErrors: [],
                 blockingErrors: [],
@@ -165,8 +170,8 @@ export class DeleteBLTemplateEventProgram {
         programId: Id,
         calculatedProgramId?: Id
     ): FutureData<{
-        events: D2TrackerEvent[];
-        calculatedEvents: D2TrackerEvent[];
+        events: TrackerEvent[];
+        calculatedEvents: TrackerEvent[];
     }> {
         const { eventListFileId, eventListDataDeleted, calculatedEventListFileId, calculatedEventListDataDeleted } =
             upload;
@@ -187,17 +192,18 @@ export class DeleteBLTemplateEventProgram {
         });
     }
 
-    private getEventsFromListFileId(listFileId: string, programId: Id): FutureData<D2TrackerEvent[]> {
+    private getEventsFromListFileId(listFileId: string, programId: Id): FutureData<TrackerEvent[]> {
         return this.glassDocumentsRepository.download(listFileId).flatMap(eventListFileBlob => {
             return getStringFromFileBlob(eventListFileBlob).flatMap(_events => {
                 const eventIdList: Id[] = JSON.parse(_events);
                 return this.trackerRepository
                     .getExistingEventsIdsByIds(eventIdList, programId)
                     .flatMap(existingEventsIds => {
-                        const events: D2TrackerEvent[] = existingEventsIds.map(eventId => {
+                        const events: TrackerEvent[] = existingEventsIds.map(eventId => {
                             return {
                                 event: eventId,
                                 program: "",
+                                programStage: "",
                                 status: "COMPLETED",
                                 orgUnit: "",
                                 occurredAt: "",

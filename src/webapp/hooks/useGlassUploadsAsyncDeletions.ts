@@ -3,12 +3,13 @@ import { GlassState } from "./State";
 import { useAppContext } from "../contexts/app-context";
 import { Id } from "../../domain/entities/Ref";
 import { useSnackbar } from "@eyeseetea/d2-ui-components";
+import { GlassAsyncDeletion } from "../../domain/entities/GlassAsyncDeletions";
 
-export type GlassUploadsAsyncDeletionsState = GlassState<Id[]>;
+export type GlassUploadsAsyncDeletionsState = GlassState<GlassAsyncDeletion[]>;
 
 type State = {
     asyncDeletions: GlassUploadsAsyncDeletionsState;
-    setToAsyncDeletions: (uploadIdsToDelete: Id[]) => void;
+    setToAsyncDeletions: (uploadIdToDelete: Id) => void;
 };
 
 export function useGlassUploadsAsyncDeletions(): State {
@@ -31,8 +32,8 @@ export function useGlassUploadsAsyncDeletions(): State {
     }, [getAsyncDeletions]);
 
     const setToAsyncDeletions = useCallback(
-        (uploadIdsToDelete: Id[]) => {
-            compositionRoot.glassUploads.setToAsyncDeletions(uploadIdsToDelete).run(
+        (uploadIdToDelete: Id) => {
+            compositionRoot.glassUploads.setToAsyncDeletions(uploadIdToDelete).run(
                 () => {
                     snackbar.info(`File marked to be deleted`);
                     getAsyncDeletions();

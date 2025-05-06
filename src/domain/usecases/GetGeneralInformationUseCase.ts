@@ -1,11 +1,12 @@
 import { UseCase } from "../../CompositionRoot";
 import { FutureData } from "../entities/Future";
-import { GeneralRepository } from "../repositories/GeneralRepository";
+import { GlassGeneralInfo } from "../entities/GlassGeneralInfo";
+import { GeneralInfoRepository } from "../repositories/GeneralInfoRepository";
 
 export class GetGeneralInformationUseCase implements UseCase {
-    constructor(private generalRepository: GeneralRepository) {}
+    constructor(private generalInfoRepository: GeneralInfoRepository) {}
 
-    public execute(): FutureData<unknown> {
-        return this.generalRepository.get();
+    public execute(): FutureData<GlassGeneralInfo> {
+        return this.generalInfoRepository.get();
     }
 }

@@ -18,8 +18,24 @@ export type ChunkSizes = {
 };
 
 export type PATHOGEN_ANTIBIOTIC_MAP = Record<string, string[]>;
+
+export const MODULE_NAMES = {
+    AMC: "AMC",
+    AMR: "AMR",
+    EGASP: "EGASP",
+    AMR_INDIVIDUAL: "AMR - Individual",
+    AMR_FUNGAL: "AMR - Fungal",
+    EAR: "EAR",
+} as const;
+
+export type GlassModuleName = typeof MODULE_NAMES[keyof typeof MODULE_NAMES];
+
+export function isGlassModuleName(value: unknown): value is GlassModuleName {
+    return Object.values(MODULE_NAMES).includes(value as GlassModuleName);
+}
+
 export interface GlassModule {
-    name: string;
+    name: GlassModuleName;
     color: string;
     id: string;
     userGroups: ModuleUserGroups;
@@ -47,6 +63,12 @@ export interface GlassModule {
     customDataColumns?: CustomDataColumns;
     lineLists?: LineListDetails[];
     chunkSizes?: ChunkSizes;
+    maxNumberOfRowsToSyncDeletion?: number;
+    maxNumberOfRowsToSyncUploads?: number;
+    asyncUploadChunkSizes?: {
+        primaryUpload: number;
+        secondaryUpload?: number;
+    };
 }
 
 export type LineListDetails = { id: Id; name?: string; programId: Id; programStageId?: Id };
@@ -55,3 +77,5 @@ interface QuestionnaireConfig {
     mandatory?: boolean;
     rules?: QuestionnaireRule[];
 }
+
+export const DEFAULT_ASYNC_UPLOAD_CHUNK_SIZE = 100;

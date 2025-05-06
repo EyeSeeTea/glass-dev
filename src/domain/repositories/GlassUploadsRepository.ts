@@ -1,13 +1,13 @@
 import { FutureData } from "../entities/Future";
-import { GlassUploads } from "../entities/GlassUploads";
+import { GlassUploads, GlassUploadsStatus } from "../entities/GlassUploads";
 import { Id } from "../entities/Ref";
-import { ImportSummaryErrors } from "../entities/data-entry/ImportSummary";
+import { ImportSummary, ImportSummaryErrors } from "../entities/data-entry/ImportSummary";
 
 export interface GlassUploadsRepository {
     getAll(): FutureData<GlassUploads[]>;
     getById(uploadId: Id): FutureData<GlassUploads>;
     save(upload: GlassUploads): FutureData<void>;
-    setStatus(id: string, status: string): FutureData<void>;
+    setStatus(id: Id, status: GlassUploadsStatus): FutureData<void>;
     setBatchId(id: string, batchId: string): FutureData<void>;
     delete(id: string): FutureData<{
         fileId: string;
@@ -27,9 +27,9 @@ export interface GlassUploadsRepository {
     getUploadsByDataSubmission(dataSubmissionId: Id): FutureData<GlassUploads[]>;
     getEventListFileIdByUploadId(id: string): FutureData<string>;
     setCalculatedEventListFileId(uploadId: string, calculatedEventListFileId: string): FutureData<void>;
-    setAsyncDeletions(uploadIdsToDelete: Id[]): FutureData<Id[]>;
-    getAsyncDeletions(): FutureData<Id[]>;
-    removeAsyncDeletions(uploadIdToRemove: Id[]): FutureData<Id[]>;
     setEventListDataDeleted(id: string): FutureData<void>;
     setCalculatedEventListDataDeleted(id: string): FutureData<void>;
+    setMultipleErrorAsyncDeleting(ids: Id[]): FutureData<void>;
+    setMultipleErrorAsyncUploading(ids: Id[]): FutureData<void>;
+    saveImportSummaries(params: { uploadId: Id; importSummaries: ImportSummary[] }): FutureData<void>;
 }

@@ -1,28 +1,21 @@
 import { BatchLogContent, logger } from "../../../../../utils/logger";
 import {
-    DEFAULT_SALT_CODE,
     GlassAtcVersionData,
     ListGlassATCVersions,
     getATCChanges,
     getAmClass,
     getAtcCodeByLevel,
     getAwareClass,
-    getDDDChanges,
-    getNewAtcCode,
-    getNewDddData,
-    ATCCodeLevel5,
-    ATCChangesData,
-    ATCData,
     getNewAtcCodeRec,
     DDDData,
     getDDDForAtcVersion,
-    getStandardizedUnit,
     UnitsData,
 } from "../../../../entities/GlassAtcVersionData";
 import { Id } from "../../../../entities/Ref";
 import { RawSubstanceConsumptionData } from "../../../../entities/data-entry/amc/RawSubstanceConsumptionData";
 import { SubstanceConsumptionCalculated } from "../../../../entities/data-entry/amc/SubstanceConsumptionCalculated";
 
+// TODO: Divide this function into smaller functions
 export function calculateConsumptionSubstanceLevelData(
     period: string,
     orgUnitId: Id,
@@ -50,7 +43,6 @@ export function calculateConsumptionSubstanceLevelData(
     const amClassData = latestAtcVersionData.am_classification;
     const awareClassData = latestAtcVersionData.aware_classification;
     const atcData = latestAtcVersionData.atcs;
-    const dddChanges = getDDDChanges(latestAtcVersionData.changes);
     const atcChanges = getATCChanges(latestAtcVersionData.changes);
 
     const calculatedConsumptionSubstanceLevelData = rawSubstanceConsumptionData
@@ -67,7 +59,7 @@ export function calculateConsumptionSubstanceLevelData(
             const { atc_version_manual } = rawSubstanceConsumption;
 
             if (atc_version_manual === currentAtcVersionKey) {
-                // user atc version is identical ot the current atc version, just copy manual to autocalculated
+                // User atc version is identical to the current atc version, just copy manual to autocalculated
                 calculationLogs = [
                     ...calculationLogs,
                     {
@@ -82,12 +74,8 @@ export function calculateConsumptionSubstanceLevelData(
                     ? rawSubstanceConsumption.tons_manual * 1000
                     : undefined;
 
-                // these cannot be undefined as check is done before
-                // @ts-ignore
                 const am_class = getAmClass(amClassData, rawSubstanceConsumption.atc_manual);
-                // @ts-ignore
                 const atcCodeByLevel = getAtcCodeByLevel(atcData, rawSubstanceConsumption.atc_manual);
-                // @ts-ignore
                 const aware = getAwareClass(awareClassData, rawSubstanceConsumption.atc_manual);
 
                 return {
@@ -129,7 +117,7 @@ export function calculateConsumptionSubstanceLevelData(
                 return;
             }
 
-            // check if the atc_manual is still valid in the current atc version, if not has it been replaced by a new atc?
+            // Check if the atc_manual is still valid in the current atc version, if not has it been replaced by a new atc?
             calculationLogs = [
                 ...calculationLogs,
                 {
@@ -158,12 +146,8 @@ export function calculateConsumptionSubstanceLevelData(
                     ? rawSubstanceConsumption.tons_manual * 1000
                     : undefined;
 
-                // these cannot be undefined as check is done before
-                // @ts-ignore
                 const am_class = getAmClass(amClassData, rawSubstanceConsumption.atc_manual);
-                // @ts-ignore
                 const atcCodeByLevel = getAtcCodeByLevel(atcData, rawSubstanceConsumption.atc_manual);
-                // @ts-ignore
                 const aware = getAwareClass(awareClassData, rawSubstanceConsumption.atc_manual);
 
                 return {
@@ -188,7 +172,7 @@ export function calculateConsumptionSubstanceLevelData(
                 };
             }
 
-            // check for the ratio old DDD and new DDD
+            // Check for the ratio old DDD and new DDD
             calculationLogs = [
                 ...calculationLogs,
                 {
@@ -217,12 +201,8 @@ export function calculateConsumptionSubstanceLevelData(
                     ? rawSubstanceConsumption.tons_manual * 1000
                     : undefined;
 
-                // these cannot be undefined as check is done before
-                // @ts-ignore
                 const am_class = getAmClass(amClassData, rawSubstanceConsumption.atc_manual);
-                // @ts-ignore
                 const atcCodeByLevel = getAtcCodeByLevel(atcData, rawSubstanceConsumption.atc_manual);
-                // @ts-ignore
                 const aware = getAwareClass(awareClassData, rawSubstanceConsumption.atc_manual);
 
                 calculationLogs = [
@@ -258,7 +238,7 @@ export function calculateConsumptionSubstanceLevelData(
             }
 
             // Adjust the number of DDDs with ratio oldDDD and newDDD
-            const dddsAdjust = getDDDsAdjust2(rawSubstanceConsumption, oldDDD, newDDD, latestAtcVersionData);
+            const dddsAdjust = getDDDsAdjust(rawSubstanceConsumption, oldDDD, newDDD, latestAtcVersionData);
             calculationLogs = [...calculationLogs, ...dddsAdjust.logs];
 
             const rawSubstanceConsumptionKilograms = rawSubstanceConsumption.tons_manual
@@ -266,9 +246,7 @@ export function calculateConsumptionSubstanceLevelData(
                 : undefined;
 
             const am_class = getAmClass(amClassData, atcAutoCalc);
-            // @ts-ignore
             const atcCodeByLevel = getAtcCodeByLevel(atcData, atcAutoCalc);
-            // @ts-ignore
             const aware = getAwareClass(awareClassData, atcAutoCalc);
 
             return {
@@ -302,133 +280,6 @@ export function calculateConsumptionSubstanceLevelData(
     return calculatedConsumptionSubstanceLevelData;
 }
 
-function getStandardizedDDD(
-    rawSubstanceConsumptionData: RawSubstanceConsumptionData,
-    atcVersion: GlassAtcVersionData | undefined
-): { result: number | undefined; logs: BatchLogContent } {
-    let calculationLogs: BatchLogContent = [];
-    const { atc_manual, salt_manual, route_admin_manual } = rawSubstanceConsumptionData;
-    const dddData = atcVersion?.ddds;
-    const dddChanges = atcVersion?.changes ? getDDDChanges(atcVersion?.changes) : [];
-    const atcChanges = atcVersion?.changes ? getATCChanges(atcVersion?.changes) : [];
-    const atcCode = getNewAtcCode(atc_manual, atcChanges) || atc_manual;
-
-    if (dddData) {
-        const dddDataFound = dddData?.find(({ ATC5, SALT, ROA }) => {
-            const isDefaultSalt = !SALT && salt_manual === DEFAULT_SALT_CODE;
-            return ATC5 === atcCode && ROA === route_admin_manual && (SALT === salt_manual || isDefaultSalt);
-        });
-
-        if (dddDataFound) {
-            return {
-                result: dddDataFound.DDD_STD,
-                logs: [
-                    ...calculationLogs,
-                    {
-                        content: `[${new Date().toISOString()}] Substance ${
-                            rawSubstanceConsumptionData.id
-                        } - DDD data found in ddd json:  ${dddDataFound.DDD_STD}.`,
-                        messageType: "Debug",
-                    },
-                ],
-            };
-        }
-
-        calculationLogs = [
-            ...calculationLogs,
-            {
-                content: `[${new Date().toISOString()}] Substance ${
-                    rawSubstanceConsumptionData.id
-                } - DDD data not found in ddd json using: ${atc_manual}, ${salt_manual} and ${route_admin_manual}.`,
-                messageType: "Warn",
-            },
-        ];
-
-        const newDddData = getNewDddData(atcCode, route_admin_manual, dddChanges);
-
-        if (newDddData) {
-            const unitData = atcVersion?.units.find(({ UNIT }) => newDddData.NEW_DDD_UNIT === UNIT);
-            if (unitData) {
-                const dddStandardizedValue = newDddData.NEW_DDD_VALUE * unitData.BASE_CONV;
-                return {
-                    result: dddStandardizedValue,
-                    logs: [
-                        ...calculationLogs,
-                        {
-                            content: `[${new Date().toISOString()}] Substance ${
-                                rawSubstanceConsumptionData.id
-                            } - DDD data found in changes in ddd json:  ${dddStandardizedValue}.`,
-                            messageType: "Debug",
-                        },
-                    ],
-                };
-            }
-            return {
-                result: undefined,
-                logs: [
-                    ...calculationLogs,
-                    {
-                        content: `[${new Date().toISOString()}] Substance ${
-                            rawSubstanceConsumptionData.id
-                        } - Unit data not found in units for ${newDddData.NEW_DDD_UNIT}.`,
-                        messageType: "Error",
-                    },
-                ],
-            };
-        }
-
-        return {
-            result: undefined,
-            logs: [
-                ...calculationLogs,
-                {
-                    content: `[${new Date().toISOString()}] Substance ${
-                        rawSubstanceConsumptionData.id
-                    } - DDD data not found in changes in ddd json: ${atc_manual} and ${route_admin_manual}.`,
-                    messageType: "Error",
-                },
-            ],
-        };
-    }
-
-    return {
-        result: undefined,
-        logs: [
-            ...calculationLogs,
-            {
-                content: `[${new Date().toISOString()}] Substance ${
-                    rawSubstanceConsumptionData.id
-                } - ddd json not found in ATC version data.`,
-                messageType: "Error",
-            },
-        ],
-    };
-}
-
-function getDDDsAdjust(
-    rawSubstanceConsumptionData: RawSubstanceConsumptionData,
-    dddStandarizedLatest: number,
-    dddStandarizedInRawSubstanceConsumption: number
-): { result: number | undefined; logs: BatchLogContent } {
-    const calculationLogs: BatchLogContent = [];
-    const { ddds_manual } = rawSubstanceConsumptionData;
-    // 3 - ratio_ddd = standardized_ddd_value_uploaded ÷ standardized_ddd_value_latest
-    const ratioDDD = dddStandarizedInRawSubstanceConsumption / dddStandarizedLatest;
-    // 4 - ddds_adjust = ddds × ratio_ddd
-    return {
-        result: ddds_manual * ratioDDD,
-        logs: [
-            ...calculationLogs,
-            {
-                content: `[${new Date().toISOString()}] Substance ${
-                    rawSubstanceConsumptionData.id
-                } - Get ratio_ddd: ${ratioDDD}. Get ddds_adjust from ddds_manual: ${ddds_manual * ratioDDD}.`,
-                messageType: "Debug",
-            },
-        ],
-    };
-}
-
 /**
  * Adjust the number of DDDs based on the ratio of the old and new DDDs.
  *
@@ -439,7 +290,7 @@ function getDDDsAdjust(
  *
  * @return { result: number | undefined; logs: BatchLogContent } - the adjusted number of DDDs and logs.
  */
-function getDDDsAdjust2(
+function getDDDsAdjust(
     rawSubstanceConsumptionData: RawSubstanceConsumptionData,
     oldDDD: DDDData | undefined,
     newDDD: DDDData | undefined,

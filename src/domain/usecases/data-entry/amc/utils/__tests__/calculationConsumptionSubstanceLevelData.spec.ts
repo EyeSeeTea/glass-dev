@@ -7,6 +7,7 @@ import { calculationConsumptionSubstanceLevelBasic } from "./data/calculationCon
 import { ListGlassATCVersions } from "../../../../../entities/GlassAtcVersionData";
 import { SubstanceConsumptionCalculated } from "../../../../../entities/data-entry/amc/SubstanceConsumptionCalculated";
 import { setupLoggerForTesting } from "../../../../../../utils/logger";
+import { calculationConsumptionSubstanceAtcNotFound } from "./data/calculationConsumptionSubstanceAtcNotFound";
 
 describe("Given calculate Consumption Substance Level Data function", () => {
     beforeAll(async () => await setupLoggerForTesting());
@@ -90,7 +91,7 @@ function givenRawSubstanceConsumptionDataByType(type?: string): RawSubstanceCons
 function getExpectedCalculationSolution(type?: string): SubstanceConsumptionCalculated[] {
     const calculationSolutionTypes = {
         basic: calculationConsumptionSubstanceLevelBasic,
-        atcNotFound: calculationConsumptionSubstanceLevelBasic,
+        atcNotFound: calculationConsumptionSubstanceAtcNotFound,
         no_atc_data: [],
     } as Record<string, SubstanceConsumptionCalculated[]>;
 

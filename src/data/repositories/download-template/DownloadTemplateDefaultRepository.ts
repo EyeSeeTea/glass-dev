@@ -1,5 +1,5 @@
 import _ from "lodash";
-import { D2Api, D2Program } from "@eyeseetea/d2-api/2.34";
+import { D2Api, D2Program, SelectedPick } from "@eyeseetea/d2-api/2.34";
 import {
     BuilderMetadata,
     DownloadTemplateRepository,
@@ -20,9 +20,9 @@ import {
 } from "../../../domain/entities/TrackedEntityInstance";
 import { DataPackage } from "../../../domain/entities/data-entry/DataPackage";
 import moment from "moment";
-import { D2TrackerEvent } from "@eyeseetea/d2-api/api/trackerEvents";
-import { D2TrackerTrackedEntity } from "@eyeseetea/d2-api/api/trackerTrackedEntities";
+import { D2TrackerTrackedEntitySchema } from "@eyeseetea/d2-api/api/trackerTrackedEntities";
 import { DataElementType } from "../../../domain/entities/DataForm";
+import { D2TrackerEventSchema } from "@eyeseetea/d2-api/api/trackerEvents";
 
 export interface Program {
     id: Id;
@@ -372,18 +372,7 @@ export class DownloadTemplateDefaultRepository implements DownloadTemplateReposi
             do {
                 result = await this.api.tracker.events
                     .get({
-                        fields: {
-                            $owner: true,
-                            event: true,
-                            dataValues: true,
-                            orgUnit: true,
-                            occurredAt: true,
-                            attributeOptionCombo: true,
-                            latitude: true,
-                            longitude: true,
-                            trackedEntity: true,
-                            programStage: true,
-                        },
+                        fields: eventFields,
                         program: program,
                         orgUnit: orgUnit,
                         totalPages: true,
@@ -458,7 +447,7 @@ async function getTrackedEntityInstances(options: GetOptions): Promise<TrackedEn
     });
 
     // Get TEIs for the first page:
-    const apiTeis: D2TrackerTrackedEntity[] = [];
+    const apiTeis: D2TrackerEntity[] = [];
 
     for (const orgUnit of orgUnits) {
         const trackedEntityInstances = await getTeisFromApi({
@@ -555,8 +544,8 @@ async function getTeisFromApi(options: {
     orgUnit: Ref;
     enrollmentStartDate: Moment | undefined;
     enrollmentEndDate: Moment | undefined;
-}): Promise<D2TrackerTrackedEntity[]> {
-    const trackedEntities: D2TrackerTrackedEntity[] = [];
+}): Promise<D2TrackerEntity[]> {
+    const trackedEntities: D2TrackerEntity[] = [];
     const { api, program, orgUnit, enrollmentStartDate, enrollmentEndDate } = options;
 
     const pageSize = 250;
@@ -571,17 +560,8 @@ async function getTeisFromApi(options: {
                     pageSize,
                     page,
                     totalPages: true,
-                    fields: {
-                        trackedEntity: true,
-                        orgUnit: true,
-                        inactive: true,
-                        attributes: true,
-                        enrollments: true,
-                        relationships: true,
-                        featureType: true,
-                        geometry: true,
-                    },
-
+                    fields: trackedEntitiesFields,
+                    ouMode: "SELECTED",
                     enrollmentEnrolledAfter: enrollmentStartDate?.format("YYYY-MM-DD") ?? "",
                     enrollmentEnrolledBefore: enrollmentEndDate?.format("YYYY-MM-DD") ?? "",
                 })
@@ -598,16 +578,12 @@ async function getTeisFromApi(options: {
     }
 }
 
-function buildTei(
-    metadata: RelationshipMetadata,
-    program: Program,
-    teiApi: D2TrackerTrackedEntity
-): TrackedEntityInstance {
+function buildTei(metadata: RelationshipMetadata, program: Program, teiApi: D2TrackerEntity): TrackedEntityInstance {
     const orgUnit = { id: teiApi.orgUnit };
     const attributesById = _.keyBy(program.attributes, attribute => attribute.id);
 
     const enrollment: Enrollment | undefined = _(teiApi.enrollments)
-        .filter(e => e.program === program.id && orgUnit.id === e.orgUnit)
+        .filter(enrollment => enrollment.program === program.id && orgUnit.id === enrollment.orgUnit)
         .map(enrollmentApi => ({
             id: enrollmentApi.enrollment,
             enrollmentDate: enrollmentApi.enrolledAt,
@@ -761,3 +737,37 @@ async function getConstraintForTypeProgram(
         events: _.flatten(events).map(({ event }) => ({ id: event })),
     };
 }
+
+const trackedEntitiesFields = {
+    trackedEntity: true,
+    orgUnit: true,
+    inactive: true,
+    attributes: true,
+    enrollments: {
+        enrollment: true,
+        program: true,
+        orgUnit: true,
+        enrolledAt: true,
+        occurredAt: true,
+    },
+    relationships: true,
+    featureType: true,
+    geometry: true,
+} as const;
+
+type D2TrackerEntity = SelectedPick<D2TrackerTrackedEntitySchema, typeof trackedEntitiesFields>;
+
+const eventFields = {
+    $owner: true,
+    event: true,
+    dataValues: true,
+    orgUnit: true,
+    occurredAt: true,
+    attributeOptionCombo: true,
+    latitude: true,
+    longitude: true,
+    trackedEntity: true,
+    programStage: true,
+} as const;
+
+type D2TrackerEvent = SelectedPick<D2TrackerEventSchema, typeof eventFields>;

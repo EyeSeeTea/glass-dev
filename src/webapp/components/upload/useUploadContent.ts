@@ -5,6 +5,7 @@ import { useCurrentModuleContext } from "../../contexts/current-module-context";
 import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context";
 import { useCurrentPeriodContext } from "../../contexts/current-period-context";
 import { useCurrentDataSubmissionId } from "../../hooks/useCurrentDataSubmissionId";
+import { Maybe } from "../../../utils/ts-utils";
 
 export type UploadContentState = {
     errorMessage: string;
@@ -23,6 +24,10 @@ export type UploadContentState = {
     dataSubmissionId: string | undefined;
     isRunningCalculation: boolean;
     setIsRunningCalculation: Dispatch<SetStateAction<boolean>>;
+    setPrimaryFileTotalRows: React.Dispatch<React.SetStateAction<Maybe<number>>>;
+    primaryFileTotalRows: Maybe<number>;
+    setSecondaryFileTotalRows: React.Dispatch<React.SetStateAction<Maybe<number>>>;
+    secondaryFileTotalRows: Maybe<number>;
 };
 
 export function useUploadContent(): UploadContentState {
@@ -44,6 +49,8 @@ export function useUploadContent(): UploadContentState {
     const [isLoadingPrimary, setIsLoadingPrimary] = useState<boolean>(false);
     const [isLoadingSecondary, setIsLoadingSecondary] = useState<boolean>(false);
     const [isRunningCalculation, setIsRunningCalculation] = useState<boolean>(false);
+    const [primaryFileTotalRows, setPrimaryFileTotalRows] = useState<number | undefined>(undefined);
+    const [secondaryFileTotalRows, setSecondaryFileTotalRows] = useState<number | undefined>(undefined);
 
     const onSetSecondaryFile = useCallback((maybeFile: File | null) => {
         setSecondaryFile(maybeFile);
@@ -122,5 +129,9 @@ export function useUploadContent(): UploadContentState {
         dataSubmissionId,
         isRunningCalculation,
         setIsRunningCalculation,
+        setPrimaryFileTotalRows,
+        primaryFileTotalRows,
+        setSecondaryFileTotalRows,
+        secondaryFileTotalRows,
     };
 }
