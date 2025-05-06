@@ -61,7 +61,6 @@ export const QuestionnaireActions: React.FC<QuestionnaireHeaderProps> = props =>
                     )}
                 </div>
             )}
-
         </QuestionnaireHeaderStyled>
     );
 };
