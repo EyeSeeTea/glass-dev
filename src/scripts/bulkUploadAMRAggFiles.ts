@@ -29,7 +29,6 @@ import { generateUid } from "../utils/uid";
 import { getD2ApiFromArgs } from "./common";
 import { DataValuesDefaultImportRepository } from "../data/repositories/data-entry/DataValuesDefaultImportRepository";
 
-
 dotenv.config();
 console.log("Base URL:", process.env.REACT_APP_DHIS2_BASE_URL);
 console.log("Auth:", process.env.REACT_APP_DHIS2_AUTH);

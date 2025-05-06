@@ -98,7 +98,6 @@ const QuestionnaireHeaderStyled = styled.div`
         text-align: right;
         margin-bottom: 15px;
     }
-
 `;
 
 const StyledButton = styled(Button)`

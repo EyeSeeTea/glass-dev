@@ -237,28 +237,29 @@ export class GlassUploadsDefaultRepository implements GlassUploadsRepository {
 
     removeAsyncDeletions(uploadIdToRemove: Id[]): FutureData<Id[]> {
         return this.dataStoreClient.listCollection<Id>(DataStoreKeys.ASYNC_DELETIONS).flatMap(asyncDeletionsArray => {
-            console.log('asyncDeletionsArray: ', asyncDeletionsArray);
-            const normalizedUploadsToRemove = asyncDeletionsArray.map(item => {
-                                
-                if (typeof item === 'object') {
-                    return item;  
-                }
+            console.log("asyncDeletionsArray: ", asyncDeletionsArray);
+            const normalizedUploadsToRemove = asyncDeletionsArray
+                .map(item => {
+                    if (typeof item === "object") {
+                        return item;
+                    }
 
-                try {
-                    return JSON.parse(item);  
-                } catch (e) {
-                    console.error('Error parsing string:', e);
-                    return null;  
-                }
-            }).filter(item => item !== null);  
+                    try {
+                        return JSON.parse(item);
+                    } catch (e) {
+                        console.error("Error parsing string:", e);
+                        return null;
+                    }
+                })
+                .filter(item => item !== null);
             //uploadIdToBeDeleted => !uploadIdToRemove.includes(uploadIdToBeDeleted)
-            console.log('normalizedUploadsToRemove: ', normalizedUploadsToRemove);
-            const restAsyncDeletions = normalizedUploadsToRemove.filter(uploadToCheck  => {
+            console.log("normalizedUploadsToRemove: ", normalizedUploadsToRemove);
+            const restAsyncDeletions = normalizedUploadsToRemove.filter(uploadToCheck => {
                 const isIncluded = uploadIdToRemove.includes(uploadToCheck.uploadId);
-                
+
                 return !isIncluded;
             });
-            console.log('restAsyncDeletions: ', restAsyncDeletions);
+            console.log("restAsyncDeletions: ", restAsyncDeletions);
             return this.dataStoreClient.saveObject(DataStoreKeys.ASYNC_DELETIONS, restAsyncDeletions).flatMap(() => {
                 return Future.success(uploadIdToRemove);
             });
