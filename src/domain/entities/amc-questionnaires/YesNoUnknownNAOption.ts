@@ -1,3 +1,5 @@
+import { Option, OptionValue, OptionType } from "./Option";
+
 export const YesNoUnknownNAValues = {
     YES: "YES",
     NO: "NO",
@@ -5,12 +7,8 @@ export const YesNoUnknownNAValues = {
     NA: "NA",
 } as const;
 
-export type YesNoUnknownNAValue = typeof YesNoUnknownNAValues[keyof typeof YesNoUnknownNAValues];
+export type YesNoUnknownNAValue = OptionValue<typeof YesNoUnknownNAValues>;
 
-export type YesNoUnknownNAOption = { code: YesNoUnknownNAValue; name: string };
+export type YesNoUnknownNAOption = OptionType<YesNoUnknownNAValue>;
 
-export function getSafeYesNoUnknownNAValue(value: unknown): YesNoUnknownNAValue | undefined {
-    return Object.values(YesNoUnknownNAValues).includes(value as YesNoUnknownNAValue)
-        ? (value as YesNoUnknownNAValue)
-        : undefined;
-}
+export const yesNoUnknownNAOption = new Option(YesNoUnknownNAValues);

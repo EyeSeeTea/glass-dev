@@ -1,9 +1,11 @@
 import { GeneralAMCQuestionnaire } from "../../../../../domain/entities/amc-questionnaires/GeneralAMCQuestionnaire";
+import { AMClassAMCQuestionnaire } from "../../../../../domain/entities/amc-questionnaires/AMClassAMCQuestionnaire";
 import { Maybe } from "../../../../../utils/ts-utils";
 import { AMCQuestionnaireFormType } from "./AMCQuestionnaireFormType";
 import { FormRule } from "../../../form/presentation-entities/FormRule";
 import { AMCQuestionnaireQuestions } from "../../../../../domain/entities/amc-questionnaires/AMCQuestionnaireQuestions";
 import { getGeneralAMCQuestionnaireFormEntity } from "../getGeneralAMCQuestionnaireFormEntity";
+import { getAMClassAMCQuestionnaireFormEntity } from "../getAMClassAMCQuestionnaireFormEntity";
 
 export type FormLables = {
     errors: Record<string, string>;
@@ -21,13 +23,36 @@ export type GeneralAMCQuestionnaireFormEntity = BaseFormData & {
     entity: Maybe<GeneralAMCQuestionnaire>;
 };
 
-export type QuestionnaireFormEntity = GeneralAMCQuestionnaireFormEntity;
+export type AMClassAMCQuestionnaireFormEntity = BaseFormData & {
+    type: "am-class-questionnaire";
+    entity: Maybe<AMClassAMCQuestionnaire>;
+};
 
-export function getQuestionnaireFormEntity(
-    type: QuestionnaireFormEntity["type"],
+export type QuestionnaireFormEntityMap = {
+    "general-questionnaire": GeneralAMCQuestionnaireFormEntity;
+    "am-class-questionnaire": AMClassAMCQuestionnaireFormEntity;
+};
+
+export type QuestionnaireFormEntity = QuestionnaireFormEntityMap[AMCQuestionnaireFormType];
+
+export function getQuestionnaireFormEntity<T extends AMCQuestionnaireFormType>(
+    type: T,
     amcQuestions: AMCQuestionnaireQuestions,
-    entity?: QuestionnaireFormEntity["entity"]
-): QuestionnaireFormEntity {
+    entity?: QuestionnaireFormEntityMap[T]["entity"]
+): QuestionnaireFormEntityMap[T] {
     // TODO: when more questionnaire types are added, add them here with switch case
-    return getGeneralAMCQuestionnaireFormEntity(amcQuestions, entity);
+    switch (type) {
+        case "general-questionnaire":
+            return getGeneralAMCQuestionnaireFormEntity(
+                amcQuestions,
+                entity as Maybe<GeneralAMCQuestionnaire>
+            ) as QuestionnaireFormEntityMap[T];
+        case "am-class-questionnaire":
+            return getAMClassAMCQuestionnaireFormEntity(
+                amcQuestions,
+                entity as Maybe<AMClassAMCQuestionnaire>
+            ) as QuestionnaireFormEntityMap[T];
+        default:
+            throw new Error(`Unsupported questionnaire type: ${type}`);
+    }
 }
