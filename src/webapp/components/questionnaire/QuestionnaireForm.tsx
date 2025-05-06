@@ -134,14 +134,13 @@ const FormWrapper = styled.div`
     gap: 0px;
 
     .desc {
-         margin-left: 14px;
-         white-space: pre-wrap;
-        }
-        
-    .desc-display * {
-     display: block;
+        margin-left: 14px;
+        white-space: pre-wrap;
     }
-        
+
+    .desc-display * {
+        display: block;
+    }
 `;
 
 function useSaveQuestionnaire(questionnaire: QuestionnaireSelector) {
