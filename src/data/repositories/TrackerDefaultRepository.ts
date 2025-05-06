@@ -38,7 +38,12 @@ export class TrackerDefaultRepository implements TrackerRepository {
                         pageSize: CHUNKED_SIZE,
                     })
                 ).map(response => {
-                    return _.compact(response.instances.map(instance => instance.trackedEntity));
+                    if (response.instances && Array.isArray(response.instances)) {
+                        return _.compact(response.instances.map(instance => instance.trackedEntity));
+                    } else {
+                        console.error(`response.instances for trackedEntity  ${trackEntitiesIdsString} is undefined or not an array:` , response.instances);
+                        return [];
+                    }
                 });
             })
         ).flatMap(trackedEntitiesIds => Future.success(_.flatten(trackedEntitiesIds)));
@@ -59,7 +64,12 @@ export class TrackerDefaultRepository implements TrackerRepository {
                         pageSize: CHUNKED_SIZE,
                     })
                 ).map(response => {
-                    return response.instances.map(instance => instance.event);
+                    if (response.instances && Array.isArray(response.instances)) {
+                        return response.instances.map((instance: { event: string; }) => instance.event);
+                    } else {
+                        console.error(`response.instances for event ${eventIdsString}is undefined or not an array:`, response.instances);
+                        return [];
+                    }
                 });
             })
         ).flatMap(eventIds => Future.success(_.flatten(eventIds)));

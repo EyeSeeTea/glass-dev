@@ -9,9 +9,8 @@ import { MetadataRepository } from "../../../repositories/MetadataRepository";
 import { checkSpecimenPathogen } from "../utils/checkSpecimenPathogen";
 import _ from "lodash";
 import { AMRAggDataValuesImportHelper } from "./AMRAggDataValuesImportHelper";
-
-import { DataValuesImportRepository } from "../../../../data/repositories/data-entry/DataValuesDefaultImportRepository";
 import { RISData } from "../../../entities/data-entry/amr-external/RISData";
+import { DataValuesImportRepository } from "../../../repositories/data-entry/DataValuesImportRepository";
 
 const AMR_AMR_DS_INPUT_FILES_RIS_DS_ID = "CeQPmXgrhHF";
 const AMR_DATA_PATHOGEN_ANTIBIOTIC_BATCHID_CC_ID = "S427AvQESbw";

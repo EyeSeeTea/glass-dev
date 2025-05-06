@@ -51,7 +51,7 @@ import { UsersRepository } from "../domain/repositories/UsersRepository";
 import { DeletePrimaryFileDataUseCase } from "../domain/usecases/data-entry/DeletePrimaryFileDataUseCase";
 import { DeleteSecondaryFileDataUseCase } from "../domain/usecases/data-entry/DeleteSecondaryFileDataUseCase";
 import { DownloadDocumentAsArrayBufferUseCase } from "../domain/usecases/DownloadDocumentAsArrayBufferUseCase";
-
+import * as fs from 'fs';
 const UPLOADED_FILE_STATUS_LOWERCASE = "uploaded";
 const IMPORT_SUMMARY_STATUS_ERROR = "ERROR";
 
@@ -108,18 +108,37 @@ async function main() {
                 console.debug(`Running asynchronous deletion for URL ${envVars.url}`);
 
                 return getAsyncDeletionsFromDatastore(glassUploadsRepository).run(
-                    uploadIdsToDelete => {
-                        if (uploadIdsToDelete && uploadIdsToDelete.length > 0) {
+                    (uploadIdsToDelete: any[]) => {           
+                        
+                        if ( uploadIdsToDelete && uploadIdsToDelete.length > 0) {
                             console.debug(
                                 `There are ${uploadIdsToDelete.length} uploaded datasets marked for deletion`
                             );
+
+                            const normalizedUploads = uploadIdsToDelete.map(item => {
+                                
+                                if (typeof item === 'object') {
+                                    return item;  
+                                }
+
+                                try {
+                                    return JSON.parse(item);  
+                                } catch (e) {
+                                    console.error('Error parsing string:', e);
+                                    return null;  
+                                }
+                            }).filter(item => item !== null);  
+
                             return Future.joinObj({
                                 glassModules: getGlassModulesFromDatastore(glassModuleRepository),
                                 allUploads: getGlassUploadsDatastore(glassUploadsRepository),
                             }).run(
                                 ({ glassModules, allUploads }) => {
-                                    const uploadsToDelete: GlassUploadsWithModuleName[] = allUploads
-                                        .filter(upload => uploadIdsToDelete.includes(upload.id))
+
+                                const uploadsToDelete: GlassUploadsWithModuleName[] = allUploads
+                                        .filter(upload =>
+                                            normalizedUploads.some(item => item.uploadId === upload.id)
+                                        )
                                         .map(upload => {
                                             const moduleName = glassModules.find(
                                                 module => module.id === upload.module
@@ -138,6 +157,21 @@ async function main() {
 
                                     if (uploadsToDelete.length === 0) {
                                         console.error(`ERROR - Uploads to delete not found in Datastore`);
+                                        const remainingUploads = normalizedUploads.filter(item => !uploadsToDelete.includes(item.uploadId));
+
+                                        remainingUploads.forEach(item => {
+                                            console.log('Remaining upload:', item);
+                                            removeAsyncDeletionsFromDatastore(
+                                                item,
+                                                glassUploadsRepository
+                                            ).flatMap(() => {
+                                                console.debug(
+                                                    `SUCCESS - Deleted async-deletions id from Datastore ${item}`
+                                                );
+                                                return Future.success(undefined);
+                                            });
+                                        });
+                                         
                                         return Future.error(`Uploads to delete not found in Datastore`);
                                     }
 
@@ -379,7 +413,7 @@ function deleteUploadedDatasets(
         amcSubstanceDataRepository: AMCSubstanceDataRepository;
     }
 ): FutureData<void> {
-    console.log(uploadsToDelete);
+    
     return Future.sequential(
         uploadsToDelete.map(uploadToDelete => {
             return Future.fromPromise(new Promise(resolve => setTimeout(resolve, 500))).flatMap(() => {
