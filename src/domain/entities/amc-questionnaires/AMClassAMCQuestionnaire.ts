@@ -7,6 +7,7 @@ import { AntimicrobialClassValue } from "./AntimicrobialClassOption";
 import { HealthSectorValue, HealthSectorValues } from "./HealthSectorOption";
 import { HealthLevelValue, HealthLevelValues } from "./HealthLevelOption";
 import { Proportion50to100Value } from "./Proportion50to100Option";
+import { Id } from "../Base";
 
 export type AMClassAMCQuestionnaireResponsesAttributes = {
     antimicrobialClass: AntimicrobialClassValue;
@@ -19,7 +20,12 @@ export type AMClassAMCQuestionnaireResponsesAttributes = {
 
 export type AMClassAMCQuestionId = keyof AMClassAMCQuestionnaireResponsesAttributes;
 
-export type AMClassAMCQuestionnaireAttributes = AMClassAMCQuestionnaireResponsesAttributes;
+export type AMClassAMCQuestionnaireBaseAttributes = {
+    id: Id;
+};
+
+export type AMClassAMCQuestionnaireAttributes = AMClassAMCQuestionnaireBaseAttributes &
+    AMClassAMCQuestionnaireResponsesAttributes;
 
 export class AMClassAMCQuestionnaire extends Struct<AMClassAMCQuestionnaireAttributes>() {
     static validateAndCreate(

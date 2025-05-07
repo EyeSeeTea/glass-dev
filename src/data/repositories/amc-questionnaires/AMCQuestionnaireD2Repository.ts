@@ -4,7 +4,7 @@ import {
 } from "../../../domain/entities/amc-questionnaires/GeneralAMCQuestionnaire";
 import { Id } from "../../../domain/entities/Base";
 import { Future, FutureData } from "../../../domain/entities/Future";
-import { GeneralAMCQuestionnaireRepository } from "../../../domain/repositories/amc-questionnaires/GeneralAMCQuestionnaireRepository";
+import { AMCQuestionnaireRepository } from "../../../domain/repositories/amc-questionnaires/AMCQuestionnaireRepository";
 import {
     D2Api,
     SelectedPick,
@@ -19,6 +19,7 @@ import { yesNoOption } from "../../../domain/entities/amc-questionnaires/YesNoOp
 import { yesNoUnknownNAOption } from "../../../domain/entities/amc-questionnaires/YesNoUnknownNAOption";
 import { yesNoUnknownOption } from "../../../domain/entities/amc-questionnaires/YesNoUnknownOption";
 import {
+    AMR_GLASS_AMC_AM_CLASS_QUESTIONNAIRE_STAGE_ID,
     AMR_GLASS_PRO_AMC_DQ_PROGRAM_ID,
     AMR_TET_AMC_DQuestionnaire_TRACKED_ENTITY_TYPE_ID,
     codesByGeneralAMCQuestionnaire,
@@ -29,32 +30,38 @@ import { D2ProgramMetadata, getAMCQuestionnaireProgramMetadata } from "./getAMCQ
 import { getISODateAsLocaleDateString, getIsoDateForPeriod } from "./dateTimeHelpers";
 import { importApiTracker } from "../utils/importApiTracker";
 import { Maybe } from "../../../types/utils";
+import { AMCQuestionnaire } from "../../../domain/entities/amc-questionnaires/AMCQuestionnaire";
+import { D2TrackerEventSchema } from "@eyeseetea/d2-api/api/trackerEvents";
+import { AMClassAMCQuestionnaire } from "../../../domain/entities/amc-questionnaires/AMClassAMCQuestionnaire";
+import { getProgramStage } from "../utils/MetadataHelper";
+import {
+    mapAMClassAMCQuestionnaireToD2Event,
+    mapD2EventToAMClassAMCQuestionnaire,
+} from "./AMClassAMCQuestionnaireMapper";
 
-export class GeneralAMCQuestionnaireD2Repository implements GeneralAMCQuestionnaireRepository {
+export class AMCQuestionnaireD2Repository implements AMCQuestionnaireRepository {
     constructor(private api: D2Api) {}
 
-    public getById(id: Id, orgUnitId: Id, period: string): FutureData<GeneralAMCQuestionnaire> {
-        return this.getTrackedEntity({ id: id, orgUnitId: orgUnitId, period: period })
-            .flatMap((maybeTrackedEntity: Maybe<D2TrackedEntity>) =>
-                assertOrError(maybeTrackedEntity, "General AMC Questionnaire")
-            )
-            .flatMap((trackedEntity: D2TrackedEntity) => {
-                return this.mapTrackedEntityAttributesToGeneralAMCQuestionnaire(
-                    trackedEntity,
-                    orgUnitId,
-                    period
-                ).flatMap(generalAMCQuestionnaire => {
-                    if (!generalAMCQuestionnaire) {
-                        return Future.error("General AMC Questionnaire not found");
-                    }
-
-                    return Future.success(generalAMCQuestionnaire);
-                });
-            });
+    public getById(id: Id, orgUnitId: Id, period: string): FutureData<AMCQuestionnaire> {
+        return this.get({ id: id, orgUnitId: orgUnitId, period: period }).flatMap(res =>
+            assertOrError(res, "AMC Questionnaire not found")
+        );
     }
 
-    public getByOrgUnitAndPeriod(orgUnitId: Id, period: string): FutureData<Maybe<GeneralAMCQuestionnaire>> {
-        return this.getTrackedEntity({ orgUnitId: orgUnitId, period: period }).flatMap(
+    public getByOrgUnitAndPeriod(orgUnitId: Id, period: string): FutureData<Maybe<AMCQuestionnaire>> {
+        return this.get({ orgUnitId: orgUnitId, period: period });
+    }
+
+    private getGeneralAMCQuestionnaire({
+        id,
+        orgUnitId,
+        period,
+    }: {
+        id?: Id;
+        orgUnitId: Id;
+        period: string;
+    }): FutureData<Maybe<GeneralAMCQuestionnaire>> {
+        return this.getTrackedEntity({ id, orgUnitId, period }).flatMap(
             (maybeTrackedEntity: Maybe<D2TrackedEntity>) => {
                 if (!maybeTrackedEntity) {
                     return Future.success(undefined);
@@ -100,6 +107,78 @@ export class GeneralAMCQuestionnaireD2Repository implements GeneralAMCQuestionna
                 }
             );
         });
+    }
+
+    public saveAmClassQuestionnaire(amClassAMCQuestionnaire: AMClassAMCQuestionnaire): FutureData<Id> {
+        return getProgramStage(this.api, AMR_GLASS_AMC_AM_CLASS_QUESTIONNAIRE_STAGE_ID)
+            .flatMap(programStageResponse =>
+                assertOrError(programStageResponse.objects[0], "AM_CLASS_QUESTIONNAIRE Program stage not found")
+            )
+            .flatMap(programStage => {
+                const d2Event = mapAMClassAMCQuestionnaireToD2Event(amClassAMCQuestionnaire, programStage);
+                return importApiTracker(this.api, { events: [d2Event] }, "CREATE_AND_UPDATE").flatMap(saveResponse => {
+                    const amClassAMCQuestionnaireId =
+                        saveResponse.bundleReport.typeReportMap.EVENT.objectReports[0]?.uid;
+
+                    if (saveResponse.status === "ERROR" || !amClassAMCQuestionnaireId) {
+                        return Future.error(
+                            `Error saving AM Class AMC questionnaire: ${saveResponse.validationReport.errorReports
+                                .map(e => e.message)
+                                .join(", ")}`
+                        );
+                    } else {
+                        return Future.success(amClassAMCQuestionnaireId);
+                    }
+                });
+            });
+    }
+
+    private get({
+        id,
+        orgUnitId,
+        period,
+    }: {
+        id?: Id;
+        orgUnitId: Id;
+        period: string;
+    }): FutureData<Maybe<AMCQuestionnaire>> {
+        return this.getGeneralAMCQuestionnaire({ id, orgUnitId, period }).flatMap(
+            (generalAMCQuestionnaire: Maybe<GeneralAMCQuestionnaire>) => {
+                if (!generalAMCQuestionnaire) {
+                    return Future.success(undefined);
+                }
+                return this.getAmClassQuestionnairesInAggregateRoot(generalAMCQuestionnaire.id, orgUnitId).map(
+                    amClassAMCQuestionnaires => {
+                        console.log("amClassQuestionnaires", amClassAMCQuestionnaires);
+                        return new AMCQuestionnaire({
+                            id: generalAMCQuestionnaire.id,
+                            orgUnitId: orgUnitId,
+                            period: period,
+                            generalQuestionnaire: generalAMCQuestionnaire,
+                            amClassQuestionnaires: amClassAMCQuestionnaires,
+                        });
+                    }
+                );
+            }
+        );
+    }
+
+    private getAmClassQuestionnairesInAggregateRoot(id: Id, orgUnitId: Id): FutureData<AMClassAMCQuestionnaire[]> {
+        return this.getEventsFromSection(id, orgUnitId, AMR_GLASS_AMC_AM_CLASS_QUESTIONNAIRE_STAGE_ID).map(events => {
+            return events.map(event => mapD2EventToAMClassAMCQuestionnaire(event));
+        });
+    }
+
+    private getEventsFromSection(trackedEntityId: Id, orgUnitId: Id, sectionId: Id): FutureData<D2Event[]> {
+        return apiToFuture(
+            this.api.tracker.events.get({
+                program: AMR_GLASS_PRO_AMC_DQ_PROGRAM_ID,
+                orgUnit: orgUnitId,
+                trackedEntity: trackedEntityId,
+                programStage: sectionId,
+                fields: eventFields,
+            })
+        ).flatMap(response => assertOrError(response.instances, "section events not found for " + sectionId));
     }
 
     private getTrackedEntity(options: { id?: Id; orgUnitId: Id; period: string }): FutureData<Maybe<D2TrackedEntity>> {
@@ -323,3 +402,21 @@ const trackedEntitiesFields = {
 } as const;
 
 type D2TrackedEntity = SelectedPick<D2TrackerTrackedEntitySchema, typeof trackedEntitiesFields>;
+
+const dataElementFields = {
+    id: true,
+    code: true,
+    name: true,
+} as const;
+
+const eventFields = {
+    dataValues: {
+        dataElement: dataElementFields,
+        value: true,
+    },
+    trackedEntity: true,
+    event: true,
+    updatedAt: true,
+} as const;
+
+export type D2Event = SelectedPick<D2TrackerEventSchema, typeof eventFields>;
