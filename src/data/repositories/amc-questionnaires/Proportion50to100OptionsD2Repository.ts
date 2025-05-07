@@ -9,7 +9,7 @@ export class Proportion50to100OptionsD2Repository
     extends OptionsD2Repository<Proportion50to100Value>
     implements Proportion50to100OptionsRepository
 {
-    protected optionSetCode = "tN1llzoUZKV"; // TODO: replace with the actual option set code
+    protected optionSetCode = "Wj4OnCYc3V0";
     protected optionSetName = "Proportion 50 to 100 OptionSet";
     protected options = proportion50to100Option;
 }

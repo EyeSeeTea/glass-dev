@@ -1,12 +1,12 @@
 import { Option, OptionType, OptionValue } from "./Option";
 
 export const Proportion50to100Values = {
-    PROP_50_59: "50%-59%",
-    PROP_60_69: "60%-69%",
-    PROP_70_79: "70%-79%",
-    PROP_80_89: "80%-89%",
-    PROP_90_99: "90%-99%",
-    PROP_100: "100%",
+    PROP_50_59: "PROP_50_59",
+    PROP_60_69: "PROP_60_69",
+    PROP_70_79: "PROP_70_79",
+    PROP_80_89: "PROP_80_89",
+    PROP_90_99: "PROP_90_99",
+    PROP_100: "PROP_100",
 } as const;
 
 export type Proportion50to100Value = OptionValue<typeof Proportion50to100Values>;
