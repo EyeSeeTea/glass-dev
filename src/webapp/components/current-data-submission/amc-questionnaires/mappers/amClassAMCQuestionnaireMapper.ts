@@ -53,7 +53,8 @@ export function mapFormStateToAMClassAMCQuestionnaire(
         throw new Error("Missing required AM Class AMC Questionnaire attributes");
     }
 
-    const generalAMCQuestionnaireAttributes: AMClassAMCQuestionnaireAttributes = {
+    const amClassAMCQuestionnaireAttributes: AMClassAMCQuestionnaireAttributes = {
+        id: "",
         antimicrobialClass,
         healthSector,
         healthLevel,
@@ -63,7 +64,7 @@ export function mapFormStateToAMClassAMCQuestionnaire(
     };
 
     const generalAMCQuestionnaireValidation = AMClassAMCQuestionnaire.validateAndCreate(
-        generalAMCQuestionnaireAttributes
+        amClassAMCQuestionnaireAttributes
     );
     const validGeneralAMCQuestionnaire = generalAMCQuestionnaireValidation.match({
         error: () => undefined,

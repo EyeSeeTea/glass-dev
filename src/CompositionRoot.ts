@@ -106,8 +106,7 @@ import { GlassAsyncUploadsDefaultRepository } from "./data/repositories/GlassAsy
 import { SetAsyncUploadsUseCase } from "./domain/usecases/SetAsyncUploadsUseCase";
 import { RemoveAsyncUploadByIdUseCase } from "./domain/usecases/RemoveAsyncUploadByIdUseCase";
 import { RemoveAsyncUploadsUseCase } from "./domain/usecases/RemoveAsyncUploadsUseCase";
-import { GetGeneralAMCQuestionnaireByIdUseCase } from "./domain/usecases/amc-questionnaires/GetGeneralAMCQuestionnaireByIdUseCase";
-import { GeneralAMCQuestionnaireD2Repository } from "./data/repositories/amc-questionnaires/GeneralAMCQuestionnaireD2Repository";
+import { AMCQuestionnaireD2Repository } from "./data/repositories/amc-questionnaires/AMCQuestionnaireD2Repository";
 import { YesNoOptionsD2Repository } from "./data/repositories/amc-questionnaires/YesNoOptionsD2Repository";
 import { GetYesNoOptionsUseCase } from "./domain/usecases/amc-questionnaires/GetYesNoOptionsUseCase";
 import { YesNoUnknownOptionsD2Repository } from "./data/repositories/amc-questionnaires/YesNoUnknownOptionsD2Repository";
@@ -119,13 +118,14 @@ import { GetAntimicrobialClassOptionsUseCase } from "./domain/usecases/amc-quest
 import { QuestionsAMCQuestionnaireD2Repository } from "./data/repositories/amc-questionnaires/QuestionsAMCQuestionnaireD2Repository";
 import { GetQuestionsAMCQuestionnaireUseCase } from "./domain/usecases/amc-questionnaires/GetQuestionsAMCQuestionnaireUseCase";
 import { SaveGeneralAMCQuestionnaireUseCase } from "./domain/usecases/amc-questionnaires/SaveGeneralAMCQuestionnaireUseCase";
-import { GetGeneralAMCQuestionnaireByOrgUnitAndPeriodUseCase } from "./domain/usecases/amc-questionnaires/GetGeneralAMCQuestionnaireByOrgUnitAndPeriodUseCase";
 import { HealthLevelOptionsD2Repository } from "./data/repositories/amc-questionnaires/HealthLevelOptionsD2Repository";
 import { GetHealthLevelOptionsUseCase } from "./domain/usecases/amc-questionnaires/GetHealthLevelOptionsUseCase";
 import { HealthSectorOptionsD2Repository } from "./data/repositories/amc-questionnaires/HealthSectorOptionsD2Repository";
 import { GetHealthSectorOptionsUseCase } from "./domain/usecases/amc-questionnaires/GetHealthSectorOptionsUseCase";
 import { Proportion50to100OptionsD2Repository } from "./data/repositories/amc-questionnaires/Proportion50to100OptionsD2Repository";
 import { GetProportion50to100OptionsUseCase } from "./domain/usecases/amc-questionnaires/GetProportion50to100OptionsUseCase";
+import { GetAMCQuestionnaireByOrgUnitAndPeriodUseCase } from "./domain/usecases/amc-questionnaires/GetAMCQuestionnaireByOrgUnitAndPeriodUseCase";
+import { GetAMCQuestionnaireByIdUseCase } from "./domain/usecases/amc-questionnaires/GetAMCQuestionnaireByIdUseCase";
 
 export function getCompositionRoot(instance: Instance) {
     const api = getD2APiFromInstance(instance);
@@ -166,7 +166,7 @@ export function getCompositionRoot(instance: Instance) {
     const glassAsyncDeletionsRepository = new GlassAsyncDeletionsDefaultRepository(dataStoreClient);
     const encryptionRepository = new EncryptionDefaultRepository(api);
     const glassAsyncUploadsRepository = new GlassAsyncUploadsDefaultRepository(dataStoreClient);
-    const generalAMCQuestionnaireRepository = new GeneralAMCQuestionnaireD2Repository(api);
+    const amcQuestionnaireRepository = new AMCQuestionnaireD2Repository(api);
     const questionsAMCQuestionnaireRepository = new QuestionsAMCQuestionnaireD2Repository(api);
     const yesNoOptionsRepository = new YesNoOptionsD2Repository(api);
     const yesNoUnknownOptionsRepository = new YesNoUnknownOptionsD2Repository(api);
@@ -394,11 +394,9 @@ export function getCompositionRoot(instance: Instance) {
         }),
 
         amcQuestionnaires: getExecute({
-            getGeneralById: new GetGeneralAMCQuestionnaireByIdUseCase(generalAMCQuestionnaireRepository),
-            getGeneralByOrgUnitAndPeriod: new GetGeneralAMCQuestionnaireByOrgUnitAndPeriodUseCase(
-                generalAMCQuestionnaireRepository
-            ),
-            saveGeneral: new SaveGeneralAMCQuestionnaireUseCase(generalAMCQuestionnaireRepository),
+            getById: new GetAMCQuestionnaireByIdUseCase(amcQuestionnaireRepository),
+            getByOrgUnitAndPeriod: new GetAMCQuestionnaireByOrgUnitAndPeriodUseCase(amcQuestionnaireRepository),
+            saveGeneral: new SaveGeneralAMCQuestionnaireUseCase(amcQuestionnaireRepository),
             getQuestions: new GetQuestionsAMCQuestionnaireUseCase(questionsAMCQuestionnaireRepository),
             getYesNoOptions: new GetYesNoOptionsUseCase(yesNoOptionsRepository),
             getYesNoUnknownOptions: new GetYesNoUnknownOptionsUseCase(yesNoUnknownOptionsRepository),

@@ -16,6 +16,7 @@ import { useAMCQuestionnaireOptionsContext } from "../../../contexts/amc-questio
 import { updateAndValidateFormState } from "../../form/presentation-entities/utils/updateAndValidateFormState";
 import { GeneralAMCQuestionnaire } from "../../../../domain/entities/amc-questionnaires/GeneralAMCQuestionnaire";
 import { amcQuestionnaireMappers } from "./mappers";
+import { useAMCQuestionnaireContext } from "../../../contexts/amc-questionnaire-context";
 
 export type GlobalMessage = {
     text: string;
@@ -64,6 +65,7 @@ export function useAMCQuestionnaireForm<T extends AMCQuestionnaireFormType>(para
     const { formType, id, orgUnitId, period, isViewOnlyMode = false } = params;
 
     const { compositionRoot } = useAppContext();
+    const { questionnaire } = useAMCQuestionnaireContext();
     const options = useAMCQuestionnaireOptionsContext();
 
     const [globalMessage, setGlobalMessage] = useState<Maybe<GlobalMessage>>();
@@ -100,36 +102,27 @@ export function useAMCQuestionnaireForm<T extends AMCQuestionnaireFormType>(para
 
     useEffect(() => {
         if (amcQuestions && options) {
-            if (id) {
+            if (questionnaire?.id) {
                 switch (formType) {
                     case "general-questionnaire":
-                        compositionRoot.amcQuestionnaires.getGeneralById(id, orgUnitId, period).run(
-                            generalAMCQuestionnaire => {
-                                const formEntity = getQuestionnaireFormEntity(
-                                    formType,
-                                    amcQuestions,
-                                    generalAMCQuestionnaire
-                                );
-                                setQuestionnaireFormEntity(formEntity);
-                                setFormLabels(formEntity.labels);
-                                setFormState({
-                                    kind: "loaded",
-                                    data: amcQuestionnaireMappers[formType].mapEntityToFormState({
-                                        questionnaireFormEntity: formEntity,
-                                        editMode: isEditMode,
-                                        options: options,
-                                        isViewOnlyMode: isViewOnlyMode,
-                                    }),
-                                });
-                            },
-                            error => {
-                                console.debug(error);
-                                setGlobalMessage({
-                                    type: "error",
-                                    text: `Error loading General AMC Questionnaire: ${error}`,
-                                });
-                            }
-                        );
+                        {
+                            const formEntity = getQuestionnaireFormEntity(
+                                formType,
+                                amcQuestions,
+                                questionnaire?.generalQuestionnaire
+                            );
+                            setQuestionnaireFormEntity(formEntity);
+                            setFormLabels(formEntity.labels);
+                            setFormState({
+                                kind: "loaded",
+                                data: amcQuestionnaireMappers[formType].mapEntityToFormState({
+                                    questionnaireFormEntity: formEntity,
+                                    editMode: isEditMode,
+                                    options: options,
+                                    isViewOnlyMode: isViewOnlyMode,
+                                }),
+                            });
+                        }
                         break;
                     default:
                         break;
@@ -159,6 +152,7 @@ export function useAMCQuestionnaireForm<T extends AMCQuestionnaireFormType>(para
         orgUnitId,
         period,
         isViewOnlyMode,
+        questionnaire,
     ]);
 
     const handleFormChange = useCallback(
