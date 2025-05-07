@@ -1,12 +1,5 @@
 import { D2TrackerEventSchema } from "@eyeseetea/d2-api/api/trackerEvents";
-import {
-    D2Api,
-    SelectedPick,
-    D2TrackerTrackedEntitySchema,
-    D2TrackedEntityInstanceToPost,
-    AttributeToPost,
-    D2TrackerEnrollmentToPost,
-} from "../../../types/d2-api";
+import { SelectedPick, D2TrackerTrackedEntitySchema } from "../../../types/d2-api";
 
 export const trackedEntitiesFields = {
     orgUnit: true,
