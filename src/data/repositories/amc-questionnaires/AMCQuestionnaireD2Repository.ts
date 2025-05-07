@@ -31,13 +31,13 @@ import { getISODateAsLocaleDateString, getIsoDateForPeriod } from "./dateTimeHel
 import { importApiTracker } from "../utils/importApiTracker";
 import { Maybe } from "../../../types/utils";
 import { AMCQuestionnaire } from "../../../domain/entities/amc-questionnaires/AMCQuestionnaire";
-import { D2TrackerEventSchema } from "@eyeseetea/d2-api/api/trackerEvents";
 import { AMClassAMCQuestionnaire } from "../../../domain/entities/amc-questionnaires/AMClassAMCQuestionnaire";
 import { getProgramStage } from "../utils/MetadataHelper";
 import {
     mapAMClassAMCQuestionnaireToD2Event,
     mapD2EventToAMClassAMCQuestionnaire,
 } from "./AMClassAMCQuestionnaireMapper";
+import { D2Event, D2TrackedEntity, eventFields, trackedEntitiesFields } from "./D2Types";
 
 export class AMCQuestionnaireD2Repository implements AMCQuestionnaireRepository {
     constructor(private api: D2Api) {}
@@ -109,28 +109,35 @@ export class AMCQuestionnaireD2Repository implements AMCQuestionnaireRepository 
         });
     }
 
-    public saveAmClassQuestionnaire(amClassAMCQuestionnaire: AMClassAMCQuestionnaire): FutureData<Id> {
-        return getProgramStage(this.api, AMR_GLASS_AMC_AM_CLASS_QUESTIONNAIRE_STAGE_ID)
-            .flatMap(programStageResponse =>
-                assertOrError(programStageResponse.objects[0], "AM_CLASS_QUESTIONNAIRE Program stage not found")
-            )
-            .flatMap(programStage => {
-                const d2Event = mapAMClassAMCQuestionnaireToD2Event(amClassAMCQuestionnaire, programStage);
-                return importApiTracker(this.api, { events: [d2Event] }, "CREATE_AND_UPDATE").flatMap(saveResponse => {
-                    const amClassAMCQuestionnaireId =
-                        saveResponse.bundleReport.typeReportMap.EVENT.objectReports[0]?.uid;
+    saveAMClassQuestionnaire(questionnaireId: Id, amClassAMCQuestionnaire: AMClassAMCQuestionnaire): FutureData<Id> {
+        return Future.joinObj({
+            programStageResponse: getProgramStage(this.api, AMR_GLASS_AMC_AM_CLASS_QUESTIONNAIRE_STAGE_ID),
+            trackedEntity: this.getTrackedEntityById(questionnaireId),
+        }).flatMap(({ programStageResponse, trackedEntity }) => {
+            const programStage = programStageResponse.objects[0];
+            if (!programStage) {
+                return Future.error("Program stage not found");
+            }
 
-                    if (saveResponse.status === "ERROR" || !amClassAMCQuestionnaireId) {
-                        return Future.error(
-                            `Error saving AM Class AMC questionnaire: ${saveResponse.validationReport.errorReports
-                                .map(e => e.message)
-                                .join(", ")}`
-                        );
-                    } else {
-                        return Future.success(amClassAMCQuestionnaireId);
-                    }
-                });
+            if (!trackedEntity) {
+                return Future.error("Tracked entity not found");
+            }
+            const d2Event = mapAMClassAMCQuestionnaireToD2Event(amClassAMCQuestionnaire, programStage, trackedEntity);
+            return importApiTracker(this.api, { events: [d2Event] }, "CREATE_AND_UPDATE").flatMap(saveResponse => {
+                const amClassAMCQuestionnaireId =
+                    saveResponse?.bundleReport?.typeReportMap?.EVENT.objectReports[0]?.uid;
+
+                if (saveResponse.status === "ERROR" || !amClassAMCQuestionnaireId) {
+                    return Future.error(
+                        `Error saving AM Class AMC questionnaire: ${saveResponse.validationReport.errorReports
+                            .map(e => e.message)
+                            .join(", ")}`
+                    );
+                } else {
+                    return Future.success(amClassAMCQuestionnaireId);
+                }
             });
+        });
     }
 
     private get({
@@ -179,6 +186,24 @@ export class AMCQuestionnaireD2Repository implements AMCQuestionnaireRepository 
                 fields: eventFields,
             })
         ).flatMap(response => assertOrError(response.instances, "section events not found for " + sectionId));
+    }
+
+    private getTrackedEntityById(id: Id): FutureData<Maybe<D2TrackedEntity>> {
+        return apiToFuture(
+            this.api.tracker.trackedEntities.get({
+                program: AMR_GLASS_PRO_AMC_DQ_PROGRAM_ID,
+                ouMode: "ALL",
+                trackedEntity: id,
+                fields: trackedEntitiesFields,
+            })
+        ).flatMap(response => {
+            if (response.instances.length === 0) {
+                return Future.success(undefined);
+            }
+
+            const trackedEntity = response.instances[0];
+            return Future.success(trackedEntity);
+        });
     }
 
     private getTrackedEntity(options: { id?: Id; orgUnitId: Id; period: string }): FutureData<Maybe<D2TrackedEntity>> {
@@ -374,49 +399,3 @@ export class AMCQuestionnaireD2Repository implements AMCQuestionnaireRepository 
 function getValueFromMap(key: keyof typeof codesByGeneralAMCQuestionnaire, trackedEntity: D2TrackedEntity): string {
     return trackedEntity.attributes?.find(a => a.code === codesByGeneralAMCQuestionnaire[key])?.value ?? "";
 }
-
-const trackedEntitiesFields = {
-    orgUnit: true,
-    trackedEntity: true,
-    updatedAt: true,
-    createdAt: true,
-    enrollments: {
-        enrollment: true,
-        status: true,
-        enrolledAt: true,
-        occurredAt: true,
-        events: {
-            enrollment: true,
-            event: true,
-            occurredAt: true,
-            orgUnit: true,
-            program: true,
-            programStage: true,
-            dataValues: {
-                dataElement: true,
-                value: true,
-            },
-        },
-    },
-    attributes: true,
-} as const;
-
-type D2TrackedEntity = SelectedPick<D2TrackerTrackedEntitySchema, typeof trackedEntitiesFields>;
-
-const dataElementFields = {
-    id: true,
-    code: true,
-    name: true,
-} as const;
-
-const eventFields = {
-    dataValues: {
-        dataElement: dataElementFields,
-        value: true,
-    },
-    trackedEntity: true,
-    event: true,
-    updatedAt: true,
-} as const;
-
-export type D2Event = SelectedPick<D2TrackerEventSchema, typeof eventFields>;

@@ -53,6 +53,13 @@ export const codesByAMClassAMCQuestionnaire: Record<AMClassAMCQuestionId, string
     estVolumeCommunityHealthLevel: "AMR_GLASS_AMC_DE_VOL_COMM",
 } as const;
 
+export type AMClassAMCQuestionnaireCode =
+    typeof codesByAMClassAMCQuestionnaire[keyof typeof codesByAMClassAMCQuestionnaire];
+
+export function isStringInAMClassAMCQuestionnaireCodes(code: string): code is AMClassAMCQuestionnaireCode {
+    return (Object.values(codesByAMClassAMCQuestionnaire) as string[]).includes(code);
+}
+
 export const AMClassAMCQuestionnaireByTEAIds: Record<Id, AMClassAMCQuestionId> = {
     EUh63YWEA62: "antimicrobialClass",
     U51LiIT3mKk: "healthSector",

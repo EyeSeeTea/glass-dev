@@ -126,6 +126,7 @@ import { Proportion50to100OptionsD2Repository } from "./data/repositories/amc-qu
 import { GetProportion50to100OptionsUseCase } from "./domain/usecases/amc-questionnaires/GetProportion50to100OptionsUseCase";
 import { GetAMCQuestionnaireByOrgUnitAndPeriodUseCase } from "./domain/usecases/amc-questionnaires/GetAMCQuestionnaireByOrgUnitAndPeriodUseCase";
 import { GetAMCQuestionnaireByIdUseCase } from "./domain/usecases/amc-questionnaires/GetAMCQuestionnaireByIdUseCase";
+import { SaveAMClassAMCQuestionnaireUseCase } from "./domain/usecases/amc-questionnaires/SaveAMClassAMCQuestionnaireUseCase";
 
 export function getCompositionRoot(instance: Instance) {
     const api = getD2APiFromInstance(instance);
@@ -397,6 +398,7 @@ export function getCompositionRoot(instance: Instance) {
             getById: new GetAMCQuestionnaireByIdUseCase(amcQuestionnaireRepository),
             getByOrgUnitAndPeriod: new GetAMCQuestionnaireByOrgUnitAndPeriodUseCase(amcQuestionnaireRepository),
             saveGeneral: new SaveGeneralAMCQuestionnaireUseCase(amcQuestionnaireRepository),
+            saveAmClass: new SaveAMClassAMCQuestionnaireUseCase(amcQuestionnaireRepository),
             getQuestions: new GetQuestionsAMCQuestionnaireUseCase(questionsAMCQuestionnaireRepository),
             getYesNoOptions: new GetYesNoOptionsUseCase(yesNoOptionsRepository),
             getYesNoUnknownOptions: new GetYesNoUnknownOptionsUseCase(yesNoUnknownOptionsRepository),

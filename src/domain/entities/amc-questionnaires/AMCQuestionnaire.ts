@@ -23,13 +23,13 @@ export class AMCQuestionnaire extends Struct<AMCQuestionnaireAttrs>() {
 
     public addAMClassQuestionnaire(
         amClassQuestionnaire: AMClassAMCQuestionnaire
-    ): Either<ValidationErrorKey, AMCQuestionnaireAttrs> {
+    ): Either<ValidationErrorKey[], AMCQuestionnaireAttrs> {
         const existingAMClassQuestionnaire = this.amClassQuestionnaires.find(
             amQuestionnaire => amQuestionnaire.antimicrobialClass === amClassQuestionnaire.antimicrobialClass
         );
 
         if (existingAMClassQuestionnaire) {
-            return Either.error(ValidationErrorKey.CANNOT_CREATE_DUPLICATE_AM_CLASS_QUESTIONNAIRE);
+            return Either.error([ValidationErrorKey.CANNOT_CREATE_DUPLICATE_AM_CLASS_QUESTIONNAIRE]);
         }
         // TODO: check there is no amClassQuestionnaire if the boolean is false in the general questionnaire
 

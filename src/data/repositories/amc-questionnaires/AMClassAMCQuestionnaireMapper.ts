@@ -1,12 +1,18 @@
-import { SelectedPick } from "../../../types/d2-api";
-import { D2TrackerEventSchema, D2TrackerEventToPost } from "@eyeseetea/d2-api/api/trackerEvents";
+import { D2TrackerEventToPost } from "@eyeseetea/d2-api/api/trackerEvents";
 import { AMClassAMCQuestionnaire } from "../../../domain/entities/amc-questionnaires/AMClassAMCQuestionnaire";
-import { AMClassAMCQuestionnaireByTEAIds, codesByAMClassAMCQuestionnaire } from "./AMCQuestionnaireConstants";
+import {
+    AMClassAMCQuestionnaireByTEAIds,
+    AMClassAMCQuestionnaireCode,
+    AMR_GLASS_PRO_AMC_DQ_PROGRAM_ID,
+    codesByAMClassAMCQuestionnaire,
+    isStringInAMClassAMCQuestionnaireCodes,
+} from "./AMCQuestionnaireConstants";
 import { antimicrobialClassOption } from "../../../domain/entities/amc-questionnaires/AntimicrobialClassOption";
 import { healthSectorOption } from "../../../domain/entities/amc-questionnaires/HealthSectorOption";
 import { healthLevelOption } from "../../../domain/entities/amc-questionnaires/HealthLevelOption";
 import { proportion50to100Option } from "../../../domain/entities/amc-questionnaires/Proportion50to100Option";
 import { D2ProgramStageMetadata } from "../utils/MetadataHelper";
+import { D2Event, D2TrackedEntity } from "./D2Types";
 
 export function mapD2EventToAMClassAMCQuestionnaire(d2Event: D2Event): AMClassAMCQuestionnaire {
     const fromMap = (key: keyof typeof codesByAMClassAMCQuestionnaire) => getValueFromMap(key, d2Event);
@@ -28,39 +34,59 @@ export function mapD2EventToAMClassAMCQuestionnaire(d2Event: D2Event): AMClassAM
     return amClassAMCQuestionnaire;
 }
 
+function getValueFromAMClassAMCQuestionnaire(
+    amClassAMCQuestionnaire: AMClassAMCQuestionnaire
+): Record<AMClassAMCQuestionnaireCode, string> {
+    return {
+        AMR_GLASS_AMC_DE_AM_CLASS: amClassAMCQuestionnaire.antimicrobialClass,
+        AMR_GLASS_AMC_DE_H_SECTOR: amClassAMCQuestionnaire.healthSector,
+        AMR_GLASS_AMC_DE_H_LEVEL: amClassAMCQuestionnaire.healthLevel,
+        AMR_GLASS_AMC_DE_VOL_TOTAL: amClassAMCQuestionnaire.estVolumeTotalHealthLevel ?? "",
+        AMR_GLASS_AMC_DE_VOL_HOSP: amClassAMCQuestionnaire.estVolumeHospitalHealthLevel ?? "",
+        AMR_GLASS_AMC_DE_VOL_COMM: amClassAMCQuestionnaire.estVolumeCommunityHealthLevel ?? "",
+    };
+}
+
 export function mapAMClassAMCQuestionnaireToD2Event(
     amClassAMCQuestionnaire: AMClassAMCQuestionnaire,
-    stageMetadata: D2ProgramStageMetadata
+    stageMetadata: D2ProgramStageMetadata,
+    trackedEntity: D2TrackedEntity
 ): D2TrackerEventToPost {
-    throw new Error("Not implemented");
-    // const d2Event: D2TrackerEventToPost = {
-    //     dataValues: [],
-    //     trackedEntity: "",
-    //     event: "",
-    //     programStage: stageMetadata.id,
+    const values = getValueFromAMClassAMCQuestionnaire(amClassAMCQuestionnaire);
 
-    // };
-    // const toMap = (key: keyof typeof codesByAMClassAMCQuestionnaire) => {
-    //     const value = amClassAMCQuestionnaire[key];
-    //     const id = Object.entries(AMClassAMCQuestionnaireByTEAIds).find(([_, v]) => v === key)?.[0];
-    //     if (!id) {
-    //         return;
-    //     }
-    //     d2Event.dataValues.push({
-    //         dataElement: id,
-    //         value: value ?? "",
-    //     });
-    // };
-    // toMap("antimicrobialClass");
-    // toMap("healthSector");
-    // toMap("healthLevel");
-    // toMap("estVolumeTotalHealthLevel");
-    // toMap("estVolumeHospitalHealthLevel");
-    // toMap("estVolumeCommunityHealthLevel");
-    // d2Event.trackedEntity = amClassAMCQuestionnaire.trackedEntity;
-    // d2Event.event = amClassAMCQuestionnaire.event;
-    // d2Event.updatedAt = amClassAMCQuestionnaire.updatedAt;
-    // return d2Event;
+    const dataValues = stageMetadata.programStageDataElements.reduce<{ dataElement: string; value: string }[]>(
+        (acc, dataElement) => {
+            if (isStringInAMClassAMCQuestionnaireCodes(dataElement.dataElement.code)) {
+                const typedCode: AMClassAMCQuestionnaireCode = dataElement.dataElement.code;
+                const value = values[typedCode];
+                return value !== undefined
+                    ? [
+                          ...acc,
+                          {
+                              dataElement: dataElement.dataElement.id,
+                              value: value,
+                          },
+                      ]
+                    : acc;
+            } else {
+                return acc;
+            }
+        },
+        []
+    );
+
+    const d2Event: D2TrackerEventToPost = {
+        occurredAt: new Date().toISOString(), // TODO: use the correct date
+        orgUnit: trackedEntity.orgUnit,
+        enrollment: trackedEntity.enrollments[0]?.enrollment,
+        program: AMR_GLASS_PRO_AMC_DQ_PROGRAM_ID,
+        dataValues: dataValues,
+        trackedEntity: trackedEntity.trackedEntity,
+        status: "ACTIVE",
+        programStage: stageMetadata.id,
+        event: amClassAMCQuestionnaire.id,
+    };
+    return d2Event;
 }
 
 function getValueFromMap(key: typeof AMClassAMCQuestionnaireByTEAIds["string"], d2Event: D2Event): string {
@@ -71,22 +97,3 @@ function getValueFromMap(key: typeof AMClassAMCQuestionnaireByTEAIds["string"], 
     }
     return d2Event.dataValues?.find(dv => dv.dataElement === id)?.value ?? "";
 }
-
-// TODO: extract repeated types
-const dataElementFields = {
-    id: true,
-    code: true,
-    name: true,
-} as const;
-
-const eventFields = {
-    dataValues: {
-        dataElement: dataElementFields,
-        value: true,
-    },
-    trackedEntity: true,
-    event: true,
-    updatedAt: true,
-} as const;
-
-export type D2Event = SelectedPick<D2TrackerEventSchema, typeof eventFields>;

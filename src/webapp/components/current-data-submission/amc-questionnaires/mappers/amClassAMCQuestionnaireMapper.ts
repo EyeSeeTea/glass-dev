@@ -18,8 +18,6 @@ export function mapFormStateToAMClassAMCQuestionnaire(
     params: MapToAMCQuestionnaireParams<AMClassAMCQuestionnaireFormEntity>
 ): AMClassAMCQuestionnaire {
     const { formState, options } = params;
-    // const { formState, formEntity, options, period, orgUnitId, editMode } = params;
-    // const baseAttributes = getGeneralAMCQuestionnaireBaseAttributes(formEntity, orgUnitId, period, editMode);
 
     const allFields: FormFieldState[] = getAllFieldsFromSections(formState.sections);
 
@@ -42,14 +40,7 @@ export function mapFormStateToAMClassAMCQuestionnaire(
         option => option.code === getStringFieldValue("estVolumeCommunityHealthLevel", allFields)
     )?.code;
 
-    if (
-        !antimicrobialClass ||
-        !healthSector ||
-        !healthLevel ||
-        !estVolumeTotalHealthLevel ||
-        !estVolumeHospitalHealthLevel ||
-        !estVolumeCommunityHealthLevel
-    ) {
+    if (!antimicrobialClass || !healthSector || !healthLevel) {
         throw new Error("Missing required AM Class AMC Questionnaire attributes");
     }
 
@@ -98,7 +89,7 @@ export function mapAMClassAMCQuestionnaireToInitialFormState(
     const fromQuestions = (id: AMClassAMCQuestionId) => getQuestionById(id, questionnaireFormEntity.questions);
 
     return {
-        id: "", // TODO: need to map base attributes? //questionnaireFormEntity?.entity?.id || "",
+        id: "",
         title: "AM Class questionnaire",
         isValid: false,
         sections: [
