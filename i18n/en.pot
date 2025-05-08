@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2025-05-05T15:36:31.380Z\n"
-"PO-Revision-Date: 2025-05-05T15:36:31.380Z\n"
+"POT-Creation-Date: 2025-05-08T10:14:45.140Z\n"
+"PO-Revision-Date: 2025-05-08T10:14:45.140Z\n"
 
 msgid "Template {{id}} not loaded"
 msgstr ""
@@ -409,7 +409,28 @@ msgstr ""
 msgid "Error downloading data"
 msgstr ""
 
+msgid "Back"
+msgstr ""
+
+msgid "AM Questionnaire Editor"
+msgstr ""
+
+msgid "Component Questionnaire Editor"
+msgstr ""
+
 msgid "Edit"
+msgstr ""
+
+msgid "AM Class"
+msgstr ""
+
+msgid "Component"
+msgstr ""
+
+msgid "AM Class Questionnaires"
+msgstr ""
+
+msgid "Component Questionnaires"
 msgstr ""
 
 msgid "Go to questionnaires"
@@ -485,9 +506,6 @@ msgid " "
 msgstr ""
 
 msgid "status"
-msgstr ""
-
-msgid "Back"
 msgstr ""
 
 msgid "Indicates required"
