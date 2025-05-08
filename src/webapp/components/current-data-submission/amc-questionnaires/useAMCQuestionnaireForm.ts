@@ -62,8 +62,10 @@ export function useAMCQuestionnaireForm<T extends AMCQuestionnaireFormType>(para
     orgUnitId: Id;
     period: string;
     isViewOnlyMode?: boolean;
+    onSave?: () => void;
+    onCancel?: () => void;
 }): State {
-    const { formType, id, orgUnitId, period, isViewOnlyMode = false } = params;
+    const { formType, id, orgUnitId, period, isViewOnlyMode = false, onSave, onCancel } = params;
 
     const { compositionRoot } = useAppContext();
     const { questionnaire } = useAMCQuestionnaireContext();
@@ -102,7 +104,7 @@ export function useAMCQuestionnaireForm<T extends AMCQuestionnaireFormType>(para
 
     useEffect(() => {
         if (amcQuestions && options) {
-            if (questionnaire?.id) {
+            if (id && questionnaire) {
                 switch (formType) {
                     case "general-questionnaire":
                         {
@@ -207,6 +209,7 @@ export function useAMCQuestionnaireForm<T extends AMCQuestionnaireFormType>(para
                 case "general-questionnaire":
                     compositionRoot.amcQuestionnaires.saveGeneral(entity as GeneralAMCQuestionnaire).run(
                         _generalQuestionnaireId => {
+                            onSave && onSave();
                             setIsLoading(false);
                         },
                         error => {
@@ -248,6 +251,7 @@ export function useAMCQuestionnaireForm<T extends AMCQuestionnaireFormType>(para
         formState,
         formType,
         isEditMode,
+        onSave,
         options,
         orgUnitId,
         period,
@@ -255,7 +259,11 @@ export function useAMCQuestionnaireForm<T extends AMCQuestionnaireFormType>(para
         questionnaire,
     ]);
 
-    const onCancelForm = useCallback(() => {}, []);
+    const onCancelForm = useCallback(() => {
+        if (onCancel) {
+            onCancel();
+        }
+    }, [onCancel]);
 
     const onCopyForm = useCallback(() => {}, []);
 
