@@ -7,9 +7,10 @@ import { QuestionnairesTableRow } from "../../questionnaires-table/Questionnaire
 import { AMClassAMCQuestionnaire } from "../../../../domain/entities/amc-questionnaires/AMClassAMCQuestionnaire";
 import { Id } from "../../../../domain/entities/Ref";
 import { AMCQuestionnaireFormType } from "./presentation-entities/AMCQuestionnaireFormType";
+import { Maybe } from "../../../../types/utils";
 
 type AMCQuestionnairPageState = {
-    questionnaire: AMCQuestionnaire | null;
+    questionnaire: Maybe<AMCQuestionnaire>;
     questionnaireRows: QuestionnairesTableRow[];
     isEditMode: boolean;
     questionnaireIdToEdit?: Id;

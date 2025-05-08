@@ -81,7 +81,11 @@ export const amClassAMCQuestionnaireFieldIds = {
 export function mapAMClassAMCQuestionnaireToInitialFormState(
     params: MapToFormStateParams<AMClassAMCQuestionnaireFormEntity>
 ): FormState {
-    const { questionnaireFormEntity, options, isViewOnlyMode } = params;
+    const { questionnaireFormEntity, options, isViewOnlyMode, amcQuestionnaire } = params;
+
+    if (!amcQuestionnaire) {
+        throw new Error("AMC Questionnaire required for the AM Class questionnaire");
+    }
 
     const fromIdsDictionary = (key: keyof typeof amClassAMCQuestionnaireFieldIds) =>
         getFieldIdFromIdsDictionary(key, amClassAMCQuestionnaireFieldIds);
@@ -106,7 +110,9 @@ export function mapAMClassAMCQuestionnaireToInitialFormState(
                         type: "select",
                         multiple: false,
                         value: questionnaireFormEntity?.entity?.antimicrobialClass || "",
-                        options: mapToFormOptions(options.antimicrobialClassOptions),
+                        options: mapToFormOptions(
+                            amcQuestionnaire.getAvailableAMClassOptions(options.antimicrobialClassOptions)
+                        ),
                         required: true,
                         showIsRequired: true,
                         text: fromQuestions("antimicrobialClass"),
