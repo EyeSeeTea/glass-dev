@@ -6,15 +6,17 @@ import { Create } from "@material-ui/icons";
 import i18n from "../../../locales";
 import { IconButton } from "../icon-button/IconButton";
 import { glassColors } from "../../pages/app/themes/dhis2.theme";
+import { Id } from "../../../domain/entities/Ref";
 
 export type QuestionnairesTableRow = {
+    id: Id;
     name: string;
 };
 
 export type QuestionnairesTableProps = {
     title: string;
     rows: QuestionnairesTableRow[];
-    onClickEdit: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
+    onClickEdit: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>, id: Id) => void;
     onClickAddNew: () => void;
     disabledAddNew?: boolean;
 };
@@ -29,20 +31,25 @@ export const QuestionnairesTable: React.FC<QuestionnairesTableProps> = props => 
                     <StyledTableHead>
                         <TableRow>
                             <StyledTH>{title}</StyledTH>
+
                             <StyledTH>{i18n.t("Edit")}</StyledTH>
                         </TableRow>
                     </StyledTableHead>
+
                     <TableBody>
                         {rows.map(row => (
-                            <StyledTableRow key={row.name}>
+                            <StyledTableRow key={row.id}>
                                 <StyledTextCell component="th" scope="row">
                                     {row.name}
                                 </StyledTextCell>
+
                                 <StyledIconCell>
                                     <StyledIconButton
                                         ariaLabel={i18n.t("Edit questionnaire")}
                                         icon={<Create />}
-                                        onClick={onClickEdit}
+                                        onClick={(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) =>
+                                            onClickEdit(event, row.id)
+                                        }
                                     />
                                 </StyledIconCell>
                             </StyledTableRow>
@@ -50,6 +57,7 @@ export const QuestionnairesTable: React.FC<QuestionnairesTableProps> = props => 
                     </TableBody>
                 </Table>
             </TableContainer>
+
             <ButtonContainer>
                 <Button onClick={onClickAddNew} disabled={disabledAddNew} variant="contained" color="primary">
                     {i18n.t("Add New")}
