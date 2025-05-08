@@ -7,40 +7,29 @@ import { QuestionnairesTableRow } from "../../questionnaires-table/Questionnaire
 import { AMClassAMCQuestionnaire } from "../../../../domain/entities/amc-questionnaires/AMClassAMCQuestionnaire";
 import { Id } from "../../../../domain/entities/Ref";
 import { AMCQuestionnaireFormType } from "./presentation-entities/AMCQuestionnaireFormType";
-import i18n from "../../../../locales";
 
-type QuestionnaireInfo = {
-    formType: AMCQuestionnaireFormType;
-    title: string;
-    id?: Id;
-};
-
-type MainPageAMCQuestionnaireState = {
+type AMCQuestionnairPageState = {
     questionnaire: AMCQuestionnaire | null;
-    amClassQuestionnaireRows: QuestionnairesTableRow[];
-    componentQuestionnaireRows: QuestionnairesTableRow[];
+    questionnaireRows: QuestionnairesTableRow[];
     isEditMode: boolean;
-    isLoading: boolean;
-    openQuestionnaire: QuestionnaireInfo | undefined;
-    onClickAddOrEdit: () => void;
+    questionnaireIdToEdit?: Id;
+    onClickAddOrEdit: (questionnaireIdToEdit?: Id) => void;
     onCancelForm: () => void;
     onSaveForm: () => void;
-    onCloseQuestionnaireForm: () => void;
-    openQuestionnaireForm: (formType: AMCQuestionnaireFormType, id?: Id) => void;
 };
 
-export function useMainPageAMCQuestionnaire(): MainPageAMCQuestionnaireState {
+export function useAMCQuestionnairPage(formType: AMCQuestionnaireFormType, id?: Id): AMCQuestionnairPageState {
     const { questionnaire } = useAMCQuestionnaireContext();
     const formOptions = useAMCQuestionnaireOptionsContext();
 
-    const [isEditMode, setIsEditMode] = useState(false);
-    const [openQuestionnaire, setOpenQuestionnaire] = useState<QuestionnaireInfo | undefined>(undefined);
+    const [isEditMode, setIsEditMode] = useState(!!id);
+    const [questionnaireIdToEdit, setQuestionnaireIdToEdit] = useState(id);
 
     const isLoading = useMemo(() => {
         return questionnaire === undefined || Object.values(formOptions).some(options => options.length === 0);
     }, [formOptions, questionnaire]);
 
-    const amClassQuestionnaireRows = useMemo(() => {
+    const questionnaireRows = useMemo(() => {
         if (isLoading || !questionnaire) {
             return [];
         }
@@ -59,35 +48,23 @@ export function useMainPageAMCQuestionnaire(): MainPageAMCQuestionnaireState {
         );
     }, [isLoading, questionnaire, formOptions]);
 
-    const componentQuestionnaireRows: QuestionnairesTableRow[] = useMemo(() => {
-        return [];
+    const onClickAddOrEdit = useCallback((id?: Id) => {
+        setIsEditMode(true);
+        setQuestionnaireIdToEdit(id);
     }, []);
 
-    const onClickAddOrEdit = useCallback(() => setIsEditMode(true), []);
-
-    const onCancelEditMode = useCallback(() => setIsEditMode(false), []);
-
-    const openQuestionnaireForm = useCallback((formType: AMCQuestionnaireFormType, id?: Id) => {
-        const title =
-            formType === "am-class-questionnaire"
-                ? i18n.t("AM Class Questionnaires")
-                : i18n.t("Component Questionnaires");
-        setOpenQuestionnaire({ formType: formType, id: id, title: title });
+    const onCancelEditMode = useCallback(() => {
+        setIsEditMode(false);
+        setQuestionnaireIdToEdit(undefined);
     }, []);
-
-    const onCloseQuestionnaireForm = useCallback(() => setOpenQuestionnaire(undefined), []);
 
     return {
         questionnaire,
-        amClassQuestionnaireRows,
-        componentQuestionnaireRows,
+        questionnaireRows,
         isEditMode,
-        isLoading,
-        openQuestionnaire,
+        questionnaireIdToEdit,
         onClickAddOrEdit,
         onCancelForm: onCancelEditMode,
         onSaveForm: onCancelEditMode,
-        onCloseQuestionnaireForm,
-        openQuestionnaireForm,
     };
 }

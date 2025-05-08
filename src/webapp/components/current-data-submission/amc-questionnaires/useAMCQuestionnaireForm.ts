@@ -104,7 +104,7 @@ export function useAMCQuestionnaireForm<T extends AMCQuestionnaireFormType>(para
 
     useEffect(() => {
         if (amcQuestions && options) {
-            if (questionnaire?.id) {
+            if (id && questionnaire) {
                 switch (formType) {
                     case "general-questionnaire":
                         {
