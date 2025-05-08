@@ -20,7 +20,7 @@ interface QuestionnaireHeaderProps {
 }
 
 export const QuestionnaireActions: React.FC<QuestionnaireHeaderProps> = props => {
-    const { description, isCompleted, isSaving, mode, saveQuestionnaireActions, setAsCompleted } = props;
+    const { isCompleted, isSaving, mode, saveQuestionnaireActions, setAsCompleted } = props;
     const { saveQuestionnaire, disableSave, isSavingQuestionnaire } = saveQuestionnaireActions;
     const hasCurrentUserCaptureAccess = useGlassCaptureAccess();
 
@@ -61,10 +61,6 @@ export const QuestionnaireActions: React.FC<QuestionnaireHeaderProps> = props =>
                     )}
                 </div>
             )}
-
-            <div className="head">
-                <span className="desc">{description}</span>
-            </div>
         </QuestionnaireHeaderStyled>
     );
 };
@@ -78,6 +74,7 @@ const QuestionnaireHeaderStyled = styled.div`
 
     .desc {
         margin-left: 14px;
+        white-space: pre-wrap;
     }
 
     .comp {

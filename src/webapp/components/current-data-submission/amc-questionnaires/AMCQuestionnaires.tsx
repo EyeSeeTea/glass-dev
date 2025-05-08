@@ -9,6 +9,7 @@ import { useCurrentOrgUnitContext } from "../../../contexts/current-orgUnit-cont
 import { AMCQuestionnaireOptionsContextProvider } from "../../../context-providers/AMCQuestionnaireOptionsContextProvider";
 import { useMainPageAMCQuestionnaire } from "./useMainPageAMCQuestionnaire";
 import i18n from "../../../../locales";
+import { AMCQuestionnaireContextProvider } from "../../../context-providers/AMCQuestionnaireContextProvider";
 
 type QuestionnairesProps = {};
 
@@ -35,33 +36,35 @@ export const AMCQuestionnaires: React.FC<QuestionnairesProps> = () => {
 
     return (
         <AMCQuestionnaireOptionsContextProvider>
-            <ButtonsContainer>
-                <Button onClick={onClickAddOrEdit} disabled={isEditMode} variant="contained" color="primary">
-                    {generalAMCQuestionnaireId ? i18n.t("Edit") : i18n.t("Add")}
-                </Button>
-            </ButtonsContainer>
+            <AMCQuestionnaireContextProvider>
+                <ButtonsContainer>
+                    <Button onClick={onClickAddOrEdit} disabled={isEditMode} variant="contained" color="primary">
+                        {generalAMCQuestionnaireId ? i18n.t("Edit") : i18n.t("Add")}
+                    </Button>
+                </ButtonsContainer>
 
-            {isLoading ? (
-                <LoaderContainer>
-                    <CircularProgress />
-                </LoaderContainer>
-            ) : (
-                <QuestionnairesContainer>
-                    <GeneralQuestionnaireContainer>
-                        <AMCQuestionnaireFormPage
-                            formType="general-questionnaire"
-                            id={generalAMCQuestionnaireId}
-                            orgUnitId={currentOrgUnitAccess.orgUnitId}
-                            period={currentPeriod}
-                            isViewOnlyMode={!isEditMode}
-                            showFormButtons={isEditMode}
-                            onSave={onSaveForm}
-                            onCancel={onCancelForm}
-                        />
-                    </GeneralQuestionnaireContainer>
-                    <QuestionnairesTableContainer></QuestionnairesTableContainer>
-                </QuestionnairesContainer>
-            )}
+                {isLoading ? (
+                    <LoaderContainer>
+                        <CircularProgress />
+                    </LoaderContainer>
+                ) : (
+                    <QuestionnairesContainer>
+                        <GeneralQuestionnaireContainer>
+                            <AMCQuestionnaireFormPage
+                                formType="general-questionnaire"
+                                id={generalAMCQuestionnaireId}
+                                orgUnitId={currentOrgUnitAccess.orgUnitId}
+                                period={currentPeriod}
+                                isViewOnlyMode={!isEditMode}
+                                showFormButtons={isEditMode}
+                                onSave={onSaveForm}
+                                onCancel={onCancelForm}
+                            />
+                        </GeneralQuestionnaireContainer>
+                        <QuestionnairesTableContainer></QuestionnairesTableContainer>
+                    </QuestionnairesContainer>
+                )}
+            </AMCQuestionnaireContextProvider>
         </AMCQuestionnaireOptionsContextProvider>
     );
 };

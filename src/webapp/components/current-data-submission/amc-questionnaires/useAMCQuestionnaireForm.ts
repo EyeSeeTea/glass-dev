@@ -16,6 +16,8 @@ import { useAMCQuestionnaireOptionsContext } from "../../../contexts/amc-questio
 import { updateAndValidateFormState } from "../../form/presentation-entities/utils/updateAndValidateFormState";
 import { GeneralAMCQuestionnaire } from "../../../../domain/entities/amc-questionnaires/GeneralAMCQuestionnaire";
 import { amcQuestionnaireMappers } from "./mappers";
+import { useAMCQuestionnaireContext } from "../../../contexts/amc-questionnaire-context";
+import { AMClassAMCQuestionnaire } from "../../../../domain/entities/amc-questionnaires/AMClassAMCQuestionnaire";
 
 export type GlobalMessage = {
     text: string;
@@ -66,8 +68,8 @@ export function useAMCQuestionnaireForm<T extends AMCQuestionnaireFormType>(para
     const { formType, id, orgUnitId, period, isViewOnlyMode = false, onSave, onCancel } = params;
 
     const { compositionRoot } = useAppContext();
+    const { questionnaire } = useAMCQuestionnaireContext();
     const options = useAMCQuestionnaireOptionsContext();
-
     const [globalMessage, setGlobalMessage] = useState<Maybe<GlobalMessage>>();
     const [formState, setFormState] = useState<FormLoadState>({ kind: "loading" });
     const [formLabels, setFormLabels] = useState<FormLables>();
@@ -102,36 +104,27 @@ export function useAMCQuestionnaireForm<T extends AMCQuestionnaireFormType>(para
 
     useEffect(() => {
         if (amcQuestions && options) {
-            if (id) {
+            if (questionnaire?.id) {
                 switch (formType) {
                     case "general-questionnaire":
-                        compositionRoot.amcQuestionnaires.getGeneralById(id, orgUnitId, period).run(
-                            generalAMCQuestionnaire => {
-                                const formEntity = getQuestionnaireFormEntity(
-                                    formType,
-                                    amcQuestions,
-                                    generalAMCQuestionnaire
-                                );
-                                setQuestionnaireFormEntity(formEntity);
-                                setFormLabels(formEntity.labels);
-                                setFormState({
-                                    kind: "loaded",
-                                    data: amcQuestionnaireMappers[formType].mapEntityToFormState({
-                                        questionnaireFormEntity: formEntity,
-                                        editMode: isEditMode,
-                                        options: options,
-                                        isViewOnlyMode: isViewOnlyMode,
-                                    }),
-                                });
-                            },
-                            error => {
-                                console.debug(error);
-                                setGlobalMessage({
-                                    type: "error",
-                                    text: `Error loading General AMC Questionnaire: ${error}`,
-                                });
-                            }
-                        );
+                        {
+                            const formEntity = getQuestionnaireFormEntity(
+                                formType,
+                                amcQuestions,
+                                questionnaire?.generalQuestionnaire
+                            );
+                            setQuestionnaireFormEntity(formEntity);
+                            setFormLabels(formEntity.labels);
+                            setFormState({
+                                kind: "loaded",
+                                data: amcQuestionnaireMappers[formType].mapEntityToFormState({
+                                    questionnaireFormEntity: formEntity,
+                                    editMode: isEditMode,
+                                    options: options,
+                                    isViewOnlyMode: isViewOnlyMode,
+                                }),
+                            });
+                        }
                         break;
                     default:
                         break;
@@ -161,6 +154,7 @@ export function useAMCQuestionnaireForm<T extends AMCQuestionnaireFormType>(para
         orgUnitId,
         period,
         isViewOnlyMode,
+        questionnaire,
     ]);
 
     const handleFormChange = useCallback(
@@ -187,7 +181,17 @@ export function useAMCQuestionnaireForm<T extends AMCQuestionnaireFormType>(para
     const onClickSave = useCallback(() => {
         if (formState.kind !== "loaded" || !questionnaireFormEntity || !formState.data.isValid || !options) return;
 
+        const handleError = (error: unknown) => {
+            console.error(error);
+            setGlobalMessage({
+                type: "error",
+                text: `Error saving ${formType} AMC Questionnaire: ${error}`,
+            });
+            setIsLoading(false);
+        };
+
         try {
+            setIsLoading(true);
             const entity = amcQuestionnaireMappers[formType].mapFormStateToEntity({
                 formState: formState.data,
                 formEntity: questionnaireFormEntity,
@@ -198,44 +202,49 @@ export function useAMCQuestionnaireForm<T extends AMCQuestionnaireFormType>(para
             });
 
             if (!entity) {
-                setGlobalMessage({
-                    type: "error",
-                    text: `Error saving AMC Questionnaire: ${formType}`,
-                });
-                return;
+                throw new Error("Form entity is undefined");
             }
 
             switch (formType) {
                 case "general-questionnaire":
-                    setIsLoading(true);
                     compositionRoot.amcQuestionnaires.saveGeneral(entity as GeneralAMCQuestionnaire).run(
                         _generalQuestionnaireId => {
                             onSave && onSave();
                             setIsLoading(false);
                         },
                         error => {
-                            console.debug(error);
-                            setGlobalMessage({
-                                type: "error",
-                                text: `Error saving General AMC Questions: ${error}`,
-                            });
-                            setIsLoading(false);
+                            handleError(error);
                         }
                     );
                     break;
-                default:
-                    setGlobalMessage({
-                        type: "error",
-                        text: `Error saving AMC Questionnaire: ${formType} not supported`,
-                    });
+                case "am-class-questionnaire":
+                    {
+                        const amClassQuestionnaire = entity as AMClassAMCQuestionnaire;
+                        if (!questionnaire) {
+                            throw new Error("AM Class needs to be added to questionnaire");
+                        }
+                        const validationErrors = questionnaire.addAMClassQuestionnaire(amClassQuestionnaire).match({
+                            error: errors => errors,
+                            success: () => [],
+                        });
+                        if (validationErrors.length > 0) {
+                            throw new Error(`Validation errors: ${validationErrors.join(", ")}`);
+                        }
+                        compositionRoot.amcQuestionnaires.saveAmClass(questionnaire.id, amClassQuestionnaire).run(
+                            _amClassQuestionnaireId => {
+                                setIsLoading(false);
+                            },
+                            error => {
+                                handleError(error);
+                            }
+                        );
+                    }
                     break;
+                default:
+                    throw new Error(`Unsupported form type: ${formType}`);
             }
         } catch (error) {
-            console.error(error);
-            setGlobalMessage({
-                type: "error",
-                text: `Error saving AMC Questionnaire: ${error}`,
-            });
+            handleError(error);
         }
     }, [
         compositionRoot.amcQuestionnaires,
@@ -247,6 +256,7 @@ export function useAMCQuestionnaireForm<T extends AMCQuestionnaireFormType>(para
         orgUnitId,
         period,
         questionnaireFormEntity,
+        questionnaire,
     ]);
 
     const onCancelForm = useCallback(() => {
