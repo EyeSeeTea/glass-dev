@@ -39,7 +39,6 @@ export class QuestionsAMCQuestionnaireD2Repository implements QuestionsAMCQuesti
                 AMClassAMCQuestionnaireByTEAIds
             );
 
-            // TODO: get questions from program stages data elements and merge with the below
             return [...generalAMCQuestions, ...amClassAMCQuestions];
         });
     }
