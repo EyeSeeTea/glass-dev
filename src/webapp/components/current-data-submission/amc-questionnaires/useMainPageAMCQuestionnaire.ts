@@ -8,6 +8,7 @@ import { AMClassAMCQuestionnaire } from "../../../../domain/entities/amc-questio
 import { Id } from "../../../../domain/entities/Ref";
 import { AMCQuestionnaireFormType } from "./presentation-entities/AMCQuestionnaireFormType";
 import i18n from "../../../../locales";
+import { Maybe } from "../../../../types/utils";
 
 type QuestionnaireInfo = {
     formType: AMCQuestionnaireFormType;
@@ -16,7 +17,7 @@ type QuestionnaireInfo = {
 };
 
 type MainPageAMCQuestionnaireState = {
-    questionnaire: AMCQuestionnaire | null;
+    questionnaire: Maybe<AMCQuestionnaire>;
     amClassQuestionnaireRows: QuestionnairesTableRow[];
     componentQuestionnaireRows: QuestionnairesTableRow[];
     isEditMode: boolean;
