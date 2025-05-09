@@ -64,7 +64,7 @@ export const AMCQuestionnairePage: React.FC<AMCQuestionnairePageProps> = props =
                     rows={questionnaireRows}
                     onClickEdit={(_event, id: Id) => onClickAddOrEdit(id)}
                     onClickAddNew={() => onClickAddOrEdit()}
-                    disabledAddNew={disabledAddNewQuestionnaire}
+                    disabledAddNew={disabledAddNewQuestionnaire || isEditMode}
                     highlightedRowId={questionnaireIdToEdit}
                 />
             </QuestionnaireTableContainer>

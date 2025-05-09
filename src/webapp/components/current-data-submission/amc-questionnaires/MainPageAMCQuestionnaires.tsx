@@ -87,8 +87,12 @@ export const MainPageAMCQuestionnaires: React.FC = () => {
                                     <QuestionnairesTable
                                         title={i18n.t("Component")}
                                         rows={componentQuestionnaireRows}
-                                        onClickEdit={(_event, id: Id) => {}}
-                                        onClickAddNew={() => {}}
+                                        onClickEdit={(_event, id: Id) => {
+                                            openQuestionnaireForm("component-questionnaire", id);
+                                        }}
+                                        onClickAddNew={() => {
+                                            openQuestionnaireForm("component-questionnaire");
+                                        }}
                                         disabledAddNew={amClassQuestionnaireRows.length === 0}
                                     />
                                 </QuestionnairesTableContainer>

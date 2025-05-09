@@ -7,6 +7,7 @@ import {
     AntimicrobialClassValue,
     AntimicrobialClassValues,
 } from "./AntimicrobialClassOption";
+import { ComponentAMCQuestionnaire } from "./ComponentAMCQuestionnaire";
 import { GeneralAMCQuestionnaire, GeneralAMCQuestionnaireAMClassAttributes } from "./GeneralAMCQuestionnaire";
 import { ValidationErrorKey } from "./ValidationError";
 import { YesNoValues } from "./YesNoOption";
@@ -17,6 +18,7 @@ export type AMCQuestionnaireAttrs = {
     period: string;
     generalQuestionnaire: GeneralAMCQuestionnaire;
     amClassQuestionnaires: AMClassAMCQuestionnaire[];
+    componentQuestionnaires: ComponentAMCQuestionnaire[];
 };
 
 const amClassOptionToGeneralMap: Record<AntimicrobialClassValue, keyof GeneralAMCQuestionnaireAMClassAttributes> = {

@@ -8,6 +8,8 @@ import {
 import {
     AMClassAMCQuestionnaireByTEAIds,
     AMR_GLASS_AMC_AM_CLASS_QUESTIONNAIRE_CODE,
+    AMR_GLASS_AMC_AM_COMPONENT_QUESTIONNAIRE_CODE,
+    ComponentAMCQuestionnaireByTEAIds,
     generalAMCQuestionnaireByTEAIds,
 } from "./AMCQuestionnaireConstants";
 import { D2ProgramMetadata, getAMCQuestionnaireProgramMetadata } from "./getAMCQuestionnaireProgramMetadata";
@@ -39,7 +41,13 @@ export class QuestionsAMCQuestionnaireD2Repository implements QuestionsAMCQuesti
                 AMClassAMCQuestionnaireByTEAIds
             );
 
-            return [...generalAMCQuestions, ...amClassAMCQuestions];
+            const componentAMCQuestions = this.getQuestionsFromProgramStage(
+                programMetadata.programStages,
+                AMR_GLASS_AMC_AM_COMPONENT_QUESTIONNAIRE_CODE,
+                ComponentAMCQuestionnaireByTEAIds
+            );
+
+            return [...generalAMCQuestions, ...amClassAMCQuestions, ...componentAMCQuestions];
         });
     }
 

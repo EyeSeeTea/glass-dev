@@ -137,6 +137,7 @@ import { GetDataLevelOptionsUseCase } from "./domain/usecases/amc-questionnaires
 import { GetDataSourceOptionsUseCase } from "./domain/usecases/amc-questionnaires/GetDataSourceOptionsUseCase";
 import { GetNationalPopulationDataSourceOptionsUseCase } from "./domain/usecases/amc-questionnaires/GetNationalPopulationDataSourceOptionsUseCase";
 import { GetProcurementLevelOptionsUseCase } from "./domain/usecases/amc-questionnaires/GetProcurementLevelOptionsUseCase";
+import { SaveComponentAMCQuestionnaireUseCase } from "./domain/usecases/amc-questionnaires/SaveComponentAMCQuestionnaireUseCase";
 
 export function getCompositionRoot(instance: Instance) {
     const api = getD2APiFromInstance(instance);
@@ -414,6 +415,7 @@ export function getCompositionRoot(instance: Instance) {
             getByOrgUnitAndPeriod: new GetAMCQuestionnaireByOrgUnitAndPeriodUseCase(amcQuestionnaireRepository),
             saveGeneral: new SaveGeneralAMCQuestionnaireUseCase(amcQuestionnaireRepository),
             saveAmClass: new SaveAMClassAMCQuestionnaireUseCase(amcQuestionnaireRepository),
+            saveComponent: new SaveComponentAMCQuestionnaireUseCase(amcQuestionnaireRepository),
             getQuestions: new GetQuestionsAMCQuestionnaireUseCase(questionsAMCQuestionnaireRepository),
             getYesNoOptions: new GetYesNoOptionsUseCase(yesNoOptionsRepository),
             getYesNoUnknownOptions: new GetYesNoUnknownOptionsUseCase(yesNoUnknownOptionsRepository),
