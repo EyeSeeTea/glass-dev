@@ -127,6 +127,24 @@ export function useAMCQuestionnaireForm<T extends AMCQuestionnaireFormType>(para
                             });
                         }
                         break;
+                    case "am-class-questionnaire":
+                        {
+                            const amClassQuestionnaire = questionnaire?.amClassQuestionnaires.find(q => q.id === id);
+                            const formEntity = getQuestionnaireFormEntity(formType, amcQuestions, amClassQuestionnaire);
+                            setQuestionnaireFormEntity(formEntity);
+                            setFormLabels(formEntity.labels);
+                            setFormState({
+                                kind: "loaded",
+                                data: amcQuestionnaireMappers[formType].mapEntityToFormState({
+                                    questionnaireFormEntity: formEntity,
+                                    editMode: isEditMode,
+                                    options: options,
+                                    amcQuestionnaire: questionnaire,
+                                    isViewOnlyMode: isViewOnlyMode,
+                                }),
+                            });
+                        }
+                        break;
                     default:
                         break;
                 }
@@ -225,10 +243,12 @@ export function useAMCQuestionnaireForm<T extends AMCQuestionnaireFormType>(para
                         if (!questionnaire) {
                             throw new Error("AM Class needs to be added to questionnaire");
                         }
-                        const validationErrors = questionnaire.addAMClassQuestionnaire(amClassQuestionnaire).match({
-                            error: errors => errors,
-                            success: () => [],
-                        });
+                        const validationErrors = questionnaire
+                            .addOrUpdateAMClassQuestionnaire(amClassQuestionnaire)
+                            .match({
+                                error: errors => errors,
+                                success: () => [],
+                            });
                         if (validationErrors.length > 0) {
                             throw new Error(`Validation errors: ${validationErrors.join(", ")}`);
                         }
