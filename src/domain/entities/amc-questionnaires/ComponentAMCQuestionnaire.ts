@@ -20,7 +20,7 @@ export type ComponentAMCQuestionnaireBaseAttributes = {
 };
 
 export type ComponentAMCQuestionnaireResponsesAttributes = {
-    antimicrobialClass: AntimicrobialClassValue[];
+    antimicrobialClasses: AntimicrobialClassValue[];
     componentStrata: string[]; // TODO: use optionSet when created
     excludedSubstances: YesNoUnknownValue;
     listOfExcludedSubstances: Maybe<string>;
