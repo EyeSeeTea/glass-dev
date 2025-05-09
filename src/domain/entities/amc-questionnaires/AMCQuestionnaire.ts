@@ -41,11 +41,20 @@ export class AMCQuestionnaire extends Struct<AMCQuestionnaireAttrs>() {
         return validationErrors;
     }
 
-    public addAMClassQuestionnaire(
+    // If the amClassQuestionnaire has an id, it will be updated, otherwise it will be added
+    public addOrUpdateAMClassQuestionnaire(
         amClassQuestionnaire: AMClassAMCQuestionnaire
     ): Either<ValidationErrorKey[], AMCQuestionnaireAttrs> {
+        const updatedAMClassQuestionnaireList = amClassQuestionnaire.id
+            ? this.amClassQuestionnaires.map(questionnaire => {
+                  if (questionnaire.id === amClassQuestionnaire.id) {
+                      return amClassQuestionnaire;
+                  }
+                  return questionnaire;
+              })
+            : [...this.amClassQuestionnaires, amClassQuestionnaire];
         const newAMCQuestionnaire = this._update({
-            amClassQuestionnaires: [...this.amClassQuestionnaires, amClassQuestionnaire],
+            amClassQuestionnaires: updatedAMClassQuestionnaireList,
         });
         const validationErrors = newAMCQuestionnaire.validate();
         if (validationErrors.length > 0) {
