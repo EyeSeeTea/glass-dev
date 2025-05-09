@@ -1,6 +1,7 @@
 import { GeneralAMCQuestionId } from "../../../domain/entities/amc-questionnaires/GeneralAMCQuestionnaire";
 import { AMClassAMCQuestionId } from "../../../domain/entities/amc-questionnaires/AMClassAMCQuestionnaire";
 import { Id } from "../../../domain/entities/Ref";
+import { ComponentAMCQuestionId } from "../../../domain/entities/amc-questionnaires/ComponentAMCQuestionnaire";
 
 export const AMR_GLASS_PRO_AMC_DQ_PROGRAM_ID = "f9Jl9O4CYZf";
 export const AMR_TET_AMC_DQuestionnaire_TRACKED_ENTITY_TYPE_ID = "W9nZpnHEGxQ";
@@ -67,4 +68,47 @@ export const AMClassAMCQuestionnaireByTEAIds: Record<Id, AMClassAMCQuestionId> =
     pKR2EiIilTO: "estVolumeTotalHealthLevel",
     NapA76XUInT: "estVolumeHospitalHealthLevel",
     gAGTbAhWrgN: "estVolumeCommunityHealthLevel",
+} as const;
+
+export const codesByComponentAMCQuestionnaire: Record<ComponentAMCQuestionId, string> = {
+    antimicrobialClasses: "AMR_GLASS_AMC_DE_AM_CLASSES",
+    componentStrata: "AMR_GLASS_AMC_DE_STRATA",
+    excludedSubstances: "AMR_GLASS_AMC_DE_ATC_EXCL",
+    listOfExcludedSubstances: "AMR_GLASS_AMC_DE_ATC_EXCL_DETAIL",
+    typeOfDataReported: "AMR_GLASS_AMC_DE_DATA_LEVEL",
+    procurementTypeOfDataReported: "AMR_GLASS_AMC_DE_PROC_SUBTYPE",
+    mixedTypeOfData: "AMR_GLASS_AMC_DE_MIX_LEVEL_DETAIL",
+    sourcesOfDataReported: "AMR_GLASS_AMC_DE_DATA_SOURCE",
+    commentsForDataSources: "AMR_GLASS_AMC_DE_DATA_SOURCE_COMMENT",
+    sameAsUNPopulation: "AMR_GLASS_AMC_DE_POP_SAME_UN",
+    sourceOfNationalPopulation: "AMR_GLASS_AMC_DE_POP_NAT_SOURCE",
+    otherSourceForNationalPopulation: "AMR_GLASS_AMC_DE_POP_NAT_SOURCE_OTHER",
+    commentOnNationalPopulation: "AMR_GLASS_AMC_DE_POP_NAT_COMMENT",
+    coverageVolumeWithinTheStratum: "AMR_GLASS_AMC_DE_COV_DATA_STRATUM",
+    commentOnCoverageWithinTheStratum: "AMR_GLASS_AMC_DE_COV_DATA_STRATUM_COMMENT",
+} as const;
+
+export type ComponentAMCQuestionnaireCode =
+    typeof codesByComponentAMCQuestionnaire[keyof typeof codesByComponentAMCQuestionnaire];
+
+export function isStringInComponentAMCQuestionnaireCodes(code: string): code is ComponentAMCQuestionnaireCode {
+    return (Object.values(codesByComponentAMCQuestionnaire) as string[]).includes(code);
+}
+
+export const ComponentAMCQuestionnaireByTEAIds: Record<Id, ComponentAMCQuestionId> = {
+    wyvp0njA59l: "antimicrobialClasses",
+    fLdaSEojS7f: "componentStrata",
+    KRE4eIuqosa: "excludedSubstances",
+    EKzFXIafzZ3: "listOfExcludedSubstances",
+    kWfwqRhsyyD: "typeOfDataReported",
+    mfxlVTtBZ4A: "procurementTypeOfDataReported",
+    HqgKnu4p7sk: "mixedTypeOfData",
+    JJOoocMExpz: "sourcesOfDataReported",
+    GDqvtXyMWdz: "commentsForDataSources",
+    VNzlCDzQ1Og: "sameAsUNPopulation",
+    OZIjuHp6Zbw: "sourceOfNationalPopulation",
+    wpBicXvTZQA: "otherSourceForNationalPopulation",
+    vm3tz1ARtzt: "commentOnNationalPopulation",
+    jcsdkdI0SY1: "coverageVolumeWithinTheStratum",
+    fpFoXP5lz7a: "commentOnCoverageWithinTheStratum",
 } as const;

@@ -18,6 +18,7 @@ import { GeneralAMCQuestionnaire } from "../../../../domain/entities/amc-questio
 import { amcQuestionnaireMappers } from "./mappers";
 import { useAMCQuestionnaireContext } from "../../../contexts/amc-questionnaire-context";
 import { AMClassAMCQuestionnaire } from "../../../../domain/entities/amc-questionnaires/AMClassAMCQuestionnaire";
+import { ComponentAMCQuestionnaire } from "../../../../domain/entities/amc-questionnaires/ComponentAMCQuestionnaire";
 
 export type GlobalMessage = {
     text: string;
@@ -77,7 +78,6 @@ export function useAMCQuestionnaireForm<T extends AMCQuestionnaireFormType>(para
     const [questionnaireFormEntity, setQuestionnaireFormEntity] = useState<QuestionnaireFormEntityMap[T]>();
     const [amcQuestions, setAMCQuestions] = useState<AMCQuestionnaireQuestions>();
     const [openModal, setOpenModal] = useState(false);
-    const [modalData, setModalData] = useState<ModalData>();
 
     const isEditMode = useMemo(() => !!id, [id]);
 
@@ -127,10 +127,52 @@ export function useAMCQuestionnaireForm<T extends AMCQuestionnaireFormType>(para
                             });
                         }
                         break;
+
                     case "am-class-questionnaire":
                         {
                             const amClassQuestionnaire = questionnaire?.amClassQuestionnaires.find(q => q.id === id);
+                            if (!amClassQuestionnaire) {
+                                setFormState({
+                                    kind: "error",
+                                    message: `AM Class Questionnaire with id ${id} not found`,
+                                });
+                                return;
+                            }
+
                             const formEntity = getQuestionnaireFormEntity(formType, amcQuestions, amClassQuestionnaire);
+                            setQuestionnaireFormEntity(formEntity);
+                            setFormLabels(formEntity.labels);
+                            setFormState({
+                                kind: "loaded",
+                                data: amcQuestionnaireMappers[formType].mapEntityToFormState({
+                                    questionnaireFormEntity: formEntity,
+                                    editMode: isEditMode,
+                                    options: options,
+                                    amcQuestionnaire: questionnaire,
+                                    isViewOnlyMode: isViewOnlyMode,
+                                }),
+                            });
+                        }
+                        break;
+
+                    case "component-questionnaire":
+                        {
+                            const componentQuestionnaire = questionnaire.componentQuestionnaires.find(
+                                componentQuestionnaire => componentQuestionnaire.id === id
+                            );
+                            if (!componentQuestionnaire) {
+                                setFormState({
+                                    kind: "error",
+                                    message: `Component Questionnaire with id ${id} not found`,
+                                });
+                                return;
+                            }
+
+                            const formEntity = getQuestionnaireFormEntity(
+                                formType,
+                                amcQuestions,
+                                componentQuestionnaire
+                            );
                             setQuestionnaireFormEntity(formEntity);
                             setFormLabels(formEntity.labels);
                             setFormState({
@@ -237,6 +279,7 @@ export function useAMCQuestionnaireForm<T extends AMCQuestionnaireFormType>(para
                         }
                     );
                     break;
+
                 case "am-class-questionnaire":
                     {
                         const amClassQuestionnaire = entity as AMClassAMCQuestionnaire;
@@ -254,6 +297,25 @@ export function useAMCQuestionnaireForm<T extends AMCQuestionnaireFormType>(para
                         }
                         compositionRoot.amcQuestionnaires.saveAmClass(questionnaire.id, amClassQuestionnaire).run(
                             _amClassQuestionnaireId => {
+                                setIsLoading(false);
+                            },
+                            error => {
+                                handleError(error);
+                            }
+                        );
+                    }
+                    break;
+
+                case "component-questionnaire":
+                    {
+                        const componentQuestionnaire = entity as ComponentAMCQuestionnaire;
+                        if (!questionnaire) {
+                            throw new Error("Component needs to be added to questionnaire");
+                        }
+
+                        //TODO: before we need to addOrUpdateComponentQuestionnaire
+                        compositionRoot.amcQuestionnaires.saveComponent(questionnaire.id, componentQuestionnaire).run(
+                            _componentQuestionnaireId => {
                                 setIsLoading(false);
                             },
                             error => {
@@ -305,7 +367,6 @@ export function useAMCQuestionnaireForm<T extends AMCQuestionnaireFormType>(para
         onAddToForm,
         onResetForm,
         openModal,
-        modalData,
         setOpenModal,
     };
 }
