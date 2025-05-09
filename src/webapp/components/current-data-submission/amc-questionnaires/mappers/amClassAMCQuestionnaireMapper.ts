@@ -17,7 +17,7 @@ import {
 export function mapFormStateToAMClassAMCQuestionnaire(
     params: MapToAMCQuestionnaireParams<AMClassAMCQuestionnaireFormEntity>
 ): AMClassAMCQuestionnaire {
-    const { formState, options } = params;
+    const { formState, options, formEntity } = params;
 
     const allFields: FormFieldState[] = getAllFieldsFromSections(formState.sections);
 
@@ -45,7 +45,7 @@ export function mapFormStateToAMClassAMCQuestionnaire(
     }
 
     const amClassAMCQuestionnaireAttributes: AMClassAMCQuestionnaireAttributes = {
-        id: "",
+        id: formEntity.entity?.id ?? "",
         antimicrobialClass,
         healthSector,
         healthLevel,
@@ -92,8 +92,19 @@ export function mapAMClassAMCQuestionnaireToInitialFormState(
 
     const fromQuestions = (id: AMClassAMCQuestionId) => getQuestionById(id, questionnaireFormEntity.questions);
 
+    const antimicrobialClassValue = questionnaireFormEntity?.entity?.antimicrobialClass;
+    const antimicrobialClassOption = options.antimicrobialClassOptions.find(
+        option => option.code === antimicrobialClassValue
+    );
+    const availableAntimicrobialClassOptions = amcQuestionnaire.getAvailableAMClassOptions(
+        options.antimicrobialClassOptions
+    );
+    const antimicrobialClassOptinsWithSelf = antimicrobialClassOption
+        ? [...new Set([antimicrobialClassOption, ...availableAntimicrobialClassOptions])]
+        : availableAntimicrobialClassOptions;
+
     return {
-        id: "",
+        id: questionnaireFormEntity.entity?.id ?? "",
         title: "AM Class questionnaire",
         isValid: false,
         sections: [
@@ -109,10 +120,8 @@ export function mapAMClassAMCQuestionnaireToInitialFormState(
                         errors: [],
                         type: "select",
                         multiple: false,
-                        value: questionnaireFormEntity?.entity?.antimicrobialClass || "",
-                        options: mapToFormOptions(
-                            amcQuestionnaire.getAvailableAMClassOptions(options.antimicrobialClassOptions)
-                        ),
+                        value: antimicrobialClassValue || "",
+                        options: mapToFormOptions(antimicrobialClassOptinsWithSelf),
                         required: true,
                         showIsRequired: true,
                         text: fromQuestions("antimicrobialClass"),
