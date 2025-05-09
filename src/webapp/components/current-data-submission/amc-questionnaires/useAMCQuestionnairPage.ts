@@ -1,17 +1,17 @@
 import { useCallback, useMemo, useState } from "react";
 
-import { useAMCQuestionnaireContext } from "../../../contexts/amc-questionnaire-context";
 import { AMCQuestionnaire } from "../../../../domain/entities/amc-questionnaires/AMCQuestionnaire";
 import { useAMCQuestionnaireOptionsContext } from "../../../contexts/amc-questionnaire-options-context";
 import { QuestionnairesTableRow } from "../../questionnaires-table/QuestionnairesTable";
 import { AMClassAMCQuestionnaire } from "../../../../domain/entities/amc-questionnaires/AMClassAMCQuestionnaire";
 import { Id } from "../../../../domain/entities/Ref";
 import { AMCQuestionnaireFormType } from "./presentation-entities/AMCQuestionnaireFormType";
-import { Maybe } from "../../../../types/utils";
+import i18n from "../../../../locales";
 
 type AMCQuestionnairPageState = {
-    questionnaire: Maybe<AMCQuestionnaire>;
     questionnaireRows: QuestionnairesTableRow[];
+    tableTitle: string;
+    disabledAddNewQuestionnaire: boolean;
     isEditMode: boolean;
     questionnaireIdToEdit?: Id;
     onClickAddOrEdit: (questionnaireIdToEdit?: Id) => void;
@@ -19,12 +19,16 @@ type AMCQuestionnairPageState = {
     onSaveForm: () => void;
 };
 
-export function useAMCQuestionnairPage(formType: AMCQuestionnaireFormType, id?: Id): AMCQuestionnairPageState {
-    const { questionnaire } = useAMCQuestionnaireContext();
+export function useAMCQuestionnairPage(options: {
+    formType: AMCQuestionnaireFormType;
+    questionnaire: AMCQuestionnaire;
+    openQuestionnaireId?: Id;
+}): AMCQuestionnairPageState {
+    const { formType, questionnaire, openQuestionnaireId } = options;
     const formOptions = useAMCQuestionnaireOptionsContext();
 
-    const [isEditMode, setIsEditMode] = useState(!!id);
-    const [questionnaireIdToEdit, setQuestionnaireIdToEdit] = useState(id);
+    const [isEditMode, setIsEditMode] = useState(!!openQuestionnaireId);
+    const [questionnaireIdToEdit, setQuestionnaireIdToEdit] = useState(openQuestionnaireId);
 
     const isLoading = useMemo(() => {
         return questionnaire === undefined || Object.values(formOptions).some(options => options.length === 0);
@@ -49,6 +53,22 @@ export function useAMCQuestionnairPage(formType: AMCQuestionnaireFormType, id?: 
         );
     }, [isLoading, questionnaire, formOptions]);
 
+    const tableTitle = useMemo(
+        () =>
+            formType === "am-class-questionnaire"
+                ? i18n.t("AM Questionnaire Editor")
+                : i18n.t("Component Questionnaire Editor"),
+        [formType]
+    );
+
+    const disabledAddNewQuestionnaire = useMemo(
+        () =>
+            formType === "am-class-questionnaire"
+                ? !questionnaire.canAddAMClassQuestionnaire()
+                : !questionnaire.canAddComponentQuestionnaire(),
+        [formType, questionnaire]
+    );
+
     const onClickAddOrEdit = useCallback((id?: Id) => {
         setIsEditMode(true);
         setQuestionnaireIdToEdit(id);
@@ -60,8 +80,9 @@ export function useAMCQuestionnairPage(formType: AMCQuestionnaireFormType, id?: 
     }, []);
 
     return {
-        questionnaire,
         questionnaireRows,
+        tableTitle,
+        disabledAddNewQuestionnaire,
         isEditMode,
         questionnaireIdToEdit,
         onClickAddOrEdit,

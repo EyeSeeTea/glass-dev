@@ -30,12 +30,13 @@ export const MainPageAMCQuestionnaires: React.FC = () => {
 
     return (
         <Container>
-            {openQuestionnaire ? (
+            {openQuestionnaire && questionnaire ? (
                 <AMCQuestionnairePage
                     formType={openQuestionnaire.formType}
-                    id={openQuestionnaire.id}
+                    openQuestionnaireId={openQuestionnaire.id}
                     onCloseQuestionnaireForm={onCloseQuestionnaireForm}
                     title={openQuestionnaire.title}
+                    questionnaire={questionnaire}
                 />
             ) : (
                 <div>

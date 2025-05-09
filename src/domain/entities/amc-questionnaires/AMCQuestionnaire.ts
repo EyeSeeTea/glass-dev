@@ -94,6 +94,10 @@ export class AMCQuestionnaire extends Struct<AMCQuestionnaireAttrs>() {
         return Object.entries(amClassOptionToGeneralMap).length > this.amClassQuestionnaires.length;
     }
 
+    public canAddComponentQuestionnaire(): boolean {
+        return this.amClassQuestionnaires.length !== 0; // TODO: implement this
+    }
+
     // Each amClass questionnaire must be unique for its antimicrobial class
     private validateAMClassQuestionnairesNotRepeated(): boolean {
         const amClassQuestionnaires = this.amClassQuestionnaires.map(
