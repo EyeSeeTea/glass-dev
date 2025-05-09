@@ -121,6 +121,7 @@ export function useAMCQuestionnaireForm<T extends AMCQuestionnaireFormType>(para
                                     questionnaireFormEntity: formEntity,
                                     editMode: isEditMode,
                                     options: options,
+                                    amcQuestionnaire: questionnaire,
                                     isViewOnlyMode: isViewOnlyMode,
                                 }),
                             });
@@ -139,6 +140,7 @@ export function useAMCQuestionnaireForm<T extends AMCQuestionnaireFormType>(para
                         questionnaireFormEntity: formEntity,
                         editMode: isEditMode,
                         options: options,
+                        amcQuestionnaire: questionnaire,
                         isViewOnlyMode: isViewOnlyMode,
                     }),
                 });

@@ -4,13 +4,14 @@ import { AMCQuestionnaireContext, defaultAMCQuestionnaireContextState } from "..
 import { AMCQuestionnaire } from "../../domain/entities/amc-questionnaires/AMCQuestionnaire";
 import { useCurrentPeriodContext } from "../contexts/current-period-context";
 import { useCurrentOrgUnitContext } from "../contexts/current-orgUnit-context";
+import { Maybe } from "../../types/utils";
 
 export const AMCQuestionnaireContextProvider: React.FC = ({ children }) => {
     const { compositionRoot } = useAppContext();
     const { currentPeriod } = useCurrentPeriodContext();
     const { currentOrgUnitAccess } = useCurrentOrgUnitContext();
 
-    const [amcQuestionnaire, setAMCQuestionnaire] = useState<AMCQuestionnaire | null>(
+    const [amcQuestionnaire, setAMCQuestionnaire] = useState<Maybe<AMCQuestionnaire>>(
         defaultAMCQuestionnaireContextState.questionnaire
     );
 
@@ -19,11 +20,11 @@ export const AMCQuestionnaireContextProvider: React.FC = ({ children }) => {
             .getByOrgUnitAndPeriod(currentOrgUnitAccess.orgUnitId, currentPeriod)
             .run(
                 amcQuestionnaire => {
-                    setAMCQuestionnaire(amcQuestionnaire ?? null);
+                    setAMCQuestionnaire(amcQuestionnaire);
                 },
                 error => {
                     console.error("Error fetching AMC Questionnaire:", error);
-                    setAMCQuestionnaire(null);
+                    setAMCQuestionnaire(undefined);
                 }
             );
     }, [compositionRoot.amcQuestionnaires, currentOrgUnitAccess.orgUnitId, currentPeriod]);

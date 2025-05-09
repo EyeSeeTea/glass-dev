@@ -1,12 +1,13 @@
 import { createContext, useContext } from "react";
 import { AMCQuestionnaire } from "../../domain/entities/amc-questionnaires/AMCQuestionnaire";
+import { Maybe } from "../../types/utils";
 
 export interface AMCQuestionnaireContextState {
-    questionnaire: AMCQuestionnaire | null;
+    questionnaire: Maybe<AMCQuestionnaire>;
 }
 
 export const defaultAMCQuestionnaireContextState: AMCQuestionnaireContextState = {
-    questionnaire: null,
+    questionnaire: undefined,
 };
 
 export const AMCQuestionnaireContext = createContext<AMCQuestionnaireContextState>(defaultAMCQuestionnaireContextState);
