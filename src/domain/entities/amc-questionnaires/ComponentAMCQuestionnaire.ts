@@ -9,6 +9,8 @@ import { ProcurementLevelValue } from "./ProcurementLevelOption";
 import { NationalPopulationDataSourceValue } from "./NationalPopulationDataSourceOption";
 import { DataSourceValue } from "./DataSourceOption";
 import { Proportion50to100UnknownValue } from "./Proportion50to100UnknownOption";
+import { ValidationError, ValidationErrorKey } from "./ValidationError";
+import { Either } from "../generic/Either";
 
 export type ComponentAMCQuestionnaireBaseAttributes = {
     id: Id;
@@ -18,14 +20,14 @@ export type ComponentAMCQuestionnaireBaseAttributes = {
 };
 
 export type ComponentAMCQuestionnaireResponsesAttributes = {
-    antimicrobialClass: AntimicrobialClassValue;
-    componentStrata: string; // TODO: use optionSet when created
+    antimicrobialClass: AntimicrobialClassValue[];
+    componentStrata: string[]; // TODO: use optionSet when created
     excludedSubstances: YesNoUnknownValue;
     listOfExcludedSubstances: Maybe<string>;
     typeOfDataReported: DataLevelValue;
-    procurementTypeOfDataReported: ProcurementLevelValue;
+    procurementTypeOfDataReported: Maybe<ProcurementLevelValue>;
     mixedTypeOfData: Maybe<string>;
-    sourcesOfDataReported: DataSourceValue;
+    sourcesOfDataReported: DataSourceValue[];
     commentsForDataSources: Maybe<string>;
     sameAsUNPopulation: YesNoValue;
     sourceOfNationalPopulation: Maybe<NationalPopulationDataSourceValue>;
@@ -40,4 +42,37 @@ export type ComponentAMCQuestionId = keyof ComponentAMCQuestionnaireResponsesAtt
 export type ComponentAMCQuestionnaireAttributes = ComponentAMCQuestionnaireBaseAttributes &
     ComponentAMCQuestionnaireResponsesAttributes;
 
-export class ComponentAMCQuestionnaire extends Struct<ComponentAMCQuestionnaireAttributes>() {}
+// TODO: add validations
+export class ComponentAMCQuestionnaire extends Struct<ComponentAMCQuestionnaireAttributes>() {
+    static validateAndCreate(
+        attributes: ComponentAMCQuestionnaireAttributes
+    ): Either<ValidationError[], ComponentAMCQuestionnaire> {
+        const errors = this.validate(attributes);
+        if (errors.length > 0) {
+            return Either.error(errors);
+        }
+        return Either.success(new ComponentAMCQuestionnaire(attributes));
+    }
+
+    static validate(attributes: ComponentAMCQuestionnaireAttributes): ValidationError[] {
+        const requiredConditions = this.requiredFieldsCustomConditions(attributes);
+        return _.compact(
+            _.map(requiredConditions, (isRequired, key) => {
+                if (isRequired && !attributes[key as keyof ComponentAMCQuestionnaireResponsesAttributes]) {
+                    return {
+                        property: key,
+                        value: attributes[key as keyof ComponentAMCQuestionnaireAttributes],
+                        errors: [ValidationErrorKey.FIELD_IS_REQUIRED],
+                    };
+                }
+                return null;
+            })
+        );
+    }
+
+    static requiredFieldsCustomConditions(
+        attributes: Partial<ComponentAMCQuestionnaireAttributes>
+    ): Partial<Record<keyof ComponentAMCQuestionnaireAttributes, boolean>> {
+        return {};
+    }
+}
