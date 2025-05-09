@@ -11,7 +11,6 @@ import {
 import { FormState } from "../../form/presentation-entities/FormState";
 import { AMCQuestionnaireFormType } from "./presentation-entities/AMCQuestionnaireFormType";
 import { ModalData } from "../../form/Form";
-import { AMCQuestionnaireQuestions } from "../../../../domain/entities/amc-questionnaires/AMCQuestionnaireQuestions";
 import { useAMCQuestionnaireOptionsContext } from "../../../contexts/amc-questionnaire-options-context";
 import { updateAndValidateFormState } from "../../form/presentation-entities/utils/updateAndValidateFormState";
 import { GeneralAMCQuestionnaire } from "../../../../domain/entities/amc-questionnaires/GeneralAMCQuestionnaire";
@@ -69,48 +68,26 @@ export function useAMCQuestionnaireForm<T extends AMCQuestionnaireFormType>(para
     const { formType, id, orgUnitId, period, isViewOnlyMode = false, onSave, onCancel } = params;
 
     const { compositionRoot } = useAppContext();
-    const { questionnaire } = useAMCQuestionnaireContext();
+    const { questionnaire, questions } = useAMCQuestionnaireContext();
     const options = useAMCQuestionnaireOptionsContext();
     const [globalMessage, setGlobalMessage] = useState<Maybe<GlobalMessage>>();
     const [formState, setFormState] = useState<FormLoadState>({ kind: "loading" });
     const [formLabels, setFormLabels] = useState<FormLables>();
     const [isLoading, setIsLoading] = useState(false);
     const [questionnaireFormEntity, setQuestionnaireFormEntity] = useState<QuestionnaireFormEntityMap[T]>();
-    const [amcQuestions, setAMCQuestions] = useState<AMCQuestionnaireQuestions>();
     const [openModal, setOpenModal] = useState(false);
 
     const isEditMode = useMemo(() => !!id, [id]);
 
     useEffect(() => {
-        if (!amcQuestions && formState.kind !== "loaded") {
-            setIsLoading(true);
-            compositionRoot.amcQuestionnaires.getQuestions().run(
-                questions => {
-                    setAMCQuestions(questions);
-                    setIsLoading(false);
-                },
-                error => {
-                    setAMCQuestions(undefined);
-                    console.debug(error);
-                    setGlobalMessage({
-                        type: "error",
-                        text: `Error loading General AMC Questions: ${error}`,
-                    });
-                    setIsLoading(false);
-                }
-            );
-        }
-    }, [amcQuestions, compositionRoot.amcQuestionnaires, formState.kind]);
-
-    useEffect(() => {
-        if (amcQuestions && options) {
+        if (questions && options) {
             if (id && questionnaire) {
                 switch (formType) {
                     case "general-questionnaire":
                         {
                             const formEntity = getQuestionnaireFormEntity(
                                 formType,
-                                amcQuestions,
+                                questions,
                                 questionnaire?.generalQuestionnaire
                             );
                             setQuestionnaireFormEntity(formEntity);
@@ -139,7 +116,7 @@ export function useAMCQuestionnaireForm<T extends AMCQuestionnaireFormType>(para
                                 return;
                             }
 
-                            const formEntity = getQuestionnaireFormEntity(formType, amcQuestions, amClassQuestionnaire);
+                            const formEntity = getQuestionnaireFormEntity(formType, questions, amClassQuestionnaire);
                             setQuestionnaireFormEntity(formEntity);
                             setFormLabels(formEntity.labels);
                             setFormState({
@@ -168,11 +145,7 @@ export function useAMCQuestionnaireForm<T extends AMCQuestionnaireFormType>(para
                                 return;
                             }
 
-                            const formEntity = getQuestionnaireFormEntity(
-                                formType,
-                                amcQuestions,
-                                componentQuestionnaire
-                            );
+                            const formEntity = getQuestionnaireFormEntity(formType, questions, componentQuestionnaire);
                             setQuestionnaireFormEntity(formEntity);
                             setFormLabels(formEntity.labels);
                             setFormState({
@@ -191,7 +164,7 @@ export function useAMCQuestionnaireForm<T extends AMCQuestionnaireFormType>(para
                         break;
                 }
             } else {
-                const formEntity = getQuestionnaireFormEntity(formType, amcQuestions);
+                const formEntity = getQuestionnaireFormEntity(formType, questions);
                 setQuestionnaireFormEntity(formEntity);
                 setFormLabels(formEntity.labels);
                 setFormState({
@@ -207,7 +180,7 @@ export function useAMCQuestionnaireForm<T extends AMCQuestionnaireFormType>(para
             }
         }
     }, [
-        amcQuestions,
+        questions,
         compositionRoot.amcQuestionnaires,
         formType,
         id,
