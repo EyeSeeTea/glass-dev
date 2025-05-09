@@ -80,6 +80,7 @@ export const MainPageAMCQuestionnaires: React.FC = () => {
                                         onClickAddNew={() => {
                                             openQuestionnaireForm("am-class-questionnaire");
                                         }}
+                                        disabledAddNew={!questionnaire.canAddAMClassQuestionnaire()}
                                     />
 
                                     <QuestionnairesTable

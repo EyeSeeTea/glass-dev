@@ -1,3 +1,5 @@
+import { AMCQuestionnaire } from "../../../../../domain/entities/amc-questionnaires/AMCQuestionnaire";
+import { Maybe } from "../../../../../types/utils";
 import { AMCQuestionnaireOptionsContextState } from "../../../../contexts/amc-questionnaire-options-context";
 import { FormState } from "../../../form/presentation-entities/FormState";
 import { AMCQuestionnaireFormType } from "../presentation-entities/AMCQuestionnaireFormType";
@@ -16,6 +18,7 @@ export type MapToFormStateParams<T extends QuestionnaireFormEntity> = {
     questionnaireFormEntity: T;
     editMode: boolean;
     options: AMCQuestionnaireOptionsContextState;
+    amcQuestionnaire: Maybe<AMCQuestionnaire>;
     isViewOnlyMode?: boolean;
 };
 
