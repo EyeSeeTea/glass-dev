@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2025-05-08T10:14:45.140Z\n"
-"PO-Revision-Date: 2025-05-08T10:14:45.140Z\n"
+"POT-Creation-Date: 2025-05-09T07:51:45.345Z\n"
+"PO-Revision-Date: 2025-05-09T07:51:45.345Z\n"
 
 msgid "Template {{id}} not loaded"
 msgstr ""
@@ -412,12 +412,6 @@ msgstr ""
 msgid "Back"
 msgstr ""
 
-msgid "AM Questionnaire Editor"
-msgstr ""
-
-msgid "Component Questionnaire Editor"
-msgstr ""
-
 msgid "Edit"
 msgstr ""
 
@@ -425,6 +419,12 @@ msgid "AM Class"
 msgstr ""
 
 msgid "Component"
+msgstr ""
+
+msgid "AM Questionnaire Editor"
+msgstr ""
+
+msgid "Component Questionnaire Editor"
 msgstr ""
 
 msgid "AM Class Questionnaires"

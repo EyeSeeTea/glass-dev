@@ -6,6 +6,11 @@ import { Proportion50to100Option } from "../../domain/entities/amc-questionnaire
 import { YesNoOption } from "../../domain/entities/amc-questionnaires/YesNoOption";
 import { YesNoUnknownNAOption } from "../../domain/entities/amc-questionnaires/YesNoUnknownNAOption";
 import { YesNoUnknownOption } from "../../domain/entities/amc-questionnaires/YesNoUnknownOption";
+import { Proportion50to100UnknownOption } from "../../domain/entities/amc-questionnaires/Proportion50to100UnknownOption";
+import { DataLevelOption } from "../../domain/entities/amc-questionnaires/DataLevelOption";
+import { DataSourceOption } from "../../domain/entities/amc-questionnaires/DataSourceOption";
+import { NationalPopulationDataSourceOption } from "../../domain/entities/amc-questionnaires/NationalPopulationDataSourceOption";
+import { ProcurementLevelOption } from "../../domain/entities/amc-questionnaires/ProcurementLevelOption";
 
 export interface AMCQuestionnaireOptionsContextState {
     yesNoUnknownNAOptions: YesNoUnknownNAOption[];
@@ -15,6 +20,11 @@ export interface AMCQuestionnaireOptionsContextState {
     healthLevelOptions: HealthLevelOption[];
     healthSectorOptions: HealthSectorOption[];
     proportion50to100Options: Proportion50to100Option[];
+    proportion50to100UnknownOptions: Proportion50to100UnknownOption[];
+    dataLevelOptions: DataLevelOption[];
+    dataSourceOptions: DataSourceOption[];
+    nationalPopulationDataSourceOptions: NationalPopulationDataSourceOption[];
+    procurementLevelOptions: ProcurementLevelOption[];
 }
 
 export const defaultAMCQuestionnaireOptionsContextState: AMCQuestionnaireOptionsContextState = {
@@ -25,6 +35,11 @@ export const defaultAMCQuestionnaireOptionsContextState: AMCQuestionnaireOptions
     healthLevelOptions: [],
     healthSectorOptions: [],
     proportion50to100Options: [],
+    proportion50to100UnknownOptions: [],
+    dataLevelOptions: [],
+    dataSourceOptions: [],
+    nationalPopulationDataSourceOptions: [],
+    procurementLevelOptions: [],
 };
 
 export const AMCQuestionnaireOptionsContext = createContext<AMCQuestionnaireOptionsContextState>(
