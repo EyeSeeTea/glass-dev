@@ -24,8 +24,17 @@ export const AMCQuestionnairePage: React.FC<AMCQuestionnairePageProps> = props =
     const { currentPeriod } = useCurrentPeriodContext();
     const { currentOrgUnitAccess } = useCurrentOrgUnitContext();
 
-    const { questionnaireRows, isEditMode, questionnaireIdToEdit, onClickAddOrEdit, onCancelForm, onSaveForm } =
-        useAMCQuestionnairPage(formType, id);
+    const {
+        questionnaireRows,
+        isEditMode,
+        questionnaireIdToEdit,
+        onClickAddOrEdit,
+        onCancelForm,
+        onSaveForm,
+        questionnaire,
+    } = useAMCQuestionnairPage(formType, id);
+
+    const disabledAddNew = formType === "am-class-questionnaire" ? !questionnaire?.canAddAMClassQuestionnaire() : false;
 
     return (
         <div>
@@ -54,6 +63,7 @@ export const AMCQuestionnairePage: React.FC<AMCQuestionnairePageProps> = props =
                     rows={questionnaireRows}
                     onClickEdit={(_event, id: Id) => onClickAddOrEdit(id)}
                     onClickAddNew={() => onClickAddOrEdit()}
+                    disabledAddNew={disabledAddNew}
                 />
             </QuestionnaireTableContainer>
 
