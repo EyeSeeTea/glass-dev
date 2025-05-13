@@ -35,8 +35,7 @@ export function mapFormStateToComponentAMCQuestionnaire(
     );
     const componentStrata = _.compact(
         getMultipleOptionsFieldValue("componentStrata", allFields).map(selectedOption => {
-            // TODO: get options when optionSet created
-            return selectedOption;
+            return options.strataOptions.find(option => option.code === selectedOption)?.code;
         })
     );
     const excludedSubstances = options.yesNoUnknownOptions.find(
@@ -203,7 +202,7 @@ export function mapComponentAMCQuestionnaireToInitialFormState(
                         type: "select",
                         multiple: true,
                         value: questionnaireFormEntity?.entity?.componentStrata || [],
-                        options: [], // TODO: get options when optionSet created
+                        options: mapToFormOptions(options.strataOptions),
                         required: true,
                         showIsRequired: true,
                         text: fromQuestions("componentStrata"),

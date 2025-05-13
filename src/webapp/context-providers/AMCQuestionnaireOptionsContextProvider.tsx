@@ -28,6 +28,7 @@ export const AMCQuestionnaireOptionsContextProvider: React.FC = ({ children }) =
             nationalPopulationDataSourceOptions:
                 compositionRoot.amcQuestionnaires.getNationalPopulationDataSourceOptions(),
             procurementLevelOptions: compositionRoot.amcQuestionnaires.getProcurementLevelOptions(),
+            strataOptions: compositionRoot.amcQuestionnaires.getStrataOptions(),
         }).run(
             options => {
                 setAMCQuestionnaireOptions(options);

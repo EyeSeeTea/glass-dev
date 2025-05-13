@@ -11,6 +11,7 @@ import { DataSourceValue } from "./DataSourceOption";
 import { Proportion50to100UnknownValue } from "./Proportion50to100UnknownOption";
 import { ValidationError, ValidationErrorKey } from "./ValidationError";
 import { Either } from "../generic/Either";
+import { StrataValue } from "./StrataOption";
 
 export type ComponentAMCQuestionnaireBaseAttributes = {
     id: Id;
@@ -21,7 +22,7 @@ export type ComponentAMCQuestionnaireBaseAttributes = {
 
 export type ComponentAMCQuestionnaireResponsesAttributes = {
     antimicrobialClasses: AntimicrobialClassValue[];
-    componentStrata: string[]; // TODO: use optionSet when created
+    componentStrata: StrataValue[];
     excludedSubstances: YesNoUnknownValue;
     listOfExcludedSubstances: Maybe<string>;
     typeOfDataReported: DataLevelValue;
@@ -71,7 +72,7 @@ export class ComponentAMCQuestionnaire extends Struct<ComponentAMCQuestionnaireA
     }
 
     static requiredFieldsCustomConditions(
-        attributes: Partial<ComponentAMCQuestionnaireAttributes>
+        _attributes: Partial<ComponentAMCQuestionnaireAttributes>
     ): Partial<Record<keyof ComponentAMCQuestionnaireAttributes, boolean>> {
         return {};
     }
