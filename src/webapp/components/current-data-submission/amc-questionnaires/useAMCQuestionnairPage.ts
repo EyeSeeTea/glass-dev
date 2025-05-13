@@ -41,18 +41,9 @@ export function useAMCQuestionnairPage(options: {
 
         if (formType === "component-questionnaire") {
             return questionnaire.componentQuestionnaires.map((componentQuestionnaire): QuestionnairesTableRow => {
-                const amClasses = componentQuestionnaire.antimicrobialClasses.map(amClass => {
-                    const amClassName =
-                        formOptions.antimicrobialClassOptions.find(option => option.code === amClass)?.name || amClass;
-                    return amClassName;
-                });
-
-                // TODO: Add function to get the componentStrata name when options are available from optionSet
-                const componentStrata = componentQuestionnaire.componentStrata;
-
                 return {
                     id: componentQuestionnaire.id,
-                    name: `${amClasses.join(", ")} - ${componentStrata.join(", ")}`,
+                    name: componentQuestionnaire.getTitle(formOptions),
                 };
             });
         }
@@ -60,20 +51,16 @@ export function useAMCQuestionnairPage(options: {
         if (formType === "am-class-questionnaire") {
             return questionnaire.amClassQuestionnaires.map(
                 (amClassQuestionnaire: AMClassAMCQuestionnaire): QuestionnairesTableRow => {
-                    const amClassName =
-                        formOptions.antimicrobialClassOptions.find(
-                            option => option.code === amClassQuestionnaire.antimicrobialClass
-                        )?.name || amClassQuestionnaire.antimicrobialClass;
                     return {
                         id: amClassQuestionnaire.id,
-                        name: amClassName,
+                        name: amClassQuestionnaire.getTitle(formOptions),
                     };
                 }
             );
         }
 
         return [];
-    }, [isLoading, questionnaire, formType, formOptions.antimicrobialClassOptions]);
+    }, [isLoading, questionnaire, formType, formOptions]);
 
     const tableTitle = useMemo(
         () =>

@@ -2,6 +2,7 @@ import _ from "lodash";
 import {
     FormFieldState,
     getAllFieldsFromSections,
+    getBooleanFieldValue,
     getFieldIdFromIdsDictionary,
     getMultipleOptionsFieldValue,
     getStringFieldValue,
@@ -33,11 +34,9 @@ export function mapFormStateToComponentAMCQuestionnaire(
             return options.antimicrobialClassOptions.find(option => option.code === selectedOption)?.code;
         })
     );
-    const componentStrata = _.compact(
-        getMultipleOptionsFieldValue("componentStrata", allFields).map(selectedOption => {
-            return options.strataOptions.find(option => option.code === selectedOption)?.code;
-        })
-    );
+    const componentStrata = options.strataOptions.find(
+        option => option.code === getStringFieldValue("componentStrata", allFields)
+    )?.code;
     const excludedSubstances = options.yesNoUnknownOptions.find(
         option => option.code === getStringFieldValue("excludedSubstances", allFields)
     )?.code;
@@ -55,9 +54,7 @@ export function mapFormStateToComponentAMCQuestionnaire(
         })
     );
     const commentsForDataSources = getStringFieldValue("commentsForDataSources", allFields);
-    const sameAsUNPopulation = options.yesNoOptions.find(
-        option => option.code === getStringFieldValue("sameAsUNPopulation", allFields)
-    )?.code;
+    const sameAsUNPopulation = yesNoOption.getValueFromBoolean(getBooleanFieldValue("sameAsUNPopulation", allFields));
     const sourceOfNationalPopulation = options.nationalPopulationDataSourceOptions.find(
         option => option.code === getStringFieldValue("sourceOfNationalPopulation", allFields)
     )?.code;
@@ -70,7 +67,7 @@ export function mapFormStateToComponentAMCQuestionnaire(
 
     if (
         antimicrobialClasses.length === 0 ||
-        componentStrata.length === 0 ||
+        !componentStrata ||
         !excludedSubstances ||
         !typeOfDataReported ||
         sourcesOfDataReported.length === 0 ||
@@ -200,8 +197,8 @@ export function mapComponentAMCQuestionnaireToInitialFormState(
                         isVisible: true,
                         errors: [],
                         type: "select",
-                        multiple: true,
-                        value: questionnaireFormEntity?.entity?.componentStrata || [],
+                        multiple: false,
+                        value: questionnaireFormEntity?.entity?.componentStrata || "",
                         options: mapToFormOptions(options.strataOptions),
                         required: true,
                         showIsRequired: true,
