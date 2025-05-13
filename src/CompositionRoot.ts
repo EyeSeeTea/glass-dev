@@ -132,11 +132,13 @@ import { DataLevelOptionsD2Repository } from "./data/repositories/amc-questionna
 import { DataSourceOptionsD2Repository } from "./data/repositories/amc-questionnaires/DataSourceOptionsD2Repository";
 import { NationalPopulationDataSourceOptionsD2Repository } from "./data/repositories/amc-questionnaires/NationalPopulationDataSourceOptionsD2Repository";
 import { ProcurementLevelOptionsD2Repository } from "./data/repositories/amc-questionnaires/ProcurementLevelOptionsD2Repository";
+import { StrataOptionsD2Repository } from "./data/repositories/amc-questionnaires/StrataOptionsD2Repository";
 import { GetProportion50to100UnknownOptionsUseCase } from "./domain/usecases/amc-questionnaires/GetProportion50to100UnknownOptionsUseCase";
 import { GetDataLevelOptionsUseCase } from "./domain/usecases/amc-questionnaires/GetDataLevelOptionsUseCase";
 import { GetDataSourceOptionsUseCase } from "./domain/usecases/amc-questionnaires/GetDataSourceOptionsUseCase";
 import { GetNationalPopulationDataSourceOptionsUseCase } from "./domain/usecases/amc-questionnaires/GetNationalPopulationDataSourceOptionsUseCase";
 import { GetProcurementLevelOptionsUseCase } from "./domain/usecases/amc-questionnaires/GetProcurementLevelOptionsUseCase";
+import { GetStrataOptionsUseCase } from "./domain/usecases/amc-questionnaires/GetStrataOptionsUseCase";
 import { SaveComponentAMCQuestionnaireUseCase } from "./domain/usecases/amc-questionnaires/SaveComponentAMCQuestionnaireUseCase";
 
 export function getCompositionRoot(instance: Instance) {
@@ -192,6 +194,7 @@ export function getCompositionRoot(instance: Instance) {
     const nationalPopulationDataSourceOptionsD2Repository = new NationalPopulationDataSourceOptionsD2Repository(api);
     const procurementLevelOptionsD2Repository = new ProcurementLevelOptionsD2Repository(api);
     const proportion50to100UnknownOptionsD2Repository = new Proportion50to100UnknownOptionsD2Repository(api);
+    const strataOptionsRepository = new StrataOptionsD2Repository(api);
 
     return {
         instance: getExecute({
@@ -433,6 +436,7 @@ export function getCompositionRoot(instance: Instance) {
                 nationalPopulationDataSourceOptionsD2Repository
             ),
             getProcurementLevelOptions: new GetProcurementLevelOptionsUseCase(procurementLevelOptionsD2Repository),
+            getStrataOptions: new GetStrataOptionsUseCase(strataOptionsRepository),
         }),
     };
 }
