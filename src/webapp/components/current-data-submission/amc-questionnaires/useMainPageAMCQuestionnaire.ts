@@ -9,6 +9,7 @@ import { Id } from "../../../../domain/entities/Ref";
 import { AMCQuestionnaireFormType } from "./presentation-entities/AMCQuestionnaireFormType";
 import i18n from "../../../../locales";
 import { Maybe } from "../../../../types/utils";
+import { ComponentAMCQuestionnaire } from "../../../../domain/entities/amc-questionnaires/ComponentAMCQuestionnaire";
 
 type QuestionnaireInfo = {
     formType: AMCQuestionnaireFormType;
@@ -48,21 +49,27 @@ export function useMainPageAMCQuestionnaire(): MainPageAMCQuestionnaireState {
 
         return questionnaire.amClassQuestionnaires.map(
             (amClassQuestionnaire: AMClassAMCQuestionnaire): QuestionnairesTableRow => {
-                const amClassName =
-                    formOptions.antimicrobialClassOptions.find(
-                        option => option.code === amClassQuestionnaire.antimicrobialClass
-                    )?.name || amClassQuestionnaire.antimicrobialClass;
                 return {
                     id: amClassQuestionnaire.id,
-                    name: amClassName,
+                    name: amClassQuestionnaire.getTitle(formOptions),
                 };
             }
         );
     }, [isLoading, questionnaire, formOptions]);
 
     const componentQuestionnaireRows: QuestionnairesTableRow[] = useMemo(() => {
-        return [];
-    }, []);
+        if (isLoading || !questionnaire) {
+            return [];
+        }
+        return questionnaire.componentQuestionnaires.map(
+            (componentQuestionnaire: ComponentAMCQuestionnaire): QuestionnairesTableRow => {
+                return {
+                    id: componentQuestionnaire.id,
+                    name: componentQuestionnaire.getTitle(formOptions),
+                };
+            }
+        );
+    }, [isLoading, questionnaire, formOptions]);
 
     const onClickAddOrEdit = useCallback(() => setIsEditMode(true), []);
 
