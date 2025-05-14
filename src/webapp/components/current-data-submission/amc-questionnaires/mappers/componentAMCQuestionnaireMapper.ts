@@ -167,7 +167,28 @@ export function mapComponentAMCQuestionnaireToInitialFormState(
 
     const fromQuestions = (id: ComponentAMCQuestionId) => getQuestionById(id, questionnaireFormEntity.questions);
 
-    // TODO: remove options in selector according with specifications
+    const selfAntimicrobialClassOptions = options.antimicrobialClassOptions.filter(option =>
+        (questionnaireFormEntity?.entity?.antimicrobialClasses || []).includes(option.code)
+    );
+    const availableAntimicrobialClassOptions = amcQuestionnaire.getAvailableAMClassOptionsForComponentQ(
+        options.antimicrobialClassOptions,
+        questionnaireFormEntity?.entity?.componentStrata
+    );
+    const antimicrobialClassOptinsWithSelf = [
+        ...new Set([...selfAntimicrobialClassOptions, ...availableAntimicrobialClassOptions]),
+    ];
+
+    const selfStrataOption = options.strataOptions.find(
+        option => option.code === questionnaireFormEntity?.entity?.componentStrata
+    );
+    const availableStrataOptions = amcQuestionnaire.getAvailableStrataOptionsForComponentQ(
+        options.strataOptions,
+        questionnaireFormEntity?.entity?.antimicrobialClasses || []
+    );
+    const strataOptionsWithSelf = selfStrataOption
+        ? [...new Set([selfStrataOption, ...availableStrataOptions])]
+        : availableStrataOptions;
+
     return {
         id: questionnaireFormEntity.entity?.id ?? "",
         title: "Component questionnaire",
@@ -186,7 +207,7 @@ export function mapComponentAMCQuestionnaireToInitialFormState(
                         type: "select",
                         multiple: true,
                         value: questionnaireFormEntity?.entity?.antimicrobialClasses || [],
-                        options: mapToFormOptions(options.antimicrobialClassOptions),
+                        options: mapToFormOptions(antimicrobialClassOptinsWithSelf),
                         required: true,
                         showIsRequired: true,
                         text: fromQuestions("antimicrobialClasses"),
@@ -199,7 +220,7 @@ export function mapComponentAMCQuestionnaireToInitialFormState(
                         type: "select",
                         multiple: false,
                         value: questionnaireFormEntity?.entity?.componentStrata || "",
-                        options: mapToFormOptions(options.strataOptions),
+                        options: mapToFormOptions(strataOptionsWithSelf),
                         required: true,
                         showIsRequired: true,
                         text: fromQuestions("componentStrata"),
