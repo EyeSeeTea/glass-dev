@@ -1,4 +1,5 @@
 import { ValidationError, ValidationErrorKey } from "../../../../domain/entities/amc-questionnaires/ValidationError";
+import { Maybe } from "../../../../types/utils";
 import { FormFieldState, isFieldInSection, updateFields, validateField } from "./FormFieldsState";
 
 import { FormRule } from "./FormRule";
@@ -13,12 +14,17 @@ export type FormSectionState = {
 };
 
 // HELPERS:
+
+export function getFieldByIdFromSections(sectionsState: FormSectionState[], fieldId: string): Maybe<FormFieldState> {
+    const section = sectionsState.find(section => section.fields.some(field => field.id === fieldId));
+    return section?.fields.find(field => field.id === fieldId);
+}
+
 export function getFieldValueByIdFromSections(
     sectionsState: FormSectionState[],
     fieldId: string
-): FormFieldState["value"] | undefined {
-    const section = sectionsState.find(section => section.fields.some(field => field.id === fieldId));
-    return section?.fields.find(field => field.id === fieldId)?.value;
+): Maybe<FormFieldState["value"]> {
+    return getFieldByIdFromSections(sectionsState, fieldId)?.value;
 }
 
 // UPDATES:
