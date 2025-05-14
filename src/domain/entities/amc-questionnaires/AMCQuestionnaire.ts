@@ -147,18 +147,22 @@ export class AMCQuestionnaire extends Struct<AMCQuestionnaireAttrs>() {
     }
 
     // filters the options based on availability in component questionnaires for the specified AM classes
-    // each strata must be available for all AM classes
+    // if no `forAMClasses` are specified, return union of stratas for all available AM classes
+    // otherwise, return stratas that are available simultaneously for `forAMClasses`
     public getAvailableStrataOptionsForComponentQ(
         allOptions: StrataOption[],
         forAMClasses: AntimicrobialClassValue[]
     ): StrataOption[] {
-        if (forAMClasses.length === 0) {
-            return allOptions;
-        }
-        const strataValuesAvailableForEachClass = forAMClasses.map(forAMClass =>
+        const useIntersection = forAMClasses.length > 0;
+        const filterForClasses = useIntersection
+            ? forAMClasses
+            : this.amClassQuestionnaires.map(amClassQuestionnaire => amClassQuestionnaire.antimicrobialClass);
+        const strataValuesAvailableForEachClass = filterForClasses.map(forAMClass =>
             this.getAvailableStrataValuesForAMClass(forAMClass)
         );
-        const strataValuesAvailableForAllClasses = _.intersection(...strataValuesAvailableForEachClass);
+        const strataValuesAvailableForAllClasses = useIntersection
+            ? _.intersection(...strataValuesAvailableForEachClass)
+            : _.union(...strataValuesAvailableForEachClass);
         return allOptions.filter(option => strataValuesAvailableForAllClasses.includes(option.code));
     }
 
