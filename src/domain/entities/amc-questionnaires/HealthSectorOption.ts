@@ -4,6 +4,7 @@ export const HealthSectorValues = {
     PublicAndPrivate: "PUB+PRV",
     Public: "PUB",
     Private: "PRV",
+    Total: "TOT",
 } as const;
 
 export type HealthSectorValue = OptionValue<typeof HealthSectorValues>;
