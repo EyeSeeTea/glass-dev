@@ -96,7 +96,7 @@ export function mapAMClassAMCQuestionnaireToInitialFormState(
     const antimicrobialClassOption = options.antimicrobialClassOptions.find(
         option => option.code === antimicrobialClassValue
     );
-    const availableAntimicrobialClassOptions = amcQuestionnaire.getAvailableAMClassOptions(
+    const availableAntimicrobialClassOptions = amcQuestionnaire.getAvailableAMClassOptionsForAMClassQ(
         options.antimicrobialClassOptions
     );
     const antimicrobialClassOptinsWithSelf = antimicrobialClassOption
