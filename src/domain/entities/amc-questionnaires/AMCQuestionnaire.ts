@@ -31,7 +31,7 @@ const amClassOptionToGeneralMap: Record<AntimicrobialClassValue, keyof GeneralAM
     [AntimicrobialClassValues.Antivirals]: "antivirals",
     [AntimicrobialClassValues.Antituberculosis]: "antituberculosis",
     [AntimicrobialClassValues.Antimalaria]: "antimalaria",
-};
+} as const;
 
 export class AMCQuestionnaire extends Struct<AMCQuestionnaireAttrs>() {
     public validate(): ValidationErrorKey[] {
@@ -106,19 +106,21 @@ export class AMCQuestionnaire extends Struct<AMCQuestionnaireAttrs>() {
 
     // filters the options based on the general questionnaire checked options and availability
     public getAvailableAMClassOptionsForAMClassQ(allOptions: AntimicrobialClassOption[]): AntimicrobialClassOption[] {
-        const amClassOptions = allOptions
-            .filter(option => {
-                const isOptionInGeneral =
-                    this.generalQuestionnaire[amClassOptionToGeneralMap[option.code]] === YesNoValues.YES;
-                return isOptionInGeneral;
-            })
-            .filter(option => {
-                const isOptionInUse = this.amClassQuestionnaires.some(
-                    amClassQuestionnaire => amClassQuestionnaire.antimicrobialClass === option.code
-                );
-                return !isOptionInUse;
-            });
-        return amClassOptions;
+        const availableValues = this.getAvailableAMClassOptionValuesForAMClassQ();
+        if (availableValues.length === 0) {
+            return [];
+        }
+        return allOptions.filter(option => availableValues.includes(option.code));
+    }
+
+    private getAvailableAMClassOptionValuesForAMClassQ(): AntimicrobialClassValue[] {
+        const usedAntimicrobials = this.amClassQuestionnaires.map(
+            amClassQuestionnaire => amClassQuestionnaire.antimicrobialClass
+        );
+        const checkedAntimicrobials = Object.entries(amClassOptionToGeneralMap)
+            .filter(([, value]) => this.generalQuestionnaire[value] === YesNoValues.YES)
+            .map(([key]) => key) as AntimicrobialClassValue[];
+        return checkedAntimicrobials.filter(antimicrobialClass => !usedAntimicrobials.includes(antimicrobialClass));
     }
 
     // filters the options based on AMClass questionnaires and Component questionnaires
@@ -193,8 +195,7 @@ export class AMCQuestionnaire extends Struct<AMCQuestionnaireAttrs>() {
     }
 
     public canAddAMClassQuestionnaire(): boolean {
-        // naive implementation, just check if the number of questionnaires is less than the number of options
-        return Object.entries(amClassOptionToGeneralMap).length > this.amClassQuestionnaires.length;
+        return this.getAvailableAMClassOptionValuesForAMClassQ().length > 0;
     }
 
     public canAddComponentQuestionnaire(): boolean {
