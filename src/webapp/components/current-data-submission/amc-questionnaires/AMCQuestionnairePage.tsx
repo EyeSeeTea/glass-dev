@@ -11,6 +11,7 @@ import { QuestionnairesTable } from "../../questionnaires-table/QuestionnairesTa
 import { useAMCQuestionnairPage } from "./useAMCQuestionnairPage";
 import { AMCQuestionnaireFormType } from "./presentation-entities/AMCQuestionnaireFormType";
 import { AMCQuestionnaire } from "../../../../domain/entities/amc-questionnaires/AMCQuestionnaire";
+import { MissingComponentQuestionnaires } from "./MissingComponentQuestionnaires";
 
 type AMCQuestionnairePageProps = {
     openQuestionnaireId?: Id;
@@ -66,7 +67,11 @@ export const AMCQuestionnairePage: React.FC<AMCQuestionnairePageProps> = props =
                     onClickAddNew={() => onClickAddOrEdit()}
                     disabledAddNew={disabledAddNewQuestionnaire || isEditMode}
                     highlightedRowId={questionnaireIdToEdit}
-                />
+                >
+                    {formType === "component-questionnaire" ? (
+                        <MissingComponentQuestionnaires value={questionnaire.getRemainingComponentCombinations()} />
+                    ) : null}
+                </QuestionnairesTable>
             </QuestionnaireTableContainer>
 
             <QuestionnaireFormContainer>
