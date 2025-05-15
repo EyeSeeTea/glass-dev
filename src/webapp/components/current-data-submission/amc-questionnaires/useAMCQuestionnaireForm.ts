@@ -299,8 +299,15 @@ export function useAMCQuestionnaireForm<T extends AMCQuestionnaireFormType>(para
                         if (!questionnaire) {
                             throw new Error("Component needs to be added to questionnaire");
                         }
-
-                        //TODO: before we need to addOrUpdateComponentQuestionnaire
+                        const validationErrors = questionnaire
+                            .addOrUpdateComponentQuestionnaire(componentQuestionnaire)
+                            .match({
+                                error: errors => errors,
+                                success: () => [],
+                            });
+                        if (validationErrors.length > 0) {
+                            throw new Error(`Validation errors: ${validationErrors.join(", ")}`);
+                        }
                         compositionRoot.amcQuestionnaires.saveComponent(questionnaire.id, componentQuestionnaire).run(
                             _componentQuestionnaireId => {
                                 setIsLoading(false);

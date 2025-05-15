@@ -14,6 +14,7 @@ import { getStrataValuesFromHealthSectorAndLevel, StrataOption, StrataValue } fr
 import { ValidationErrorKey } from "./ValidationError";
 import { YesNoValues } from "./YesNoOption";
 import _ from "lodash";
+import { replaceById } from "../../../utils/ts-utils";
 
 export type AMCQuestionnaireAttrs = {
     id: Id;
@@ -41,6 +42,12 @@ export class AMCQuestionnaire extends Struct<AMCQuestionnaireAttrs>() {
         if (!this.validateAMClassQuestionnairesNotRepeated()) {
             validationErrors.push(ValidationErrorKey.CANNOT_CREATE_DUPLICATE_AM_CLASS_QUESTIONNAIRE);
         }
+        if (!this.validateComponentQuestionnairesHaveAmClassQuestionnaires()) {
+            validationErrors.push(ValidationErrorKey.COMPONENT_AM_WITHOUT_AMCLASS_QUESTIONNAIRE);
+        }
+        if (!this.validateComponentQuestionnairesStrataOverlap()) {
+            validationErrors.push(ValidationErrorKey.COMPONENT_STRATA_OVERLAP);
+        }
         // TODO: validate each indiviual questionnaire here?
         // TODO: return ValidationError instead?
         return validationErrors;
@@ -51,15 +58,26 @@ export class AMCQuestionnaire extends Struct<AMCQuestionnaireAttrs>() {
         amClassQuestionnaire: AMClassAMCQuestionnaire
     ): Either<ValidationErrorKey[], AMCQuestionnaireAttrs> {
         const updatedAMClassQuestionnaireList = amClassQuestionnaire.id
-            ? this.amClassQuestionnaires.map(questionnaire => {
-                  if (questionnaire.id === amClassQuestionnaire.id) {
-                      return amClassQuestionnaire;
-                  }
-                  return questionnaire;
-              })
+            ? replaceById(this.amClassQuestionnaires, amClassQuestionnaire)
             : [...this.amClassQuestionnaires, amClassQuestionnaire];
         const newAMCQuestionnaire = this._update({
             amClassQuestionnaires: updatedAMClassQuestionnaireList,
+        });
+        const validationErrors = newAMCQuestionnaire.validate();
+        if (validationErrors.length > 0) {
+            return Either.error(validationErrors);
+        }
+        return Either.success(newAMCQuestionnaire);
+    }
+
+    public addOrUpdateComponentQuestionnaire(
+        componentQuestionnaire: ComponentAMCQuestionnaire
+    ): Either<ValidationErrorKey[], AMCQuestionnaireAttrs> {
+        const updatedComponentQuestionnaireList = componentQuestionnaire.id
+            ? replaceById(this.componentQuestionnaires, componentQuestionnaire)
+            : [...this.componentQuestionnaires, componentQuestionnaire];
+        const newAMCQuestionnaire = this._update({
+            componentQuestionnaires: updatedComponentQuestionnaireList,
         });
         const validationErrors = newAMCQuestionnaire.validate();
         if (validationErrors.length > 0) {
@@ -198,5 +216,21 @@ export class AMCQuestionnaire extends Struct<AMCQuestionnaireAttrs>() {
             const amClassOption = amClassOptionToGeneralMap[amClassQuestionnaire.antimicrobialClass];
             return this.generalQuestionnaire[amClassOption] === YesNoValues.YES;
         });
+    }
+
+    // All the antimicrobialClasses in component questionnaires must have a corresponding amClass questionnaire
+    private validateComponentQuestionnairesHaveAmClassQuestionnaires(): boolean {
+        return this.componentQuestionnaires.every(componentQuestionnaire => {
+            return componentQuestionnaire.antimicrobialClasses.every(amClass =>
+                this.amClassQuestionnaires.some(
+                    amClassQuestionnaire => amClassQuestionnaire.antimicrobialClass === amClass
+                )
+            );
+        });
+    }
+
+    // strata values for antimicrobial classes in component questionnaires must not overlap
+    public validateComponentQuestionnairesStrataOverlap(): boolean {
+        return true; // TODO: implement this
     }
 }
