@@ -17,6 +17,9 @@ export const MissingComponentQuestionnaires: React.FC<MissingComponentQuestionna
         const strataOption = options.strataOptions.find(option => option.code === strata);
         return strataOption ? strataOption.name : strata;
     };
+    if (value.length === 0) {
+        return null;
+    }
     return (
         <Container>
             <HeadingContainer>
