@@ -8,7 +8,7 @@ import {
     AntimicrobialClassValue,
     AntimicrobialClassValues,
 } from "./AntimicrobialClassOption";
-import { ComponentAMCQuestionnaire } from "./ComponentAMCQuestionnaire";
+import { ComponentAMCQuestionnaire, ComponentAMCQuestionnaireCombination } from "./ComponentAMCQuestionnaire";
 import { GeneralAMCQuestionnaire, GeneralAMCQuestionnaireAMClassAttributes } from "./GeneralAMCQuestionnaire";
 import { getStrataValuesFromHealthSectorAndLevel, StrataOption, StrataValue } from "./StrataOption";
 import { ValidationErrorKey } from "./ValidationError";
@@ -166,10 +166,7 @@ export class AMCQuestionnaire extends Struct<AMCQuestionnaireAttrs>() {
         return allOptions.filter(option => strataValuesAvailableForAllClasses.includes(option.code));
     }
 
-    public getRemainingComponentCombinations(): {
-        antimicrobialClass: AntimicrobialClassValue;
-        strataValues: StrataValue[];
-    }[] {
+    public getRemainingComponentCombinations(): ComponentAMCQuestionnaireCombination[] {
         const result = this.amClassQuestionnaires.map(amClassQuestionnaire => ({
             antimicrobialClass: amClassQuestionnaire.antimicrobialClass,
             strataValues: this.getAvailableStrataValuesForAMClass(amClassQuestionnaire.antimicrobialClass),
@@ -183,7 +180,7 @@ export class AMCQuestionnaire extends Struct<AMCQuestionnaireAttrs>() {
     }
 
     public canAddComponentQuestionnaire(): boolean {
-        return this.amClassQuestionnaires.length !== 0; // TODO: implement this
+        return this.getRemainingComponentCombinations().length > 0;
     }
 
     // Each amClass questionnaire must be unique for its antimicrobial class

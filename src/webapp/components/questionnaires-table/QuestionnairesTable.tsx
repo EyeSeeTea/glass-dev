@@ -20,6 +20,7 @@ export type QuestionnairesTableProps = {
     onClickAddNew: () => void;
     disabledAddNew?: boolean;
     highlightedRowId?: Id;
+    children?: React.ReactNode;
 };
 
 export const QuestionnairesTable: React.FC<QuestionnairesTableProps> = props => {
@@ -58,7 +59,7 @@ export const QuestionnairesTable: React.FC<QuestionnairesTableProps> = props => 
                     </TableBody>
                 </Table>
             </TableContainer>
-
+            {props.children}
             <ButtonContainer>
                 <Button onClick={onClickAddNew} disabled={disabledAddNew} variant="contained" color="primary">
                     {i18n.t("Add New")}

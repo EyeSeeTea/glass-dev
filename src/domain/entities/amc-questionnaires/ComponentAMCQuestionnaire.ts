@@ -43,6 +43,11 @@ export type ComponentAMCQuestionId = keyof ComponentAMCQuestionnaireResponsesAtt
 export type ComponentAMCQuestionnaireAttributes = ComponentAMCQuestionnaireBaseAttributes &
     ComponentAMCQuestionnaireResponsesAttributes;
 
+export type ComponentAMCQuestionnaireCombination = {
+    antimicrobialClass: AntimicrobialClassValue;
+    strataValues: StrataValue[];
+};
+
 // TODO: add validations
 export class ComponentAMCQuestionnaire extends Struct<ComponentAMCQuestionnaireAttributes>() {
     static validateAndCreate(
