@@ -32,15 +32,15 @@ type MainPageAMCQuestionnaireState = {
 };
 
 export function useMainPageAMCQuestionnaire(): MainPageAMCQuestionnaireState {
-    const { questionnaire } = useAMCQuestionnaireContext();
+    const { questionnaire, questionnaireIsLoading } = useAMCQuestionnaireContext();
     const formOptions = useAMCQuestionnaireOptionsContext();
 
     const [isEditMode, setIsEditMode] = useState(false);
     const [openQuestionnaire, setOpenQuestionnaire] = useState<QuestionnaireInfo | undefined>(undefined);
 
     const isLoading = useMemo(() => {
-        return questionnaire === undefined || Object.values(formOptions).some(options => options.length === 0);
-    }, [formOptions, questionnaire]);
+        return questionnaireIsLoading || Object.values(formOptions).some(options => options.length === 0);
+    }, [questionnaireIsLoading, formOptions]);
 
     const amClassQuestionnaireRows = useMemo(() => {
         if (isLoading || !questionnaire) {
