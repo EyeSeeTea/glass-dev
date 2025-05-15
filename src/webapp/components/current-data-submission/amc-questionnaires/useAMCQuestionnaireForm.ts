@@ -69,7 +69,7 @@ export function useAMCQuestionnaireForm<T extends AMCQuestionnaireFormType>(para
     const { formType, id, orgUnitId, period, isViewOnlyMode = false, onSave, onCancel } = params;
 
     const { compositionRoot } = useAppContext();
-    const { questionnaire, questions } = useAMCQuestionnaireContext();
+    const { questionnaire, questions, fetchQuestionnaire } = useAMCQuestionnaireContext();
     const options = useAMCQuestionnaireOptionsContext();
     const [globalMessage, setGlobalMessage] = useState<Maybe<GlobalMessage>>();
     const [formState, setFormState] = useState<FormLoadState>({ kind: "loading" });
@@ -260,6 +260,7 @@ export function useAMCQuestionnaireForm<T extends AMCQuestionnaireFormType>(para
                         _generalQuestionnaireId => {
                             onSave && onSave();
                             setIsLoading(false);
+                            fetchQuestionnaire();
                         },
                         error => {
                             handleError(error);
@@ -284,7 +285,9 @@ export function useAMCQuestionnaireForm<T extends AMCQuestionnaireFormType>(para
                         }
                         compositionRoot.amcQuestionnaires.saveAmClass(questionnaire.id, amClassQuestionnaire).run(
                             _amClassQuestionnaireId => {
+                                onSave && onSave();
                                 setIsLoading(false);
+                                fetchQuestionnaire();
                             },
                             error => {
                                 handleError(error);
@@ -310,7 +313,9 @@ export function useAMCQuestionnaireForm<T extends AMCQuestionnaireFormType>(para
                         }
                         compositionRoot.amcQuestionnaires.saveComponent(questionnaire.id, componentQuestionnaire).run(
                             _componentQuestionnaireId => {
+                                onSave && onSave();
                                 setIsLoading(false);
+                                fetchQuestionnaire();
                             },
                             error => {
                                 handleError(error);
@@ -335,6 +340,7 @@ export function useAMCQuestionnaireForm<T extends AMCQuestionnaireFormType>(para
         period,
         questionnaireFormEntity,
         questionnaire,
+        fetchQuestionnaire,
     ]);
 
     const onCancelForm = useCallback(() => {
