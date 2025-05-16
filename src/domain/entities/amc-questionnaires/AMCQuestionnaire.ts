@@ -232,6 +232,25 @@ export class AMCQuestionnaire extends Struct<AMCQuestionnaireAttrs>() {
 
     // strata values for antimicrobial classes in component questionnaires must not overlap
     public validateComponentQuestionnairesStrataOverlap(): boolean {
-        return true; // TODO: implement this
+        const stratasByAMClass: Record<AntimicrobialClassValue, StrataValue[]> = this.componentQuestionnaires.reduce(
+            (acc, componentQuestionnaire) => {
+                componentQuestionnaire.antimicrobialClasses.forEach(amClass => {
+                    if (!acc[amClass]) {
+                        acc[amClass] = [];
+                    }
+                    acc[amClass].push(componentQuestionnaire.componentStrata);
+                });
+                return acc;
+            },
+            {} as Record<AntimicrobialClassValue, StrataValue[]>
+        );
+        const strataValuesByAMClass = Object.values(stratasByAMClass);
+        for (const strataValues of strataValuesByAMClass) {
+            if (_.uniq(strataValues).length !== strataValues.length) {
+                // Overlapping strata values found
+                return false;
+            }
+        }
+        return true;
     }
 }
