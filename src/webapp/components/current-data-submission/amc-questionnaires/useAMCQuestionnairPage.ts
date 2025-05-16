@@ -27,7 +27,7 @@ export function useAMCQuestionnairPage(options: {
     const { formType, questionnaire, openQuestionnaireId } = options;
     const formOptions = useAMCQuestionnaireOptionsContext();
 
-    const [isEditMode, setIsEditMode] = useState(!!openQuestionnaireId);
+    const [isEditMode, setIsEditMode] = useState(true);
     const [questionnaireIdToEdit, setQuestionnaireIdToEdit] = useState(openQuestionnaireId);
 
     const isLoading = useMemo(() => {
