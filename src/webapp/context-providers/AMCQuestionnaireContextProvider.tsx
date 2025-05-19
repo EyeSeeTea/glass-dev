@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useAppContext } from "../contexts/app-context";
 import { AMCQuestionnaireContext, defaultAMCQuestionnaireContextState } from "../contexts/amc-questionnaire-context";
 import { AMCQuestionnaire } from "../../domain/entities/amc-questionnaires/AMCQuestionnaire";
@@ -12,7 +12,8 @@ export const AMCQuestionnaireContextProvider: React.FC = ({ children }) => {
     const { compositionRoot } = useAppContext();
     const { currentPeriod } = useCurrentPeriodContext();
     const { currentOrgUnitAccess } = useCurrentOrgUnitContext();
-
+    const [amcQuestionnaireIsLoading, setAMCQuestionnaireIsLoading] = useState(false);
+    const [amcQuestionnaireError, setAMCQuestionnaireError] = useState<Maybe<Error>>(undefined);
     const [amcQuestionnaire, setAMCQuestionnaire] = useState<Maybe<AMCQuestionnaire>>(
         defaultAMCQuestionnaireContextState.questionnaire
     );
@@ -20,7 +21,8 @@ export const AMCQuestionnaireContextProvider: React.FC = ({ children }) => {
         defaultAMCQuestionnaireContextState.questions
     );
 
-    useEffect(() => {
+    const fetchQuestionnaire = useCallback(() => {
+        setAMCQuestionnaireIsLoading(true);
         return Future.joinObj({
             amcQuestionnaireResponse: compositionRoot.amcQuestionnaires.getByOrgUnitAndPeriod(
                 currentOrgUnitAccess.orgUnitId,
@@ -31,17 +33,37 @@ export const AMCQuestionnaireContextProvider: React.FC = ({ children }) => {
             ({ amcQuestionnaireResponse, amcQuestionsResponse }) => {
                 setAMCQuestionnaire(amcQuestionnaireResponse);
                 setAMCQuestions(amcQuestionsResponse);
+                setAMCQuestionnaireIsLoading(false);
             },
-            error => {
+            (error: unknown) => {
                 console.error("Error fetching AMC Questionnaire and questions:", error);
                 setAMCQuestionnaire(undefined);
                 setAMCQuestions(undefined);
+                setAMCQuestionnaireIsLoading(false);
+                if (error instanceof Error) {
+                    setAMCQuestionnaireError(error);
+                }
             }
         );
     }, [compositionRoot.amcQuestionnaires, currentOrgUnitAccess.orgUnitId, currentPeriod]);
 
+    useEffect(() => {
+        const cancel = fetchQuestionnaire();
+        return () => {
+            cancel();
+        };
+    }, [fetchQuestionnaire]);
+
     return (
-        <AMCQuestionnaireContext.Provider value={{ questionnaire: amcQuestionnaire, questions: amcQuestions }}>
+        <AMCQuestionnaireContext.Provider
+            value={{
+                fetchQuestionnaire,
+                questionnaireIsLoading: amcQuestionnaireIsLoading,
+                questionnaireError: amcQuestionnaireError,
+                questionnaire: amcQuestionnaire,
+                questions: amcQuestions,
+            }}
+        >
             {children}
         </AMCQuestionnaireContext.Provider>
     );

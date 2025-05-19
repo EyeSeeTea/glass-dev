@@ -18,6 +18,7 @@ import { amcQuestionnaireMappers } from "./mappers";
 import { useAMCQuestionnaireContext } from "../../../contexts/amc-questionnaire-context";
 import { AMClassAMCQuestionnaire } from "../../../../domain/entities/amc-questionnaires/AMClassAMCQuestionnaire";
 import { ComponentAMCQuestionnaire } from "../../../../domain/entities/amc-questionnaires/ComponentAMCQuestionnaire";
+import { updateComponentQuestionnaireFormOptions } from "./utils/updateComponentQuestionnaireFormOptions";
 
 export type GlobalMessage = {
     text: string;
@@ -68,7 +69,7 @@ export function useAMCQuestionnaireForm<T extends AMCQuestionnaireFormType>(para
     const { formType, id, orgUnitId, period, isViewOnlyMode = false, onSave, onCancel } = params;
 
     const { compositionRoot } = useAppContext();
-    const { questionnaire, questions } = useAMCQuestionnaireContext();
+    const { questionnaire, questions, fetchQuestionnaire } = useAMCQuestionnaireContext();
     const options = useAMCQuestionnaireOptionsContext();
     const [globalMessage, setGlobalMessage] = useState<Maybe<GlobalMessage>>();
     const [formState, setFormState] = useState<FormLoadState>({ kind: "loading" });
@@ -201,6 +202,19 @@ export function useAMCQuestionnaireForm<T extends AMCQuestionnaireFormType>(para
                         updatedField,
                         questionnaireFormEntity
                     );
+                    if (questionnaire && formType === "component-questionnaire") {
+                        const formWithUpdatedOptions = updateComponentQuestionnaireFormOptions(
+                            updatedData,
+                            updatedField,
+                            questionnaireFormEntity,
+                            questionnaire,
+                            options
+                        );
+                        return {
+                            kind: "loaded" as const,
+                            data: formWithUpdatedOptions,
+                        };
+                    }
                     return {
                         kind: "loaded" as const,
                         data: updatedData,
@@ -210,7 +224,7 @@ export function useAMCQuestionnaireForm<T extends AMCQuestionnaireFormType>(para
                 }
             });
         },
-        [questionnaireFormEntity]
+        [questionnaireFormEntity, questionnaire, formType, options]
     );
 
     const onClickSave = useCallback(() => {
@@ -246,6 +260,7 @@ export function useAMCQuestionnaireForm<T extends AMCQuestionnaireFormType>(para
                         _generalQuestionnaireId => {
                             onSave && onSave();
                             setIsLoading(false);
+                            fetchQuestionnaire();
                         },
                         error => {
                             handleError(error);
@@ -270,7 +285,9 @@ export function useAMCQuestionnaireForm<T extends AMCQuestionnaireFormType>(para
                         }
                         compositionRoot.amcQuestionnaires.saveAmClass(questionnaire.id, amClassQuestionnaire).run(
                             _amClassQuestionnaireId => {
+                                onSave && onSave();
                                 setIsLoading(false);
+                                fetchQuestionnaire();
                             },
                             error => {
                                 handleError(error);
@@ -285,11 +302,20 @@ export function useAMCQuestionnaireForm<T extends AMCQuestionnaireFormType>(para
                         if (!questionnaire) {
                             throw new Error("Component needs to be added to questionnaire");
                         }
-
-                        //TODO: before we need to addOrUpdateComponentQuestionnaire
+                        const validationErrors = questionnaire
+                            .addOrUpdateComponentQuestionnaire(componentQuestionnaire)
+                            .match({
+                                error: errors => errors,
+                                success: () => [],
+                            });
+                        if (validationErrors.length > 0) {
+                            throw new Error(`Validation errors: ${validationErrors.join(", ")}`);
+                        }
                         compositionRoot.amcQuestionnaires.saveComponent(questionnaire.id, componentQuestionnaire).run(
                             _componentQuestionnaireId => {
+                                onSave && onSave();
                                 setIsLoading(false);
+                                fetchQuestionnaire();
                             },
                             error => {
                                 handleError(error);
@@ -314,6 +340,7 @@ export function useAMCQuestionnaireForm<T extends AMCQuestionnaireFormType>(para
         period,
         questionnaireFormEntity,
         questionnaire,
+        fetchQuestionnaire,
     ]);
 
     const onCancelForm = useCallback(() => {

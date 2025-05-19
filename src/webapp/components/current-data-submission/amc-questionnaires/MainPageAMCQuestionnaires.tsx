@@ -10,6 +10,7 @@ import i18n from "../../../../locales";
 import { QuestionnairesTable } from "../../questionnaires-table/QuestionnairesTable";
 import { Id } from "../../../../domain/entities/Ref";
 import { AMCQuestionnairePage } from "./AMCQuestionnairePage";
+import { MissingComponentQuestionnaires } from "./MissingComponentQuestionnaires";
 
 export const MainPageAMCQuestionnaires: React.FC = () => {
     const { currentPeriod } = useCurrentPeriodContext();
@@ -93,8 +94,12 @@ export const MainPageAMCQuestionnaires: React.FC = () => {
                                         onClickAddNew={() => {
                                             openQuestionnaireForm("component-questionnaire");
                                         }}
-                                        disabledAddNew={amClassQuestionnaireRows.length === 0}
-                                    />
+                                        disabledAddNew={!questionnaire.canAddComponentQuestionnaire()}
+                                    >
+                                        <MissingComponentQuestionnaires
+                                            value={questionnaire.getRemainingComponentCombinations()}
+                                        />
+                                    </QuestionnairesTable>
                                 </QuestionnairesTableContainer>
                             ) : null}
                         </QuestionnairesContainer>

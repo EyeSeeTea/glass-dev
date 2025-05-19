@@ -1,5 +1,5 @@
 import { Struct } from "../generic/Struct";
-import { AntimicrobialClassValue } from "./AntimicrobialClassOption";
+import { AntimicrobialClassOption, AntimicrobialClassValue } from "./AntimicrobialClassOption";
 import { Id } from "../Base";
 import { YesNoUnknownValue } from "./YesNoUnknownOption";
 import { Maybe } from "../../../utils/ts-utils";
@@ -11,6 +11,7 @@ import { DataSourceValue } from "./DataSourceOption";
 import { Proportion50to100UnknownValue } from "./Proportion50to100UnknownOption";
 import { ValidationError, ValidationErrorKey } from "./ValidationError";
 import { Either } from "../generic/Either";
+import { StrataOption, StrataValue } from "./StrataOption";
 
 export type ComponentAMCQuestionnaireBaseAttributes = {
     id: Id;
@@ -21,7 +22,7 @@ export type ComponentAMCQuestionnaireBaseAttributes = {
 
 export type ComponentAMCQuestionnaireResponsesAttributes = {
     antimicrobialClasses: AntimicrobialClassValue[];
-    componentStrata: string[]; // TODO: use optionSet when created
+    componentStrata: StrataValue;
     excludedSubstances: YesNoUnknownValue;
     listOfExcludedSubstances: Maybe<string>;
     typeOfDataReported: DataLevelValue;
@@ -41,6 +42,11 @@ export type ComponentAMCQuestionId = keyof ComponentAMCQuestionnaireResponsesAtt
 
 export type ComponentAMCQuestionnaireAttributes = ComponentAMCQuestionnaireBaseAttributes &
     ComponentAMCQuestionnaireResponsesAttributes;
+
+export type ComponentAMCQuestionnaireCombination = {
+    antimicrobialClass: AntimicrobialClassValue;
+    strataValues: StrataValue[];
+};
 
 // TODO: add validations
 export class ComponentAMCQuestionnaire extends Struct<ComponentAMCQuestionnaireAttributes>() {
@@ -71,8 +77,26 @@ export class ComponentAMCQuestionnaire extends Struct<ComponentAMCQuestionnaireA
     }
 
     static requiredFieldsCustomConditions(
-        attributes: Partial<ComponentAMCQuestionnaireAttributes>
+        _attributes: Partial<ComponentAMCQuestionnaireAttributes>
     ): Partial<Record<keyof ComponentAMCQuestionnaireAttributes, boolean>> {
         return {};
+    }
+
+    public getTitle({
+        antimicrobialClassOptions,
+        strataOptions,
+    }: {
+        antimicrobialClassOptions: AntimicrobialClassOption[];
+        strataOptions: StrataOption[];
+    }): string {
+        const amClasses = this.antimicrobialClasses.map(amClass => {
+            const amClassName = antimicrobialClassOptions.find(option => option.code === amClass)?.name || amClass;
+            return amClassName;
+        });
+
+        const componentStrata =
+            strataOptions.find(option => option.code === this.componentStrata)?.name || this.componentStrata;
+
+        return `${amClasses.join(", ")} - ${componentStrata}`;
     }
 }
