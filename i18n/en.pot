@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2025-02-05T15:58:56.508Z\n"
-"PO-Revision-Date: 2025-02-05T15:58:56.508Z\n"
+"POT-Creation-Date: 2025-05-09T07:51:45.345Z\n"
+"PO-Revision-Date: 2025-05-09T07:51:45.345Z\n"
 
 msgid "Template {{id}} not loaded"
 msgstr ""
@@ -409,6 +409,30 @@ msgstr ""
 msgid "Error downloading data"
 msgstr ""
 
+msgid "Back"
+msgstr ""
+
+msgid "Edit"
+msgstr ""
+
+msgid "AM Class"
+msgstr ""
+
+msgid "Component"
+msgstr ""
+
+msgid "AM Questionnaire Editor"
+msgstr ""
+
+msgid "Component Questionnaire Editor"
+msgstr ""
+
+msgid "AM Class Questionnaires"
+msgstr ""
+
+msgid "Component Questionnaires"
+msgstr ""
+
 msgid "Go to questionnaires"
 msgstr ""
 
@@ -484,6 +508,12 @@ msgstr ""
 msgid "status"
 msgstr ""
 
+msgid "Indicates required"
+msgstr ""
+
+msgid "Save"
+msgstr ""
+
 msgid "Import summary errors"
 msgstr ""
 
@@ -526,16 +556,10 @@ msgstr ""
 msgid "GO"
 msgstr ""
 
-msgid "Save"
-msgstr ""
-
 msgid "Save Draft"
 msgstr ""
 
 msgid "Publish"
-msgstr ""
-
-msgid "Back"
 msgstr ""
 
 msgid "Help"
@@ -554,6 +578,15 @@ msgid "Set as incomplete"
 msgstr ""
 
 msgid "Set as completed"
+msgstr ""
+
+msgid "Questionnaires table"
+msgstr ""
+
+msgid "Edit questionnaire"
+msgstr ""
+
+msgid "Add New"
 msgstr ""
 
 msgid "HOME"
