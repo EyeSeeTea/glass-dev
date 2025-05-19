@@ -1,8 +1,8 @@
 import { AMClassAMCQuestionId } from "./AMClassAMCQuestionnaire";
+import { ComponentAMCQuestionId } from "./ComponentAMCQuestionnaire";
 import { GeneralAMCQuestionId } from "./GeneralAMCQuestionnaire";
 
-// TODO: union type for id with other questionnaires
-export type AMCQuestionId = GeneralAMCQuestionId | AMClassAMCQuestionId;
+export type AMCQuestionId = GeneralAMCQuestionId | AMClassAMCQuestionId | ComponentAMCQuestionId;
 
 export type AMCQuestion = {
     text: string;

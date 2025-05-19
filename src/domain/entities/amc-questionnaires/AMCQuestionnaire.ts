@@ -1,3 +1,4 @@
+import { Maybe } from "../../../types/utils";
 import { Id } from "../Base";
 import { Either } from "../Either";
 import { Struct } from "../generic/Struct";
@@ -7,9 +8,13 @@ import {
     AntimicrobialClassValue,
     AntimicrobialClassValues,
 } from "./AntimicrobialClassOption";
+import { ComponentAMCQuestionnaire, ComponentAMCQuestionnaireCombination } from "./ComponentAMCQuestionnaire";
 import { GeneralAMCQuestionnaire, GeneralAMCQuestionnaireAMClassAttributes } from "./GeneralAMCQuestionnaire";
+import { getStrataValuesFromHealthSectorAndLevel, StrataOption, StrataValue } from "./StrataOption";
 import { ValidationErrorKey } from "./ValidationError";
 import { YesNoValues } from "./YesNoOption";
+import _ from "lodash";
+import { replaceById } from "../../../utils/ts-utils";
 
 export type AMCQuestionnaireAttrs = {
     id: Id;
@@ -17,6 +22,7 @@ export type AMCQuestionnaireAttrs = {
     period: string;
     generalQuestionnaire: GeneralAMCQuestionnaire;
     amClassQuestionnaires: AMClassAMCQuestionnaire[];
+    componentQuestionnaires: ComponentAMCQuestionnaire[];
 };
 
 const amClassOptionToGeneralMap: Record<AntimicrobialClassValue, keyof GeneralAMCQuestionnaireAMClassAttributes> = {
@@ -25,7 +31,7 @@ const amClassOptionToGeneralMap: Record<AntimicrobialClassValue, keyof GeneralAM
     [AntimicrobialClassValues.Antivirals]: "antivirals",
     [AntimicrobialClassValues.Antituberculosis]: "antituberculosis",
     [AntimicrobialClassValues.Antimalaria]: "antimalaria",
-};
+} as const;
 
 export class AMCQuestionnaire extends Struct<AMCQuestionnaireAttrs>() {
     public validate(): ValidationErrorKey[] {
@@ -35,6 +41,12 @@ export class AMCQuestionnaire extends Struct<AMCQuestionnaireAttrs>() {
         }
         if (!this.validateAMClassQuestionnairesNotRepeated()) {
             validationErrors.push(ValidationErrorKey.CANNOT_CREATE_DUPLICATE_AM_CLASS_QUESTIONNAIRE);
+        }
+        if (!this.validateComponentQuestionnairesHaveAmClassQuestionnaires()) {
+            validationErrors.push(ValidationErrorKey.COMPONENT_AM_WITHOUT_AMCLASS_QUESTIONNAIRE);
+        }
+        if (!this.validateComponentQuestionnairesStrataOverlap()) {
+            validationErrors.push(ValidationErrorKey.COMPONENT_STRATA_OVERLAP);
         }
         // TODO: validate each indiviual questionnaire here?
         // TODO: return ValidationError instead?
@@ -46,15 +58,26 @@ export class AMCQuestionnaire extends Struct<AMCQuestionnaireAttrs>() {
         amClassQuestionnaire: AMClassAMCQuestionnaire
     ): Either<ValidationErrorKey[], AMCQuestionnaireAttrs> {
         const updatedAMClassQuestionnaireList = amClassQuestionnaire.id
-            ? this.amClassQuestionnaires.map(questionnaire => {
-                  if (questionnaire.id === amClassQuestionnaire.id) {
-                      return amClassQuestionnaire;
-                  }
-                  return questionnaire;
-              })
+            ? replaceById(this.amClassQuestionnaires, amClassQuestionnaire)
             : [...this.amClassQuestionnaires, amClassQuestionnaire];
         const newAMCQuestionnaire = this._update({
             amClassQuestionnaires: updatedAMClassQuestionnaireList,
+        });
+        const validationErrors = newAMCQuestionnaire.validate();
+        if (validationErrors.length > 0) {
+            return Either.error(validationErrors);
+        }
+        return Either.success(newAMCQuestionnaire);
+    }
+
+    public addOrUpdateComponentQuestionnaire(
+        componentQuestionnaire: ComponentAMCQuestionnaire
+    ): Either<ValidationErrorKey[], AMCQuestionnaireAttrs> {
+        const updatedComponentQuestionnaireList = componentQuestionnaire.id
+            ? replaceById(this.componentQuestionnaires, componentQuestionnaire)
+            : [...this.componentQuestionnaires, componentQuestionnaire];
+        const newAMCQuestionnaire = this._update({
+            componentQuestionnaires: updatedComponentQuestionnaireList,
         });
         const validationErrors = newAMCQuestionnaire.validate();
         if (validationErrors.length > 0) {
@@ -82,25 +105,101 @@ export class AMCQuestionnaire extends Struct<AMCQuestionnaireAttrs>() {
     }
 
     // filters the options based on the general questionnaire checked options and availability
-    public getAvailableAMClassOptions(allOptions: AntimicrobialClassOption[]): AntimicrobialClassOption[] {
-        const amClassOptions = allOptions
+    public getAvailableAMClassOptionsForAMClassQ(allOptions: AntimicrobialClassOption[]): AntimicrobialClassOption[] {
+        const availableValues = this.getAvailableAMClassOptionValuesForAMClassQ();
+        if (availableValues.length === 0) {
+            return [];
+        }
+        return allOptions.filter(option => availableValues.includes(option.code));
+    }
+
+    private getAvailableAMClassOptionValuesForAMClassQ(): AntimicrobialClassValue[] {
+        const usedAntimicrobials = this.amClassQuestionnaires.map(
+            amClassQuestionnaire => amClassQuestionnaire.antimicrobialClass
+        );
+        const checkedAntimicrobials = Object.entries(amClassOptionToGeneralMap)
+            .filter(([, value]) => this.generalQuestionnaire[value] === YesNoValues.YES)
+            .map(([key]) => key) as AntimicrobialClassValue[];
+        return checkedAntimicrobials.filter(antimicrobialClass => !usedAntimicrobials.includes(antimicrobialClass));
+    }
+
+    // filters the options based on AMClass questionnaires and Component questionnaires
+    public getAvailableAMClassOptionsForComponentQ(
+        allOptions: AntimicrobialClassOption[],
+        forStrata: Maybe<StrataValue>
+    ): AntimicrobialClassOption[] {
+        return allOptions
             .filter(option => {
-                const isOptionInGeneral =
-                    this.generalQuestionnaire[amClassOptionToGeneralMap[option.code]] === YesNoValues.YES;
-                return isOptionInGeneral;
-            })
-            .filter(option => {
-                const isOptionInUse = this.amClassQuestionnaires.some(
+                const isOptionInAmClass = this.amClassQuestionnaires.some(
                     amClassQuestionnaire => amClassQuestionnaire.antimicrobialClass === option.code
                 );
-                return !isOptionInUse;
+                return isOptionInAmClass;
+            })
+            .filter(option => {
+                const availableStratasForAmClass = this.getAvailableStrataValuesForAMClass(option.code);
+                return forStrata
+                    ? availableStratasForAmClass.includes(forStrata)
+                    : availableStratasForAmClass.length > 0;
             });
-        return amClassOptions;
+    }
+
+    private getAvailableStrataValuesForAMClass(forAMClass: AntimicrobialClassValue): StrataValue[] {
+        const amClassQuestionnaire = this.amClassQuestionnaires.find(
+            amClassQuestionnaire => amClassQuestionnaire.antimicrobialClass === forAMClass
+        );
+        if (!amClassQuestionnaire) {
+            return [];
+        }
+        const allStrataValuesForAm = getStrataValuesFromHealthSectorAndLevel(
+            amClassQuestionnaire.healthSector,
+            amClassQuestionnaire.healthLevel
+        );
+        const strataValuesAlreadyAssignedToAm = this.componentQuestionnaires.reduce<StrataValue[]>(
+            (acc, componentQuestionnaire) => {
+                if (componentQuestionnaire.antimicrobialClasses.includes(forAMClass)) {
+                    return [...acc, componentQuestionnaire.componentStrata];
+                }
+                return acc;
+            },
+            []
+        );
+        return allStrataValuesForAm.filter(strataValue => !strataValuesAlreadyAssignedToAm.includes(strataValue));
+    }
+
+    // filters the options based on availability in component questionnaires for the specified AM classes
+    // if no `forAMClasses` are specified, return union of stratas for all available AM classes
+    // otherwise, return stratas that are available simultaneously for `forAMClasses`
+    public getAvailableStrataOptionsForComponentQ(
+        allOptions: StrataOption[],
+        forAMClasses: AntimicrobialClassValue[]
+    ): StrataOption[] {
+        const useIntersection = forAMClasses.length > 0;
+        const filterForClasses = useIntersection
+            ? forAMClasses
+            : this.amClassQuestionnaires.map(amClassQuestionnaire => amClassQuestionnaire.antimicrobialClass);
+        const strataValuesAvailableForEachClass = filterForClasses.map(forAMClass =>
+            this.getAvailableStrataValuesForAMClass(forAMClass)
+        );
+        const strataValuesAvailableForAllClasses = useIntersection
+            ? _.intersection(...strataValuesAvailableForEachClass)
+            : _.union(...strataValuesAvailableForEachClass);
+        return allOptions.filter(option => strataValuesAvailableForAllClasses.includes(option.code));
+    }
+
+    public getRemainingComponentCombinations(): ComponentAMCQuestionnaireCombination[] {
+        const result = this.amClassQuestionnaires.map(amClassQuestionnaire => ({
+            antimicrobialClass: amClassQuestionnaire.antimicrobialClass,
+            strataValues: this.getAvailableStrataValuesForAMClass(amClassQuestionnaire.antimicrobialClass),
+        }));
+        return result.filter(item => item.strataValues.length > 0);
     }
 
     public canAddAMClassQuestionnaire(): boolean {
-        // naive implementation, just check if the number of questionnaires is less than the number of options
-        return Object.entries(amClassOptionToGeneralMap).length > this.amClassQuestionnaires.length;
+        return this.getAvailableAMClassOptionValuesForAMClassQ().length > 0;
+    }
+
+    public canAddComponentQuestionnaire(): boolean {
+        return this.getRemainingComponentCombinations().length > 0;
     }
 
     // Each amClass questionnaire must be unique for its antimicrobial class
@@ -118,5 +217,40 @@ export class AMCQuestionnaire extends Struct<AMCQuestionnaireAttrs>() {
             const amClassOption = amClassOptionToGeneralMap[amClassQuestionnaire.antimicrobialClass];
             return this.generalQuestionnaire[amClassOption] === YesNoValues.YES;
         });
+    }
+
+    // All the antimicrobialClasses in component questionnaires must have a corresponding amClass questionnaire
+    private validateComponentQuestionnairesHaveAmClassQuestionnaires(): boolean {
+        return this.componentQuestionnaires.every(componentQuestionnaire => {
+            return componentQuestionnaire.antimicrobialClasses.every(amClass =>
+                this.amClassQuestionnaires.some(
+                    amClassQuestionnaire => amClassQuestionnaire.antimicrobialClass === amClass
+                )
+            );
+        });
+    }
+
+    // strata values for antimicrobial classes in component questionnaires must not overlap
+    public validateComponentQuestionnairesStrataOverlap(): boolean {
+        const stratasByAMClass: Record<AntimicrobialClassValue, StrataValue[]> = this.componentQuestionnaires.reduce(
+            (acc, componentQuestionnaire) => {
+                componentQuestionnaire.antimicrobialClasses.forEach(amClass => {
+                    if (!acc[amClass]) {
+                        acc[amClass] = [];
+                    }
+                    acc[amClass].push(componentQuestionnaire.componentStrata);
+                });
+                return acc;
+            },
+            {} as Record<AntimicrobialClassValue, StrataValue[]>
+        );
+        const strataValuesByAMClass = Object.values(stratasByAMClass);
+        for (const strataValues of strataValuesByAMClass) {
+            if (_.uniq(strataValues).length !== strataValues.length) {
+                // Overlapping strata values found
+                return false;
+            }
+        }
+        return true;
     }
 }

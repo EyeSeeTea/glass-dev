@@ -127,6 +127,19 @@ import { GetProportion50to100OptionsUseCase } from "./domain/usecases/amc-questi
 import { GetAMCQuestionnaireByOrgUnitAndPeriodUseCase } from "./domain/usecases/amc-questionnaires/GetAMCQuestionnaireByOrgUnitAndPeriodUseCase";
 import { GetAMCQuestionnaireByIdUseCase } from "./domain/usecases/amc-questionnaires/GetAMCQuestionnaireByIdUseCase";
 import { SaveAMClassAMCQuestionnaireUseCase } from "./domain/usecases/amc-questionnaires/SaveAMClassAMCQuestionnaireUseCase";
+import { Proportion50to100UnknownOptionsD2Repository } from "./data/repositories/amc-questionnaires/Proportion50to100UnknownOptionsD2Repository";
+import { DataLevelOptionsD2Repository } from "./data/repositories/amc-questionnaires/DataLevelOptionsD2Repository";
+import { DataSourceOptionsD2Repository } from "./data/repositories/amc-questionnaires/DataSourceOptionsD2Repository";
+import { NationalPopulationDataSourceOptionsD2Repository } from "./data/repositories/amc-questionnaires/NationalPopulationDataSourceOptionsD2Repository";
+import { ProcurementLevelOptionsD2Repository } from "./data/repositories/amc-questionnaires/ProcurementLevelOptionsD2Repository";
+import { StrataOptionsD2Repository } from "./data/repositories/amc-questionnaires/StrataOptionsD2Repository";
+import { GetProportion50to100UnknownOptionsUseCase } from "./domain/usecases/amc-questionnaires/GetProportion50to100UnknownOptionsUseCase";
+import { GetDataLevelOptionsUseCase } from "./domain/usecases/amc-questionnaires/GetDataLevelOptionsUseCase";
+import { GetDataSourceOptionsUseCase } from "./domain/usecases/amc-questionnaires/GetDataSourceOptionsUseCase";
+import { GetNationalPopulationDataSourceOptionsUseCase } from "./domain/usecases/amc-questionnaires/GetNationalPopulationDataSourceOptionsUseCase";
+import { GetProcurementLevelOptionsUseCase } from "./domain/usecases/amc-questionnaires/GetProcurementLevelOptionsUseCase";
+import { GetStrataOptionsUseCase } from "./domain/usecases/amc-questionnaires/GetStrataOptionsUseCase";
+import { SaveComponentAMCQuestionnaireUseCase } from "./domain/usecases/amc-questionnaires/SaveComponentAMCQuestionnaireUseCase";
 
 export function getCompositionRoot(instance: Instance) {
     const api = getD2APiFromInstance(instance);
@@ -176,6 +189,12 @@ export function getCompositionRoot(instance: Instance) {
     const healthLevelOptionsD2Repository = new HealthLevelOptionsD2Repository(api);
     const healthSectorOptionsD2Repository = new HealthSectorOptionsD2Repository(api);
     const proportion50to100OptionsD2Repository = new Proportion50to100OptionsD2Repository(api);
+    const dataLevelOptionsD2Repository = new DataLevelOptionsD2Repository(api);
+    const dataSourceOptionsD2Repository = new DataSourceOptionsD2Repository(api);
+    const nationalPopulationDataSourceOptionsD2Repository = new NationalPopulationDataSourceOptionsD2Repository(api);
+    const procurementLevelOptionsD2Repository = new ProcurementLevelOptionsD2Repository(api);
+    const proportion50to100UnknownOptionsD2Repository = new Proportion50to100UnknownOptionsD2Repository(api);
+    const strataOptionsRepository = new StrataOptionsD2Repository(api);
 
     return {
         instance: getExecute({
@@ -399,6 +418,7 @@ export function getCompositionRoot(instance: Instance) {
             getByOrgUnitAndPeriod: new GetAMCQuestionnaireByOrgUnitAndPeriodUseCase(amcQuestionnaireRepository),
             saveGeneral: new SaveGeneralAMCQuestionnaireUseCase(amcQuestionnaireRepository),
             saveAmClass: new SaveAMClassAMCQuestionnaireUseCase(amcQuestionnaireRepository),
+            saveComponent: new SaveComponentAMCQuestionnaireUseCase(amcQuestionnaireRepository),
             getQuestions: new GetQuestionsAMCQuestionnaireUseCase(questionsAMCQuestionnaireRepository),
             getYesNoOptions: new GetYesNoOptionsUseCase(yesNoOptionsRepository),
             getYesNoUnknownOptions: new GetYesNoUnknownOptionsUseCase(yesNoUnknownOptionsRepository),
@@ -407,6 +427,16 @@ export function getCompositionRoot(instance: Instance) {
             getHealthLevelOptions: new GetHealthLevelOptionsUseCase(healthLevelOptionsD2Repository),
             getHealthSectorOptions: new GetHealthSectorOptionsUseCase(healthSectorOptionsD2Repository),
             getProportion50to100Options: new GetProportion50to100OptionsUseCase(proportion50to100OptionsD2Repository),
+            getProportion50to100UnknownOptions: new GetProportion50to100UnknownOptionsUseCase(
+                proportion50to100UnknownOptionsD2Repository
+            ),
+            getDataLevelOptions: new GetDataLevelOptionsUseCase(dataLevelOptionsD2Repository),
+            getDataSourceOptions: new GetDataSourceOptionsUseCase(dataSourceOptionsD2Repository),
+            getNationalPopulationDataSourceOptions: new GetNationalPopulationDataSourceOptionsUseCase(
+                nationalPopulationDataSourceOptionsD2Repository
+            ),
+            getProcurementLevelOptions: new GetProcurementLevelOptionsUseCase(procurementLevelOptionsD2Repository),
+            getStrataOptions: new GetStrataOptionsUseCase(strataOptionsRepository),
         }),
     };
 }
