@@ -37,7 +37,7 @@ const programFields = {
             dataElement: {
                 id: true,
                 code: true,
-                displayName: true,
+                displayFormName: true,
             },
         },
     },

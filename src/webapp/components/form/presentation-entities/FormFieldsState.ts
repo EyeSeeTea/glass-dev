@@ -1,7 +1,6 @@
 import { validateFieldRequired } from "../validations";
 import { FormSectionState } from "./FormSectionsState";
 import { ValidationError, ValidationErrorKey } from "../../../../domain/entities/amc-questionnaires/ValidationError";
-import { FormRule } from "./FormRule";
 import { FormOption } from "./FormOption";
 
 export type FieldType = "text" | "boolean" | "select" | "radio" | "checkboxes";
@@ -160,28 +159,4 @@ export function hideFieldsAndSetToEmpty(fields: FormFieldState[]): FormFieldStat
         isVisible: false,
         errors: [],
     }));
-}
-
-export function applyRulesInUpdatedField(updatedField: FormFieldState, formRules: FormRule[]): FormFieldState {
-    const filteredRulesByFieldId = formRules.filter(rule => rule.fieldId === updatedField.id);
-
-    if (filteredRulesByFieldId.length === 0) {
-        return updatedField;
-    }
-
-    const formStateWithRulesApplied = filteredRulesByFieldId.reduce((currentUpdatedField, rule) => {
-        switch (rule.type) {
-            case "requiredFieldsByFieldValue":
-                return rule.requiredFieldIds.includes(currentUpdatedField.id)
-                    ? {
-                          ...currentUpdatedField,
-                          required: currentUpdatedField.value === rule.fieldValue,
-                      }
-                    : currentUpdatedField;
-            default:
-                return currentUpdatedField;
-        }
-    }, updatedField);
-
-    return formStateWithRulesApplied;
 }

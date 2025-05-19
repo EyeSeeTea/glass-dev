@@ -17,6 +17,14 @@ export type GeneralAMCQuestionnaireBaseAttributes = {
     lastUpdated?: Date;
 };
 
+export type GeneralAMCQuestionnaireAMClassAttributes = {
+    antibacterials: YesNoValue;
+    antifungals: YesNoValue;
+    antivirals: YesNoValue;
+    antituberculosis: YesNoValue;
+    antimalaria: YesNoValue;
+};
+
 export type GeneralAMCQuestionnaireResponsesAttributes = {
     isSameAsLastYear: YesNoUnknownNAValue;
     shortageInPublicSector: YesNoUnknownValue;
@@ -24,12 +32,7 @@ export type GeneralAMCQuestionnaireResponsesAttributes = {
     shortageInPrivateSector: YesNoUnknownValue;
     detailOnShortageInPrivateSector: Maybe<string>;
     generalComments: Maybe<string>;
-    antibacterials: YesNoValue;
-    antifungals: YesNoValue;
-    antivirals: YesNoValue;
-    antituberculosis: YesNoValue;
-    antimalaria: YesNoValue;
-};
+} & GeneralAMCQuestionnaireAMClassAttributes;
 
 export type GeneralAMCQuestionId = keyof GeneralAMCQuestionnaireResponsesAttributes;
 
