@@ -11,6 +11,7 @@ import { DataLevelOption } from "../../domain/entities/amc-questionnaires/DataLe
 import { DataSourceOption } from "../../domain/entities/amc-questionnaires/DataSourceOption";
 import { NationalPopulationDataSourceOption } from "../../domain/entities/amc-questionnaires/NationalPopulationDataSourceOption";
 import { ProcurementLevelOption } from "../../domain/entities/amc-questionnaires/ProcurementLevelOption";
+import { StrataOption } from "../../domain/entities/amc-questionnaires/StrataOption";
 
 export interface AMCQuestionnaireOptionsContextState {
     yesNoUnknownNAOptions: YesNoUnknownNAOption[];
@@ -25,6 +26,7 @@ export interface AMCQuestionnaireOptionsContextState {
     dataSourceOptions: DataSourceOption[];
     nationalPopulationDataSourceOptions: NationalPopulationDataSourceOption[];
     procurementLevelOptions: ProcurementLevelOption[];
+    strataOptions: StrataOption[];
 }
 
 export const defaultAMCQuestionnaireOptionsContextState: AMCQuestionnaireOptionsContextState = {
@@ -40,6 +42,7 @@ export const defaultAMCQuestionnaireOptionsContextState: AMCQuestionnaireOptions
     dataSourceOptions: [],
     nationalPopulationDataSourceOptions: [],
     procurementLevelOptions: [],
+    strataOptions: [],
 };
 
 export const AMCQuestionnaireOptionsContext = createContext<AMCQuestionnaireOptionsContextState>(

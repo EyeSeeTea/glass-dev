@@ -26,6 +26,11 @@ import {
     mapTrackedEntityAttributesToGeneralAMCQuestionnaire,
 } from "./GeneralAMCQuestionnaireMapper";
 import { ComponentAMCQuestionnaire } from "../../../domain/entities/amc-questionnaires/ComponentAMCQuestionnaire";
+import {
+    mapComponentAMCQuestionnaireToD2Event,
+    mapD2EventToComponentAMCQuestionnaire,
+} from "./ComponentAMCQuestionnaireMapper";
+import { D2TrackerEventToPost } from "@eyeseetea/d2-api/api/trackerEvents";
 
 export class AMCQuestionnaireD2Repository implements AMCQuestionnaireRepository {
     constructor(private api: D2Api) {}
@@ -106,25 +111,11 @@ export class AMCQuestionnaireD2Repository implements AMCQuestionnaireRepository 
             if (!programStage) {
                 return Future.error("Program stage not found");
             }
-
             if (!trackedEntity) {
                 return Future.error("Tracked entity not found");
             }
             const d2Event = mapAMClassAMCQuestionnaireToD2Event(amClassAMCQuestionnaire, programStage, trackedEntity);
-            return importApiTracker(this.api, { events: [d2Event] }, "CREATE_AND_UPDATE").flatMap(saveResponse => {
-                const amClassAMCQuestionnaireId =
-                    saveResponse?.bundleReport?.typeReportMap?.EVENT.objectReports[0]?.uid;
-
-                if (saveResponse.status === "ERROR" || !amClassAMCQuestionnaireId) {
-                    return Future.error(
-                        `Error saving AM Class AMC questionnaire: ${saveResponse.validationReport.errorReports
-                            .map(e => e.message)
-                            .join(", ")}`
-                    );
-                } else {
-                    return Future.success(amClassAMCQuestionnaireId);
-                }
-            });
+            return this.importQuestionnaireD2Event(d2Event, "AM Class AMC");
         });
     }
 
@@ -140,13 +131,31 @@ export class AMCQuestionnaireD2Repository implements AMCQuestionnaireRepository 
             if (!programStage) {
                 return Future.error("Program stage not found");
             }
-
             if (!trackedEntity) {
                 return Future.error("Tracked entity not found");
             }
+            const d2Event = mapComponentAMCQuestionnaireToD2Event(
+                componentAMCQuestionnaire,
+                programStage,
+                trackedEntity
+            );
+            return this.importQuestionnaireD2Event(d2Event, "Component AMC");
+        });
+    }
 
-            // TODO: map componentAMCQuestionnaire to D2 event and import it. Also this code is very similar to saveAMClassQuestionnaire
-            return Future.success("");
+    private importQuestionnaireD2Event(event: D2TrackerEventToPost, questionnaireName: string): FutureData<Id> {
+        return importApiTracker(this.api, { events: [event] }, "CREATE_AND_UPDATE").flatMap(saveResponse => {
+            const questionnaireId = saveResponse?.bundleReport?.typeReportMap?.EVENT.objectReports[0]?.uid;
+
+            if (saveResponse.status === "ERROR" || !questionnaireId) {
+                return Future.error(
+                    `Error saving ${questionnaireName} questionnaire: ${saveResponse.validationReport.errorReports
+                        .map(e => e.message)
+                        .join(", ")}`
+                );
+            } else {
+                return Future.success(questionnaireId);
+            }
         });
     }
 
@@ -197,8 +206,7 @@ export class AMCQuestionnaireD2Repository implements AMCQuestionnaireRepository 
     private getComponentQuestionnairesInAggregateRoot(id: Id, orgUnitId: Id): FutureData<ComponentAMCQuestionnaire[]> {
         return this.getEventsFromSection(id, orgUnitId, AMR_GLASS_AMC_AM_COMPONENT_QUESTIONNAIRE_STAGE_ID).map(
             events => {
-                // TODO: map events to component AMC questionnaires
-                return [];
+                return events.map(event => mapD2EventToComponentAMCQuestionnaire(event));
             }
         );
     }
