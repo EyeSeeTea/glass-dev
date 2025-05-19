@@ -19,10 +19,12 @@ export type QuestionnairesTableProps = {
     onClickEdit: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>, id: Id) => void;
     onClickAddNew: () => void;
     disabledAddNew?: boolean;
+    highlightedRowId?: Id;
+    children?: React.ReactNode;
 };
 
 export const QuestionnairesTable: React.FC<QuestionnairesTableProps> = props => {
-    const { title, rows, onClickEdit, onClickAddNew, disabledAddNew = false } = props;
+    const { title, rows, onClickEdit, onClickAddNew, disabledAddNew = false, highlightedRowId } = props;
 
     return (
         <Container>
@@ -38,7 +40,7 @@ export const QuestionnairesTable: React.FC<QuestionnairesTableProps> = props => 
 
                     <TableBody>
                         {rows.map(row => (
-                            <StyledTableRow key={row.id}>
+                            <StyledTableRow key={row.id} highlighted={row.id === highlightedRowId}>
                                 <StyledTextCell component="th" scope="row">
                                     {row.name}
                                 </StyledTextCell>
@@ -57,7 +59,7 @@ export const QuestionnairesTable: React.FC<QuestionnairesTableProps> = props => 
                     </TableBody>
                 </Table>
             </TableContainer>
-
+            {props.children}
             <ButtonContainer>
                 <Button onClick={onClickAddNew} disabled={disabledAddNew} variant="contained" color="primary">
                     {i18n.t("Add New")}
@@ -85,7 +87,11 @@ const StyledTH = styled(TableCell)`
     font-size: 15px;
 `;
 
-const StyledTableRow = styled(TableRow)`
+const StyledTableRow = styled(TableRow)<{ highlighted?: boolean }>`
+    background-color: ${props => (props.highlighted ? glassColors.greyLight : "inherit")};
+    &:hover {
+        background-color: ${glassColors.greyLight};
+    }
     border: none;
 `;
 

@@ -3,7 +3,7 @@ import { Maybe } from "../../../types/utils";
 import { Struct } from "../generic/Struct";
 import { ValidationError, ValidationErrorKey } from "./ValidationError";
 import { Either } from "../generic/Either";
-import { AntimicrobialClassValue } from "./AntimicrobialClassOption";
+import { AntimicrobialClassOption, AntimicrobialClassValue } from "./AntimicrobialClassOption";
 import { HealthSectorValue, HealthSectorValues } from "./HealthSectorOption";
 import { HealthLevelValue, HealthLevelValues } from "./HealthLevelOption";
 import { Proportion50to100Value } from "./Proportion50to100Option";
@@ -71,5 +71,12 @@ export class AMClassAMCQuestionnaire extends Struct<AMClassAMCQuestionnaireAttri
                 (attributes.healthLevel === HealthLevelValues.Community ||
                     attributes.healthLevel === HealthLevelValues.HospitalAndCommunity),
         };
+    }
+
+    public getTitle({ antimicrobialClassOptions }: { antimicrobialClassOptions: AntimicrobialClassOption[] }): string {
+        const amClassName =
+            antimicrobialClassOptions.find(option => option.code === this.antimicrobialClass)?.name ||
+            this.antimicrobialClass;
+        return amClassName;
     }
 }

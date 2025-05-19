@@ -10,31 +10,37 @@ import { Icon, IconButton, Typography } from "@material-ui/core";
 import { QuestionnairesTable } from "../../questionnaires-table/QuestionnairesTable";
 import { useAMCQuestionnairPage } from "./useAMCQuestionnairPage";
 import { AMCQuestionnaireFormType } from "./presentation-entities/AMCQuestionnaireFormType";
+import { AMCQuestionnaire } from "../../../../domain/entities/amc-questionnaires/AMCQuestionnaire";
+import { MissingComponentQuestionnaires } from "./MissingComponentQuestionnaires";
 
 type AMCQuestionnairePageProps = {
-    id?: Id;
+    openQuestionnaireId?: Id;
     formType: AMCQuestionnaireFormType;
     title: string;
+    questionnaire: AMCQuestionnaire;
     onCloseQuestionnaireForm: () => void;
 };
 
 export const AMCQuestionnairePage: React.FC<AMCQuestionnairePageProps> = props => {
-    const { id, formType, title, onCloseQuestionnaireForm } = props;
+    const { openQuestionnaireId, formType, questionnaire, title, onCloseQuestionnaireForm } = props;
 
     const { currentPeriod } = useCurrentPeriodContext();
     const { currentOrgUnitAccess } = useCurrentOrgUnitContext();
 
     const {
         questionnaireRows,
+        tableTitle,
+        disabledAddNewQuestionnaire,
         isEditMode,
         questionnaireIdToEdit,
         onClickAddOrEdit,
         onCancelForm,
         onSaveForm,
-        questionnaire,
-    } = useAMCQuestionnairPage(formType, id);
-
-    const disabledAddNew = formType === "am-class-questionnaire" ? !questionnaire?.canAddAMClassQuestionnaire() : false;
+    } = useAMCQuestionnairPage({
+        formType: formType,
+        questionnaire: questionnaire,
+        openQuestionnaireId: openQuestionnaireId,
+    });
 
     return (
         <div>
@@ -55,16 +61,17 @@ export const AMCQuestionnairePage: React.FC<AMCQuestionnairePageProps> = props =
 
             <QuestionnaireTableContainer>
                 <QuestionnairesTable
-                    title={
-                        formType === "am-class-questionnaire"
-                            ? i18n.t("AM Questionnaire Editor")
-                            : i18n.t("Component Questionnaire Editor")
-                    }
+                    title={tableTitle}
                     rows={questionnaireRows}
                     onClickEdit={(_event, id: Id) => onClickAddOrEdit(id)}
                     onClickAddNew={() => onClickAddOrEdit()}
-                    disabledAddNew={disabledAddNew}
-                />
+                    disabledAddNew={disabledAddNewQuestionnaire || isEditMode}
+                    highlightedRowId={questionnaireIdToEdit}
+                >
+                    {formType === "component-questionnaire" ? (
+                        <MissingComponentQuestionnaires value={questionnaire.getRemainingComponentCombinations()} />
+                    ) : null}
+                </QuestionnairesTable>
             </QuestionnaireTableContainer>
 
             <QuestionnaireFormContainer>

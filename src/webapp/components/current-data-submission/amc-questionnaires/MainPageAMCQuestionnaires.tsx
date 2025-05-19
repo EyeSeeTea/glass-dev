@@ -10,6 +10,7 @@ import i18n from "../../../../locales";
 import { QuestionnairesTable } from "../../questionnaires-table/QuestionnairesTable";
 import { Id } from "../../../../domain/entities/Ref";
 import { AMCQuestionnairePage } from "./AMCQuestionnairePage";
+import { MissingComponentQuestionnaires } from "./MissingComponentQuestionnaires";
 
 export const MainPageAMCQuestionnaires: React.FC = () => {
     const { currentPeriod } = useCurrentPeriodContext();
@@ -30,12 +31,13 @@ export const MainPageAMCQuestionnaires: React.FC = () => {
 
     return (
         <Container>
-            {openQuestionnaire ? (
+            {openQuestionnaire && questionnaire ? (
                 <AMCQuestionnairePage
                     formType={openQuestionnaire.formType}
-                    id={openQuestionnaire.id}
+                    openQuestionnaireId={openQuestionnaire.id}
                     onCloseQuestionnaireForm={onCloseQuestionnaireForm}
                     title={openQuestionnaire.title}
+                    questionnaire={questionnaire}
                 />
             ) : (
                 <div>
@@ -86,10 +88,18 @@ export const MainPageAMCQuestionnaires: React.FC = () => {
                                     <QuestionnairesTable
                                         title={i18n.t("Component")}
                                         rows={componentQuestionnaireRows}
-                                        onClickEdit={(_event, id: Id) => {}}
-                                        onClickAddNew={() => {}}
-                                        disabledAddNew={amClassQuestionnaireRows.length === 0}
-                                    />
+                                        onClickEdit={(_event, id: Id) => {
+                                            openQuestionnaireForm("component-questionnaire", id);
+                                        }}
+                                        onClickAddNew={() => {
+                                            openQuestionnaireForm("component-questionnaire");
+                                        }}
+                                        disabledAddNew={!questionnaire.canAddComponentQuestionnaire()}
+                                    >
+                                        <MissingComponentQuestionnaires
+                                            value={questionnaire.getRemainingComponentCombinations()}
+                                        />
+                                    </QuestionnairesTable>
                                 </QuestionnairesTableContainer>
                             ) : null}
                         </QuestionnairesContainer>
