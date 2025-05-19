@@ -18,13 +18,20 @@ export const AMCQuestionnaireOptionsContextProvider: React.FC = ({ children }) =
             yesNoOptions: compositionRoot.amcQuestionnaires.getYesNoOptions(),
             yesNoUnknownOptions: compositionRoot.amcQuestionnaires.getYesNoUnknownOptions(),
             yesNoUnknownNAOptions: compositionRoot.amcQuestionnaires.getYesNoUnknownNAOptions(),
+            antimicrobialClassOptions: compositionRoot.amcQuestionnaires.getAntimicrobialClassOptions(),
+            healthLevelOptions: compositionRoot.amcQuestionnaires.getHealthLevelOptions(),
+            healthSectorOptions: compositionRoot.amcQuestionnaires.getHealthSectorOptions(),
+            proportion50to100Options: compositionRoot.amcQuestionnaires.getProportion50to100Options(),
+            proportion50to100UnknownOptions: compositionRoot.amcQuestionnaires.getProportion50to100UnknownOptions(),
+            dataLevelOptions: compositionRoot.amcQuestionnaires.getDataLevelOptions(),
+            dataSourceOptions: compositionRoot.amcQuestionnaires.getDataSourceOptions(),
+            nationalPopulationDataSourceOptions:
+                compositionRoot.amcQuestionnaires.getNationalPopulationDataSourceOptions(),
+            procurementLevelOptions: compositionRoot.amcQuestionnaires.getProcurementLevelOptions(),
+            strataOptions: compositionRoot.amcQuestionnaires.getStrataOptions(),
         }).run(
-            ({ yesNoOptions, yesNoUnknownOptions, yesNoUnknownNAOptions }) => {
-                setAMCQuestionnaireOptions({
-                    yesNoOptions,
-                    yesNoUnknownOptions,
-                    yesNoUnknownNAOptions,
-                });
+            options => {
+                setAMCQuestionnaireOptions(options);
             },
             error => {
                 console.error("Error fetching AMC questionnaire options", error);

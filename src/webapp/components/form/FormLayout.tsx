@@ -1,6 +1,6 @@
 import React from "react";
 import styled from "styled-components";
-import { Button, Icon, IconButton, Typography } from "@material-ui/core";
+import { Button, Typography } from "@material-ui/core";
 
 import i18n from "../../../locales";
 
@@ -13,36 +13,14 @@ type FormLayoutProps = {
     onSave: () => void;
     onCancel?: () => void;
     disableSave?: boolean;
-    onBackClick?: () => void;
     showFormButtons?: boolean;
 };
 
 export const FormLayout: React.FC<FormLayoutProps> = React.memo(
-    ({
-        title,
-        onBackClick,
-        saveLabel,
-        cancelLabel,
-        children,
-        onSave,
-        onCancel,
-        disableSave = false,
-        showFormButtons = true,
-    }) => {
+    ({ title, saveLabel, cancelLabel, children, onSave, onCancel, disableSave = false, showFormButtons = true }) => {
         return (
             <StyledFormLayout>
                 <Header>
-                    {!!onBackClick && (
-                        <BackButton
-                            onClick={onBackClick}
-                            color="secondary"
-                            aria-label={i18n.t("Back")}
-                            data-test={"page-header-back"}
-                        >
-                            <Icon color="primary">arrow_back</Icon>
-                        </BackButton>
-                    )}
-
                     <Title variant="h5" gutterBottom data-test={"page-header-title"}>
                         {title}
                     </Title>
@@ -53,18 +31,16 @@ export const FormLayout: React.FC<FormLayoutProps> = React.memo(
                 <Content>{children}</Content>
 
                 {showFormButtons ? (
-                    <Footer>
-                        <ButtonsFooter>
-                            <Button onClick={onSave} disabled={disableSave} variant="contained" color="primary">
-                                {saveLabel || i18n.t("Save")}
+                    <ButtonsFooter>
+                        <Button onClick={onSave} disabled={disableSave} variant="contained" color="primary">
+                            {saveLabel || i18n.t("Save")}
+                        </Button>
+                        {onCancel && (
+                            <Button onClick={onCancel} variant="text" color="primary">
+                                {cancelLabel || i18n.t("Cancel")}
                             </Button>
-                            {onCancel && (
-                                <Button onClick={onCancel} variant="text" color="primary">
-                                    {cancelLabel || i18n.t("Cancel")}
-                                </Button>
-                            )}
-                        </ButtonsFooter>
-                    </Footer>
+                        )}
+                    </ButtonsFooter>
                 ) : null}
             </StyledFormLayout>
         );
@@ -86,8 +62,6 @@ const Content = styled.div`
     width: 100%;
 `;
 
-const Footer = styled.div``;
-
 const ButtonsFooter = styled.div`
     margin-block-start: 48px;
     display: flex;
@@ -98,6 +72,8 @@ const ButtonsFooter = styled.div`
 const Title = styled(Typography)`
     display: inline-block;
     font-weight: 300;
+    color: black;
+    margin-block-end: 5px;
 `;
 
 const RequiredText = styled.span`
@@ -107,9 +83,4 @@ const RequiredText = styled.span`
         content: "*";
         margin-inline-end: 4px;
     }
-`;
-
-const BackButton = styled(IconButton)`
-    padding-top: 10px;
-    margin-bottom: 5x;
 `;

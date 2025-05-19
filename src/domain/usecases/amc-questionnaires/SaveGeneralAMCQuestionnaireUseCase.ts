@@ -2,10 +2,10 @@ import { UseCase } from "../../../CompositionRoot";
 import { GeneralAMCQuestionnaire } from "../../entities/amc-questionnaires/GeneralAMCQuestionnaire";
 import { FutureData } from "../../entities/Future";
 import { Id } from "../../entities/Ref";
-import { GeneralAMCQuestionnaireRepository } from "../../repositories/amc-questionnaires/GeneralAMCQuestionnaireRepository";
+import { AMCQuestionnaireRepository } from "../../repositories/amc-questionnaires/AMCQuestionnaireRepository";
 
 export class SaveGeneralAMCQuestionnaireUseCase implements UseCase {
-    constructor(private generalAMCQuestionnaireRepository: GeneralAMCQuestionnaireRepository) {}
+    constructor(private generalAMCQuestionnaireRepository: AMCQuestionnaireRepository) {}
 
     public execute(generalAMCQuestionnaire: GeneralAMCQuestionnaire): FutureData<Id> {
         return this.generalAMCQuestionnaireRepository.save(generalAMCQuestionnaire);
