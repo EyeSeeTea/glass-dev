@@ -1,14 +1,45 @@
 import i18n from "../../../../locales";
-import { RISData } from "../../../entities/data-entry/amr-external/RISData";
+import { CustomDataColumns } from "../../../entities/data-entry/amr-individual-fungal-external/RISIndividualFungalData";
 import { ConsistencyError } from "../../../entities/data-entry/ImportSummary";
 import { PATHOGEN_ANTIBIOTIC_MAP } from "../../../entities/GlassModule";
 
+type SpecimenPathogenChekable = {
+    SPECIMEN: string;
+    PATHOGEN: string;
+    ANTIBIOTIC: string;
+};
+
+function mapCustomDataColumnsToSpecimenPathogenAntibiotic(
+    customDataColumns: CustomDataColumns[]
+): SpecimenPathogenChekable[] {
+    const getValue = (row: CustomDataColumns, key: keyof SpecimenPathogenChekable): string => {
+        const element = row.find(el => el.key === key);
+        if (element && typeof element.value === "string") {
+            return element.value;
+        }
+        return "";
+    };
+    return customDataColumns.map(row => ({
+        SPECIMEN: getValue(row, "SPECIMEN"),
+        PATHOGEN: getValue(row, "PATHOGEN"),
+        ANTIBIOTIC: getValue(row, "ANTIBIOTIC"),
+    }));
+}
+
+export function checkSpecimenPathogenFromDataColumns(
+    dataColumns: CustomDataColumns[],
+    specimenPathogenValidations: Record<string, PATHOGEN_ANTIBIOTIC_MAP[]>
+): ConsistencyError[] {
+    const data = mapCustomDataColumnsToSpecimenPathogenAntibiotic(dataColumns);
+    return checkSpecimenPathogen(data, specimenPathogenValidations);
+}
+
 export function checkSpecimenPathogen(
-    risData: RISData[],
+    data: SpecimenPathogenChekable[],
     specimenPathogenValidations: Record<string, PATHOGEN_ANTIBIOTIC_MAP[]>
 ): ConsistencyError[] {
     const errors = _(
-        risData.map((item, index) => {
+        data.map((item, index) => {
             const allowPathogens = specimenPathogenValidations[item.SPECIMEN];
 
             const pathogenAntibiotics = allowPathogens?.find(pathogen => pathogen[item.PATHOGEN]);

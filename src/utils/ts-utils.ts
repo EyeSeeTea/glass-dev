@@ -90,3 +90,10 @@ export type RecursivePartial<T> = {
 };
 
 export type PartialBy<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
+
+/**
+ * Returns a new array with the item replaced by the replacement item if they have the same id.
+ */
+export function replaceById<T extends { id: unknown }>(array: T[], replacement: T): T[] {
+    return array.map(item => (item.id === replacement.id ? replacement : item));
+}
