@@ -29,7 +29,7 @@ function getAMClassAMCQuestionnaireFormLabelsRules(): { rules: FormRule[]; label
         rules: [
             {
                 type: "requiredFieldsByCustomCondition",
-                fieldIds: ["healthSector", "healthLevel"],
+                fieldIds: ["stratas"],
                 condition: fields =>
                     !!AMClassAMCQuestionnaire.requiredFieldsCustomConditions(fields)["estVolumeTotalHealthLevel"],
                 requiredFieldIds: ["estVolumeTotalHealthLevel"],
@@ -37,7 +37,7 @@ function getAMClassAMCQuestionnaireFormLabelsRules(): { rules: FormRule[]; label
             },
             {
                 type: "requiredFieldsByCustomCondition",
-                fieldIds: ["healthSector", "healthLevel"],
+                fieldIds: ["stratas"],
                 condition: fields =>
                     !!AMClassAMCQuestionnaire.requiredFieldsCustomConditions(fields)["estVolumeHospitalHealthLevel"],
                 requiredFieldIds: ["estVolumeHospitalHealthLevel"],
@@ -45,7 +45,7 @@ function getAMClassAMCQuestionnaireFormLabelsRules(): { rules: FormRule[]; label
             },
             {
                 type: "requiredFieldsByCustomCondition",
-                fieldIds: ["healthSector", "healthLevel"],
+                fieldIds: ["stratas"],
                 condition: fields =>
                     !!AMClassAMCQuestionnaire.requiredFieldsCustomConditions(fields)["estVolumeCommunityHealthLevel"],
                 requiredFieldIds: ["estVolumeCommunityHealthLevel"],

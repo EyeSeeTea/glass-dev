@@ -1,70 +1,70 @@
-import { HealthLevelValues } from "../HealthLevelOption";
-import { HealthSectorValues } from "../HealthSectorOption";
-import { getStrataValuesFromHealthSectorAndLevel, StrataValues } from "../StrataOption";
+import { getDisabledStratas, StrataValues } from "../StrataOption";
 
-describe("getStrataValuesFromHealthSectorAndLevel", () => {
-    it("should return a single result for single combinations", () => {
-        expect(getStrataValuesFromHealthSectorAndLevel(HealthSectorValues.Public, HealthLevelValues.Hospital)).toEqual([
-            StrataValues.publicHospital,
-        ]);
-        expect(getStrataValuesFromHealthSectorAndLevel(HealthSectorValues.Public, HealthLevelValues.Community)).toEqual(
-            [StrataValues.publicCommunity]
+describe("getDisabledStratas", () => {
+    it("should disable individuals when total is selected (public)", () => {
+        const selected = [StrataValues.publicTotal];
+        const result = getDisabledStratas(selected);
+        expect(result).toEqual(expect.arrayContaining([StrataValues.publicHospital, StrataValues.publicCommunity]));
+        expect(result).not.toContain(StrataValues.publicTotal);
+    });
+
+    it("should disable individuals when total is selected (private)", () => {
+        const selected = [StrataValues.privateTotal];
+        const result = getDisabledStratas(selected);
+        expect(result).toEqual(expect.arrayContaining([StrataValues.privateHospital, StrataValues.privateCommunity]));
+        expect(result).not.toContain(StrataValues.privateTotal);
+    });
+
+    it("should disable individuals when total is selected (global)", () => {
+        const selected = [StrataValues.globalTotal];
+        const result = getDisabledStratas(selected);
+        expect(result).toEqual(expect.arrayContaining([StrataValues.globalHospital, StrataValues.globalCommunity]));
+        expect(result).not.toContain(StrataValues.globalTotal);
+    });
+
+    it("should disable total when any individual is selected (public)", () => {
+        const selected = [StrataValues.publicHospital];
+        const result = getDisabledStratas(selected);
+        expect(result).toContain(StrataValues.publicTotal);
+        expect(result).not.toContain(StrataValues.publicHospital);
+    });
+
+    it("should disable total when any individual is selected (private)", () => {
+        const selected = [StrataValues.privateCommunity];
+        const result = getDisabledStratas(selected);
+        expect(result).toContain(StrataValues.privateTotal);
+        expect(result).not.toContain(StrataValues.privateCommunity);
+    });
+
+    it("should disable total when any individual is selected (global)", () => {
+        const selected = [StrataValues.globalHospital];
+        const result = getDisabledStratas(selected);
+        expect(result).toContain(StrataValues.globalTotal);
+        expect(result).not.toContain(StrataValues.globalHospital);
+    });
+
+    it("should disable both individuals and total when both are selected", () => {
+        const selected = [StrataValues.publicTotal, StrataValues.publicHospital];
+        const result = getDisabledStratas(selected);
+        expect(result).toEqual(
+            expect.arrayContaining([
+                StrataValues.publicHospital,
+                StrataValues.publicCommunity,
+                StrataValues.publicTotal,
+            ])
         );
-        expect(getStrataValuesFromHealthSectorAndLevel(HealthSectorValues.Public, HealthLevelValues.Total)).toEqual([
-            StrataValues.publicTotal,
-        ]);
-        expect(getStrataValuesFromHealthSectorAndLevel(HealthSectorValues.Private, HealthLevelValues.Hospital)).toEqual(
-            [StrataValues.privateHospital]
-        );
-        expect(
-            getStrataValuesFromHealthSectorAndLevel(HealthSectorValues.Private, HealthLevelValues.Community)
-        ).toEqual([StrataValues.privateCommunity]);
-        expect(getStrataValuesFromHealthSectorAndLevel(HealthSectorValues.Private, HealthLevelValues.Total)).toEqual([
-            StrataValues.privateTotal,
-        ]);
     });
 
-    it("should return appropriate results for PublicAndPrivate sector and Hospital/Community/Total level", () => {
-        expect(
-            getStrataValuesFromHealthSectorAndLevel(HealthSectorValues.PublicAndPrivate, HealthLevelValues.Hospital)
-        ).toEqual([StrataValues.publicHospital, StrataValues.privateHospital]);
-        expect(
-            getStrataValuesFromHealthSectorAndLevel(HealthSectorValues.PublicAndPrivate, HealthLevelValues.Community)
-        ).toEqual([StrataValues.publicCommunity, StrataValues.privateCommunity]);
-        expect(
-            getStrataValuesFromHealthSectorAndLevel(HealthSectorValues.PublicAndPrivate, HealthLevelValues.Total)
-        ).toEqual([StrataValues.publicTotal, StrataValues.privateTotal]);
+    it("should return empty array if nothing is selected", () => {
+        const selected: string[] = [];
+        const result = getDisabledStratas(selected as any);
+        expect(result).toEqual([]);
     });
 
-    it("should return appropriate results for Total sector and Hospital/Community", () => {
-        expect(getStrataValuesFromHealthSectorAndLevel(HealthSectorValues.Total, HealthLevelValues.Hospital)).toEqual([
-            StrataValues.globalHospital,
-        ]);
-        expect(getStrataValuesFromHealthSectorAndLevel(HealthSectorValues.Total, HealthLevelValues.Community)).toEqual([
-            StrataValues.globalCommunity,
-        ]);
-        expect(
-            getStrataValuesFromHealthSectorAndLevel(HealthSectorValues.Total, HealthLevelValues.HospitalAndCommunity)
-        ).toEqual([StrataValues.globalHospital, StrataValues.globalCommunity]);
-    });
-
-    it("should return appropriate results for PublicAndPrivate sector and HospitalAndCommunity level", () => {
-        expect(
-            getStrataValuesFromHealthSectorAndLevel(
-                HealthSectorValues.PublicAndPrivate,
-                HealthLevelValues.HospitalAndCommunity
-            )
-        ).toEqual([
-            StrataValues.publicHospital,
-            StrataValues.privateHospital,
-            StrataValues.publicCommunity,
-            StrataValues.privateCommunity,
-        ]);
-    });
-
-    it("should return globalTotal for Total sector and Total level", () => {
-        expect(getStrataValuesFromHealthSectorAndLevel(HealthSectorValues.Total, HealthLevelValues.Total)).toEqual([
-            StrataValues.globalTotal,
-        ]);
+    it("should not disable unrelated stratas", () => {
+        const selected = [StrataValues.publicTotal];
+        const result = getDisabledStratas(selected);
+        expect(result).not.toContain(StrataValues.privateHospital);
+        expect(result).not.toContain(StrataValues.globalCommunity);
     });
 });
