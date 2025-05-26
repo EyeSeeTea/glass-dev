@@ -10,7 +10,7 @@ import {
 } from "./AntimicrobialClassOption";
 import { ComponentAMCQuestionnaire, ComponentAMCQuestionnaireCombination } from "./ComponentAMCQuestionnaire";
 import { GeneralAMCQuestionnaire, GeneralAMCQuestionnaireAMClassAttributes } from "./GeneralAMCQuestionnaire";
-import { getStrataValuesFromHealthSectorAndLevel, StrataOption, StrataValue } from "./StrataOption";
+import { StrataOption, StrataValue } from "./StrataOption";
 import { ValidationErrorKey } from "./ValidationError";
 import { YesNoValues } from "./YesNoOption";
 import _ from "lodash";
@@ -150,10 +150,7 @@ export class AMCQuestionnaire extends Struct<AMCQuestionnaireAttrs>() {
         if (!amClassQuestionnaire) {
             return [];
         }
-        const allStrataValuesForAm = getStrataValuesFromHealthSectorAndLevel(
-            amClassQuestionnaire.healthSector,
-            amClassQuestionnaire.healthLevel
-        );
+        const allStrataValuesForAm = amClassQuestionnaire.stratas;
         const strataValuesAlreadyAssignedToAm = this.componentQuestionnaires.reduce<StrataValue[]>(
             (acc, componentQuestionnaire) => {
                 if (componentQuestionnaire.antimicrobialClasses.includes(forAMClass)) {

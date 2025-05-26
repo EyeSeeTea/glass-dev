@@ -4,15 +4,13 @@ import { Struct } from "../generic/Struct";
 import { ValidationError, ValidationErrorKey } from "./ValidationError";
 import { Either } from "../generic/Either";
 import { AntimicrobialClassOption, AntimicrobialClassValue } from "./AntimicrobialClassOption";
-import { HealthSectorValue, HealthSectorValues } from "./HealthSectorOption";
-import { HealthLevelValue, HealthLevelValues } from "./HealthLevelOption";
 import { Proportion50to100Value } from "./Proportion50to100Option";
 import { Id } from "../Base";
+import { StrataOptionHelper, StrataValue } from "./StrataOption";
 
 export type AMClassAMCQuestionnaireResponsesAttributes = {
     antimicrobialClass: AntimicrobialClassValue;
-    healthSector: HealthSectorValue;
-    healthLevel: HealthLevelValue;
+    stratas: StrataValue[];
     estVolumeTotalHealthLevel: Maybe<Proportion50to100Value>;
     estVolumeHospitalHealthLevel: Maybe<Proportion50to100Value>;
     estVolumeCommunityHealthLevel: Maybe<Proportion50to100Value>;
@@ -57,19 +55,14 @@ export class AMClassAMCQuestionnaire extends Struct<AMClassAMCQuestionnaireAttri
     static requiredFieldsCustomConditions(
         attributes: Partial<AMClassAMCQuestionnaireAttributes>
     ): Partial<Record<keyof AMClassAMCQuestionnaireAttributes, boolean>> {
-        const isPublicOrPrivate =
-            attributes.healthSector === HealthSectorValues.Public ||
-            attributes.healthSector === HealthSectorValues.Private;
+        const isPublicOrPrivate = !!attributes.stratas?.some(StrataOptionHelper.isPublicOrPrivateStrata);
+        const isTotalHealthLevel = !!attributes.stratas?.some(StrataOptionHelper.isTotalHealthLevelStrata);
+        const isHospitalHealthLevel = !!attributes.stratas?.some(StrataOptionHelper.isHospitalHealthLevelStrata);
+        const isCommunityHealthLevel = !!attributes.stratas?.some(StrataOptionHelper.isCommunityHealthLevelStrata);
         return {
-            estVolumeTotalHealthLevel: isPublicOrPrivate && attributes.healthLevel === HealthLevelValues.Total,
-            estVolumeHospitalHealthLevel:
-                isPublicOrPrivate &&
-                (attributes.healthLevel === HealthLevelValues.Hospital ||
-                    attributes.healthLevel === HealthLevelValues.HospitalAndCommunity),
-            estVolumeCommunityHealthLevel:
-                isPublicOrPrivate &&
-                (attributes.healthLevel === HealthLevelValues.Community ||
-                    attributes.healthLevel === HealthLevelValues.HospitalAndCommunity),
+            estVolumeTotalHealthLevel: isPublicOrPrivate && isTotalHealthLevel,
+            estVolumeHospitalHealthLevel: isPublicOrPrivate && isHospitalHealthLevel,
+            estVolumeCommunityHealthLevel: isPublicOrPrivate && isCommunityHealthLevel,
         };
     }
 

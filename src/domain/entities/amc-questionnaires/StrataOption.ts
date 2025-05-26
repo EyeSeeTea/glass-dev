@@ -20,40 +20,80 @@ export type StrataOption = OptionType<StrataValue>;
 
 export const strataOption = new Option(StrataValues);
 
-export function getStrataValuesFromHealthSectorAndLevel(
-    healthSector: HealthSectorValue,
-    healthLevel: HealthLevelValue
-): StrataValue[] {
-    const permutations: Record<HealthSectorValue, Record<HealthLevelValue, StrataValue[]>> = {
-        [HealthSectorValues.Public]: {
-            [HealthLevelValues.Hospital]: [StrataValues.publicHospital],
-            [HealthLevelValues.Community]: [StrataValues.publicCommunity],
-            [HealthLevelValues.HospitalAndCommunity]: [StrataValues.publicHospital, StrataValues.publicCommunity],
-            [HealthLevelValues.Total]: [StrataValues.publicTotal],
+const publicOrPrivateStratas: StrataValue[] = [
+    StrataValues.publicCommunity,
+    StrataValues.publicHospital,
+    StrataValues.privateCommunity,
+    StrataValues.privateHospital,
+    StrataValues.publicTotal,
+    StrataValues.privateTotal,
+];
+const totalHealthLevelStratas: StrataValue[] = [
+    StrataValues.publicTotal,
+    StrataValues.privateTotal,
+    StrataValues.globalTotal,
+];
+const hospitalHealthLevelStratas: StrataValue[] = [
+    StrataValues.publicHospital,
+    StrataValues.privateHospital,
+    StrataValues.globalHospital,
+];
+const communityHealthLevelStratas: StrataValue[] = [
+    StrataValues.publicCommunity,
+    StrataValues.privateCommunity,
+    StrataValues.globalCommunity,
+];
+
+export class StrataOptionHelper {
+    static isPublicOrPrivateStrata(strata: StrataValue): boolean {
+        return publicOrPrivateStratas.includes(strata);
+    }
+
+    static isTotalHealthLevelStrata(strata: StrataValue): boolean {
+        return totalHealthLevelStratas.includes(strata);
+    }
+
+    static isHospitalHealthLevelStrata(strata: StrataValue): boolean {
+        return hospitalHealthLevelStratas.includes(strata);
+    }
+
+    static isCommunityHealthLevelStrata(strata: StrataValue): boolean {
+        return communityHealthLevelStratas.includes(strata);
+    }
+}
+
+export function getDisabledStratas(selected: StrataValue[]): StrataValue[] {
+    const strataGroups = [
+        {
+            total: StrataValues.publicTotal,
+            individuals: [StrataValues.publicHospital, StrataValues.publicCommunity],
         },
-        [HealthSectorValues.Private]: {
-            [HealthLevelValues.Hospital]: [StrataValues.privateHospital],
-            [HealthLevelValues.Community]: [StrataValues.privateCommunity],
-            [HealthLevelValues.HospitalAndCommunity]: [StrataValues.privateHospital, StrataValues.privateCommunity],
-            [HealthLevelValues.Total]: [StrataValues.privateTotal],
+        {
+            total: StrataValues.privateTotal,
+            individuals: [StrataValues.privateHospital, StrataValues.privateCommunity],
         },
-        [HealthSectorValues.PublicAndPrivate]: {
-            [HealthLevelValues.Hospital]: [StrataValues.publicHospital, StrataValues.privateHospital],
-            [HealthLevelValues.Community]: [StrataValues.publicCommunity, StrataValues.privateCommunity],
-            [HealthLevelValues.HospitalAndCommunity]: [
-                StrataValues.publicHospital,
-                StrataValues.privateHospital,
-                StrataValues.publicCommunity,
-                StrataValues.privateCommunity,
-            ],
-            [HealthLevelValues.Total]: [StrataValues.publicTotal, StrataValues.privateTotal],
+        {
+            total: StrataValues.globalTotal,
+            individuals: [StrataValues.globalHospital, StrataValues.globalCommunity],
         },
-        [HealthLevelValues.Total]: {
-            [HealthLevelValues.Hospital]: [StrataValues.globalHospital],
-            [HealthLevelValues.Community]: [StrataValues.globalCommunity],
-            [HealthLevelValues.HospitalAndCommunity]: [StrataValues.globalHospital, StrataValues.globalCommunity],
-            [HealthLevelValues.Total]: [StrataValues.globalTotal],
-        },
-    };
-    return permutations[healthSector][healthLevel];
+    ];
+
+    const disabled = new Set<StrataValue>();
+
+    for (const group of strataGroups) {
+        const totalSelected = selected.includes(group.total);
+        const individualSelected = group.individuals.some(val => selected.includes(val));
+
+        if (totalSelected) {
+            for (const ind of group.individuals) {
+                disabled.add(ind);
+            }
+        }
+
+        if (individualSelected) {
+            disabled.add(group.total);
+        }
+    }
+
+    return Array.from(disabled);
 }
