@@ -118,10 +118,6 @@ import { GetAntimicrobialClassOptionsUseCase } from "./domain/usecases/amc-quest
 import { QuestionsAMCQuestionnaireD2Repository } from "./data/repositories/amc-questionnaires/QuestionsAMCQuestionnaireD2Repository";
 import { GetQuestionsAMCQuestionnaireUseCase } from "./domain/usecases/amc-questionnaires/GetQuestionsAMCQuestionnaireUseCase";
 import { SaveGeneralAMCQuestionnaireUseCase } from "./domain/usecases/amc-questionnaires/SaveGeneralAMCQuestionnaireUseCase";
-import { HealthLevelOptionsD2Repository } from "./data/repositories/amc-questionnaires/HealthLevelOptionsD2Repository";
-import { GetHealthLevelOptionsUseCase } from "./domain/usecases/amc-questionnaires/GetHealthLevelOptionsUseCase";
-import { HealthSectorOptionsD2Repository } from "./data/repositories/amc-questionnaires/HealthSectorOptionsD2Repository";
-import { GetHealthSectorOptionsUseCase } from "./domain/usecases/amc-questionnaires/GetHealthSectorOptionsUseCase";
 import { Proportion50to100OptionsD2Repository } from "./data/repositories/amc-questionnaires/Proportion50to100OptionsD2Repository";
 import { GetProportion50to100OptionsUseCase } from "./domain/usecases/amc-questionnaires/GetProportion50to100OptionsUseCase";
 import { GetAMCQuestionnaireByOrgUnitAndPeriodUseCase } from "./domain/usecases/amc-questionnaires/GetAMCQuestionnaireByOrgUnitAndPeriodUseCase";
@@ -186,8 +182,6 @@ export function getCompositionRoot(instance: Instance) {
     const yesNoUnknownOptionsRepository = new YesNoUnknownOptionsD2Repository(api);
     const yesNoUnknownNAOptionsRepository = new YesNoUnknownNAOptionsD2Repository(api);
     const antimicrobialClassOptionsRepository = new AntimicrobialClassOptionsD2Repository(api);
-    const healthLevelOptionsD2Repository = new HealthLevelOptionsD2Repository(api);
-    const healthSectorOptionsD2Repository = new HealthSectorOptionsD2Repository(api);
     const proportion50to100OptionsD2Repository = new Proportion50to100OptionsD2Repository(api);
     const dataLevelOptionsD2Repository = new DataLevelOptionsD2Repository(api);
     const dataSourceOptionsD2Repository = new DataSourceOptionsD2Repository(api);
@@ -424,8 +418,6 @@ export function getCompositionRoot(instance: Instance) {
             getYesNoUnknownOptions: new GetYesNoUnknownOptionsUseCase(yesNoUnknownOptionsRepository),
             getYesNoUnknownNAOptions: new GetYesNoUnknownNAOptionsUseCase(yesNoUnknownNAOptionsRepository),
             getAntimicrobialClassOptions: new GetAntimicrobialClassOptionsUseCase(antimicrobialClassOptionsRepository),
-            getHealthLevelOptions: new GetHealthLevelOptionsUseCase(healthLevelOptionsD2Repository),
-            getHealthSectorOptions: new GetHealthSectorOptionsUseCase(healthSectorOptionsD2Repository),
             getProportion50to100Options: new GetProportion50to100OptionsUseCase(proportion50to100OptionsD2Repository),
             getProportion50to100UnknownOptions: new GetProportion50to100UnknownOptionsUseCase(
                 proportion50to100UnknownOptionsD2Repository

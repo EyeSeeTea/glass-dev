@@ -1,5 +1,3 @@
-import { HealthLevelValue, HealthLevelValues } from "./HealthLevelOption";
-import { HealthSectorValue, HealthSectorValues } from "./HealthSectorOption";
 import { Option, OptionType, OptionValue } from "./Option";
 
 export const StrataValues = {
