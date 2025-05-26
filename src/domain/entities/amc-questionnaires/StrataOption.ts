@@ -60,6 +60,9 @@ export class StrataOptionHelper {
     }
 }
 
+/**
+ * Based on the selected stratas, returns an array of stratas that shouldn't be elegible simultaneously.
+ */
 export function getDisabledStratas(selected: StrataValue[]): StrataValue[] {
     const strataGroups = [
         {
