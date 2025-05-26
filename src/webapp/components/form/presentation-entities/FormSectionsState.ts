@@ -1,5 +1,6 @@
 import { ValidationError, ValidationErrorKey } from "../../../../domain/entities/amc-questionnaires/ValidationError";
 import { Maybe } from "../../../../types/utils";
+import { replaceById } from "../../../../utils/ts-utils";
 import { FormFieldState, isFieldInSection, updateFields, validateField } from "./FormFieldsState";
 
 import { FormRule } from "./FormRule";
@@ -150,4 +151,28 @@ export function setRequiredFieldsByFieldsConditionInSection(
             ...section,
         };
     }
+}
+
+export function setDisabledOptionsByFieldValues(section: FormSectionState, rule: FormRule): FormSectionState {
+    if (rule.type !== "disableOptionsByFieldValues") return section;
+    const field = section.fields.find(field => field.id === rule.fieldId);
+    if (!field) {
+        return section; // No field with the specified ID in this section
+    }
+    if (!("options" in field)) {
+        console.warn(`setDisabledOptionsByFieldValues: Field with id ${rule.fieldId} has no options`);
+        return section;
+    }
+    const disabledOptions = rule.disableCondition(Array.isArray(field.value) ? field.value : [field.value]);
+    const updatedField: FormFieldState = {
+        ...field,
+        options: field.options.map(option => ({
+            ...option,
+            disabled: disabledOptions.includes(option.value),
+        })),
+    };
+    return {
+        ...section,
+        fields: replaceById(section.fields, updatedField),
+    };
 }

@@ -6,7 +6,7 @@ import { Either } from "../generic/Either";
 import { AntimicrobialClassOption, AntimicrobialClassValue } from "./AntimicrobialClassOption";
 import { Proportion50to100Value } from "./Proportion50to100Option";
 import { Id } from "../Base";
-import { StrataOptionHelper, StrataValue } from "./StrataOption";
+import { getDisabledStratas, StrataOptionHelper, StrataValue } from "./StrataOption";
 
 export type AMClassAMCQuestionnaireResponsesAttributes = {
     antimicrobialClass: AntimicrobialClassValue;
@@ -38,8 +38,15 @@ export class AMClassAMCQuestionnaire extends Struct<AMClassAMCQuestionnaireAttri
 
     static validate(attributes: AMClassAMCQuestionnaireAttributes): ValidationError[] {
         const requiredConditions = this.requiredFieldsCustomConditions(attributes);
-        return _.compact(
-            _.map(requiredConditions, (isRequired, key) => {
+        const strataError = this.validateStratas(attributes.stratas)
+            ? null
+            : {
+                  property: "stratas",
+                  value: attributes.stratas,
+                  errors: [ValidationErrorKey.INVALID_STRATA_VALUES],
+              };
+        return _.compact([
+            ..._.map(requiredConditions, (isRequired, key) => {
                 if (isRequired && !attributes[key as keyof AMClassAMCQuestionnaireResponsesAttributes]) {
                     return {
                         property: key,
@@ -48,8 +55,9 @@ export class AMClassAMCQuestionnaire extends Struct<AMClassAMCQuestionnaireAttri
                     };
                 }
                 return null;
-            })
-        );
+            }),
+            strataError,
+        ]);
     }
 
     static requiredFieldsCustomConditions(
@@ -64,6 +72,11 @@ export class AMClassAMCQuestionnaire extends Struct<AMClassAMCQuestionnaireAttri
             estVolumeHospitalHealthLevel: isPublicOrPrivate && isHospitalHealthLevel,
             estVolumeCommunityHealthLevel: isPublicOrPrivate && isCommunityHealthLevel,
         };
+    }
+
+    static validateStratas(stratas: StrataValue[]): boolean {
+        const invalidStratas = getDisabledStratas(stratas);
+        return !invalidStratas.some(invalidStrata => stratas.includes(invalidStrata));
     }
 
     public getTitle({ antimicrobialClassOptions }: { antimicrobialClassOptions: AntimicrobialClassOption[] }): string {

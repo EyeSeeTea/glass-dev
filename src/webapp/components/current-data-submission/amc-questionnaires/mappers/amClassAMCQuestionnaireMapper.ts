@@ -14,6 +14,7 @@ import {
     AMClassAMCQuestionnaire,
     AMClassAMCQuestionnaireAttributes,
 } from "../../../../../domain/entities/amc-questionnaires/AMClassAMCQuestionnaire";
+import { getDisabledStratas } from "../../../../../domain/entities/amc-questionnaires/StrataOption";
 
 export function mapFormStateToAMClassAMCQuestionnaire(
     params: MapToAMCQuestionnaireParams<AMClassAMCQuestionnaireFormEntity>
@@ -101,11 +102,7 @@ export function mapAMClassAMCQuestionnaireToInitialFormState(
         ? [...new Set([antimicrobialClassOption, ...availableAntimicrobialClassOptions])]
         : availableAntimicrobialClassOptions;
 
-    const selfStrataOptions = options.strataOptions.filter(option =>
-        (questionnaireFormEntity?.entity?.stratas || []).includes(option.code)
-    );
-    const availableStrataOptions = options.strataOptions;
-    const strataOptionsWithSelf = [...new Set([...selfStrataOptions, ...availableStrataOptions])];
+    const disabledStratas = getDisabledStratas(questionnaireFormEntity?.entity?.stratas || []);
 
     return {
         id: questionnaireFormEntity.entity?.id ?? "",
@@ -138,7 +135,7 @@ export function mapAMClassAMCQuestionnaireToInitialFormState(
                         type: "checkboxes",
                         multiple: true,
                         value: questionnaireFormEntity?.entity?.stratas || [],
-                        options: mapToFormOptions(strataOptionsWithSelf),
+                        options: mapToFormOptions(options.strataOptions, disabledStratas),
                         required: true,
                         showIsRequired: true,
                         text: fromQuestions("stratas"),

@@ -6,6 +6,7 @@ export enum ValidationErrorKey {
     CANNOT_CREATE_DUPLICATE_AM_CLASS_QUESTIONNAIRE = "cannot_create_duplicate_am_class_questionnaire",
     COMPONENT_AM_WITHOUT_AMCLASS_QUESTIONNAIRE = "component_antimicrobial_without_amclass_questionnaire",
     COMPONENT_STRATA_OVERLAP = "component_strata_must_not_overlap",
+    INVALID_STRATA_VALUES = "invalid_strata_values",
 }
 
 export type ValidationError = {

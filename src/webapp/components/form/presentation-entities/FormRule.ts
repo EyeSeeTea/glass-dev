@@ -18,4 +18,12 @@ type RequiredFieldByCustomCondition = {
     sectionIdsWithRequiredFields: string[];
 };
 
-export type FormRule = RequiredyFieldByFieldValue | RequiredFieldByCustomCondition;
+// useful for disabling mutually exclusive options in a select field
+type DisableOptionsByFieldValues = {
+    type: "disableOptionsByFieldValues";
+    fieldId: string;
+    // return option values to disable
+    disableCondition: (selectedValues: string[]) => string[];
+};
+
+export type FormRule = RequiredyFieldByFieldValue | RequiredFieldByCustomCondition | DisableOptionsByFieldValues;

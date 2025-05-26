@@ -1,6 +1,7 @@
 import { FormFieldState } from "../FormFieldsState";
 import { FormRule } from "../FormRule";
 import {
+    setDisabledOptionsByFieldValues,
     setRequiredFieldsByFieldsConditionInSection,
     setRequiredFieldsByFieldValueInSection,
 } from "../FormSectionsState";
@@ -35,6 +36,12 @@ export function applyRulesInFormState(
                         setRequiredFieldsByFieldsConditionInSection(section, currentFormState, rule)
                     ),
                 };
+            case "disableOptionsByFieldValues": {
+                return {
+                    ...formState,
+                    sections: formState.sections.map(section => setDisabledOptionsByFieldValues(section, rule)),
+                };
+            }
         }
     }, currentFormState);
 
