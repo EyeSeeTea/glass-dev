@@ -61,10 +61,52 @@ describe("getDisabledStratas", () => {
         expect(result).toEqual([]);
     });
 
-    it("should not disable unrelated stratas", () => {
-        const selected = [StrataValues.publicTotal];
+    it("should disable all public/private individuals when public/private totals are selected, and also disable globalTotal", () => {
+        const selected = [StrataValues.publicTotal, StrataValues.privateTotal];
         const result = getDisabledStratas(selected);
-        expect(result).not.toContain(StrataValues.privateHospital);
-        expect(result).not.toContain(StrataValues.globalCommunity);
+        expect(result).toEqual(
+            expect.arrayContaining([
+                StrataValues.publicHospital,
+                StrataValues.publicCommunity,
+                StrataValues.privateHospital,
+                StrataValues.privateCommunity,
+                StrataValues.globalTotal,
+            ])
+        );
+        expect(result).not.toContain(StrataValues.publicTotal);
+        expect(result).not.toContain(StrataValues.privateTotal);
+    });
+
+    it("should disable all related totals when multiple individuals are selected", () => {
+        const selected = [StrataValues.publicHospital, StrataValues.privateCommunity];
+        const result = getDisabledStratas(selected);
+        expect(result).toEqual(
+            expect.arrayContaining([
+                StrataValues.publicTotal,
+                StrataValues.privateTotal,
+                StrataValues.globalHospital,
+                StrataValues.globalCommunity,
+                StrataValues.globalTotal,
+            ])
+        );
+        expect(result).not.toContain(StrataValues.publicHospital);
+        expect(result).not.toContain(StrataValues.privateCommunity);
+    });
+
+    it("should disable everything else if globalTotal is selected", () => {
+        const selected = [StrataValues.globalTotal];
+        const result = getDisabledStratas(selected);
+        expect(result).toEqual(
+            expect.arrayContaining([
+                StrataValues.globalHospital,
+                StrataValues.globalCommunity,
+                StrataValues.publicTotal,
+                StrataValues.privateTotal,
+                StrataValues.publicHospital,
+                StrataValues.privateHospital,
+                StrataValues.publicCommunity,
+                StrataValues.privateCommunity,
+            ])
+        );
     });
 });

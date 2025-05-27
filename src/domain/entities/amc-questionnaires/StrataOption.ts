@@ -75,7 +75,24 @@ export function getDisabledStratas(selected: StrataValue[]): StrataValue[] {
         },
         {
             total: StrataValues.globalTotal,
-            individuals: [StrataValues.globalHospital, StrataValues.globalCommunity],
+            individuals: [
+                StrataValues.globalHospital,
+                StrataValues.globalCommunity,
+                StrataValues.publicTotal,
+                StrataValues.privateTotal,
+                StrataValues.publicHospital,
+                StrataValues.privateHospital,
+                StrataValues.publicCommunity,
+                StrataValues.privateCommunity,
+            ],
+        },
+        {
+            total: StrataValues.globalHospital,
+            individuals: [StrataValues.publicHospital, StrataValues.privateHospital],
+        },
+        {
+            total: StrataValues.globalCommunity,
+            individuals: [StrataValues.publicCommunity, StrataValues.privateCommunity],
         },
     ];
 
