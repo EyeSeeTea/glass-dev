@@ -37,7 +37,7 @@ export function CheckboxesGroup<Value extends string>({
                 value: unknown;
             }>
         ) => {
-            const selectedValue = event.target.value as Value;
+            const selectedValue = (event.target as HTMLInputElement).name as Value;
             const isChecked = selected.includes(selectedValue);
             const value = isChecked
                 ? selected.filter(selection => selection !== selectedValue)

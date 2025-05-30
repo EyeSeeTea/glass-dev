@@ -47,8 +47,7 @@ export const generalAMCQuestionnaireByTEAIds: Record<Id, GeneralAMCQuestionId> =
 
 export const codesByAMClassAMCQuestionnaire: Record<AMClassAMCQuestionId, string> = {
     antimicrobialClass: "AMR_GLASS_AMC_DE_AM_CLASS",
-    healthSector: "AMR_GLASS_AMC_DE_H_SECTOR",
-    healthLevel: "AMR_GLASS_AMC_DE_H_LEVEL",
+    stratas: "AMR_GLASS_AMC_DE_STRATAS",
     estVolumeTotalHealthLevel: "AMR_GLASS_AMC_DE_VOL_TOTAL",
     estVolumeHospitalHealthLevel: "AMR_GLASS_AMC_DE_VOL_HOSP",
     estVolumeCommunityHealthLevel: "AMR_GLASS_AMC_DE_VOL_COMM",
@@ -63,8 +62,7 @@ export function isStringInAMClassAMCQuestionnaireCodes(code: string): code is AM
 
 export const AMClassAMCQuestionnaireByTEAIds: Record<Id, AMClassAMCQuestionId> = {
     EUh63YWEA62: "antimicrobialClass",
-    U51LiIT3mKk: "healthSector",
-    Fv9NNL4rmrm: "healthLevel",
+    OlTdx6NFkw1: "stratas",
     pKR2EiIilTO: "estVolumeTotalHealthLevel",
     NapA76XUInT: "estVolumeHospitalHealthLevel",
     gAGTbAhWrgN: "estVolumeCommunityHealthLevel",
