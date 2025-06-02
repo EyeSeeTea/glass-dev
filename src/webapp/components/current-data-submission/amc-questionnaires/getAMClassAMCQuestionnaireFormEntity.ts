@@ -30,30 +30,6 @@ function getAMClassAMCQuestionnaireFormLabelsRules(): { rules: FormRule[]; label
         },
         rules: [
             {
-                type: "requiredFieldsByCustomCondition",
-                fieldIds: ["stratas"],
-                condition: fields =>
-                    !!AMClassAMCQuestionnaire.requiredFieldsCustomConditions(fields)["estVolumeTotalHealthLevel"],
-                requiredFieldIds: ["estVolumeTotalHealthLevel"],
-                sectionIdsWithRequiredFields: ["general_section"],
-            },
-            {
-                type: "requiredFieldsByCustomCondition",
-                fieldIds: ["stratas"],
-                condition: fields =>
-                    !!AMClassAMCQuestionnaire.requiredFieldsCustomConditions(fields)["estVolumeHospitalHealthLevel"],
-                requiredFieldIds: ["estVolumeHospitalHealthLevel"],
-                sectionIdsWithRequiredFields: ["general_section"],
-            },
-            {
-                type: "requiredFieldsByCustomCondition",
-                fieldIds: ["stratas"],
-                condition: fields =>
-                    !!AMClassAMCQuestionnaire.requiredFieldsCustomConditions(fields)["estVolumeCommunityHealthLevel"],
-                requiredFieldIds: ["estVolumeCommunityHealthLevel"],
-                sectionIdsWithRequiredFields: ["general_section"],
-            },
-            {
                 type: "disableOptionsByFieldValues",
                 fieldId: "stratas",
                 disableCondition: selectedValues => {

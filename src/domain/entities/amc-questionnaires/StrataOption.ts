@@ -18,48 +18,6 @@ export type StrataOption = OptionType<StrataValue>;
 
 export const strataOption = new Option(StrataValues);
 
-const publicOrPrivateStratas: StrataValue[] = [
-    StrataValues.publicCommunity,
-    StrataValues.publicHospital,
-    StrataValues.privateCommunity,
-    StrataValues.privateHospital,
-    StrataValues.publicTotal,
-    StrataValues.privateTotal,
-];
-const totalHealthLevelStratas: StrataValue[] = [
-    StrataValues.publicTotal,
-    StrataValues.privateTotal,
-    StrataValues.globalTotal,
-];
-const hospitalHealthLevelStratas: StrataValue[] = [
-    StrataValues.publicHospital,
-    StrataValues.privateHospital,
-    StrataValues.globalHospital,
-];
-const communityHealthLevelStratas: StrataValue[] = [
-    StrataValues.publicCommunity,
-    StrataValues.privateCommunity,
-    StrataValues.globalCommunity,
-];
-
-export class StrataOptionHelper {
-    static isPublicOrPrivateStrata(strata: StrataValue): boolean {
-        return publicOrPrivateStratas.includes(strata);
-    }
-
-    static isTotalHealthLevelStrata(strata: StrataValue): boolean {
-        return totalHealthLevelStratas.includes(strata);
-    }
-
-    static isHospitalHealthLevelStrata(strata: StrataValue): boolean {
-        return hospitalHealthLevelStratas.includes(strata);
-    }
-
-    static isCommunityHealthLevelStrata(strata: StrataValue): boolean {
-        return communityHealthLevelStratas.includes(strata);
-    }
-}
-
 /**
  * Based on the selected stratas, returns an array of stratas that shouldn't be elegible simultaneously.
  */
