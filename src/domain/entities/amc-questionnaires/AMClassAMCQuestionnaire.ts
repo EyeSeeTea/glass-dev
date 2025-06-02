@@ -6,7 +6,7 @@ import { Either } from "../generic/Either";
 import { AntimicrobialClassOption, AntimicrobialClassValue } from "./AntimicrobialClassOption";
 import { Proportion50to100Value } from "./Proportion50to100Option";
 import { Id } from "../Base";
-import { getDisabledStratas, StrataOptionHelper, StrataValue } from "./StrataOption";
+import { getDisabledStratas, StrataValue } from "./StrataOption";
 
 export type AMClassAMCQuestionnaireResponsesAttributes = {
     antimicrobialClass: AntimicrobialClassValue;
@@ -37,7 +37,6 @@ export class AMClassAMCQuestionnaire extends Struct<AMClassAMCQuestionnaireAttri
     }
 
     static validate(attributes: AMClassAMCQuestionnaireAttributes): ValidationError[] {
-        const requiredConditions = this.requiredFieldsCustomConditions(attributes);
         const strataError = this.validateStratas(attributes.stratas)
             ? null
             : {
@@ -45,33 +44,7 @@ export class AMClassAMCQuestionnaire extends Struct<AMClassAMCQuestionnaireAttri
                   value: attributes.stratas,
                   errors: [ValidationErrorKey.INVALID_STRATA_VALUES],
               };
-        return _.compact([
-            ..._.map(requiredConditions, (isRequired, key) => {
-                if (isRequired && !attributes[key as keyof AMClassAMCQuestionnaireResponsesAttributes]) {
-                    return {
-                        property: key,
-                        value: attributes[key as keyof AMClassAMCQuestionnaireAttributes],
-                        errors: [ValidationErrorKey.FIELD_IS_REQUIRED],
-                    };
-                }
-                return null;
-            }),
-            strataError,
-        ]);
-    }
-
-    static requiredFieldsCustomConditions(
-        attributes: Partial<AMClassAMCQuestionnaireAttributes>
-    ): Partial<Record<keyof AMClassAMCQuestionnaireAttributes, boolean>> {
-        const isPublicOrPrivate = !!attributes.stratas?.some(StrataOptionHelper.isPublicOrPrivateStrata);
-        const isTotalHealthLevel = !!attributes.stratas?.some(StrataOptionHelper.isTotalHealthLevelStrata);
-        const isHospitalHealthLevel = !!attributes.stratas?.some(StrataOptionHelper.isHospitalHealthLevelStrata);
-        const isCommunityHealthLevel = !!attributes.stratas?.some(StrataOptionHelper.isCommunityHealthLevelStrata);
-        return {
-            estVolumeTotalHealthLevel: isPublicOrPrivate && isTotalHealthLevel,
-            estVolumeHospitalHealthLevel: isPublicOrPrivate && isHospitalHealthLevel,
-            estVolumeCommunityHealthLevel: isPublicOrPrivate && isCommunityHealthLevel,
-        };
+        return _.compact([strataError]);
     }
 
     static validateStratas(stratas: StrataValue[]): boolean {
