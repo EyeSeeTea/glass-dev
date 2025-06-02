@@ -2,7 +2,6 @@ import { AMCQuestionnaireQuestions } from "../../../../domain/entities/amc-quest
 import { ComponentAMCQuestionnaire } from "../../../../domain/entities/amc-questionnaires/ComponentAMCQuestionnaire";
 import { DataLevelValues } from "../../../../domain/entities/amc-questionnaires/DataLevelOption";
 import { NationalPopulationDataSourceValues } from "../../../../domain/entities/amc-questionnaires/NationalPopulationDataSourceOption";
-import { YesNoValues } from "../../../../domain/entities/amc-questionnaires/YesNoOption";
 import { YesNoUnknownValues } from "../../../../domain/entities/amc-questionnaires/YesNoUnknownOption";
 import { Maybe } from "../../../../utils/ts-utils";
 import { FormRule } from "../../form/presentation-entities/FormRule";
@@ -55,7 +54,7 @@ function getComponentAMCQuestionnaireFormLabelsRules(): { rules: FormRule[]; lab
             {
                 type: "requiredFieldsByFieldValue",
                 fieldId: "sameAsUNPopulation",
-                fieldValue: YesNoValues.NO,
+                fieldValue: false, // checkboxes return booleans instead of YesNoValue
                 requiredFieldIds: ["sourceOfNationalPopulation"],
                 sectionIdsWithRequiredFields: ["component_section"],
             },

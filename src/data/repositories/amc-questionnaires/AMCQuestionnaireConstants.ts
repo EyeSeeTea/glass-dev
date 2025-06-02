@@ -69,8 +69,11 @@ export const AMClassAMCQuestionnaireByTEAIds: Record<Id, AMClassAMCQuestionId> =
 } as const;
 
 export const codesByComponentAMCQuestionnaire: Record<ComponentAMCQuestionId, string> = {
-    antimicrobialClasses: "AMR_GLASS_AMC_DE_AM_CLASSES",
-    componentStrata: "AMR_GLASS_AMC_DE_STRATA",
+    antibacterialStratum: "AMR_GLASS_AMC_DE_ATB_STRATUM",
+    antifungalStratum: "AMR_GLASS_AMC_DE_ATF_STRATUM",
+    antiviralStratum: "AMR_GLASS_AMC_DE_ATV_STRATUM",
+    antituberculosisStratum: "AMR_GLASS_AMC_DE_ATT_STRATUM",
+    antimalariaStratum: "AMR_GLASS_AMC_DE_ATM_STRATUM",
     excludedSubstances: "AMR_GLASS_AMC_DE_ATC_EXCL",
     listOfExcludedSubstances: "AMR_GLASS_AMC_DE_ATC_EXCL_DETAIL",
     typeOfDataReported: "AMR_GLASS_AMC_DE_DATA_LEVEL",
@@ -94,8 +97,11 @@ export function isStringInComponentAMCQuestionnaireCodes(code: string): code is 
 }
 
 export const ComponentAMCQuestionnaireByTEAIds: Record<Id, ComponentAMCQuestionId> = {
-    wyvp0njA59l: "antimicrobialClasses",
-    fLdaSEojS7f: "componentStrata",
+    T3iWvdmEWbt: "antibacterialStratum",
+    BQ7rCgQ59wm: "antifungalStratum",
+    moYkeUGjkh3: "antiviralStratum",
+    NtkirtAJeGS: "antituberculosisStratum",
+    A5rC9XbXlJE: "antimalariaStratum",
     KRE4eIuqosa: "excludedSubstances",
     EKzFXIafzZ3: "listOfExcludedSubstances",
     kWfwqRhsyyD: "typeOfDataReported",

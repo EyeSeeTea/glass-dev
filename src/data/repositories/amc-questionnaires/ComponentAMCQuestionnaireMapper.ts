@@ -1,5 +1,4 @@
 import { D2TrackerEventToPost } from "@eyeseetea/d2-api/api/trackerEvents";
-import { antimicrobialClassOption } from "../../../domain/entities/amc-questionnaires/AntimicrobialClassOption";
 import { ComponentAMCQuestionnaire } from "../../../domain/entities/amc-questionnaires/ComponentAMCQuestionnaire";
 import { dataLevelOption } from "../../../domain/entities/amc-questionnaires/DataLevelOption";
 import { nationalPopulationDataSourceOption } from "../../../domain/entities/amc-questionnaires/NationalPopulationDataSourceOption";
@@ -22,12 +21,12 @@ import { dataSourceOption } from "../../../domain/entities/amc-questionnaires/Da
 
 export function mapD2EventToComponentAMCQuestionnaire(d2Event: D2Event): ComponentAMCQuestionnaire {
     const fromMap = (key: keyof typeof codesByComponentAMCQuestionnaire) => getValueFromMap(key, d2Event);
-    const antimicrobialClasses = _.compact(
-        fromMap("antimicrobialClasses")
-            .split(",")
-            .map(antimicrobialClass => antimicrobialClassOption.getSafeValue(antimicrobialClass))
-    );
-    const componentStrata = strataOption.getSafeValue(fromMap("componentStrata"));
+    const getStratum = (key: keyof typeof codesByComponentAMCQuestionnaire) =>
+        _.compact(
+            fromMap(key)
+                .split(",")
+                .map(strata => strataOption.getSafeValue(strata))
+        );
     const excludedSubstances = yesNoUnknownOption.getSafeValue(fromMap("excludedSubstances"));
     const typeOfDataReported = dataLevelOption.getSafeValue(fromMap("typeOfDataReported"));
     const sameAsUNPopulation = yesNoOption.getSafeValue(fromMap("sameAsUNPopulation"));
@@ -40,20 +39,37 @@ export function mapD2EventToComponentAMCQuestionnaire(d2Event: D2Event): Compone
             .map(source => dataSourceOption.getSafeValue(source))
     );
     if (
-        !componentStrata ||
         !excludedSubstances ||
         !typeOfDataReported ||
         !sameAsUNPopulation ||
         !coverageVolumeWithinTheStratum ||
-        !antimicrobialClasses.length ||
         !sourcesOfDataReported.length
     ) {
         throw new Error(`Missing required fields in D2Event for ComponentAMCQuestionnaire: ${JSON.stringify(d2Event)}`);
     }
+    const antibacterialStratum = getStratum("antibacterialStratum");
+    const antifungalStratum = getStratum("antifungalStratum");
+    const antiviralStratum = getStratum("antiviralStratum");
+    const antituberculosisStratum = getStratum("antituberculosisStratum");
+    const antimalariaStratum = getStratum("antimalariaStratum");
+    if (
+        !antibacterialStratum.length &&
+        !antifungalStratum.length &&
+        !antiviralStratum.length &&
+        !antituberculosisStratum.length &&
+        !antimalariaStratum.length
+    ) {
+        throw new Error(
+            `At least one stratum must be selected in D2Event for ComponentAMCQuestionnaire: ${JSON.stringify(d2Event)}`
+        );
+    }
     const componentAMCQuestionnaire = new ComponentAMCQuestionnaire({
         id: d2Event.event,
-        antimicrobialClasses: antimicrobialClasses,
-        componentStrata: componentStrata,
+        antibacterialStratum: antibacterialStratum,
+        antifungalStratum: antifungalStratum,
+        antiviralStratum: antiviralStratum,
+        antituberculosisStratum: antituberculosisStratum,
+        antimalariaStratum: antimalariaStratum,
         excludedSubstances: excludedSubstances,
         listOfExcludedSubstances: fromMap("listOfExcludedSubstances"),
         typeOfDataReported: typeOfDataReported,
@@ -78,8 +94,11 @@ function getValuesFromComponentAMCQuestionnaire(
     componentAMCQuestionnaire: ComponentAMCQuestionnaire
 ): Record<ComponentAMCQuestionnaireCode, string> {
     const values: Record<ComponentAMCQuestionnaireCode, string> = {
-        AMR_GLASS_AMC_DE_AM_CLASSES: componentAMCQuestionnaire.antimicrobialClasses.join(","),
-        AMR_GLASS_AMC_DE_STRATA: componentAMCQuestionnaire.componentStrata,
+        AMR_GLASS_AMC_DE_ATB_STRATUM: componentAMCQuestionnaire.antibacterialStratum.join(","),
+        AMR_GLASS_AMC_DE_ATF_STRATUM: componentAMCQuestionnaire.antifungalStratum.join(","),
+        AMR_GLASS_AMC_DE_ATV_STRATUM: componentAMCQuestionnaire.antiviralStratum.join(","),
+        AMR_GLASS_AMC_DE_ATT_STRATUM: componentAMCQuestionnaire.antituberculosisStratum.join(","),
+        AMR_GLASS_AMC_DE_ATM_STRATUM: componentAMCQuestionnaire.antimalariaStratum.join(","),
         AMR_GLASS_AMC_DE_ATC_EXCL: componentAMCQuestionnaire.excludedSubstances,
         AMR_GLASS_AMC_DE_ATC_EXCL_DETAIL: componentAMCQuestionnaire.listOfExcludedSubstances ?? "",
         AMR_GLASS_AMC_DE_DATA_LEVEL: componentAMCQuestionnaire.typeOfDataReported,
