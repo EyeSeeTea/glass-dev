@@ -1,4 +1,6 @@
 import { Maybe } from "../../../../utils/ts-utils";
+import { FormFieldState } from "./FormFieldsState";
+import { FormState } from "./FormState";
 
 type FieldValue = string | boolean | string[] | Date | Maybe<string> | null;
 
@@ -26,4 +28,16 @@ type DisableOptionsByFieldValues = {
     disableCondition: (selectedValues: string[]) => string[];
 };
 
-export type FormRule = RequiredyFieldByFieldValue | RequiredFieldByCustomCondition | DisableOptionsByFieldValues;
+// flexible rule to override multiple fields based on a field value change
+export type OverrideFieldsByFieldValue = {
+    type: "overrideFieldsOnChange";
+    fieldId: string;
+    fieldValue: FieldValue;
+    overrideFieldsCallback: (formState: FormState) => (Pick<FormFieldState, "id"> & Partial<FormFieldState>)[];
+};
+
+export type FormRule =
+    | RequiredyFieldByFieldValue
+    | RequiredFieldByCustomCondition
+    | DisableOptionsByFieldValues
+    | OverrideFieldsByFieldValue;

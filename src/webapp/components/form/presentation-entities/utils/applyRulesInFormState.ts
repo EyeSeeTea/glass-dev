@@ -2,6 +2,7 @@ import { FormFieldState } from "../FormFieldsState";
 import { FormRule } from "../FormRule";
 import {
     setDisabledOptionsByFieldValues,
+    setOverrideFieldsByFieldValue,
     setRequiredFieldsByFieldsConditionInSection,
     setRequiredFieldsByFieldValueInSection,
 } from "../FormSectionsState";
@@ -40,6 +41,14 @@ export function applyRulesInFormState(
                 return {
                     ...formState,
                     sections: formState.sections.map(section => setDisabledOptionsByFieldValues(section, rule)),
+                };
+            }
+            case "overrideFieldsOnChange": {
+                return {
+                    ...formState,
+                    sections: formState.sections.map(section =>
+                        setOverrideFieldsByFieldValue(section, currentFormState, rule)
+                    ),
                 };
             }
         }

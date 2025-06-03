@@ -3,7 +3,11 @@ import { Maybe } from "../../../types/utils";
 import { Struct } from "../generic/Struct";
 import { ValidationError, ValidationErrorKey } from "./ValidationError";
 import { Either } from "../generic/Either";
-import { AntimicrobialClassOption, AntimicrobialClassValue } from "./AntimicrobialClassOption";
+import {
+    antimicrobialClassOption,
+    AntimicrobialClassOption,
+    AntimicrobialClassValue,
+} from "./AntimicrobialClassOption";
 import { Proportion50to100Value } from "./Proportion50to100Option";
 import { Id } from "../Base";
 import { getDisabledStratas, StrataValue } from "./StrataOption";
@@ -53,9 +57,6 @@ export class AMClassAMCQuestionnaire extends Struct<AMClassAMCQuestionnaireAttri
     }
 
     public getTitle({ antimicrobialClassOptions }: { antimicrobialClassOptions: AntimicrobialClassOption[] }): string {
-        const amClassName =
-            antimicrobialClassOptions.find(option => option.code === this.antimicrobialClass)?.name ||
-            this.antimicrobialClass;
-        return amClassName;
+        return antimicrobialClassOption.getNameByCode(antimicrobialClassOptions, this.antimicrobialClass);
     }
 }

@@ -176,3 +176,31 @@ export function setDisabledOptionsByFieldValues(section: FormSectionState, rule:
         fields: replaceById(section.fields, updatedField),
     };
 }
+
+export function setOverrideFieldsByFieldValue(
+    section: FormSectionState,
+    formState: FormState,
+    rule: FormRule
+): FormSectionState {
+    if (rule.type !== "overrideFieldsOnChange") return section;
+
+    const fieldValue = getFieldValueByIdFromSections(formState.sections, rule.fieldId);
+    if (fieldValue === undefined) {
+        console.warn(`setOverrideFieldsByFieldValue: Field with id ${rule.fieldId} not found in sections`);
+        return section;
+    }
+    if (fieldValue !== rule.fieldValue) {
+        return section; // No override if value is not matching to target
+    }
+    const overrideFields = rule.overrideFieldsCallback(formState);
+
+    const fieldsInSection: FormFieldState[] = section.fields.map(field => {
+        const overrideField = overrideFields.find(override => override.id === field.id);
+        return overrideField ? ({ ...field, ...overrideField } as FormFieldState) : field;
+    });
+
+    return {
+        ...section,
+        fields: fieldsInSection,
+    };
+}
