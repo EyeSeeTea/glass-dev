@@ -1,4 +1,3 @@
-import { Maybe } from "../../../types/utils";
 import { Id } from "../Base";
 import { Either } from "../Either";
 import { Struct } from "../generic/Struct";
@@ -121,26 +120,6 @@ export class AMCQuestionnaire extends Struct<AMCQuestionnaireAttrs>() {
             .filter(([, value]) => this.generalQuestionnaire[value] === YesNoValues.YES)
             .map(([key]) => key) as AntimicrobialClassValue[];
         return checkedAntimicrobials.filter(antimicrobialClass => !usedAntimicrobials.includes(antimicrobialClass));
-    }
-
-    // filters the options based on AMClass questionnaires and Component questionnaires
-    public getAvailableAMClassOptionsForComponentQ(
-        allOptions: AntimicrobialClassOption[],
-        forStrata: Maybe<StrataValue>
-    ): AntimicrobialClassOption[] {
-        return allOptions
-            .filter(option => {
-                const isOptionInAmClass = this.amClassQuestionnaires.some(
-                    amClassQuestionnaire => amClassQuestionnaire.antimicrobialClass === option.code
-                );
-                return isOptionInAmClass;
-            })
-            .filter(option => {
-                const availableStratasForAmClass = this.getAvailableStrataValuesForAMClass(option.code);
-                return forStrata
-                    ? availableStratasForAmClass.includes(forStrata)
-                    : availableStratasForAmClass.length > 0;
-            });
     }
 
     private getUsedStratasInComponentQ(forAMClass: AntimicrobialClassValue): StrataValue[] {

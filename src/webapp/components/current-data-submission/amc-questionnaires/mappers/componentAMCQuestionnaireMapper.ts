@@ -139,7 +139,7 @@ function getComponentAMCQuestionnaireBaseAttributes(
     }
 }
 
-const ComponentAMCQuestionnaireStratumFieldIds = {
+export const ComponentAMCQuestionnaireStratumFieldIds = {
     antibacterialStratum: "antibacterialStratum",
     antifungalStratum: "antifungalStratum",
     antiviralStratum: "antiviralStratum",
@@ -225,6 +225,16 @@ export function mapComponentAMCQuestionnaireToInitialFormState(
                     getStratumField("antiviralStratum", params),
                     getStratumField("antituberculosisStratum", params),
                     getStratumField("antimalariaStratum", params),
+                    {
+                        id: "select-all-amclass-stratum",
+                        isVisible: true,
+                        type: "boolean",
+                        value: false,
+                        required: false,
+                        showIsRequired: false,
+                        text: i18n.t("Use all available antimicrobial classes / stratum combinations"),
+                        errors: [],
+                    },
                 ],
             },
             {
