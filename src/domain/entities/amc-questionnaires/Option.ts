@@ -14,6 +14,11 @@ export class Option<T extends string> {
     getSafeValue(value: unknown): T | undefined {
         return Object.values(this.values).includes(value as T) ? (value as T) : undefined;
     }
+
+    getNameByCode(options: OptionType<T>[], code: T): string {
+        const option = options.find(option => option.code === code);
+        return option?.name ?? code;
+    }
 }
 
 type BooleanOptionConfig<T> = {

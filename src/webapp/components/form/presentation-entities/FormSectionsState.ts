@@ -1,9 +1,6 @@
-import { ValidationError, ValidationErrorKey } from "../../../../domain/entities/amc-questionnaires/ValidationError";
+import { ValidationError } from "../../../../domain/entities/amc-questionnaires/ValidationError";
 import { Maybe } from "../../../../types/utils";
 import { FormFieldState, isFieldInSection, updateFields, validateField } from "./FormFieldsState";
-
-import { FormRule } from "./FormRule";
-import { FormState } from "./FormState";
 
 export type FormSectionState = {
     id: string;
@@ -73,81 +70,4 @@ function validateSection(section: FormSectionState, updatedField: FormFieldState
             return [];
         }
     });
-}
-
-// RULES:
-
-export function setRequiredFieldsByFieldValueInSection(
-    section: FormSectionState,
-    fieldValue: FormFieldState["value"],
-    rule: FormRule
-): FormSectionState {
-    if (rule.type !== "requiredFieldsByFieldValue") return section;
-
-    if (rule.sectionIdsWithRequiredFields.includes(section.id)) {
-        const fieldsInSection: FormFieldState[] = section.fields.map(field => {
-            return rule.requiredFieldIds.includes(field.id)
-                ? {
-                      ...field,
-                      required: fieldValue === rule.fieldValue,
-                      errors:
-                          fieldValue !== rule.fieldValue
-                              ? field.errors.filter(error => error !== ValidationErrorKey.FIELD_IS_REQUIRED)
-                              : field.errors,
-                  }
-                : field;
-        });
-
-        return {
-            ...section,
-            fields: fieldsInSection,
-        };
-    } else {
-        return {
-            ...section,
-        };
-    }
-}
-
-export function setRequiredFieldsByFieldsConditionInSection(
-    section: FormSectionState,
-    formState: FormState,
-    rule: FormRule
-): FormSectionState {
-    if (rule.type !== "requiredFieldsByCustomCondition") return section;
-
-    const fieldValues = rule.fieldIds.reduce((acc: Record<string, FormFieldState["value"]>, fieldId) => {
-        const fieldValue = getFieldValueByIdFromSections(formState.sections, fieldId);
-        if (fieldValue === undefined) {
-            console.warn(`setRequiredFieldsByFieldsConditionInSection: Field with id ${fieldId} not found in sections`);
-            return acc;
-        }
-        return {
-            ...acc,
-            [fieldId]: fieldValue,
-        };
-    }, {});
-
-    if (rule.sectionIdsWithRequiredFields.includes(section.id)) {
-        const fieldsInSection: FormFieldState[] = section.fields.map(field => {
-            return rule.requiredFieldIds.includes(field.id)
-                ? {
-                      ...field,
-                      required: rule.condition(fieldValues),
-                      errors: !rule.condition(fieldValues)
-                          ? field.errors.filter(error => error !== ValidationErrorKey.FIELD_IS_REQUIRED)
-                          : field.errors,
-                  }
-                : field;
-        });
-
-        return {
-            ...section,
-            fields: fieldsInSection,
-        };
-    } else {
-        return {
-            ...section,
-        };
-    }
 }

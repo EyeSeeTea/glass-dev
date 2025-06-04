@@ -1,17 +1,25 @@
 import { Struct } from "../generic/Struct";
-import { AntimicrobialClassOption, AntimicrobialClassValue } from "./AntimicrobialClassOption";
+import {
+    antimicrobialClassOption,
+    AntimicrobialClassOption,
+    AntimicrobialClassValue,
+    AntimicrobialClassValues,
+} from "./AntimicrobialClassOption";
 import { Id } from "../Base";
-import { YesNoUnknownValue } from "./YesNoUnknownOption";
+import { YesNoUnknownValue, YesNoUnknownValues } from "./YesNoUnknownOption";
 import { Maybe } from "../../../utils/ts-utils";
-import { YesNoValue } from "./YesNoOption";
-import { DataLevelValue } from "./DataLevelOption";
+import { YesNoValue, YesNoValues } from "./YesNoOption";
+import { DataLevelValue, DataLevelValues } from "./DataLevelOption";
 import { ProcurementLevelValue } from "./ProcurementLevelOption";
-import { NationalPopulationDataSourceValue } from "./NationalPopulationDataSourceOption";
+import {
+    NationalPopulationDataSourceValue,
+    NationalPopulationDataSourceValues,
+} from "./NationalPopulationDataSourceOption";
 import { DataSourceValue } from "./DataSourceOption";
 import { Proportion50to100UnknownValue } from "./Proportion50to100UnknownOption";
 import { ValidationError, ValidationErrorKey } from "./ValidationError";
 import { Either } from "../generic/Either";
-import { StrataOption, StrataValue } from "./StrataOption";
+import { strataOption, StrataOption, StrataValue } from "./StrataOption";
 
 export type ComponentAMCQuestionnaireBaseAttributes = {
     id: Id;
@@ -21,8 +29,11 @@ export type ComponentAMCQuestionnaireBaseAttributes = {
 };
 
 export type ComponentAMCQuestionnaireResponsesAttributes = {
-    antimicrobialClasses: AntimicrobialClassValue[];
-    componentStrata: StrataValue;
+    antibacterialStratum: StrataValue[];
+    antifungalStratum: StrataValue[];
+    antiviralStratum: StrataValue[];
+    antituberculosisStratum: StrataValue[];
+    antimalariaStratum: StrataValue[];
     excludedSubstances: YesNoUnknownValue;
     listOfExcludedSubstances: Maybe<string>;
     typeOfDataReported: DataLevelValue;
@@ -48,7 +59,6 @@ export type ComponentAMCQuestionnaireCombination = {
     strataValues: StrataValue[];
 };
 
-// TODO: add validations
 export class ComponentAMCQuestionnaire extends Struct<ComponentAMCQuestionnaireAttributes>() {
     static validateAndCreate(
         attributes: ComponentAMCQuestionnaireAttributes
@@ -62,8 +72,16 @@ export class ComponentAMCQuestionnaire extends Struct<ComponentAMCQuestionnaireA
 
     static validate(attributes: ComponentAMCQuestionnaireAttributes): ValidationError[] {
         const requiredConditions = this.requiredFieldsCustomConditions(attributes);
-        return _.compact(
-            _.map(requiredConditions, (isRequired, key) => {
+        const haveAtLeastOneStrata =
+            [
+                ...attributes.antibacterialStratum,
+                ...attributes.antifungalStratum,
+                ...attributes.antimalariaStratum,
+                ...attributes.antituberculosisStratum,
+                ...attributes.antiviralStratum,
+            ].length > 0;
+        return _.compact([
+            ..._.map(requiredConditions, (isRequired, key) => {
                 if (isRequired && !attributes[key as keyof ComponentAMCQuestionnaireResponsesAttributes]) {
                     return {
                         property: key,
@@ -72,14 +90,61 @@ export class ComponentAMCQuestionnaire extends Struct<ComponentAMCQuestionnaireA
                     };
                 }
                 return null;
-            })
-        );
+            }),
+            haveAtLeastOneStrata
+                ? null
+                : {
+                      property: "stratum",
+                      value: null,
+                      errors: [ValidationErrorKey.COMPONENT_MUST_HAVE_AT_LEAST_ONE_STRATA],
+                  },
+        ]);
     }
 
     static requiredFieldsCustomConditions(
-        _attributes: Partial<ComponentAMCQuestionnaireAttributes>
+        attributes: Partial<ComponentAMCQuestionnaireAttributes>
     ): Partial<Record<keyof ComponentAMCQuestionnaireAttributes, boolean>> {
-        return {};
+        return {
+            excludedSubstances: true,
+            typeOfDataReported: true,
+            sourcesOfDataReported: true,
+            coverageVolumeWithinTheStratum: true,
+            listOfExcludedSubstances: attributes.excludedSubstances === YesNoUnknownValues.YES,
+            procurementTypeOfDataReported: attributes.typeOfDataReported === DataLevelValues.Procurement,
+            mixedTypeOfData: attributes.typeOfDataReported === DataLevelValues.Mixed,
+            sourceOfNationalPopulation: attributes.sameAsUNPopulation === YesNoValues.NO,
+            otherSourceForNationalPopulation:
+                attributes.sourceOfNationalPopulation === NationalPopulationDataSourceValues.Other,
+        };
+    }
+
+    static getAntimicrobialClassByStratumProperty(
+        property: keyof ComponentAMCQuestionnaireResponsesAttributes
+    ): AntimicrobialClassValue {
+        switch (property) {
+            case "antibacterialStratum":
+                return AntimicrobialClassValues.Antibacterials;
+            case "antifungalStratum":
+                return AntimicrobialClassValues.Antifungals;
+            case "antiviralStratum":
+                return AntimicrobialClassValues.Antivirals;
+            case "antituberculosisStratum":
+                return AntimicrobialClassValues.Antituberculosis;
+            case "antimalariaStratum":
+                return AntimicrobialClassValues.Antimalaria;
+            default:
+                throw new Error(`Property "${property}" does not map to an antimicrobial class.`);
+        }
+    }
+
+    public get stratumByAntimicrobialClass(): Record<AntimicrobialClassValue, StrataValue[]> {
+        return {
+            [AntimicrobialClassValues.Antibacterials]: this.antibacterialStratum,
+            [AntimicrobialClassValues.Antifungals]: this.antifungalStratum,
+            [AntimicrobialClassValues.Antivirals]: this.antiviralStratum,
+            [AntimicrobialClassValues.Antituberculosis]: this.antituberculosisStratum,
+            [AntimicrobialClassValues.Antimalaria]: this.antimalariaStratum,
+        };
     }
 
     public getTitle({
@@ -89,14 +154,19 @@ export class ComponentAMCQuestionnaire extends Struct<ComponentAMCQuestionnaireA
         antimicrobialClassOptions: AntimicrobialClassOption[];
         strataOptions: StrataOption[];
     }): string {
-        const amClasses = this.antimicrobialClasses.map(amClass => {
-            const amClassName = antimicrobialClassOptions.find(option => option.code === amClass)?.name || amClass;
-            return amClassName;
-        });
-
-        const componentStrata =
-            strataOptions.find(option => option.code === this.componentStrata)?.name || this.componentStrata;
-
-        return `${amClasses.join(", ")} - ${componentStrata}`;
+        return Object.entries(this.stratumByAntimicrobialClass)
+            .map(([amClass, stratas]) => {
+                if (stratas.length === 0) {
+                    return "";
+                }
+                const amClassName = antimicrobialClassOption.getNameByCode(
+                    antimicrobialClassOptions,
+                    amClass as AntimicrobialClassValue
+                );
+                const stratasNames = stratas.map(strata => strataOption.getNameByCode(strataOptions, strata));
+                return `${amClassName} (${stratasNames.join(", ")})`;
+            })
+            .filter(Boolean)
+            .join(" / ");
     }
 }

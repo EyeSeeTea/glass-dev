@@ -1,18 +1,16 @@
-import { FormFieldState } from "../FormFieldsState";
+import { FormFieldState, getAllFieldsFromSections } from "../FormFieldsState";
 import { FormRule } from "../FormRule";
-import {
-    setRequiredFieldsByFieldsConditionInSection,
-    setRequiredFieldsByFieldValueInSection,
-} from "../FormSectionsState";
+import { FormRuleExecEvent, FormRulesImplementation } from "../FormRulesImplementation";
 import { FormState } from "../FormState";
 
 export function applyRulesInFormState(
     currentFormState: FormState,
-    updatedField: FormFieldState,
-    formRules: FormRule[]
+    triggerField: FormFieldState,
+    formRules: FormRule[],
+    event: FormRuleExecEvent
 ): FormState {
     const filteredRulesByFieldId = formRules.filter(rule =>
-        "fieldIds" in rule ? rule.fieldIds.includes(updatedField.id) : rule.fieldId === updatedField.id
+        "fieldIds" in rule ? rule.fieldIds.includes(triggerField.id) : rule.fieldId === triggerField.id
     );
 
     if (filteredRulesByFieldId.length === 0) {
@@ -20,23 +18,24 @@ export function applyRulesInFormState(
     }
 
     const formStateWithRulesApplied = filteredRulesByFieldId.reduce((formState, rule) => {
-        switch (rule.type) {
-            case "requiredFieldsByFieldValue":
-                return {
-                    ...formState,
-                    sections: formState.sections.map(section =>
-                        setRequiredFieldsByFieldValueInSection(section, updatedField.value, rule)
-                    ),
-                };
-            case "requiredFieldsByCustomCondition":
-                return {
-                    ...formState,
-                    sections: formState.sections.map(section =>
-                        setRequiredFieldsByFieldsConditionInSection(section, currentFormState, rule)
-                    ),
-                };
-        }
+        return {
+            ...formState,
+            sections: formState.sections.map(section =>
+                FormRulesImplementation[rule.type]({ section, triggerField, rule, formState, event })
+            ),
+        };
     }, currentFormState);
 
     return formStateWithRulesApplied;
+}
+
+/**
+ * @todo This is a workaround to apply rules after the initial form state is created
+ * It does not take into account dependencies between fields
+ */
+export function applyRulesToAllFieldsInFormState(currentFormState: FormState, formRules: FormRule[]): FormState {
+    const allFields = getAllFieldsFromSections(currentFormState.sections);
+    return allFields.reduce((formState, field) => {
+        return applyRulesInFormState(formState, field, formRules, "load");
+    }, currentFormState);
 }
