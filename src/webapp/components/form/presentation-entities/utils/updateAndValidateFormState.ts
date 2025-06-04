@@ -24,7 +24,7 @@ export function updateAndValidateFormState(
         ).length > 0;
 
     const updatedFormWithRulesApplied = hasUpdatedFieldAnyRule
-        ? applyRulesInFormState(updatedForm, updatedField, questionnaireFormEntity.rules)
+        ? applyRulesInFormState(updatedForm, updatedField, questionnaireFormEntity.rules, "change")
         : updatedForm;
 
     const fieldValidationErrors = validateFormState(updatedFormWithRulesApplied, updatedField);

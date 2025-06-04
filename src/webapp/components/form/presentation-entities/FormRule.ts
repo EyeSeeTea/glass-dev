@@ -34,6 +34,7 @@ export type OverrideFieldsByFieldValue = {
     fieldId: string;
     fieldValue: FieldValue;
     overrideFieldsCallback: (formState: FormState) => (Pick<FormFieldState, "id"> & Partial<FormFieldState>)[];
+    triggerOnLoad: boolean;
 };
 
 export type FormRule =
