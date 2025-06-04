@@ -104,6 +104,7 @@ function getComponentAMCQuestionnaireFormLabelsRules(): { rules: FormRule[]; lab
                     value: field.options.map(option => option.value),
                     disabled: true,
                 })),
+                triggerOnLoad: false,
             },
             {
                 type: "overrideFieldsOnChange",
@@ -114,6 +115,7 @@ function getComponentAMCQuestionnaireFormLabelsRules(): { rules: FormRule[]; lab
                     value: [],
                     disabled: false,
                 })),
+                triggerOnLoad: false,
             },
         ],
     };
