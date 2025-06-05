@@ -1,28 +1,20 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useAppContext } from "../../../contexts/app-context";
-import { Id } from "../../../../domain/entities/Ref";
-import { FormFieldState } from "../../form/presentation-entities/FormFieldsState";
-import { Maybe } from "../../../../utils/ts-utils";
+import { useAppContext } from "../../../../contexts/app-context";
+import { Id } from "../../../../../domain/entities/Ref";
+import { FormFieldState } from "../../../form/presentation-entities/FormFieldsState";
+import { Maybe } from "../../../../../utils/ts-utils";
 import {
     FormLables,
     getQuestionnaireFormEntity,
     QuestionnaireFormEntityMap,
-} from "./presentation-entities/QuestionnaireFormEntity";
-import { FormState } from "../../form/presentation-entities/FormState";
-import { AMCQuestionnaireFormType } from "./presentation-entities/AMCQuestionnaireFormType";
-import { ModalData } from "../../form/Form";
-import { useAMCQuestionnaireOptionsContext } from "../../../contexts/amc-questionnaire-options-context";
-import { updateAndValidateFormState } from "../../form/presentation-entities/utils/updateAndValidateFormState";
-import { GeneralAMCQuestionnaire } from "../../../../domain/entities/amc-questionnaires/GeneralAMCQuestionnaire";
-import { amcQuestionnaireMappers } from "./mappers";
-import { useAMCQuestionnaireContext } from "../../../contexts/amc-questionnaire-context";
-import { AMClassAMCQuestionnaire } from "../../../../domain/entities/amc-questionnaires/AMClassAMCQuestionnaire";
-import { ComponentAMCQuestionnaire } from "../../../../domain/entities/amc-questionnaires/ComponentAMCQuestionnaire";
-
-export type GlobalMessage = {
-    text: string;
-    type: "warning" | "success" | "error";
-};
+} from "../presentation-entities/QuestionnaireFormEntity";
+import { FormState } from "../../../form/presentation-entities/FormState";
+import { AMCQuestionnaireFormType } from "../presentation-entities/AMCQuestionnaireFormType";
+import { ModalData } from "../../../form/Form";
+import { useAMCQuestionnaireOptionsContext } from "../../../../contexts/amc-questionnaire-options-context";
+import { updateAndValidateFormState } from "../../../form/presentation-entities/utils/updateAndValidateFormState";
+import { amcQuestionnaireMappers } from "../mappers";
+import { useAMCQuestionnaireContext } from "../../../../contexts/amc-questionnaire-context";
 
 export type FormStateLoaded = {
     kind: "loaded";
@@ -40,13 +32,10 @@ export type FormStateError = {
 
 export type FormLoadState = FormStateLoaded | FormStateLoading | FormStateError;
 
-type State = {
+type State<T extends AMCQuestionnaireFormType> = {
     formLabels: Maybe<FormLables>;
-    globalMessage: Maybe<GlobalMessage>;
     formState: FormLoadState;
-    isLoading: boolean;
     handleFormChange: (updatedField: FormFieldState) => void;
-    onClickSave: () => void;
     onCancelForm: () => void;
     onCopyForm: () => void;
     onAddToForm: () => void;
@@ -54,6 +43,7 @@ type State = {
     openModal: boolean;
     modalData?: ModalData;
     setOpenModal: (open: boolean) => void;
+    questionnaireFormEntity: Maybe<QuestionnaireFormEntityMap[T]>;
 };
 
 export function useAMCQuestionnaireForm<T extends AMCQuestionnaireFormType>(params: {
@@ -62,18 +52,15 @@ export function useAMCQuestionnaireForm<T extends AMCQuestionnaireFormType>(para
     orgUnitId: Id;
     period: string;
     isViewOnlyMode?: boolean;
-    onSave?: () => void;
     onCancel?: () => void;
-}): State {
-    const { formType, id, orgUnitId, period, isViewOnlyMode = false, onSave, onCancel } = params;
+}): State<T> {
+    const { formType, id, orgUnitId, period, isViewOnlyMode = false, onCancel } = params;
 
     const { compositionRoot } = useAppContext();
-    const { questionnaire, questions, fetchQuestionnaire } = useAMCQuestionnaireContext();
+    const { questionnaire, questions } = useAMCQuestionnaireContext();
     const options = useAMCQuestionnaireOptionsContext();
-    const [globalMessage, setGlobalMessage] = useState<Maybe<GlobalMessage>>();
     const [formState, setFormState] = useState<FormLoadState>({ kind: "loading" });
     const [formLabels, setFormLabels] = useState<FormLables>();
-    const [isLoading, setIsLoading] = useState(false);
     const [questionnaireFormEntity, setQuestionnaireFormEntity] = useState<QuestionnaireFormEntityMap[T]>();
     const [openModal, setOpenModal] = useState(false);
 
@@ -214,122 +201,6 @@ export function useAMCQuestionnaireForm<T extends AMCQuestionnaireFormType>(para
         [questionnaireFormEntity]
     );
 
-    const onClickSave = useCallback(() => {
-        if (formState.kind !== "loaded" || !questionnaireFormEntity || !formState.data.isValid || !options) return;
-
-        const handleError = (error: unknown) => {
-            console.error(error);
-            setGlobalMessage({
-                type: "error",
-                text: `Error saving ${formType} AMC Questionnaire: ${error}`,
-            });
-            setIsLoading(false);
-        };
-
-        try {
-            setIsLoading(true);
-            const entity = amcQuestionnaireMappers[formType].mapFormStateToEntity({
-                formState: formState.data,
-                formEntity: questionnaireFormEntity,
-                orgUnitId,
-                period,
-                editMode: isEditMode,
-                options: options,
-            });
-
-            if (!entity) {
-                throw new Error("Form entity is undefined");
-            }
-
-            switch (formType) {
-                case "general-questionnaire":
-                    compositionRoot.amcQuestionnaires.saveGeneral(entity as GeneralAMCQuestionnaire).run(
-                        _generalQuestionnaireId => {
-                            onSave && onSave();
-                            setIsLoading(false);
-                            fetchQuestionnaire();
-                        },
-                        error => {
-                            handleError(error);
-                        }
-                    );
-                    break;
-
-                case "am-class-questionnaire":
-                    {
-                        const amClassQuestionnaire = entity as AMClassAMCQuestionnaire;
-                        if (!questionnaire) {
-                            throw new Error("AM Class needs to be added to questionnaire");
-                        }
-                        const validationErrors = questionnaire
-                            .addOrUpdateAMClassQuestionnaire(amClassQuestionnaire)
-                            .match({
-                                error: errors => errors,
-                                success: () => [],
-                            });
-                        if (validationErrors.length > 0) {
-                            throw new Error(`Validation errors: ${validationErrors.join(", ")}`);
-                        }
-                        compositionRoot.amcQuestionnaires.saveAmClass(questionnaire.id, amClassQuestionnaire).run(
-                            _amClassQuestionnaireId => {
-                                onSave && onSave();
-                                setIsLoading(false);
-                                fetchQuestionnaire();
-                            },
-                            error => {
-                                handleError(error);
-                            }
-                        );
-                    }
-                    break;
-
-                case "component-questionnaire":
-                    {
-                        const componentQuestionnaire = entity as ComponentAMCQuestionnaire;
-                        if (!questionnaire) {
-                            throw new Error("Component needs to be added to questionnaire");
-                        }
-                        const validationErrors = questionnaire
-                            .addOrUpdateComponentQuestionnaire(componentQuestionnaire)
-                            .match({
-                                error: errors => errors,
-                                success: () => [],
-                            });
-                        if (validationErrors.length > 0) {
-                            throw new Error(`Validation errors: ${validationErrors.join(", ")}`);
-                        }
-                        compositionRoot.amcQuestionnaires.saveComponent(questionnaire.id, componentQuestionnaire).run(
-                            _componentQuestionnaireId => {
-                                onSave && onSave();
-                                setIsLoading(false);
-                                fetchQuestionnaire();
-                            },
-                            error => {
-                                handleError(error);
-                            }
-                        );
-                    }
-                    break;
-                default:
-                    throw new Error(`Unsupported form type: ${formType}`);
-            }
-        } catch (error) {
-            handleError(error);
-        }
-    }, [
-        compositionRoot.amcQuestionnaires,
-        formState,
-        formType,
-        isEditMode,
-        onSave,
-        options,
-        orgUnitId,
-        period,
-        questionnaireFormEntity,
-        questionnaire,
-        fetchQuestionnaire,
-    ]);
-
     const onCancelForm = useCallback(() => {
         if (onCancel) {
             onCancel();
@@ -344,16 +215,14 @@ export function useAMCQuestionnaireForm<T extends AMCQuestionnaireFormType>(para
 
     return {
         formLabels,
-        globalMessage,
         formState,
-        isLoading,
         handleFormChange,
-        onClickSave,
         onCancelForm,
         onCopyForm,
         onAddToForm,
         onResetForm,
         openModal,
         setOpenModal,
+        questionnaireFormEntity,
     };
 }

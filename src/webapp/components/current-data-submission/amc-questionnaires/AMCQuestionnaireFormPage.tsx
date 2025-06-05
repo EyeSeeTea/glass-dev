@@ -4,9 +4,11 @@ import styled from "styled-components";
 import { CircularProgress } from "@material-ui/core";
 
 import { Id } from "../../../../domain/entities/Base";
-import { useAMCQuestionnaireForm } from "./useAMCQuestionnaireForm";
+import { useAMCQuestionnaireForm } from "./hooks/useAMCQuestionnaireForm";
 import { Form } from "../../form/Form";
 import { AMCQuestionnaireFormType } from "./presentation-entities/AMCQuestionnaireFormType";
+import { useAMCQuestionnaireContext } from "../../../contexts/amc-questionnaire-context";
+import { useSaveAMCQuestionnaireForm } from "./hooks/useSaveAMCQuestionnaireForm";
 
 type AMCQuestionnaireFormPageProps = {
     formType: AMCQuestionnaireFormType;
@@ -21,18 +23,21 @@ type AMCQuestionnaireFormPageProps = {
 
 export const AMCQuestionnaireFormPage: React.FC<AMCQuestionnaireFormPageProps> = React.memo(props => {
     const { formType, id, orgUnitId, period, onSave, onCancel, isViewOnlyMode = false, showFormButtons = true } = props;
+    const { globalMessage } = useAMCQuestionnaireContext();
 
     const snackbar = useSnackbar();
-    const { formLabels, globalMessage, formState, isLoading, handleFormChange, onClickSave, onCancelForm } =
-        useAMCQuestionnaireForm({
-            formType: formType,
-            id: id,
-            orgUnitId: orgUnitId,
-            period: period,
-            isViewOnlyMode: isViewOnlyMode,
-            onSave: onSave,
-            onCancel: onCancel,
-        });
+    const { formLabels, formState, handleFormChange, onCancelForm, questionnaireFormEntity } = useAMCQuestionnaireForm({
+        formType: formType,
+        id: id,
+        orgUnitId: orgUnitId,
+        period: period,
+        isViewOnlyMode: isViewOnlyMode,
+        onCancel: onCancel,
+    });
+
+    const { save, isLoading: isSaveLoading } = useSaveAMCQuestionnaireForm({
+        formType: formType,
+    });
 
     useEffect(() => {
         if (!globalMessage) return;
@@ -40,7 +45,7 @@ export const AMCQuestionnaireFormPage: React.FC<AMCQuestionnaireFormPageProps> =
         snackbar[globalMessage.type](globalMessage.text);
     }, [globalMessage, snackbar]);
 
-    return formState.kind === "loading" || isLoading ? (
+    return formState.kind === "loading" || isSaveLoading ? (
         <LoaderContainer>
             <CircularProgress />
         </LoaderContainer>
@@ -48,7 +53,17 @@ export const AMCQuestionnaireFormPage: React.FC<AMCQuestionnaireFormPageProps> =
         <Form
             formState={formState.data}
             onFormChange={handleFormChange}
-            onSave={onClickSave}
+            onSave={() =>
+                questionnaireFormEntity &&
+                save({
+                    orgUnitId,
+                    period,
+                    id: id,
+                    questionnaireFormEntity: questionnaireFormEntity,
+                    formState: formState,
+                    onSave: onSave,
+                })
+            }
             onCancel={onCancelForm}
             errorLabels={formLabels?.errors}
             isViewOnlyMode={isViewOnlyMode}

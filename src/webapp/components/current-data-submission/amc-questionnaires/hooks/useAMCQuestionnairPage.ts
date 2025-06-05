@@ -1,12 +1,12 @@
 import { useCallback, useMemo, useState } from "react";
 
-import { AMCQuestionnaire } from "../../../../domain/entities/amc-questionnaires/AMCQuestionnaire";
-import { useAMCQuestionnaireOptionsContext } from "../../../contexts/amc-questionnaire-options-context";
-import { QuestionnairesTableRow } from "../../questionnaires-table/QuestionnairesTable";
-import { AMClassAMCQuestionnaire } from "../../../../domain/entities/amc-questionnaires/AMClassAMCQuestionnaire";
-import { Id } from "../../../../domain/entities/Ref";
-import { AMCQuestionnaireFormType } from "./presentation-entities/AMCQuestionnaireFormType";
-import i18n from "../../../../locales";
+import { AMCQuestionnaire } from "../../../../../domain/entities/amc-questionnaires/AMCQuestionnaire";
+import { useAMCQuestionnaireOptionsContext } from "../../../../contexts/amc-questionnaire-options-context";
+import { QuestionnairesTableRow } from "../../../questionnaires-table/QuestionnairesTable";
+import { AMClassAMCQuestionnaire } from "../../../../../domain/entities/amc-questionnaires/AMClassAMCQuestionnaire";
+import { Id } from "../../../../../domain/entities/Ref";
+import { AMCQuestionnaireFormType } from "../presentation-entities/AMCQuestionnaireFormType";
+import i18n from "../../../../../locales";
 
 type AMCQuestionnairPageState = {
     questionnaireRows: QuestionnairesTableRow[];

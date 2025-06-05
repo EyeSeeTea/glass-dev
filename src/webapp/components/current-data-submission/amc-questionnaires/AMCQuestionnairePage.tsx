@@ -8,7 +8,7 @@ import { Id } from "../../../../domain/entities/Ref";
 import i18n from "../../../../locales";
 import { Icon, IconButton, Typography } from "@material-ui/core";
 import { QuestionnairesTable } from "../../questionnaires-table/QuestionnairesTable";
-import { useAMCQuestionnairPage } from "./useAMCQuestionnairPage";
+import { useAMCQuestionnairPage } from "./hooks/useAMCQuestionnairPage";
 import { AMCQuestionnaireFormType } from "./presentation-entities/AMCQuestionnaireFormType";
 import { AMCQuestionnaire } from "../../../../domain/entities/amc-questionnaires/AMCQuestionnaire";
 import { MissingComponentQuestionnaires } from "./MissingComponentQuestionnaires";

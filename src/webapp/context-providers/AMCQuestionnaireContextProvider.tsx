@@ -1,6 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
 import { useAppContext } from "../contexts/app-context";
-import { AMCQuestionnaireContext, defaultAMCQuestionnaireContextState } from "../contexts/amc-questionnaire-context";
+import {
+    AMCQuestionnaireContext,
+    defaultAMCQuestionnaireContextState,
+    GlobalMessage,
+} from "../contexts/amc-questionnaire-context";
 import { AMCQuestionnaire } from "../../domain/entities/amc-questionnaires/AMCQuestionnaire";
 import { useCurrentPeriodContext } from "../contexts/current-period-context";
 import { useCurrentOrgUnitContext } from "../contexts/current-orgUnit-context";
@@ -20,6 +24,7 @@ export const AMCQuestionnaireContextProvider: React.FC = ({ children }) => {
     const [amcQuestions, setAMCQuestions] = useState<Maybe<AMCQuestionnaireQuestions>>(
         defaultAMCQuestionnaireContextState.questions
     );
+    const [globalMessage, setGlobalMessage] = useState<Maybe<GlobalMessage>>();
 
     const fetchQuestionnaire = useCallback(() => {
         setAMCQuestionnaireIsLoading(true);
@@ -62,6 +67,8 @@ export const AMCQuestionnaireContextProvider: React.FC = ({ children }) => {
                 questionnaireError: amcQuestionnaireError,
                 questionnaire: amcQuestionnaire,
                 questions: amcQuestions,
+                globalMessage: globalMessage,
+                setGlobalMessage: setGlobalMessage,
             }}
         >
             {children}
