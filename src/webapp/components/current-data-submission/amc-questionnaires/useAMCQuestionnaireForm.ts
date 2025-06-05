@@ -80,104 +80,105 @@ export function useAMCQuestionnaireForm<T extends AMCQuestionnaireFormType>(para
     const isEditMode = useMemo(() => !!id, [id]);
 
     useEffect(() => {
-        if (questions && options) {
-            if (id && questionnaire) {
-                switch (formType) {
-                    case "general-questionnaire":
-                        {
-                            const formEntity = getQuestionnaireFormEntity(
-                                formType,
-                                questions,
-                                questionnaire?.generalQuestionnaire
-                            );
-                            setQuestionnaireFormEntity(formEntity);
-                            setFormLabels(formEntity.labels);
-                            setFormState({
-                                kind: "loaded",
-                                data: amcQuestionnaireMappers[formType].mapEntityToFormState({
-                                    questionnaireFormEntity: formEntity,
-                                    editMode: isEditMode,
-                                    options: options,
-                                    amcQuestionnaire: questionnaire,
-                                    isViewOnlyMode: isViewOnlyMode,
-                                }),
-                            });
-                        }
-                        break;
-
-                    case "am-class-questionnaire":
-                        {
-                            const amClassQuestionnaire = questionnaire?.amClassQuestionnaires.find(q => q.id === id);
-                            if (!amClassQuestionnaire) {
-                                setFormState({
-                                    kind: "error",
-                                    message: `AM Class Questionnaire with id ${id} not found`,
-                                });
-                                return;
-                            }
-
-                            const formEntity = getQuestionnaireFormEntity(formType, questions, amClassQuestionnaire);
-                            setQuestionnaireFormEntity(formEntity);
-                            setFormLabels(formEntity.labels);
-                            setFormState({
-                                kind: "loaded",
-                                data: amcQuestionnaireMappers[formType].mapEntityToFormState({
-                                    questionnaireFormEntity: formEntity,
-                                    editMode: isEditMode,
-                                    options: options,
-                                    amcQuestionnaire: questionnaire,
-                                    isViewOnlyMode: isViewOnlyMode,
-                                }),
-                            });
-                        }
-                        break;
-
-                    case "component-questionnaire":
-                        {
-                            const componentQuestionnaire = questionnaire.componentQuestionnaires.find(
-                                componentQuestionnaire => componentQuestionnaire.id === id
-                            );
-                            if (!componentQuestionnaire) {
-                                setFormState({
-                                    kind: "error",
-                                    message: `Component Questionnaire with id ${id} not found`,
-                                });
-                                return;
-                            }
-
-                            const formEntity = getQuestionnaireFormEntity(formType, questions, componentQuestionnaire);
-                            setQuestionnaireFormEntity(formEntity);
-                            setFormLabels(formEntity.labels);
-                            setFormState({
-                                kind: "loaded",
-                                data: amcQuestionnaireMappers[formType].mapEntityToFormState({
-                                    questionnaireFormEntity: formEntity,
-                                    editMode: isEditMode,
-                                    options: options,
-                                    amcQuestionnaire: questionnaire,
-                                    isViewOnlyMode: isViewOnlyMode,
-                                }),
-                            });
-                        }
-                        break;
-                    default:
-                        break;
+        if (!questions || !options) {
+            return;
+        }
+        if (!id || !questionnaire) {
+            const formEntity = getQuestionnaireFormEntity(formType, questions);
+            setQuestionnaireFormEntity(formEntity);
+            setFormLabels(formEntity.labels);
+            setFormState({
+                kind: "loaded",
+                data: amcQuestionnaireMappers[formType].mapEntityToFormState({
+                    questionnaireFormEntity: formEntity,
+                    editMode: isEditMode,
+                    options: options,
+                    amcQuestionnaire: questionnaire,
+                    isViewOnlyMode: isViewOnlyMode,
+                }),
+            });
+            return;
+        }
+        switch (formType) {
+            case "general-questionnaire":
+                {
+                    const formEntity = getQuestionnaireFormEntity(
+                        formType,
+                        questions,
+                        questionnaire?.generalQuestionnaire
+                    );
+                    setQuestionnaireFormEntity(formEntity);
+                    setFormLabels(formEntity.labels);
+                    setFormState({
+                        kind: "loaded",
+                        data: amcQuestionnaireMappers[formType].mapEntityToFormState({
+                            questionnaireFormEntity: formEntity,
+                            editMode: isEditMode,
+                            options: options,
+                            amcQuestionnaire: questionnaire,
+                            isViewOnlyMode: isViewOnlyMode,
+                        }),
+                    });
                 }
-            } else {
-                const formEntity = getQuestionnaireFormEntity(formType, questions);
-                setQuestionnaireFormEntity(formEntity);
-                setFormLabels(formEntity.labels);
-                setFormState({
-                    kind: "loaded",
-                    data: amcQuestionnaireMappers[formType].mapEntityToFormState({
-                        questionnaireFormEntity: formEntity,
-                        editMode: isEditMode,
-                        options: options,
-                        amcQuestionnaire: questionnaire,
-                        isViewOnlyMode: isViewOnlyMode,
-                    }),
-                });
-            }
+                break;
+
+            case "am-class-questionnaire":
+                {
+                    const amClassQuestionnaire = questionnaire?.amClassQuestionnaires.find(q => q.id === id);
+                    if (!amClassQuestionnaire) {
+                        setFormState({
+                            kind: "error",
+                            message: `AM Class Questionnaire with id ${id} not found`,
+                        });
+                        return;
+                    }
+
+                    const formEntity = getQuestionnaireFormEntity(formType, questions, amClassQuestionnaire);
+                    setQuestionnaireFormEntity(formEntity);
+                    setFormLabels(formEntity.labels);
+                    setFormState({
+                        kind: "loaded",
+                        data: amcQuestionnaireMappers[formType].mapEntityToFormState({
+                            questionnaireFormEntity: formEntity,
+                            editMode: isEditMode,
+                            options: options,
+                            amcQuestionnaire: questionnaire,
+                            isViewOnlyMode: isViewOnlyMode,
+                        }),
+                    });
+                }
+                break;
+
+            case "component-questionnaire":
+                {
+                    const componentQuestionnaire = questionnaire.componentQuestionnaires.find(
+                        componentQuestionnaire => componentQuestionnaire.id === id
+                    );
+                    if (!componentQuestionnaire) {
+                        setFormState({
+                            kind: "error",
+                            message: `Component Questionnaire with id ${id} not found`,
+                        });
+                        return;
+                    }
+
+                    const formEntity = getQuestionnaireFormEntity(formType, questions, componentQuestionnaire);
+                    setQuestionnaireFormEntity(formEntity);
+                    setFormLabels(formEntity.labels);
+                    setFormState({
+                        kind: "loaded",
+                        data: amcQuestionnaireMappers[formType].mapEntityToFormState({
+                            questionnaireFormEntity: formEntity,
+                            editMode: isEditMode,
+                            options: options,
+                            amcQuestionnaire: questionnaire,
+                            isViewOnlyMode: isViewOnlyMode,
+                        }),
+                    });
+                }
+                break;
+            default:
+                break;
         }
     }, [
         questions,
