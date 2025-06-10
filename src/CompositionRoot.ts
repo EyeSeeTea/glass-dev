@@ -106,6 +106,36 @@ import { GlassAsyncUploadsDefaultRepository } from "./data/repositories/GlassAsy
 import { SetAsyncUploadsUseCase } from "./domain/usecases/SetAsyncUploadsUseCase";
 import { RemoveAsyncUploadByIdUseCase } from "./domain/usecases/RemoveAsyncUploadByIdUseCase";
 import { RemoveAsyncUploadsUseCase } from "./domain/usecases/RemoveAsyncUploadsUseCase";
+import { AMCQuestionnaireD2Repository } from "./data/repositories/amc-questionnaires/AMCQuestionnaireD2Repository";
+import { YesNoOptionsD2Repository } from "./data/repositories/amc-questionnaires/YesNoOptionsD2Repository";
+import { GetYesNoOptionsUseCase } from "./domain/usecases/amc-questionnaires/GetYesNoOptionsUseCase";
+import { YesNoUnknownOptionsD2Repository } from "./data/repositories/amc-questionnaires/YesNoUnknownOptionsD2Repository";
+import { YesNoUnknownNAOptionsD2Repository } from "./data/repositories/amc-questionnaires/YesNoUnknownNAOptionsD2Repository";
+import { GetYesNoUnknownOptionsUseCase } from "./domain/usecases/amc-questionnaires/GetYesNoUnknownOptionsUseCase";
+import { GetYesNoUnknownNAOptionsUseCase } from "./domain/usecases/amc-questionnaires/GetYesNoUnknownNAOptionsUseCase";
+import { AntimicrobialClassOptionsD2Repository } from "./data/repositories/amc-questionnaires/AntimicrobialClassOptionsD2Repository";
+import { GetAntimicrobialClassOptionsUseCase } from "./domain/usecases/amc-questionnaires/GetAntimicrobialClassOptionsUseCase";
+import { QuestionsAMCQuestionnaireD2Repository } from "./data/repositories/amc-questionnaires/QuestionsAMCQuestionnaireD2Repository";
+import { GetQuestionsAMCQuestionnaireUseCase } from "./domain/usecases/amc-questionnaires/GetQuestionsAMCQuestionnaireUseCase";
+import { SaveGeneralAMCQuestionnaireUseCase } from "./domain/usecases/amc-questionnaires/SaveGeneralAMCQuestionnaireUseCase";
+import { Proportion50to100OptionsD2Repository } from "./data/repositories/amc-questionnaires/Proportion50to100OptionsD2Repository";
+import { GetProportion50to100OptionsUseCase } from "./domain/usecases/amc-questionnaires/GetProportion50to100OptionsUseCase";
+import { GetAMCQuestionnaireByOrgUnitAndPeriodUseCase } from "./domain/usecases/amc-questionnaires/GetAMCQuestionnaireByOrgUnitAndPeriodUseCase";
+import { GetAMCQuestionnaireByIdUseCase } from "./domain/usecases/amc-questionnaires/GetAMCQuestionnaireByIdUseCase";
+import { SaveAMClassAMCQuestionnaireUseCase } from "./domain/usecases/amc-questionnaires/SaveAMClassAMCQuestionnaireUseCase";
+import { Proportion50to100UnknownOptionsD2Repository } from "./data/repositories/amc-questionnaires/Proportion50to100UnknownOptionsD2Repository";
+import { DataLevelOptionsD2Repository } from "./data/repositories/amc-questionnaires/DataLevelOptionsD2Repository";
+import { DataSourceOptionsD2Repository } from "./data/repositories/amc-questionnaires/DataSourceOptionsD2Repository";
+import { NationalPopulationDataSourceOptionsD2Repository } from "./data/repositories/amc-questionnaires/NationalPopulationDataSourceOptionsD2Repository";
+import { ProcurementLevelOptionsD2Repository } from "./data/repositories/amc-questionnaires/ProcurementLevelOptionsD2Repository";
+import { StrataOptionsD2Repository } from "./data/repositories/amc-questionnaires/StrataOptionsD2Repository";
+import { GetProportion50to100UnknownOptionsUseCase } from "./domain/usecases/amc-questionnaires/GetProportion50to100UnknownOptionsUseCase";
+import { GetDataLevelOptionsUseCase } from "./domain/usecases/amc-questionnaires/GetDataLevelOptionsUseCase";
+import { GetDataSourceOptionsUseCase } from "./domain/usecases/amc-questionnaires/GetDataSourceOptionsUseCase";
+import { GetNationalPopulationDataSourceOptionsUseCase } from "./domain/usecases/amc-questionnaires/GetNationalPopulationDataSourceOptionsUseCase";
+import { GetProcurementLevelOptionsUseCase } from "./domain/usecases/amc-questionnaires/GetProcurementLevelOptionsUseCase";
+import { GetStrataOptionsUseCase } from "./domain/usecases/amc-questionnaires/GetStrataOptionsUseCase";
+import { SaveComponentAMCQuestionnaireUseCase } from "./domain/usecases/amc-questionnaires/SaveComponentAMCQuestionnaireUseCase";
 
 export function getCompositionRoot(instance: Instance) {
     const api = getD2APiFromInstance(instance);
@@ -146,6 +176,19 @@ export function getCompositionRoot(instance: Instance) {
     const glassAsyncDeletionsRepository = new GlassAsyncDeletionsDefaultRepository(dataStoreClient);
     const encryptionRepository = new EncryptionDefaultRepository(api);
     const glassAsyncUploadsRepository = new GlassAsyncUploadsDefaultRepository(dataStoreClient);
+    const amcQuestionnaireRepository = new AMCQuestionnaireD2Repository(api);
+    const questionsAMCQuestionnaireRepository = new QuestionsAMCQuestionnaireD2Repository(api);
+    const yesNoOptionsRepository = new YesNoOptionsD2Repository(api);
+    const yesNoUnknownOptionsRepository = new YesNoUnknownOptionsD2Repository(api);
+    const yesNoUnknownNAOptionsRepository = new YesNoUnknownNAOptionsD2Repository(api);
+    const antimicrobialClassOptionsRepository = new AntimicrobialClassOptionsD2Repository(api);
+    const proportion50to100OptionsD2Repository = new Proportion50to100OptionsD2Repository(api);
+    const dataLevelOptionsD2Repository = new DataLevelOptionsD2Repository(api);
+    const dataSourceOptionsD2Repository = new DataSourceOptionsD2Repository(api);
+    const nationalPopulationDataSourceOptionsD2Repository = new NationalPopulationDataSourceOptionsD2Repository(api);
+    const procurementLevelOptionsD2Repository = new ProcurementLevelOptionsD2Repository(api);
+    const proportion50to100UnknownOptionsD2Repository = new Proportion50to100UnknownOptionsD2Repository(api);
+    const strataOptionsRepository = new StrataOptionsD2Repository(api);
 
     return {
         instance: getExecute({
@@ -362,6 +405,30 @@ export function getCompositionRoot(instance: Instance) {
                 glassModuleRepository
             ),
             downloadAllData: new DownloadAllDataForModuleUseCase(eventVisualizationRepository),
+        }),
+
+        amcQuestionnaires: getExecute({
+            getById: new GetAMCQuestionnaireByIdUseCase(amcQuestionnaireRepository),
+            getByOrgUnitAndPeriod: new GetAMCQuestionnaireByOrgUnitAndPeriodUseCase(amcQuestionnaireRepository),
+            saveGeneral: new SaveGeneralAMCQuestionnaireUseCase(amcQuestionnaireRepository),
+            saveAmClass: new SaveAMClassAMCQuestionnaireUseCase(amcQuestionnaireRepository),
+            saveComponent: new SaveComponentAMCQuestionnaireUseCase(amcQuestionnaireRepository),
+            getQuestions: new GetQuestionsAMCQuestionnaireUseCase(questionsAMCQuestionnaireRepository),
+            getYesNoOptions: new GetYesNoOptionsUseCase(yesNoOptionsRepository),
+            getYesNoUnknownOptions: new GetYesNoUnknownOptionsUseCase(yesNoUnknownOptionsRepository),
+            getYesNoUnknownNAOptions: new GetYesNoUnknownNAOptionsUseCase(yesNoUnknownNAOptionsRepository),
+            getAntimicrobialClassOptions: new GetAntimicrobialClassOptionsUseCase(antimicrobialClassOptionsRepository),
+            getProportion50to100Options: new GetProportion50to100OptionsUseCase(proportion50to100OptionsD2Repository),
+            getProportion50to100UnknownOptions: new GetProportion50to100UnknownOptionsUseCase(
+                proportion50to100UnknownOptionsD2Repository
+            ),
+            getDataLevelOptions: new GetDataLevelOptionsUseCase(dataLevelOptionsD2Repository),
+            getDataSourceOptions: new GetDataSourceOptionsUseCase(dataSourceOptionsD2Repository),
+            getNationalPopulationDataSourceOptions: new GetNationalPopulationDataSourceOptionsUseCase(
+                nationalPopulationDataSourceOptionsD2Repository
+            ),
+            getProcurementLevelOptions: new GetProcurementLevelOptionsUseCase(procurementLevelOptionsD2Repository),
+            getStrataOptions: new GetStrataOptionsUseCase(strataOptionsRepository),
         }),
     };
 }

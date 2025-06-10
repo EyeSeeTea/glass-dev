@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2025-02-05T15:58:56.508Z\n"
-"PO-Revision-Date: 2025-02-05T15:58:56.508Z\n"
+"POT-Creation-Date: 2025-06-03T16:56:09.366Z\n"
+"PO-Revision-Date: 2025-06-03T16:56:09.366Z\n"
 
 msgid "Template {{id}} not loaded"
 msgstr ""
@@ -98,6 +98,36 @@ msgid "Longitude"
 msgstr ""
 
 msgid "Invalid choice was chosen"
+msgstr ""
+
+msgid "An unknown validation error occurred"
+msgstr ""
+
+msgid "The field {{property}} is required"
+msgstr ""
+
+msgid ""
+"Cannot create AM Class Questionnaire because the antimicrobial class is not "
+"checked in the General Questionnaire"
+msgstr ""
+
+msgid "AM class questionnaire already exists for this antimicrobial class"
+msgstr ""
+
+msgid ""
+"Component questionnaire cannot include an antimicrobial without an AM Class "
+"Questionnaire"
+msgstr ""
+
+msgid "Component questionnaire must have at least one stratum selected"
+msgstr ""
+
+msgid ""
+"Component questionnaire stratum must not overlap with other components "
+"stratum"
+msgstr ""
+
+msgid "Invalid strata values selected. TOT / GLOB values must not overlap"
 msgstr ""
 
 msgid "The AST results provided are not valid (they are all empty)"
@@ -409,6 +439,36 @@ msgstr ""
 msgid "Error downloading data"
 msgstr ""
 
+msgid "Back"
+msgstr ""
+
+msgid "Edit"
+msgstr ""
+
+msgid "AM Class"
+msgstr ""
+
+msgid "Component"
+msgstr ""
+
+msgid "Component Antimicrobial Class Stratum"
+msgstr ""
+
+msgid "Use all available antimicrobial classes / stratum combinations"
+msgstr ""
+
+msgid "AM Questionnaire Editor"
+msgstr ""
+
+msgid "Component Questionnaire Editor"
+msgstr ""
+
+msgid "AM Class Questionnaires"
+msgstr ""
+
+msgid "Component Questionnaires"
+msgstr ""
+
 msgid "Go to questionnaires"
 msgstr ""
 
@@ -484,6 +544,12 @@ msgstr ""
 msgid "status"
 msgstr ""
 
+msgid "Indicates required"
+msgstr ""
+
+msgid "Save"
+msgstr ""
+
 msgid "Import summary errors"
 msgstr ""
 
@@ -526,16 +592,10 @@ msgstr ""
 msgid "GO"
 msgstr ""
 
-msgid "Save"
-msgstr ""
-
 msgid "Save Draft"
 msgstr ""
 
 msgid "Publish"
-msgstr ""
-
-msgid "Back"
 msgstr ""
 
 msgid "Help"
@@ -554,6 +614,15 @@ msgid "Set as incomplete"
 msgstr ""
 
 msgid "Set as completed"
+msgstr ""
+
+msgid "Questionnaires table"
+msgstr ""
+
+msgid "Edit questionnaire"
+msgstr ""
+
+msgid "Add New"
 msgstr ""
 
 msgid "HOME"
