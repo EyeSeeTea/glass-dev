@@ -18,7 +18,6 @@ import { amcQuestionnaireMappers } from "./mappers";
 import { useAMCQuestionnaireContext } from "../../../contexts/amc-questionnaire-context";
 import { AMClassAMCQuestionnaire } from "../../../../domain/entities/amc-questionnaires/AMClassAMCQuestionnaire";
 import { ComponentAMCQuestionnaire } from "../../../../domain/entities/amc-questionnaires/ComponentAMCQuestionnaire";
-import { updateComponentQuestionnaireFormOptions } from "./utils/updateComponentQuestionnaireFormOptions";
 
 export type GlobalMessage = {
     text: string;
@@ -202,19 +201,6 @@ export function useAMCQuestionnaireForm<T extends AMCQuestionnaireFormType>(para
                         updatedField,
                         questionnaireFormEntity
                     );
-                    if (questionnaire && formType === "component-questionnaire") {
-                        const formWithUpdatedOptions = updateComponentQuestionnaireFormOptions(
-                            updatedData,
-                            updatedField,
-                            questionnaireFormEntity,
-                            questionnaire,
-                            options
-                        );
-                        return {
-                            kind: "loaded" as const,
-                            data: formWithUpdatedOptions,
-                        };
-                    }
                     return {
                         kind: "loaded" as const,
                         data: updatedData,
@@ -224,7 +210,7 @@ export function useAMCQuestionnaireForm<T extends AMCQuestionnaireFormType>(para
                 }
             });
         },
-        [questionnaireFormEntity, questionnaire, formType, options]
+        [questionnaireFormEntity]
     );
 
     const onClickSave = useCallback(() => {

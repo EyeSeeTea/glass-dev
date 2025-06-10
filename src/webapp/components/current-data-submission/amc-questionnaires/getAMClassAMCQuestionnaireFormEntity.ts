@@ -1,8 +1,10 @@
 import { AMClassAMCQuestionnaire } from "../../../../domain/entities/amc-questionnaires/AMClassAMCQuestionnaire";
 import { AMCQuestionnaireQuestions } from "../../../../domain/entities/amc-questionnaires/AMCQuestionnaireQuestions";
+import { getDisabledStratas, strataOption } from "../../../../domain/entities/amc-questionnaires/StrataOption";
 import { Maybe } from "../../../../utils/ts-utils";
 import { FormRule } from "../../form/presentation-entities/FormRule";
 import { AMClassAMCQuestionnaireFormEntity, FormLables } from "./presentation-entities/QuestionnaireFormEntity";
+import _ from "lodash";
 
 export function getAMClassAMCQuestionnaireFormEntity(
     amcQuestions: AMCQuestionnaireQuestions,
@@ -28,28 +30,12 @@ function getAMClassAMCQuestionnaireFormLabelsRules(): { rules: FormRule[]; label
         },
         rules: [
             {
-                type: "requiredFieldsByCustomCondition",
-                fieldIds: ["healthSector", "healthLevel"],
-                condition: fields =>
-                    !!AMClassAMCQuestionnaire.requiredFieldsCustomConditions(fields)["estVolumeTotalHealthLevel"],
-                requiredFieldIds: ["estVolumeTotalHealthLevel"],
-                sectionIdsWithRequiredFields: ["general_section"],
-            },
-            {
-                type: "requiredFieldsByCustomCondition",
-                fieldIds: ["healthSector", "healthLevel"],
-                condition: fields =>
-                    !!AMClassAMCQuestionnaire.requiredFieldsCustomConditions(fields)["estVolumeHospitalHealthLevel"],
-                requiredFieldIds: ["estVolumeHospitalHealthLevel"],
-                sectionIdsWithRequiredFields: ["general_section"],
-            },
-            {
-                type: "requiredFieldsByCustomCondition",
-                fieldIds: ["healthSector", "healthLevel"],
-                condition: fields =>
-                    !!AMClassAMCQuestionnaire.requiredFieldsCustomConditions(fields)["estVolumeCommunityHealthLevel"],
-                requiredFieldIds: ["estVolumeCommunityHealthLevel"],
-                sectionIdsWithRequiredFields: ["general_section"],
+                type: "disableOptionsByFieldValues",
+                fieldId: "stratas",
+                disableCondition: selectedValues => {
+                    const selectedStratas = _.compact(selectedValues.map(code => strataOption.getSafeValue(code)));
+                    return getDisabledStratas(selectedStratas);
+                },
             },
         ],
     };

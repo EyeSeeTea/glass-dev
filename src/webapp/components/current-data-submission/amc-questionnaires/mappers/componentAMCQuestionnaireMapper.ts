@@ -20,6 +20,7 @@ import {
 import { YesNoUnknownValues } from "../../../../../domain/entities/amc-questionnaires/YesNoUnknownOption";
 import { yesNoOption } from "../../../../../domain/entities/amc-questionnaires/YesNoOption";
 import i18n from "../../../../../locales";
+import { getValidationMessage } from "../../../../../domain/entities/amc-questionnaires/ValidationError";
 
 export function mapFormStateToComponentAMCQuestionnaire(
     params: MapToAMCQuestionnaireParams<ComponentAMCQuestionnaireFormEntity>
@@ -29,14 +30,18 @@ export function mapFormStateToComponentAMCQuestionnaire(
 
     const allFields: FormFieldState[] = getAllFieldsFromSections(formState.sections);
 
-    const antimicrobialClasses = _.compact(
-        getMultipleOptionsFieldValue("antimicrobialClasses", allFields).map(selectedOption => {
-            return options.antimicrobialClassOptions.find(option => option.code === selectedOption)?.code;
-        })
-    );
-    const componentStrata = options.strataOptions.find(
-        option => option.code === getStringFieldValue("componentStrata", allFields)
-    )?.code;
+    const getStratum = (stratumKey: keyof typeof ComponentAMCQuestionnaireStratumFieldIds) =>
+        _.compact(
+            getMultipleOptionsFieldValue(stratumKey, allFields).map(selectedOption => {
+                return options.strataOptions.find(option => option.code === selectedOption)?.code;
+            })
+        );
+    const antibacterialStratum = getStratum("antibacterialStratum");
+    const antifungalStratum = getStratum("antifungalStratum");
+    const antiviralStratum = getStratum("antiviralStratum");
+    const antituberculosisStratum = getStratum("antituberculosisStratum");
+    const antimalariaStratum = getStratum("antimalariaStratum");
+
     const excludedSubstances = options.yesNoUnknownOptions.find(
         option => option.code === getStringFieldValue("excludedSubstances", allFields)
     )?.code;
@@ -66,8 +71,6 @@ export function mapFormStateToComponentAMCQuestionnaire(
     const commentOnCoverageWithinTheStratum = getStringFieldValue("commentOnCoverageWithinTheStratum", allFields);
 
     if (
-        antimicrobialClasses.length === 0 ||
-        !componentStrata ||
         !excludedSubstances ||
         !typeOfDataReported ||
         sourcesOfDataReported.length === 0 ||
@@ -79,8 +82,11 @@ export function mapFormStateToComponentAMCQuestionnaire(
 
     const ComponentAMCQuestionnaireAttributes: ComponentAMCQuestionnaireAttributes = {
         ...baseAttributes,
-        antimicrobialClasses: antimicrobialClasses,
-        componentStrata: componentStrata,
+        antibacterialStratum: antibacterialStratum,
+        antifungalStratum: antifungalStratum,
+        antiviralStratum: antiviralStratum,
+        antituberculosisStratum: antituberculosisStratum,
+        antimalariaStratum: antimalariaStratum,
         excludedSubstances: excludedSubstances,
         listOfExcludedSubstances: listOfExcludedSubstances,
         typeOfDataReported: typeOfDataReported,
@@ -100,13 +106,11 @@ export function mapFormStateToComponentAMCQuestionnaire(
         ComponentAMCQuestionnaireAttributes
     );
     const validGeneralAMCQuestionnaire = generalAMCQuestionnaireValidation.match({
-        error: () => undefined,
+        error: errors => {
+            throw new Error(errors.map(error => getValidationMessage(error)).join(", "));
+        },
         success: ComponentAMCQuestionnaire => ComponentAMCQuestionnaire,
     });
-
-    if (!validGeneralAMCQuestionnaire) {
-        throw new Error("Invalid Component AMC Questionnaire");
-    }
 
     return validGeneralAMCQuestionnaire;
 }
@@ -135,9 +139,16 @@ function getComponentAMCQuestionnaireBaseAttributes(
     }
 }
 
+export const ComponentAMCQuestionnaireStratumFieldIds = {
+    antibacterialStratum: "antibacterialStratum",
+    antifungalStratum: "antifungalStratum",
+    antiviralStratum: "antiviralStratum",
+    antituberculosisStratum: "antituberculosisStratum",
+    antimalariaStratum: "antimalariaStratum",
+} as const;
+
 export const ComponentAMCQuestionnaireFieldIds = {
-    antimicrobialClasses: "antimicrobialClasses",
-    componentStrata: "componentStrata",
+    ...ComponentAMCQuestionnaireStratumFieldIds,
     excludedSubstances: "excludedSubstances",
     listOfExcludedSubstances: "listOfExcludedSubstances",
     typeOfDataReported: "typeOfDataReported",
@@ -153,6 +164,37 @@ export const ComponentAMCQuestionnaireFieldIds = {
     commentOnCoverageWithinTheStratum: "commentOnCoverageWithinTheStratum",
 } as const;
 
+function getStratumField(
+    stratumKey: keyof typeof ComponentAMCQuestionnaireStratumFieldIds,
+    params: MapToFormStateParams<ComponentAMCQuestionnaireFormEntity>
+): FormFieldState {
+    const { questionnaireFormEntity, options, isViewOnlyMode, amcQuestionnaire } = params;
+    const fieldId = getFieldIdFromIdsDictionary(stratumKey, ComponentAMCQuestionnaireFieldIds);
+    const question = getQuestionById(stratumKey, questionnaireFormEntity.questions);
+    const selfOptions = options.strataOptions.filter(option =>
+        (questionnaireFormEntity?.entity?.[stratumKey] ?? []).includes(option.code)
+    );
+    const availableStratas =
+        amcQuestionnaire?.getAvailableStrataOptionsForComponentQ(
+            options.strataOptions,
+            ComponentAMCQuestionnaire.getAntimicrobialClassByStratumProperty(stratumKey)
+        ) ?? [];
+    const strataOptionsWithSelf = [...new Set([...selfOptions, ...availableStratas])];
+    return {
+        id: fieldId,
+        isVisible: strataOptionsWithSelf.length > 0,
+        errors: [],
+        type: "select",
+        multiple: true,
+        value: questionnaireFormEntity?.entity?.[stratumKey] || [],
+        options: mapToFormOptions(strataOptionsWithSelf),
+        required: false,
+        showIsRequired: false,
+        text: question,
+        disabled: isViewOnlyMode,
+    };
+}
+
 export function mapComponentAMCQuestionnaireToInitialFormState(
     params: MapToFormStateParams<ComponentAMCQuestionnaireFormEntity>
 ): FormState {
@@ -167,65 +209,40 @@ export function mapComponentAMCQuestionnaireToInitialFormState(
 
     const fromQuestions = (id: ComponentAMCQuestionId) => getQuestionById(id, questionnaireFormEntity.questions);
 
-    const selfAntimicrobialClassOptions = options.antimicrobialClassOptions.filter(option =>
-        (questionnaireFormEntity?.entity?.antimicrobialClasses || []).includes(option.code)
-    );
-    const availableAntimicrobialClassOptions = amcQuestionnaire.getAvailableAMClassOptionsForComponentQ(
-        options.antimicrobialClassOptions,
-        questionnaireFormEntity?.entity?.componentStrata
-    );
-    const antimicrobialClassOptinsWithSelf = [
-        ...new Set([...selfAntimicrobialClassOptions, ...availableAntimicrobialClassOptions]),
-    ];
-
-    const selfStrataOption = options.strataOptions.find(
-        option => option.code === questionnaireFormEntity?.entity?.componentStrata
-    );
-    const availableStrataOptions = amcQuestionnaire.getAvailableStrataOptionsForComponentQ(
-        options.strataOptions,
-        questionnaireFormEntity?.entity?.antimicrobialClasses || []
-    );
-    const strataOptionsWithSelf = selfStrataOption
-        ? [...new Set([selfStrataOption, ...availableStrataOptions])]
-        : availableStrataOptions;
-
     return {
         id: questionnaireFormEntity.entity?.id ?? "",
         title: "Component questionnaire",
         isValid: false,
         sections: [
             {
+                title: i18n.t("Component Antimicrobial Class Stratum"),
+                id: "antimicrobial_stratum_section",
+                isVisible: true,
+                required: true,
+                fields: [
+                    getStratumField("antibacterialStratum", params),
+                    getStratumField("antifungalStratum", params),
+                    getStratumField("antiviralStratum", params),
+                    getStratumField("antituberculosisStratum", params),
+                    getStratumField("antimalariaStratum", params),
+                    {
+                        id: "select-all-amclass-stratum",
+                        isVisible: true,
+                        type: "boolean",
+                        value: false,
+                        required: false,
+                        showIsRequired: false,
+                        text: i18n.t("Use all available antimicrobial classes / stratum combinations"),
+                        errors: [],
+                    },
+                ],
+            },
+            {
                 title: "Component General questionnaire",
                 id: "component_section",
                 isVisible: true,
                 required: true,
                 fields: [
-                    {
-                        id: fromIdsDictionary("antimicrobialClasses"),
-                        isVisible: true,
-                        errors: [],
-                        type: "select",
-                        multiple: true,
-                        value: questionnaireFormEntity?.entity?.antimicrobialClasses || [],
-                        options: mapToFormOptions(antimicrobialClassOptinsWithSelf),
-                        required: true,
-                        showIsRequired: true,
-                        text: fromQuestions("antimicrobialClasses"),
-                        disabled: isViewOnlyMode,
-                    },
-                    {
-                        id: fromIdsDictionary("componentStrata"),
-                        isVisible: true,
-                        errors: [],
-                        type: "select",
-                        multiple: false,
-                        value: questionnaireFormEntity?.entity?.componentStrata || "",
-                        options: mapToFormOptions(strataOptionsWithSelf),
-                        required: true,
-                        showIsRequired: true,
-                        text: fromQuestions("componentStrata"),
-                        disabled: isViewOnlyMode,
-                    },
                     {
                         id: fromIdsDictionary("excludedSubstances"),
                         isVisible: true,

@@ -22,11 +22,13 @@ export type MapToFormStateParams<T extends QuestionnaireFormEntity> = {
     isViewOnlyMode?: boolean;
 };
 
+export type MapToFormStateFunction<T extends QuestionnaireFormEntity> = (params: MapToFormStateParams<T>) => FormState;
+
 export type AMCQuestionnaireFormMapper = {
     [key in AMCQuestionnaireFormType]: {
         mapFormStateToEntity: (
             params: MapToAMCQuestionnaireParams<QuestionnaireFormEntityMap[key]>
         ) => QuestionnaireFormEntityMap[key]["entity"];
-        mapEntityToFormState: (params: MapToFormStateParams<QuestionnaireFormEntityMap[key]>) => FormState;
+        mapEntityToFormState: MapToFormStateFunction<QuestionnaireFormEntityMap[key]>;
     };
 };
