@@ -1,5 +1,3 @@
-import { HealthLevelValue, HealthLevelValues } from "./HealthLevelOption";
-import { HealthSectorValue, HealthSectorValues } from "./HealthSectorOption";
 import { Option, OptionType, OptionValue } from "./Option";
 
 export const StrataValues = {
@@ -20,40 +18,58 @@ export type StrataOption = OptionType<StrataValue>;
 
 export const strataOption = new Option(StrataValues);
 
-export function getStrataValuesFromHealthSectorAndLevel(
-    healthSector: HealthSectorValue,
-    healthLevel: HealthLevelValue
-): StrataValue[] {
-    const permutations: Record<HealthSectorValue, Record<HealthLevelValue, StrataValue[]>> = {
-        [HealthSectorValues.Public]: {
-            [HealthLevelValues.Hospital]: [StrataValues.publicHospital],
-            [HealthLevelValues.Community]: [StrataValues.publicCommunity],
-            [HealthLevelValues.HospitalAndCommunity]: [StrataValues.publicHospital, StrataValues.publicCommunity],
-            [HealthLevelValues.Total]: [StrataValues.publicTotal],
+/**
+ * Based on the selected stratas, returns an array of stratas that shouldn't be elegible simultaneously.
+ */
+export function getDisabledStratas(selected: StrataValue[]): StrataValue[] {
+    const strataGroups = [
+        {
+            total: StrataValues.publicTotal,
+            individuals: [StrataValues.publicHospital, StrataValues.publicCommunity],
         },
-        [HealthSectorValues.Private]: {
-            [HealthLevelValues.Hospital]: [StrataValues.privateHospital],
-            [HealthLevelValues.Community]: [StrataValues.privateCommunity],
-            [HealthLevelValues.HospitalAndCommunity]: [StrataValues.privateHospital, StrataValues.privateCommunity],
-            [HealthLevelValues.Total]: [StrataValues.privateTotal],
+        {
+            total: StrataValues.privateTotal,
+            individuals: [StrataValues.privateHospital, StrataValues.privateCommunity],
         },
-        [HealthSectorValues.PublicAndPrivate]: {
-            [HealthLevelValues.Hospital]: [StrataValues.publicHospital, StrataValues.privateHospital],
-            [HealthLevelValues.Community]: [StrataValues.publicCommunity, StrataValues.privateCommunity],
-            [HealthLevelValues.HospitalAndCommunity]: [
+        {
+            total: StrataValues.globalTotal,
+            individuals: [
+                StrataValues.globalHospital,
+                StrataValues.globalCommunity,
+                StrataValues.publicTotal,
+                StrataValues.privateTotal,
                 StrataValues.publicHospital,
                 StrataValues.privateHospital,
                 StrataValues.publicCommunity,
                 StrataValues.privateCommunity,
             ],
-            [HealthLevelValues.Total]: [StrataValues.publicTotal, StrataValues.privateTotal],
         },
-        [HealthLevelValues.Total]: {
-            [HealthLevelValues.Hospital]: [StrataValues.globalHospital],
-            [HealthLevelValues.Community]: [StrataValues.globalCommunity],
-            [HealthLevelValues.HospitalAndCommunity]: [StrataValues.globalHospital, StrataValues.globalCommunity],
-            [HealthLevelValues.Total]: [StrataValues.globalTotal],
+        {
+            total: StrataValues.globalHospital,
+            individuals: [StrataValues.publicHospital, StrataValues.privateHospital],
         },
-    };
-    return permutations[healthSector][healthLevel];
+        {
+            total: StrataValues.globalCommunity,
+            individuals: [StrataValues.publicCommunity, StrataValues.privateCommunity],
+        },
+    ];
+
+    const disabled = new Set<StrataValue>();
+
+    for (const group of strataGroups) {
+        const totalSelected = selected.includes(group.total);
+        const individualSelected = group.individuals.some(val => selected.includes(val));
+
+        if (totalSelected) {
+            for (const ind of group.individuals) {
+                disabled.add(ind);
+            }
+        }
+
+        if (individualSelected) {
+            disabled.add(group.total);
+        }
+    }
+
+    return Array.from(disabled);
 }

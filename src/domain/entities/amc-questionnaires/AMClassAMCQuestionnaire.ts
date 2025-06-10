@@ -3,16 +3,18 @@ import { Maybe } from "../../../types/utils";
 import { Struct } from "../generic/Struct";
 import { ValidationError, ValidationErrorKey } from "./ValidationError";
 import { Either } from "../generic/Either";
-import { AntimicrobialClassOption, AntimicrobialClassValue } from "./AntimicrobialClassOption";
-import { HealthSectorValue, HealthSectorValues } from "./HealthSectorOption";
-import { HealthLevelValue, HealthLevelValues } from "./HealthLevelOption";
+import {
+    antimicrobialClassOption,
+    AntimicrobialClassOption,
+    AntimicrobialClassValue,
+} from "./AntimicrobialClassOption";
 import { Proportion50to100Value } from "./Proportion50to100Option";
 import { Id } from "../Base";
+import { getDisabledStratas, StrataValue } from "./StrataOption";
 
 export type AMClassAMCQuestionnaireResponsesAttributes = {
     antimicrobialClass: AntimicrobialClassValue;
-    healthSector: HealthSectorValue;
-    healthLevel: HealthLevelValue;
+    stratas: StrataValue[];
     estVolumeTotalHealthLevel: Maybe<Proportion50to100Value>;
     estVolumeHospitalHealthLevel: Maybe<Proportion50to100Value>;
     estVolumeCommunityHealthLevel: Maybe<Proportion50to100Value>;
@@ -39,44 +41,22 @@ export class AMClassAMCQuestionnaire extends Struct<AMClassAMCQuestionnaireAttri
     }
 
     static validate(attributes: AMClassAMCQuestionnaireAttributes): ValidationError[] {
-        const requiredConditions = this.requiredFieldsCustomConditions(attributes);
-        return _.compact(
-            _.map(requiredConditions, (isRequired, key) => {
-                if (isRequired && !attributes[key as keyof AMClassAMCQuestionnaireResponsesAttributes]) {
-                    return {
-                        property: key,
-                        value: attributes[key as keyof AMClassAMCQuestionnaireAttributes],
-                        errors: [ValidationErrorKey.FIELD_IS_REQUIRED],
-                    };
-                }
-                return null;
-            })
-        );
+        const strataError = this.validateStratas(attributes.stratas)
+            ? null
+            : {
+                  property: "stratas",
+                  value: attributes.stratas,
+                  errors: [ValidationErrorKey.INVALID_STRATA_VALUES],
+              };
+        return _.compact([strataError]);
     }
 
-    static requiredFieldsCustomConditions(
-        attributes: Partial<AMClassAMCQuestionnaireAttributes>
-    ): Partial<Record<keyof AMClassAMCQuestionnaireAttributes, boolean>> {
-        const isPublicOrPrivate =
-            attributes.healthSector === HealthSectorValues.Public ||
-            attributes.healthSector === HealthSectorValues.Private;
-        return {
-            estVolumeTotalHealthLevel: isPublicOrPrivate && attributes.healthLevel === HealthLevelValues.Total,
-            estVolumeHospitalHealthLevel:
-                isPublicOrPrivate &&
-                (attributes.healthLevel === HealthLevelValues.Hospital ||
-                    attributes.healthLevel === HealthLevelValues.HospitalAndCommunity),
-            estVolumeCommunityHealthLevel:
-                isPublicOrPrivate &&
-                (attributes.healthLevel === HealthLevelValues.Community ||
-                    attributes.healthLevel === HealthLevelValues.HospitalAndCommunity),
-        };
+    static validateStratas(stratas: StrataValue[]): boolean {
+        const invalidStratas = getDisabledStratas(stratas);
+        return !invalidStratas.some(invalidStrata => stratas.includes(invalidStrata));
     }
 
     public getTitle({ antimicrobialClassOptions }: { antimicrobialClassOptions: AntimicrobialClassOption[] }): string {
-        const amClassName =
-            antimicrobialClassOptions.find(option => option.code === this.antimicrobialClass)?.name ||
-            this.antimicrobialClass;
-        return amClassName;
+        return antimicrobialClassOption.getNameByCode(antimicrobialClassOptions, this.antimicrobialClass);
     }
 }

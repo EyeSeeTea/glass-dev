@@ -8,25 +8,26 @@ import {
     isStringInAMClassAMCQuestionnaireCodes,
 } from "./AMCQuestionnaireConstants";
 import { antimicrobialClassOption } from "../../../domain/entities/amc-questionnaires/AntimicrobialClassOption";
-import { healthSectorOption } from "../../../domain/entities/amc-questionnaires/HealthSectorOption";
-import { healthLevelOption } from "../../../domain/entities/amc-questionnaires/HealthLevelOption";
 import { proportion50to100Option } from "../../../domain/entities/amc-questionnaires/Proportion50to100Option";
 import { D2ProgramStageMetadata } from "../utils/MetadataHelper";
 import { D2Event, D2TrackedEntity } from "./D2Types";
+import { strataOption } from "../../../domain/entities/amc-questionnaires/StrataOption";
 
 export function mapD2EventToAMClassAMCQuestionnaire(d2Event: D2Event): AMClassAMCQuestionnaire {
     const fromMap = (key: keyof typeof codesByAMClassAMCQuestionnaire) => getValueFromMap(key, d2Event);
     const antimicrobialClass = antimicrobialClassOption.getSafeValue(fromMap("antimicrobialClass"));
-    const healthSector = healthSectorOption.getSafeValue(fromMap("healthSector"));
-    const healthLevel = healthLevelOption.getSafeValue(fromMap("healthLevel"));
-    if (!antimicrobialClass || !healthSector || !healthLevel) {
+    const stratas = _.compact(
+        fromMap("stratas")
+            .split(",")
+            .map(strata => strataOption.getSafeValue(strata))
+    );
+    if (!antimicrobialClass || !stratas) {
         throw new Error(`Missing required fields in D2Event for AMClassAMCQuestionnaire: ${JSON.stringify(d2Event)}`);
     }
     const amClassAMCQuestionnaire = new AMClassAMCQuestionnaire({
         id: d2Event.event,
         antimicrobialClass: antimicrobialClass,
-        healthSector: healthSector,
-        healthLevel: healthLevel,
+        stratas: stratas,
         estVolumeTotalHealthLevel: proportion50to100Option.getSafeValue(fromMap("estVolumeTotalHealthLevel")),
         estVolumeHospitalHealthLevel: proportion50to100Option.getSafeValue(fromMap("estVolumeHospitalHealthLevel")),
         estVolumeCommunityHealthLevel: proportion50to100Option.getSafeValue(fromMap("estVolumeCommunityHealthLevel")),
@@ -39,8 +40,7 @@ function getValueFromAMClassAMCQuestionnaire(
 ): Record<AMClassAMCQuestionnaireCode, string> {
     return {
         AMR_GLASS_AMC_DE_AM_CLASS: amClassAMCQuestionnaire.antimicrobialClass,
-        AMR_GLASS_AMC_DE_H_SECTOR: amClassAMCQuestionnaire.healthSector,
-        AMR_GLASS_AMC_DE_H_LEVEL: amClassAMCQuestionnaire.healthLevel,
+        AMR_GLASS_AMC_DE_STRATAS: amClassAMCQuestionnaire.stratas.join(","),
         AMR_GLASS_AMC_DE_VOL_TOTAL: amClassAMCQuestionnaire.estVolumeTotalHealthLevel ?? "",
         AMR_GLASS_AMC_DE_VOL_HOSP: amClassAMCQuestionnaire.estVolumeHospitalHealthLevel ?? "",
         AMR_GLASS_AMC_DE_VOL_COMM: amClassAMCQuestionnaire.estVolumeCommunityHealthLevel ?? "",
