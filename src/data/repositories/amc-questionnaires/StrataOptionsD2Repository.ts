@@ -3,7 +3,7 @@ import { StrataOptionsRepository } from "../../../domain/repositories/amc-questi
 import { OptionsD2Repository } from "./OptionsD2Repository";
 
 export class StrataOptionsD2Repository extends OptionsD2Repository<StrataValue> implements StrataOptionsRepository {
-    protected optionSetCode = "HXpkMXdbC7T";
+    protected optionSetCode = "ZMwHadH2OwV";
     protected optionSetName = "Strata OptionSet";
     protected options = strataOption;
 }

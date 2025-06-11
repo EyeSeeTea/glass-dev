@@ -80,6 +80,7 @@ export function MultipleSelector<Value extends string>({
                                     deleteIcon={<IconCross16 />}
                                     onDelete={event => handleDelete(event, value)}
                                     onMouseDown={event => handleDelete(event, value)}
+                                    disabled={disabled}
                                 />
                             ))}
                         </SelectedContainer>
