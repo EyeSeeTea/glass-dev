@@ -2,6 +2,7 @@ import {
     FormFieldState,
     getAllFieldsFromSections,
     getFieldIdFromIdsDictionary,
+    getMultipleOptionsFieldValue,
     getStringFieldValue,
 } from "../../../form/presentation-entities/FormFieldsState";
 import { FormState } from "../../../form/presentation-entities/FormState";
@@ -13,6 +14,7 @@ import {
     AMClassAMCQuestionnaire,
     AMClassAMCQuestionnaireAttributes,
 } from "../../../../../domain/entities/amc-questionnaires/AMClassAMCQuestionnaire";
+import { getDisabledStratas } from "../../../../../domain/entities/amc-questionnaires/StrataOption";
 
 export function mapFormStateToAMClassAMCQuestionnaire(
     params: MapToAMCQuestionnaireParams<AMClassAMCQuestionnaireFormEntity>
@@ -24,12 +26,11 @@ export function mapFormStateToAMClassAMCQuestionnaire(
     const antimicrobialClass = options.antimicrobialClassOptions.find(
         option => option.code === getStringFieldValue("antimicrobialClass", allFields)
     )?.code;
-    const healthSector = options.healthSectorOptions.find(
-        option => option.code === getStringFieldValue("healthSector", allFields)
-    )?.code;
-    const healthLevel = options.healthLevelOptions.find(
-        option => option.code === getStringFieldValue("healthLevel", allFields)
-    )?.code;
+    const stratas = _.compact(
+        getMultipleOptionsFieldValue("stratas", allFields).map(selectedOption => {
+            return options.strataOptions.find(option => option.code === selectedOption)?.code;
+        })
+    );
     const estVolumeTotalHealthLevel = options.proportion50to100Options.find(
         option => option.code === getStringFieldValue("estVolumeTotalHealthLevel", allFields)
     )?.code;
@@ -40,15 +41,14 @@ export function mapFormStateToAMClassAMCQuestionnaire(
         option => option.code === getStringFieldValue("estVolumeCommunityHealthLevel", allFields)
     )?.code;
 
-    if (!antimicrobialClass || !healthSector || !healthLevel) {
+    if (!antimicrobialClass || !stratas) {
         throw new Error("Missing required AM Class AMC Questionnaire attributes");
     }
 
     const amClassAMCQuestionnaireAttributes: AMClassAMCQuestionnaireAttributes = {
         id: formEntity.entity?.id ?? "",
         antimicrobialClass,
-        healthSector,
-        healthLevel,
+        stratas,
         estVolumeTotalHealthLevel,
         estVolumeHospitalHealthLevel,
         estVolumeCommunityHealthLevel,
@@ -71,8 +71,7 @@ export function mapFormStateToAMClassAMCQuestionnaire(
 
 export const amClassAMCQuestionnaireFieldIds = {
     antimicrobialClass: "antimicrobialClass",
-    healthSector: "healthSector",
-    healthLevel: "healthLevel",
+    stratas: "stratas",
     estVolumeTotalHealthLevel: "estVolumeTotalHealthLevel",
     estVolumeHospitalHealthLevel: "estVolumeHospitalHealthLevel",
     estVolumeCommunityHealthLevel: "estVolumeCommunityHealthLevel",
@@ -103,6 +102,8 @@ export function mapAMClassAMCQuestionnaireToInitialFormState(
         ? [...new Set([antimicrobialClassOption, ...availableAntimicrobialClassOptions])]
         : availableAntimicrobialClassOptions;
 
+    const disabledStratas = getDisabledStratas(questionnaireFormEntity?.entity?.stratas || []);
+
     return {
         id: questionnaireFormEntity.entity?.id ?? "",
         title: "AM Class questionnaire",
@@ -128,29 +129,16 @@ export function mapAMClassAMCQuestionnaireToInitialFormState(
                         disabled: isViewOnlyMode,
                     },
                     {
-                        id: fromIdsDictionary("healthSector"),
+                        id: fromIdsDictionary("stratas"),
                         isVisible: true,
                         errors: [],
-                        type: "radio",
-                        multiple: false,
-                        value: questionnaireFormEntity?.entity?.healthSector || "",
-                        options: mapToFormOptions(options.healthSectorOptions),
+                        type: "checkboxes",
+                        multiple: true,
+                        value: questionnaireFormEntity?.entity?.stratas || [],
+                        options: mapToFormOptions(options.strataOptions, disabledStratas),
                         required: true,
                         showIsRequired: true,
-                        text: fromQuestions("healthSector"),
-                        disabled: isViewOnlyMode,
-                    },
-                    {
-                        id: fromIdsDictionary("healthLevel"),
-                        isVisible: true,
-                        errors: [],
-                        type: "radio",
-                        multiple: false,
-                        value: questionnaireFormEntity?.entity?.healthLevel || "",
-                        options: mapToFormOptions(options.healthLevelOptions),
-                        required: true,
-                        showIsRequired: true,
-                        text: fromQuestions("healthLevel"),
+                        text: fromQuestions("stratas"),
                         disabled: isViewOnlyMode,
                     },
                     {
