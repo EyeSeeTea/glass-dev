@@ -1,6 +1,6 @@
 import React from "react";
 import styled from "styled-components";
-import { Button, CircularProgress } from "@material-ui/core";
+import { Button, CircularProgress, Typography } from "@material-ui/core";
 
 import { AMCQuestionnaireFormPage } from "./AMCQuestionnaireFormPage";
 import { useCurrentPeriodContext } from "../../../contexts/current-period-context";
@@ -11,6 +11,7 @@ import { QuestionnairesTable } from "../../questionnaires-table/QuestionnairesTa
 import { Id } from "../../../../domain/entities/Ref";
 import { AMCQuestionnairePage } from "./AMCQuestionnairePage";
 import { MissingComponentQuestionnaires } from "./MissingComponentQuestionnaires";
+import { palette } from "../../../pages/app/themes/dhis2.theme";
 
 export const MainPageAMCQuestionnaires: React.FC = () => {
     const { currentPeriod } = useCurrentPeriodContext();
@@ -27,6 +28,7 @@ export const MainPageAMCQuestionnaires: React.FC = () => {
         onSaveForm,
         openQuestionnaireForm,
         onCloseQuestionnaireForm,
+        questionnaireError,
     } = useMainPageAMCQuestionnaire();
 
     return (
@@ -45,6 +47,21 @@ export const MainPageAMCQuestionnaires: React.FC = () => {
                         <LoaderContainer>
                             <CircularProgress />
                         </LoaderContainer>
+                    ) : questionnaireError ? (
+                        <ErrorContainer>
+                            <Typography variant="h6">{i18n.t("Error loading AMC Questionnaire")}</Typography>
+                            <Typography variant="body1">
+                                {i18n.t("This may be due to a network issue or a data inconsistency. ")}
+                            </Typography>
+                            <Typography variant="body1">
+                                {i18n.t(
+                                    "Please check the error details below, correct any issues with the event, and try again. If the problem persists, contact support for assistance."
+                                )}
+                            </Typography>
+                            <Typography variant="caption" style={{ marginTop: "1em" }} paragraph>
+                                {questionnaireError.message}
+                            </Typography>
+                        </ErrorContainer>
                     ) : (
                         <QuestionnairesContainer>
                             <ButtonsContainer>
@@ -119,6 +136,12 @@ const ButtonsContainer = styled.div`
 const QuestionnairesContainer = styled.div``;
 
 const LoaderContainer = styled.div``;
+
+const ErrorContainer = styled.div`
+    border: 1px solid ${palette.error.main};
+    color: ${palette.error.main};
+    padding: 2em;
+`;
 
 const GeneralQuestionnaireContainer = styled.div`
     border: 1px solid #ccc;
