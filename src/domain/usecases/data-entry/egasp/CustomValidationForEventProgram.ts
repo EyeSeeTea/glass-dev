@@ -148,7 +148,7 @@ export class CustomValidationForEventProgram {
         const errors = _(
             events.map(event => {
                 const eventDate = new Date(event.occurredAt);
-                if (eventDate.getFullYear().toString() !== period) {
+                if (eventDate.getUTCFullYear().toString() !== period) {
                     return {
                         error: i18n.t(
                             `Event date is incorrect: Selected period : ${period}, date in file: ${event.occurredAt}`
