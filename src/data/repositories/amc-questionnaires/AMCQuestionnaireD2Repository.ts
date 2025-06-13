@@ -183,30 +183,55 @@ export class AMCQuestionnaireD2Repository implements AMCQuestionnaireRepository 
                         generalAMCQuestionnaire.id,
                         orgUnitId
                     ),
-                }).map(({ amClassAMCQuestionnaires, componentAMCQuestionnaires }) => {
-                    return new AMCQuestionnaire({
-                        id: generalAMCQuestionnaire.id,
-                        orgUnitId: orgUnitId,
-                        period: period,
-                        generalQuestionnaire: generalAMCQuestionnaire,
-                        amClassQuestionnaires: amClassAMCQuestionnaires,
-                        componentQuestionnaires: componentAMCQuestionnaires,
-                    });
+                }).flatMap(({ amClassAMCQuestionnaires, componentAMCQuestionnaires }) => {
+                    try {
+                        const questionnaire = new AMCQuestionnaire({
+                            id: generalAMCQuestionnaire.id,
+                            orgUnitId: orgUnitId,
+                            period: period,
+                            generalQuestionnaire: generalAMCQuestionnaire,
+                            amClassQuestionnaires: amClassAMCQuestionnaires,
+                            componentQuestionnaires: componentAMCQuestionnaires,
+                        });
+                        return Future.success(questionnaire);
+                    } catch (error) {
+                        return Future.error(error instanceof Error ? error.message : String(error));
+                    }
                 });
             }
         );
     }
 
     private getAmClassQuestionnairesInAggregateRoot(id: Id, orgUnitId: Id): FutureData<AMClassAMCQuestionnaire[]> {
-        return this.getEventsFromSection(id, orgUnitId, AMR_GLASS_AMC_AM_CLASS_QUESTIONNAIRE_STAGE_ID).map(events => {
-            return events.map(event => mapD2EventToAMClassAMCQuestionnaire(event));
-        });
+        return this.getEventsFromSection(id, orgUnitId, AMR_GLASS_AMC_AM_CLASS_QUESTIONNAIRE_STAGE_ID).flatMap(
+            events => {
+                try {
+                    const mapped = events.map(event => mapD2EventToAMClassAMCQuestionnaire(event));
+                    return Future.success(mapped);
+                } catch (error) {
+                    return Future.error(
+                        `Error in AM Class AMC Questionnaires: ${
+                            error instanceof Error ? error.message : String(error)
+                        }`
+                    );
+                }
+            }
+        );
     }
 
     private getComponentQuestionnairesInAggregateRoot(id: Id, orgUnitId: Id): FutureData<ComponentAMCQuestionnaire[]> {
-        return this.getEventsFromSection(id, orgUnitId, AMR_GLASS_AMC_AM_COMPONENT_QUESTIONNAIRE_STAGE_ID).map(
+        return this.getEventsFromSection(id, orgUnitId, AMR_GLASS_AMC_AM_COMPONENT_QUESTIONNAIRE_STAGE_ID).flatMap(
             events => {
-                return events.map(event => mapD2EventToComponentAMCQuestionnaire(event));
+                try {
+                    const mapped = events.map(event => mapD2EventToComponentAMCQuestionnaire(event));
+                    return Future.success(mapped);
+                } catch (error) {
+                    return Future.error(
+                        `Error in Component AMC Questionnaires: ${
+                            error instanceof Error ? error.message : String(error)
+                        }`
+                    );
+                }
             }
         );
     }
