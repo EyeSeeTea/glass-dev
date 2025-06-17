@@ -83,16 +83,7 @@ export function useSaveAMCQuestionnaireForm<T extends AMCQuestionnaireFormType>(
                             if (!questionnaire) {
                                 throw new Error("AM Class needs to be added to questionnaire");
                             }
-                            const validationErrors = questionnaire
-                                .addOrUpdateAMClassQuestionnaire(amClassQuestionnaire)
-                                .match({
-                                    error: errors => errors,
-                                    success: () => [],
-                                });
-                            if (validationErrors.length > 0) {
-                                throw new Error(`Validation errors: ${validationErrors.join(", ")}`);
-                            }
-                            compositionRoot.amcQuestionnaires.saveAmClass(questionnaire.id, amClassQuestionnaire).run(
+                            compositionRoot.amcQuestionnaires.saveAmClass(questionnaire, amClassQuestionnaire).run(
                                 _amClassQuestionnaireId => {
                                     onSave && onSave();
                                     setIsLoading(false);
@@ -111,27 +102,16 @@ export function useSaveAMCQuestionnaireForm<T extends AMCQuestionnaireFormType>(
                             if (!questionnaire) {
                                 throw new Error("Component needs to be added to questionnaire");
                             }
-                            const validationErrors = questionnaire
-                                .addOrUpdateComponentQuestionnaire(componentQuestionnaire)
-                                .match({
-                                    error: errors => errors,
-                                    success: () => [],
-                                });
-                            if (validationErrors.length > 0) {
-                                throw new Error(`Validation errors: ${validationErrors.join(", ")}`);
-                            }
-                            compositionRoot.amcQuestionnaires
-                                .saveComponent(questionnaire.id, componentQuestionnaire)
-                                .run(
-                                    _componentQuestionnaireId => {
-                                        onSave && onSave();
-                                        setIsLoading(false);
-                                        fetchQuestionnaire();
-                                    },
-                                    error => {
-                                        handleError(error);
-                                    }
-                                );
+                            compositionRoot.amcQuestionnaires.saveComponent(questionnaire, componentQuestionnaire).run(
+                                _componentQuestionnaireId => {
+                                    onSave && onSave();
+                                    setIsLoading(false);
+                                    fetchQuestionnaire();
+                                },
+                                error => {
+                                    handleError(error);
+                                }
+                            );
                         }
                         break;
                     default:
