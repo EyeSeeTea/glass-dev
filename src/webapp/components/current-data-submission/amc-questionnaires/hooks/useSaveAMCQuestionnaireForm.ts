@@ -10,7 +10,7 @@ import { useAppContext } from "../../../../contexts/app-context";
 import { amcQuestionnaireMappers } from "../mappers";
 import { AMCQuestionnaireFormType } from "../presentation-entities/AMCQuestionnaireFormType";
 import { QuestionnaireFormEntityMap } from "../presentation-entities/QuestionnaireFormEntity";
-import { FormLoadState } from "./useAMCQuestionnaireForm";
+import { FormLoadState } from "./useLoadAMCQuestionnaireForm";
 
 type SaveOptions<T extends AMCQuestionnaireFormType> = {
     id: Maybe<Id>;
