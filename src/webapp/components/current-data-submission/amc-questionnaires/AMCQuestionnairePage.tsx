@@ -1,7 +1,7 @@
 import React from "react";
 import styled from "styled-components";
 
-import { AMCQuestionnaireFormPage } from "./AMCQuestionnaireFormPage";
+import { AMCQuestionnaireFormPage } from "./form-pages/AMCQuestionnaireFormPage";
 import { useCurrentOrgUnitContext } from "../../../contexts/current-orgUnit-context";
 import { useCurrentPeriodContext } from "../../../contexts/current-period-context";
 import { Id } from "../../../../domain/entities/Ref";
