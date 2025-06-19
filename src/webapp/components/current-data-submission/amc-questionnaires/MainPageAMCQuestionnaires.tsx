@@ -2,10 +2,10 @@ import React from "react";
 import styled from "styled-components";
 import { Button, CircularProgress } from "@material-ui/core";
 
-import { AMCQuestionnaireFormPage } from "./AMCQuestionnaireFormPage";
+import { AMCQuestionnaireFormPage } from "./form-pages/AMCQuestionnaireFormPage";
 import { useCurrentPeriodContext } from "../../../contexts/current-period-context";
 import { useCurrentOrgUnitContext } from "../../../contexts/current-orgUnit-context";
-import { useMainPageAMCQuestionnaire } from "./useMainPageAMCQuestionnaire";
+import { useMainPageAMCQuestionnaire } from "./hooks/useMainPageAMCQuestionnaire";
 import i18n from "../../../../locales";
 import { QuestionnairesTable } from "../../questionnaires-table/QuestionnairesTable";
 import { Id } from "../../../../domain/entities/Ref";

@@ -1,15 +1,15 @@
 import { useCallback, useMemo, useState } from "react";
 
-import { useAMCQuestionnaireContext } from "../../../contexts/amc-questionnaire-context";
-import { AMCQuestionnaire } from "../../../../domain/entities/amc-questionnaires/AMCQuestionnaire";
-import { useAMCQuestionnaireOptionsContext } from "../../../contexts/amc-questionnaire-options-context";
-import { QuestionnairesTableRow } from "../../questionnaires-table/QuestionnairesTable";
-import { AMClassAMCQuestionnaire } from "../../../../domain/entities/amc-questionnaires/AMClassAMCQuestionnaire";
-import { Id } from "../../../../domain/entities/Ref";
-import { AMCQuestionnaireFormType } from "./presentation-entities/AMCQuestionnaireFormType";
-import i18n from "../../../../locales";
-import { Maybe } from "../../../../types/utils";
-import { ComponentAMCQuestionnaire } from "../../../../domain/entities/amc-questionnaires/ComponentAMCQuestionnaire";
+import { useAMCQuestionnaireContext } from "../../../../contexts/amc-questionnaire-context";
+import { AMCQuestionnaire } from "../../../../../domain/entities/amc-questionnaires/AMCQuestionnaire";
+import { useAMCQuestionnaireOptionsContext } from "../../../../contexts/amc-questionnaire-options-context";
+import { QuestionnairesTableRow } from "../../../questionnaires-table/QuestionnairesTable";
+import { AMClassAMCQuestionnaire } from "../../../../../domain/entities/amc-questionnaires/AMClassAMCQuestionnaire";
+import { Id } from "../../../../../domain/entities/Ref";
+import { AMCQuestionnaireFormType } from "../presentation-entities/AMCQuestionnaireFormType";
+import i18n from "../../../../../locales";
+import { Maybe } from "../../../../../types/utils";
+import { ComponentAMCQuestionnaire } from "../../../../../domain/entities/amc-questionnaires/ComponentAMCQuestionnaire";
 
 type QuestionnaireInfo = {
     formType: AMCQuestionnaireFormType;
