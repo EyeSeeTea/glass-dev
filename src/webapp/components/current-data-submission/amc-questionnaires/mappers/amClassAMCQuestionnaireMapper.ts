@@ -3,12 +3,11 @@ import {
     getAllFieldsFromSections,
     getFieldIdFromIdsDictionary,
     getMultipleOptionsFieldValue,
-    getStringFieldValue,
 } from "../../../form/presentation-entities/FormFieldsState";
 import { FormState } from "../../../form/presentation-entities/FormState";
 import { AMClassAMCQuestionnaireFormEntity } from "../presentation-entities/QuestionnaireFormEntity";
 import { MapToAMCQuestionnaireParams, MapToFormStateParams } from "./mapperTypes";
-import { getQuestionById, mapToFormOptions } from "./mapperUtils";
+import { getOptionCodeFromFieldValue, getQuestionById, mapToFormOptions } from "./mapperUtils";
 import {
     AMClassAMCQuestionId,
     AMClassAMCQuestionnaire,
@@ -23,23 +22,31 @@ export function mapFormStateToAMClassAMCQuestionnaire(
 
     const allFields: FormFieldState[] = getAllFieldsFromSections(formState.sections);
 
-    const antimicrobialClass = options.antimicrobialClassOptions.find(
-        option => option.code === getStringFieldValue("antimicrobialClass", allFields)
-    )?.code;
+    const antimicrobialClass = getOptionCodeFromFieldValue(
+        "antimicrobialClass",
+        options.antimicrobialClassOptions,
+        allFields
+    );
     const stratas = _.compact(
         getMultipleOptionsFieldValue("stratas", allFields).map(selectedOption => {
             return options.strataOptions.find(option => option.code === selectedOption)?.code;
         })
     );
-    const estVolumeTotalHealthLevel = options.proportion50to100Options.find(
-        option => option.code === getStringFieldValue("estVolumeTotalHealthLevel", allFields)
-    )?.code;
-    const estVolumeHospitalHealthLevel = options.proportion50to100Options.find(
-        option => option.code === getStringFieldValue("estVolumeHospitalHealthLevel", allFields)
-    )?.code;
-    const estVolumeCommunityHealthLevel = options.proportion50to100Options.find(
-        option => option.code === getStringFieldValue("estVolumeCommunityHealthLevel", allFields)
-    )?.code;
+    const estVolumeTotalHealthLevel = getOptionCodeFromFieldValue(
+        "estVolumeTotalHealthLevel",
+        options.proportion50to100Options,
+        allFields
+    );
+    const estVolumeHospitalHealthLevel = getOptionCodeFromFieldValue(
+        "estVolumeHospitalHealthLevel",
+        options.proportion50to100Options,
+        allFields
+    );
+    const estVolumeCommunityHealthLevel = getOptionCodeFromFieldValue(
+        "estVolumeCommunityHealthLevel",
+        options.proportion50to100Options,
+        allFields
+    );
 
     if (!antimicrobialClass || !stratas) {
         throw new Error("Missing required AM Class AMC Questionnaire attributes");
