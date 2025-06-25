@@ -4,20 +4,17 @@ import {
     GeneralAMCQuestionnaireAttributes,
     GeneralAMCQuestionnaireBaseAttributes,
 } from "../../../../../domain/entities/amc-questionnaires/GeneralAMCQuestionnaire";
-import { yesNoOption } from "../../../../../domain/entities/amc-questionnaires/YesNoOption";
 import { YesNoUnknownValues } from "../../../../../domain/entities/amc-questionnaires/YesNoUnknownOption";
 import {
     FormFieldState,
     getAllFieldsFromSections,
-    getBooleanFieldValue,
     getFieldIdFromIdsDictionary,
     getStringFieldValue,
 } from "../../../form/presentation-entities/FormFieldsState";
 import { FormState } from "../../../form/presentation-entities/FormState";
 import { GeneralAMCQuestionnaireFormEntity } from "../presentation-entities/QuestionnaireFormEntity";
 import { MapToAMCQuestionnaireParams, MapToFormStateParams } from "./mapperTypes";
-import { getQuestionById, mapToFormOptions } from "./mapperUtils";
-import i18n from "../../../../../locales";
+import { getOptionCodeFromFieldValue, getQuestionById, mapToFormOptions } from "./mapperUtils";
 
 export function mapFormStateToGeneralAMCQuestionnaire(
     params: MapToAMCQuestionnaireParams<GeneralAMCQuestionnaireFormEntity>
@@ -27,23 +24,23 @@ export function mapFormStateToGeneralAMCQuestionnaire(
 
     const allFields: FormFieldState[] = getAllFieldsFromSections(formState.sections);
 
-    const isSameAsLastYear = options.yesNoUnknownNAOptions.find(
-        option => option.code === getStringFieldValue("sameAsLastYear", allFields)
-    )?.code;
-    const shortageInPublicSector = options.yesNoUnknownOptions.find(
-        option => option.code === getStringFieldValue("shortageInPublicSector", allFields)
-    )?.code;
+    const isSameAsLastYear = getOptionCodeFromFieldValue("sameAsLastYear", options.yesNoUnknownNAOptions, allFields);
+    const shortageInPublicSector = getOptionCodeFromFieldValue(
+        "shortageInPublicSector",
+        options.yesNoUnknownOptions,
+        allFields
+    );
     const detailOnShortageInPublicSector = getStringFieldValue("detailOnShortageInPublicSector", allFields);
     const shortageInPrivateSector = options.yesNoUnknownOptions.find(
         option => option.code === getStringFieldValue("shortageInPrivateSector", allFields)
     )?.code;
     const detailOnShortageInPrivateSector = getStringFieldValue("detailOnShortageInPrivateSector", allFields);
     const generalComments = getStringFieldValue("generalComments", allFields);
-    const antibacterials = yesNoOption.getValueFromBoolean(getBooleanFieldValue("antibacterials", allFields));
-    const antifungals = yesNoOption.getValueFromBoolean(getBooleanFieldValue("antifungals", allFields));
-    const antivirals = yesNoOption.getValueFromBoolean(getBooleanFieldValue("antivirals", allFields));
-    const antituberculosis = yesNoOption.getValueFromBoolean(getBooleanFieldValue("antituberculosis", allFields));
-    const antimalaria = yesNoOption.getValueFromBoolean(getBooleanFieldValue("antimalaria", allFields));
+    const antibacterials = getOptionCodeFromFieldValue("antibacterials", options.yesNoOptions, allFields);
+    const antifungals = getOptionCodeFromFieldValue("antifungals", options.yesNoOptions, allFields);
+    const antivirals = getOptionCodeFromFieldValue("antivirals", options.yesNoOptions, allFields);
+    const antituberculosis = getOptionCodeFromFieldValue("antituberculosis", options.yesNoOptions, allFields);
+    const antimalaria = getOptionCodeFromFieldValue("antimalaria", options.yesNoOptions, allFields);
 
     if (
         !isSameAsLastYear ||
@@ -261,11 +258,10 @@ export function mapGeneralAMCQuestionnaireToInitialFormState(
                         id: fromIdsDictionary("antibacterials"),
                         isVisible: true,
                         errors: [],
-                        type: "boolean",
-                        label: i18n.t("Yes"),
-                        value:
-                            yesNoOption.getBooleanFromValue(questionnaireFormEntity?.entity?.antibacterials || "0") ||
-                            false,
+                        type: "radio",
+                        multiple: false,
+                        options: mapToFormOptions(options.yesNoOptions),
+                        value: questionnaireFormEntity?.entity?.antibacterials || "",
                         required: true,
                         showIsRequired: true,
                         text: fromQuestions("antibacterials"),
@@ -275,11 +271,10 @@ export function mapGeneralAMCQuestionnaireToInitialFormState(
                         id: fromIdsDictionary("antifungals"),
                         isVisible: true,
                         errors: [],
-                        type: "boolean",
-                        label: i18n.t("Yes"),
-                        value:
-                            yesNoOption.getBooleanFromValue(questionnaireFormEntity?.entity?.antifungals || "0") ||
-                            false,
+                        type: "radio",
+                        multiple: false,
+                        options: mapToFormOptions(options.yesNoOptions),
+                        value: questionnaireFormEntity?.entity?.antifungals || "",
                         required: true,
                         showIsRequired: true,
                         text: fromQuestions("antifungals"),
@@ -289,11 +284,10 @@ export function mapGeneralAMCQuestionnaireToInitialFormState(
                         id: fromIdsDictionary("antivirals"),
                         isVisible: true,
                         errors: [],
-                        type: "boolean",
-                        label: i18n.t("Yes"),
-                        value:
-                            yesNoOption.getBooleanFromValue(questionnaireFormEntity?.entity?.antivirals || "0") ||
-                            false,
+                        type: "radio",
+                        multiple: false,
+                        options: mapToFormOptions(options.yesNoOptions),
+                        value: questionnaireFormEntity?.entity?.antivirals || "",
                         required: true,
                         showIsRequired: true,
                         text: fromQuestions("antivirals"),
@@ -303,11 +297,10 @@ export function mapGeneralAMCQuestionnaireToInitialFormState(
                         id: fromIdsDictionary("antituberculosis"),
                         isVisible: true,
                         errors: [],
-                        type: "boolean",
-                        label: i18n.t("Yes"),
-                        value:
-                            yesNoOption.getBooleanFromValue(questionnaireFormEntity?.entity?.antituberculosis || "0") ||
-                            false,
+                        type: "radio",
+                        multiple: false,
+                        options: mapToFormOptions(options.yesNoOptions),
+                        value: questionnaireFormEntity?.entity?.antituberculosis || "",
                         required: true,
                         showIsRequired: true,
                         text: fromQuestions("antituberculosis"),
@@ -317,11 +310,10 @@ export function mapGeneralAMCQuestionnaireToInitialFormState(
                         id: fromIdsDictionary("antimalaria"),
                         isVisible: true,
                         errors: [],
-                        type: "boolean",
-                        label: i18n.t("Yes"),
-                        value:
-                            yesNoOption.getBooleanFromValue(questionnaireFormEntity?.entity?.antimalaria || "0") ||
-                            false,
+                        type: "radio",
+                        multiple: false,
+                        options: mapToFormOptions(options.yesNoOptions),
+                        value: questionnaireFormEntity?.entity?.antimalaria || "",
                         required: true,
                         showIsRequired: true,
                         text: fromQuestions("antimalaria"),
