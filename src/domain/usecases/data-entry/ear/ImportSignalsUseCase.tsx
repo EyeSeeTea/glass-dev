@@ -8,6 +8,7 @@ import { generateId } from "../../../entities/Ref";
 import { Signal, SignalStatusTypes } from "../../../entities/Signal";
 import { NotificationRepository } from "../../../repositories/NotificationRepository";
 import { TrackerEvent, TrackerEventDataValue } from "../../../entities/TrackedEntityInstance";
+import { formatDate } from "../../../../utils/dates";
 
 export const EAR_PROGRAM_ID = "SQe26z0smFP";
 export const EAR_PROGRAM_STAGE_ID = "Oic1c7maX1g";
@@ -41,6 +42,16 @@ export class ImportSignalsUseCase {
                 return this.dhis2EventsDefaultRepository
                     .import({ events: events }, "CREATE_AND_UPDATE")
                     .flatMap(importSummary => {
+                        if (importSummary.status === "ERROR") {
+                            return Future.error(
+                                `EAR-IMPORT-ERROR: ${importSummary.validationReport?.errorReports
+                                    ?.map(e => e.message)
+                                    .join(", ")}`
+                            );
+                        }
+                        if (!importSummary.bundleReport) {
+                            return Future.error("EAR-IMPORT-ERROR: No bundle report found in import summary");
+                        }
                         // const eventId = importSummary.importSummaries?.at(0)?.reference;
                         const eventId = importSummary.bundleReport.typeReportMap.EVENT.objectReports[0]?.uid;
                         if (importSummary.status === "OK" && eventId) {
@@ -136,6 +147,11 @@ export class ImportSignalsUseCase {
                             dataElement: q.id,
                             value: q.value.code,
                         };
+                    } else if (q.type === "date" && q.value) {
+                        return {
+                            dataElement: q.id,
+                            value: formatDate(q.value),
+                        };
                     } else {
                         message = message + `${q.text} : ${q.value} \n\n`;
                         return {
@@ -165,7 +181,7 @@ export class ImportSignalsUseCase {
                 program: EAR_PROGRAM_ID,
                 programStage: EAR_PROGRAM_STAGE_ID,
                 status: eventStatus,
-                occurredAt: new Date().toISOString().split("T")?.at(0) || "",
+                occurredAt: formatDate(new Date()),
                 //@ts-ignore
                 dataValues: dataValues,
             };
