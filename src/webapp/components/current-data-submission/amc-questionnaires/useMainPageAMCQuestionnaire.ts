@@ -29,10 +29,11 @@ type MainPageAMCQuestionnaireState = {
     onSaveForm: () => void;
     onCloseQuestionnaireForm: () => void;
     openQuestionnaireForm: (formType: AMCQuestionnaireFormType, id?: Id) => void;
+    questionnaireError: Maybe<Error>;
 };
 
 export function useMainPageAMCQuestionnaire(): MainPageAMCQuestionnaireState {
-    const { questionnaire, questionnaireIsLoading } = useAMCQuestionnaireContext();
+    const { questionnaire, questionnaireIsLoading, questionnaireError } = useAMCQuestionnaireContext();
     const formOptions = useAMCQuestionnaireOptionsContext();
 
     const [isEditMode, setIsEditMode] = useState(false);
@@ -97,5 +98,6 @@ export function useMainPageAMCQuestionnaire(): MainPageAMCQuestionnaireState {
         onSaveForm: onCancelEditMode,
         onCloseQuestionnaireForm,
         openQuestionnaireForm,
+        questionnaireError,
     };
 }

@@ -33,6 +33,14 @@ const amClassOptionToGeneralMap: Record<AntimicrobialClassValue, keyof GeneralAM
 } as const;
 
 export class AMCQuestionnaire extends Struct<AMCQuestionnaireAttrs>() {
+    constructor(_attributes: AMCQuestionnaireAttrs) {
+        super(_attributes);
+        const validationResults = this.validate();
+        if (validationResults.length > 0) {
+            throw new Error(`Invalid AMCQuestionnaire: ${validationResults.join(", ")}`);
+        }
+    }
+
     public validate(): ValidationErrorKey[] {
         const validationErrors: ValidationErrorKey[] = [];
         if (!this.validateAMClassQuestionnairesHasOptionChecked()) {
