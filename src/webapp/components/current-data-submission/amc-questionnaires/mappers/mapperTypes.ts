@@ -23,12 +23,13 @@ export type MapToFormStateParams<T extends QuestionnaireFormEntity> = {
 };
 
 export type MapToFormStateFunction<T extends QuestionnaireFormEntity> = (params: MapToFormStateParams<T>) => FormState;
+export type MapToAMCQuestionnaireFunction<T extends QuestionnaireFormEntity> = (
+    params: MapToAMCQuestionnaireParams<T>
+) => T["entity"];
 
 export type AMCQuestionnaireFormMapper = {
     [key in AMCQuestionnaireFormType]: {
-        mapFormStateToEntity: (
-            params: MapToAMCQuestionnaireParams<QuestionnaireFormEntityMap[key]>
-        ) => QuestionnaireFormEntityMap[key]["entity"];
+        mapFormStateToEntity: MapToAMCQuestionnaireFunction<QuestionnaireFormEntityMap[key]>;
         mapEntityToFormState: MapToFormStateFunction<QuestionnaireFormEntityMap[key]>;
     };
 };
