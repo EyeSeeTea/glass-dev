@@ -10,6 +10,7 @@ type FormFieldStateBase<T> = {
     label?: string;
     text?: string;
     placeholder?: string;
+    infoTooltipText?: string;
     helperText?: string;
     errors: string[];
     required?: boolean;
