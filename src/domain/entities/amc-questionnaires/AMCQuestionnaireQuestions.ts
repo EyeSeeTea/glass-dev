@@ -6,6 +6,7 @@ export type AMCQuestionId = GeneralAMCQuestionId | AMClassAMCQuestionId | Compon
 
 export type AMCQuestion = {
     text: string;
+    description?: string;
     id: AMCQuestionId;
 };
 

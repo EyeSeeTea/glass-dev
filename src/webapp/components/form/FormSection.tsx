@@ -5,6 +5,8 @@ import { DataTable, TableHead, DataTableRow, DataTableColumnHeader, TableBody, D
 
 import { FieldWidget } from "./FieldWidget";
 import { FormFieldState } from "./presentation-entities/FormFieldsState";
+import { InfoTooltip } from "./InfoTooltip";
+import { palette } from "../../pages/app/themes/dhis2.theme";
 
 type FormSectionProps = {
     id: string;
@@ -33,7 +35,10 @@ export const FormSection: React.FC<FormSectionProps> = React.memo(({ title, fiel
                           return (
                               <StyledDataTableRow key={field.id}>
                                   <DataTableCell width="60%">
-                                      <StyledTextField required={field.required || false}>{field.text}</StyledTextField>
+                                      <StyledTextField required={field.required || false} disabled={field.disabled}>
+                                          {field.text}
+                                      </StyledTextField>
+                                      {field.infoTooltipText && <InfoTooltip text={field.infoTooltipText} />}
                                   </DataTableCell>
 
                                   <DataTableCell>
@@ -65,9 +70,10 @@ const StyledDataTableRow = styled(DataTableRow)`
     }
 `;
 
-const StyledTextField = styled.span<{ required: boolean }>`
+const StyledTextField = styled.span<{ required: boolean; disabled?: boolean }>`
     ::after {
         content: ${props => (props.required ? "'*'" : "''")};
         margin-inline-start: 4px;
+        color: ${props => (props.required && !props.disabled ? palette.error.main : "inherit")};
     }
 `;
