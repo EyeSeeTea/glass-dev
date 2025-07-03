@@ -1,27 +1,24 @@
 import { useSnackbar } from "@eyeseetea/d2-ui-components";
 import React, { useEffect } from "react";
 import { useAMCQuestionnaireContext } from "../../../../contexts/amc-questionnaire-context";
-import { useSaveAMCQuestionnaireForm } from "../hooks/useSaveAMCQuestionnaireForm";
 import { AMCQuestionnaireComponent } from "../AMCQuestionnaireComponent";
-import { useLoadAMCQuestionnaireForm } from "../hooks/useLoadAMCQuestionnaireForm";
 import { useChangeAMCQuestionnaireForm } from "../hooks/useChangeAMCQuestionnaireForm";
 import { AMCQuestionnaireFormPageProps } from "./AMCQuestionnaireFormPageProps";
+import { useLoadComponentAMCQuestionnaireForm } from "../hooks/useLoad/useLoadComponentAMCQuestionnaireForm";
+import { useSaveComponentAMCQuestionnaireForm } from "../hooks/useSave/useSaveComponentAMCQuestionnaireForm";
 
 export const ComponentAMCQuestionnaireFormPage: React.FC<AMCQuestionnaireFormPageProps> = React.memo(props => {
     const { id, orgUnitId, period, onSave, onCancel, isViewOnlyMode = false, showFormButtons = true } = props;
     const { globalMessage } = useAMCQuestionnaireContext();
 
     const snackbar = useSnackbar();
-    const { formLabels, formState, setFormState, questionnaireFormEntity } = useLoadAMCQuestionnaireForm({
-        formType: "component-questionnaire",
+    const { formLabels, formState, setFormState, questionnaireFormEntity } = useLoadComponentAMCQuestionnaireForm({
         id,
         orgUnitId,
         period,
         isViewOnlyMode,
     });
-    const { save, isLoading: isSaveLoading } = useSaveAMCQuestionnaireForm({
-        formType: "component-questionnaire",
-    });
+    const { save, isLoading: isSaveLoading } = useSaveComponentAMCQuestionnaireForm();
     const { handleFormChange } = useChangeAMCQuestionnaireForm({
         questionnaireFormEntity,
         setFormState,
