@@ -7,10 +7,10 @@ import { Maybe } from "../../../../../types/utils";
 import { useAMCQuestionnaireContext } from "../../../../contexts/amc-questionnaire-context";
 import { useAMCQuestionnaireOptionsContext } from "../../../../contexts/amc-questionnaire-options-context";
 import { useAppContext } from "../../../../contexts/app-context";
+import { FormLoadState } from "../../../form/presentation-entities/FormState";
 import { amcQuestionnaireMappers } from "../mappers";
 import { AMCQuestionnaireFormType } from "../presentation-entities/AMCQuestionnaireFormType";
 import { QuestionnaireFormEntityMap } from "../presentation-entities/QuestionnaireFormEntity";
-import { FormLoadState } from "./useLoadAMCQuestionnaireForm";
 
 type SaveOptions<T extends AMCQuestionnaireFormType> = {
     id: Maybe<Id>;

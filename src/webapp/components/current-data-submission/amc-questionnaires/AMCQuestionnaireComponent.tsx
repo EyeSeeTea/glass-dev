@@ -5,10 +5,10 @@ import { CircularProgress } from "@material-ui/core";
 
 import { Form } from "../../form/Form";
 import { useAMCQuestionnaireContext } from "../../../contexts/amc-questionnaire-context";
-import { FormLoadState } from "./hooks/useLoadAMCQuestionnaireForm";
 import { FormFieldState } from "../../form/presentation-entities/FormFieldsState";
 import { Maybe } from "../../../../types/utils";
 import { FormLables } from "./presentation-entities/QuestionnaireFormEntity";
+import { FormLoadState } from "../../form/presentation-entities/FormState";
 
 type AMCQuestionnaireComponentProps = {
     formState: FormLoadState;

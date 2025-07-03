@@ -12,6 +12,22 @@ export type FormState = {
     isValid: boolean;
 };
 
+type FormStateLoaded = {
+    kind: "loaded";
+    data: FormState;
+};
+
+type FormStateLoading = {
+    kind: "loading";
+};
+
+type FormStateError = {
+    kind: "error";
+    message: string;
+};
+
+export type FormLoadState = FormStateLoaded | FormStateLoading | FormStateError;
+
 // UPDATES:
 
 export function updateFormStateAndApplySideEffects(

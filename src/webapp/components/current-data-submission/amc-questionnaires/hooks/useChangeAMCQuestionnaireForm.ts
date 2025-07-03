@@ -1,10 +1,10 @@
 import React from "react";
 import { Maybe } from "../../../../../types/utils";
 import { FormFieldState } from "../../../form/presentation-entities/FormFieldsState";
+import { FormLoadState } from "../../../form/presentation-entities/FormState";
 import { updateAndValidateFormState } from "../../../form/presentation-entities/utils/updateAndValidateFormState";
 import { AMCQuestionnaireFormType } from "../presentation-entities/AMCQuestionnaireFormType";
 import { QuestionnaireFormEntityMap } from "../presentation-entities/QuestionnaireFormEntity";
-import { FormLoadState } from "./useLoadAMCQuestionnaireForm";
 
 export function useChangeAMCQuestionnaireForm<T extends AMCQuestionnaireFormType>(params: {
     setFormState: React.Dispatch<React.SetStateAction<FormLoadState>>;

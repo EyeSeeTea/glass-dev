@@ -7,27 +7,11 @@ import {
     getQuestionnaireFormEntity,
     QuestionnaireFormEntityMap,
 } from "../presentation-entities/QuestionnaireFormEntity";
-import { FormState } from "../../../form/presentation-entities/FormState";
 import { AMCQuestionnaireFormType } from "../presentation-entities/AMCQuestionnaireFormType";
 import { useAMCQuestionnaireOptionsContext } from "../../../../contexts/amc-questionnaire-options-context";
 import { amcQuestionnaireMappers } from "../mappers";
 import { useAMCQuestionnaireContext } from "../../../../contexts/amc-questionnaire-context";
-
-export type FormStateLoaded = {
-    kind: "loaded";
-    data: FormState;
-};
-
-export type FormStateLoading = {
-    kind: "loading";
-};
-
-export type FormStateError = {
-    kind: "error";
-    message: string;
-};
-
-export type FormLoadState = FormStateLoaded | FormStateLoading | FormStateError;
+import { FormLoadState } from "../../../form/presentation-entities/FormState";
 
 type State<T extends AMCQuestionnaireFormType> = {
     formLabels: Maybe<FormLables>;
