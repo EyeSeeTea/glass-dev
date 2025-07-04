@@ -20,6 +20,12 @@ type BaseFormData = {
     type: AMCQuestionnaireFormType;
 };
 
+export type AMCQuestionnaireMap = {
+    "general-questionnaire": GeneralAMCQuestionnaire;
+    "am-class-questionnaire": AMClassAMCQuestionnaire;
+    "component-questionnaire": ComponentAMCQuestionnaire;
+};
+
 export type GeneralAMCQuestionnaireFormEntity = BaseFormData & {
     type: "general-questionnaire";
     entity: Maybe<GeneralAMCQuestionnaire>;
@@ -43,28 +49,25 @@ export type QuestionnaireFormEntityMap = {
 
 export type QuestionnaireFormEntity = QuestionnaireFormEntityMap[AMCQuestionnaireFormType];
 
+type FormEntityGetterFunction<T extends AMCQuestionnaireFormType> = (
+    amcQuestions: AMCQuestionnaireQuestions,
+    entity?: Maybe<AMCQuestionnaireMap[T]>
+) => Extract<QuestionnaireFormEntityMap[T], { type: T }>;
+
+type FormEntityGetterMap = {
+    [key in AMCQuestionnaireFormType]: FormEntityGetterFunction<key>;
+};
+
+const formEntityGetters: FormEntityGetterMap = {
+    "general-questionnaire": getGeneralAMCQuestionnaireFormEntity,
+    "am-class-questionnaire": getAMClassAMCQuestionnaireFormEntity,
+    "component-questionnaire": getComponentAMCQuestionnaireFormEntity,
+};
+
 export function getQuestionnaireFormEntity<T extends AMCQuestionnaireFormType>(
     type: T,
     amcQuestions: AMCQuestionnaireQuestions,
-    entity?: QuestionnaireFormEntityMap[T]["entity"]
-): QuestionnaireFormEntityMap[T] {
-    switch (type) {
-        case "general-questionnaire":
-            return getGeneralAMCQuestionnaireFormEntity(
-                amcQuestions,
-                entity as Maybe<GeneralAMCQuestionnaire>
-            ) as QuestionnaireFormEntityMap[T];
-        case "am-class-questionnaire":
-            return getAMClassAMCQuestionnaireFormEntity(
-                amcQuestions,
-                entity as Maybe<AMClassAMCQuestionnaire>
-            ) as QuestionnaireFormEntityMap[T];
-        case "component-questionnaire":
-            return getComponentAMCQuestionnaireFormEntity(
-                amcQuestions,
-                entity as Maybe<ComponentAMCQuestionnaire>
-            ) as QuestionnaireFormEntityMap[T];
-        default:
-            throw new Error(`Unsupported questionnaire type: ${type}`);
-    }
+    entity?: AMCQuestionnaireMap[T]
+): Extract<QuestionnaireFormEntityMap[T], { type: T }> {
+    return formEntityGetters[type](amcQuestions, entity);
 }
