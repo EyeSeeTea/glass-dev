@@ -6,7 +6,7 @@ export class DataSourceOptionsD2Repository
     extends OptionsD2Repository<DataSourceValue>
     implements DataSourceOptionsRepository
 {
-    protected optionSetCode = "YxVWiSz3pVA";
+    protected optionSetCode = "KxaU7AN3WyS";
     protected optionSetName = "Data Source OptionSet";
     protected options = dataSourceOption;
 }
