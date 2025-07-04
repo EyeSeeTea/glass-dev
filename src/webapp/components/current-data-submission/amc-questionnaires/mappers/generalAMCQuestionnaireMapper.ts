@@ -148,7 +148,7 @@ export function mapGeneralAMCQuestionnaireToInitialFormState(
         isValid: false,
         sections: [
             {
-                title: "General questionnaire",
+                title: "Data comparability with previous year's data",
                 id: "general_section",
                 isVisible: true,
                 required: true,
@@ -169,7 +169,7 @@ export function mapGeneralAMCQuestionnaireToInitialFormState(
                 ],
             },
             {
-                title: "Public sector",
+                title: "Shortages in public sector",
                 id: "public_sector_section",
                 isVisible: true,
                 required: true,
@@ -201,7 +201,7 @@ export function mapGeneralAMCQuestionnaireToInitialFormState(
                 ],
             },
             {
-                title: "Private sector",
+                title: "Shortages in private sector",
                 id: "private_sector_section",
                 isVisible: true,
                 required: true,
@@ -252,7 +252,7 @@ export function mapGeneralAMCQuestionnaireToInitialFormState(
                 ],
             },
             {
-                title: "AM class",
+                title: "Antimicrobial classes reported",
                 id: "am_class_section",
                 isVisible: true,
                 required: true,
