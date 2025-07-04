@@ -14,7 +14,7 @@ import { FormLoadState } from "../../../../form/presentation-entities/FormState"
 import { AMCQuestionnaireFormType } from "../../presentation-entities/AMCQuestionnaireFormType";
 import { AMCQuestionnaire } from "../../../../../../domain/entities/amc-questionnaires/AMCQuestionnaire";
 
-type State<T extends AMCQuestionnaireFormType> = {
+export type UseLoadFormResult<T extends AMCQuestionnaireFormType> = {
     formLabels: Maybe<FormLables>;
     formState: FormLoadState;
     setFormState: (state: FormLoadState | ((prevState: FormLoadState) => FormLoadState)) => void;
@@ -33,7 +33,7 @@ export function useLoadAMCQuestionnaireForm<T extends AMCQuestionnaireFormType>(
         formType: T;
         finderFunction: (amcQuestionnaire: AMCQuestionnaire, id?: Id) => Maybe<AMCQuestionnaireMap[T]>;
     }
-): State<T> {
+): UseLoadFormResult<T> {
     const { id, orgUnitId, period, isViewOnlyMode, formType, finderFunction } = params;
     const { questionnaire: rootQuestionnaire, questions } = useAMCQuestionnaireContext();
     const options = useAMCQuestionnaireOptionsContext();

@@ -1,16 +1,12 @@
-import { Maybe } from "../../../../../../utils/ts-utils";
-import { ComponentAMCQuestionnaireFormEntity, FormLables } from "../../presentation-entities/QuestionnaireFormEntity";
-import { FormLoadState } from "../../../../form/presentation-entities/FormState";
-import { useLoadAMCQuestionnaireForm, UseLoadAMCQuestionnaireFormParamsBase } from "./useLoadAMCQuestionnaireForm";
+import {
+    useLoadAMCQuestionnaireForm,
+    UseLoadAMCQuestionnaireFormParamsBase,
+    UseLoadFormResult,
+} from "./useLoadAMCQuestionnaireForm";
 
-type State = {
-    formLabels: Maybe<FormLables>;
-    formState: FormLoadState;
-    setFormState: (state: FormLoadState | ((prevState: FormLoadState) => FormLoadState)) => void;
-    questionnaireFormEntity: Maybe<ComponentAMCQuestionnaireFormEntity>;
-};
-
-export function useLoadComponentAMCQuestionnaireForm(params: UseLoadAMCQuestionnaireFormParamsBase): State {
+export function useLoadComponentAMCQuestionnaireForm(
+    params: UseLoadAMCQuestionnaireFormParamsBase
+): UseLoadFormResult<"component-questionnaire"> {
     return useLoadAMCQuestionnaireForm({
         ...params,
         formType: "component-questionnaire",
