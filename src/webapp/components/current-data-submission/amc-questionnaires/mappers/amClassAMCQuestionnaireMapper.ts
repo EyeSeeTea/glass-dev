@@ -106,11 +106,11 @@ export function mapAMClassAMCQuestionnaireToInitialFormState(
 
     return {
         id: questionnaireFormEntity.entity?.id ?? "",
-        title: "AM Class questionnaire",
+        title: "Antimicrobial classes questionnaire",
         isValid: false,
         sections: [
             {
-                title: "AM Class General questionnaire",
+                title: "Antimicrobial classes ",
                 id: "general_section",
                 isVisible: true,
                 required: true,
