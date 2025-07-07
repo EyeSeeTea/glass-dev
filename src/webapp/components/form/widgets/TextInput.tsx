@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { TextField, InputLabel } from "@material-ui/core";
 import styled from "styled-components";
 import { useDebounce } from "../../../hooks/useDebounce";
+import { palette } from "../../../pages/app/themes/dhis2.theme";
 
 type TextInputProps = {
     id: string;
@@ -77,15 +78,19 @@ const Label = styled(InputLabel)`
     }
 `;
 
-const StyledTextField = styled(TextField)<{ error?: boolean }>`
-    height: 40px;
+const StyledTextField = styled(TextField)<{ error?: boolean; disabled?: boolean; helperText?: string }>`
+    height: ${({ helperText }) => (helperText ? "auto" : "40px")};
     .MuiOutlinedInput-root {
-        height: 40px;
+        height: ${({ helperText }) => (helperText ? "auto" : "40px")};
+        background-color: ${({ disabled }) => (disabled ? palette.background.default : "inherit")};
+        opacity: ${({ disabled }) => (disabled ? 0.8 : 1)};
     }
     .MuiFormHelperText-root {
+        color: ${({ disabled }) => (disabled ? palette.text.disabled : "inherit")};
     }
     .MuiInputBase-input {
         padding-inline: 12px;
         padding-block: 10px;
+        color: ${({ disabled }) => (disabled ? palette.text.disabled : "inherit")};
     }
 `;
