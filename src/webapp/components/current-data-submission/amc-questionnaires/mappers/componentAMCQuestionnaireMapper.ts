@@ -60,7 +60,7 @@ export function mapFormStateToComponentAMCQuestionnaire(
     );
     const commentsForDataSources = getStringFieldValue("commentsForDataSources", allFields);
     const sameAsUNPopulation = yesNoOption.getValueFromBoolean(getBooleanFieldValue("sameAsUNPopulation", allFields));
-    const unPopulation = parseInt(getStringFieldValue("unPopulation", allFields));
+    const unPopulation = parseInt(getStringFieldValue("unPopulation", allFields)) || undefined;
     const sourceOfNationalPopulation = options.nationalPopulationDataSourceOptions.find(
         option => option.code === getStringFieldValue("sourceOfNationalPopulation", allFields)
     )?.code;
@@ -355,7 +355,7 @@ export function mapComponentAMCQuestionnaireToInitialFormState(
                         value: questionnaireFormEntity?.entity?.unPopulation?.toString() || "",
                         required: false,
                         text: fromQuestions("unPopulation"),
-                        disabled: true,
+                        disabled: false,
                     },
                     {
                         id: fromIdsDictionary("sourceOfNationalPopulation"),
