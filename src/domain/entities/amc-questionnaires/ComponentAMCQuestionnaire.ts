@@ -42,6 +42,7 @@ export type ComponentAMCQuestionnaireResponsesAttributes = {
     sourcesOfDataReported: DataSourceValue[];
     commentsForDataSources: Maybe<string>;
     sameAsUNPopulation: YesNoValue;
+    unPopulation: Maybe<number>;
     sourceOfNationalPopulation: Maybe<NationalPopulationDataSourceValue>;
     otherSourceForNationalPopulation: Maybe<string>;
     commentOnNationalPopulation: Maybe<string>;

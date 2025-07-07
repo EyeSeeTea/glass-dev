@@ -60,6 +60,7 @@ export function mapFormStateToComponentAMCQuestionnaire(
     );
     const commentsForDataSources = getStringFieldValue("commentsForDataSources", allFields);
     const sameAsUNPopulation = yesNoOption.getValueFromBoolean(getBooleanFieldValue("sameAsUNPopulation", allFields));
+    const unPopulation = parseInt(getStringFieldValue("unPopulation", allFields));
     const sourceOfNationalPopulation = options.nationalPopulationDataSourceOptions.find(
         option => option.code === getStringFieldValue("sourceOfNationalPopulation", allFields)
     )?.code;
@@ -95,6 +96,7 @@ export function mapFormStateToComponentAMCQuestionnaire(
         sourcesOfDataReported: sourcesOfDataReported,
         commentsForDataSources: commentsForDataSources,
         sameAsUNPopulation: sameAsUNPopulation,
+        unPopulation: unPopulation,
         sourceOfNationalPopulation: sourceOfNationalPopulation,
         otherSourceForNationalPopulation: otherSourceForNationalPopulation,
         commentOnNationalPopulation: commentOnNationalPopulation,
@@ -157,6 +159,7 @@ export const ComponentAMCQuestionnaireFieldIds = {
     sourcesOfDataReported: "sourcesOfDataReported",
     commentsForDataSources: "commentsForDataSources",
     sameAsUNPopulation: "sameAsUNPopulation",
+    unPopulation: "unPopulation",
     sourceOfNationalPopulation: "sourceOfNationalPopulation",
     otherSourceForNationalPopulation: "otherSourceForNationalPopulation",
     commentOnNationalPopulation: "commentOnNationalPopulation",
@@ -341,6 +344,18 @@ export function mapComponentAMCQuestionnaireToInitialFormState(
                         showIsRequired: true,
                         text: fromQuestions("sameAsUNPopulation"),
                         disabled: isViewOnlyMode,
+                    },
+                    {
+                        id: fromIdsDictionary("unPopulation"),
+                        isVisible: yesNoOption.getBooleanFromValue(
+                            questionnaireFormEntity?.entity?.sameAsUNPopulation || "0"
+                        ),
+                        errors: [],
+                        type: "text",
+                        value: questionnaireFormEntity?.entity?.unPopulation?.toString() || "",
+                        required: false,
+                        text: fromQuestions("unPopulation"),
+                        disabled: true,
                     },
                     {
                         id: fromIdsDictionary("sourceOfNationalPopulation"),

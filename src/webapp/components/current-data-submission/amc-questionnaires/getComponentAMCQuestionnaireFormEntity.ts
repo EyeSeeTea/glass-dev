@@ -52,6 +52,22 @@ function getStratumFieldValueOverrides(
     };
 }
 
+function toggleUnPopulationField(visible: boolean): OverrideFieldsByFieldValue["overrideFieldsCallback"] {
+    return function (formState: FormState): ReturnType<OverrideFieldsByFieldValue["overrideFieldsCallback"]> {
+        const unPopulationField = getFieldByIdFromSections(formState.sections, "unPopulation");
+        if (!unPopulationField || unPopulationField.type !== "text") {
+            return [];
+        }
+        return [
+            {
+                id: unPopulationField.id,
+                isVisible: visible,
+                value: visible ? unPopulationField.value : "",
+            },
+        ];
+    };
+}
+
 function getComponentAMCQuestionnaireFormLabelsRules(): { rules: FormRule[]; labels: FormLables } {
     return {
         labels: {
@@ -116,6 +132,20 @@ function getComponentAMCQuestionnaireFormLabelsRules(): { rules: FormRule[]; lab
                     disabled: false,
                 })),
                 triggerOnLoad: false,
+            },
+            {
+                type: "overrideFieldsOnChange",
+                fieldId: "sameAsUNPopulation",
+                fieldValue: true,
+                overrideFieldsCallback: toggleUnPopulationField(true),
+                triggerOnLoad: true,
+            },
+            {
+                type: "overrideFieldsOnChange",
+                fieldId: "sameAsUNPopulation",
+                fieldValue: false,
+                overrideFieldsCallback: toggleUnPopulationField(false),
+                triggerOnLoad: true,
             },
         ],
     };
