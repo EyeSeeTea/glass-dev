@@ -136,6 +136,8 @@ import { GetNationalPopulationDataSourceOptionsUseCase } from "./domain/usecases
 import { GetProcurementLevelOptionsUseCase } from "./domain/usecases/amc-questionnaires/GetProcurementLevelOptionsUseCase";
 import { GetStrataOptionsUseCase } from "./domain/usecases/amc-questionnaires/GetStrataOptionsUseCase";
 import { SaveComponentAMCQuestionnaireUseCase } from "./domain/usecases/amc-questionnaires/SaveComponentAMCQuestionnaireUseCase";
+import { UNPopulationD2Repository } from "./data/repositories/amc-questionnaires/UNPopulationD2Repository";
+import { GetUNPopulationUseCase } from "./domain/usecases/amc-questionnaires/GetUNPopulationUseCase";
 
 export function getCompositionRoot(instance: Instance) {
     const api = getD2APiFromInstance(instance);
@@ -189,6 +191,7 @@ export function getCompositionRoot(instance: Instance) {
     const procurementLevelOptionsD2Repository = new ProcurementLevelOptionsD2Repository(api);
     const proportion50to100UnknownOptionsD2Repository = new Proportion50to100UnknownOptionsD2Repository(api);
     const strataOptionsRepository = new StrataOptionsD2Repository(api);
+    const unPopulationRepository = new UNPopulationD2Repository(api);
 
     return {
         instance: getExecute({
@@ -429,6 +432,7 @@ export function getCompositionRoot(instance: Instance) {
             ),
             getProcurementLevelOptions: new GetProcurementLevelOptionsUseCase(procurementLevelOptionsD2Repository),
             getStrataOptions: new GetStrataOptionsUseCase(strataOptionsRepository),
+            getUNPopulation: new GetUNPopulationUseCase(unPopulationRepository),
         }),
     };
 }

@@ -11,10 +11,11 @@ import {
 } from "../FormState";
 import { applyRulesInFormState } from "./applyRulesInFormState";
 
-export function updateAndValidateFormState(
+export function updateAndValidateFormState<ContextType extends object>(
     prevFormState: FormState,
     updatedField: FormFieldState,
-    questionnaireFormEntity: QuestionnaireFormEntity
+    questionnaireFormEntity: QuestionnaireFormEntity,
+    context?: ContextType
 ): FormState {
     const updatedForm = updateFormStateAndApplySideEffects(prevFormState, updatedField);
 
@@ -24,7 +25,7 @@ export function updateAndValidateFormState(
         ).length > 0;
 
     const updatedFormWithRulesApplied = hasUpdatedFieldAnyRule
-        ? applyRulesInFormState(updatedForm, updatedField, questionnaireFormEntity.rules, "change")
+        ? applyRulesInFormState(updatedForm, updatedField, questionnaireFormEntity.rules, "change", context)
         : updatedForm;
 
     const fieldValidationErrors = validateFormState(updatedFormWithRulesApplied, updatedField);
