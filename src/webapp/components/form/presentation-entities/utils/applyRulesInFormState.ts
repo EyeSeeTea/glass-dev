@@ -1,13 +1,14 @@
 import { FormFieldState, getAllFieldsFromSections } from "../FormFieldsState";
 import { FormRule } from "../FormRule";
-import { FormRuleExecEvent, FormRulesImplementation } from "../FormRulesImplementation";
+import { FormRuleExecEvent, getFormRuleImplementation } from "../FormRulesImplementation";
 import { FormState } from "../FormState";
 
-export function applyRulesInFormState(
+export function applyRulesInFormState<ContextType extends object>(
     currentFormState: FormState,
     triggerField: FormFieldState,
     formRules: FormRule[],
-    event: FormRuleExecEvent
+    event: FormRuleExecEvent,
+    context?: ContextType
 ): FormState {
     const filteredRulesByFieldId = formRules.filter(rule =>
         "fieldIds" in rule ? rule.fieldIds.includes(triggerField.id) : rule.fieldId === triggerField.id
@@ -21,7 +22,14 @@ export function applyRulesInFormState(
         return {
             ...formState,
             sections: formState.sections.map(section =>
-                FormRulesImplementation[rule.type]({ section, triggerField, rule, formState, event })
+                getFormRuleImplementation(rule.type)({
+                    section,
+                    triggerField,
+                    rule,
+                    formState,
+                    event,
+                    context: context,
+                })
             ),
         };
     }, currentFormState);
