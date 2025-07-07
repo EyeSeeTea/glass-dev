@@ -78,6 +78,7 @@ export function mapD2EventToComponentAMCQuestionnaire(d2Event: D2Event): Compone
         sourcesOfDataReported: sourcesOfDataReported,
         commentsForDataSources: fromMap("commentsForDataSources"),
         sameAsUNPopulation: sameAsUNPopulation,
+        unPopulation: fromMap("unPopulation") ? parseInt(fromMap("unPopulation")) : undefined,
         sourceOfNationalPopulation: nationalPopulationDataSourceOption.getSafeValue(
             fromMap("sourceOfNationalPopulation")
         ),
@@ -107,6 +108,7 @@ function getValuesFromComponentAMCQuestionnaire(
         AMR_GLASS_AMC_DE_DATA_SOURCE: componentAMCQuestionnaire.sourcesOfDataReported.join(","),
         AMR_GLASS_AMC_DE_DATA_SOURCE_COMMENT: componentAMCQuestionnaire.commentsForDataSources ?? "",
         AMR_GLASS_AMC_DE_POP_SAME_UN: componentAMCQuestionnaire.sameAsUNPopulation,
+        AMR_GLASS_AMC_DE_POP_UN: componentAMCQuestionnaire.unPopulation?.toString() ?? "",
         AMR_GLASS_AMC_DE_POP_NAT_SOURCE: componentAMCQuestionnaire.sourceOfNationalPopulation ?? "",
         AMR_GLASS_AMC_DE_POP_NAT_SOURCE_OTHER: componentAMCQuestionnaire.otherSourceForNationalPopulation ?? "",
         AMR_GLASS_AMC_DE_POP_NAT_COMMENT: componentAMCQuestionnaire.commentOnNationalPopulation ?? "",

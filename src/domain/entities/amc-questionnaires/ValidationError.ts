@@ -13,7 +13,7 @@ export enum ValidationErrorKey {
 
 export type ValidationError = {
     property: string;
-    value: string | boolean | Date | Maybe<string> | string[] | null | Maybe<File>;
+    value: string | boolean | Date | Maybe<string> | string[] | null | Maybe<File> | number | Maybe<number>;
     errors: ValidationErrorKey[];
 };
 
