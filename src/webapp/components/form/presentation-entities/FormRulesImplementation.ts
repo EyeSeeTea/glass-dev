@@ -7,22 +7,39 @@ import { FormState } from "./FormState";
 
 export type FormRuleExecEvent = "change" | "load";
 
-export type FormRuleExecOptions = {
+export type FormRuleExecOptions<ContextType extends object> = {
     formState: FormState;
-    rule: FormRule;
+    rule: FormRule<ContextType>;
     section: FormSectionState;
     triggerField: FormFieldState;
     event: FormRuleExecEvent;
+    context?: ContextType;
 };
 
-export const FormRulesImplementation: Record<FormRule["type"], (options: FormRuleExecOptions) => FormSectionState> = {
-    requiredFieldsByFieldValue: setRequiredFieldsByFieldValueInSection,
-    requiredFieldsByCustomCondition: setRequiredFieldsByFieldsConditionInSection,
-    disableOptionsByFieldValues: setDisabledOptionsByFieldValues,
-    overrideFieldsOnChange: setOverrideFieldsByFieldValue,
-} as const;
+type FormRulesImplementationMap<ContextType extends object> = Record<
+    FormRule<ContextType>["type"],
+    (options: FormRuleExecOptions<ContextType>) => FormSectionState
+>;
 
-export function setRequiredFieldsByFieldValueInSection(options: FormRuleExecOptions): FormSectionState {
+function getFormRulesImplementations<ContextType extends object>(): FormRulesImplementationMap<ContextType> {
+    return {
+        requiredFieldsByFieldValue: setRequiredFieldsByFieldValueInSection,
+        requiredFieldsByCustomCondition: setRequiredFieldsByFieldsConditionInSection,
+        disableOptionsByFieldValues: setDisabledOptionsByFieldValues,
+        overrideFieldsOnChange: setOverrideFieldsByFieldValue,
+    } as FormRulesImplementationMap<ContextType>;
+}
+
+export function getFormRuleImplementation<ContextType extends object>(
+    ruleType: FormRule<ContextType>["type"]
+): (options: FormRuleExecOptions<ContextType>) => FormSectionState {
+    const implementation = getFormRulesImplementations<ContextType>()[ruleType];
+    return implementation;
+}
+
+export function setRequiredFieldsByFieldValueInSection<ContextType extends object>(
+    options: FormRuleExecOptions<ContextType>
+): FormSectionState {
     const { section, rule, triggerField } = options;
     const fieldValue = triggerField.value;
 
@@ -53,7 +70,9 @@ export function setRequiredFieldsByFieldValueInSection(options: FormRuleExecOpti
     }
 }
 
-export function setRequiredFieldsByFieldsConditionInSection(options: FormRuleExecOptions): FormSectionState {
+export function setRequiredFieldsByFieldsConditionInSection<ContextType extends object>(
+    options: FormRuleExecOptions<ContextType>
+): FormSectionState {
     const { section, formState, rule } = options;
     if (rule.type !== "requiredFieldsByCustomCondition") return section;
 
@@ -93,7 +112,9 @@ export function setRequiredFieldsByFieldsConditionInSection(options: FormRuleExe
     }
 }
 
-export function setDisabledOptionsByFieldValues(options: FormRuleExecOptions): FormSectionState {
+export function setDisabledOptionsByFieldValues<ContextType extends object>(
+    options: FormRuleExecOptions<ContextType>
+): FormSectionState {
     const { section, rule } = options;
     if (rule.type !== "disableOptionsByFieldValues") return section;
     const field = section.fields.find(field => field.id === rule.fieldId);
@@ -118,8 +139,10 @@ export function setDisabledOptionsByFieldValues(options: FormRuleExecOptions): F
     };
 }
 
-export function setOverrideFieldsByFieldValue(options: FormRuleExecOptions): FormSectionState {
-    const { section, formState, rule, event } = options;
+export function setOverrideFieldsByFieldValue<ContextType extends object>(
+    options: FormRuleExecOptions<ContextType>
+): FormSectionState {
+    const { section, formState, rule, event, context } = options;
     if (rule.type !== "overrideFieldsOnChange") return section;
     if (!rule.triggerOnLoad && event === "load") return section;
     const fieldValue = getFieldValueByIdFromSections(formState.sections, rule.fieldId);
@@ -130,7 +153,7 @@ export function setOverrideFieldsByFieldValue(options: FormRuleExecOptions): For
     if (fieldValue !== rule.fieldValue) {
         return section; // No override if value is not matching to target
     }
-    const overrideFields = rule.overrideFieldsCallback(formState);
+    const overrideFields = rule.overrideFieldsCallback(formState, context);
 
     const fieldsInSection: FormFieldState[] = section.fields.map(field => {
         const overrideField = overrideFields.find(override => override.id === field.id);

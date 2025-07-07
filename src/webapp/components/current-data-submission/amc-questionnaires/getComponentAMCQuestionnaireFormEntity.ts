@@ -1,7 +1,9 @@
+import i18n from "@eyeseetea/d2-ui-components/locales";
 import { AMCQuestionnaireQuestions } from "../../../../domain/entities/amc-questionnaires/AMCQuestionnaireQuestions";
 import { ComponentAMCQuestionnaire } from "../../../../domain/entities/amc-questionnaires/ComponentAMCQuestionnaire";
 import { DataLevelValues } from "../../../../domain/entities/amc-questionnaires/DataLevelOption";
 import { NationalPopulationDataSourceValues } from "../../../../domain/entities/amc-questionnaires/NationalPopulationDataSourceOption";
+import { UNPopulation } from "../../../../domain/entities/amc-questionnaires/UNPopulation";
 import { YesNoUnknownValues } from "../../../../domain/entities/amc-questionnaires/YesNoUnknownOption";
 import { Maybe } from "../../../../utils/ts-utils";
 import { FormMultipleOptionsFieldState } from "../../form/presentation-entities/FormFieldsState";
@@ -10,6 +12,10 @@ import { getFieldByIdFromSections } from "../../form/presentation-entities/FormS
 import { FormState } from "../../form/presentation-entities/FormState";
 import { ComponentAMCQuestionnaireStratumFieldIds } from "./mappers/componentAMCQuestionnaireMapper";
 import { ComponentAMCQuestionnaireFormEntity, FormLables } from "./presentation-entities/QuestionnaireFormEntity";
+
+export type ComponentAMCQuestionnaireRulesContext = {
+    unPopulation?: UNPopulation;
+};
 
 export function getComponentAMCQuestionnaireFormEntity(
     amcQuestions: AMCQuestionnaireQuestions,
@@ -28,8 +34,10 @@ export function getComponentAMCQuestionnaireFormEntity(
 
 function getStratumFieldValueOverrides(
     valueCallback: (field: FormMultipleOptionsFieldState) => Partial<FormMultipleOptionsFieldState>
-): OverrideFieldsByFieldValue["overrideFieldsCallback"] {
-    return function (formState: FormState): ReturnType<OverrideFieldsByFieldValue["overrideFieldsCallback"]> {
+): OverrideFieldsByFieldValue<ComponentAMCQuestionnaireRulesContext>["overrideFieldsCallback"] {
+    return function (
+        formState: FormState
+    ): ReturnType<OverrideFieldsByFieldValue<ComponentAMCQuestionnaireRulesContext>["overrideFieldsCallback"]> {
         const stratumFields = Object.keys(ComponentAMCQuestionnaireStratumFieldIds);
         const fieldsToOverride = stratumFields.map(stratum => {
             const field = getFieldByIdFromSections(formState.sections, stratum);
@@ -52,23 +60,41 @@ function getStratumFieldValueOverrides(
     };
 }
 
-function toggleUnPopulationField(visible: boolean): OverrideFieldsByFieldValue["overrideFieldsCallback"] {
-    return function (formState: FormState): ReturnType<OverrideFieldsByFieldValue["overrideFieldsCallback"]> {
+function toggleUnPopulationField(
+    visible: boolean
+): OverrideFieldsByFieldValue<ComponentAMCQuestionnaireRulesContext>["overrideFieldsCallback"] {
+    return function (
+        formState: FormState,
+        context?: ComponentAMCQuestionnaireRulesContext
+    ): ReturnType<OverrideFieldsByFieldValue<ComponentAMCQuestionnaireRulesContext>["overrideFieldsCallback"]> {
         const unPopulationField = getFieldByIdFromSections(formState.sections, "unPopulation");
         if (!unPopulationField || unPopulationField.type !== "text") {
             return [];
         }
+        const valueFromDataSet = context?.unPopulation?.population?.toString() ?? "";
+        // do not override the value if it is already set
+        const useValueFromDataSet = visible && !unPopulationField.value;
         return [
             {
                 id: unPopulationField.id,
                 isVisible: visible,
-                value: visible ? unPopulationField.value : "",
+                value: useValueFromDataSet ? valueFromDataSet : unPopulationField.value,
+                helperText: !visible
+                    ? undefined
+                    : useValueFromDataSet
+                    ? valueFromDataSet
+                        ? i18n.t("Population value loaded from Population UN DataSet")
+                        : i18n.t("Population value could not be loaded from Population UN DataSet")
+                    : undefined,
             },
         ];
     };
 }
 
-function getComponentAMCQuestionnaireFormLabelsRules(): { rules: FormRule[]; labels: FormLables } {
+function getComponentAMCQuestionnaireFormLabelsRules(): {
+    rules: FormRule<ComponentAMCQuestionnaireRulesContext>[];
+    labels: FormLables;
+} {
     return {
         labels: {
             errors: {
@@ -138,14 +164,14 @@ function getComponentAMCQuestionnaireFormLabelsRules(): { rules: FormRule[]; lab
                 fieldId: "sameAsUNPopulation",
                 fieldValue: true,
                 overrideFieldsCallback: toggleUnPopulationField(true),
-                triggerOnLoad: true,
+                triggerOnLoad: false,
             },
             {
                 type: "overrideFieldsOnChange",
                 fieldId: "sameAsUNPopulation",
                 fieldValue: false,
                 overrideFieldsCallback: toggleUnPopulationField(false),
-                triggerOnLoad: true,
+                triggerOnLoad: false,
             },
         ],
     };
