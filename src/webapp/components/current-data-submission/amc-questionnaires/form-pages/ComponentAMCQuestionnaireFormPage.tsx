@@ -6,7 +6,6 @@ import { useChangeAMCQuestionnaireForm } from "../hooks/useChangeAMCQuestionnair
 import { AMCQuestionnaireFormPageProps } from "./AMCQuestionnaireFormPageProps";
 import { useLoadAMCQuestionnaireForm } from "../hooks/useLoadAMCQuestionnaireForm";
 import { useAppContext } from "../../../../contexts/app-context";
-import { amcQuestionnaireMappers } from "../mappers";
 import { useSaveAMCQuestionnaireForm } from "../hooks/useSaveAMCQuestionnaireForm";
 import { Future } from "../../../../../domain/entities/Future";
 
@@ -27,7 +26,6 @@ export const ComponentAMCQuestionnaireFormPage: React.FC<AMCQuestionnaireFormPag
 
     const { save, isLoading: isSaveLoading } = useSaveAMCQuestionnaireForm({
         formType: "component-questionnaire",
-        mapper: amcQuestionnaireMappers["component-questionnaire"],
         saveFunction: (rootQuestionnaire, questionnaire) => {
             if (!questionnaire) {
                 return Future.error("Component Questionnaire is undefined");

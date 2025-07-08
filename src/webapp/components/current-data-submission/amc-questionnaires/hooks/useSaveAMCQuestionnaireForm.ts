@@ -6,7 +6,7 @@ import { Maybe } from "../../../../../types/utils";
 import { useAMCQuestionnaireContext } from "../../../../contexts/amc-questionnaire-context";
 import { useAMCQuestionnaireOptionsContext } from "../../../../contexts/amc-questionnaire-options-context";
 import { FormLoadState } from "../../../form/presentation-entities/FormState";
-import { AMCQuestionnaireFormMapper } from "../mappers/mapperTypes";
+import { amcQuestionnaireMappers } from "../mappers";
 import { AMCQuestionnaireFormType } from "../presentation-entities/AMCQuestionnaireFormType";
 import { QuestionnaireFormEntityMap } from "../presentation-entities/QuestionnaireFormEntity";
 
@@ -21,7 +21,6 @@ type SaveOptions<T extends AMCQuestionnaireFormType> = {
 
 type UseSaveAMCQuestionnaireFormParams<T extends AMCQuestionnaireFormType> = {
     formType: T;
-    mapper: AMCQuestionnaireFormMapper[T];
     saveFunction: (
         rootQuestionnaire: AMCQuestionnaire,
         questionnaire: Extract<QuestionnaireFormEntityMap[T], { type: T }>["entity"]
@@ -31,7 +30,7 @@ type UseSaveAMCQuestionnaireFormParams<T extends AMCQuestionnaireFormType> = {
 export function useSaveAMCQuestionnaireForm<T extends AMCQuestionnaireFormType>(
     params: UseSaveAMCQuestionnaireFormParams<T>
 ) {
-    const { formType, mapper, saveFunction } = params;
+    const { formType, saveFunction } = params;
     const [isLoading, setIsLoading] = React.useState(false);
     const { questionnaire, fetchQuestionnaire, setGlobalMessage } = useAMCQuestionnaireContext();
     const options = useAMCQuestionnaireOptionsContext();
@@ -53,7 +52,7 @@ export function useSaveAMCQuestionnaireForm<T extends AMCQuestionnaireFormType>(
 
             try {
                 setIsLoading(true);
-                const entity = mapper.mapFormStateToEntity({
+                const entity = amcQuestionnaireMappers[formType].mapFormStateToEntity({
                     formState: formState.data,
                     formEntity: questionnaireFormEntity,
                     orgUnitId,
@@ -82,7 +81,7 @@ export function useSaveAMCQuestionnaireForm<T extends AMCQuestionnaireFormType>(
                 handleError(error);
             }
         },
-        [options, setGlobalMessage, formType, mapper, questionnaire, saveFunction, fetchQuestionnaire]
+        [options, setGlobalMessage, formType, questionnaire, saveFunction, fetchQuestionnaire]
     );
 
     return {
