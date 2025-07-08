@@ -5,7 +5,7 @@ import {
     AMCQuestionnaireMap,
     FormLables,
     getQuestionnaireFormEntity,
-    QuestionnaireFormEntityMap,
+    QuestionnaireFormEntityOf,
 } from "../presentation-entities/QuestionnaireFormEntity";
 import { useAMCQuestionnaireOptionsContext } from "../../../../contexts/amc-questionnaire-options-context";
 import { amcQuestionnaireMappers } from "../mappers";
@@ -18,7 +18,7 @@ export type UseLoadFormResult<T extends AMCQuestionnaireFormType> = {
     formLabels: Maybe<FormLables>;
     formState: FormLoadState;
     setFormState: (state: FormLoadState | ((prevState: FormLoadState) => FormLoadState)) => void;
-    questionnaireFormEntity: Maybe<Extract<QuestionnaireFormEntityMap[T], { type: T }>>;
+    questionnaireFormEntity: Maybe<QuestionnaireFormEntityOf<T>>;
 };
 
 export type UseLoadAMCQuestionnaireFormParamsBase = {
@@ -39,8 +39,7 @@ export function useLoadAMCQuestionnaireForm<T extends AMCQuestionnaireFormType>(
     const options = useAMCQuestionnaireOptionsContext();
     const [formState, setFormState] = useState<FormLoadState>({ kind: "loading" });
     const [formLabels, setFormLabels] = useState<FormLables>();
-    const [questionnaireFormEntity, setQuestionnaireFormEntity] =
-        useState<Extract<QuestionnaireFormEntityMap[T], { type: T }>>();
+    const [questionnaireFormEntity, setQuestionnaireFormEntity] = useState<QuestionnaireFormEntityOf<T>>();
 
     const isEditMode = useMemo(() => !!id, [id]);
     useEffect(() => {

@@ -48,11 +48,14 @@ export type QuestionnaireFormEntityMap = {
 };
 
 export type QuestionnaireFormEntity = QuestionnaireFormEntityMap[AMCQuestionnaireFormType];
-
+export type QuestionnaireFormEntityOf<T extends AMCQuestionnaireFormType> = Extract<
+    QuestionnaireFormEntityMap[T],
+    { type: T }
+>;
 type FormEntityGetterFunction<T extends AMCQuestionnaireFormType> = (
     amcQuestions: AMCQuestionnaireQuestions,
     entity?: Maybe<AMCQuestionnaireMap[T]>
-) => Extract<QuestionnaireFormEntityMap[T], { type: T }>;
+) => QuestionnaireFormEntityOf<T>;
 
 type FormEntityGetterMap = {
     [key in AMCQuestionnaireFormType]: FormEntityGetterFunction<key>;
@@ -68,6 +71,6 @@ export function getQuestionnaireFormEntity<T extends AMCQuestionnaireFormType>(
     type: T,
     amcQuestions: AMCQuestionnaireQuestions,
     entity?: AMCQuestionnaireMap[T]
-): Extract<QuestionnaireFormEntityMap[T], { type: T }> {
+): QuestionnaireFormEntityOf<T> {
     return formEntityGetters[type](amcQuestions, entity);
 }

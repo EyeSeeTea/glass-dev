@@ -8,13 +8,13 @@ import { useAMCQuestionnaireOptionsContext } from "../../../../contexts/amc-ques
 import { FormLoadState } from "../../../form/presentation-entities/FormState";
 import { amcQuestionnaireMappers } from "../mappers";
 import { AMCQuestionnaireFormType } from "../presentation-entities/AMCQuestionnaireFormType";
-import { QuestionnaireFormEntityMap } from "../presentation-entities/QuestionnaireFormEntity";
+import { QuestionnaireFormEntityOf } from "../presentation-entities/QuestionnaireFormEntity";
 
 type SaveOptions<T extends AMCQuestionnaireFormType> = {
     id: Maybe<Id>;
     orgUnitId: Id;
     period: string;
-    questionnaireFormEntity: Extract<QuestionnaireFormEntityMap[T], { type: T }>;
+    questionnaireFormEntity: QuestionnaireFormEntityOf<T>;
     formState: FormLoadState;
     onSave?: () => void;
 };
@@ -23,7 +23,7 @@ type UseSaveAMCQuestionnaireFormParams<T extends AMCQuestionnaireFormType> = {
     formType: T;
     saveFunction: (
         rootQuestionnaire: AMCQuestionnaire,
-        questionnaire: Extract<QuestionnaireFormEntityMap[T], { type: T }>["entity"]
+        questionnaire: QuestionnaireFormEntityOf<T>["entity"]
     ) => FutureData<Id>;
 };
 
