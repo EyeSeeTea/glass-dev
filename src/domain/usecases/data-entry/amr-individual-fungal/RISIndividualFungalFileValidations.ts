@@ -33,7 +33,9 @@ export function checkSpecimenDate(dataItem: CustomDataColumns, period: string): 
         dataItem.find(item => item.key === RISIndividualFungalFileColumns.SPECIMEN_DATE)?.value || `01-01-${period}`;
     const yearValue = dataItem.find(item => item.key === RISIndividualFungalFileColumns.YEAR)?.value;
     if (moment(specimenDateValue).year().toString() !== yearValue?.toString()) {
-        return `${RISIndividualFungalFileColumns.SPECIMEN_DATE} year is different from ${RISIndividualFungalFileColumns.YEAR}: Specimen date is: ${specimenDateValue}, Year in file: ${yearValue}`;
+        return `${RISIndividualFungalFileColumns.SPECIMEN_DATE} year is different from ${
+            RISIndividualFungalFileColumns.YEAR
+        }: Specimen date is: ${moment(specimenDateValue).format("YYYY-MM-DD")}, Year in file: ${yearValue}`;
     }
     return null;
 }
@@ -45,10 +47,16 @@ export function checkAdmissionDate(dataItem: CustomDataColumns): string | null {
     const specimenDateValue = dataItem.find(item => item.key === RISIndividualFungalFileColumns.SPECIMEN_DATE)?.value;
     if (admissionDateValue) {
         if (moment(admissionDateValue).isBefore(MIN_ADMISSION_DATE)) {
-            return `${RISIndividualFungalFileColumns.ADMISSION_DATE} cannot be prior to ${MIN_ADMISSION_DATE}: ${admissionDateValue}`;
+            return `${RISIndividualFungalFileColumns.ADMISSION_DATE} cannot be prior to ${MIN_ADMISSION_DATE}: ${moment(
+                admissionDateValue
+            ).format("YYYY-MM-DD")}`;
         }
         if (moment(admissionDateValue).isAfter(moment(specimenDateValue))) {
-            return `${RISIndividualFungalFileColumns.ADMISSION_DATE} cannot be after ${RISIndividualFungalFileColumns.SPECIMEN_DATE}: Admission Date: ${admissionDateValue}, Specimen Date: ${specimenDateValue}`;
+            return `${RISIndividualFungalFileColumns.ADMISSION_DATE} cannot be after ${
+                RISIndividualFungalFileColumns.SPECIMEN_DATE
+            }: Admission Date: ${moment(admissionDateValue).format("YYYY-MM-DD")}, Specimen Date: ${moment(
+                specimenDateValue
+            ).format("YYYY-MM-DD")}`;
         }
     }
     return null;
