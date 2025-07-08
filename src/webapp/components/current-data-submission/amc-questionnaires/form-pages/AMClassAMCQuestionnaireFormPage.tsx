@@ -4,21 +4,38 @@ import { useAMCQuestionnaireContext } from "../../../../contexts/amc-questionnai
 import { AMCQuestionnaireComponent } from "../AMCQuestionnaireComponent";
 import { useChangeAMCQuestionnaireForm } from "../hooks/useChangeAMCQuestionnaireForm";
 import { AMCQuestionnaireFormPageProps } from "./AMCQuestionnaireFormPageProps";
-import { useLoadAMClassAMCQuestionnaireForm } from "../hooks/useLoad/useLoadAMClassAMCQuestionnaireForm";
-import { useSaveAMClassAMCQuestionnaireForm } from "../hooks/useSave/useSaveAMClassAMCQuestionnaireForm";
+import { useLoadAMCQuestionnaireForm } from "../hooks/useLoadAMCQuestionnaireForm";
+import { useSaveAMCQuestionnaireForm } from "../hooks/useSaveAMCQuestionnaireForm";
+import { amcQuestionnaireMappers } from "../mappers";
+import { Future } from "../../../../../domain/entities/Future";
+import { useAppContext } from "../../../../contexts/app-context";
 
 export const AMClassAMCQuestionnaireFormPage: React.FC<AMCQuestionnaireFormPageProps> = React.memo(props => {
     const { id, orgUnitId, period, onSave, onCancel, isViewOnlyMode = false, showFormButtons = true } = props;
     const { globalMessage } = useAMCQuestionnaireContext();
-
+    const { compositionRoot } = useAppContext();
     const snackbar = useSnackbar();
-    const { formLabels, formState, setFormState, questionnaireFormEntity } = useLoadAMClassAMCQuestionnaireForm({
+    const { formLabels, formState, setFormState, questionnaireFormEntity } = useLoadAMCQuestionnaireForm({
         id,
         orgUnitId,
         period,
         isViewOnlyMode,
+        formType: "am-class-questionnaire",
+        finderFunction: (amcQuestionnaire, id) =>
+            amcQuestionnaire.amClassQuestionnaires.find(amClassQuestionnaire => amClassQuestionnaire.id === id),
     });
-    const { save, isLoading: isSaveLoading } = useSaveAMClassAMCQuestionnaireForm();
+
+    const { save, isLoading: isSaveLoading } = useSaveAMCQuestionnaireForm({
+        formType: "am-class-questionnaire",
+        mapper: amcQuestionnaireMappers["am-class-questionnaire"],
+        saveFunction: (rootQuestionnaire, questionnaire) => {
+            if (!questionnaire) {
+                return Future.error("AM Class Questionnaire is undefined");
+            }
+            return compositionRoot.amcQuestionnaires.saveAmClass(rootQuestionnaire, questionnaire);
+        },
+    });
+
     const { handleFormChange } = useChangeAMCQuestionnaireForm({
         questionnaireFormEntity,
         setFormState,

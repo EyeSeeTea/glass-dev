@@ -1,14 +1,14 @@
 import React from "react";
-import { AMCQuestionnaire } from "../../../../../../domain/entities/amc-questionnaires/AMCQuestionnaire";
-import { FutureData } from "../../../../../../domain/entities/Future";
-import { Id } from "../../../../../../domain/entities/Ref";
-import { Maybe } from "../../../../../../types/utils";
-import { useAMCQuestionnaireContext } from "../../../../../contexts/amc-questionnaire-context";
-import { useAMCQuestionnaireOptionsContext } from "../../../../../contexts/amc-questionnaire-options-context";
-import { FormLoadState } from "../../../../form/presentation-entities/FormState";
-import { AMCQuestionnaireFormMapper } from "../../mappers/mapperTypes";
-import { AMCQuestionnaireFormType } from "../../presentation-entities/AMCQuestionnaireFormType";
-import { QuestionnaireFormEntityMap } from "../../presentation-entities/QuestionnaireFormEntity";
+import { AMCQuestionnaire } from "../../../../../domain/entities/amc-questionnaires/AMCQuestionnaire";
+import { FutureData } from "../../../../../domain/entities/Future";
+import { Id } from "../../../../../domain/entities/Ref";
+import { Maybe } from "../../../../../types/utils";
+import { useAMCQuestionnaireContext } from "../../../../contexts/amc-questionnaire-context";
+import { useAMCQuestionnaireOptionsContext } from "../../../../contexts/amc-questionnaire-options-context";
+import { FormLoadState } from "../../../form/presentation-entities/FormState";
+import { AMCQuestionnaireFormMapper } from "../mappers/mapperTypes";
+import { AMCQuestionnaireFormType } from "../presentation-entities/AMCQuestionnaireFormType";
+import { QuestionnaireFormEntityMap } from "../presentation-entities/QuestionnaireFormEntity";
 
 type SaveOptions<T extends AMCQuestionnaireFormType> = {
     id: Maybe<Id>;

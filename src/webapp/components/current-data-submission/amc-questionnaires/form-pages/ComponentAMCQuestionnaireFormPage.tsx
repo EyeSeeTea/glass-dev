@@ -4,21 +4,37 @@ import { useAMCQuestionnaireContext } from "../../../../contexts/amc-questionnai
 import { AMCQuestionnaireComponent } from "../AMCQuestionnaireComponent";
 import { useChangeAMCQuestionnaireForm } from "../hooks/useChangeAMCQuestionnaireForm";
 import { AMCQuestionnaireFormPageProps } from "./AMCQuestionnaireFormPageProps";
-import { useLoadComponentAMCQuestionnaireForm } from "../hooks/useLoad/useLoadComponentAMCQuestionnaireForm";
-import { useSaveComponentAMCQuestionnaireForm } from "../hooks/useSave/useSaveComponentAMCQuestionnaireForm";
+import { useLoadAMCQuestionnaireForm } from "../hooks/useLoadAMCQuestionnaireForm";
+import { useAppContext } from "../../../../contexts/app-context";
+import { amcQuestionnaireMappers } from "../mappers";
+import { useSaveAMCQuestionnaireForm } from "../hooks/useSaveAMCQuestionnaireForm";
+import { Future } from "../../../../../domain/entities/Future";
 
 export const ComponentAMCQuestionnaireFormPage: React.FC<AMCQuestionnaireFormPageProps> = React.memo(props => {
     const { id, orgUnitId, period, onSave, onCancel, isViewOnlyMode = false, showFormButtons = true } = props;
     const { globalMessage } = useAMCQuestionnaireContext();
-
+    const { compositionRoot } = useAppContext();
     const snackbar = useSnackbar();
-    const { formLabels, formState, setFormState, questionnaireFormEntity } = useLoadComponentAMCQuestionnaireForm({
+    const { formLabels, formState, setFormState, questionnaireFormEntity } = useLoadAMCQuestionnaireForm({
         id,
         orgUnitId,
         period,
         isViewOnlyMode,
+        formType: "component-questionnaire",
+        finderFunction: (amcQuestionnaire, id) =>
+            amcQuestionnaire.componentQuestionnaires.find(componentQuestionnaire => componentQuestionnaire.id === id),
     });
-    const { save, isLoading: isSaveLoading } = useSaveComponentAMCQuestionnaireForm();
+
+    const { save, isLoading: isSaveLoading } = useSaveAMCQuestionnaireForm({
+        formType: "component-questionnaire",
+        mapper: amcQuestionnaireMappers["component-questionnaire"],
+        saveFunction: (rootQuestionnaire, questionnaire) => {
+            if (!questionnaire) {
+                return Future.error("Component Questionnaire is undefined");
+            }
+            return compositionRoot.amcQuestionnaires.saveComponent(rootQuestionnaire, questionnaire);
+        },
+    });
     const { handleFormChange } = useChangeAMCQuestionnaireForm({
         questionnaireFormEntity,
         setFormState,

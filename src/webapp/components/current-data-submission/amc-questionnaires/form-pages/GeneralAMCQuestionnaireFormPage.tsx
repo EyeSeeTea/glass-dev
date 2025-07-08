@@ -4,21 +4,37 @@ import { useAMCQuestionnaireContext } from "../../../../contexts/amc-questionnai
 import { AMCQuestionnaireComponent } from "../AMCQuestionnaireComponent";
 import { useChangeAMCQuestionnaireForm } from "../hooks/useChangeAMCQuestionnaireForm";
 import { AMCQuestionnaireFormPageProps } from "./AMCQuestionnaireFormPageProps";
-import { useLoadGeneralAMCQuestionnaireForm } from "../hooks/useLoad/useLoadGeneralAMCQuestionnaireForm";
-import { useSaveGeneralAMCQuestionnaireForm } from "../hooks/useSave/useSaveGeneralAMCQuestionnaireForm";
+import { useLoadAMCQuestionnaireForm } from "../hooks/useLoadAMCQuestionnaireForm";
+import { useSaveAMCQuestionnaireForm } from "../hooks/useSaveAMCQuestionnaireForm";
+import { amcQuestionnaireMappers } from "../mappers";
+import { Future } from "../../../../../domain/entities/Future";
+import { useAppContext } from "../../../../contexts/app-context";
 
 export const GeneralAMCQuestionnaireFormPage: React.FC<AMCQuestionnaireFormPageProps> = React.memo(props => {
     const { id, orgUnitId, period, onSave, onCancel, isViewOnlyMode = false, showFormButtons = true } = props;
     const { globalMessage } = useAMCQuestionnaireContext();
-
+    const { compositionRoot } = useAppContext();
     const snackbar = useSnackbar();
-    const { formLabels, formState, setFormState, questionnaireFormEntity } = useLoadGeneralAMCQuestionnaireForm({
+    const { formLabels, formState, setFormState, questionnaireFormEntity } = useLoadAMCQuestionnaireForm({
         id,
         orgUnitId,
         period,
         isViewOnlyMode,
+        formType: "general-questionnaire",
+        finderFunction: amcQuestionnaire => amcQuestionnaire.generalQuestionnaire,
     });
-    const { save, isLoading: isSaveLoading } = useSaveGeneralAMCQuestionnaireForm();
+
+    const { save, isLoading: isSaveLoading } = useSaveAMCQuestionnaireForm({
+        formType: "general-questionnaire",
+        mapper: amcQuestionnaireMappers["general-questionnaire"],
+        saveFunction: (_rootQuestionnaire, questionnaire) => {
+            if (!questionnaire) {
+                return Future.error("Questionnaire entity is undefined");
+            }
+            return compositionRoot.amcQuestionnaires.saveGeneral(questionnaire);
+        },
+    });
+
     const { handleFormChange } = useChangeAMCQuestionnaireForm({
         questionnaireFormEntity,
         setFormState,

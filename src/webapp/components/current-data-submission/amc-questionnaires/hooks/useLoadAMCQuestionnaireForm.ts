@@ -1,18 +1,18 @@
 import { useEffect, useMemo, useState } from "react";
-import { Id } from "../../../../../../domain/entities/Ref";
-import { Maybe } from "../../../../../../utils/ts-utils";
+import { Id } from "../../../../../domain/entities/Ref";
+import { Maybe } from "../../../../../utils/ts-utils";
 import {
     AMCQuestionnaireMap,
     FormLables,
     getQuestionnaireFormEntity,
     QuestionnaireFormEntityMap,
-} from "../../presentation-entities/QuestionnaireFormEntity";
-import { useAMCQuestionnaireOptionsContext } from "../../../../../contexts/amc-questionnaire-options-context";
-import { amcQuestionnaireMappers } from "../../mappers";
-import { useAMCQuestionnaireContext } from "../../../../../contexts/amc-questionnaire-context";
-import { FormLoadState } from "../../../../form/presentation-entities/FormState";
-import { AMCQuestionnaireFormType } from "../../presentation-entities/AMCQuestionnaireFormType";
-import { AMCQuestionnaire } from "../../../../../../domain/entities/amc-questionnaires/AMCQuestionnaire";
+} from "../presentation-entities/QuestionnaireFormEntity";
+import { useAMCQuestionnaireOptionsContext } from "../../../../contexts/amc-questionnaire-options-context";
+import { amcQuestionnaireMappers } from "../mappers";
+import { useAMCQuestionnaireContext } from "../../../../contexts/amc-questionnaire-context";
+import { FormLoadState } from "../../../form/presentation-entities/FormState";
+import { AMCQuestionnaireFormType } from "../presentation-entities/AMCQuestionnaireFormType";
+import { AMCQuestionnaire } from "../../../../../domain/entities/amc-questionnaires/AMCQuestionnaire";
 
 export type UseLoadFormResult<T extends AMCQuestionnaireFormType> = {
     formLabels: Maybe<FormLables>;
