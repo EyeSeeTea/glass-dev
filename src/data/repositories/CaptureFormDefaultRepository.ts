@@ -14,6 +14,7 @@ import {
 import { apiToFuture } from "../../utils/futures";
 import { D2TrackerEvent } from "@eyeseetea/d2-api/api/trackerEvents";
 import { Id } from "../../domain/entities/Ref";
+import { parseDate } from "../../utils/dates";
 
 interface EARProgram {
     code: string;
@@ -241,7 +242,7 @@ export class CaptureFormDefaultRepository implements CaptureFormRepository {
                                 code: curDE.code,
                                 text: curDE.formName,
                                 type: "date",
-                                value: dataValue ? new Date(dataValue.value as string) : new Date(),
+                                value: dataValue ? parseDate(dataValue.value) : new Date(),
                             };
 
                             return dateQ;
