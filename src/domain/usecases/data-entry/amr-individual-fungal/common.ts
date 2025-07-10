@@ -15,6 +15,7 @@ import {
     TrackerTrackedEntity,
     TrackerTrackedEntityAttribute,
 } from "../../../entities/TrackedEntityInstance";
+import { checkAdmissionDate, checkCountry, checkPeriod, checkSpecimenDate } from "./RISIndividualFungalFileValidations";
 
 const AMR_GLASS_AMR_TET_PATIENT = "CcgnfemKr5U";
 
@@ -182,68 +183,46 @@ export function runProgramRuleValidations(
         });
 }
 
-function checkCountry(risIndividualFungalDataItems: CustomDataColumns[], orgUnit: string): ConsistencyError[] {
-    const errors = _(
-        risIndividualFungalDataItems.map((dataItem, index) => {
-            if (dataItem.find(item => item.key === "COUNTRY")?.value !== orgUnit) {
-                return {
-                    error: `Country is different: Selected Data Submission Country : ${orgUnit}, Country in file: ${
-                        dataItem.find(item => item.key === "COUNTRY")?.value
-                    }`,
-                    line: index,
-                };
-            }
-        })
-    )
-        .omitBy(_.isNil)
-        .groupBy(error => error?.error)
-        .mapValues(value => value.map(el => el?.line || 0))
-        .value();
-
-    return Object.keys(errors).map(error => ({
-        error: error,
-        count: errors[error]?.length || 0,
-        lines: errors[error] || [],
-    }));
-}
-
-function checkPeriod(risIndividualFungalDataItems: CustomDataColumns[], period: string): ConsistencyError[] {
-    const errors = _(
-        risIndividualFungalDataItems.map((dataItem, index) => {
-            if (dataItem.find(item => item.key === "YEAR")?.value !== parseInt(period)) {
-                return {
-                    error: `Year is different: Selected Data Submission Year : ${period}, Year in file: ${
-                        dataItem.find(item => item.key === "YEAR")?.value
-                    }`,
-                    line: index,
-                };
-            }
-        })
-    )
-        .omitBy(_.isNil)
-        .groupBy(error => error?.error)
-        .mapValues(value => value.map(el => el?.line || 0))
-        .value();
-
-    return Object.keys(errors).map(error => ({
-        error: error,
-        count: errors[error]?.length || 0,
-        lines: errors[error] || [],
-    }));
-}
+type CustomValidationFunction = (dataItem: CustomDataColumns) => string | null;
 
 export function runCustomValidations(
     risIndividualFungalDataItems: CustomDataColumns[],
     orgUnit: string,
     period: string
 ): FutureData<ImportSummary> {
-    const orgUnitErrors = checkCountry(risIndividualFungalDataItems, orgUnit);
-    const periodErrors = checkPeriod(risIndividualFungalDataItems, period);
+    const validations: CustomValidationFunction[] = [
+        (dataItem: CustomDataColumns) => checkCountry(dataItem, orgUnit),
+        (dataItem: CustomDataColumns) => checkPeriod(dataItem, period),
+        (dataItem: CustomDataColumns) => checkSpecimenDate(dataItem, period),
+        (dataItem: CustomDataColumns) => checkAdmissionDate(dataItem),
+    ];
+    const errors = risIndividualFungalDataItems.flatMap((dataItem, index) => {
+        return validations.map(validation => {
+            const error = validation(dataItem);
+            if (error) {
+                return {
+                    error: error,
+                    line: index,
+                };
+            }
+            return null;
+        });
+    });
+    const groupedErrors = _(errors)
+        .omitBy(_.isNil)
+        .groupBy(error => error?.error)
+        .mapValues(value => value.map(el => el?.line || 0))
+        .value();
+    const blockingErrors: ConsistencyError[] = Object.keys(groupedErrors).map(error => ({
+        error: error,
+        count: groupedErrors[error]?.length || 0,
+        lines: groupedErrors[error] || [],
+    }));
     const summary: ImportSummary = {
         status: "ERROR",
         importCount: { ignored: 0, imported: 0, deleted: 0, updated: 0, total: 0 },
         nonBlockingErrors: [],
-        blockingErrors: [...orgUnitErrors, ...periodErrors],
+        blockingErrors: blockingErrors,
     };
     return Future.success(summary);
 }

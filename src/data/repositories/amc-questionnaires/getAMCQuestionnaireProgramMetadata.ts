@@ -24,6 +24,7 @@ const programFields = {
         trackedEntityAttribute: {
             id: true,
             code: true,
+            displayFormName: true,
             displayDescription: true,
         },
     },
@@ -38,6 +39,7 @@ const programFields = {
                 id: true,
                 code: true,
                 displayFormName: true,
+                displayDescription: true,
             },
         },
     },
