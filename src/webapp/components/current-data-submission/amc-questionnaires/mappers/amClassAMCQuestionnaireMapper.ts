@@ -8,7 +8,7 @@ import {
 import { FormState } from "../../../form/presentation-entities/FormState";
 import { AMClassAMCQuestionnaireFormEntity } from "../presentation-entities/QuestionnaireFormEntity";
 import { MapToAMCQuestionnaireParams, MapToFormStateParams } from "./mapperTypes";
-import { getQuestionById, mapToFormOptions } from "./mapperUtils";
+import { getQuestionTextsByQuestionId, mapToFormOptions } from "./mapperUtils";
 import {
     AMClassAMCQuestionId,
     AMClassAMCQuestionnaire,
@@ -89,7 +89,8 @@ export function mapAMClassAMCQuestionnaireToInitialFormState(
     const fromIdsDictionary = (key: keyof typeof amClassAMCQuestionnaireFieldIds) =>
         getFieldIdFromIdsDictionary(key, amClassAMCQuestionnaireFieldIds);
 
-    const fromQuestions = (id: AMClassAMCQuestionId) => getQuestionById(id, questionnaireFormEntity.questions);
+    const fromQuestions = (id: AMClassAMCQuestionId) =>
+        getQuestionTextsByQuestionId(id, questionnaireFormEntity.questions);
 
     const antimicrobialClassValue = questionnaireFormEntity?.entity?.antimicrobialClass;
     const antimicrobialClassOption = options.antimicrobialClassOptions.find(
@@ -106,11 +107,11 @@ export function mapAMClassAMCQuestionnaireToInitialFormState(
 
     return {
         id: questionnaireFormEntity.entity?.id ?? "",
-        title: "AM Class questionnaire",
+        title: "Antimicrobial classes questionnaire",
         isValid: false,
         sections: [
             {
-                title: "AM Class General questionnaire",
+                title: "Antimicrobial classes ",
                 id: "general_section",
                 isVisible: true,
                 required: true,
@@ -125,8 +126,8 @@ export function mapAMClassAMCQuestionnaireToInitialFormState(
                         options: mapToFormOptions(antimicrobialClassOptinsWithSelf),
                         required: true,
                         showIsRequired: true,
-                        text: fromQuestions("antimicrobialClass"),
                         disabled: isViewOnlyMode,
+                        ...fromQuestions("antimicrobialClass"),
                     },
                     {
                         id: fromIdsDictionary("stratas"),
@@ -138,8 +139,8 @@ export function mapAMClassAMCQuestionnaireToInitialFormState(
                         options: mapToFormOptions(options.strataOptions, disabledStratas),
                         required: true,
                         showIsRequired: true,
-                        text: fromQuestions("stratas"),
                         disabled: isViewOnlyMode,
+                        ...fromQuestions("stratas"),
                     },
                     {
                         id: fromIdsDictionary("estVolumeTotalHealthLevel"),
@@ -151,8 +152,8 @@ export function mapAMClassAMCQuestionnaireToInitialFormState(
                         options: mapToFormOptions(options.proportion50to100Options),
                         required: false,
                         showIsRequired: false,
-                        text: fromQuestions("estVolumeTotalHealthLevel"),
                         disabled: isViewOnlyMode,
+                        ...fromQuestions("estVolumeTotalHealthLevel"),
                     },
                     {
                         id: fromIdsDictionary("estVolumeHospitalHealthLevel"),
@@ -164,8 +165,8 @@ export function mapAMClassAMCQuestionnaireToInitialFormState(
                         options: mapToFormOptions(options.proportion50to100Options),
                         required: false,
                         showIsRequired: false,
-                        text: fromQuestions("estVolumeHospitalHealthLevel"),
                         disabled: isViewOnlyMode,
+                        ...fromQuestions("estVolumeHospitalHealthLevel"),
                     },
                     {
                         id: fromIdsDictionary("estVolumeCommunityHealthLevel"),
@@ -177,8 +178,8 @@ export function mapAMClassAMCQuestionnaireToInitialFormState(
                         options: mapToFormOptions(options.proportion50to100Options),
                         required: false,
                         showIsRequired: false,
-                        text: fromQuestions("estVolumeCommunityHealthLevel"),
                         disabled: isViewOnlyMode,
+                        ...fromQuestions("estVolumeCommunityHealthLevel"),
                     },
                 ],
             },
