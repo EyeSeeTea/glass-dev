@@ -139,7 +139,7 @@ export class CustomValidationsAMCProductData {
                         line: tei.trackedEntity ? parseInt(tei.trackedEntity) + 6 : -1,
                     });
                 }
-                if (eventDate.getFullYear().toString() !== period) {
+                if (eventDate.getUTCFullYear().toString() !== period) {
                     curErrors.push({
                         error: i18n.t(
                             `Event date is incorrect: Selected period : ${period}, date in file: ${
