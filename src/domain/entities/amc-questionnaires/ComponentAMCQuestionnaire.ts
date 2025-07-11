@@ -43,8 +43,11 @@ export type ComponentAMCQuestionnaireResponsesAttributes = {
     commentsForDataSources: Maybe<string>;
     sameAsUNPopulation: YesNoValue;
     unPopulation: Maybe<number>;
+    populationCovered: Maybe<number>;
     sourceOfNationalPopulation: Maybe<NationalPopulationDataSourceValue>;
+    nationalCoverage: Maybe<number>;
     otherSourceForNationalPopulation: Maybe<string>;
+    unPopulationCoverage: Maybe<number>;
     commentOnNationalPopulation: Maybe<string>;
     coverageVolumeWithinTheStratum: Proportion50to100UnknownValue;
     commentOnCoverageWithinTheStratum: Maybe<string>;
