@@ -26,7 +26,8 @@ export class QuestionsAMCQuestionnaireD2Repository implements QuestionsAMCQuesti
                         ? [
                               ...acc,
                               {
-                                  text: attribute.trackedEntityAttribute.displayDescription || "",
+                                  text: attribute.trackedEntityAttribute.displayFormName || "",
+                                  description: attribute.trackedEntityAttribute.displayDescription || undefined,
                                   id: questionId,
                               },
                           ]
@@ -68,6 +69,7 @@ export class QuestionsAMCQuestionnaireD2Repository implements QuestionsAMCQuesti
                           ...acc,
                           {
                               text: dataElement.dataElement.displayFormName || "",
+                              description: dataElement.dataElement.displayDescription || undefined,
                               id: questionId,
                           },
                       ]
