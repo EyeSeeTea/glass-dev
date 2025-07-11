@@ -19,8 +19,19 @@ export function mapToFormOptions<
     );
 }
 
-export function getQuestionById(id: AMCQuestionId, questions: AMCQuestionnaireQuestions): string {
-    return questions.find(question => question.id === id)?.text || "";
+export function getQuestionTextsByQuestionId(
+    id: AMCQuestionId,
+    questions: AMCQuestionnaireQuestions
+): { text: string; infoTooltipText?: string } {
+    const question = questions.find(question => question.id === id);
+    if (!question) {
+        console.warn(`Question with id ${id} not found.`);
+        return { text: "", infoTooltipText: undefined };
+    }
+    return {
+        text: question.text,
+        infoTooltipText: question.description,
+    };
 }
 
 export function getOptionCodeFromFieldValue<T extends string>(

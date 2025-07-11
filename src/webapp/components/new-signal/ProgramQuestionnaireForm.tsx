@@ -66,6 +66,21 @@ export const ProgramQuestionnaireForm: React.FC<ProgramQuestionnaireFormProps> =
         props.aggsubQuestionnaires
     );
 
+    const showSubmissionError = React.useCallback(
+        (error: string) => {
+            if (error && error.startsWith("EAR-IMPORT-ERROR:")) {
+                snackbar.error(error.replace("EAR-IMPORT-ERROR:", i18n.t("Submission failed - ")));
+            } else {
+                console.error("Unknown Error during submission:", error);
+                // TODO: return the permissions error from inner layers, use this for unknown errors
+                snackbar.error(
+                    "Submission Failed! You do not have the necessary permissions, please contact your administrator"
+                );
+            }
+        },
+        [snackbar]
+    );
+
     const publishQuestionnaire = () => {
         setLoading(true);
 
@@ -99,12 +114,9 @@ export const ProgramQuestionnaireForm: React.FC<ProgramQuestionnaireFormProps> =
                         setLoading(false);
                         if (props.hideForm) props.hideForm();
                     },
-                    () => {
-                        snackbar.error(
-                            "Submission Failed! You do not have the necessary permissions, please contact your administrator"
-                        );
+                    error => {
+                        showSubmissionError(error);
                         setLoading(false);
-                        if (props.hideForm) props.hideForm();
                     }
                 );
         }
@@ -144,12 +156,9 @@ export const ProgramQuestionnaireForm: React.FC<ProgramQuestionnaireFormProps> =
                         if (props.hideForm) props.hideForm();
                         if (props.refreshGrid) props.refreshGrid({});
                     },
-                    () => {
-                        snackbar.error(
-                            "Submission Failed! You do not have the necessary permissions, please contact your administrator"
-                        );
+                    error => {
+                        showSubmissionError(error);
                         setLoading(false);
-                        if (props.hideForm) props.hideForm();
                     }
                 );
         }
