@@ -611,6 +611,9 @@ msgstr ""
 msgid "GO"
 msgstr ""
 
+msgid "Submission failed - "
+msgstr ""
+
 msgid "Save Draft"
 msgstr ""
 
