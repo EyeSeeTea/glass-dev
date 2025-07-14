@@ -17,7 +17,7 @@ import { FormState } from "../../../form/presentation-entities/FormState";
 import { GeneralAMCQuestionnaireFormEntity } from "../presentation-entities/QuestionnaireFormEntity";
 import { MapToAMCQuestionnaireParams, MapToFormStateParams } from "./mapperTypes";
 import { getOptionCodeFromFieldValue, getQuestionTextsByQuestionId, mapToFormOptions } from "./mapperUtils";
-import i18n from "@eyeseetea/d2-ui-components/locales";
+import i18n from "../../../../../locales";
 
 export function mapFormStateToGeneralAMCQuestionnaire(
     params: MapToAMCQuestionnaireParams<GeneralAMCQuestionnaireFormEntity>
