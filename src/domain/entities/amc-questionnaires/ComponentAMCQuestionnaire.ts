@@ -11,10 +11,7 @@ import { Maybe } from "../../../utils/ts-utils";
 import { YesNoValue, YesNoValues } from "./YesNoOption";
 import { DataLevelValue, DataLevelValues } from "./DataLevelOption";
 import { ProcurementLevelValue } from "./ProcurementLevelOption";
-import {
-    NationalPopulationDataSourceValue,
-    NationalPopulationDataSourceValues,
-} from "./NationalPopulationDataSourceOption";
+import { NationalPopulationDataSourceValue } from "./NationalPopulationDataSourceOption";
 import { DataSourceValue } from "./DataSourceOption";
 import { Proportion50to100UnknownValue } from "./Proportion50to100UnknownOption";
 import { ValidationError, ValidationErrorKey } from "./ValidationError";
@@ -46,7 +43,6 @@ export type ComponentAMCQuestionnaireResponsesAttributes = {
     populationCovered: Maybe<number>;
     sourceOfNationalPopulation: Maybe<NationalPopulationDataSourceValue>;
     nationalCoverage: Maybe<number>;
-    otherSourceForNationalPopulation: Maybe<string>;
     unPopulationCoverage: Maybe<number>;
     commentOnNationalPopulation: Maybe<string>;
     coverageVolumeWithinTheStratum: Proportion50to100UnknownValue;
@@ -117,8 +113,6 @@ export class ComponentAMCQuestionnaire extends Struct<ComponentAMCQuestionnaireA
             procurementTypeOfDataReported: attributes.typeOfDataReported === DataLevelValues.Procurement,
             mixedTypeOfData: attributes.typeOfDataReported === DataLevelValues.Mixed,
             sourceOfNationalPopulation: attributes.sameAsUNPopulation === YesNoValues.NO,
-            otherSourceForNationalPopulation:
-                attributes.sourceOfNationalPopulation === NationalPopulationDataSourceValues.Other,
         };
     }
 
