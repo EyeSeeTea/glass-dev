@@ -27,6 +27,7 @@ function getFormRulesImplementations<ContextType extends object>(): FormRulesImp
         requiredFieldsByCustomCondition: setRequiredFieldsByFieldsConditionInSection,
         disableOptionsByFieldValues: setDisabledOptionsByFieldValues,
         overrideFieldsOnChange: setOverrideFieldsByFieldValue,
+        toggleVisibilityByFieldValue: setVisibleFieldsByFieldValue,
     } as FormRulesImplementationMap<ContextType>;
 }
 
@@ -112,6 +113,24 @@ export function setRequiredFieldsByFieldsConditionInSection<ContextType extends 
     }
 }
 
+export function setVisibleFieldsByFieldValue<ContextType extends object>(
+    options: FormRuleExecOptions<ContextType>
+): FormSectionState {
+    const { section, rule, triggerField } = options;
+    if (rule.type !== "toggleVisibilityByFieldValue") return section;
+
+    const fieldValue = triggerField.value;
+    const shouldShow = rule.showCondition(fieldValue);
+    const fieldsInSection: FormFieldState[] = section.fields.map(field => {
+        return rule.fieldIdsToToggle.includes(field.id) ? { ...field, isVisible: shouldShow } : field;
+    });
+
+    return {
+        ...section,
+        fields: fieldsInSection,
+    };
+}
+
 export function setDisabledOptionsByFieldValues<ContextType extends object>(
     options: FormRuleExecOptions<ContextType>
 ): FormSectionState {
@@ -150,7 +169,8 @@ export function setOverrideFieldsByFieldValue<ContextType extends object>(
         console.warn(`setOverrideFieldsByFieldValue: Field with id ${rule.fieldId} not found in sections`);
         return section;
     }
-    if (fieldValue !== rule.fieldValue) {
+    // undefined rule.fieldValue means it should always exec the rule
+    if (rule.fieldValue !== undefined && fieldValue !== rule.fieldValue) {
         return section; // No override if value is not matching to target
     }
     const overrideFields = rule.overrideFieldsCallback(formState, context);

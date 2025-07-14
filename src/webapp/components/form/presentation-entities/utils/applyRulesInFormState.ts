@@ -41,9 +41,13 @@ export function applyRulesInFormState<ContextType extends object>(
  * @todo This is a workaround to apply rules after the initial form state is created
  * It does not take into account dependencies between fields
  */
-export function applyRulesToAllFieldsInFormState(currentFormState: FormState, formRules: FormRule[]): FormState {
+export function applyRulesToAllFieldsInFormState<ContextType extends object>(
+    currentFormState: FormState,
+    formRules: FormRule[],
+    context?: ContextType
+): FormState {
     const allFields = getAllFieldsFromSections(currentFormState.sections);
     return allFields.reduce((formState, field) => {
-        return applyRulesInFormState(formState, field, formRules, "load");
+        return applyRulesInFormState(formState, field, formRules, "load", context);
     }, currentFormState);
 }

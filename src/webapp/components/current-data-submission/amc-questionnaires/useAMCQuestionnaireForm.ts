@@ -81,6 +81,14 @@ export function useAMCQuestionnaireForm<T extends AMCQuestionnaireFormType>(para
     const isEditMode = useMemo(() => !!id, [id]);
 
     useEffect(() => {
+        if (!unPopulation || unPopulation.orgUnitId !== orgUnitId || unPopulation.period !== period) {
+            // prefetch UN Population, used later to prepopulate population field in component questionnaires
+            // TODO: review and move this
+            fetchUNPopulation(orgUnitId, period);
+        }
+    }, [orgUnitId, period, unPopulation, fetchUNPopulation]);
+
+    useEffect(() => {
         if (questions && options) {
             if (id && questionnaire) {
                 switch (formType) {
@@ -135,15 +143,6 @@ export function useAMCQuestionnaireForm<T extends AMCQuestionnaireFormType>(para
 
                     case "component-questionnaire":
                         {
-                            if (
-                                isEditMode &&
-                                (!unPopulation ||
-                                    unPopulation.orgUnitId !== orgUnitId ||
-                                    unPopulation.period !== period)
-                            ) {
-                                // prefetch UN Population, used later to prepopulate population field
-                                fetchUNPopulation(orgUnitId, period);
-                            }
                             const componentQuestionnaire = questionnaire.componentQuestionnaires.find(
                                 componentQuestionnaire => componentQuestionnaire.id === id
                             );
@@ -154,7 +153,6 @@ export function useAMCQuestionnaireForm<T extends AMCQuestionnaireFormType>(para
                                 });
                                 return;
                             }
-
                             const formEntity = getQuestionnaireFormEntity(formType, questions, componentQuestionnaire);
                             setQuestionnaireFormEntity(formEntity);
                             setFormLabels(formEntity.labels);
@@ -166,6 +164,7 @@ export function useAMCQuestionnaireForm<T extends AMCQuestionnaireFormType>(para
                                     options: options,
                                     amcQuestionnaire: questionnaire,
                                     isViewOnlyMode: isViewOnlyMode,
+                                    context: { unPopulation: unPopulation },
                                 }),
                             });
                         }
@@ -185,6 +184,7 @@ export function useAMCQuestionnaireForm<T extends AMCQuestionnaireFormType>(para
                         options: options,
                         amcQuestionnaire: questionnaire,
                         isViewOnlyMode: isViewOnlyMode,
+                        context: { unPopulation: unPopulation }, // TODO: this context can be different for each form type
                     }),
                 });
             }
@@ -201,7 +201,6 @@ export function useAMCQuestionnaireForm<T extends AMCQuestionnaireFormType>(para
         isViewOnlyMode,
         questionnaire,
         unPopulation,
-        fetchUNPopulation,
     ]);
 
     const handleFormChange = useCallback(
