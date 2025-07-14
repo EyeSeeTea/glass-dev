@@ -29,13 +29,24 @@ export const TextInput: React.FC<TextInputProps> = React.memo(
         error = false,
     }) => {
         const [textFieldValue, setTextFieldValue] = useState<string>(value || "");
+        const [isUserTyping, setIsUserTyping] = useState<boolean>(false);
         const debouncedTextFieldValue = useDebounce(textFieldValue);
 
+        // Handle prop value changes (external updates)
         useEffect(() => {
-            if (debouncedTextFieldValue !== value) {
-                onChange(debouncedTextFieldValue);
+            if (value !== textFieldValue && !isUserTyping) {
+                setTextFieldValue(value || "");
+                onChange(value || "");
             }
-        }, [debouncedTextFieldValue, onChange, value]);
+        }, [value, textFieldValue, isUserTyping, onChange]);
+
+        // Handle debounced user input
+        useEffect(() => {
+            if (isUserTyping && debouncedTextFieldValue !== value) {
+                onChange(debouncedTextFieldValue);
+                setIsUserTyping(false);
+            }
+        }, [debouncedTextFieldValue, isUserTyping, value, onChange]);
 
         return (
             <Container>
@@ -48,7 +59,10 @@ export const TextInput: React.FC<TextInputProps> = React.memo(
                 <StyledTextField
                     id={id}
                     value={textFieldValue}
-                    onChange={event => setTextFieldValue(event.target.value)}
+                    onChange={event => {
+                        setTextFieldValue(event.target.value);
+                        setIsUserTyping(true);
+                    }}
                     helperText={error && !!errorText ? errorText : helperText}
                     error={error}
                     disabled={disabled}
