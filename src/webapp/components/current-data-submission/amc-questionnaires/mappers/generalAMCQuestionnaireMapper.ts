@@ -16,8 +16,8 @@ import {
 import { FormState } from "../../../form/presentation-entities/FormState";
 import { GeneralAMCQuestionnaireFormEntity } from "../presentation-entities/QuestionnaireFormEntity";
 import { MapToAMCQuestionnaireParams, MapToFormStateParams } from "./mapperTypes";
-import { getQuestionTextsByQuestionId, mapToFormOptions } from "./mapperUtils";
-import i18n from "../../../../../locales";
+import { getOptionCodeFromFieldValue, getQuestionTextsByQuestionId, mapToFormOptions } from "./mapperUtils";
+import i18n from "@eyeseetea/d2-ui-components/locales";
 
 export function mapFormStateToGeneralAMCQuestionnaire(
     params: MapToAMCQuestionnaireParams<GeneralAMCQuestionnaireFormEntity>
@@ -27,12 +27,12 @@ export function mapFormStateToGeneralAMCQuestionnaire(
 
     const allFields: FormFieldState[] = getAllFieldsFromSections(formState.sections);
 
-    const isSameAsLastYear = options.yesNoUnknownNAOptions.find(
-        option => option.code === getStringFieldValue("sameAsLastYear", allFields)
-    )?.code;
-    const shortageInPublicSector = options.yesNoUnknownOptions.find(
-        option => option.code === getStringFieldValue("shortageInPublicSector", allFields)
-    )?.code;
+    const isSameAsLastYear = getOptionCodeFromFieldValue("sameAsLastYear", options.yesNoUnknownNAOptions, allFields);
+    const shortageInPublicSector = getOptionCodeFromFieldValue(
+        "shortageInPublicSector",
+        options.yesNoUnknownOptions,
+        allFields
+    );
     const detailOnShortageInPublicSector = getStringFieldValue("detailOnShortageInPublicSector", allFields);
     const shortageInPrivateSector = options.yesNoUnknownOptions.find(
         option => option.code === getStringFieldValue("shortageInPrivateSector", allFields)
