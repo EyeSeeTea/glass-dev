@@ -2,7 +2,6 @@ import _ from "lodash";
 import {
     FormFieldState,
     getAllFieldsFromSections,
-    getBooleanFieldValue,
     getFieldIdFromIdsDictionary,
     getMultipleOptionsFieldValue,
     getStringFieldValue,
@@ -10,7 +9,7 @@ import {
 import { FormState } from "../../../form/presentation-entities/FormState";
 import { ComponentAMCQuestionnaireFormEntity } from "../presentation-entities/QuestionnaireFormEntity";
 import { MapToAMCQuestionnaireParams, MapToFormStateParams } from "./mapperTypes";
-import { getQuestionTextsByQuestionId, mapToFormOptions } from "./mapperUtils";
+import { getOptionCodeFromFieldValue, getQuestionTextsByQuestionId, mapToFormOptions } from "./mapperUtils";
 import {
     ComponentAMCQuestionId,
     ComponentAMCQuestionnaire,
@@ -18,7 +17,6 @@ import {
     ComponentAMCQuestionnaireBaseAttributes,
 } from "../../../../../domain/entities/amc-questionnaires/ComponentAMCQuestionnaire";
 import { YesNoUnknownValues } from "../../../../../domain/entities/amc-questionnaires/YesNoUnknownOption";
-import { yesNoOption } from "../../../../../domain/entities/amc-questionnaires/YesNoOption";
 import i18n from "../../../../../locales";
 import { getValidationMessage } from "../../../../../domain/entities/amc-questionnaires/ValidationError";
 
@@ -42,16 +40,18 @@ export function mapFormStateToComponentAMCQuestionnaire(
     const antituberculosisStratum = getStratum("antituberculosisStratum");
     const antimalariaStratum = getStratum("antimalariaStratum");
 
-    const excludedSubstances = options.yesNoUnknownOptions.find(
-        option => option.code === getStringFieldValue("excludedSubstances", allFields)
-    )?.code;
+    const excludedSubstances = getOptionCodeFromFieldValue(
+        "excludedSubstances",
+        options.yesNoUnknownOptions,
+        allFields
+    );
     const listOfExcludedSubstances = getStringFieldValue("listOfExcludedSubstances", allFields);
-    const typeOfDataReported = options.dataLevelOptions.find(
-        option => option.code === getStringFieldValue("typeOfDataReported", allFields)
-    )?.code;
-    const procurementTypeOfDataReported = options.procurementLevelOptions.find(
-        option => option.code === getStringFieldValue("procurementTypeOfDataReported", allFields)
-    )?.code;
+    const typeOfDataReported = getOptionCodeFromFieldValue("typeOfDataReported", options.dataLevelOptions, allFields);
+    const procurementTypeOfDataReported = getOptionCodeFromFieldValue(
+        "procurementTypeOfDataReported",
+        options.procurementLevelOptions,
+        allFields
+    );
     const mixedTypeOfData = getStringFieldValue("mixedTypeOfData", allFields);
     const sourcesOfDataReported = _.compact(
         getMultipleOptionsFieldValue("sourcesOfDataReported", allFields).map(selectedOption => {
@@ -59,19 +59,23 @@ export function mapFormStateToComponentAMCQuestionnaire(
         })
     );
     const commentsForDataSources = getStringFieldValue("commentsForDataSources", allFields);
-    const sameAsUNPopulation = yesNoOption.getValueFromBoolean(getBooleanFieldValue("sameAsUNPopulation", allFields));
+    const sameAsUNPopulation = getOptionCodeFromFieldValue("sameAsUNPopulation", options.yesNoOptions, allFields);
     const unPopulation = parseInt(getStringFieldValue("unPopulation", allFields)) || undefined;
     const populationCovered = parseFloat(getStringFieldValue("populationCovered", allFields)) || undefined;
-    const sourceOfNationalPopulation = options.nationalPopulationDataSourceOptions.find(
-        option => option.code === getStringFieldValue("sourceOfNationalPopulation", allFields)
-    )?.code;
+    const sourceOfNationalPopulation = getOptionCodeFromFieldValue(
+        "sourceOfNationalPopulation",
+        options.nationalPopulationDataSourceOptions,
+        allFields
+    );
     const nationalCoverage = parseFloat(getStringFieldValue("nationalCoverage", allFields)) || undefined;
     const otherSourceForNationalPopulation = getStringFieldValue("otherSourceForNationalPopulation", allFields);
     const unPopulationCoverage = parseFloat(getStringFieldValue("unPopulationCoverage", allFields)) || undefined;
     const commentOnNationalPopulation = getStringFieldValue("commentOnNationalPopulation", allFields);
-    const coverageVolumeWithinTheStratum = options.proportion50to100UnknownOptions.find(
-        option => option.code === getStringFieldValue("coverageVolumeWithinTheStratum", allFields)
-    )?.code;
+    const coverageVolumeWithinTheStratum = getOptionCodeFromFieldValue(
+        "coverageVolumeWithinTheStratum",
+        options.proportion50to100UnknownOptions,
+        allFields
+    );
     const commentOnCoverageWithinTheStratum = getStringFieldValue("commentOnCoverageWithinTheStratum", allFields);
 
     if (
@@ -356,12 +360,10 @@ export function mapComponentAMCQuestionnaireToInitialFormState(
                         id: fromIdsDictionary("sameAsUNPopulation"),
                         isVisible: true,
                         errors: [],
-                        type: "boolean",
-                        label: i18n.t("Yes"),
-                        value:
-                            yesNoOption.getBooleanFromValue(
-                                questionnaireFormEntity?.entity?.sameAsUNPopulation || "0"
-                            ) || false,
+                        type: "radio",
+                        multiple: false,
+                        options: mapToFormOptions(options.yesNoOptions),
+                        value: questionnaireFormEntity?.entity?.sameAsUNPopulation || "",
                         required: true,
                         showIsRequired: true,
                         disabled: isViewOnlyMode,
