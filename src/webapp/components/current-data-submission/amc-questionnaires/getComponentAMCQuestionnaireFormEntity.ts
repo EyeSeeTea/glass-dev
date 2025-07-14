@@ -1,7 +1,6 @@
 import { AMCQuestionnaireQuestions } from "../../../../domain/entities/amc-questionnaires/AMCQuestionnaireQuestions";
 import { ComponentAMCQuestionnaire } from "../../../../domain/entities/amc-questionnaires/ComponentAMCQuestionnaire";
 import { DataLevelValues } from "../../../../domain/entities/amc-questionnaires/DataLevelOption";
-import { NationalPopulationDataSourceValues } from "../../../../domain/entities/amc-questionnaires/NationalPopulationDataSourceOption";
 import { UNPopulation } from "../../../../domain/entities/amc-questionnaires/UNPopulation";
 import { YesNoValues } from "../../../../domain/entities/amc-questionnaires/YesNoOption";
 import { YesNoUnknownValues } from "../../../../domain/entities/amc-questionnaires/YesNoUnknownOption";
@@ -139,13 +138,6 @@ function getComponentAMCQuestionnaireFormLabelsRules(): {
                 sectionIdsWithRequiredFields: ["component_section"],
             },
             {
-                type: "requiredFieldsByFieldValue",
-                fieldId: "sourceOfNationalPopulation",
-                fieldValue: NationalPopulationDataSourceValues.Other,
-                requiredFieldIds: ["otherSourceForNationalPopulation"],
-                sectionIdsWithRequiredFields: ["component_section"],
-            },
-            {
                 type: "overrideFieldsOnChange",
                 fieldId: "select-all-amclass-stratum",
                 fieldValue: true,
@@ -171,12 +163,7 @@ function getComponentAMCQuestionnaireFormLabelsRules(): {
                 type: "toggleVisibilityByFieldValue",
                 fieldId: "sameAsUNPopulation",
                 showCondition: fieldValue => fieldValue === YesNoValues.NO,
-                fieldIdsToToggle: [
-                    "populationCovered",
-                    "sourceOfNationalPopulation",
-                    "nationalCoverage",
-                    "otherSourceForNationalPopulation",
-                ],
+                fieldIdsToToggle: ["populationCovered", "sourceOfNationalPopulation", "nationalCoverage"],
             },
             {
                 type: "overrideFieldsOnChange",

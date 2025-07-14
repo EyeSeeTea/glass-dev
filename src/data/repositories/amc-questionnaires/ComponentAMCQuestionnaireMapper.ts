@@ -84,7 +84,6 @@ export function mapD2EventToComponentAMCQuestionnaire(d2Event: D2Event): Compone
             fromMap("sourceOfNationalPopulation")
         ),
         nationalCoverage: fromMap("nationalCoverage") ? parseFloat(fromMap("nationalCoverage")) : undefined,
-        otherSourceForNationalPopulation: fromMap("otherSourceForNationalPopulation"),
         unPopulationCoverage: fromMap("unPopulationCoverage") ? parseFloat(fromMap("unPopulationCoverage")) : undefined,
         commentOnNationalPopulation: fromMap("commentOnNationalPopulation"),
         coverageVolumeWithinTheStratum: coverageVolumeWithinTheStratum,
@@ -115,7 +114,6 @@ function getValuesFromComponentAMCQuestionnaire(
         AMR_GLASS_AMC_DE_POP_NAT: componentAMCQuestionnaire.populationCovered?.toString() ?? "",
         AMR_GLASS_AMC_DE_POP_NAT_SOURCE: componentAMCQuestionnaire.sourceOfNationalPopulation ?? "",
         AMR_GLASS_AMC_DE_POP_NAT_COV: componentAMCQuestionnaire.nationalCoverage?.toString() ?? "",
-        AMR_GLASS_AMC_DE_POP_NAT_SOURCE_OTHER: componentAMCQuestionnaire.otherSourceForNationalPopulation ?? "",
         AMR_GLASS_AMC_DE_POP_UN_COV: componentAMCQuestionnaire.unPopulationCoverage?.toString() ?? "",
         AMR_GLASS_AMC_DE_POP_NAT_COMMENT: componentAMCQuestionnaire.commentOnNationalPopulation ?? "",
         AMR_GLASS_AMC_DE_COV_DATA_STRATUM: componentAMCQuestionnaire.coverageVolumeWithinTheStratum,
