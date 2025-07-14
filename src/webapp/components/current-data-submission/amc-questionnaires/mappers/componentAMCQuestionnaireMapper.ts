@@ -19,6 +19,11 @@ import {
 import { YesNoUnknownValues } from "../../../../../domain/entities/amc-questionnaires/YesNoUnknownOption";
 import i18n from "../../../../../locales";
 import { getValidationMessage } from "../../../../../domain/entities/amc-questionnaires/ValidationError";
+import { UNPopulation } from "../../../../../domain/entities/amc-questionnaires/UNPopulation";
+
+export type ComponentAMCQuestionnaireContext = {
+    unPopulation?: UNPopulation;
+};
 
 export function mapFormStateToComponentAMCQuestionnaire(
     params: MapToAMCQuestionnaireParams<ComponentAMCQuestionnaireFormEntity>
@@ -212,7 +217,7 @@ function getStratumField(
 }
 
 export function mapComponentAMCQuestionnaireToInitialFormState(
-    params: MapToFormStateParams<ComponentAMCQuestionnaireFormEntity>
+    params: MapToFormStateParams<ComponentAMCQuestionnaireFormEntity, ComponentAMCQuestionnaireContext>
 ): FormState {
     const { questionnaireFormEntity, options, isViewOnlyMode, amcQuestionnaire } = params;
 
@@ -225,6 +230,9 @@ export function mapComponentAMCQuestionnaireToInitialFormState(
 
     const fromQuestions = (id: ComponentAMCQuestionId) =>
         getQuestionTextsByQuestionId(id, questionnaireFormEntity.questions);
+
+    const unPopulation = questionnaireFormEntity?.entity?.unPopulation?.toString();
+    const contextUnPopulation = params.context?.unPopulation?.population?.toString() || "";
 
     return {
         id: questionnaireFormEntity.entity?.id ?? "",
@@ -346,14 +354,16 @@ export function mapComponentAMCQuestionnaireToInitialFormState(
                     },
                     {
                         id: fromIdsDictionary("unPopulation"),
-                        isVisible: yesNoOption.getBooleanFromValue(
-                            questionnaireFormEntity?.entity?.sameAsUNPopulation || "0"
-                        ),
+                        isVisible: true,
                         errors: [],
                         type: "text",
-                        value: questionnaireFormEntity?.entity?.unPopulation?.toString() || "",
+                        value: unPopulation || contextUnPopulation || "",
                         required: false,
-                        disabled: false,
+                        disabled: true,
+                        helperText:
+                            !unPopulation && !contextUnPopulation
+                                ? i18n.t("Error loading value from World Prospect Population")
+                                : undefined,
                         ...fromQuestions("unPopulation"),
                     },
                     {
@@ -422,7 +432,7 @@ export function mapComponentAMCQuestionnaireToInitialFormState(
                         value: questionnaireFormEntity?.entity?.unPopulationCoverage?.toString() || "",
                         multiline: false,
                         required: false,
-                        disabled: isViewOnlyMode,
+                        disabled: true,
                         ...fromQuestions("unPopulationCoverage"),
                     },
                     {

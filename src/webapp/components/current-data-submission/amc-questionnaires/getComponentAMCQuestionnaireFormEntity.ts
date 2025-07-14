@@ -1,4 +1,3 @@
-import i18n from "@eyeseetea/d2-ui-components/locales";
 import { AMCQuestionnaireQuestions } from "../../../../domain/entities/amc-questionnaires/AMCQuestionnaireQuestions";
 import { ComponentAMCQuestionnaire } from "../../../../domain/entities/amc-questionnaires/ComponentAMCQuestionnaire";
 import { DataLevelValues } from "../../../../domain/entities/amc-questionnaires/DataLevelOption";
@@ -8,7 +7,7 @@ import { YesNoValues } from "../../../../domain/entities/amc-questionnaires/YesN
 import { YesNoUnknownValues } from "../../../../domain/entities/amc-questionnaires/YesNoUnknownOption";
 import { Maybe } from "../../../../utils/ts-utils";
 import { FormMultipleOptionsFieldState } from "../../form/presentation-entities/FormFieldsState";
-import { FormRule, OverrideFieldsByFieldValue } from "../../form/presentation-entities/FormRule";
+import { FormRule, OverrideFieldsCallback } from "../../form/presentation-entities/FormRule";
 import { getFieldByIdFromSections } from "../../form/presentation-entities/FormSectionsState";
 import { FormState } from "../../form/presentation-entities/FormState";
 import { ComponentAMCQuestionnaireStratumFieldIds } from "./mappers/componentAMCQuestionnaireMapper";
@@ -35,10 +34,8 @@ export function getComponentAMCQuestionnaireFormEntity(
 
 function getStratumFieldValueOverrides(
     valueCallback: (field: FormMultipleOptionsFieldState) => Partial<FormMultipleOptionsFieldState>
-): OverrideFieldsByFieldValue<ComponentAMCQuestionnaireRulesContext>["overrideFieldsCallback"] {
-    return function (
-        formState: FormState
-    ): ReturnType<OverrideFieldsByFieldValue<ComponentAMCQuestionnaireRulesContext>["overrideFieldsCallback"]> {
+): OverrideFieldsCallback<ComponentAMCQuestionnaireRulesContext> {
+    return function (formState: FormState): ReturnType<OverrideFieldsCallback<ComponentAMCQuestionnaireRulesContext>> {
         const stratumFields = Object.keys(ComponentAMCQuestionnaireStratumFieldIds);
         const fieldsToOverride = stratumFields.map(stratum => {
             const field = getFieldByIdFromSections(formState.sections, stratum);
@@ -61,35 +58,45 @@ function getStratumFieldValueOverrides(
     };
 }
 
-function toggleUnPopulationField(
-    visible: boolean
-): OverrideFieldsByFieldValue<ComponentAMCQuestionnaireRulesContext>["overrideFieldsCallback"] {
-    return function (
-        formState: FormState,
-        context?: ComponentAMCQuestionnaireRulesContext
-    ): ReturnType<OverrideFieldsByFieldValue<ComponentAMCQuestionnaireRulesContext>["overrideFieldsCallback"]> {
-        const unPopulationField = getFieldByIdFromSections(formState.sections, "unPopulation");
-        if (!unPopulationField || unPopulationField.type !== "text") {
-            return [];
+function calculateUnPopulationCoverage(
+    formState: FormState
+): ReturnType<OverrideFieldsCallback<ComponentAMCQuestionnaireRulesContext>> {
+    const fields = {
+        sameAsUNPopulation: getFieldByIdFromSections(formState.sections, "sameAsUNPopulation"),
+        unPopulation: getFieldByIdFromSections(formState.sections, "unPopulation"),
+        populationCovered: getFieldByIdFromSections(formState.sections, "populationCovered"),
+        unPopulationCoverage: getFieldByIdFromSections(formState.sections, "unPopulationCoverage"),
+    };
+    if (
+        !fields.sameAsUNPopulation ||
+        !fields.unPopulation ||
+        !fields.populationCovered ||
+        !fields.unPopulationCoverage
+    ) {
+        console.warn("calculateUnPopulationCoverage: Required fields are missing");
+        return [];
+    }
+    if (fields.sameAsUNPopulation.value === YesNoValues.YES) {
+        return [{ id: fields.unPopulationCoverage.id, value: "100" }];
+    } else {
+        const populationCoveredValue = fields.populationCovered.value;
+        const populationUnValue = fields.unPopulation.value;
+        if (
+            !populationCoveredValue ||
+            !populationUnValue ||
+            typeof populationCoveredValue !== "string" ||
+            typeof populationUnValue !== "string"
+        ) {
+            return [{ id: fields.unPopulationCoverage.id, value: "" }];
         }
-        const valueFromDataSet = context?.unPopulation?.population?.toString() ?? "";
-        // do not override the value if it is already set
-        const useValueFromDataSet = visible && !unPopulationField.value;
+        const result = (parseFloat(populationCoveredValue) / parseFloat(populationUnValue)) * 100;
         return [
             {
-                id: unPopulationField.id,
-                isVisible: visible,
-                value: useValueFromDataSet ? valueFromDataSet : unPopulationField.value,
-                helperText: !visible
-                    ? undefined
-                    : useValueFromDataSet
-                    ? valueFromDataSet
-                        ? i18n.t("Population value loaded from Population UN DataSet")
-                        : i18n.t("Population value could not be loaded from Population UN DataSet")
-                    : undefined,
+                id: fields.unPopulationCoverage.id,
+                value: isNaN(result) ? "" : result.toFixed(2),
             },
         ];
-    };
+    }
 }
 
 function getComponentAMCQuestionnaireFormLabelsRules(): {
@@ -161,17 +168,32 @@ function getComponentAMCQuestionnaireFormLabelsRules(): {
                 triggerOnLoad: false,
             },
             {
-                type: "overrideFieldsOnChange",
+                type: "toggleVisibilityByFieldValue",
                 fieldId: "sameAsUNPopulation",
-                fieldValue: true,
-                overrideFieldsCallback: toggleUnPopulationField(true),
-                triggerOnLoad: false,
+                showCondition: fieldValue => fieldValue === YesNoValues.NO,
+                fieldIdsToToggle: [
+                    "populationCovered",
+                    "sourceOfNationalPopulation",
+                    "nationalCoverage",
+                    "otherSourceForNationalPopulation",
+                ],
             },
             {
                 type: "overrideFieldsOnChange",
                 fieldId: "sameAsUNPopulation",
-                fieldValue: false,
-                overrideFieldsCallback: toggleUnPopulationField(false),
+                overrideFieldsCallback: calculateUnPopulationCoverage,
+                triggerOnLoad: false,
+            },
+            {
+                type: "overrideFieldsOnChange",
+                fieldId: "unPopulation",
+                overrideFieldsCallback: calculateUnPopulationCoverage,
+                triggerOnLoad: false,
+            },
+            {
+                type: "overrideFieldsOnChange",
+                fieldId: "populationCovered",
+                overrideFieldsCallback: calculateUnPopulationCoverage,
                 triggerOnLoad: false,
             },
         ],

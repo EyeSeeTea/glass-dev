@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2025-07-07T17:47:30.100Z\n"
-"PO-Revision-Date: 2025-07-07T17:47:30.100Z\n"
+"POT-Creation-Date: 2025-07-14T16:42:04.814Z\n"
+"PO-Revision-Date: 2025-07-14T16:42:04.814Z\n"
 
 msgid "Template {{id}} not loaded"
 msgstr ""
@@ -462,16 +462,13 @@ msgstr ""
 msgid "Component"
 msgstr ""
 
-msgid "Population value loaded from Population UN DataSet"
-msgstr ""
-
-msgid "Population value could not be loaded from Population UN DataSet"
-msgstr ""
-
 msgid "Component Antimicrobial Class Stratum"
 msgstr ""
 
 msgid "Use all available antimicrobial classes / stratum combinations"
+msgstr ""
+
+msgid "Error loading value from World Prospect Population"
 msgstr ""
 
 msgid "AM Questionnaire Editor"
