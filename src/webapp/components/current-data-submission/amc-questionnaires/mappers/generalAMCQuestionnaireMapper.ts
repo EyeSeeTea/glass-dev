@@ -16,7 +16,7 @@ import {
 import { FormState } from "../../../form/presentation-entities/FormState";
 import { GeneralAMCQuestionnaireFormEntity } from "../presentation-entities/QuestionnaireFormEntity";
 import { MapToAMCQuestionnaireParams, MapToFormStateParams } from "./mapperTypes";
-import { getQuestionById, mapToFormOptions } from "./mapperUtils";
+import { getOptionCodeFromFieldValue, getQuestionTextsByQuestionId, mapToFormOptions } from "./mapperUtils";
 import i18n from "../../../../../locales";
 
 export function mapFormStateToGeneralAMCQuestionnaire(
@@ -27,12 +27,12 @@ export function mapFormStateToGeneralAMCQuestionnaire(
 
     const allFields: FormFieldState[] = getAllFieldsFromSections(formState.sections);
 
-    const isSameAsLastYear = options.yesNoUnknownNAOptions.find(
-        option => option.code === getStringFieldValue("sameAsLastYear", allFields)
-    )?.code;
-    const shortageInPublicSector = options.yesNoUnknownOptions.find(
-        option => option.code === getStringFieldValue("shortageInPublicSector", allFields)
-    )?.code;
+    const isSameAsLastYear = getOptionCodeFromFieldValue("sameAsLastYear", options.yesNoUnknownNAOptions, allFields);
+    const shortageInPublicSector = getOptionCodeFromFieldValue(
+        "shortageInPublicSector",
+        options.yesNoUnknownOptions,
+        allFields
+    );
     const detailOnShortageInPublicSector = getStringFieldValue("detailOnShortageInPublicSector", allFields);
     const shortageInPrivateSector = options.yesNoUnknownOptions.find(
         option => option.code === getStringFieldValue("shortageInPrivateSector", allFields)
@@ -140,7 +140,8 @@ export function mapGeneralAMCQuestionnaireToInitialFormState(
     const fromIdsDictionary = (key: keyof typeof generalAMCQuestionnaireFieldIds) =>
         getFieldIdFromIdsDictionary(key, generalAMCQuestionnaireFieldIds);
 
-    const fromQuestions = (id: GeneralAMCQuestionId) => getQuestionById(id, questionnaireFormEntity.questions);
+    const fromQuestions = (id: GeneralAMCQuestionId) =>
+        getQuestionTextsByQuestionId(id, questionnaireFormEntity.questions);
 
     return {
         id: questionnaireFormEntity?.entity?.id || "",
@@ -148,7 +149,7 @@ export function mapGeneralAMCQuestionnaireToInitialFormState(
         isValid: false,
         sections: [
             {
-                title: "General questionnaire",
+                title: "Data comparability with previous year's data",
                 id: "general_section",
                 isVisible: true,
                 required: true,
@@ -163,13 +164,13 @@ export function mapGeneralAMCQuestionnaireToInitialFormState(
                         options: mapToFormOptions(options.yesNoUnknownNAOptions),
                         required: true,
                         showIsRequired: true,
-                        text: fromQuestions("isSameAsLastYear"),
                         disabled: isViewOnlyMode,
+                        ...fromQuestions("isSameAsLastYear"),
                     },
                 ],
             },
             {
-                title: "Public sector",
+                title: "Shortages in public sector",
                 id: "public_sector_section",
                 isVisible: true,
                 required: true,
@@ -184,8 +185,8 @@ export function mapGeneralAMCQuestionnaireToInitialFormState(
                         value: questionnaireFormEntity?.entity?.shortageInPublicSector || "",
                         required: true,
                         showIsRequired: true,
-                        text: fromQuestions("shortageInPublicSector"),
                         disabled: isViewOnlyMode,
+                        ...fromQuestions("shortageInPublicSector"),
                     },
                     {
                         id: fromIdsDictionary("detailOnShortageInPublicSector"),
@@ -195,13 +196,13 @@ export function mapGeneralAMCQuestionnaireToInitialFormState(
                         value: questionnaireFormEntity?.entity?.detailOnShortageInPublicSector || "",
                         multiline: false,
                         required: YesNoUnknownValues.YES === questionnaireFormEntity?.entity?.shortageInPublicSector,
-                        text: fromQuestions("detailOnShortageInPublicSector"),
                         disabled: isViewOnlyMode,
+                        ...fromQuestions("detailOnShortageInPublicSector"),
                     },
                 ],
             },
             {
-                title: "Private sector",
+                title: "Shortages in private sector",
                 id: "private_sector_section",
                 isVisible: true,
                 required: true,
@@ -216,8 +217,8 @@ export function mapGeneralAMCQuestionnaireToInitialFormState(
                         value: questionnaireFormEntity?.entity?.shortageInPrivateSector || "",
                         required: true,
                         showIsRequired: true,
-                        text: fromQuestions("shortageInPrivateSector"),
                         disabled: isViewOnlyMode,
+                        ...fromQuestions("shortageInPrivateSector"),
                     },
                     {
                         id: fromIdsDictionary("detailOnShortageInPrivateSector"),
@@ -227,8 +228,8 @@ export function mapGeneralAMCQuestionnaireToInitialFormState(
                         value: questionnaireFormEntity?.entity?.detailOnShortageInPrivateSector || "",
                         multiline: false,
                         required: YesNoUnknownValues.YES === questionnaireFormEntity?.entity?.shortageInPrivateSector,
-                        text: fromQuestions("detailOnShortageInPrivateSector"),
                         disabled: isViewOnlyMode,
+                        ...fromQuestions("detailOnShortageInPrivateSector"),
                     },
                 ],
             },
@@ -246,13 +247,13 @@ export function mapGeneralAMCQuestionnaireToInitialFormState(
                         value: questionnaireFormEntity?.entity?.generalComments || "",
                         multiline: false,
                         required: false,
-                        text: fromQuestions("generalComments"),
                         disabled: isViewOnlyMode,
+                        ...fromQuestions("generalComments"),
                     },
                 ],
             },
             {
-                title: "AM class",
+                title: "Antimicrobial classes reported",
                 id: "am_class_section",
                 isVisible: true,
                 required: true,
@@ -268,8 +269,8 @@ export function mapGeneralAMCQuestionnaireToInitialFormState(
                             false,
                         required: true,
                         showIsRequired: true,
-                        text: fromQuestions("antibacterials"),
                         disabled: isViewOnlyMode || !!amcQuestionnaire?.hasAMClassForm("antibacterials"),
+                        ...fromQuestions("antibacterials"),
                     },
                     {
                         id: fromIdsDictionary("antifungals"),
@@ -282,8 +283,8 @@ export function mapGeneralAMCQuestionnaireToInitialFormState(
                             false,
                         required: true,
                         showIsRequired: true,
-                        text: fromQuestions("antifungals"),
                         disabled: isViewOnlyMode || !!amcQuestionnaire?.hasAMClassForm("antifungals"),
+                        ...fromQuestions("antifungals"),
                     },
                     {
                         id: fromIdsDictionary("antivirals"),
@@ -296,8 +297,8 @@ export function mapGeneralAMCQuestionnaireToInitialFormState(
                             false,
                         required: true,
                         showIsRequired: true,
-                        text: fromQuestions("antivirals"),
                         disabled: isViewOnlyMode || !!amcQuestionnaire?.hasAMClassForm("antivirals"),
+                        ...fromQuestions("antivirals"),
                     },
                     {
                         id: fromIdsDictionary("antituberculosis"),
@@ -310,8 +311,8 @@ export function mapGeneralAMCQuestionnaireToInitialFormState(
                             false,
                         required: true,
                         showIsRequired: true,
-                        text: fromQuestions("antituberculosis"),
                         disabled: isViewOnlyMode || !!amcQuestionnaire?.hasAMClassForm("antituberculosis"),
+                        ...fromQuestions("antituberculosis"),
                     },
                     {
                         id: fromIdsDictionary("antimalaria"),
@@ -324,8 +325,8 @@ export function mapGeneralAMCQuestionnaireToInitialFormState(
                             false,
                         required: true,
                         showIsRequired: true,
-                        text: fromQuestions("antimalaria"),
                         disabled: isViewOnlyMode || !!amcQuestionnaire?.hasAMClassForm("antimalaria"),
+                        ...fromQuestions("antimalaria"),
                     },
                 ],
             },

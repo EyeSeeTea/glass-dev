@@ -28,17 +28,31 @@ type DisableOptionsByFieldValues = {
     disableCondition: (selectedValues: string[]) => string[];
 };
 
+type ToggleVisibilityByFieldValue = {
+    type: "toggleVisibilityByFieldValue";
+    fieldId: string;
+    /** If true, the field will be visible */
+    showCondition: (fieldValue: FieldValue) => boolean;
+    fieldIdsToToggle: string[];
+};
+
+export type OverrideFieldsCallback<ContextType extends object> = (
+    formState: FormState,
+    context?: ContextType
+) => (Pick<FormFieldState, "id"> & Partial<FormFieldState>)[];
+
 // flexible rule to override multiple fields based on a field value change
-export type OverrideFieldsByFieldValue = {
+export type OverrideFieldsByFieldValue<ContextType extends object> = {
     type: "overrideFieldsOnChange";
     fieldId: string;
-    fieldValue: FieldValue;
-    overrideFieldsCallback: (formState: FormState) => (Pick<FormFieldState, "id"> & Partial<FormFieldState>)[];
+    fieldValue?: FieldValue;
+    overrideFieldsCallback: OverrideFieldsCallback<ContextType>;
     triggerOnLoad: boolean;
 };
 
-export type FormRule =
+export type FormRule<ContextType extends object = object> =
     | RequiredyFieldByFieldValue
     | RequiredFieldByCustomCondition
     | DisableOptionsByFieldValues
-    | OverrideFieldsByFieldValue;
+    | OverrideFieldsByFieldValue<ContextType>
+    | ToggleVisibilityByFieldValue;

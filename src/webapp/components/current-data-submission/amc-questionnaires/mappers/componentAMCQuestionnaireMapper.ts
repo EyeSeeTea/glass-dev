@@ -2,7 +2,6 @@ import _ from "lodash";
 import {
     FormFieldState,
     getAllFieldsFromSections,
-    getBooleanFieldValue,
     getFieldIdFromIdsDictionary,
     getMultipleOptionsFieldValue,
     getStringFieldValue,
@@ -10,7 +9,7 @@ import {
 import { FormState } from "../../../form/presentation-entities/FormState";
 import { ComponentAMCQuestionnaireFormEntity } from "../presentation-entities/QuestionnaireFormEntity";
 import { MapToAMCQuestionnaireParams, MapToFormStateParams } from "./mapperTypes";
-import { getQuestionById, mapToFormOptions } from "./mapperUtils";
+import { getOptionCodeFromFieldValue, getQuestionTextsByQuestionId, mapToFormOptions } from "./mapperUtils";
 import {
     ComponentAMCQuestionId,
     ComponentAMCQuestionnaire,
@@ -18,9 +17,13 @@ import {
     ComponentAMCQuestionnaireBaseAttributes,
 } from "../../../../../domain/entities/amc-questionnaires/ComponentAMCQuestionnaire";
 import { YesNoUnknownValues } from "../../../../../domain/entities/amc-questionnaires/YesNoUnknownOption";
-import { yesNoOption } from "../../../../../domain/entities/amc-questionnaires/YesNoOption";
 import i18n from "../../../../../locales";
 import { getValidationMessage } from "../../../../../domain/entities/amc-questionnaires/ValidationError";
+import { UNPopulation } from "../../../../../domain/entities/amc-questionnaires/UNPopulation";
+
+export type ComponentAMCQuestionnaireContext = {
+    unPopulation?: UNPopulation;
+};
 
 export function mapFormStateToComponentAMCQuestionnaire(
     params: MapToAMCQuestionnaireParams<ComponentAMCQuestionnaireFormEntity>
@@ -42,16 +45,18 @@ export function mapFormStateToComponentAMCQuestionnaire(
     const antituberculosisStratum = getStratum("antituberculosisStratum");
     const antimalariaStratum = getStratum("antimalariaStratum");
 
-    const excludedSubstances = options.yesNoUnknownOptions.find(
-        option => option.code === getStringFieldValue("excludedSubstances", allFields)
-    )?.code;
+    const excludedSubstances = getOptionCodeFromFieldValue(
+        "excludedSubstances",
+        options.yesNoUnknownOptions,
+        allFields
+    );
     const listOfExcludedSubstances = getStringFieldValue("listOfExcludedSubstances", allFields);
-    const typeOfDataReported = options.dataLevelOptions.find(
-        option => option.code === getStringFieldValue("typeOfDataReported", allFields)
-    )?.code;
-    const procurementTypeOfDataReported = options.procurementLevelOptions.find(
-        option => option.code === getStringFieldValue("procurementTypeOfDataReported", allFields)
-    )?.code;
+    const typeOfDataReported = getOptionCodeFromFieldValue("typeOfDataReported", options.dataLevelOptions, allFields);
+    const procurementTypeOfDataReported = getOptionCodeFromFieldValue(
+        "procurementTypeOfDataReported",
+        options.procurementLevelOptions,
+        allFields
+    );
     const mixedTypeOfData = getStringFieldValue("mixedTypeOfData", allFields);
     const sourcesOfDataReported = _.compact(
         getMultipleOptionsFieldValue("sourcesOfDataReported", allFields).map(selectedOption => {
@@ -59,15 +64,22 @@ export function mapFormStateToComponentAMCQuestionnaire(
         })
     );
     const commentsForDataSources = getStringFieldValue("commentsForDataSources", allFields);
-    const sameAsUNPopulation = yesNoOption.getValueFromBoolean(getBooleanFieldValue("sameAsUNPopulation", allFields));
-    const sourceOfNationalPopulation = options.nationalPopulationDataSourceOptions.find(
-        option => option.code === getStringFieldValue("sourceOfNationalPopulation", allFields)
-    )?.code;
-    const otherSourceForNationalPopulation = getStringFieldValue("otherSourceForNationalPopulation", allFields);
+    const sameAsUNPopulation = getOptionCodeFromFieldValue("sameAsUNPopulation", options.yesNoOptions, allFields);
+    const unPopulation = parseInt(getStringFieldValue("unPopulation", allFields)) || undefined;
+    const populationCovered = parseFloat(getStringFieldValue("populationCovered", allFields)) || undefined;
+    const sourceOfNationalPopulation = getOptionCodeFromFieldValue(
+        "sourceOfNationalPopulation",
+        options.nationalPopulationDataSourceOptions,
+        allFields
+    );
+    const nationalCoverage = parseFloat(getStringFieldValue("nationalCoverage", allFields)) || undefined;
+    const unPopulationCoverage = parseFloat(getStringFieldValue("unPopulationCoverage", allFields)) || undefined;
     const commentOnNationalPopulation = getStringFieldValue("commentOnNationalPopulation", allFields);
-    const coverageVolumeWithinTheStratum = options.proportion50to100UnknownOptions.find(
-        option => option.code === getStringFieldValue("coverageVolumeWithinTheStratum", allFields)
-    )?.code;
+    const coverageVolumeWithinTheStratum = getOptionCodeFromFieldValue(
+        "coverageVolumeWithinTheStratum",
+        options.proportion50to100UnknownOptions,
+        allFields
+    );
     const commentOnCoverageWithinTheStratum = getStringFieldValue("commentOnCoverageWithinTheStratum", allFields);
 
     if (
@@ -95,8 +107,11 @@ export function mapFormStateToComponentAMCQuestionnaire(
         sourcesOfDataReported: sourcesOfDataReported,
         commentsForDataSources: commentsForDataSources,
         sameAsUNPopulation: sameAsUNPopulation,
+        unPopulation: unPopulation,
+        populationCovered: populationCovered,
         sourceOfNationalPopulation: sourceOfNationalPopulation,
-        otherSourceForNationalPopulation: otherSourceForNationalPopulation,
+        nationalCoverage: nationalCoverage,
+        unPopulationCoverage: unPopulationCoverage,
         commentOnNationalPopulation: commentOnNationalPopulation,
         coverageVolumeWithinTheStratum: coverageVolumeWithinTheStratum,
         commentOnCoverageWithinTheStratum: commentOnCoverageWithinTheStratum,
@@ -157,8 +172,11 @@ export const ComponentAMCQuestionnaireFieldIds = {
     sourcesOfDataReported: "sourcesOfDataReported",
     commentsForDataSources: "commentsForDataSources",
     sameAsUNPopulation: "sameAsUNPopulation",
+    unPopulation: "unPopulation",
+    populationCovered: "populationCovered",
     sourceOfNationalPopulation: "sourceOfNationalPopulation",
-    otherSourceForNationalPopulation: "otherSourceForNationalPopulation",
+    nationalCoverage: "nationalCoverage",
+    unPopulationCoverage: "unPopulationCoverage",
     commentOnNationalPopulation: "commentOnNationalPopulation",
     coverageVolumeWithinTheStratum: "coverageVolumeWithinTheStratum",
     commentOnCoverageWithinTheStratum: "commentOnCoverageWithinTheStratum",
@@ -170,7 +188,7 @@ function getStratumField(
 ): FormFieldState {
     const { questionnaireFormEntity, options, isViewOnlyMode, amcQuestionnaire } = params;
     const fieldId = getFieldIdFromIdsDictionary(stratumKey, ComponentAMCQuestionnaireFieldIds);
-    const question = getQuestionById(stratumKey, questionnaireFormEntity.questions);
+    const question = getQuestionTextsByQuestionId(stratumKey, questionnaireFormEntity.questions);
     const selfOptions = options.strataOptions.filter(option =>
         (questionnaireFormEntity?.entity?.[stratumKey] ?? []).includes(option.code)
     );
@@ -190,13 +208,13 @@ function getStratumField(
         options: mapToFormOptions(strataOptionsWithSelf),
         required: false,
         showIsRequired: false,
-        text: question,
         disabled: isViewOnlyMode,
+        ...question,
     };
 }
 
 export function mapComponentAMCQuestionnaireToInitialFormState(
-    params: MapToFormStateParams<ComponentAMCQuestionnaireFormEntity>
+    params: MapToFormStateParams<ComponentAMCQuestionnaireFormEntity, ComponentAMCQuestionnaireContext>
 ): FormState {
     const { questionnaireFormEntity, options, isViewOnlyMode, amcQuestionnaire } = params;
 
@@ -207,7 +225,11 @@ export function mapComponentAMCQuestionnaireToInitialFormState(
     const fromIdsDictionary = (key: keyof typeof ComponentAMCQuestionnaireFieldIds) =>
         getFieldIdFromIdsDictionary(key, ComponentAMCQuestionnaireFieldIds);
 
-    const fromQuestions = (id: ComponentAMCQuestionId) => getQuestionById(id, questionnaireFormEntity.questions);
+    const fromQuestions = (id: ComponentAMCQuestionId) =>
+        getQuestionTextsByQuestionId(id, questionnaireFormEntity.questions);
+
+    const unPopulation = questionnaireFormEntity?.entity?.unPopulation?.toString();
+    const contextUnPopulation = params.context?.unPopulation?.population?.toString() || "";
 
     return {
         id: questionnaireFormEntity.entity?.id ?? "",
@@ -253,8 +275,8 @@ export function mapComponentAMCQuestionnaireToInitialFormState(
                         value: questionnaireFormEntity?.entity?.excludedSubstances || "",
                         required: true,
                         showIsRequired: true,
-                        text: fromQuestions("excludedSubstances"),
                         disabled: isViewOnlyMode,
+                        ...fromQuestions("excludedSubstances"),
                     },
                     {
                         id: fromIdsDictionary("listOfExcludedSubstances"),
@@ -264,8 +286,8 @@ export function mapComponentAMCQuestionnaireToInitialFormState(
                         value: questionnaireFormEntity?.entity?.listOfExcludedSubstances || "",
                         multiline: false,
                         required: YesNoUnknownValues.YES === questionnaireFormEntity?.entity?.excludedSubstances,
-                        text: fromQuestions("listOfExcludedSubstances"),
                         disabled: isViewOnlyMode,
+                        ...fromQuestions("listOfExcludedSubstances"),
                     },
                     {
                         id: fromIdsDictionary("typeOfDataReported"),
@@ -277,8 +299,8 @@ export function mapComponentAMCQuestionnaireToInitialFormState(
                         value: questionnaireFormEntity?.entity?.typeOfDataReported || "",
                         required: true,
                         showIsRequired: true,
-                        text: fromQuestions("typeOfDataReported"),
                         disabled: isViewOnlyMode,
+                        ...fromQuestions("typeOfDataReported"),
                     },
                     {
                         id: fromIdsDictionary("procurementTypeOfDataReported"),
@@ -289,8 +311,8 @@ export function mapComponentAMCQuestionnaireToInitialFormState(
                         options: mapToFormOptions(options.procurementLevelOptions),
                         value: questionnaireFormEntity?.entity?.procurementTypeOfDataReported || "",
                         required: false,
-                        text: fromQuestions("procurementTypeOfDataReported"),
                         disabled: isViewOnlyMode,
+                        ...fromQuestions("procurementTypeOfDataReported"),
                     },
                     {
                         id: fromIdsDictionary("mixedTypeOfData"),
@@ -300,8 +322,8 @@ export function mapComponentAMCQuestionnaireToInitialFormState(
                         value: questionnaireFormEntity?.entity?.mixedTypeOfData || "",
                         multiline: false,
                         required: false,
-                        text: fromQuestions("mixedTypeOfData"),
                         disabled: isViewOnlyMode,
+                        ...fromQuestions("mixedTypeOfData"),
                     },
                     {
                         id: fromIdsDictionary("sourcesOfDataReported"),
@@ -313,8 +335,8 @@ export function mapComponentAMCQuestionnaireToInitialFormState(
                         options: mapToFormOptions(options.dataSourceOptions),
                         required: true,
                         showIsRequired: true,
-                        text: fromQuestions("sourcesOfDataReported"),
                         disabled: isViewOnlyMode,
+                        ...fromQuestions("sourcesOfDataReported"),
                     },
                     {
                         id: fromIdsDictionary("commentsForDataSources"),
@@ -324,23 +346,46 @@ export function mapComponentAMCQuestionnaireToInitialFormState(
                         value: questionnaireFormEntity?.entity?.commentsForDataSources || "",
                         multiline: false,
                         required: false,
-                        text: fromQuestions("commentsForDataSources"),
                         disabled: isViewOnlyMode,
+                        ...fromQuestions("commentsForDataSources"),
+                    },
+                    {
+                        id: fromIdsDictionary("unPopulation"),
+                        isVisible: true,
+                        errors: [],
+                        type: "text",
+                        value: unPopulation || contextUnPopulation || "",
+                        required: false,
+                        disabled: true,
+                        helperText:
+                            !unPopulation && !contextUnPopulation
+                                ? i18n.t("Error loading value from World Prospect Population")
+                                : undefined,
+                        ...fromQuestions("unPopulation"),
                     },
                     {
                         id: fromIdsDictionary("sameAsUNPopulation"),
                         isVisible: true,
                         errors: [],
-                        type: "boolean",
-                        label: i18n.t("Yes"),
-                        value:
-                            yesNoOption.getBooleanFromValue(
-                                questionnaireFormEntity?.entity?.sameAsUNPopulation || "0"
-                            ) || false,
+                        type: "radio",
+                        multiple: false,
+                        options: mapToFormOptions(options.yesNoOptions),
+                        value: questionnaireFormEntity?.entity?.sameAsUNPopulation || "",
                         required: true,
                         showIsRequired: true,
-                        text: fromQuestions("sameAsUNPopulation"),
                         disabled: isViewOnlyMode,
+                        ...fromQuestions("sameAsUNPopulation"),
+                    },
+                    {
+                        id: fromIdsDictionary("populationCovered"),
+                        isVisible: true,
+                        errors: [],
+                        type: "text",
+                        value: questionnaireFormEntity?.entity?.populationCovered?.toString() || "",
+                        multiline: false,
+                        required: false,
+                        disabled: isViewOnlyMode,
+                        ...fromQuestions("populationCovered"),
                     },
                     {
                         id: fromIdsDictionary("sourceOfNationalPopulation"),
@@ -351,19 +396,30 @@ export function mapComponentAMCQuestionnaireToInitialFormState(
                         options: mapToFormOptions(options.nationalPopulationDataSourceOptions),
                         value: questionnaireFormEntity?.entity?.sourceOfNationalPopulation || "",
                         required: false,
-                        text: fromQuestions("sourceOfNationalPopulation"),
                         disabled: isViewOnlyMode,
+                        ...fromQuestions("sourceOfNationalPopulation"),
                     },
                     {
-                        id: fromIdsDictionary("otherSourceForNationalPopulation"),
+                        id: fromIdsDictionary("nationalCoverage"),
                         isVisible: true,
                         errors: [],
                         type: "text",
-                        value: questionnaireFormEntity?.entity?.otherSourceForNationalPopulation || "",
+                        value: questionnaireFormEntity?.entity?.nationalCoverage?.toString() || "",
                         multiline: false,
                         required: false,
-                        text: fromQuestions("otherSourceForNationalPopulation"),
                         disabled: isViewOnlyMode,
+                        ...fromQuestions("nationalCoverage"),
+                    },
+                    {
+                        id: fromIdsDictionary("unPopulationCoverage"),
+                        isVisible: true,
+                        errors: [],
+                        type: "text",
+                        value: questionnaireFormEntity?.entity?.unPopulationCoverage?.toString() || "",
+                        multiline: false,
+                        required: false,
+                        disabled: true,
+                        ...fromQuestions("unPopulationCoverage"),
                     },
                     {
                         id: fromIdsDictionary("commentOnNationalPopulation"),
@@ -373,8 +429,8 @@ export function mapComponentAMCQuestionnaireToInitialFormState(
                         value: questionnaireFormEntity?.entity?.commentOnNationalPopulation || "",
                         multiline: false,
                         required: false,
-                        text: fromQuestions("commentOnNationalPopulation"),
                         disabled: isViewOnlyMode,
+                        ...fromQuestions("commentOnNationalPopulation"),
                     },
                     {
                         id: fromIdsDictionary("coverageVolumeWithinTheStratum"),
@@ -386,8 +442,8 @@ export function mapComponentAMCQuestionnaireToInitialFormState(
                         value: questionnaireFormEntity?.entity?.coverageVolumeWithinTheStratum || "",
                         required: true,
                         showIsRequired: true,
-                        text: fromQuestions("coverageVolumeWithinTheStratum"),
                         disabled: isViewOnlyMode,
+                        ...fromQuestions("coverageVolumeWithinTheStratum"),
                     },
                     {
                         id: fromIdsDictionary("commentOnCoverageWithinTheStratum"),
@@ -397,8 +453,8 @@ export function mapComponentAMCQuestionnaireToInitialFormState(
                         value: questionnaireFormEntity?.entity?.commentOnCoverageWithinTheStratum || "",
                         multiline: false,
                         required: false,
-                        text: fromQuestions("commentOnCoverageWithinTheStratum"),
                         disabled: isViewOnlyMode,
+                        ...fromQuestions("commentOnCoverageWithinTheStratum"),
                     },
                 ],
             },

@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2025-06-03T16:56:09.366Z\n"
-"PO-Revision-Date: 2025-06-03T16:56:09.366Z\n"
+"POT-Creation-Date: 2025-07-14T16:42:04.814Z\n"
+"PO-Revision-Date: 2025-07-14T16:42:04.814Z\n"
 
 msgid "Template {{id}} not loaded"
 msgstr ""
@@ -442,6 +442,17 @@ msgstr ""
 msgid "Back"
 msgstr ""
 
+msgid "Error loading AMC Questionnaire"
+msgstr ""
+
+msgid "This may be due to a network issue or a data inconsistency. "
+msgstr ""
+
+msgid ""
+"Please check the error details below, correct any issues with the event, "
+"and try again. If the problem persists, contact support for assistance."
+msgstr ""
+
 msgid "Edit"
 msgstr ""
 
@@ -455,6 +466,9 @@ msgid "Component Antimicrobial Class Stratum"
 msgstr ""
 
 msgid "Use all available antimicrobial classes / stratum combinations"
+msgstr ""
+
+msgid "Error loading value from World Prospect Population"
 msgstr ""
 
 msgid "AM Questionnaire Editor"
@@ -590,6 +604,9 @@ msgid "OPEN ALL YEAR"
 msgstr ""
 
 msgid "GO"
+msgstr ""
+
+msgid "Submission failed - "
 msgstr ""
 
 msgid "Save Draft"

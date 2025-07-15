@@ -23,6 +23,7 @@ export const AMCQuestionnaireContextProvider: React.FC = ({ children }) => {
 
     const fetchQuestionnaire = useCallback(() => {
         setAMCQuestionnaireIsLoading(true);
+        setAMCQuestionnaireError(undefined);
         return Future.joinObj({
             amcQuestionnaireResponse: compositionRoot.amcQuestionnaires.getByOrgUnitAndPeriod(
                 currentOrgUnitAccess.orgUnitId,
@@ -42,6 +43,10 @@ export const AMCQuestionnaireContextProvider: React.FC = ({ children }) => {
                 setAMCQuestionnaireIsLoading(false);
                 if (error instanceof Error) {
                     setAMCQuestionnaireError(error);
+                } else if (typeof error === "string") {
+                    setAMCQuestionnaireError(new Error(error));
+                } else {
+                    setAMCQuestionnaireError(new Error("Unknown error occurred while fetching the AMC Questionnaire"));
                 }
             }
         );
