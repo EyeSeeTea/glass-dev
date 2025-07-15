@@ -14,15 +14,18 @@ export type MapToAMCQuestionnaireParams<T extends QuestionnaireFormEntity> = {
     options: AMCQuestionnaireOptionsContextState;
 };
 
-export type MapToFormStateParams<T extends QuestionnaireFormEntity> = {
+export type MapToFormStateParams<T extends QuestionnaireFormEntity, ContextType extends object = object> = {
     questionnaireFormEntity: T;
     editMode: boolean;
     options: AMCQuestionnaireOptionsContextState;
     amcQuestionnaire: Maybe<AMCQuestionnaire>;
     isViewOnlyMode?: boolean;
+    context?: ContextType;
 };
 
-export type MapToFormStateFunction<T extends QuestionnaireFormEntity> = (params: MapToFormStateParams<T>) => FormState;
+export type MapToFormStateFunction<T extends QuestionnaireFormEntity, ContextType extends object = object> = (
+    params: MapToFormStateParams<T, ContextType>
+) => FormState;
 
 export type AMCQuestionnaireFormMapper = {
     [key in AMCQuestionnaireFormType]: {
