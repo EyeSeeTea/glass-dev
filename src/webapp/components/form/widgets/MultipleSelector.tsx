@@ -4,6 +4,7 @@ import { Select, InputLabel, MenuItem, FormHelperText, Chip } from "@material-ui
 import { IconChevronDown24, IconCross16 } from "@dhis2/ui";
 import { getLabelFromValue } from "./utils/selectorHelper";
 import { FormOption } from "../presentation-entities/FormOption";
+import { palette } from "../../../pages/app/themes/dhis2.theme";
 
 type MultipleSelectorProps<Value extends string = string> = {
     id: string;
@@ -125,7 +126,7 @@ const Label = styled(InputLabel)`
 
 const StyledFormHelperText = styled(FormHelperText)<{ error?: boolean }>``;
 
-const StyledSelect = styled(Select)<{ error?: boolean }>`
+const StyledSelect = styled(Select)<{ error?: boolean; disabled?: boolean }>`
     min-height: 40px;
     .MuiOutlinedInput-notchedOutline {
     }
@@ -135,6 +136,8 @@ const StyledSelect = styled(Select)<{ error?: boolean }>`
         padding-block: 1px;
         &:focus {
         }
+        background-color: ${({ disabled }) => (disabled ? palette.background.default : "inherit")};
+        opacity: ${({ disabled }) => (disabled ? 0.8 : 1)};
     }
 `;
 

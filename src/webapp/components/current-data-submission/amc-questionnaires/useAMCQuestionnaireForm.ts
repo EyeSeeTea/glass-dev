@@ -18,6 +18,7 @@ import { amcQuestionnaireMappers } from "./mappers";
 import { useAMCQuestionnaireContext } from "../../../contexts/amc-questionnaire-context";
 import { AMClassAMCQuestionnaire } from "../../../../domain/entities/amc-questionnaires/AMClassAMCQuestionnaire";
 import { ComponentAMCQuestionnaire } from "../../../../domain/entities/amc-questionnaires/ComponentAMCQuestionnaire";
+import { useUNPopulation } from "./hooks/useUNPopulation";
 
 export type GlobalMessage = {
     text: string;
@@ -45,7 +46,7 @@ type State = {
     globalMessage: Maybe<GlobalMessage>;
     formState: FormLoadState;
     isLoading: boolean;
-    handleFormChange: (updatedField: FormFieldState) => void;
+    handleFormChange: (updatedField: FormFieldState) => Promise<void>;
     onClickSave: () => void;
     onCancelForm: () => void;
     onCopyForm: () => void;
@@ -76,8 +77,16 @@ export function useAMCQuestionnaireForm<T extends AMCQuestionnaireFormType>(para
     const [isLoading, setIsLoading] = useState(false);
     const [questionnaireFormEntity, setQuestionnaireFormEntity] = useState<QuestionnaireFormEntityMap[T]>();
     const [openModal, setOpenModal] = useState(false);
-
+    const { unPopulation, fetchUNPopulation } = useUNPopulation();
     const isEditMode = useMemo(() => !!id, [id]);
+
+    useEffect(() => {
+        if (!unPopulation || unPopulation.orgUnitId !== orgUnitId || unPopulation.period !== period) {
+            // prefetch UN Population, used later to prepopulate population field in component questionnaires
+            // TODO: review and move this
+            fetchUNPopulation(orgUnitId, period);
+        }
+    }, [orgUnitId, period, unPopulation, fetchUNPopulation]);
 
     useEffect(() => {
         if (questions && options) {
@@ -144,7 +153,6 @@ export function useAMCQuestionnaireForm<T extends AMCQuestionnaireFormType>(para
                                 });
                                 return;
                             }
-
                             const formEntity = getQuestionnaireFormEntity(formType, questions, componentQuestionnaire);
                             setQuestionnaireFormEntity(formEntity);
                             setFormLabels(formEntity.labels);
@@ -156,6 +164,7 @@ export function useAMCQuestionnaireForm<T extends AMCQuestionnaireFormType>(para
                                     options: options,
                                     amcQuestionnaire: questionnaire,
                                     isViewOnlyMode: isViewOnlyMode,
+                                    context: { unPopulation: unPopulation },
                                 }),
                             });
                         }
@@ -175,6 +184,7 @@ export function useAMCQuestionnaireForm<T extends AMCQuestionnaireFormType>(para
                         options: options,
                         amcQuestionnaire: questionnaire,
                         isViewOnlyMode: isViewOnlyMode,
+                        context: { unPopulation: unPopulation }, // TODO: this context can be different for each form type
                     }),
                 });
             }
@@ -190,16 +200,18 @@ export function useAMCQuestionnaireForm<T extends AMCQuestionnaireFormType>(para
         period,
         isViewOnlyMode,
         questionnaire,
+        unPopulation,
     ]);
 
     const handleFormChange = useCallback(
-        (updatedField: FormFieldState) => {
+        async (updatedField: FormFieldState) => {
             setFormState(prevState => {
                 if (prevState.kind === "loaded" && questionnaireFormEntity) {
                     const updatedData = updateAndValidateFormState(
                         prevState.data,
                         updatedField,
-                        questionnaireFormEntity
+                        questionnaireFormEntity,
+                        { unPopulation: unPopulation } // TODO: this context will be different for each form type
                     );
                     return {
                         kind: "loaded" as const,
@@ -210,7 +222,7 @@ export function useAMCQuestionnaireForm<T extends AMCQuestionnaireFormType>(para
                 }
             });
         },
-        [questionnaireFormEntity]
+        [questionnaireFormEntity, unPopulation]
     );
 
     const onClickSave = useCallback(() => {
