@@ -117,6 +117,7 @@ export class CustomValidationsAMCProductData {
         const errors = _(
             teis.map(tei => {
                 const curErrors = [];
+                // enrolledAt string format is "2023-01-01T00:00"
                 const eventDate = tei.enrollments?.[0]?.enrolledAt
                     ? new Date(tei.enrollments?.[0].enrolledAt)
                     : new Date();
@@ -139,7 +140,7 @@ export class CustomValidationsAMCProductData {
                         line: tei.trackedEntity ? parseInt(tei.trackedEntity) + 6 : -1,
                     });
                 }
-                if (eventDate.getUTCFullYear().toString() !== period) {
+                if (eventDate.getFullYear().toString() !== period) {
                     curErrors.push({
                         error: i18n.t(
                             `Event date is incorrect: Selected period : ${period}, date in file: ${
