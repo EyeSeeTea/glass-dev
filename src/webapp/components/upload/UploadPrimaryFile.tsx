@@ -103,8 +103,9 @@ export const UploadPrimaryFile: React.FC<UploadPrimaryFileProps> = ({
                                         localStorage.setItem("primaryUploadId", uploadId);
                                         setIsLoading(false);
                                     },
-                                    () => {
-                                        snackbar.error(i18n.t("Error in file upload"));
+                                    error => {
+                                        console.error(`Error in file upload: ${error}`);
+                                        snackbar.error(i18n.t(`Error in file upload: ${error}`));
                                         setIsLoading(false);
                                     }
                                 );

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
     Backdrop,
     Button,
@@ -464,14 +464,18 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
         }
     }, [compositionRoot.glassDocuments, hasSecondaryFile, moduleName, setToAsyncUploads, snackbar]);
 
-    const continueClick = () => {
-        if (
+    const isAsyncUploadsEnabled = useMemo(() => {
+        return !!(
             moduleProperties.get(moduleName)?.hasAsyncUploads &&
             currentModule.kind === "loaded" &&
             currentModule.data.maxNumberOfRowsToSyncUploads &&
             ((primaryFileTotalRows && primaryFileTotalRows > currentModule.data.maxNumberOfRowsToSyncUploads) ||
                 (secondaryFileTotalRows && secondaryFileTotalRows > currentModule.data.maxNumberOfRowsToSyncUploads))
-        ) {
+        );
+    }, [currentModule, moduleName, primaryFileTotalRows, secondaryFileTotalRows]);
+
+    const continueClick = () => {
+        if (isAsyncUploadsEnabled) {
             handleAsyncUploads();
         } else {
             if (!hasSecondaryFile) {
@@ -697,7 +701,13 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
                 <Button
                     variant="contained"
                     color={isValidated ? "primary" : "default"}
-                    disabled={isValidated ? false : true}
+                    disabled={
+                        isValidated
+                            ? isAsyncUploadsEnabled &&
+                              !localStorage.getItem("primaryUploadId") &&
+                              !localStorage.getItem("secondaryUploadId")
+                            : true
+                    }
                     endIcon={<ChevronRightIcon />}
                     disableElevation
                     onClick={continueClick}

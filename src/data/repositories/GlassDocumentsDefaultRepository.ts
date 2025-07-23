@@ -47,14 +47,18 @@ export class GlassDocumentsDefaultRepository implements GlassDocumentsRepository
                 })
             ),
             this.dataStoreClient.listCollection<GlassDocuments>(DataStoreKeys.DOCUMENTS)
-        ).flatMap(([fileUploadResult, documents]: [FileUploadResult, GlassDocuments[]]) => {
-            return this.saveSharingSettingsAndNewDocument(
-                fileUploadResult.id,
-                fileUploadResult.fileResourceId,
-                documents,
-                module
-            );
-        });
+        )
+            .flatMapError((error: unknown) => {
+                return Future.error(typeof error === "string" ? error : "Error while saving file");
+            })
+            .flatMap(([fileUploadResult, documents]: [FileUploadResult, GlassDocuments[]]) => {
+                return this.saveSharingSettingsAndNewDocument(
+                    fileUploadResult.id,
+                    fileUploadResult.fileResourceId,
+                    documents,
+                    module
+                );
+            });
     }
 
     saveBuffer(fileBuffer: Buffer, fileName: string, module: string): FutureData<string> {

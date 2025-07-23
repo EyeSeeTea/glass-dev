@@ -755,7 +755,10 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({
                                             }}
                                             disabled={
                                                 !hasCurrentUserCaptureAccess ||
-                                                !isEditModeStatus(currentDataSubmissionStatus.data.title)
+                                                !isEditModeStatus(currentDataSubmissionStatus.data.title) ||
+                                                isAlreadyMarkedToBeDeleted(row) ||
+                                                isCurrentlyBeingUploadedAsync(row) ||
+                                                hasErrorAsyncDeleting(row)
                                             }
                                         >
                                             <CheckCircleOutline />

@@ -104,8 +104,9 @@ export const UploadSecondary: React.FC<UploadSecondaryProps> = ({
                                         setIsLoading(false);
                                         setHasSecondaryFile(true);
                                     },
-                                    () => {
-                                        snackbar.error(i18n.t("Error in file upload"));
+                                    error => {
+                                        console.error(`Error in file upload: ${error}`);
+                                        snackbar.error(i18n.t(`Error in file upload: ${error}`));
                                         setIsLoading(false);
                                     }
                                 );
