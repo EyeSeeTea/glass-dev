@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2025-06-26T17:11:26.187Z\n"
-"PO-Revision-Date: 2025-06-26T17:11:26.187Z\n"
+"POT-Creation-Date: 2025-07-22T10:36:25.197Z\n"
+"PO-Revision-Date: 2025-07-22T10:36:25.197Z\n"
 
 msgid "Template {{id}} not loaded"
 msgstr ""
@@ -468,6 +468,9 @@ msgstr ""
 msgid "Use all available antimicrobial classes / stratum combinations"
 msgstr ""
 
+msgid "Error loading value from World Prospect Population"
+msgstr ""
+
 msgid "AM Questionnaire Editor"
 msgstr ""
 
@@ -750,10 +753,10 @@ msgstr ""
 msgid "Data submission id not found. Please try again"
 msgstr ""
 
-msgid "Error in file upload"
+msgid "Incorrect File Format. Please retry with a valid file"
 msgstr ""
 
-msgid "Incorrect File Format. Please retry with a valid file"
+msgid "Error in file upload"
 msgstr ""
 
 msgid "Select file"
