@@ -20,7 +20,7 @@ const makeMapToFormState = <T extends QuestionnaireFormEntity>(
     return function (params: Parameters<MapToFormStateFunction<T>>[0]): ReturnType<MapToFormStateFunction<T>> {
         const formState = mapper(params);
         // We need to apply rules so required fields and other rules are consistent after initial mapping
-        return applyRulesToAllFieldsInFormState(formState, params.questionnaireFormEntity.rules);
+        return applyRulesToAllFieldsInFormState(formState, params.questionnaireFormEntity.rules, params.context);
     };
 };
 
