@@ -18,7 +18,7 @@ export type GeneralAMCQuestionnaireBaseAttributes = {
 };
 
 export type GeneralAMCQuestionnaireAMClassAttributes = {
-    antibacterials: YesNoValue;
+    antibiotics: YesNoValue;
     antifungals: YesNoValue;
     antivirals: YesNoValue;
     antituberculosis: YesNoValue;
