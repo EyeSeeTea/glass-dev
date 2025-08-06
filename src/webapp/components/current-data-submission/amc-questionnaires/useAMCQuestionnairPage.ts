@@ -65,8 +65,8 @@ export function useAMCQuestionnairPage(options: {
     const tableTitle = useMemo(
         () =>
             formType === "am-class-questionnaire"
-                ? i18n.t("AM Questionnaire Editor")
-                : i18n.t("Component Questionnaire Editor"),
+                ? i18n.t("Antimicrobial Classes - health-care strata")
+                : i18n.t("Antimicrobial Classes - health-care strata - characteristics"),
         [formType]
     );
 

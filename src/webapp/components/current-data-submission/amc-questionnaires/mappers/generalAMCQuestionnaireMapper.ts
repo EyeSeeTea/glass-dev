@@ -39,7 +39,7 @@ export function mapFormStateToGeneralAMCQuestionnaire(
     )?.code;
     const detailOnShortageInPrivateSector = getStringFieldValue("detailOnShortageInPrivateSector", allFields);
     const generalComments = getStringFieldValue("generalComments", allFields);
-    const antibacterials = yesNoOption.getValueFromBoolean(getBooleanFieldValue("antibacterials", allFields));
+    const antibiotics = yesNoOption.getValueFromBoolean(getBooleanFieldValue("antibacterials", allFields));
     const antifungals = yesNoOption.getValueFromBoolean(getBooleanFieldValue("antifungals", allFields));
     const antivirals = yesNoOption.getValueFromBoolean(getBooleanFieldValue("antivirals", allFields));
     const antituberculosis = yesNoOption.getValueFromBoolean(getBooleanFieldValue("antituberculosis", allFields));
@@ -49,7 +49,7 @@ export function mapFormStateToGeneralAMCQuestionnaire(
         !isSameAsLastYear ||
         !shortageInPublicSector ||
         !shortageInPrivateSector ||
-        !antibacterials ||
+        !antibiotics ||
         !antifungals ||
         !antivirals ||
         !antituberculosis ||
@@ -66,7 +66,7 @@ export function mapFormStateToGeneralAMCQuestionnaire(
         shortageInPrivateSector: shortageInPrivateSector,
         detailOnShortageInPrivateSector: detailOnShortageInPrivateSector,
         generalComments: generalComments,
-        antibacterials: antibacterials,
+        antibiotics: antibiotics,
         antifungals: antifungals,
         antivirals: antivirals,
         antituberculosis: antituberculosis,
@@ -125,7 +125,7 @@ export const generalAMCQuestionnaireFieldIds = {
     shortageInPrivateSector: "shortageInPrivateSector",
     detailOnShortageInPrivateSector: "detailOnShortageInPrivateSector",
     generalComments: "generalComments",
-    antibacterials: "antibacterials",
+    antibiotics: "antibiotics",
     antifungals: "antifungals",
     antivirals: "antivirals",
     antituberculosis: "antituberculosis",
@@ -259,18 +259,18 @@ export function mapGeneralAMCQuestionnaireToInitialFormState(
                 required: true,
                 fields: [
                     {
-                        id: fromIdsDictionary("antibacterials"),
+                        id: fromIdsDictionary("antibiotics"),
                         isVisible: true,
                         errors: [],
                         type: "boolean",
                         label: i18n.t("Yes"),
                         value:
-                            yesNoOption.getBooleanFromValue(questionnaireFormEntity?.entity?.antibacterials || "0") ||
+                            yesNoOption.getBooleanFromValue(questionnaireFormEntity?.entity?.antibiotics || "0") ||
                             false,
                         required: true,
                         showIsRequired: true,
-                        disabled: isViewOnlyMode || !!amcQuestionnaire?.hasAMClassForm("antibacterials"),
-                        ...fromQuestions("antibacterials"),
+                        disabled: isViewOnlyMode || !!amcQuestionnaire?.hasAMClassForm("antibiotics"),
+                        ...fromQuestions("antibiotics"),
                     },
                     {
                         id: fromIdsDictionary("antifungals"),

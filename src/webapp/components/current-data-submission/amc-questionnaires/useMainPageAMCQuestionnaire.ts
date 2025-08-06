@@ -79,8 +79,8 @@ export function useMainPageAMCQuestionnaire(): MainPageAMCQuestionnaireState {
     const openQuestionnaireForm = useCallback((formType: AMCQuestionnaireFormType, id?: Id) => {
         const title =
             formType === "am-class-questionnaire"
-                ? i18n.t("AM Class Questionnaires")
-                : i18n.t("Component Questionnaires");
+                ? i18n.t("Antimicrobial classes - health-care strata")
+                : i18n.t("Antimicrobial classes - health-care strata - characteristics");
         setOpenQuestionnaire({ formType: formType, id: id, title: title });
     }, []);
 

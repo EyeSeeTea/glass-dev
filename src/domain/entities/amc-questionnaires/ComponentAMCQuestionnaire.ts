@@ -121,7 +121,7 @@ export class ComponentAMCQuestionnaire extends Struct<ComponentAMCQuestionnaireA
     ): AntimicrobialClassValue {
         switch (property) {
             case "antibacterialStratum":
-                return AntimicrobialClassValues.Antibacterials;
+                return AntimicrobialClassValues.Antibiotics;
             case "antifungalStratum":
                 return AntimicrobialClassValues.Antifungals;
             case "antiviralStratum":
@@ -137,7 +137,7 @@ export class ComponentAMCQuestionnaire extends Struct<ComponentAMCQuestionnaireA
 
     public get stratumByAntimicrobialClass(): Record<AntimicrobialClassValue, StrataValue[]> {
         return {
-            [AntimicrobialClassValues.Antibacterials]: this.antibacterialStratum,
+            [AntimicrobialClassValues.Antibiotics]: this.antibacterialStratum,
             [AntimicrobialClassValues.Antifungals]: this.antifungalStratum,
             [AntimicrobialClassValues.Antivirals]: this.antiviralStratum,
             [AntimicrobialClassValues.Antituberculosis]: this.antituberculosisStratum,

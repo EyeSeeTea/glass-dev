@@ -233,11 +233,11 @@ export function mapComponentAMCQuestionnaireToInitialFormState(
 
     return {
         id: questionnaireFormEntity.entity?.id ?? "",
-        title: "Component questionnaire",
+        title: i18n.t("Antimicrobial Classes - health-care strata - characteristics"),
         isValid: false,
         sections: [
             {
-                title: i18n.t("Component Antimicrobial Class Stratum"),
+                title: i18n.t("Antimicrobial Class Stratum"),
                 id: "antimicrobial_stratum_section",
                 isVisible: true,
                 required: true,
@@ -260,7 +260,7 @@ export function mapComponentAMCQuestionnaireToInitialFormState(
                 ],
             },
             {
-                title: "Component General questionnaire",
+                title: i18n.t("Substances Coverage"),
                 id: "component_section",
                 isVisible: true,
                 required: true,
@@ -288,7 +288,14 @@ export function mapComponentAMCQuestionnaireToInitialFormState(
                         required: YesNoUnknownValues.YES === questionnaireFormEntity?.entity?.excludedSubstances,
                         disabled: isViewOnlyMode,
                         ...fromQuestions("listOfExcludedSubstances"),
-                    },
+                    }
+                ],
+            }, {
+                title: i18n.t("Type and source(s) of data"),
+                id: "data_source_section",
+                isVisible: true,
+                required: true,
+                fields: [
                     {
                         id: fromIdsDictionary("typeOfDataReported"),
                         isVisible: true,
@@ -348,7 +355,15 @@ export function mapComponentAMCQuestionnaireToInitialFormState(
                         required: false,
                         disabled: isViewOnlyMode,
                         ...fromQuestions("commentsForDataSources"),
-                    },
+                    }
+                ],
+            },
+            {
+                title: i18n.t("Population coverage"),
+                id: "population_section",
+                isVisible: true,
+                required: true,
+                fields: [
                     {
                         id: fromIdsDictionary("unPopulation"),
                         isVisible: true,
@@ -431,7 +446,15 @@ export function mapComponentAMCQuestionnaireToInitialFormState(
                         required: false,
                         disabled: isViewOnlyMode,
                         ...fromQuestions("commentOnNationalPopulation"),
-                    },
+                    }
+                ],
+            },
+            {
+                title: i18n.t("Antimicrobial volume coverage"),
+                id: "volume_section",
+                isVisible: true,
+                required: true,
+                fields: [
                     {
                         id: fromIdsDictionary("coverageVolumeWithinTheStratum"),
                         isVisible: true,
@@ -455,7 +478,7 @@ export function mapComponentAMCQuestionnaireToInitialFormState(
                         required: false,
                         disabled: isViewOnlyMode,
                         ...fromQuestions("commentOnCoverageWithinTheStratum"),
-                    },
+                    }
                 ],
             },
         ],
