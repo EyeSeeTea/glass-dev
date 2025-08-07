@@ -31,6 +31,11 @@ export const NumberInput: React.FC<NumberInputProps> = React.memo(
         const debouncedValue = useDebounce(inputValue);
 
         useEffect(() => {
+            if (debouncedValue === "") {
+                setInputValue("0");
+                onChange(0);
+            }
+
             const parsed = Number(debouncedValue);
             if (!isNaN(parsed)) {
                 onChange(parsed);
@@ -50,8 +55,6 @@ export const NumberInput: React.FC<NumberInputProps> = React.memo(
                     value={inputValue}
                     onChange={e => {
                         const val = e.target.value;
-                        // Prevent empty string — fallback to 0
-                        setInputValue(val === "" ? "0" : val);
                     }}
                     helperText={error && errorText ? errorText : helperText}
                     error={error}
