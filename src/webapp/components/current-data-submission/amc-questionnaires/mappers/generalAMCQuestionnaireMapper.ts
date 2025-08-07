@@ -39,7 +39,7 @@ export function mapFormStateToGeneralAMCQuestionnaire(
     )?.code;
     const detailOnShortageInPrivateSector = getStringFieldValue("detailOnShortageInPrivateSector", allFields);
     const generalComments = getStringFieldValue("generalComments", allFields);
-    const antibiotics = yesNoOption.getValueFromBoolean(getBooleanFieldValue("antibacterials", allFields));
+    const antibiotics = yesNoOption.getValueFromBoolean(getBooleanFieldValue("antibiotics", allFields));
     const antifungals = yesNoOption.getValueFromBoolean(getBooleanFieldValue("antifungals", allFields));
     const antivirals = yesNoOption.getValueFromBoolean(getBooleanFieldValue("antivirals", allFields));
     const antituberculosis = yesNoOption.getValueFromBoolean(getBooleanFieldValue("antituberculosis", allFields));
