@@ -29,8 +29,12 @@ export function mapD2EventToAMClassAMCQuestionnaire(d2Event: D2Event): AMClassAM
         antimicrobialClass: antimicrobialClass,
         stratas: stratas,
         estVolumeTotalHealthLevel: proportion50to100UnknownOption.getSafeValue(fromMap("estVolumeTotalHealthLevel")),
-        estVolumeHospitalHealthLevel: proportion50to100UnknownOption.getSafeValue(fromMap("estVolumeHospitalHealthLevel")),
-        estVolumeCommunityHealthLevel: proportion50to100UnknownOption.getSafeValue(fromMap("estVolumeCommunityHealthLevel")),
+        estVolumeHospitalHealthLevel: proportion50to100UnknownOption.getSafeValue(
+            fromMap("estVolumeHospitalHealthLevel")
+        ),
+        estVolumeCommunityHealthLevel: proportion50to100UnknownOption.getSafeValue(
+            fromMap("estVolumeCommunityHealthLevel")
+        ),
     });
     return amClassAMCQuestionnaire;
 }

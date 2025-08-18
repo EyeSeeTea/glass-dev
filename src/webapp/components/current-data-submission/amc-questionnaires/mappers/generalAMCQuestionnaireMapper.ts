@@ -28,6 +28,7 @@ export function mapFormStateToGeneralAMCQuestionnaire(
     const allFields: FormFieldState[] = getAllFieldsFromSections(formState.sections);
 
     const isSameAsLastYear = getOptionCodeFromFieldValue("sameAsLastYear", options.yesNoUnknownNAOptions, allFields);
+    const detailOnSameAsLast = getStringFieldValue("detailOnSameAsLast", allFields);
     const shortageInPublicSector = getOptionCodeFromFieldValue(
         "shortageInPublicSector",
         options.yesNoUnknownOptions,
@@ -61,6 +62,7 @@ export function mapFormStateToGeneralAMCQuestionnaire(
     const generalAMCQuestionnaireAttributes: GeneralAMCQuestionnaireAttributes = {
         ...baseAttributes,
         isSameAsLastYear: isSameAsLastYear,
+        detailOnSameAsLast: detailOnSameAsLast, 
         shortageInPublicSector: shortageInPublicSector,
         detailOnShortageInPublicSector: detailOnShortageInPublicSector,
         shortageInPrivateSector: shortageInPrivateSector,
@@ -120,6 +122,7 @@ function getGeneralAMCQuestionnaireBaseAttributes(
 
 export const generalAMCQuestionnaireFieldIds = {
     sameAsLastYear: "sameAsLastYear",
+    detailOnSameAsLast: "detailOnSameAsLast",
     shortageInPublicSector: "shortageInPublicSector",
     detailOnShortageInPublicSector: "detailOnShortageInPublicSector",
     shortageInPrivateSector: "shortageInPrivateSector",
@@ -145,7 +148,7 @@ export function mapGeneralAMCQuestionnaireToInitialFormState(
 
     return {
         id: questionnaireFormEntity?.entity?.id || "",
-        title: "General questionnaire",
+        title: "Data contextual questionnaire",
         isValid: false,
         sections: [
             {
@@ -166,6 +169,17 @@ export function mapGeneralAMCQuestionnaireToInitialFormState(
                         showIsRequired: true,
                         disabled: isViewOnlyMode,
                         ...fromQuestions("isSameAsLastYear"),
+                    },
+                    {
+                        id: fromIdsDictionary("detailOnSameAsLast"),
+                        isVisible: true,
+                        errors: [],
+                        type: "text",
+                        value: questionnaireFormEntity?.entity?.detailOnSameAsLast || "",
+                        multiline: false,
+                        required: YesNoUnknownValues.NO === questionnaireFormEntity?.entity?.isSameAsLastYear,
+                        disabled: isViewOnlyMode,
+                        ...fromQuestions("detailOnSameAsLast"),
                     },
                 ],
             },

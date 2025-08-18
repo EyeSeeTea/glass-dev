@@ -458,13 +458,22 @@ msgstr ""
 msgid "Edit"
 msgstr ""
 
-msgid "Antimicrobial Classes - health-care strata"
+msgid "Data structure"
 msgstr ""
 
-msgid "Antimicrobial Classes - health-care strata - characteristics"
+msgid "Data characteristics"
 msgstr ""
 
-msgid "Antimicrobial Class Stratum"
+msgid "Antimicrobial class strata with data characteristics missing"
+msgstr ""
+
+msgid "Antimicrobial class strata data with characteristics defined"
+msgstr ""
+
+msgid "Antimicrobial class strata data defined"
+msgstr ""
+
+msgid "Antimicrobial class(es) – healthcare strata sharing the same data characteristics (to be defined below)"
 msgstr ""
 
 msgid "Substances Coverage"
@@ -479,7 +488,7 @@ msgstr ""
 msgid "Population coverage"
 msgstr ""
 
-msgid "Use all available antimicrobial classes / stratum combinations"
+msgid "Use all available antimicrobial classes / combinations"
 msgstr ""
 
 msgid "Error loading value from World Prospect Population"

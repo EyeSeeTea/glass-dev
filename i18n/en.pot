@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2025-08-05T15:16:27.951Z\n"
-"PO-Revision-Date: 2025-08-05T15:16:27.951Z\n"
+"POT-Creation-Date: 2025-08-13T15:39:29.927Z\n"
+"PO-Revision-Date: 2025-08-13T15:39:29.927Z\n"
 
 msgid "Event id"
 msgstr ""
@@ -207,19 +207,21 @@ msgstr ""
 msgid "Edit"
 msgstr ""
 
-msgid "Antimicrobial classes - health-care strata"
+msgid "Data structure"
 msgstr ""
 
-msgid "Antimicrobial classes - health-care strata - characteristics"
+msgid "Data characteristics"
 msgstr ""
 
-msgid "Antimicrobial Classes - health-care strata - characteristics"
+msgid "Antimicrobial Classes - health-care strata"
 msgstr ""
 
-msgid "Antimicrobial Class Stratum"
+msgid ""
+"Antimicrobial class(es) – healthcare strata sharing the same data "
+"characteristics (to be defined below)"
 msgstr ""
 
-msgid "Use all available antimicrobial classes / stratum combinations"
+msgid "Use all available antimicrobial classes / combinations"
 msgstr ""
 
 msgid "Substances Coverage"
@@ -237,7 +239,10 @@ msgstr ""
 msgid "Antimicrobial volume coverage"
 msgstr ""
 
-msgid "Antimicrobial Classes - health-care strata"
+msgid "Antimicrobial class strata data defined"
+msgstr ""
+
+msgid "Antimicrobial class strata data with characteristics defined"
 msgstr ""
 
 msgid "Correct Uploads"

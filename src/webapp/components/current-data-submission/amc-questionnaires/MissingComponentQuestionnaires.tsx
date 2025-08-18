@@ -18,7 +18,7 @@ export const MissingComponentQuestionnaires: React.FC<MissingComponentQuestionna
         <Container>
             <HeadingContainer>
                 <InfoIcon />
-                <Typography>{i18n.t("Missing antimicrobial class - stratum combinations:")}</Typography>
+                <Typography>{i18n.t("Antimicrobial class strata with data characteristics missing:")}</Typography>
             </HeadingContainer>
             <List>
                 {value.map(item => (

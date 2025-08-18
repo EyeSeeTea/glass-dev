@@ -233,11 +233,11 @@ export function mapComponentAMCQuestionnaireToInitialFormState(
 
     return {
         id: questionnaireFormEntity.entity?.id ?? "",
-        title: i18n.t("Antimicrobial Classes - health-care strata - characteristics"),
+        title: i18n.t("Data characteristics"),
         isValid: false,
         sections: [
             {
-                title: i18n.t("Antimicrobial Class Stratum"),
+                title: i18n.t("Antimicrobial class(es) – healthcare strata sharing the same data characteristics (to be defined below)"),
                 id: "antimicrobial_stratum_section",
                 isVisible: true,
                 required: true,
@@ -254,7 +254,7 @@ export function mapComponentAMCQuestionnaireToInitialFormState(
                         value: false,
                         required: false,
                         showIsRequired: false,
-                        text: i18n.t("Use all available antimicrobial classes / stratum combinations"),
+                        text: i18n.t("Use all available antimicrobial classes / combinations"),
                         errors: [],
                     },
                 ],
@@ -288,9 +288,10 @@ export function mapComponentAMCQuestionnaireToInitialFormState(
                         required: YesNoUnknownValues.YES === questionnaireFormEntity?.entity?.excludedSubstances,
                         disabled: isViewOnlyMode,
                         ...fromQuestions("listOfExcludedSubstances"),
-                    }
+                    },
                 ],
-            }, {
+            },
+            {
                 title: i18n.t("Type and source(s) of data"),
                 id: "data_source_section",
                 isVisible: true,
@@ -355,7 +356,7 @@ export function mapComponentAMCQuestionnaireToInitialFormState(
                         required: false,
                         disabled: isViewOnlyMode,
                         ...fromQuestions("commentsForDataSources"),
-                    }
+                    },
                 ],
             },
             {
@@ -446,7 +447,7 @@ export function mapComponentAMCQuestionnaireToInitialFormState(
                         required: false,
                         disabled: isViewOnlyMode,
                         ...fromQuestions("commentOnNationalPopulation"),
-                    }
+                    },
                 ],
             },
             {
@@ -478,7 +479,7 @@ export function mapComponentAMCQuestionnaireToInitialFormState(
                         required: false,
                         disabled: isViewOnlyMode,
                         ...fromQuestions("commentOnCoverageWithinTheStratum"),
-                    }
+                    },
                 ],
             },
         ],
