@@ -28,7 +28,7 @@ export const NumberInput: React.FC<NumberInputProps> = React.memo(
         error = false,
     }) => {
         const [inputValue, setInputValue] = useState<string>(value.toString());
-        const debouncedValue = useDebounce(inputValue);
+        const debouncedValue = useDebounce(inputValue, 500);
 
         useEffect(() => {
             if (debouncedValue === "") {
@@ -54,7 +54,7 @@ export const NumberInput: React.FC<NumberInputProps> = React.memo(
                     type="number"
                     value={inputValue}
                     onChange={e => {
-                        const val = e.target.value;
+                        setInputValue(e.target.value);
                     }}
                     helperText={error && errorText ? errorText : helperText}
                     error={error}

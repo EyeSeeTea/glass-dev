@@ -65,8 +65,8 @@ export function useAMCQuestionnairPage(options: {
     const tableTitle = useMemo(
         () =>
             formType === "am-class-questionnaire"
-                ? i18n.t("Antimicrobial Classes - health-care strata")
-                : i18n.t("Antimicrobial Classes - health-care strata - characteristics"),
+                ? i18n.t("Antimicrobial class strata data defined")
+                : i18n.t("Antimicrobial class strata data with characteristics defined"),
         [formType]
     );
 
