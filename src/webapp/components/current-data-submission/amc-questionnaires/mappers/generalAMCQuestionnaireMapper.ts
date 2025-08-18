@@ -62,7 +62,7 @@ export function mapFormStateToGeneralAMCQuestionnaire(
     const generalAMCQuestionnaireAttributes: GeneralAMCQuestionnaireAttributes = {
         ...baseAttributes,
         isSameAsLastYear: isSameAsLastYear,
-        detailOnSameAsLast: detailOnSameAsLast, 
+        detailOnSameAsLast: detailOnSameAsLast,
         shortageInPublicSector: shortageInPublicSector,
         detailOnShortageInPublicSector: detailOnShortageInPublicSector,
         shortageInPrivateSector: shortageInPrivateSector,

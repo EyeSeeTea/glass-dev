@@ -77,10 +77,7 @@ export function useMainPageAMCQuestionnaire(): MainPageAMCQuestionnaireState {
     const onCancelEditMode = useCallback(() => setIsEditMode(false), []);
 
     const openQuestionnaireForm = useCallback((formType: AMCQuestionnaireFormType, id?: Id) => {
-        const title =
-            formType === "am-class-questionnaire"
-                ? i18n.t("Data structure")
-                : i18n.t("Data characteristics");
+        const title = formType === "am-class-questionnaire" ? i18n.t("Data structure") : i18n.t("Data characteristics");
         setOpenQuestionnaire({ formType: formType, id: id, title: title });
     }, []);
 

@@ -114,7 +114,7 @@ function getValueFromGeneralAMCQuestionnaire(
 ): Record<GeneralAMCQuestionnaireCode, string> {
     return {
         AMR_GLASS_AMC_TEA_SAME_PREV_YEAR: generalAMCQuestionnaire.isSameAsLastYear,
-        AMR_GLASS_AMC_TEA_SAME_DESC : generalAMCQuestionnaire.detailOnSameAsLast ?? "",
+        AMR_GLASS_AMC_TEA_SAME_DESC: generalAMCQuestionnaire.detailOnSameAsLast ?? "",
         AMR_GLASS_AMC_TEA_SHORTAGE_PUB: generalAMCQuestionnaire.shortageInPublicSector,
         AMR_GLASS_AMC_TEA_SHORTAGE_PUB_DESCR: generalAMCQuestionnaire.detailOnShortageInPublicSector ?? "",
         AMR_GLASS_AMC_TEA_SHORTAGE_PRV: generalAMCQuestionnaire.shortageInPrivateSector,
