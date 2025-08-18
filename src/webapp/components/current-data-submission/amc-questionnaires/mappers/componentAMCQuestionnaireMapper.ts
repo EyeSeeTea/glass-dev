@@ -237,7 +237,9 @@ export function mapComponentAMCQuestionnaireToInitialFormState(
         isValid: false,
         sections: [
             {
-                title: i18n.t("Antimicrobial class(es) – healthcare strata sharing the same data characteristics (to be defined below)"),
+                title: i18n.t(
+                    "Antimicrobial class(es) – healthcare strata sharing the same data characteristics (to be defined below)"
+                ),
                 id: "antimicrobial_stratum_section",
                 isVisible: true,
                 required: true,
