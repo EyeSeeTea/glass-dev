@@ -5,8 +5,14 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2025-08-13T15:39:29.927Z\n"
-"PO-Revision-Date: 2025-08-13T15:39:29.927Z\n"
+"POT-Creation-Date: 2025-08-20T13:28:55.361Z\n"
+"PO-Revision-Date: 2025-08-20T13:28:55.361Z\n"
+
+msgid "Template {{id}} not loaded"
+msgstr ""
+
+msgid "Error saving registration status"
+msgstr ""
 
 msgid "Event id"
 msgstr ""
@@ -92,12 +98,6 @@ msgid "Longitude"
 msgstr ""
 
 msgid "Invalid choice was chosen"
-msgstr ""
-
-msgid "Template {{id}} not loaded"
-msgstr ""
-
-msgid "Error saving registration status"
 msgstr ""
 
 msgid "An unknown validation error occurred"
@@ -190,61 +190,6 @@ msgstr ""
 msgid "Request Dataset update"
 msgstr ""
 
-msgid "Back"
-msgstr ""
-
-msgid "Error loading AMC Questionnaire"
-msgstr ""
-
-msgid "This may be due to a network issue or a data inconsistency. "
-msgstr ""
-
-msgid ""
-"Please check the error details below, correct any issues with the event, "
-"and try again. If the problem persists, contact support for assistance."
-msgstr ""
-
-msgid "Edit"
-msgstr ""
-
-msgid "Data structure"
-msgstr ""
-
-msgid "Data characteristics"
-msgstr ""
-
-msgid "Antimicrobial Classes - health-care strata"
-msgstr ""
-
-msgid ""
-"Antimicrobial class(es) – healthcare strata sharing the same data "
-"characteristics (to be defined below)"
-msgstr ""
-
-msgid "Use all available antimicrobial classes / combinations"
-msgstr ""
-
-msgid "Substances Coverage"
-msgstr ""
-
-msgid "Type and source(s) of data"
-msgstr ""
-
-msgid "Population coverage"
-msgstr ""
-
-msgid "Error loading value from World Prospect Population"
-msgstr ""
-
-msgid "Antimicrobial volume coverage"
-msgstr ""
-
-msgid "Antimicrobial class strata data defined"
-msgstr ""
-
-msgid "Antimicrobial class strata data with characteristics defined"
-msgstr ""
-
 msgid "Correct Uploads"
 msgstr ""
 
@@ -264,51 +209,6 @@ msgid "Validated Uploads, Review to complete"
 msgstr ""
 
 msgid "Uploads with errors, or discarded"
-msgstr ""
-
-msgid "Go to questionnaires"
-msgstr ""
-
-msgid "Upload/Delete datasets"
-msgstr ""
-
-msgid "Go to submission"
-msgstr ""
-
-msgid "Full Status History"
-msgstr ""
-
-msgid "Done"
-msgstr ""
-
-msgid "From"
-msgstr ""
-
-msgid "To"
-msgstr ""
-
-msgid "Changed at"
-msgstr ""
-
-msgid "Error fetching questionnaires."
-msgstr ""
-
-msgid "Error fetching uploads."
-msgstr ""
-
-msgid "Current Status"
-msgstr ""
-
-msgid "Content"
-msgstr ""
-
-msgid "Mandatory"
-msgstr ""
-
-msgid "State"
-msgstr ""
-
-msgid "Data Submission status has errors..."
 msgstr ""
 
 msgid "There are no questionnaries for this module"
@@ -432,6 +332,27 @@ msgstr ""
 msgid "Send Submission"
 msgstr ""
 
+msgid "Overview"
+msgstr ""
+
+msgid "Questionnaires"
+msgstr ""
+
+msgid "Datasets"
+msgstr ""
+
+msgid "Validation Report"
+msgstr ""
+
+msgid "Advanced"
+msgstr ""
+
+msgid "Submission"
+msgstr ""
+
+msgid "No Data uploaded..."
+msgstr ""
+
 msgid "Uploaded"
 msgstr ""
 
@@ -515,28 +436,107 @@ msgstr ""
 msgid "There was an error deleting this file. Admin needs to check."
 msgstr ""
 
-msgid "Overview"
-msgstr ""
-
-msgid "Questionnaires"
-msgstr ""
-
-msgid "Datasets"
-msgstr ""
-
-msgid "Validation Report"
-msgstr ""
-
-msgid "Advanced"
-msgstr ""
-
-msgid "Submission"
-msgstr ""
-
-msgid "No Data uploaded..."
-msgstr ""
-
 msgid "Error downloading data"
+msgstr ""
+
+msgid "Back"
+msgstr ""
+
+msgid "Error loading AMC Questionnaire"
+msgstr ""
+
+msgid "This may be due to a network issue or a data inconsistency. "
+msgstr ""
+
+msgid ""
+"Please check the error details below, correct any issues with the event, "
+"and try again. If the problem persists, contact support for assistance."
+msgstr ""
+
+msgid "Edit"
+msgstr ""
+
+msgid "Data structure"
+msgstr ""
+
+msgid "Data characteristics"
+msgstr ""
+
+msgid "Antimicrobial Classes - health-care strata"
+msgstr ""
+
+msgid ""
+"Antimicrobial class(es) – healthcare strata sharing the same data "
+"characteristics (to be defined below)"
+msgstr ""
+
+msgid "Use all available antimicrobial classes / combinations"
+msgstr ""
+
+msgid "Substances Coverage"
+msgstr ""
+
+msgid "Type and source(s) of data"
+msgstr ""
+
+msgid "Population coverage"
+msgstr ""
+
+msgid "Error loading value from World Prospect Population"
+msgstr ""
+
+msgid "Antimicrobial volume coverage"
+msgstr ""
+
+msgid "Antimicrobial class strata data defined"
+msgstr ""
+
+msgid "Antimicrobial class strata data with characteristics defined"
+msgstr ""
+
+msgid "Go to questionnaires"
+msgstr ""
+
+msgid "Upload/Delete datasets"
+msgstr ""
+
+msgid "Go to submission"
+msgstr ""
+
+msgid "Full Status History"
+msgstr ""
+
+msgid "Done"
+msgstr ""
+
+msgid "From"
+msgstr ""
+
+msgid "To"
+msgstr ""
+
+msgid "Changed at"
+msgstr ""
+
+msgid "Error fetching questionnaires."
+msgstr ""
+
+msgid "Error fetching uploads."
+msgstr ""
+
+msgid "Current Status"
+msgstr ""
+
+msgid "Content"
+msgstr ""
+
+msgid "Mandatory"
+msgstr ""
+
+msgid "State"
+msgstr ""
+
+msgid "Data Submission status has errors..."
 msgstr ""
 
 msgid "File Type"
