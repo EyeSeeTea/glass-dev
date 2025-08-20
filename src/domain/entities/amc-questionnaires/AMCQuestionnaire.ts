@@ -25,7 +25,7 @@ export type AMCQuestionnaireAttrs = {
 };
 
 const amClassOptionToGeneralMap: Record<AntimicrobialClassValue, keyof GeneralAMCQuestionnaireAMClassAttributes> = {
-    [AntimicrobialClassValues.Antibacterials]: "antibacterials",
+    [AntimicrobialClassValues.Antibiotics]: "antibiotics",
     [AntimicrobialClassValues.Antifungals]: "antifungals",
     [AntimicrobialClassValues.Antivirals]: "antivirals",
     [AntimicrobialClassValues.Antituberculosis]: "antituberculosis",

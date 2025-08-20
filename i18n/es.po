@@ -458,31 +458,40 @@ msgstr ""
 msgid "Edit"
 msgstr ""
 
-msgid "AM Class"
+msgid "Data structure"
 msgstr ""
 
-msgid "Component"
+msgid "Data characteristics"
 msgstr ""
 
-msgid "Component Antimicrobial Class Stratum"
+msgid "Antimicrobial class strata with data characteristics missing"
 msgstr ""
 
-msgid "Use all available antimicrobial classes / stratum combinations"
+msgid "Antimicrobial class strata data with characteristics defined"
+msgstr ""
+
+msgid "Antimicrobial class strata data defined"
+msgstr ""
+
+msgid "Antimicrobial class(es) – healthcare strata sharing the same data characteristics (to be defined below)"
+msgstr ""
+
+msgid "Substances Coverage"
+msgstr ""
+
+msgid "Type and source(s) of data"
+msgstr ""
+
+msgid "Antimicrobial volume coverage"
+msgstr ""
+
+msgid "Population coverage"
+msgstr ""
+
+msgid "Use all available antimicrobial classes / combinations"
 msgstr ""
 
 msgid "Error loading value from World Prospect Population"
-msgstr ""
-
-msgid "AM Questionnaire Editor"
-msgstr ""
-
-msgid "Component Questionnaire Editor"
-msgstr ""
-
-msgid "AM Class Questionnaires"
-msgstr ""
-
-msgid "Component Questionnaires"
 msgstr ""
 
 msgid "Go to questionnaires"

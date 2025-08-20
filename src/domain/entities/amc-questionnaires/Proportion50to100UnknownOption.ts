@@ -1,6 +1,7 @@
 import { Option, OptionType, OptionValue } from "./Option";
 
 export const Proportion50to100UnknownValues = {
+    PROP_LESS_50: "PROP_LESS_50",
     PROP_50_59: "PROP_50_59",
     PROP_60_69: "PROP_60_69",
     PROP_70_79: "PROP_70_79",

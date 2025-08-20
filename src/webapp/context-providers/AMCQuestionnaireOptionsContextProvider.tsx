@@ -19,7 +19,6 @@ export const AMCQuestionnaireOptionsContextProvider: React.FC = ({ children }) =
             yesNoUnknownOptions: compositionRoot.amcQuestionnaires.getYesNoUnknownOptions(),
             yesNoUnknownNAOptions: compositionRoot.amcQuestionnaires.getYesNoUnknownNAOptions(),
             antimicrobialClassOptions: compositionRoot.amcQuestionnaires.getAntimicrobialClassOptions(),
-            proportion50to100Options: compositionRoot.amcQuestionnaires.getProportion50to100Options(),
             proportion50to100UnknownOptions: compositionRoot.amcQuestionnaires.getProportion50to100UnknownOptions(),
             dataLevelOptions: compositionRoot.amcQuestionnaires.getDataLevelOptions(),
             dataSourceOptions: compositionRoot.amcQuestionnaires.getDataSourceOptions(),

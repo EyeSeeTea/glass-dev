@@ -1,6 +1,5 @@
 import { createContext, useContext } from "react";
 import { AntimicrobialClassOption } from "../../domain/entities/amc-questionnaires/AntimicrobialClassOption";
-import { Proportion50to100Option } from "../../domain/entities/amc-questionnaires/Proportion50to100Option";
 import { YesNoOption } from "../../domain/entities/amc-questionnaires/YesNoOption";
 import { YesNoUnknownNAOption } from "../../domain/entities/amc-questionnaires/YesNoUnknownNAOption";
 import { YesNoUnknownOption } from "../../domain/entities/amc-questionnaires/YesNoUnknownOption";
@@ -16,7 +15,6 @@ export interface AMCQuestionnaireOptionsContextState {
     yesNoOptions: YesNoOption[];
     yesNoUnknownOptions: YesNoUnknownOption[];
     antimicrobialClassOptions: AntimicrobialClassOption[];
-    proportion50to100Options: Proportion50to100Option[];
     proportion50to100UnknownOptions: Proportion50to100UnknownOption[];
     dataLevelOptions: DataLevelOption[];
     dataSourceOptions: DataSourceOption[];
@@ -30,7 +28,6 @@ export const defaultAMCQuestionnaireOptionsContextState: AMCQuestionnaireOptions
     yesNoOptions: [],
     yesNoUnknownOptions: [],
     antimicrobialClassOptions: [],
-    proportion50to100Options: [],
     proportion50to100UnknownOptions: [],
     dataLevelOptions: [],
     dataSourceOptions: [],

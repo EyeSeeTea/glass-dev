@@ -28,6 +28,7 @@ export function mapFormStateToGeneralAMCQuestionnaire(
     const allFields: FormFieldState[] = getAllFieldsFromSections(formState.sections);
 
     const isSameAsLastYear = getOptionCodeFromFieldValue("sameAsLastYear", options.yesNoUnknownNAOptions, allFields);
+    const detailOnSameAsLast = getStringFieldValue("detailOnSameAsLast", allFields);
     const shortageInPublicSector = getOptionCodeFromFieldValue(
         "shortageInPublicSector",
         options.yesNoUnknownOptions,
@@ -39,7 +40,7 @@ export function mapFormStateToGeneralAMCQuestionnaire(
     )?.code;
     const detailOnShortageInPrivateSector = getStringFieldValue("detailOnShortageInPrivateSector", allFields);
     const generalComments = getStringFieldValue("generalComments", allFields);
-    const antibacterials = yesNoOption.getValueFromBoolean(getBooleanFieldValue("antibacterials", allFields));
+    const antibiotics = yesNoOption.getValueFromBoolean(getBooleanFieldValue("antibiotics", allFields));
     const antifungals = yesNoOption.getValueFromBoolean(getBooleanFieldValue("antifungals", allFields));
     const antivirals = yesNoOption.getValueFromBoolean(getBooleanFieldValue("antivirals", allFields));
     const antituberculosis = yesNoOption.getValueFromBoolean(getBooleanFieldValue("antituberculosis", allFields));
@@ -49,7 +50,7 @@ export function mapFormStateToGeneralAMCQuestionnaire(
         !isSameAsLastYear ||
         !shortageInPublicSector ||
         !shortageInPrivateSector ||
-        !antibacterials ||
+        !antibiotics ||
         !antifungals ||
         !antivirals ||
         !antituberculosis ||
@@ -61,12 +62,13 @@ export function mapFormStateToGeneralAMCQuestionnaire(
     const generalAMCQuestionnaireAttributes: GeneralAMCQuestionnaireAttributes = {
         ...baseAttributes,
         isSameAsLastYear: isSameAsLastYear,
+        detailOnSameAsLast: detailOnSameAsLast,
         shortageInPublicSector: shortageInPublicSector,
         detailOnShortageInPublicSector: detailOnShortageInPublicSector,
         shortageInPrivateSector: shortageInPrivateSector,
         detailOnShortageInPrivateSector: detailOnShortageInPrivateSector,
         generalComments: generalComments,
-        antibacterials: antibacterials,
+        antibiotics: antibiotics,
         antifungals: antifungals,
         antivirals: antivirals,
         antituberculosis: antituberculosis,
@@ -120,12 +122,13 @@ function getGeneralAMCQuestionnaireBaseAttributes(
 
 export const generalAMCQuestionnaireFieldIds = {
     sameAsLastYear: "sameAsLastYear",
+    detailOnSameAsLast: "detailOnSameAsLast",
     shortageInPublicSector: "shortageInPublicSector",
     detailOnShortageInPublicSector: "detailOnShortageInPublicSector",
     shortageInPrivateSector: "shortageInPrivateSector",
     detailOnShortageInPrivateSector: "detailOnShortageInPrivateSector",
     generalComments: "generalComments",
-    antibacterials: "antibacterials",
+    antibiotics: "antibiotics",
     antifungals: "antifungals",
     antivirals: "antivirals",
     antituberculosis: "antituberculosis",
@@ -145,7 +148,7 @@ export function mapGeneralAMCQuestionnaireToInitialFormState(
 
     return {
         id: questionnaireFormEntity?.entity?.id || "",
-        title: "General questionnaire",
+        title: "Data contextual questionnaire",
         isValid: false,
         sections: [
             {
@@ -166,6 +169,17 @@ export function mapGeneralAMCQuestionnaireToInitialFormState(
                         showIsRequired: true,
                         disabled: isViewOnlyMode,
                         ...fromQuestions("isSameAsLastYear"),
+                    },
+                    {
+                        id: fromIdsDictionary("detailOnSameAsLast"),
+                        isVisible: true,
+                        errors: [],
+                        type: "text",
+                        value: questionnaireFormEntity?.entity?.detailOnSameAsLast || "",
+                        multiline: false,
+                        required: YesNoUnknownValues.NO === questionnaireFormEntity?.entity?.isSameAsLastYear,
+                        disabled: isViewOnlyMode,
+                        ...fromQuestions("detailOnSameAsLast"),
                     },
                 ],
             },
@@ -259,18 +273,18 @@ export function mapGeneralAMCQuestionnaireToInitialFormState(
                 required: true,
                 fields: [
                     {
-                        id: fromIdsDictionary("antibacterials"),
+                        id: fromIdsDictionary("antibiotics"),
                         isVisible: true,
                         errors: [],
                         type: "boolean",
                         label: i18n.t("Yes"),
                         value:
-                            yesNoOption.getBooleanFromValue(questionnaireFormEntity?.entity?.antibacterials || "0") ||
+                            yesNoOption.getBooleanFromValue(questionnaireFormEntity?.entity?.antibiotics || "0") ||
                             false,
                         required: true,
                         showIsRequired: true,
-                        disabled: isViewOnlyMode || !!amcQuestionnaire?.hasAMClassForm("antibacterials"),
-                        ...fromQuestions("antibacterials"),
+                        disabled: isViewOnlyMode || !!amcQuestionnaire?.hasAMClassForm("antibiotics"),
+                        ...fromQuestions("antibiotics"),
                     },
                     {
                         id: fromIdsDictionary("antifungals"),
