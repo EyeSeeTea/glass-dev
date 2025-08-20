@@ -71,6 +71,17 @@ export function MultipleSelector<Value extends string>({
                 variant="outlined"
                 IconComponent={IconChevronDown24}
                 error={error}
+                MenuProps={{
+                    anchorOrigin: {
+                        vertical: "bottom",
+                        horizontal: "left",
+                    },
+                    transformOrigin: {
+                        vertical: "top",
+                        horizontal: "left",
+                    },
+                    getContentAnchorEl: null,
+                }}
                 renderValue={(selected: unknown) =>
                     (selected as Value[])?.length ? (
                         <SelectedContainer>
@@ -134,6 +145,7 @@ const StyledSelect = styled(Select)<{ error?: boolean; disabled?: boolean }>`
         padding-inline-start: 12px;
         padding-inline-end: 6px;
         padding-block: 1px;
+        min-height: 38px;
         &:focus {
         }
         background-color: ${({ disabled }) => (disabled ? palette.background.default : "inherit")};
@@ -158,4 +170,5 @@ const SelectedContainer = styled.div`
     display: flex;
     flex-wrap: wrap;
     gap: 5px;
+    margin-block: 5px;
 `;
