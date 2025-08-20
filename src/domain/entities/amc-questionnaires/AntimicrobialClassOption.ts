@@ -1,7 +1,7 @@
 import { Option, OptionType, OptionValue } from "./Option";
 
 export const AntimicrobialClassValues = {
-    Antibacterials: "ATB",
+    Antibiotics: "ATB",
     Antifungals: "ATF",
     Antivirals: "ATV",
     Antituberculosis: "ATT",
