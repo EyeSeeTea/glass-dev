@@ -11,6 +11,7 @@ export const DataSourceValues = {
     hospitals: "HOSP",
     communityPharmacies: "PHARM",
     marketResearchCompanies: "MRS",
+    doctors: "DOCTORS",
 } as const;
 
 export type DataSourceValue = OptionValue<typeof DataSourceValues>;

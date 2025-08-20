@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2025-07-22T10:36:25.197Z\n"
-"PO-Revision-Date: 2025-07-22T10:36:25.197Z\n"
+"POT-Creation-Date: 2025-08-20T13:28:55.361Z\n"
+"PO-Revision-Date: 2025-08-20T13:28:55.361Z\n"
 
 msgid "Template {{id}} not loaded"
 msgstr ""
@@ -456,31 +456,42 @@ msgstr ""
 msgid "Edit"
 msgstr ""
 
-msgid "AM Class"
+msgid "Data structure"
 msgstr ""
 
-msgid "Component"
+msgid "Data characteristics"
 msgstr ""
 
-msgid "Component Antimicrobial Class Stratum"
+msgid "Antimicrobial Classes - health-care strata"
 msgstr ""
 
-msgid "Use all available antimicrobial classes / stratum combinations"
+msgid ""
+"Antimicrobial class(es) – healthcare strata sharing the same data "
+"characteristics (to be defined below)"
+msgstr ""
+
+msgid "Use all available antimicrobial classes / combinations"
+msgstr ""
+
+msgid "Substances Coverage"
+msgstr ""
+
+msgid "Type and source(s) of data"
+msgstr ""
+
+msgid "Population coverage"
 msgstr ""
 
 msgid "Error loading value from World Prospect Population"
 msgstr ""
 
-msgid "AM Questionnaire Editor"
+msgid "Antimicrobial volume coverage"
 msgstr ""
 
-msgid "Component Questionnaire Editor"
+msgid "Antimicrobial class strata data defined"
 msgstr ""
 
-msgid "AM Class Questionnaires"
-msgstr ""
-
-msgid "Component Questionnaires"
+msgid "Antimicrobial class strata data with characteristics defined"
 msgstr ""
 
 msgid "Go to questionnaires"

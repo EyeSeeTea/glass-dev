@@ -114,12 +114,13 @@ function getValueFromGeneralAMCQuestionnaire(
 ): Record<GeneralAMCQuestionnaireCode, string> {
     return {
         AMR_GLASS_AMC_TEA_SAME_PREV_YEAR: generalAMCQuestionnaire.isSameAsLastYear,
+        AMR_GLASS_AMC_TEA_SAME_DESC: generalAMCQuestionnaire.detailOnSameAsLast ?? "",
         AMR_GLASS_AMC_TEA_SHORTAGE_PUB: generalAMCQuestionnaire.shortageInPublicSector,
         AMR_GLASS_AMC_TEA_SHORTAGE_PUB_DESCR: generalAMCQuestionnaire.detailOnShortageInPublicSector ?? "",
         AMR_GLASS_AMC_TEA_SHORTAGE_PRV: generalAMCQuestionnaire.shortageInPrivateSector,
         AMR_GLASS_AMC_TEA_SHORTAGE_PRV_DESCR: generalAMCQuestionnaire.detailOnShortageInPrivateSector ?? "",
         AMR_GLASS_AMC_TEA_GEN_COMMENTS: generalAMCQuestionnaire.generalComments ?? "",
-        AMR_GLASS_AMC_TEA_ATB: generalAMCQuestionnaire.antibacterials,
+        AMR_GLASS_AMC_TEA_ATB: generalAMCQuestionnaire.antibiotics,
         AMR_GLASS_AMC_TEA_ATF: generalAMCQuestionnaire.antifungals,
         AMR_GLASS_AMC_TEA_ATV: generalAMCQuestionnaire.antivirals,
         AMR_GLASS_AMC_TEA_ATT: generalAMCQuestionnaire.antituberculosis,
@@ -141,7 +142,7 @@ export function mapTrackedEntityAttributesToGeneralAMCQuestionnaire(
     const isSameAsLastYear = yesNoUnknownNAOption.getSafeValue(fromMap("isSameAsLastYear"));
     const shortageInPublicSector = yesNoUnknownOption.getSafeValue(fromMap("shortageInPublicSector"));
     const shortageInPrivateSector = yesNoUnknownOption.getSafeValue(fromMap("shortageInPrivateSector"));
-    const antibacterials = yesNoOption.getSafeValue(fromMap("antibacterials"));
+    const antibiotics = yesNoOption.getSafeValue(fromMap("antibiotics"));
     const antifungals = yesNoOption.getSafeValue(fromMap("antifungals"));
     const antivirals = yesNoOption.getSafeValue(fromMap("antivirals"));
     const antituberculosis = yesNoOption.getSafeValue(fromMap("antituberculosis"));
@@ -151,7 +152,7 @@ export function mapTrackedEntityAttributesToGeneralAMCQuestionnaire(
         !isSameAsLastYear ||
         !shortageInPublicSector ||
         !shortageInPrivateSector ||
-        !antibacterials ||
+        !antibiotics ||
         !antifungals ||
         !antivirals ||
         !antituberculosis ||
@@ -168,12 +169,13 @@ export function mapTrackedEntityAttributesToGeneralAMCQuestionnaire(
         created: trackedEntity.createdAt ? getISODateAsLocaleDateString(trackedEntity.createdAt) : undefined,
         lastUpdated: trackedEntity.updatedAt ? getISODateAsLocaleDateString(trackedEntity.updatedAt) : undefined,
         isSameAsLastYear: isSameAsLastYear,
+        detailOnSameAsLast: fromMap("detailOnSameAsLast"),
         shortageInPublicSector: shortageInPublicSector,
         detailOnShortageInPublicSector: fromMap("detailOnShortageInPublicSector"),
         shortageInPrivateSector: shortageInPrivateSector,
         detailOnShortageInPrivateSector: fromMap("detailOnShortageInPrivateSector"),
         generalComments: fromMap("generalComments"),
-        antibacterials: antibacterials,
+        antibiotics: antibiotics,
         antifungals: antifungals,
         antivirals: antivirals,
         antituberculosis: antituberculosis,

@@ -8,16 +8,16 @@ import {
     AntimicrobialClassOption,
     AntimicrobialClassValue,
 } from "./AntimicrobialClassOption";
-import { Proportion50to100Value } from "./Proportion50to100Option";
+import { Proportion50to100UnknownValue } from "./Proportion50to100UnknownOption";
 import { Id } from "../Base";
 import { getDisabledStratas, StrataValue } from "./StrataOption";
 
 export type AMClassAMCQuestionnaireResponsesAttributes = {
     antimicrobialClass: AntimicrobialClassValue;
     stratas: StrataValue[];
-    estVolumeTotalHealthLevel: Maybe<Proportion50to100Value>;
-    estVolumeHospitalHealthLevel: Maybe<Proportion50to100Value>;
-    estVolumeCommunityHealthLevel: Maybe<Proportion50to100Value>;
+    estVolumeTotalHealthLevel: Maybe<Proportion50to100UnknownValue>;
+    estVolumeHospitalHealthLevel: Maybe<Proportion50to100UnknownValue>;
+    estVolumeCommunityHealthLevel: Maybe<Proportion50to100UnknownValue>;
 };
 
 export type AMClassAMCQuestionId = keyof AMClassAMCQuestionnaireResponsesAttributes;

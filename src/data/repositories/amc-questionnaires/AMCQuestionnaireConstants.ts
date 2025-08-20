@@ -12,12 +12,13 @@ export const AMR_GLASS_AMC_AM_COMPONENT_QUESTIONNAIRE_STAGE_ID = "nnZVAdx3zwP";
 
 export const codesByGeneralAMCQuestionnaire: Record<GeneralAMCQuestionId, string> = {
     isSameAsLastYear: "AMR_GLASS_AMC_TEA_SAME_PREV_YEAR",
+    detailOnSameAsLast: "AMR_GLASS_AMC_TEA_SAME_DESC",
     shortageInPublicSector: "AMR_GLASS_AMC_TEA_SHORTAGE_PUB",
     detailOnShortageInPublicSector: "AMR_GLASS_AMC_TEA_SHORTAGE_PUB_DESCR",
     shortageInPrivateSector: "AMR_GLASS_AMC_TEA_SHORTAGE_PRV",
     detailOnShortageInPrivateSector: "AMR_GLASS_AMC_TEA_SHORTAGE_PRV_DESCR",
     generalComments: "AMR_GLASS_AMC_TEA_GEN_COMMENTS",
-    antibacterials: "AMR_GLASS_AMC_TEA_ATB",
+    antibiotics: "AMR_GLASS_AMC_TEA_ATB",
     antifungals: "AMR_GLASS_AMC_TEA_ATF",
     antivirals: "AMR_GLASS_AMC_TEA_ATV",
     antituberculosis: "AMR_GLASS_AMC_TEA_ATT",
@@ -33,12 +34,13 @@ export function isStringInGeneralAMCQuestionnaireCodes(code: string): code is Ge
 
 export const generalAMCQuestionnaireByTEAIds: Record<Id, GeneralAMCQuestionId> = {
     Tfa9gLIci1G: "isSameAsLastYear",
+    Y7Gn8n7a8RB: "detailOnSameAsLast",
     SgmkuzKsZcv: "shortageInPublicSector",
     L4i4LA6rZjS: "detailOnShortageInPublicSector",
     xBsRZ7MfQno: "shortageInPrivateSector",
     Wm8cRaJytdw: "detailOnShortageInPrivateSector",
     SHF4Hzhenvr: "generalComments",
-    h15ltjSxYDC: "antibacterials",
+    h15ltjSxYDC: "antibiotics",
     fZUBnl9eFj3: "antifungals",
     VLwzYm63c5Y: "antivirals",
     BZbWaqfCmuZ: "antituberculosis",

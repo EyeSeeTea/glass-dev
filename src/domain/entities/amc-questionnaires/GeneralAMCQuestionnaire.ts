@@ -18,7 +18,7 @@ export type GeneralAMCQuestionnaireBaseAttributes = {
 };
 
 export type GeneralAMCQuestionnaireAMClassAttributes = {
-    antibacterials: YesNoValue;
+    antibiotics: YesNoValue;
     antifungals: YesNoValue;
     antivirals: YesNoValue;
     antituberculosis: YesNoValue;
@@ -27,6 +27,7 @@ export type GeneralAMCQuestionnaireAMClassAttributes = {
 
 export type GeneralAMCQuestionnaireResponsesAttributes = {
     isSameAsLastYear: YesNoUnknownNAValue;
+    detailOnSameAsLast: Maybe<string>;
     shortageInPublicSector: YesNoUnknownValue;
     detailOnShortageInPublicSector: Maybe<string>;
     shortageInPrivateSector: YesNoUnknownValue;
@@ -52,6 +53,14 @@ export class GeneralAMCQuestionnaire extends Struct<GeneralAMCQuestionnaireAttri
 
     static validate(attributes: GeneralAMCQuestionnaireAttributes): ValidationError[] {
         return _.compact([
+            attributes.isSameAsLastYear === "NO" && !attributes.detailOnSameAsLast?.trim()
+                ? {
+                      property: "detailOnSameAsLast",
+                      value: attributes.detailOnSameAsLast,
+                      errors: [ValidationErrorKey.FIELD_IS_REQUIRED],
+                  }
+                : null,
+
             attributes.shortageInPublicSector === "YES" && !attributes.detailOnShortageInPublicSector?.trim()
                 ? {
                       property: "detailOnShortageInPublicSector",
