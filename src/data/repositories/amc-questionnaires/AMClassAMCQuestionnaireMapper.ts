@@ -8,7 +8,7 @@ import {
     isStringInAMClassAMCQuestionnaireCodes,
 } from "./AMCQuestionnaireConstants";
 import { antimicrobialClassOption } from "../../../domain/entities/amc-questionnaires/AntimicrobialClassOption";
-import { proportion50to100Option } from "../../../domain/entities/amc-questionnaires/Proportion50to100Option";
+import { proportion50to100UnknownOption } from "../../../domain/entities/amc-questionnaires/Proportion50to100UnknownOption";
 import { D2ProgramStageMetadata } from "../utils/MetadataHelper";
 import { D2Event, D2TrackedEntity } from "./D2Types";
 import { strataOption } from "../../../domain/entities/amc-questionnaires/StrataOption";
@@ -28,9 +28,13 @@ export function mapD2EventToAMClassAMCQuestionnaire(d2Event: D2Event): AMClassAM
         id: d2Event.event,
         antimicrobialClass: antimicrobialClass,
         stratas: stratas,
-        estVolumeTotalHealthLevel: proportion50to100Option.getSafeValue(fromMap("estVolumeTotalHealthLevel")),
-        estVolumeHospitalHealthLevel: proportion50to100Option.getSafeValue(fromMap("estVolumeHospitalHealthLevel")),
-        estVolumeCommunityHealthLevel: proportion50to100Option.getSafeValue(fromMap("estVolumeCommunityHealthLevel")),
+        estVolumeTotalHealthLevel: proportion50to100UnknownOption.getSafeValue(fromMap("estVolumeTotalHealthLevel")),
+        estVolumeHospitalHealthLevel: proportion50to100UnknownOption.getSafeValue(
+            fromMap("estVolumeHospitalHealthLevel")
+        ),
+        estVolumeCommunityHealthLevel: proportion50to100UnknownOption.getSafeValue(
+            fromMap("estVolumeCommunityHealthLevel")
+        ),
     });
     return amClassAMCQuestionnaire;
 }
