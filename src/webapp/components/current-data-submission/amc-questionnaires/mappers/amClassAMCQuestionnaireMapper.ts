@@ -14,6 +14,7 @@ import {
     AMClassAMCQuestionnaireAttributes,
 } from "../../../../../domain/entities/amc-questionnaires/AMClassAMCQuestionnaire";
 import { getDisabledStratas } from "../../../../../domain/entities/amc-questionnaires/StrataOption";
+import i18n from "../../../../../locales";
 
 export function mapFormStateToAMClassAMCQuestionnaire(
     params: MapToAMCQuestionnaireParams<AMClassAMCQuestionnaireFormEntity>
@@ -34,22 +35,22 @@ export function mapFormStateToAMClassAMCQuestionnaire(
     );
     const estVolumeTotalHealthLevel = getOptionCodeFromFieldValue(
         "estVolumeTotalHealthLevel",
-        options.proportion50to100Options,
+        options.proportion50to100UnknownOptions,
         allFields
     );
     const estVolumeHospitalHealthLevel = getOptionCodeFromFieldValue(
         "estVolumeHospitalHealthLevel",
-        options.proportion50to100Options,
+        options.proportion50to100UnknownOptions,
         allFields
     );
     const estVolumeCommunityHealthLevel = getOptionCodeFromFieldValue(
         "estVolumeCommunityHealthLevel",
-        options.proportion50to100Options,
+        options.proportion50to100UnknownOptions,
         allFields
     );
 
     if (!antimicrobialClass || !stratas) {
-        throw new Error("Missing required AM Class AMC Questionnaire attributes");
+        throw new Error("Missing required Antimicrobial Classes AMC Questionnaire attributes");
     }
 
     const amClassAMCQuestionnaireAttributes: AMClassAMCQuestionnaireAttributes = {
@@ -70,7 +71,7 @@ export function mapFormStateToAMClassAMCQuestionnaire(
     });
 
     if (!validGeneralAMCQuestionnaire) {
-        throw new Error("Invalid AM Class AMC Questionnaire");
+        throw new Error("Invalid Antimicrobial Classes strata AMC Questionnaire");
     }
 
     return validGeneralAMCQuestionnaire;
@@ -114,11 +115,11 @@ export function mapAMClassAMCQuestionnaireToInitialFormState(
 
     return {
         id: questionnaireFormEntity.entity?.id ?? "",
-        title: "Antimicrobial classes questionnaire",
+        title: "",
         isValid: false,
         sections: [
             {
-                title: "Antimicrobial classes ",
+                title: i18n.t("Antimicrobial Classes - health-care strata"),
                 id: "general_section",
                 isVisible: true,
                 required: true,
@@ -156,7 +157,7 @@ export function mapAMClassAMCQuestionnaireToInitialFormState(
                         type: "select",
                         multiple: false,
                         value: questionnaireFormEntity?.entity?.estVolumeTotalHealthLevel || "",
-                        options: mapToFormOptions(options.proportion50to100Options),
+                        options: mapToFormOptions(options.proportion50to100UnknownOptions),
                         required: false,
                         showIsRequired: false,
                         disabled: isViewOnlyMode,
@@ -169,7 +170,7 @@ export function mapAMClassAMCQuestionnaireToInitialFormState(
                         type: "select",
                         multiple: false,
                         value: questionnaireFormEntity?.entity?.estVolumeHospitalHealthLevel || "",
-                        options: mapToFormOptions(options.proportion50to100Options),
+                        options: mapToFormOptions(options.proportion50to100UnknownOptions),
                         required: false,
                         showIsRequired: false,
                         disabled: isViewOnlyMode,
@@ -182,7 +183,7 @@ export function mapAMClassAMCQuestionnaireToInitialFormState(
                         type: "select",
                         multiple: false,
                         value: questionnaireFormEntity?.entity?.estVolumeCommunityHealthLevel || "",
-                        options: mapToFormOptions(options.proportion50to100Options),
+                        options: mapToFormOptions(options.proportion50to100UnknownOptions),
                         required: false,
                         showIsRequired: false,
                         disabled: isViewOnlyMode,

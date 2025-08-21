@@ -118,8 +118,6 @@ import { GetAntimicrobialClassOptionsUseCase } from "./domain/usecases/amc-quest
 import { QuestionsAMCQuestionnaireD2Repository } from "./data/repositories/amc-questionnaires/QuestionsAMCQuestionnaireD2Repository";
 import { GetQuestionsAMCQuestionnaireUseCase } from "./domain/usecases/amc-questionnaires/GetQuestionsAMCQuestionnaireUseCase";
 import { SaveGeneralAMCQuestionnaireUseCase } from "./domain/usecases/amc-questionnaires/SaveGeneralAMCQuestionnaireUseCase";
-import { Proportion50to100OptionsD2Repository } from "./data/repositories/amc-questionnaires/Proportion50to100OptionsD2Repository";
-import { GetProportion50to100OptionsUseCase } from "./domain/usecases/amc-questionnaires/GetProportion50to100OptionsUseCase";
 import { GetAMCQuestionnaireByOrgUnitAndPeriodUseCase } from "./domain/usecases/amc-questionnaires/GetAMCQuestionnaireByOrgUnitAndPeriodUseCase";
 import { GetAMCQuestionnaireByIdUseCase } from "./domain/usecases/amc-questionnaires/GetAMCQuestionnaireByIdUseCase";
 import { SaveAMClassAMCQuestionnaireUseCase } from "./domain/usecases/amc-questionnaires/SaveAMClassAMCQuestionnaireUseCase";
@@ -184,7 +182,6 @@ export function getCompositionRoot(instance: Instance) {
     const yesNoUnknownOptionsRepository = new YesNoUnknownOptionsD2Repository(api);
     const yesNoUnknownNAOptionsRepository = new YesNoUnknownNAOptionsD2Repository(api);
     const antimicrobialClassOptionsRepository = new AntimicrobialClassOptionsD2Repository(api);
-    const proportion50to100OptionsD2Repository = new Proportion50to100OptionsD2Repository(api);
     const dataLevelOptionsD2Repository = new DataLevelOptionsD2Repository(api);
     const dataSourceOptionsD2Repository = new DataSourceOptionsD2Repository(api);
     const nationalPopulationDataSourceOptionsD2Repository = new NationalPopulationDataSourceOptionsD2Repository(api);
@@ -421,7 +418,6 @@ export function getCompositionRoot(instance: Instance) {
             getYesNoUnknownOptions: new GetYesNoUnknownOptionsUseCase(yesNoUnknownOptionsRepository),
             getYesNoUnknownNAOptions: new GetYesNoUnknownNAOptionsUseCase(yesNoUnknownNAOptionsRepository),
             getAntimicrobialClassOptions: new GetAntimicrobialClassOptionsUseCase(antimicrobialClassOptionsRepository),
-            getProportion50to100Options: new GetProportion50to100OptionsUseCase(proportion50to100OptionsD2Repository),
             getProportion50to100UnknownOptions: new GetProportion50to100UnknownOptionsUseCase(
                 proportion50to100UnknownOptionsD2Repository
             ),

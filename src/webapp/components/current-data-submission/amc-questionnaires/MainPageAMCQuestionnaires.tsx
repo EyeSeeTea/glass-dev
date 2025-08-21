@@ -91,7 +91,7 @@ export const MainPageAMCQuestionnaires: React.FC = () => {
                             {questionnaire?.id ? (
                                 <QuestionnairesTableContainer>
                                     <QuestionnairesTable
-                                        title={i18n.t("AM Class")}
+                                        title={i18n.t("Data structure")}
                                         rows={amClassQuestionnaireRows}
                                         onClickEdit={(_event, id: Id) => {
                                             openQuestionnaireForm("am-class-questionnaire", id);
@@ -103,7 +103,7 @@ export const MainPageAMCQuestionnaires: React.FC = () => {
                                     />
 
                                     <QuestionnairesTable
-                                        title={i18n.t("Component")}
+                                        title={i18n.t("Data characteristics")}
                                         rows={componentQuestionnaireRows}
                                         onClickEdit={(_event, id: Id) => {
                                             openQuestionnaireForm("component-questionnaire", id);

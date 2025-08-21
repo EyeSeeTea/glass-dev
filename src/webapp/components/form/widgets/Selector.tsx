@@ -79,6 +79,18 @@ export function Selector<Value extends string>({
                 variant="outlined"
                 IconComponent={IconChevronDown24}
                 error={error}
+                MenuProps={{
+                    anchorOrigin: {
+                        vertical: "bottom",
+                        horizontal: "left",
+                    },
+                    transformOrigin: {
+                        vertical: "top",
+                        horizontal: "left",
+                    },
+                    getContentAnchorEl: null,
+                    style: { marginTop: 2 },
+                }}
                 renderValue={(selected: unknown) => {
                     const value = getLabelFromValue(selected as Value, options);
                     if (value) {
