@@ -129,6 +129,7 @@
         "amr-agg-data-reset-ris": "npx ts-node -r dotenv/config src/scripts/amr_agg_data_reset.ts",
         "amr-agg-data-validation-sample": "npx ts-node -r dotenv/config src/scripts/amr_agg_data_validation_sample.ts",
         "amr-agg-data-reset-sample": "npx ts-node -r dotenv/config src/scripts/amr_agg_data_reset_sample.ts",
+        "ear-signals-validation": "npx ts-node -r dotenv/config src/scripts/ear_signals_validation.ts",
         "get-max-min-amc-calculated-tons": "npx ts-node -r dotenv/config src/scripts/get_max_min_amc_calculated_tons.ts",
         "generate-secret-key-and-nonce": "npx ts-node src/scripts/generate_secret_key_and_nonce.ts"
     },
