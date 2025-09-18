@@ -37,9 +37,12 @@ export class DeletePrimaryFileDataUseCase implements UseCase {
     public execute(
         currentModule: GlassModule,
         upload: GlassUploads,
-        arrayBuffer: ArrayBuffer
+        arrayBuffer: ArrayBuffer,
+        isAsyncDeletion: boolean
     ): FutureData<ImportSummary> {
         const { name: currentModuleName } = currentModule;
+        const asyncDeleteChunkSize = isAsyncDeletion ? currentModule.asyncDeleteChunkSizes?.primaryUpload : undefined;
+
         switch (currentModuleName) {
             case "AMR": {
                 return new DeleteRISDataset(this.options).delete(arrayBuffer);
@@ -52,11 +55,16 @@ export class DeletePrimaryFileDataUseCase implements UseCase {
             case "AMR - Individual":
             case "AMR - Fungal": {
                 const programId = currentModule.programs !== undefined ? currentModule.programs.at(0)?.id : undefined;
-                return new DeleteRISIndividualFungalFile(this.options).delete(upload, programId);
+                return new DeleteRISIndividualFungalFile(this.options).delete(
+                    upload,
+                    programId,
+                    currentModuleName,
+                    asyncDeleteChunkSize
+                );
             }
 
             case "AMC": {
-                return new DeleteAMCProductLevelData(this.options).delete(arrayBuffer, upload);
+                return new DeleteAMCProductLevelData(this.options).delete(arrayBuffer, upload, asyncDeleteChunkSize);
             }
 
             default: {

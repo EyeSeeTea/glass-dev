@@ -33,8 +33,11 @@ export class DeleteSecondaryFileDataUseCase implements UseCase {
     public execute(
         currentModule: GlassModule,
         upload: GlassUploads,
-        arrayBuffer: ArrayBuffer
+        arrayBuffer: ArrayBuffer,
+        isAsyncDeletion: boolean
     ): FutureData<ImportSummary> {
+        const asyncDeleteChunkSize = isAsyncDeletion ? currentModule.asyncDeleteChunkSizes?.primaryUpload : undefined;
+
         const { name: currentModuleName } = currentModule;
         switch (currentModuleName) {
             case "AMR":

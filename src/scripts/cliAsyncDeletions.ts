@@ -452,7 +452,7 @@ function deleteDatasetValuesOrEventsFromPrimaryUploaded(
     }
 ): FutureData<ImportSummary> {
     console.debug(`[${new Date().toISOString()}] Deleting data from primary file ${upload.id}`);
-    return new DeletePrimaryFileDataUseCase(repositories).execute(currentModule, upload, arrayBuffer);
+    return new DeletePrimaryFileDataUseCase(repositories).execute(currentModule, upload, arrayBuffer, true);
 }
 
 function deleteDatasetValuesOrEventsFromSecondaryUploaded(
@@ -472,7 +472,7 @@ function deleteDatasetValuesOrEventsFromSecondaryUploaded(
     }
 ): FutureData<ImportSummary> {
     console.debug(`[${new Date().toISOString()}] Deleting data from secondary file ${upload.id}`);
-    return new DeleteSecondaryFileDataUseCase(repositories).execute(currentModule, upload, arrayBuffer);
+    return new DeleteSecondaryFileDataUseCase(repositories).execute(currentModule, upload, arrayBuffer, true);
 }
 
 function deleteDatasetValuesOrEvents(
