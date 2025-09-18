@@ -35,7 +35,13 @@ export function importOrDeleteTrackedEntitiesInChunks(parmas: {
     } = parmas;
     const chunkedTrackedEntities = _(trackedEntities).chunk(chunkSize).value();
 
-    const $importTrackedEntities = chunkedTrackedEntities.map(trackedEntitiesChunk => {
+    const $importTrackedEntities = chunkedTrackedEntities.map((trackedEntitiesChunk, index) => {
+        console.debug(
+            `[${new Date().toISOString()}] Chunk ${index + 1}/${
+                chunkedTrackedEntities.length
+            } of tracked entities to ${action} for module ${glassModuleName}.`
+        );
+
         return trackerRepository
             .import({ trackedEntities: trackedEntitiesChunk }, action)
             .mapError(error => {
@@ -49,6 +55,11 @@ export function importOrDeleteTrackedEntitiesInChunks(parmas: {
                 return errorImportSummary;
             })
             .flatMap(response => {
+                console.debug(
+                    `[${new Date().toISOString()}] End of chunk ${index + 1}/${
+                        chunkedTrackedEntities.length
+                    } of tracked entities to ${action} for module ${glassModuleName}.`
+                );
                 return mapToImportSummary(response, TRACKED_ENTITY_IMPORT_SUMMARY_TYPE, metadataRepository)
                     .mapError(error => {
                         console.error(

@@ -79,14 +79,29 @@ export const downloadIdsAndDeleteTrackedEntitiesUsingFileBlob = (
 ): FutureData<ImportSummary> => {
     const { id: uploadId, orgUnit: orgUnitId, eventListFileId } = upload;
     if (eventListFileId && !upload.eventListDataDeleted) {
+        console.debug(
+            `[${new Date().toISOString()}] Download document with id ${eventListFileId} to delete tracked entities`
+        );
         return repositories.glassDocumentsRepository.download(eventListFileId).flatMap(fileBlob => {
             return getStringFromFileBlob(fileBlob).flatMap(_trackedEntities => {
                 const trackedEntitiesIdList: Id[] = JSON.parse(_trackedEntities);
-
+                console.debug(
+                    `[${new Date().toISOString()}] Retrieved ${
+                        trackedEntitiesIdList.length
+                    } tracked entities to delete for upload ${uploadId}`
+                );
                 return repositories.trackerRepository
                     .getExistingTrackedEntitiesIdsByIds(trackedEntitiesIdList, programId)
                     .flatMap(existingTrackedEntitiesIds => {
+                        console.debug(
+                            `[${new Date().toISOString()}] Found existing tracked entities: ${
+                                existingTrackedEntitiesIds.length
+                            } to delete for upload ${uploadId}`
+                        );
                         if (existingTrackedEntitiesIds.length === 0) {
+                            console.debug(
+                                `[${new Date().toISOString()}] No existing tracked entities found to delete for upload ${uploadId}`
+                            );
                             return repositories.glassUploadsRepository.setEventListDataDeleted(uploadId).flatMap(() => {
                                 const summary: ImportSummary = {
                                     status: "SUCCESS",
@@ -116,6 +131,9 @@ export const downloadIdsAndDeleteTrackedEntitiesUsingFileBlob = (
                         });
 
                         if (!asyncDeleteChunkSize) {
+                            console.debug(
+                                `[${new Date().toISOString()}] Deleting all tracked entities in a single request for upload ${uploadId}`
+                            );
                             return repositories.trackerRepository
                                 .import({ trackedEntities: trackedEntities }, action)
                                 .flatMap(response => {
@@ -148,7 +166,10 @@ export const downloadIdsAndDeleteTrackedEntitiesUsingFileBlob = (
             });
         });
     } else {
-        //No enrollments were created during import, so no events to delete.
+        console.debug(
+            `[${new Date().toISOString()}] No enrollments were created during import, so no events to delete.`
+        );
+
         return repositories.glassUploadsRepository.setEventListDataDeleted(uploadId).flatMap(() => {
             const summary: ImportSummary = {
                 status: "SUCCESS",
@@ -178,6 +199,10 @@ function deleteTrackedEntitiesInChunks(
         metadataRepository: MetadataRepository;
     }
 ): FutureData<ImportSummary> {
+    console.debug(
+        `[${new Date().toISOString()}] Deleting tracked entities in chunks of ${uploadChunkSize} for upload ${uploadId}`
+    );
+
     return importOrDeleteTrackedEntitiesInChunks({
         trackedEntities: trackedEntities,
         chunkSize: uploadChunkSize,
