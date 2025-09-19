@@ -1,7 +1,11 @@
 import _ from "lodash";
 
 import { Dhis2EventsDefaultRepository } from "../../../data/repositories/Dhis2EventsDefaultRepository";
-import { ImportSummary, joinAllImportSummaries } from "../../entities/data-entry/ImportSummary";
+import {
+    getDefaultErrorImportSummary,
+    ImportSummary,
+    joinAllImportSummaries,
+} from "../../entities/data-entry/ImportSummary";
 import { Future, FutureData } from "../../entities/Future";
 import { ExcelRepository } from "../../repositories/ExcelRepository";
 import { GlassDocumentsRepository } from "../../repositories/GlassDocumentsRepository";
@@ -207,13 +211,13 @@ export class DeleteBLTemplateEventProgram {
 
     private deleteAllEvents(events: TrackerEvent[], asyncDeleteChunkSize: Maybe<number>): FutureData<ImportSummary> {
         if (!asyncDeleteChunkSize) {
-            return this.deleteEvents(events);
+            return this.deleteEventsInBulk(events);
         } else {
             return this.deleteEventsInChunks(events, asyncDeleteChunkSize);
         }
     }
 
-    private deleteEvents(events: TrackerEvent[]): FutureData<ImportSummary> {
+    private deleteEventsInBulk(events: TrackerEvent[]): FutureData<ImportSummary> {
         return this.dhis2EventsDefaultRepository.import({ events }, "DELETE").flatMap(result => {
             return mapToImportSummary(result, "event", this.metadataRepository).flatMap(({ importSummary }) => {
                 return Future.success(importSummary);
@@ -229,14 +233,23 @@ export class DeleteBLTemplateEventProgram {
                 `[${new Date().toISOString()}] Chunk ${index + 1}/${chunkedEvents.length} of events to DELETE.`
             );
 
-            return this.deleteEvents(eventChunk).map(importSummary => {
-                console.debug(
-                    `[${new Date().toISOString()}] Chunk ${index + 1}/${
-                        chunkedEvents.length
-                    } of events to DELETE processed.`
-                );
-                return importSummary;
-            });
+            return this.deleteEventsInBulk(eventChunk)
+                .mapError(error => {
+                    console.error(`[${new Date().toISOString()}] Error deleting events: ${error}`);
+                    const errorImportSummary = getDefaultErrorImportSummary({
+                        blockingErrors: [{ error: error, count: 1 }],
+                    });
+
+                    return errorImportSummary;
+                })
+                .map(importSummary => {
+                    console.debug(
+                        `[${new Date().toISOString()}] Chunk ${index + 1}/${
+                            chunkedEvents.length
+                        } of events to DELETE processed.`
+                    );
+                    return importSummary;
+                });
         });
 
         return Future.sequentialWithAccumulation($deleteEvents, {
@@ -244,19 +257,21 @@ export class DeleteBLTemplateEventProgram {
         })
             .flatMap(result => {
                 if (result.type === "error") {
-                    const messageError = result.error;
-                    console.error(`[${new Date().toISOString()}] Error deleting some events: ${messageError}`);
+                    const errorImportSummary = result.error;
+                    const messageErrors = errorImportSummary.blockingErrors.map(error => error.error).join(", ");
+
+                    console.error(`[${new Date().toISOString()}] Error deleting some events: ${messageErrors}`);
 
                     const accumulatedImportSummaries = result.data;
 
-                    return Future.success(joinAllImportSummaries(accumulatedImportSummaries));
+                    return Future.success(joinAllImportSummaries([...accumulatedImportSummaries, errorImportSummary]));
                 } else {
                     console.debug(`[${new Date().toISOString()}] SUCCESS - All chunks of events to DELETE processed.`);
                     const importSummary = joinAllImportSummaries(result.data);
                     return Future.success(importSummary);
                 }
             })
-            .mapError(() => "Internal error");
+            .mapError(() => `[${new Date().toISOString()}] - Unknown error while deleting events in chunks.`);
     }
 
     private buildEventsPayload(

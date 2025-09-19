@@ -115,5 +115,5 @@ export function importOrDeleteTrackedEntitiesInChunks(parmas: {
                 return Future.success(importSummariesWithMergedEventIdList);
             }
         })
-        .mapError(() => "Internal error");
+        .mapError(() => `[${new Date().toISOString()}] - Unknown error while processing tracked entities in chunks.`);
 }
