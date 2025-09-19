@@ -1,6 +1,6 @@
 import { Future, FutureData } from "../../../entities/Future";
 import { ImportStrategy } from "../../../entities/data-entry/DataValuesSaveSummary";
-import { ImportSummary } from "../../../entities/data-entry/ImportSummary";
+import { ImportSummary, joinAllImportSummaries } from "../../../entities/data-entry/ImportSummary";
 import { GlassDocumentsRepository } from "../../../repositories/GlassDocumentsRepository";
 import { MetadataRepository } from "../../../repositories/MetadataRepository";
 import { TrackerRepository } from "../../../repositories/TrackerRepository";
@@ -11,7 +11,7 @@ import { GlassUploadsRepository } from "../../../repositories/GlassUploadsReposi
 import { GlassUploads } from "../../../entities/GlassUploads";
 import { TrackerTrackedEntity } from "../../../entities/TrackedEntityInstance";
 import { Maybe } from "../../../../utils/ts-utils";
-import { importOrDeleteTrackedEntitiesInChunks, joinAllImportSummaries } from "./importTrackedEntitiesInChunks";
+import { importOrDeleteTrackedEntitiesInChunks } from "./importOrDeleteTrackedEntitiesInChunks";
 
 export const downloadIdsAndDeleteTrackedEntities = (
     eventListId: string | undefined,

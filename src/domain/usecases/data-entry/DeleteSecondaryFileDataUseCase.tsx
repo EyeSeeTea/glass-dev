@@ -42,11 +42,11 @@ export class DeleteSecondaryFileDataUseCase implements UseCase {
         switch (currentModuleName) {
             case "AMR":
             case "AMR - Individual": {
-                return new DeleteSampleDataset(this.options).delete(arrayBuffer);
+                return new DeleteSampleDataset(this.options).delete(arrayBuffer, asyncDeleteChunkSize);
             }
 
             case "AMC": {
-                return new DeleteAMCSubstanceLevelData(this.options).delete(arrayBuffer, upload);
+                return new DeleteAMCSubstanceLevelData(this.options).delete(arrayBuffer, upload, asyncDeleteChunkSize);
             }
             default: {
                 return Future.error(`Secondary upload async deletion for module ${currentModuleName} not found`);

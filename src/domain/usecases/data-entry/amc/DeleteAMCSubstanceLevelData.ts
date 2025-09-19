@@ -13,6 +13,7 @@ import {
 import { GlassUploads } from "../../../entities/GlassUploads";
 import { GlassUploadsRepository } from "../../../repositories/GlassUploadsRepository";
 import { TrackerRepository } from "../../../repositories/TrackerRepository";
+import { Maybe } from "../../../../utils/ts-utils";
 
 export class DeleteAMCSubstanceLevelData {
     constructor(
@@ -26,7 +27,11 @@ export class DeleteAMCSubstanceLevelData {
             trackerRepository: TrackerRepository;
         }
     ) {}
-    public delete(arrayBuffer: ArrayBuffer, upload: GlassUploads): FutureData<ImportSummary> {
+    public delete(
+        arrayBuffer: ArrayBuffer,
+        upload: GlassUploads,
+        asyncDeleteChunkSize: Maybe<number>
+    ): FutureData<ImportSummary> {
         const deleteBLTemplateEventProgram = new DeleteBLTemplateEventProgram(
             this.options.excelRepository,
             this.options.instanceRepository,
@@ -37,11 +42,12 @@ export class DeleteAMCSubstanceLevelData {
             this.options.trackerRepository
         );
 
-        return deleteBLTemplateEventProgram.delete(
+        return deleteBLTemplateEventProgram.delete({
             arrayBuffer,
-            AMC_RAW_SUBSTANCE_CONSUMPTION_PROGRAM_ID,
+            programId: AMC_RAW_SUBSTANCE_CONSUMPTION_PROGRAM_ID,
             upload,
-            AMC_SUBSTANCE_CALCULATED_CONSUMPTION_PROGRAM_ID
-        );
+            asyncDeleteChunkSize: asyncDeleteChunkSize,
+            calculatedProgramId: AMC_SUBSTANCE_CALCULATED_CONSUMPTION_PROGRAM_ID,
+        });
     }
 }

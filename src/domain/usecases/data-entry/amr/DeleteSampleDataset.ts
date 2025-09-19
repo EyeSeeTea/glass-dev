@@ -12,6 +12,7 @@ import { mapDataValuesToImportSummary } from "../utils/mapDhis2Summary";
 import { SampleDataRepository } from "../../../repositories/data-entry/SampleDataRepository";
 import { SampleData } from "../../../entities/data-entry/amr-external/SampleData";
 import { AMR_AMR_DS_Input_files_Sample_DS_ID, AMR_BATCHID_CC_ID } from "./ImportSampleFile";
+import { Maybe } from "../../../../utils/ts-utils";
 
 // NOTICE: code adapted for node environment from ImportSampleFile.ts (only DELETE)
 export class DeleteSampleDataset {
@@ -23,9 +24,9 @@ export class DeleteSampleDataset {
         }
     ) {}
 
-    public delete(arrayBuffer: ArrayBuffer): FutureData<ImportSummary> {
+    public delete(arrayBuffer: ArrayBuffer, asyncDeleteChunkSize: Maybe<number>): FutureData<ImportSummary> {
         return this.options.sampleDataRepository
-            .getFromArayBuffer(arrayBuffer)
+            .getFromArrayBuffer(arrayBuffer)
             .flatMap(risDataItems => {
                 return Future.joinObj({
                     risDataItems: Future.success(risDataItems),
