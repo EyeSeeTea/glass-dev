@@ -2,8 +2,8 @@ import _ from "lodash";
 import {
     ImportSummary,
     ImportSummaryWithEventIdList,
-    MergedImportSummaryWithEventIdList,
     getDefaultErrorImportSummaryWithEventIdList,
+    mergeImportSummaries,
 } from "../../../entities/data-entry/ImportSummary";
 import { FutureData, Future } from "../../../entities/Future";
 import { DEFAULT_ASYNC_UPLOAD_DELETE_CHUNK_SIZE } from "../../../entities/GlassModule";
@@ -116,66 +116,4 @@ export function importOrDeleteTrackedEntitiesInChunks(parmas: {
             }
         })
         .mapError(() => "Internal error");
-}
-
-export function mergeImportSummaries(
-    importSummaries: ImportSummaryWithEventIdList[]
-): MergedImportSummaryWithEventIdList {
-    const importSummariesWithMergedEventIdList = importSummaries.reduce(
-        (
-            acc: {
-                allImportSummaries: ImportSummary[];
-                mergedEventIdList: Id[];
-            },
-            data: {
-                importSummary: ImportSummary;
-                eventIdList: Id[];
-            }
-        ) => {
-            const { importSummary } = data;
-            return {
-                allImportSummaries: [...acc.allImportSummaries, importSummary],
-                mergedEventIdList: [...acc.mergedEventIdList, ...data.eventIdList],
-            };
-        },
-        {
-            allImportSummaries: [],
-            mergedEventIdList: [],
-        }
-    );
-
-    return importSummariesWithMergedEventIdList;
-}
-
-export function joinAllImportSummaries(importSummaries: ImportSummary[]): ImportSummary {
-    const finalImportSummary: ImportSummary = importSummaries.reduce(
-        (acc: ImportSummary, data: ImportSummary) => {
-            return {
-                status: data.status === "ERROR" ? "ERROR" : acc.status,
-                importCount: {
-                    imported: acc.importCount.imported + data.importCount.imported,
-                    updated: acc.importCount.updated + data.importCount.updated,
-                    deleted: acc.importCount.deleted + data.importCount.deleted,
-                    ignored: acc.importCount.ignored + data.importCount.ignored,
-                    total: acc.importCount.total + data.importCount.total,
-                },
-                nonBlockingErrors: [...acc.nonBlockingErrors, ...data.nonBlockingErrors],
-                blockingErrors: [...acc.blockingErrors, ...data.blockingErrors],
-            };
-        },
-        {
-            status: "SUCCESS",
-            importCount: {
-                imported: 0,
-                updated: 0,
-                deleted: 0,
-                ignored: 0,
-                total: 0,
-            },
-            nonBlockingErrors: [],
-            blockingErrors: [],
-        }
-    );
-
-    return finalImportSummary;
 }

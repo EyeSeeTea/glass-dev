@@ -612,6 +612,12 @@ function deleteUploadedDatasets(
                                     });
                                 }
 
+                                console.debug(
+                                    `[${new Date().toISOString()}] Downloading files to delete: ${
+                                        primaryFileToDelete?.fileId
+                                    }, ${secondaryFileToDelete?.fileId}`
+                                );
+
                                 return Future.joinObj({
                                     primaryArrayBuffer: primaryFileToDelete
                                         ? getArrayBufferOfFile(primaryFileToDelete.fileId, repositories)

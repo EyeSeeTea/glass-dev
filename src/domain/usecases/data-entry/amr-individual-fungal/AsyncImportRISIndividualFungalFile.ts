@@ -12,7 +12,7 @@ import { TrackerRepository } from "../../../repositories/TrackerRepository";
 import { RISIndividualFungalDataRepository } from "../../../repositories/data-entry/RISIndividualFungalDataRepository";
 import { ProgramRulesMetadataRepository } from "../../../repositories/program-rules/ProgramRulesMetadataRepository";
 import { mapIndividualFungalDataItemsToEntities, runCustomValidations, runProgramRuleValidations } from "./common";
-import { importOrDeleteTrackedEntitiesInChunks } from "../utils/importTrackedEntitiesInChunks";
+import { importOrDeleteTrackedEntitiesInChunks } from "../utils/importOrDeleteTrackedEntitiesInChunks";
 
 const AMR_INDIVIDUAL_PROGRAM_ID = "mMAj6Gofe49";
 const AMR_DATA_PROGRAM_STAGE_ID = "KCmWZD8qoAk";

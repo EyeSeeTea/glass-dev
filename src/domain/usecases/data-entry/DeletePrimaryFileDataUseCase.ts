@@ -45,11 +45,11 @@ export class DeletePrimaryFileDataUseCase implements UseCase {
 
         switch (currentModuleName) {
             case "AMR": {
-                return new DeleteRISDataset(this.options).delete(arrayBuffer);
+                return new DeleteRISDataset(this.options).delete(arrayBuffer, asyncDeleteChunkSize);
             }
 
             case "EGASP": {
-                return new DeleteEGASPDataset(this.options).delete(arrayBuffer, upload);
+                return new DeleteEGASPDataset(this.options).delete(arrayBuffer, upload, asyncDeleteChunkSize);
             }
 
             case "AMR - Individual":
