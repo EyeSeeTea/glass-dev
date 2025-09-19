@@ -55,6 +55,11 @@ export class AsyncImportSampleFile {
     }): FutureData<ImportSummary[]> {
         const { uploadId, inputBlob, batchId, uploadChunkSize, period, orgUnitId, countryCode, dryRun } = params;
         return this.repositories.sampleDataRepository.getFromBlob(inputBlob).flatMap(risDataItems => {
+            console.debug(
+                `[${new Date().toISOString()}] Get ${
+                    risDataItems.length
+                } sample data items from blob for upload ${uploadId}`
+            );
             return Future.joinObj({
                 risDataItems: Future.success(risDataItems),
                 dataSet: this.repositories.metadataRepository.getDataSet(AMR_AMR_DS_Input_files_Sample_ID),
@@ -66,6 +71,11 @@ export class AsyncImportSampleFile {
                     ...new Set(risDataItems.map(item => item.COUNTRY)),
                 ]),
             }).flatMap(({ risDataItems, dataSet, dataSet_CC, dataElement_CC, orgUnits }) => {
+                console.debug(
+                    `[${new Date().toISOString()}] Running validations for ${
+                        risDataItems.length
+                    } sample data items for upload ${uploadId}`
+                );
                 const batchIdErrors = checkBatchId(risDataItems, batchId);
                 const yearErrors = checkYear(risDataItems, period);
                 const countryErrors = checkCountry(risDataItems, countryCode);
@@ -124,6 +134,12 @@ export class AsyncImportSampleFile {
                 ];
 
                 if (allBlockingErrors.length > 0) {
+                    console.debug(
+                        `[${new Date().toISOString()}] Found ${
+                            allBlockingErrors.length
+                        } blocking errors during validations for upload ${uploadId}. Skipping data import.`
+                    );
+
                     const errorImportSummary: ImportSummary = getDefaultErrorImportSummary({
                         blockingErrors: allBlockingErrors,
                     });
@@ -156,7 +172,9 @@ export class AsyncImportSampleFile {
     }
 
     private saveDataValuesByChunks(chunkedDataValues: DataValue[][], dryRun: boolean): FutureData<ImportSummary[]> {
-        const $saveDataValuesFutures = chunkedDataValues.map(dataValuesChunk => {
+        console.debug(`[${new Date().toISOString()}] Saving data values in chunks of ${chunkedDataValues.length}.`);
+        const $saveDataValuesFutures = chunkedDataValues.map((dataValuesChunk, index) => {
+            console.debug(`[${new Date().toISOString()}] Saving chunk ${index + 1} of ${chunkedDataValues.length}.`);
             return this.repositories.dataValuesRepository
                 .save(dataValuesChunk, CREATE_AND_UPDATE, dryRun)
                 .mapError(error => {
@@ -173,6 +191,11 @@ export class AsyncImportSampleFile {
                     return importSummaryError;
                 })
                 .flatMap((dataValuesSaveSummary): Future<ImportSummary, ImportSummary> => {
+                    console.debug(
+                        `[${new Date().toISOString()}] Finished saving chunk ${index + 1} of ${
+                            chunkedDataValues.length
+                        }.`
+                    );
                     const importSummary = mapDataValuesToImportSummary(dataValuesSaveSummary, CREATE_AND_UPDATE);
                     const hasErrorStatus = importSummary.status === "ERROR";
                     if (hasErrorStatus) {
@@ -197,6 +220,7 @@ export class AsyncImportSampleFile {
                     const accumulatedImportSummaries = result.data;
                     return Future.success([...accumulatedImportSummaries, errorImportSummary]);
                 } else {
+                    console.debug(`[${new Date().toISOString()}] SUCCESS - Finished saving all chunks.`);
                     return Future.success(result.data);
                 }
             })

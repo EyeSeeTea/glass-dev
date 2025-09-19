@@ -108,6 +108,9 @@ export function importOrDeleteTrackedEntitiesInChunks(parmas: {
                 ]);
                 return Future.success(importSummariesWithMergedEventIdListWithErrorSummary);
             } else {
+                console.debug(
+                    `[${new Date().toISOString()}] SUCCESS - All chunks of tracked entities to ${action} for module ${glassModuleName} processed.`
+                );
                 const importSummariesWithMergedEventIdList = mergeImportSummaries(result.data);
                 return Future.success(importSummariesWithMergedEventIdList);
             }

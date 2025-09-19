@@ -319,6 +319,11 @@ function incrementAsyncUploadsOrDeleteIfMaxAttemptAndSetErrorStatus(
 ): FutureData<void> {
     const nextAttempt = asyncUpload.attempts + 1;
     if (nextAttempt >= maxAttemptsForAsyncDeletions) {
+        console.debug(
+            `[${new Date().toISOString()}] Upload ${
+                asyncUpload.uploadId
+            } has reached the maximum number of attempts (${maxAttemptsForAsyncDeletions}). Setting errorAsyncUploading in upload and removing from async-uploads in Datastore.`
+        );
         return removeAsyncUploadByIdFromDatastore(
             glassAsyncUploadsRepository,
             glassUploadsRepository,
@@ -393,6 +398,11 @@ function asyncPrimaryFileSubmission(
         allCountries: Country[];
     }
 ): FutureData<ImportSummary[]> {
+    console.debug(
+        `[${new Date().toISOString()}] Importing primary file ${params.primaryUploadId} for module ${
+            params.glassModule.name
+        }, org unit ${params.orgUnitId} and period ${params.period}`
+    );
     return new AsyncImportPrimaryFileUseCase(repositories).execute(params);
 }
 
@@ -416,6 +426,11 @@ function asyncSecondaryFileSubmission(
         dryRun: boolean;
     }
 ): FutureData<ImportSummary[]> {
+    console.debug(
+        `[${new Date().toISOString()}] Importing secondary file ${params.secondaryUploadId} for module ${
+            params.glassModule.name
+        }, org unit ${params.orgUnitId} and period ${params.period}`
+    );
     return new AsyncImportSecondaryFileUseCase(repositories).execute(params);
 }
 
@@ -443,6 +458,7 @@ function manageAsyncUploadPrimaryFile(
     return setAsyncUploadStatus(repositories.glassAsyncUploadsRepository, asyncUpload.uploadId, "UPLOADING").flatMap(
         () => {
             return downloadBlob(repositories.glassDocumentsRepository, primaryUpload.fileId).flatMap(inputBlob => {
+                console.debug(`[${new Date().toISOString()}] Downloaded blob for primary upload ${primaryUpload.id}`);
                 return asyncPrimaryFileSubmission(repositories, {
                     primaryUploadId: primaryUpload.id,
                     inputBlob: inputBlob,
@@ -514,6 +530,9 @@ function manageAsyncUploadSecondaryFile(
     return setAsyncUploadStatus(repositories.glassAsyncUploadsRepository, asyncUpload.uploadId, "UPLOADING").flatMap(
         () => {
             return downloadBlob(repositories.glassDocumentsRepository, secondaryUpload.fileId).flatMap(inputBlob => {
+                console.debug(
+                    `[${new Date().toISOString()}] Downloaded blob for secondary upload ${secondaryUpload.id}`
+                );
                 const applyDryRun = module.name === "AMR - Individual";
 
                 return asyncSecondaryFileSubmission(repositories, {
@@ -529,6 +548,11 @@ function manageAsyncUploadSecondaryFile(
                     const hasBlockingErrors = importSummaries.some(summary => summary.blockingErrors.length > 0);
 
                     if (applyDryRun && !hasBlockingErrors) {
+                        console.debug(
+                            `[${new Date().toISOString()}] No blocking errors found during dry run for secondary upload ${
+                                secondaryUpload.id
+                            }. Run import without dry run to import data.`
+                        );
                         return asyncSecondaryFileSubmission(repositories, {
                             secondaryUploadId: secondaryUpload.id,
                             inputBlob: inputBlob,
@@ -653,6 +677,11 @@ function uploadDatasets(
                         return isPendingUpload(repositories.glassAsyncUploadsRepository, asyncUpload.uploadId).flatMap(
                             isPending => {
                                 if (isPending) {
+                                    console.debug(
+                                        `[${new Date().toISOString()}] Processing upload ${
+                                            asyncUpload.uploadId
+                                        } of type ${asyncUpload.type} and upload id ${asyncUpload.uploadId}`
+                                    );
                                     return Future.joinObj({
                                         primaryUpload:
                                             asyncUpload.type === "primary"
@@ -670,6 +699,9 @@ function uploadDatasets(
                                                 : Future.success(undefined),
                                     }).flatMap(({ primaryUpload, secondaryUpload }) => {
                                         if (primaryUpload) {
+                                            console.debug(
+                                                `[${new Date().toISOString()}] Found primary upload ${primaryUpload.id}`
+                                            );
                                             const currentModule = glassModules.find(
                                                 module => module.id === primaryUpload.module
                                             );
@@ -691,6 +723,11 @@ function uploadDatasets(
                                                 return Future.error(`Module ${primaryUpload.module} not found`);
                                             }
                                         } else if (secondaryUpload) {
+                                            console.debug(
+                                                `[${new Date().toISOString()}] Found secondary upload ${
+                                                    secondaryUpload.id
+                                                }`
+                                            );
                                             const currentModule = glassModules.find(
                                                 module => module.id === secondaryUpload.module
                                             );
