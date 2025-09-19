@@ -224,7 +224,9 @@ export class AsyncImportSampleFile {
                     return Future.success(result.data);
                 }
             })
-            .mapError(() => "Internal error");
+            .mapError(
+                () => `[${new Date().toISOString()}] - Unknown error while saving Sample File data values in chunks.`
+            );
     }
 
     private getDataSetDHIS2ValidationErrors(
