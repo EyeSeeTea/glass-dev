@@ -15,7 +15,7 @@ import { mapToImportSummary } from "../ImportBLTemplateEventProgram";
 
 const TRACKED_ENTITY_IMPORT_SUMMARY_TYPE = "trackedEntity";
 
-export function importOrDeleteTrackedEntitiesInChunks(parmas: {
+export function importOrDeleteTrackedEntitiesInChunks(params: {
     trackedEntities: TrackerTrackedEntity[];
     chunkSize?: number;
     glassModuleName: string;
@@ -33,7 +33,7 @@ export function importOrDeleteTrackedEntitiesInChunks(parmas: {
         action,
         trackerRepository,
         metadataRepository,
-    } = parmas;
+    } = params;
     const chunkedTrackedEntities = _(trackedEntities).chunk(chunkSize).value();
 
     const $importTrackedEntities = chunkedTrackedEntities.map((trackedEntitiesChunk, index) => {
