@@ -12,6 +12,7 @@ import { TrackerTrackedEntity } from "../../../entities/TrackedEntityInstance";
 import { MetadataRepository } from "../../../repositories/MetadataRepository";
 import { TrackerRepository } from "../../../repositories/TrackerRepository";
 import { mapToImportSummary } from "../ImportBLTemplateEventProgram";
+import consoleLogger from "../../../../utils/consoleLogger";
 
 const TRACKED_ENTITY_IMPORT_SUMMARY_TYPE = "trackedEntity";
 
@@ -37,8 +38,8 @@ export function importOrDeleteTrackedEntitiesInChunks(params: {
     const chunkedTrackedEntities = _(trackedEntities).chunk(chunkSize).value();
 
     const $importTrackedEntities = chunkedTrackedEntities.map((trackedEntitiesChunk, index) => {
-        console.debug(
-            `[${new Date().toISOString()}] Chunk ${index + 1}/${
+        consoleLogger.debug(
+            `Chunk ${index + 1}/${
                 chunkedTrackedEntities.length
             } of tracked entities to ${action} for module ${glassModuleName}.`
         );
@@ -46,8 +47,8 @@ export function importOrDeleteTrackedEntitiesInChunks(params: {
         return trackerRepository
             .import({ trackedEntities: trackedEntitiesChunk }, action)
             .mapError(error => {
-                console.error(
-                    `[${new Date().toISOString()}] Error importing tracked entities from file in module ${glassModuleName} with action ${action}: ${error}`
+                consoleLogger.error(
+                    `Error importing tracked entities from file in module ${glassModuleName} with action ${action}: ${error}`
                 );
                 const errorImportSummary: ImportSummaryWithEventIdList = getDefaultErrorImportSummaryWithEventIdList({
                     blockingErrors: [{ error: error, count: 1 }],
@@ -56,15 +57,15 @@ export function importOrDeleteTrackedEntitiesInChunks(params: {
                 return errorImportSummary;
             })
             .flatMap(response => {
-                console.debug(
-                    `[${new Date().toISOString()}] End of chunk ${index + 1}/${
+                consoleLogger.debug(
+                    `End of chunk ${index + 1}/${
                         chunkedTrackedEntities.length
                     } of tracked entities to ${action} for module ${glassModuleName}.`
                 );
                 return mapToImportSummary(response, TRACKED_ENTITY_IMPORT_SUMMARY_TYPE, metadataRepository)
                     .mapError(error => {
-                        console.error(
-                            `[${new Date().toISOString()}] Error importing tracked entities from file in module ${glassModuleName} with action ${action}: ${error}`
+                        consoleLogger.error(
+                            `Error importing tracked entities from file in module ${glassModuleName} with action ${action}: ${error}`
                         );
 
                         const errorImportSummary: ImportSummaryWithEventIdList =
@@ -97,8 +98,8 @@ export function importOrDeleteTrackedEntitiesInChunks(params: {
                     .map(error => error.error)
                     .join(", ");
 
-                console.error(
-                    `[${new Date().toISOString()}] Error importing some tracked entities from file in module ${glassModuleName} with action ${action}: ${messageErrors}`
+                consoleLogger.error(
+                    `Error importing some tracked entities from file in module ${glassModuleName} with action ${action}: ${messageErrors}`
                 );
 
                 const accumulatedImportSummaries = result.data;
@@ -108,12 +109,15 @@ export function importOrDeleteTrackedEntitiesInChunks(params: {
                 ]);
                 return Future.success(importSummariesWithMergedEventIdListWithErrorSummary);
             } else {
-                console.debug(
-                    `[${new Date().toISOString()}] SUCCESS - All chunks of tracked entities to ${action} for module ${glassModuleName} processed.`
+                consoleLogger.debug(
+                    `SUCCESS - All chunks of tracked entities to ${action} for module ${glassModuleName} processed.`
                 );
                 const importSummariesWithMergedEventIdList = mergeImportSummaries(result.data);
                 return Future.success(importSummariesWithMergedEventIdList);
             }
         })
-        .mapError(() => `[${new Date().toISOString()}] - Unknown error while processing tracked entities in chunks.`);
+        .mapError(() => {
+            consoleLogger.error(`Unknown error while processing tracked entities in chunks.`);
+            return `Unknown error while processing tracked entities in chunks.`;
+        });
 }

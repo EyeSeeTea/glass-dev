@@ -13,6 +13,7 @@ import { RISIndividualFungalDataRepository } from "../../../repositories/data-en
 import { ProgramRulesMetadataRepository } from "../../../repositories/program-rules/ProgramRulesMetadataRepository";
 import { mapIndividualFungalDataItemsToEntities, runCustomValidations, runProgramRuleValidations } from "./common";
 import { importOrDeleteTrackedEntitiesInChunks } from "../utils/importOrDeleteTrackedEntitiesInChunks";
+import consoleLogger from "../../../../utils/consoleLogger";
 
 const AMR_INDIVIDUAL_PROGRAM_ID = "mMAj6Gofe49";
 const AMR_DATA_PROGRAM_STAGE_ID = "KCmWZD8qoAk";
@@ -62,29 +63,21 @@ export class AsyncImportRISIndividualFungalFile {
         return this.repositories.risIndividualFungalRepository
             .getFromBlob(dataColumns, inputBlob)
             .flatMap(risIndividualFungalDataItems => {
-                console.debug(
-                    `[${new Date().toISOString()}] ${
-                        risIndividualFungalDataItems.length
-                    } rows read from file of upload ${uploadId} for module ${
-                        glassModule.name
-                    }, orgUnitId ${orgUnitId}, countryCode ${countryCode}, period ${period}`
+                consoleLogger.debug(
+                    `${risIndividualFungalDataItems.length} rows read from file of upload ${uploadId} for module ${glassModule.name}, orgUnitId ${orgUnitId}, countryCode ${countryCode}, period ${period}`
                 );
                 //Run custom validations
                 return runCustomValidations(risIndividualFungalDataItems, countryCode, period).flatMap(
                     validationSummary => {
                         //If there are blocking errors on custom validation, do not import. Return immediately.
                         if (validationSummary.blockingErrors.length > 0) {
-                            console.debug(
-                                `[${new Date().toISOString()}] Blocking errors found during custom validation of ${uploadId} for module ${
-                                    glassModule.name
-                                }, orgUnitId ${orgUnitId}, countryCode ${countryCode}, period ${period}`
+                            consoleLogger.debug(
+                                `Blocking errors found during custom validation of ${uploadId} for module ${glassModule.name}, orgUnitId ${orgUnitId}, countryCode ${countryCode}, period ${period}`
                             );
                             return this.saveAllImportSummaries(uploadId, [validationSummary]);
                         } else {
-                            console.debug(
-                                `[${new Date().toISOString()}] No blocking errors found during custom validation of ${uploadId} for module ${
-                                    glassModule.name
-                                }, orgUnitId ${orgUnitId}, countryCode ${countryCode}, period ${period}.`
+                            consoleLogger.debug(
+                                `No blocking errors found during custom validation of ${uploadId} for module ${glassModule.name}, orgUnitId ${orgUnitId}, countryCode ${countryCode}, period ${period}.`
                             );
                             //Import RIS data
                             const programId = program ? program.id : AMR_INDIVIDUAL_PROGRAM_ID;
@@ -104,12 +97,8 @@ export class AsyncImportRISIndividualFungalFile {
                                 allCountries,
                                 this.repositories.trackerRepository
                             ).flatMap(entities => {
-                                console.debug(
-                                    `[${new Date().toISOString()}] ${
-                                        entities.length
-                                    } Tracked entity instances mapped from of ${uploadId} for module ${
-                                        glassModule.name
-                                    }, programId ${programId}, orgUnitId ${orgUnitId}, countryCode ${countryCode}, period ${period}`
+                                consoleLogger.debug(
+                                    `${entities.length} Tracked entity instances mapped from of ${uploadId} for module ${glassModule.name}, programId ${programId}, orgUnitId ${orgUnitId}, countryCode ${countryCode}, period ${period}`
                                 );
                                 //Run program rule validations
                                 return runProgramRuleValidations(
@@ -119,10 +108,8 @@ export class AsyncImportRISIndividualFungalFile {
                                     this.repositories.programRulesMetadataRepository
                                 ).flatMap(validationResult => {
                                     if (validationResult.blockingErrors.length > 0) {
-                                        console.debug(
-                                            `[${new Date().toISOString()}] Blocking errors found during program rule validation of ${uploadId} for module ${
-                                                glassModule.name
-                                            }, programId ${programId}, orgUnitId ${orgUnitId}, countryCode ${countryCode}, period ${period}`
+                                        consoleLogger.debug(
+                                            `Blocking errors found during program rule validation of ${uploadId} for module ${glassModule.name}, programId ${programId}, orgUnitId ${orgUnitId}, countryCode ${countryCode}, period ${period}`
                                         );
 
                                         const errorSummaries: ImportSummary[] = [
@@ -133,10 +120,8 @@ export class AsyncImportRISIndividualFungalFile {
                                         ];
                                         return this.saveAllImportSummaries(uploadId, errorSummaries);
                                     } else {
-                                        console.debug(
-                                            `[${new Date().toISOString()}] No blocking errors found during program rule validation of ${uploadId} for module ${
-                                                glassModule.name
-                                            }, programId ${programId}, orgUnitId ${orgUnitId}, countryCode ${countryCode}, period ${period}. Proceeding with import...`
+                                        consoleLogger.debug(
+                                            `No blocking errors found during program rule validation of ${uploadId} for module ${glassModule.name}, programId ${programId}, orgUnitId ${orgUnitId}, countryCode ${countryCode}, period ${period}. Proceeding with import...`
                                         );
                                         const trackedEntities =
                                             validationResult.teis && validationResult.teis.length > 0
@@ -152,12 +137,8 @@ export class AsyncImportRISIndividualFungalFile {
                                             metadataRepository: this.repositories.metadataRepository,
                                         }).flatMap(importSummariesWithMergedEventIdList => {
                                             if (importSummariesWithMergedEventIdList.mergedEventIdList.length > 0) {
-                                                console.debug(
-                                                    `[${new Date().toISOString()}] ${
-                                                        importSummariesWithMergedEventIdList.mergedEventIdList.length
-                                                    } Tracked entity IDs imported from ${uploadId} for module ${
-                                                        glassModule.name
-                                                    }, programId ${programId}, orgUnitId ${orgUnitId}, countryCode ${countryCode}, period ${period}`
+                                                consoleLogger.debug(
+                                                    `${importSummariesWithMergedEventIdList.mergedEventIdList.length} Tracked entity IDs imported from ${uploadId} for module ${glassModule.name}, programId ${programId}, orgUnitId ${orgUnitId}, countryCode ${countryCode}, period ${period}`
                                                 );
                                                 return this.uploadIdListFileAndSave(
                                                     uploadId,
@@ -170,7 +151,7 @@ export class AsyncImportRISIndividualFungalFile {
                                                     );
                                                 });
                                             } else {
-                                                console.debug(
+                                                consoleLogger.debug(
                                                     `No Tracked entity IDs imported from ${uploadId} for module ${glassModule.name}, programId ${programId}, orgUnitId ${orgUnitId}, countryCode ${countryCode}, period ${period}`
                                                 );
                                                 return this.saveAllImportSummaries(
