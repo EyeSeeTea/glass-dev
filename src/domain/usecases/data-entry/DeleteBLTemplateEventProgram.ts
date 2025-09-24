@@ -20,6 +20,7 @@ import { Id } from "../../entities/Ref";
 import { TrackerRepository } from "../../repositories/TrackerRepository";
 import { TrackerEvent } from "../../entities/TrackedEntityInstance";
 import { Maybe } from "../../../utils/ts-utils";
+import consoleLogger from "../../../utils/consoleLogger";
 
 // NOTICE: code adapted for node environment from ImportBLTemplateEventProgram.ts (only DELETE)
 export class DeleteBLTemplateEventProgram {
@@ -57,10 +58,8 @@ export class DeleteBLTemplateEventProgram {
                         if (dataPackage) {
                             return this.buildEventsPayload(upload, programId, calculatedProgramId).flatMap(
                                 ({ events, calculatedEvents }) => {
-                                    console.debug(
-                                        `[${new Date().toISOString()}] Deleting ${events.length} events for upload ${
-                                            upload.id
-                                        }${
+                                    consoleLogger.debug(
+                                        `Deleting ${events.length} events for upload ${upload.id}${
                                             calculatedProgramId
                                                 ? ` and ${calculatedEvents.length} calculated events`
                                                 : ""
@@ -69,10 +68,8 @@ export class DeleteBLTemplateEventProgram {
                                     return this.deleteAllDataEvents(upload.id, events, asyncDeleteChunkSize).flatMap(
                                         importSummary => {
                                             if (importSummary.status === "SUCCESS") {
-                                                console.debug(
-                                                    `[${new Date().toISOString()}] All events for upload ${
-                                                        upload.id
-                                                    } deleted successfully.`
+                                                consoleLogger.debug(
+                                                    `All events for upload ${upload.id} deleted successfully.`
                                                 );
                                                 return this.deleteAllCalculatedEvents(
                                                     upload.id,
@@ -109,10 +106,8 @@ export class DeleteBLTemplateEventProgram {
                                                     });
                                                 });
                                             } else {
-                                                console.error(
-                                                    `[${new Date().toISOString()}] Some events for upload ${
-                                                        upload.id
-                                                    } could not be deleted.`
+                                                consoleLogger.error(
+                                                    `Some events for upload ${upload.id} could not be deleted.`
                                                 );
                                                 return Future.success(importSummary);
                                             }
@@ -156,14 +151,12 @@ export class DeleteBLTemplateEventProgram {
 
         return this.deleteAllEvents(events, asyncDeleteChunkSize).flatMap(importSummary => {
             if (importSummary.status === "SUCCESS") {
-                console.debug(
-                    `[${new Date().toISOString()}] All events to DELETE for upload ${uploadId} processed successfully.`
-                );
+                consoleLogger.debug(`All events to DELETE for upload ${uploadId} processed successfully.`);
                 return this.glassUploadsRepository.setEventListDataDeleted(uploadId).flatMap(() => {
                     return Future.success(importSummary);
                 });
             } else {
-                console.error(`[${new Date().toISOString()}] Some events for upload ${uploadId} could not be deleted.`);
+                consoleLogger.error(`Some events for upload ${uploadId} could not be deleted.`);
                 return Future.success(importSummary);
             }
         });
@@ -194,16 +187,12 @@ export class DeleteBLTemplateEventProgram {
 
         return this.deleteAllEvents(calculatedEvents, asyncDeleteChunkSize).flatMap(importSummary => {
             if (importSummary.status === "SUCCESS") {
-                console.debug(
-                    `[${new Date().toISOString()}] All calculated events to DELETE for upload ${uploadId} processed successfully.`
-                );
+                consoleLogger.debug(`All calculated events to DELETE for upload ${uploadId} processed successfully.`);
                 return this.glassUploadsRepository.setCalculatedEventListDataDeleted(uploadId).flatMap(() => {
                     return Future.success(importSummary);
                 });
             } else {
-                console.error(
-                    `[${new Date().toISOString()}] Some calculated events for upload ${uploadId} could not be deleted.`
-                );
+                consoleLogger.error(`Some calculated events for upload ${uploadId} could not be deleted.`);
                 return Future.success(importSummary);
             }
         });
@@ -229,13 +218,11 @@ export class DeleteBLTemplateEventProgram {
         const chunkedEvents = _(events).chunk(asyncDeleteChunkSize).value();
 
         const $deleteEvents = chunkedEvents.map((eventChunk, index) => {
-            console.debug(
-                `[${new Date().toISOString()}] Chunk ${index + 1}/${chunkedEvents.length} of events to DELETE.`
-            );
+            consoleLogger.debug(`Chunk ${index + 1}/${chunkedEvents.length} of events to DELETE.`);
 
             return this.deleteEventsInBulk(eventChunk)
                 .mapError(error => {
-                    console.error(`[${new Date().toISOString()}] Error deleting events: ${error}`);
+                    consoleLogger.error(`Error deleting events: ${error}`);
                     const errorImportSummary = getDefaultErrorImportSummary({
                         blockingErrors: [{ error: error, count: 1 }],
                     });
@@ -243,11 +230,7 @@ export class DeleteBLTemplateEventProgram {
                     return errorImportSummary;
                 })
                 .map(importSummary => {
-                    console.debug(
-                        `[${new Date().toISOString()}] Chunk ${index + 1}/${
-                            chunkedEvents.length
-                        } of events to DELETE processed.`
-                    );
+                    consoleLogger.debug(`Chunk ${index + 1}/${chunkedEvents.length} of events to DELETE processed.`);
                     return importSummary;
                 });
         });
@@ -260,18 +243,18 @@ export class DeleteBLTemplateEventProgram {
                     const errorImportSummary = result.error;
                     const messageErrors = errorImportSummary.blockingErrors.map(error => error.error).join(", ");
 
-                    console.error(`[${new Date().toISOString()}] Error deleting some events: ${messageErrors}`);
+                    consoleLogger.error(`Error deleting some events: ${messageErrors}`);
 
                     const accumulatedImportSummaries = result.data;
 
                     return Future.success(joinAllImportSummaries([...accumulatedImportSummaries, errorImportSummary]));
                 } else {
-                    console.debug(`[${new Date().toISOString()}] SUCCESS - All chunks of events to DELETE processed.`);
+                    consoleLogger.debug(`SUCCESS - All chunks of events to DELETE processed.`);
                     const importSummary = joinAllImportSummaries(result.data);
                     return Future.success(importSummary);
                 }
             })
-            .mapError(() => `[${new Date().toISOString()}] - Unknown error while deleting events in chunks.`);
+            .mapError(() => `- Unknown error while deleting events in chunks.`);
     }
 
     private buildEventsPayload(

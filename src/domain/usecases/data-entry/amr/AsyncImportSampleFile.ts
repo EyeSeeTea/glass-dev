@@ -28,6 +28,7 @@ import {
     DataValuesSaveSummary,
     getDefaultErrorDataValuesSaveSummary,
 } from "../../../entities/data-entry/DataValuesSaveSummary";
+import consoleLogger from "../../../../utils/consoleLogger";
 
 const AMR_AMR_DS_Input_files_Sample_ID = "OcAB7oaC072";
 const AMR_BATCHID_CC_ID = "rEMx3WFeLcU";
@@ -55,11 +56,7 @@ export class AsyncImportSampleFile {
     }): FutureData<ImportSummary[]> {
         const { uploadId, inputBlob, batchId, uploadChunkSize, period, orgUnitId, countryCode, dryRun } = params;
         return this.repositories.sampleDataRepository.getFromBlob(inputBlob).flatMap(risDataItems => {
-            console.debug(
-                `[${new Date().toISOString()}] Get ${
-                    risDataItems.length
-                } sample data items from blob for upload ${uploadId}`
-            );
+            consoleLogger.debug(`Get ${risDataItems.length} sample data items from blob for upload ${uploadId}`);
             return Future.joinObj({
                 risDataItems: Future.success(risDataItems),
                 dataSet: this.repositories.metadataRepository.getDataSet(AMR_AMR_DS_Input_files_Sample_ID),
@@ -71,10 +68,8 @@ export class AsyncImportSampleFile {
                     ...new Set(risDataItems.map(item => item.COUNTRY)),
                 ]),
             }).flatMap(({ risDataItems, dataSet, dataSet_CC, dataElement_CC, orgUnits }) => {
-                console.debug(
-                    `[${new Date().toISOString()}] Running validations for ${
-                        risDataItems.length
-                    } sample data items for upload ${uploadId}`
+                consoleLogger.debug(
+                    `Running validations for ${risDataItems.length} sample data items for upload ${uploadId}`
                 );
                 const batchIdErrors = checkBatchId(risDataItems, batchId);
                 const yearErrors = checkYear(risDataItems, period);
@@ -134,10 +129,8 @@ export class AsyncImportSampleFile {
                 ];
 
                 if (allBlockingErrors.length > 0) {
-                    console.debug(
-                        `[${new Date().toISOString()}] Found ${
-                            allBlockingErrors.length
-                        } blocking errors during validations for upload ${uploadId}. Skipping data import.`
+                    consoleLogger.debug(
+                        `Found ${allBlockingErrors.length} blocking errors during validations for upload ${uploadId}. Skipping data import.`
                     );
 
                     const errorImportSummary: ImportSummary = getDefaultErrorImportSummary({
@@ -172,15 +165,13 @@ export class AsyncImportSampleFile {
     }
 
     private saveDataValuesByChunks(chunkedDataValues: DataValue[][], dryRun: boolean): FutureData<ImportSummary[]> {
-        console.debug(`[${new Date().toISOString()}] Saving data values in chunks of ${chunkedDataValues.length}.`);
+        consoleLogger.debug(`Saving data values in chunks of ${chunkedDataValues.length}.`);
         const $saveDataValuesFutures = chunkedDataValues.map((dataValuesChunk, index) => {
-            console.debug(`[${new Date().toISOString()}] Saving chunk ${index + 1} of ${chunkedDataValues.length}.`);
+            consoleLogger.debug(`Saving chunk ${index + 1} of ${chunkedDataValues.length}.`);
             return this.repositories.dataValuesRepository
                 .save(dataValuesChunk, CREATE_AND_UPDATE, dryRun)
                 .mapError(error => {
-                    console.error(
-                        `[${new Date().toISOString()}] Error importing Individual Sample File data values: ${error}`
-                    );
+                    consoleLogger.error(`Error importing Individual Sample File data values: ${error}`);
                     const dataValuesSaveSummaryError: DataValuesSaveSummary =
                         getDefaultErrorDataValuesSaveSummary(error);
 
@@ -191,11 +182,7 @@ export class AsyncImportSampleFile {
                     return importSummaryError;
                 })
                 .flatMap((dataValuesSaveSummary): Future<ImportSummary, ImportSummary> => {
-                    console.debug(
-                        `[${new Date().toISOString()}] Finished saving chunk ${index + 1} of ${
-                            chunkedDataValues.length
-                        }.`
-                    );
+                    consoleLogger.debug(`Finished saving chunk ${index + 1} of ${chunkedDataValues.length}.`);
                     const importSummary = mapDataValuesToImportSummary(dataValuesSaveSummary, CREATE_AND_UPDATE);
                     const hasErrorStatus = importSummary.status === "ERROR";
                     if (hasErrorStatus) {
@@ -214,19 +201,18 @@ export class AsyncImportSampleFile {
                     const errorImportSummary = result.error;
                     const messageErrors = errorImportSummary.blockingErrors.map(error => error.error).join(", ");
 
-                    console.error(
-                        `[${new Date().toISOString()}] Error importing Individual Sample File data values: ${messageErrors}`
-                    );
+                    consoleLogger.error(`Error importing Individual Sample File data values: ${messageErrors}`);
                     const accumulatedImportSummaries = result.data;
                     return Future.success([...accumulatedImportSummaries, errorImportSummary]);
                 } else {
-                    console.debug(`[${new Date().toISOString()}] SUCCESS - Finished saving all chunks.`);
+                    consoleLogger.debug(`SUCCESS - Finished saving all chunks.`);
                     return Future.success(result.data);
                 }
             })
-            .mapError(
-                () => `[${new Date().toISOString()}] - Unknown error while saving Sample File data values in chunks.`
-            );
+            .mapError(() => {
+                consoleLogger.error(`Unknown error while saving Sample File data values in chunks.`);
+                return `[${new Date().toISOString()}] Unknown error while saving Sample File data values in chunks.`;
+            });
     }
 
     private getDataSetDHIS2ValidationErrors(
