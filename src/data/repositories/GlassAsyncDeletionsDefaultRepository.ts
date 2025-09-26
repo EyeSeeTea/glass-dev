@@ -92,8 +92,11 @@ export class GlassAsyncDeletionsDefaultRepository implements GlassAsyncDeletions
             .flatMap(asyncDeletionsArray => {
                 const uploadIdToUpdate = asyncDeletionsArray.find(asyncDeletion => asyncDeletion.uploadId === uploadId);
                 if (uploadIdToUpdate) {
+                    const restAsyncDeletionsArray = asyncDeletionsArray.filter(
+                        asyncDeletion => asyncDeletion.uploadId !== uploadId
+                    );
                     const newAsyncDeletions: GlassAsyncDeletion[] = [
-                        ...asyncDeletionsArray,
+                        ...restAsyncDeletionsArray,
                         {
                             ...uploadIdToUpdate,
                             attempts: uploadIdToUpdate.attempts + 1,
