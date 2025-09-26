@@ -13,7 +13,7 @@ export class RISDataCSVDefaultRepository implements RISDataRepository {
         });
     }
 
-    getFromArayBuffer(arrayBuffer: ArrayBuffer): FutureData<RISData[]> {
+    getFromArrayBuffer(arrayBuffer: ArrayBuffer): FutureData<RISData[]> {
         return Future.fromPromise(new SpreadsheetXlsxDataSource().readFromArrayBuffer(arrayBuffer)).map(spreadsheet => {
             const sheet = spreadsheet.sheets[0]; //Only one sheet for AMR RIS
             return this.mapSheetRowsToRISData(sheet?.rows || []);
