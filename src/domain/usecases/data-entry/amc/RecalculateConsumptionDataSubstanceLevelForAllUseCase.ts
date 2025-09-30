@@ -28,23 +28,18 @@ export class RecalculateConsumptionDataSubstanceLevelForAllUseCase {
             )} and periods=${periods.join(",")}. Current ATC version ${currentATCVersion}`
         );
 
+        const allCombinations = orgUnitsIds.flatMap(orgUnitId => periods.map(period => ({ orgUnitId, period })));
+
         return Future.sequential(
-            orgUnitsIds.map(orgUnitId => {
-                return Future.fromPromise(new Promise(resolve => setTimeout(resolve, 1000))).flatMap(() => {
-                    console.debug(`Waiting 1 second... orgUnit: ${orgUnitId}`);
-                    return Future.sequential(
-                        periods.map(period => {
-                            return Future.fromPromise(new Promise(resolve => setTimeout(resolve, 1000))).flatMap(() => {
-                                console.debug(`Waiting 1 second... period: ${period}`);
-                                return this.calculateByOrgUnitAndPeriod(
-                                    orgUnitId,
-                                    period,
-                                    currentATCVersion,
-                                    currentATCData,
-                                    allowCreationIfNotExist
-                                ).toVoid();
-                            });
-                        })
+            allCombinations.map(({ orgUnitId, period }) => {
+                return Future.fromPromise(new Promise(resolve => setTimeout(resolve, 500))).flatMap(() => {
+                    console.debug(`Waiting 500 milliseconds... orgUnit: ${orgUnitId}, period: ${period}`);
+                    return this.calculateByOrgUnitAndPeriod(
+                        orgUnitId,
+                        period,
+                        currentATCVersion,
+                        currentATCData,
+                        allowCreationIfNotExist
                     ).toVoid();
                 });
             })

@@ -54,6 +54,7 @@ export class RecalculateConsumptionDataProductLevelForAllUseCase {
                 ","
             )} and periods=${periods.join(",")}. Current ATC version ${currentATCVersion}`
         );
+
         return this.amcProductDataRepository
             .getProductRegisterProgramMetadata()
             .flatMap(productRegisterProgramMetadata => {
@@ -62,32 +63,30 @@ export class RecalculateConsumptionDataProductLevelForAllUseCase {
                     return Future.error("Product register program metadata not found");
                 }
 
+                const allCombinations = orgUnitsIds.flatMap(orgUnitId =>
+                    periods.map(period => ({ orgUnitId, period }))
+                );
+
                 return Future.sequential(
-                    orgUnitsIds.map(orgUnitId => {
-                        return Future.fromPromise(new Promise(resolve => setTimeout(resolve, 1000))).flatMap(() => {
-                            console.debug(`Waiting 1 second... orgUnit: ${orgUnitId}`);
-                            return Future.sequential(
-                                periods.map(period => {
-                                    return Future.fromPromise(
-                                        new Promise(resolve => setTimeout(resolve, 1000))
-                                    ).flatMap(() => {
-                                        console.debug(`Waiting 1 second... period: ${period}`);
-                                        return this.calculateByOrgUnitAndPeriod(
-                                            productRegisterProgramMetadata,
-                                            orgUnitId,
-                                            period,
-                                            currentATCData,
-                                            currentATCVersion,
-                                            allowCreationIfNotExist
-                                        ).toVoid();
-                                    });
-                                })
+                    allCombinations.map(({ orgUnitId, period }) => {
+                        return Future.fromPromise(new Promise(resolve => setTimeout(resolve, 500))).flatMap(() => {
+                            console.debug(
+                                `Waiting 500 milliseconds... Processing orgUnit: ${orgUnitId}, period: ${period}`
+                            );
+                            return this.calculateByOrgUnitAndPeriod(
+                                productRegisterProgramMetadata,
+                                orgUnitId,
+                                period,
+                                currentATCData,
+                                currentATCVersion,
+                                allowCreationIfNotExist
                             ).toVoid();
                         });
                     })
                 ).toVoid();
             });
     }
+
     private calculateByOrgUnitAndPeriod(
         productRegisterProgramMetadata: ProductRegisterProgramMetadata,
         orgUnitId: Id,
@@ -126,6 +125,12 @@ export class RecalculateConsumptionDataProductLevelForAllUseCase {
                 return Future.success(undefined);
             }
 
+            const allRawSubstanceConsumptionCalculated = Object.values(
+                currentRawSubstanceConsumptionCalculatedByProductId
+            ).flat();
+            // Every raw substance consumption calculated event has the same atc_version_autocalculated value
+            const prevAtcVersionAutocalculated = allRawSubstanceConsumptionCalculated[0]?.atc_version_autocalculated;
+
             return getConsumptionDataProductLevel({
                 orgUnitId,
                 period,
@@ -133,6 +138,7 @@ export class RecalculateConsumptionDataProductLevelForAllUseCase {
                 productDataTrackedEntities,
                 atcCurrentVersionData,
                 atcVersionKey,
+                prevAtcVersionAutocalculated: prevAtcVersionAutocalculated,
             }).flatMap(newRawSubstanceConsumptionCalculatedData => {
                 if (_.isEmpty(newRawSubstanceConsumptionCalculatedData)) {
                     logger.error(
@@ -193,7 +199,7 @@ export class RecalculateConsumptionDataProductLevelForAllUseCase {
                         ","
                     )}`
                 );
-                //
+
                 const rawSubstanceConsumptionCalculatedDataToCreate =
                     newRawSubstanceConsumptionCalculatedDataWithIds.filter(({ eventId }) => eventId === undefined);
 
