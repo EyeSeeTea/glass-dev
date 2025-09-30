@@ -192,7 +192,7 @@ export class RecalculateConsumptionDataProductLevelForAllUseCase {
 
                 if (eventIdsNoUpdated.length) {
                     logger.error(
-                        `[${new Date().toISOString()}] Product level: these events could not be updated events=${eventIdsNoUpdated.join(
+                        `[${new Date().toISOString()}] Product level: recalculations could not be done for these events=${eventIdsNoUpdated.join(
                             ","
                         )}`
                     );

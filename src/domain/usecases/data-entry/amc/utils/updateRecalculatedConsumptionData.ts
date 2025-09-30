@@ -29,7 +29,7 @@ export function updateRecalculatedConsumptionData(
 
     if (eventIdsNoUpdated.length) {
         logger.error(
-            `[${new Date().toISOString()}] Substance level: these events could not be updated events=${eventIdsNoUpdated.join(
+            `[${new Date().toISOString()}] Substance level: these events could not be recalculated events=${eventIdsNoUpdated.join(
                 ","
             )}`
         );
