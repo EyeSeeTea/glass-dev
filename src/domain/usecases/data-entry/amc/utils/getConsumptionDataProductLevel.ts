@@ -4,7 +4,7 @@ import {
 } from "../../../../../data/repositories/data-entry/AMCProductDataDefaultRepository";
 import { logger } from "../../../../../utils/logger";
 import { Future, FutureData } from "../../../../entities/Future";
-import { GlassAtcVersionData } from "../../../../entities/GlassAtcVersionData";
+import { ATCVersionKey, GlassAtcVersionData } from "../../../../entities/GlassAtcVersionData";
 import { Id } from "../../../../entities/Ref";
 import {
     Attributes,
@@ -36,6 +36,7 @@ export function getConsumptionDataProductLevel(params: {
     productDataTrackedEntities: ProductDataTrackedEntity[];
     atcCurrentVersionData: GlassAtcVersionData;
     atcVersionKey: string;
+    prevAtcVersionAutocalculated?: ATCVersionKey;
 }): FutureData<RawSubstanceConsumptionCalculated[]> {
     const {
         orgUnitId,
@@ -44,6 +45,7 @@ export function getConsumptionDataProductLevel(params: {
         productDataTrackedEntities,
         atcCurrentVersionData,
         atcVersionKey,
+        prevAtcVersionAutocalculated,
     } = params;
 
     if (!productRegisterProgramMetadata) {
@@ -87,7 +89,8 @@ export function getConsumptionDataProductLevel(params: {
         productRegistryAttributes,
         rawProductConsumption,
         atcCurrentVersionData,
-        atcVersionKey
+        atcVersionKey,
+        prevAtcVersionAutocalculated
     );
     return Future.success(rawSubstanceConsumptionCalculatedData);
 }
