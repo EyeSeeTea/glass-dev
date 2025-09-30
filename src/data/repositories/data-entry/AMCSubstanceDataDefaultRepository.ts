@@ -20,15 +20,21 @@ import {
     SubstanceConsumptionCalculated,
     SubstanceConsumptionCalculatedKeys,
 } from "../../../domain/entities/data-entry/amc/SubstanceConsumptionCalculated";
-import { ImportStrategy } from "../../../domain/entities/data-entry/DataValuesSaveSummary";
 import { logger } from "../../../utils/logger";
 import { TrackerPostResponse } from "@eyeseetea/d2-api/api/tracker";
-import { importApiTracker } from "../utils/importApiTracker";
+import {
+    getDefaultErrorTrackerPostResponse,
+    importApiTracker,
+    joinAllTrackerPostResponses,
+} from "../utils/importApiTracker";
+import { ImportStrategy } from "../../../domain/entities/data-entry/ImportSummary";
 
 export const AMC_RAW_SUBSTANCE_CONSUMPTION_PROGRAM_ID = "q8aSKr17J5S";
 const AMC_CALCULATED_CONSUMPTION_DATA_PROGRAM_ID = "eUmWZeKZNrg";
 export const AMC_RAW_SUBSTANCE_CONSUMPTION_DATA_PROGRAM_STAGE_ID = "GuGDhDZUSBX";
 const AMC_CALCULATED_CONSUMPTION_DATA_PROGRAM_STAGE_ID = "ekEXxadjL0e";
+
+const DEFAULT_IMPORT_CALCULATIONS_CHUNK_SIZE = 200;
 
 // TODO: Move logic to use case and entity instead of in repository which should be logic-less, just get/store the data.
 export class AMCSubstanceDataDefaultRepository implements AMCSubstanceDataRepository {
@@ -142,11 +148,18 @@ export class AMCSubstanceDataDefaultRepository implements AMCSubstanceDataReposi
     }
 
     // TODO: decouple TrackerPostResponse from DHIS2
-    importCalculations(
-        importStrategy: ImportStrategy,
-        orgUnitId: Id,
-        calculatedConsumptionSubstanceLevelData: SubstanceConsumptionCalculated[]
-    ): FutureData<{ response: TrackerPostResponse; eventIdLineNoMap: { id: string; lineNo: number }[] }> {
+    importCalculations(params: {
+        importStrategy: ImportStrategy;
+        orgUnitId: Id;
+        calculatedConsumptionSubstanceLevelData: SubstanceConsumptionCalculated[];
+        chunkSize?: number;
+    }): FutureData<{ response: TrackerPostResponse; eventIdLineNoMap: { id: string; lineNo: number }[] }> {
+        const {
+            importStrategy,
+            orgUnitId,
+            calculatedConsumptionSubstanceLevelData,
+            chunkSize = DEFAULT_IMPORT_CALCULATIONS_CHUNK_SIZE,
+        } = params;
         return this.getCalculatedConsumptionDataProgram().flatMap(calculatedConsumptionDataProgram => {
             const d2TrackerEvents = this.mapSubstanceConsumptionCalculatedToD2TrackerEvent(
                 calculatedConsumptionSubstanceLevelData,
@@ -159,7 +172,8 @@ export class AMCSubstanceDataDefaultRepository implements AMCSubstanceDataReposi
                     id: d2TrackerEvent.event,
                     lineNo: isNaN(parseInt(d2TrackerEvent.event)) ? 0 : parseInt(d2TrackerEvent.event),
                 }));
-                return importApiTracker(this.api, { events: d2TrackerEvents }, importStrategy).flatMap(response => {
+
+                return this.importCalculationsInChunks(importStrategy, d2TrackerEvents, chunkSize).flatMap(response => {
                     return Future.success({
                         response,
                         eventIdLineNoMap,
@@ -167,9 +181,67 @@ export class AMCSubstanceDataDefaultRepository implements AMCSubstanceDataReposi
                 });
             } else {
                 logger.error(`[${new Date().toISOString()}] Substance level data: there are no events to be created`);
-                return Future.error("There are no events to be created");
+                return Future.error("Substance level data: There are no events to be created");
             }
         });
+    }
+
+    private importCalculationsInChunks(
+        importStrategy: ImportStrategy,
+        d2TrackerEvents: D2TrackerEventToPost[],
+        chunkSize: number
+    ): FutureData<TrackerPostResponse> {
+        const chunkedD2TrackerEvents = _(d2TrackerEvents).chunk(chunkSize).value();
+
+        const $importTrackerEvents = chunkedD2TrackerEvents.map((d2TrackerEventsChunk, index) => {
+            logger.debug(
+                `Substance level data: Chunk ${index + 1}/${
+                    chunkedD2TrackerEvents.length
+                } of Calculated Consumption Data.`
+            );
+
+            return importApiTracker(this.api, { events: d2TrackerEventsChunk }, importStrategy)
+                .mapError(error => {
+                    logger.error(`Substance level data: Error importing Calculated Consumption Data: ${error}`);
+                    return getDefaultErrorTrackerPostResponse(error);
+                })
+                .flatMap(response => {
+                    logger.debug(
+                        `Substance level data: End of chunk ${index + 1}/${
+                            chunkedD2TrackerEvents.length
+                        } of Calculated Consumption Data.`
+                    );
+
+                    return Future.success(response);
+                });
+        });
+
+        return Future.sequentialWithAccumulation<TrackerPostResponse, TrackerPostResponse>($importTrackerEvents, {
+            stopOnError: true,
+        })
+            .flatMap(result => {
+                if (result.type === "error") {
+                    const errorTrackerPostResponse = result.error;
+                    const messageError = errorTrackerPostResponse.message;
+                    logger.error(
+                        `Substance level data: Error importing some Calculated Consumption Data: ${messageError}`
+                    );
+                    const accumulatedTrackerPostResponses = result.data;
+                    const trackerPostResponse = joinAllTrackerPostResponses([
+                        ...accumulatedTrackerPostResponses,
+                        errorTrackerPostResponse,
+                    ]);
+                    return Future.success(trackerPostResponse);
+                } else {
+                    logger.debug(`Substance level data: All chunks of Calculated Consumption Data imported.`);
+                    const trackerPostResponse = joinAllTrackerPostResponses(result.data);
+                    return Future.success(trackerPostResponse);
+                }
+            })
+            .mapError(() => {
+                logger.error(`Substance level data: Unknown error while saving Calculated Consumption Data in chunks.`);
+                return `[${new Date().toISOString()}] Substance level data: Unknown error while saving Calculated Consumption Data in chunks.`;
+            });
     }
 
     deleteCalculatedSubstanceConsumptionDataById(calculatedConsumptionIds: Id[]): FutureData<TrackerPostResponse> {

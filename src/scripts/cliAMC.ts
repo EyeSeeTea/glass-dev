@@ -14,6 +14,14 @@ import { GlassATCRecalculateDataInfo } from "../domain/entities/GlassAtcVersionD
 import { DisableAMCRecalculationsUseCase } from "../domain/usecases/data-entry/amc/DisableAMCRecalculationsUseCase";
 import { GetRecalculateDataInfoUseCase } from "../domain/usecases/data-entry/amc/GetRecalculateDataInfoUseCase";
 import { GetCurrentATCVersionData } from "../domain/usecases/data-entry/amc/GetCurrentATCVersionData";
+import { GlassModuleDefaultRepository } from "../data/repositories/GlassModuleDefaultRepository";
+import { GlassModuleRepository } from "../domain/repositories/GlassModuleRepository";
+import { GetGlassModuleByIdUseCase } from "../domain/usecases/GetGlassModuleByIdUseCase";
+import { Id } from "../domain/entities/Ref";
+import { GlassModule } from "../domain/entities/GlassModule";
+import { Maybe } from "../types/utils";
+
+const AMC_MODULE_ID = "BVnik5xiXGJ";
 
 async function main() {
     const cmd = command({
@@ -42,11 +50,14 @@ async function main() {
                 const amcProductDataRepository = new AMCProductDataDefaultRepository(api);
                 const amcSubstanceDataRepository = new AMCSubstanceDataDefaultRepository(api);
                 const atcRepository = new GlassATCDefaultRepository(dataStoreClient);
+                const glassModuleRepository = new GlassModuleDefaultRepository(dataStoreClient);
 
                 try {
                     await setupLogger(instance, { isDebug: args.debug });
                     logger.info(`Starting AMC recalculations...`);
                     const recalculateDataInfo = await getRecalculateDataInfo(atcRepository);
+                    const glassModule = await getGetAMCModuleById(glassModuleRepository, AMC_MODULE_ID);
+
                     logger.debug(
                         `Recalculate data info: date=${recalculateDataInfo?.date}, recalculate=${
                             recalculateDataInfo?.recalculate
@@ -67,6 +78,7 @@ async function main() {
                             amcSubstanceDataRepository,
                             atcRepository,
                             allowCreationIfNotExist: args.calculate,
+                            importCalculationChunkSize: glassModule.chunkSizes?.importCalculations,
                         });
                     } else {
                         logger.info(`AMC recalculations are disabled`);
@@ -103,6 +115,11 @@ export async function getRecalculateDataInfo(
     return recalculateDataInfo;
 }
 
+export async function getGetAMCModuleById(glassModuleRepository: GlassModuleRepository, id: Id): Promise<GlassModule> {
+    const glassModule = await new GetGlassModuleByIdUseCase(glassModuleRepository).execute(id).toPromise();
+    return glassModule;
+}
+
 export async function disableRecalculations(atcRepository: GlassATCRepository): Promise<void> {
     await new DisableAMCRecalculationsUseCase(atcRepository).execute().toPromise();
 }
@@ -114,6 +131,7 @@ export async function recalculateData(params: {
     amcSubstanceDataRepository: AMCSubstanceDataRepository;
     atcRepository: GlassATCRepository;
     allowCreationIfNotExist: boolean;
+    importCalculationChunkSize: Maybe<number>;
 }): Promise<void> {
     const {
         orgUnitsIds,
@@ -122,6 +140,7 @@ export async function recalculateData(params: {
         amcSubstanceDataRepository,
         atcRepository,
         allowCreationIfNotExist,
+        importCalculationChunkSize,
     } = params;
     logger.info(
         `START - Recalculating AMC data for orgnanisations ${orgUnitsIds.join(",")} and periods ${periods.join(
@@ -134,11 +153,25 @@ export async function recalculateData(params: {
         .toPromise();
 
     await new RecalculateConsumptionDataProductLevelForAllUseCase(amcProductDataRepository, amcSubstanceDataRepository)
-        .execute(orgUnitsIds, periods, currentATCVersion, currentATCData, allowCreationIfNotExist)
+        .execute(
+            orgUnitsIds,
+            periods,
+            currentATCVersion,
+            currentATCData,
+            allowCreationIfNotExist,
+            importCalculationChunkSize
+        )
         .toPromise();
 
     await new RecalculateConsumptionDataSubstanceLevelForAllUseCase(amcSubstanceDataRepository, atcRepository)
-        .execute(orgUnitsIds, periods, currentATCVersion, currentATCData, allowCreationIfNotExist)
+        .execute(
+            orgUnitsIds,
+            periods,
+            currentATCVersion,
+            currentATCData,
+            allowCreationIfNotExist,
+            importCalculationChunkSize
+        )
         .toPromise();
 
     logger.success(

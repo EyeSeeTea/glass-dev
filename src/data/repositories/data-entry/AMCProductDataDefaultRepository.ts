@@ -22,10 +22,14 @@ import {
     RawSubstanceConsumptionCalculatedKeys,
 } from "../../../domain/entities/data-entry/amc/RawSubstanceConsumptionCalculated";
 import { TrackerPostResponse } from "@eyeseetea/d2-api/api/tracker";
-import { importApiTracker } from "../utils/importApiTracker";
-import { ImportStrategy } from "../../../domain/entities/data-entry/DataValuesSaveSummary";
+import {
+    getDefaultErrorTrackerPostResponse,
+    importApiTracker,
+    joinAllTrackerPostResponses,
+} from "../utils/importApiTracker";
 import { logger } from "../../../utils/logger";
 import moment from "moment";
+import { ImportStrategy } from "../../../domain/entities/data-entry/ImportSummary";
 
 export const AMC_PRODUCT_REGISTER_PROGRAM_ID = "G6ChA5zMW9n";
 
@@ -33,6 +37,8 @@ export const AMC_RAW_PRODUCT_CONSUMPTION_STAGE_ID = "GmElQHKXLIE";
 export const AMC_RAW_SUBSTANCE_CONSUMPTION_CALCULATED_STAGE_ID = "q8cl5qllyjd";
 
 export const AMR_GLASS_AMC_TEA_PRODUCT_ID = "iasfoeU8veF";
+
+const DEFAULT_IMPORT_CALCULATIONS_CHUNK_SIZE = 200;
 
 // TODO: Move logic to use case and entity instead of in repository which should be logic-less, just get/store the data.
 export class AMCProductDataDefaultRepository implements AMCProductDataRepository {
@@ -76,14 +82,25 @@ export class AMCProductDataDefaultRepository implements AMCProductDataRepository
     }
 
     // TODO: decouple TrackerPostResponse from DHIS2
-    importCalculations(
-        importStrategy: ImportStrategy,
-        productDataTrackedEntities: ProductDataTrackedEntity[],
-        rawSubstanceConsumptionCalculatedStageMetadata: ProgramStage,
-        rawSubstanceConsumptionCalculatedData: RawSubstanceConsumptionCalculated[],
-        orgUnitId: Id,
-        period: string
-    ): FutureData<TrackerPostResponse> {
+    importCalculations(params: {
+        importStrategy: ImportStrategy;
+        productDataTrackedEntities: ProductDataTrackedEntity[];
+        rawSubstanceConsumptionCalculatedStageMetadata: ProgramStage;
+        rawSubstanceConsumptionCalculatedData: RawSubstanceConsumptionCalculated[];
+        orgUnitId: Id;
+        period: string;
+        chunkSize?: number;
+    }): FutureData<TrackerPostResponse> {
+        const {
+            importStrategy,
+            productDataTrackedEntities,
+            rawSubstanceConsumptionCalculatedStageMetadata,
+            rawSubstanceConsumptionCalculatedData,
+            orgUnitId,
+            period,
+            chunkSize = DEFAULT_IMPORT_CALCULATIONS_CHUNK_SIZE,
+        } = params;
+
         const d2TrackerEvents = this.mapRawSubstanceConsumptionCalculatedToD2TrackerEvent(
             productDataTrackedEntities,
             rawSubstanceConsumptionCalculatedStageMetadata,
@@ -92,10 +109,66 @@ export class AMCProductDataDefaultRepository implements AMCProductDataRepository
             period
         );
         if (!_.isEmpty(d2TrackerEvents)) {
-            return importApiTracker(this.api, { events: d2TrackerEvents }, importStrategy);
+            const chunkedD2TrackerEvents = _(d2TrackerEvents).chunk(chunkSize).value();
+
+            const $importTrackerEvents = chunkedD2TrackerEvents.map((d2TrackerEventsChunk, index) => {
+                logger.debug(
+                    `Product level data: Chunk ${index + 1}/${
+                        chunkedD2TrackerEvents.length
+                    } of Raw Substance Consumption Calculated.`
+                );
+
+                return importApiTracker(this.api, { events: d2TrackerEventsChunk }, importStrategy)
+                    .mapError(error => {
+                        logger.error(
+                            `Product level data: Error importing Raw Substance Consumption Calculated: ${error}`
+                        );
+
+                        return getDefaultErrorTrackerPostResponse(error);
+                    })
+                    .flatMap(response => {
+                        logger.debug(
+                            `Product level data: End of chunk ${index + 1}/${
+                                chunkedD2TrackerEvents.length
+                            } of Raw Substance Consumption Calculated.`
+                        );
+                        return Future.success(response);
+                    });
+            });
+
+            return Future.sequentialWithAccumulation($importTrackerEvents, {
+                stopOnError: true,
+            })
+                .flatMap(result => {
+                    if (result.type === "error") {
+                        const errorTrackerPostResponse = result.error;
+                        const messageError = errorTrackerPostResponse.message;
+                        logger.error(
+                            `Product level data: Error importing some Raw Substance Consumption Calculated: ${messageError}`
+                        );
+                        const accumulatedTrackerPostResponses = result.data;
+                        const trackerPostResponse = joinAllTrackerPostResponses([
+                            ...accumulatedTrackerPostResponses,
+                            errorTrackerPostResponse,
+                        ]);
+                        return Future.success(trackerPostResponse);
+                    } else {
+                        logger.debug(
+                            `Product level data: All chunks of Raw Substance Consumption Calculated imported.`
+                        );
+                        const trackerPostResponse = joinAllTrackerPostResponses(result.data);
+                        return Future.success(trackerPostResponse);
+                    }
+                })
+                .mapError(() => {
+                    logger.error(
+                        `Product level data: Unknown error while saving Raw Substance Consumption Calculated in chunks.`
+                    );
+                    return `[${new Date().toISOString()}] Product level data: Unknown error while saving Raw Substance Consumption Calculated in chunks.`;
+                });
         } else {
             logger.error(`[${new Date().toISOString()}] Product level data: there are no events to be created`);
-            return Future.error("There are no events to be created");
+            return Future.error("Product level data: There are no events to be created");
         }
     }
 

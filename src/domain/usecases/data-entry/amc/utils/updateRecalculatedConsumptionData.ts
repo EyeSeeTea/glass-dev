@@ -15,7 +15,8 @@ export function updateRecalculatedConsumptionData(
     newCalculatedConsumptionData: SubstanceConsumptionCalculated[],
     currentCalculatedConsumptionData: Maybe<SubstanceConsumptionCalculated[]>,
     amcSubstanceDataRepository: AMCSubstanceDataRepository,
-    allowCreationIfNotExist: boolean
+    allowCreationIfNotExist: boolean,
+    importCalculationChunkSize: Maybe<number>
 ): FutureData<void> {
     const { withEventId: newCalculatedConsumptionDataWithIds, withoutEventId: newCalculatedConsumptionDataWithoutIds } =
         linkEventIdToNewCalculatedConsumptionData(currentCalculatedConsumptionData || [], newCalculatedConsumptionData);
@@ -49,13 +50,14 @@ export function updateRecalculatedConsumptionData(
     }
 
     return amcSubstanceDataRepository
-        .importCalculations(
-            allowCreationIfNotExist ? IMPORT_STRATEGY_CREATE_AND_UPDATE : IMPORT_STRATEGY_UPDATE,
-            orgUnitId,
-            allowCreationIfNotExist
+        .importCalculations({
+            importStrategy: allowCreationIfNotExist ? IMPORT_STRATEGY_CREATE_AND_UPDATE : IMPORT_STRATEGY_UPDATE,
+            orgUnitId: orgUnitId,
+            calculatedConsumptionSubstanceLevelData: allowCreationIfNotExist
                 ? [...newCalculatedConsumptionDataWithIds, ...newCalculatedConsumptionDataWithoutIds]
-                : newCalculatedConsumptionDataWithIds
-        )
+                : newCalculatedConsumptionDataWithIds,
+            chunkSize: importCalculationChunkSize,
+        })
         .flatMap(({ response }) => {
             if (response.status === "OK") {
                 logger.success(
