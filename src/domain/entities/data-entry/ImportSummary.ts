@@ -1,5 +1,7 @@
 import { Id } from "../Ref";
 
+export type ImportStrategy = "CREATE" | "UPDATE" | "CREATE_AND_UPDATE" | "DELETE";
+
 export type ImportSummary = {
     status: "SUCCESS" | "ERROR" | "WARNING";
     importCount: {

@@ -9,6 +9,7 @@ import { GlassATCRepository } from "../../../repositories/GlassATCRepository";
 import { AMCSubstanceDataRepository } from "../../../repositories/data-entry/AMCSubstanceDataRepository";
 import { getConsumptionDataSubstanceLevel } from "./utils/getConsumptionDataSubstanceLevel";
 import { updateRecalculatedConsumptionData } from "./utils/updateRecalculatedConsumptionData";
+import { Maybe } from "../../../../utils/ts-utils";
 
 export class RecalculateConsumptionDataSubstanceLevelForAllUseCase {
     constructor(
@@ -20,7 +21,8 @@ export class RecalculateConsumptionDataSubstanceLevelForAllUseCase {
         periods: string[],
         currentATCVersion: string,
         currentATCData: GlassAtcVersionData,
-        allowCreationIfNotExist: boolean
+        allowCreationIfNotExist: boolean,
+        importCalculationChunkSize: Maybe<number>
     ): FutureData<void> {
         logger.info(
             `[${new Date().toISOString()}] Calculate consumption data of substance level for orgUnitsIds=${orgUnitsIds.join(
@@ -39,7 +41,8 @@ export class RecalculateConsumptionDataSubstanceLevelForAllUseCase {
                         period,
                         currentATCVersion,
                         currentATCData,
-                        allowCreationIfNotExist
+                        allowCreationIfNotExist,
+                        importCalculationChunkSize
                     ).toVoid();
                 });
             })
@@ -51,7 +54,8 @@ export class RecalculateConsumptionDataSubstanceLevelForAllUseCase {
         period: string,
         currentATCVersion: string,
         currentATCData: GlassAtcVersionData,
-        allowCreationIfNotExist: boolean
+        allowCreationIfNotExist: boolean,
+        importCalculationChunkSize: Maybe<number>
     ): FutureData<void> {
         logger.info(
             `[${new Date().toISOString()}] Calculating consumption data of substance level for orgUnitsId ${orgUnitId} and period ${period}`
@@ -96,7 +100,8 @@ export class RecalculateConsumptionDataSubstanceLevelForAllUseCase {
                         newCalculatedConsumptionData,
                         currentCalculatedConsumptionData,
                         this.amcSubstanceDataRepository,
-                        allowCreationIfNotExist
+                        allowCreationIfNotExist,
+                        importCalculationChunkSize
                     );
                 });
             }

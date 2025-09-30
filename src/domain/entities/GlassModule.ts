@@ -15,6 +15,7 @@ type DataSubmissionPeriodTypes = "YEARLY" | "QUARTERLY";
 export type ChunkSizes = {
     productIds: number;
     substanceIds: number;
+    importCalculations: number;
 };
 
 export type PATHOGEN_ANTIBIOTIC_MAP = Record<string, string[]>;
