@@ -54,22 +54,27 @@ async function main() {
 
                 try {
                     await setupLogger(instance, { isDebug: args.debug });
-                    logger.info(`Starting AMC recalculations...`);
+                    logger.info(`[${new Date().toISOString()}] Starting AMC recalculations...`);
                     const recalculateDataInfo = await getRecalculateDataInfo(atcRepository);
                     const glassModule = await getGetAMCModuleById(glassModuleRepository, AMC_MODULE_ID);
 
                     logger.debug(
-                        `Recalculate data info: date=${recalculateDataInfo?.date}, recalculate=${
-                            recalculateDataInfo?.recalculate
-                        }, periods=${recalculateDataInfo?.periods.join(
+                        `[${new Date().toISOString()}] Recalculate data info: date=${
+                            recalculateDataInfo?.date
+                        }, recalculate=${recalculateDataInfo?.recalculate}, periods=${recalculateDataInfo?.periods.join(
                             ","
                         )} and orgUnitsIds=${recalculateDataInfo?.orgUnitsIds.join(",")}`
                     );
+
                     if (recalculateDataInfo && recalculateDataInfo.recalculate) {
-                        logger.info(`Disabling AMC recalculations before start with calculations`);
+                        logger.info(
+                            `[${new Date().toISOString()}] Disabling AMC recalculations before start with calculations`
+                        );
                         await disableRecalculations(atcRepository);
                         if (args.calculate) {
-                            logger.info(`Calculate flag enabled. Events will be created if they do not exist`);
+                            logger.info(
+                                `[${new Date().toISOString()}] Calculate flag enabled. Events will be created if they do not exist`
+                            );
                         }
                         await recalculateData({
                             periods: Array.from(new Set(recalculateDataInfo.periods)),
@@ -81,25 +86,27 @@ async function main() {
                             importCalculationChunkSize: glassModule.chunkSizes?.importCalculations,
                         });
                     } else {
-                        logger.info(`AMC recalculations are disabled`);
+                        logger.info(`[${new Date().toISOString()}] AMC recalculations are disabled`);
                     }
-                    logger.info(`Waiting for next AMC recalculations...`);
+                    logger.info(`[${new Date().toISOString()}] Waiting for next AMC recalculations...`);
                 } catch (err) {
-                    logger.info(`Disabling AMC recalculations`);
+                    logger.info(`[${new Date().toISOString()}] Disabling AMC recalculations`);
                     await disableRecalculations(atcRepository);
                     await logger.error(
-                        `ERROR - AMC recalculations has not been properly executed because of the following error: ${err}. Recalculations will be rerun again on the next iteration if it's enabled.`
+                        `[${new Date().toISOString()}] ERROR - AMC recalculations has not been properly executed because of the following error: ${err}. Recalculations will be rerun again on the next iteration if it's enabled.`
                     );
                     console.error(
-                        `ERROR - AMC recalculations has not been properly executed because of the following error: ${err}. Recalculations will be rerun again on the next iteration if it's enabled.`
+                        `[${new Date().toISOString()}] ERROR - AMC recalculations has not been properly executed because of the following error: ${err}. Recalculations will be rerun again on the next iteration if it's enabled.`
                     );
-                    logger.info(`Waiting for next AMC recalculations...`);
+                    logger.info(`[${new Date().toISOString()}] Waiting for next AMC recalculations...`);
                 }
             } catch (err) {
                 await logger.error(
-                    `STOPPING AMC RECALCULATIONS SCRIPT: AMC recalculations have stopped with error ${err}. Please, restart again.`
+                    `[${new Date().toISOString()}] STOPPING AMC RECALCULATIONS SCRIPT: AMC recalculations have stopped with error ${err}. Please, restart again.`
                 );
-                console.error(`AMC recalculations have stopped with error: ${err}. Please, restart again.`);
+                console.error(
+                    `[${new Date().toISOString()}] AMC recalculations have stopped with error: ${err}. Please, restart again.`
+                );
                 process.exit(1);
             }
         },
@@ -143,9 +150,9 @@ export async function recalculateData(params: {
         importCalculationChunkSize,
     } = params;
     logger.info(
-        `START - Recalculating AMC data for orgnanisations ${orgUnitsIds.join(",")} and periods ${periods.join(
+        `[${new Date().toISOString()}] START - Recalculating AMC data for orgnanisations ${orgUnitsIds.join(
             ","
-        )} with new ATC version`
+        )} and periods ${periods.join(",")} with new ATC version`
     );
 
     const { currentATCVersion, currentATCData } = await new GetCurrentATCVersionData(atcRepository)
@@ -175,7 +182,9 @@ export async function recalculateData(params: {
         .toPromise();
 
     logger.success(
-        `END - End of AMC recalculations for orgnanisations ${orgUnitsIds.join(",")} and periods ${periods.join(",")}`
+        `[${new Date().toISOString()}] END - End of AMC recalculations for orgnanisations ${orgUnitsIds.join(
+            ","
+        )} and periods ${periods.join(",")}`
     );
 }
 
