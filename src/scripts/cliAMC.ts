@@ -20,6 +20,7 @@ import { GetGlassModuleByIdUseCase } from "../domain/usecases/GetGlassModuleById
 import { Id } from "../domain/entities/Ref";
 import { GlassModule } from "../domain/entities/GlassModule";
 import { Maybe } from "../types/utils";
+import consoleLogger from "../utils/consoleLogger";
 
 const AMC_MODULE_ID = "BVnik5xiXGJ";
 
@@ -66,7 +67,7 @@ async function main() {
                         )} and orgUnitsIds=${recalculateDataInfo?.orgUnitsIds.join(",")}`
                     );
 
-                    if (recalculateDataInfo && recalculateDataInfo.recalculate) {
+                    if (recalculateDataInfo) {
                         logger.info(
                             `[${new Date().toISOString()}] Disabling AMC recalculations before start with calculations`
                         );
@@ -95,7 +96,7 @@ async function main() {
                     await logger.error(
                         `[${new Date().toISOString()}] ERROR - AMC recalculations has not been properly executed because of the following error: ${err}. Recalculations will be rerun again on the next iteration if it's enabled.`
                     );
-                    console.error(
+                    consoleLogger.error(
                         `[${new Date().toISOString()}] ERROR - AMC recalculations has not been properly executed because of the following error: ${err}. Recalculations will be rerun again on the next iteration if it's enabled.`
                     );
                     logger.info(`[${new Date().toISOString()}] Waiting for next AMC recalculations...`);
@@ -104,7 +105,7 @@ async function main() {
                 await logger.error(
                     `[${new Date().toISOString()}] STOPPING AMC RECALCULATIONS SCRIPT: AMC recalculations have stopped with error ${err}. Please, restart again.`
                 );
-                console.error(
+                consoleLogger.error(
                     `[${new Date().toISOString()}] AMC recalculations have stopped with error: ${err}. Please, restart again.`
                 );
                 process.exit(1);

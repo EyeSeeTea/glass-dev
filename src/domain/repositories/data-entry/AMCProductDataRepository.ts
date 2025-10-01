@@ -34,4 +34,8 @@ export interface AMCProductDataRepository {
         period: string
     ): FutureData<ProductDataTrackedEntity[]>;
     getTrackedEntityProductIdsByOUAndPeriod(orgUnitId: Id, period: string): FutureData<string[]>;
+    deleteRawSubstanceConsumptionCalculatedById(
+        rawSubstanceConsumptionCalculatedIds: Id[],
+        chunkSize?: number
+    ): FutureData<TrackerPostResponse>;
 }

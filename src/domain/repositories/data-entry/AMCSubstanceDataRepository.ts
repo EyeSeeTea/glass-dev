@@ -30,5 +30,8 @@ export interface AMCSubstanceDataRepository {
         orgUnitId: Id,
         period: string
     ): FutureData<SubstanceConsumptionCalculated[] | undefined>;
-    deleteCalculatedSubstanceConsumptionDataById(calculatedConsumptionIds: Id[]): FutureData<TrackerPostResponse>;
+    deleteCalculatedSubstanceConsumptionDataById(
+        calculatedConsumptionIds: Id[],
+        chunkSize?: number
+    ): FutureData<TrackerPostResponse>;
 }
