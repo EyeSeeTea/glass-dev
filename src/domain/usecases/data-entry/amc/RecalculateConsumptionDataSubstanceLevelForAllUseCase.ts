@@ -10,6 +10,7 @@ import { AMCSubstanceDataRepository } from "../../../repositories/data-entry/AMC
 import { getConsumptionDataSubstanceLevel } from "./utils/getConsumptionDataSubstanceLevel";
 import { updateRecalculatedConsumptionData } from "./utils/updateRecalculatedConsumptionData";
 import { Maybe } from "../../../../utils/ts-utils";
+import consoleLogger from "../../../../utils/consoleLogger";
 
 export class RecalculateConsumptionDataSubstanceLevelForAllUseCase {
     constructor(
@@ -35,7 +36,9 @@ export class RecalculateConsumptionDataSubstanceLevelForAllUseCase {
         return Future.sequential(
             allCombinations.map(({ orgUnitId, period }) => {
                 return Future.fromPromise(new Promise(resolve => setTimeout(resolve, 500))).flatMap(() => {
-                    console.debug(`Waiting 500 milliseconds... orgUnit: ${orgUnitId}, period: ${period}`);
+                    consoleLogger.debug(
+                        `[${new Date().toISOString()}] Waiting 500 milliseconds... orgUnit: ${orgUnitId}, period: ${period}`
+                    );
                     return this.calculateByOrgUnitAndPeriod(
                         orgUnitId,
                         period,

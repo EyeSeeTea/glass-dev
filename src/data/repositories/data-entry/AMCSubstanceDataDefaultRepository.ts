@@ -28,13 +28,14 @@ import {
     joinAllTrackerPostResponses,
 } from "../utils/importApiTracker";
 import { ImportStrategy } from "../../../domain/entities/data-entry/ImportSummary";
+import consoleLogger from "../../../utils/consoleLogger";
 
 export const AMC_RAW_SUBSTANCE_CONSUMPTION_PROGRAM_ID = "q8aSKr17J5S";
 const AMC_CALCULATED_CONSUMPTION_DATA_PROGRAM_ID = "eUmWZeKZNrg";
 export const AMC_RAW_SUBSTANCE_CONSUMPTION_DATA_PROGRAM_STAGE_ID = "GuGDhDZUSBX";
 const AMC_CALCULATED_CONSUMPTION_DATA_PROGRAM_STAGE_ID = "ekEXxadjL0e";
 
-const DEFAULT_IMPORT_CALCULATIONS_CHUNK_SIZE = 200;
+const DEFAULT_IMPORT_DELETE_CALCULATIONS_CHUNK_SIZE = 300;
 
 // TODO: Move logic to use case and entity instead of in repository which should be logic-less, just get/store the data.
 export class AMCSubstanceDataDefaultRepository implements AMCSubstanceDataRepository {
@@ -158,7 +159,7 @@ export class AMCSubstanceDataDefaultRepository implements AMCSubstanceDataReposi
             importStrategy,
             orgUnitId,
             calculatedConsumptionSubstanceLevelData,
-            chunkSize = DEFAULT_IMPORT_CALCULATIONS_CHUNK_SIZE,
+            chunkSize = DEFAULT_IMPORT_DELETE_CALCULATIONS_CHUNK_SIZE,
         } = params;
         return this.getCalculatedConsumptionDataProgram().flatMap(calculatedConsumptionDataProgram => {
             const d2TrackerEvents = this.mapSubstanceConsumptionCalculatedToD2TrackerEvent(
@@ -195,19 +196,21 @@ export class AMCSubstanceDataDefaultRepository implements AMCSubstanceDataReposi
 
         const $importTrackerEvents = chunkedD2TrackerEvents.map((d2TrackerEventsChunk, index) => {
             logger.debug(
-                `Substance level data: Chunk ${index + 1}/${
+                `[${new Date().toISOString()}] Substance level data: Chunk ${index + 1}/${
                     chunkedD2TrackerEvents.length
                 } of Calculated Consumption Data.`
             );
 
             return importApiTracker(this.api, { events: d2TrackerEventsChunk }, importStrategy)
                 .mapError(error => {
-                    logger.error(`Substance level data: Error importing Calculated Consumption Data: ${error}`);
+                    logger.error(
+                        `[${new Date().toISOString()}] Substance level data: Error importing Calculated Consumption Data: ${error}`
+                    );
                     return getDefaultErrorTrackerPostResponse(error);
                 })
                 .flatMap(response => {
                     logger.debug(
-                        `Substance level data: End of chunk ${index + 1}/${
+                        `[${new Date().toISOString()}] Substance level data: End of chunk ${index + 1}/${
                             chunkedD2TrackerEvents.length
                         } of Calculated Consumption Data.`
                     );
@@ -224,7 +227,7 @@ export class AMCSubstanceDataDefaultRepository implements AMCSubstanceDataReposi
                     const errorTrackerPostResponse = result.error;
                     const messageError = errorTrackerPostResponse.message;
                     logger.error(
-                        `Substance level data: Error importing some Calculated Consumption Data: ${messageError}`
+                        `[${new Date().toISOString()}] Substance level data: Error importing some Calculated Consumption Data: ${messageError}`
                     );
                     const accumulatedTrackerPostResponses = result.data;
                     const trackerPostResponse = joinAllTrackerPostResponses([
@@ -233,18 +236,25 @@ export class AMCSubstanceDataDefaultRepository implements AMCSubstanceDataReposi
                     ]);
                     return Future.success(trackerPostResponse);
                 } else {
-                    logger.debug(`Substance level data: All chunks of Calculated Consumption Data imported.`);
+                    logger.debug(
+                        `[${new Date().toISOString()}] Substance level data: All chunks of Calculated Consumption Data imported.`
+                    );
                     const trackerPostResponse = joinAllTrackerPostResponses(result.data);
                     return Future.success(trackerPostResponse);
                 }
             })
             .mapError(() => {
-                logger.error(`Substance level data: Unknown error while saving Calculated Consumption Data in chunks.`);
+                logger.error(
+                    `[${new Date().toISOString()}] Substance level data: Unknown error while saving Calculated Consumption Data in chunks.`
+                );
                 return `[${new Date().toISOString()}] Substance level data: Unknown error while saving Calculated Consumption Data in chunks.`;
             });
     }
 
-    deleteCalculatedSubstanceConsumptionDataById(calculatedConsumptionIds: Id[]): FutureData<TrackerPostResponse> {
+    deleteCalculatedSubstanceConsumptionDataById(
+        calculatedConsumptionIds: Id[],
+        chunkSize?: number
+    ): FutureData<TrackerPostResponse> {
         const d2EventsCalculatedConsumption: D2TrackerEventToPost[] = calculatedConsumptionIds.map(eventId => {
             return {
                 event: eventId,
@@ -258,9 +268,72 @@ export class AMCSubstanceDataDefaultRepository implements AMCSubstanceDataReposi
                 scheduledAt: "",
             };
         });
-        return importApiTracker(this.api, { events: d2EventsCalculatedConsumption }, "DELETE").flatMap(response => {
-            return Future.success(response);
-        });
+
+        if (chunkSize) {
+            const chunkedD2EventsCalculatedConsumption = _(d2EventsCalculatedConsumption).chunk(chunkSize).value();
+
+            const $deleteTrackerEvents = chunkedD2EventsCalculatedConsumption.map(
+                (d2EventsCalculatedConsumptionChunk, index) => {
+                    consoleLogger.debug(
+                        `[${new Date().toISOString()}] Chunk ${index + 1}/${
+                            chunkedD2EventsCalculatedConsumption.length
+                        } of Calculated Consumption Data.`
+                    );
+
+                    return importApiTracker(this.api, { events: d2EventsCalculatedConsumptionChunk }, "DELETE")
+                        .mapError(error => {
+                            consoleLogger.error(
+                                `[${new Date().toISOString()}] Error deleting Calculated Consumption Data: ${error}`
+                            );
+                            return getDefaultErrorTrackerPostResponse(error);
+                        })
+                        .flatMap(response => {
+                            consoleLogger.debug(
+                                `[${new Date().toISOString()}] End of chunk ${index + 1}/${
+                                    chunkedD2EventsCalculatedConsumption.length
+                                } of Calculated Consumption Data.`
+                            );
+
+                            return Future.success(response);
+                        });
+                }
+            );
+
+            return Future.sequentialWithAccumulation($deleteTrackerEvents, {
+                stopOnError: true,
+            })
+                .flatMap(result => {
+                    if (result.type === "error") {
+                        const errorTrackerPostResponse = result.error;
+                        const messageError = errorTrackerPostResponse.message;
+                        logger.error(
+                            `[${new Date().toISOString()}] Error deleting some Calculated Consumption Data: ${messageError}`
+                        );
+                        const accumulatedTrackerPostResponses = result.data;
+                        const trackerPostResponse = joinAllTrackerPostResponses([
+                            ...accumulatedTrackerPostResponses,
+                            errorTrackerPostResponse,
+                        ]);
+                        return Future.success(trackerPostResponse);
+                    } else {
+                        logger.debug(
+                            `[${new Date().toISOString()}] All chunks of Calculated Consumption Data deleted.`
+                        );
+                        const trackerPostResponse = joinAllTrackerPostResponses(result.data);
+                        return Future.success(trackerPostResponse);
+                    }
+                })
+                .mapError(() => {
+                    logger.error(
+                        `[${new Date().toISOString()}] Unknown error while deleting Calculated Consumption Data in chunks.`
+                    );
+                    return `[${new Date().toISOString()}] Unknown error while deleting Calculated Consumption Data in chunks.`;
+                });
+        } else {
+            return importApiTracker(this.api, { events: d2EventsCalculatedConsumption }, "DELETE").flatMap(response => {
+                return Future.success(response);
+            });
+        }
     }
 
     private mapSubstanceConsumptionCalculatedToD2TrackerEvent(

@@ -32,6 +32,7 @@ import { AMCSubstanceDataRepository } from "../../../repositories/data-entry/AMC
 import { mapRawSubstanceCalculatedToSubstanceCalculated } from "./utils/mapRawSubstanceCalculatedToSubstanceCalculated";
 import { updateRecalculatedConsumptionData } from "./utils/updateRecalculatedConsumptionData";
 import { Maybe } from "../../../../utils/ts-utils";
+import consoleLogger from "../../../../utils/consoleLogger";
 
 const IMPORT_STRATEGY_UPDATE = "UPDATE";
 const IMPORT_STRATEGY_CREATE_AND_UPDATE = "CREATE_AND_UPDATE";
@@ -72,8 +73,8 @@ export class RecalculateConsumptionDataProductLevelForAllUseCase {
                 return Future.sequential(
                     allCombinations.map(({ orgUnitId, period }) => {
                         return Future.fromPromise(new Promise(resolve => setTimeout(resolve, 500))).flatMap(() => {
-                            console.debug(
-                                `Waiting 500 milliseconds... Processing orgUnit: ${orgUnitId}, period: ${period}`
+                            consoleLogger.debug(
+                                `[${new Date().toISOString()}] Waiting 500 milliseconds... Processing orgUnit: ${orgUnitId}, period: ${period}`
                             );
                             return this.calculateByOrgUnitAndPeriod(
                                 productRegisterProgramMetadata,
@@ -172,32 +173,6 @@ export class RecalculateConsumptionDataProductLevelForAllUseCase {
                     newRawSubstanceConsumptionCalculatedDataWithIds.filter(({ eventId }) => eventId !== undefined);
                 const eventIdsToUpdate = rawSubstanceConsumptionCalculatedDataToUpdate.map(({ eventId }) => eventId);
 
-                const eventIdsNoUpdated: Id[] = Object.keys(currentRawSubstanceConsumptionCalculatedByProductId).reduce(
-                    (acc: Id[], productId) => {
-                        const rawSubstanceConsumptionCalculatedNotToUpdate =
-                            currentRawSubstanceConsumptionCalculatedByProductId[productId]?.filter(
-                                ({ eventId }) => !eventIdsToUpdate.includes(eventId)
-                            );
-                        return rawSubstanceConsumptionCalculatedNotToUpdate
-                            ? [
-                                  ...acc,
-                                  ...(rawSubstanceConsumptionCalculatedNotToUpdate.map(
-                                      ({ eventId }) => eventId
-                                  ) as Id[]),
-                              ]
-                            : acc;
-                    },
-                    []
-                );
-
-                if (eventIdsNoUpdated.length) {
-                    logger.error(
-                        `[${new Date().toISOString()}] Product level: recalculations could not be done for these events=${eventIdsNoUpdated.join(
-                            ","
-                        )}`
-                    );
-                }
-
                 logger.info(
                     `[${new Date().toISOString()}] Updating calculations of product level events in DHIS2 for orgUnitId ${orgUnitId} and period ${period}: events=${eventIdsToUpdate.join(
                         ","
@@ -235,55 +210,122 @@ export class RecalculateConsumptionDataProductLevelForAllUseCase {
                         chunkSize: importCalculationChunkSize,
                     })
                     .flatMap(response => {
-                        if (response.status === "OK") {
-                            logger.success(
-                                `[${new Date().toISOString()}] Calculations of product level updated for orgUnitId ${orgUnitId} and period ${period}: ${
-                                    response.stats.updated
-                                } of ${response.stats.total} events updated${
-                                    allowCreationIfNotExist
-                                        ? ` and ${response.stats.created} of ${response.stats.total} events created`
-                                        : ""
-                                }`
-                            );
+                        const eventIdsNoRecalculated: Id[] = Object.keys(
+                            currentRawSubstanceConsumptionCalculatedByProductId
+                        ).reduce((acc: Id[], productId) => {
+                            const rawSubstanceConsumptionCalculatedNotToUpdate =
+                                currentRawSubstanceConsumptionCalculatedByProductId[productId]?.filter(
+                                    ({ eventId }) => !eventIdsToUpdate.includes(eventId)
+                                );
+                            return rawSubstanceConsumptionCalculatedNotToUpdate
+                                ? [
+                                      ...acc,
+                                      ...(rawSubstanceConsumptionCalculatedNotToUpdate.map(
+                                          ({ eventId }) => eventId
+                                      ) as Id[]),
+                                  ]
+                                : acc;
+                        }, []);
 
-                            return this.importSubstanceConsumptionCalculated(
-                                rawSubstanceConsumptionCalculatedDataToImport,
-                                orgUnitId,
-                                period,
-                                allowCreationIfNotExist,
-                                importCalculationChunkSize
-                            );
-                        }
-                        if (response.status === "ERROR") {
-                            logger.error(
-                                `[${new Date().toISOString()}] Error updating calculations of product level updated for orgUnitId ${orgUnitId} and period ${period}: ${JSON.stringify(
-                                    response.validationReport.errorReports
-                                )}`
-                            );
-                        }
+                        return this.deleteNoRecalculatedEvents(
+                            eventIdsNoRecalculated,
+                            importCalculationChunkSize
+                        ).flatMap(() => {
+                            if (response.status === "OK") {
+                                logger.success(
+                                    `[${new Date().toISOString()}] Calculations of product level updated for orgUnitId ${orgUnitId} and period ${period}: ${
+                                        response.stats.updated
+                                    } of ${response.stats.total} events updated${
+                                        allowCreationIfNotExist
+                                            ? ` and ${response.stats.created} of ${response.stats.total} events created`
+                                            : ""
+                                    }`
+                                );
 
-                        if (response.status === "WARNING") {
-                            logger.warn(
-                                `[${new Date().toISOString()}] Warning updating calculations of product level updated for orgUnitId ${orgUnitId} and period ${period}: updated=${
-                                    response.stats.updated
-                                }, ${allowCreationIfNotExist ? `created=${response.stats.created}, ` : ""} total=${
-                                    response.stats.total
-                                } and warning=${JSON.stringify(response.validationReport.warningReports)}`
-                            );
+                                return this.importSubstanceConsumptionCalculated(
+                                    rawSubstanceConsumptionCalculatedDataToImport,
+                                    orgUnitId,
+                                    period,
+                                    allowCreationIfNotExist,
+                                    importCalculationChunkSize
+                                );
+                            }
+                            if (response.status === "ERROR") {
+                                logger.error(
+                                    `[${new Date().toISOString()}] Error updating calculations of product level updated for orgUnitId ${orgUnitId} and period ${period}: ${JSON.stringify(
+                                        response.validationReport.errorReports
+                                    )}`
+                                );
+                            }
 
-                            return this.importSubstanceConsumptionCalculated(
-                                rawSubstanceConsumptionCalculatedDataToImport,
-                                orgUnitId,
-                                period,
-                                allowCreationIfNotExist,
-                                importCalculationChunkSize
-                            );
-                        }
+                            if (response.status === "WARNING") {
+                                logger.warn(
+                                    `[${new Date().toISOString()}] Warning updating calculations of product level updated for orgUnitId ${orgUnitId} and period ${period}: updated=${
+                                        response.stats.updated
+                                    }, ${allowCreationIfNotExist ? `created=${response.stats.created}, ` : ""} total=${
+                                        response.stats.total
+                                    } and warning=${JSON.stringify(response.validationReport.warningReports)}`
+                                );
 
-                        return Future.success(undefined);
+                                return this.importSubstanceConsumptionCalculated(
+                                    rawSubstanceConsumptionCalculatedDataToImport,
+                                    orgUnitId,
+                                    period,
+                                    allowCreationIfNotExist,
+                                    importCalculationChunkSize
+                                );
+                            }
+
+                            return Future.success(undefined);
+                        });
                     });
             });
         });
+    }
+
+    private deleteNoRecalculatedEvents(
+        eventIdsNoRecalculated: Id[],
+        importCalculationChunkSize: Maybe<number>
+    ): FutureData<void> {
+        if (eventIdsNoRecalculated.length) {
+            logger.error(
+                `[${new Date().toISOString()}] Product level: these events could not be recalculated so they will be deleted: events=${eventIdsNoRecalculated.join(
+                    ","
+                )}`
+            );
+
+            return this.amcProductDataRepository
+                .deleteRawSubstanceConsumptionCalculatedById(eventIdsNoRecalculated, importCalculationChunkSize)
+                .flatMap(response => {
+                    if (response.status === "OK") {
+                        logger.success(
+                            `[${new Date().toISOString()}] Product level: no recalculated events deleted=${
+                                response.stats.deleted
+                            } of ${response.stats.total} events to delete`
+                        );
+                    }
+                    if (response.status === "ERROR") {
+                        logger.error(
+                            `[${new Date().toISOString()}] Product level: error deleting no recalculated events=${JSON.stringify(
+                                response.validationReport.errorReports
+                            )}`
+                        );
+                    }
+                    if (response.status === "WARNING") {
+                        logger.warn(
+                            `[${new Date().toISOString()}] Product level: warning deleting no recalculated events=deleted=${
+                                response.stats.deleted
+                            }, total=${response.stats.total} and warning=${JSON.stringify(
+                                response.validationReport.warningReports
+                            )}`
+                        );
+                    }
+                    return Future.success(undefined);
+                });
+        } else {
+            logger.info(`[${new Date().toISOString()}] Product level: all the events were recalculated.`);
+            return Future.success(undefined);
+        }
     }
 
     private getTrackedEntitiesAndRawSubstanceConsumptionCalculatedEvents(
