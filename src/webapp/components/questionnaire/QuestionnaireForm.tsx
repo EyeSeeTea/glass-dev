@@ -1,25 +1,15 @@
-import { useSnackbar } from "@eyeseetea/d2-ui-components";
 import { LinearProgress, makeStyles } from "@material-ui/core";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useMemo } from "react";
 import { Id } from "../../../domain/entities/Base";
-import {
-    Questionnaire,
-    Question,
-    QuestionnaireBase,
-    QuestionnarieM,
-    QuestionnaireSelector,
-} from "../../../domain/entities/Questionnaire";
-import { useAppContext } from "../../contexts/app-context";
+import { Question, QuestionnaireBase } from "../../../domain/entities/Questionnaire";
 // @ts-ignore
 import { DataTable, TableHead, DataTableRow, DataTableColumnHeader, TableBody } from "@dhis2/ui";
 import QuestionRow from "./QuestionRow";
-import { useCallbackEffect } from "../../hooks/useCallbackEffect";
 import { PageHeader } from "../page-header/PageHeader";
 import styled from "styled-components";
-import { useGlassModule } from "../../hooks/useGlassModule";
-import { useBooleanState } from "../../hooks/useBooleanState";
 import { QuestionnaireActions } from "./QuestionnaireActions";
-import { useGlassCaptureAccess } from "../../hooks/useGlassCaptureAccess";
+import { useSaveQuestionnaire } from "./hooks/useSaveQuestionnaire";
+import { useQuestionnaire } from "./hooks/useQuestionnaire";
 
 export interface QuestionnarieFormProps {
     id: Id;
@@ -40,14 +30,6 @@ const QuestionnaireForm: React.FC<QuestionnarieFormProps> = props => {
 
     const classes = useStyles();
     const disabled = questionnaire?.isCompleted ? true : mode === "show";
-
-    const setAsCompleted = (complete: boolean) => {
-        actions.setAsCompleted(complete, {
-            onSuccess: () => {
-                props.validateAndUpdateDataSubmissionStatus(complete, selector.id);
-            },
-        });
-    };
 
     const handleQuestionChange = useCallback(
         (newQuestion: Question) => {
@@ -75,6 +57,18 @@ const QuestionnaireForm: React.FC<QuestionnarieFormProps> = props => {
     }, [questionnaire]);
 
     const disableSave = _.isEmpty(questionsToSave) || !_.isEmpty(validationErrors) || isSavingQuestionnaire;
+
+    const setAsCompleted = (complete: boolean) => {
+        if (complete && !disableSave) {
+            saveQuestionnaire(true);
+        }
+
+        actions.setAsCompleted(complete, {
+            onSuccess: () => {
+                props.validateAndUpdateDataSubmissionStatus(complete, selector.id);
+            },
+        });
+    };
 
     if (!questionnaire) return <LinearProgress />;
 
@@ -141,95 +135,6 @@ const FormWrapper = styled.div`
         display: block;
     }
 `;
-
-function useSaveQuestionnaire(questionnaire: QuestionnaireSelector) {
-    const { compositionRoot } = useAppContext();
-    const snackbar = useSnackbar();
-    const [isSavingQuestionnaire, savingActions] = useBooleanState(false);
-    const [questionsToSave, setQuestionsToSave] = useState<Question[]>([]);
-
-    const saveQuestionnaire = useCallbackEffect(
-        useCallback(() => {
-            savingActions.enable();
-
-            return compositionRoot.questionnaires.saveResponse(questionnaire, questionsToSave).run(
-                () => {
-                    savingActions.disable();
-                    setQuestionsToSave([]);
-                    snackbar.success("Questionnaire saved successfully");
-                },
-                err => {
-                    savingActions.disable();
-                    console.error(err);
-                    snackbar.error(err);
-                }
-            );
-        }, [compositionRoot.questionnaires, questionnaire, questionsToSave, savingActions, snackbar])
-    );
-
-    return {
-        isSavingQuestionnaire: isSavingQuestionnaire,
-        questionsToSave: questionsToSave,
-        saveQuestionnaire: saveQuestionnaire,
-        setQuestionsToSave: setQuestionsToSave,
-    };
-}
-
-function useQuestionnaire(options: QuestionnarieFormProps) {
-    const { compositionRoot } = useAppContext();
-    const snackbar = useSnackbar();
-    const module = useGlassModule();
-    const [isSaving, savingActions] = useBooleanState(false);
-
-    const { onSave, id, orgUnitId, year } = options;
-    const selector = React.useMemo(() => ({ id, orgUnitId, year }), [id, orgUnitId, year]);
-    const [questionnaire, setQuestionnaire] = useState<Questionnaire>();
-    const hasCurrentUserCaptureAccess = useGlassCaptureAccess() ? true : false;
-
-    useEffect(() => {
-        if (module.kind !== "loaded") return;
-        return compositionRoot.questionnaires
-            .get(module.data, selector, hasCurrentUserCaptureAccess)
-            .run(setQuestionnaire, err => snackbar.error(err));
-    }, [compositionRoot, snackbar, selector, module, hasCurrentUserCaptureAccess]);
-
-    React.useEffect(() => {
-        if (questionnaire) onSave(questionnaire);
-    }, [questionnaire, onSave]);
-
-    const setAsCompleted = useCallbackEffect(
-        React.useCallback(
-            (isCompleted: boolean, options: { onSuccess: () => void }) => {
-                savingActions.enable();
-
-                return compositionRoot.questionnaires.setAsCompleted(selector, isCompleted).run(
-                    () => {
-                        savingActions.disable();
-                        options.onSuccess();
-                        setQuestionnaire(questionnaire => {
-                            return questionnaire ? QuestionnarieM.setAsComplete(questionnaire, isCompleted) : undefined;
-                        });
-                    },
-                    err => {
-                        savingActions.disable();
-                        snackbar.error(err);
-                    }
-                );
-            },
-            [compositionRoot, snackbar, selector, savingActions]
-        )
-    );
-
-    const setQuestion = React.useCallback((newQuestion: Question) => {
-        setQuestionnaire(questionnaire => {
-            return questionnaire ? QuestionnarieM.updateQuestion(questionnaire, newQuestion) : undefined;
-        });
-    }, []);
-
-    const actions = { setAsCompleted, setQuestion };
-
-    return [questionnaire, selector, actions, isSaving] as const;
-}
 
 export const useStyles = makeStyles({
     wrapper: { margin: 10 },
