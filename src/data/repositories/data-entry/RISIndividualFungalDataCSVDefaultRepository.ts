@@ -8,6 +8,12 @@ import { SpreadsheetXlsxDataSource } from "../SpreadsheetXlsxDefaultRepository";
 import { doesColumnExist, getNumberValue, getTextValue } from "../utils/CSVUtils";
 import { RISIndividualFungalDataRepository } from "../../../domain/repositories/data-entry/RISIndividualFungalDataRepository";
 
+type RISIndividualFungalDataCsvValidationResult = {
+    isValid: boolean;
+    specimens: string[];
+    rows: number;
+};
+
 export class RISIndividualFungalDataCSVDefaultRepository implements RISIndividualFungalDataRepository {
     get(dataColumns: CustomDataColumns, file: File): FutureData<CustomDataColumns[]> {
         return Future.fromPromise(new SpreadsheetXlsxDataSource().read(file)).map(spreadsheet => {
@@ -37,9 +43,13 @@ export class RISIndividualFungalDataCSVDefaultRepository implements RISIndividua
 
     validate(
         dataColumns: CustomDataColumns,
-        file: File
-    ): FutureData<{ isValid: boolean; specimens: string[]; rows: number }> {
-        return Future.fromPromise(new SpreadsheetXlsxDataSource().read(file)).map(spreadsheet => {
+        file: File | Blob
+    ): FutureData<RISIndividualFungalDataCsvValidationResult> {
+        const readPromise =
+            file instanceof File
+                ? new SpreadsheetXlsxDataSource().read(file)
+                : new SpreadsheetXlsxDataSource().readFromBlob(file);
+        return Future.fromPromise(readPromise).map(spreadsheet => {
             const sheet = spreadsheet.sheets[0]; //Only one sheet for AMR RIS
 
             const headerRow = sheet?.headers;

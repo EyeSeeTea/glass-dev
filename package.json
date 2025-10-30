@@ -125,6 +125,8 @@
         "build-async-deletions": "ncc build src/scripts/cliAsyncDeletions.ts -m -o $npm_package_name-async-deletions-server && zip -r $npm_package_name-async-deletions-server.zip $npm_package_name-async-deletions-server && npx rimraf $npm_package_name-async-deletions-server/",
         "start-async-uploads": "npx ts-node -r dotenv/config src/scripts/cliAsyncUploads.ts",
         "build-async-uploads": "ncc build src/scripts/cliAsyncUploads.ts -m -o $npm_package_name-async-uploads-server && zip -r $npm_package_name-async-uploads-server.zip $npm_package_name-async-uploads-server && npx rimraf $npm_package_name-async-uploads-server/",
+        "start-async-preprocessing": "npx ts-node -r dotenv/config src/scripts/cliAsyncPreprocessing.ts",
+        "build-async-preprocessing": "ncc build src/scripts/cliAsyncPreprocessing.ts -m -o $npm_package_name-async-preprocessing-server && zip -r $npm_package_name-async-preprocessing-server.zip $npm_package_name-async-preprocessing-server && npx rimraf $npm_package_name-async-preprocessing-server/",
         "amr-agg-data-validation-ris": "npx ts-node -r dotenv/config src/scripts/amr_agg_data_validation.ts",
         "amr-agg-data-reset-ris": "npx ts-node -r dotenv/config src/scripts/amr_agg_data_reset.ts",
         "amr-agg-data-validation-sample": "npx ts-node -r dotenv/config src/scripts/amr_agg_data_validation_sample.ts",

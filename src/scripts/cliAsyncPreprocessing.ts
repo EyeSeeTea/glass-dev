@@ -32,6 +32,18 @@ import { DownloadDocumentUseCase } from "../domain/usecases/DownloadDocumentUseC
 import { SetAsyncPreprocessingStatusUseCase } from "../domain/usecases/SetAsyncPreprocessingStatusUseCase";
 import { GlassModuleRepository } from "../domain/repositories/GlassModuleRepository";
 import { GlassModule } from "../domain/entities/GlassModule";
+import { CountryDefaultRepository } from "../data/repositories/CountryDefaultRepository";
+import { RISIndividualFungalDataCSVDefaultRepository } from "../data/repositories/data-entry/RISIndividualFungalDataCSVDefaultRepository";
+import { SampleDataCSVDeafultRepository } from "../data/repositories/data-entry/SampleDataCSVDeafultRepository";
+import { TrackerDefaultRepository } from "../data/repositories/TrackerDefaultRepository";
+import { ProgramRulesMetadataDefaultRepository } from "../data/repositories/program-rule/ProgramRulesMetadataDefaultRepository";
+import { MetadataDefaultRepository } from "../data/repositories/MetadataDefaultRepository";
+import { DataValuesDefaultRepository } from "../data/repositories/data-entry/DataValuesDefaultRepository";
+import { RISIndividualFungalDataRepository } from "../domain/repositories/data-entry/RISIndividualFungalDataRepository";
+import { SetAsyncUploadsUseCase } from "../domain/usecases/SetAsyncUploadsUseCase";
+import { GlassAsyncUploadsRepository } from "../domain/repositories/GlassAsyncUploadsRepository";
+import { GlassAsyncUploadsDefaultRepository } from "../data/repositories/GlassAsyncUploadsDefaultRepository";
+import { SetUploadStatusUseCase } from "../domain/usecases/SetUploadStatusUseCase";
 
 async function main() {
     const cmd = command({
@@ -77,6 +89,7 @@ async function main() {
                 const programRulesMetadataRepository = new ProgramRulesMetadataDefaultRepository(instance);
                 const metadataRepository = new MetadataDefaultRepository(instance);
                 const dataValuesRepository = new DataValuesDefaultRepository(instance);
+                const glassAsyncUploadsRepository = new GlassAsyncUploadsDefaultRepository(dataStoreClient);
 
                 consoleLogger.debug(`Running asynchronous preprocessing for URL ${envVars.url}`);
                 return getMaxAttemptsFromDatastore(glassGeneralInfoRepository).run(
@@ -132,6 +145,8 @@ async function main() {
                                                                 asyncPreprocessingRepository,
                                                                 glassUploadsRepository,
                                                                 glassDocumentsRepository,
+                                                                risIndividualFungalRepository,
+                                                                glassAsyncUploadsRepository,
                                                             },
                                                             pendingToPreprocess,
                                                             glassModules
@@ -193,13 +208,33 @@ function getAsyncPreprocessingFromDatastore(
     return new GetAsyncPreprocessingUseCase(asyncPreprocessingRepository).execute();
 }
 
+function deleteAsyncPreprocessingAndMoveToAsyncUpload(
+    repositories: {
+        asyncPreprocessingRepository: AsyncPreprocessingRepository;
+        glassUploadsRepository: GlassUploadsRepository;
+        glassDocumentsRepository: GlassDocumentsRepository;
+        glassAsyncUploadsRepository: GlassAsyncUploadsRepository;
+    },
+    uploadId: Id
+): FutureData<void> {
+    consoleLogger.debug(
+        `Removing upload ${uploadId} from async-preprocessing in Datastore and moving to async-uploads`
+    );
+    return removeAsyncPreprocessingFromDatastore(repositories, [uploadId]).flatMap(() => {
+        return new SetAsyncUploadsUseCase(repositories).execute(uploadId, undefined).flatMap(() => {
+            return setUploadStatusToUploaded(repositories.glassUploadsRepository, uploadId);
+        });
+    });
+}
+
 function deleteAsyncPreprocessingAndSetErrorAsyncPreprocessing(
     repositories: {
         asyncPreprocessingRepository: AsyncPreprocessingRepository;
         glassUploadsRepository: GlassUploadsRepository;
         glassDocumentsRepository: GlassDocumentsRepository;
     },
-    uploadIdsToSetError: Id[]
+    uploadIdsToSetError: Id[],
+    errorMessage?: string
 ): FutureData<void> {
     if (uploadIdsToSetError.length === 0) {
         return Future.success(undefined);
@@ -211,7 +246,7 @@ function deleteAsyncPreprocessingAndSetErrorAsyncPreprocessing(
         );
         return removeAsyncPreprocessingFromDatastore(repositories, uploadIdsToSetError).flatMap(() => {
             return new SetMultipleErrorAsyncPreprocessingUseCase(repositories.glassUploadsRepository)
-                .execute(uploadIdsToSetError)
+                .execute(uploadIdsToSetError, errorMessage)
                 .flatMap(() => {
                     return removeDocumentsByUploadId(repositories, uploadIdsToSetError);
                 });
@@ -257,11 +292,21 @@ function setAsyncPreprocessingStatus(
     return new SetAsyncPreprocessingStatusUseCase(asyncPreprocessingRepository).execute(uploadId, status);
 }
 
+function setUploadStatusToUploaded(glassUploadsRepository: GlassUploadsRepository, uploadId: Id): FutureData<void> {
+    consoleLogger.debug(`Setting upload ${uploadId} status to UPLOADED`);
+    return new SetUploadStatusUseCase(glassUploadsRepository).execute({
+        id: uploadId,
+        status: "UPLOADED",
+    });
+}
+
 function preprocessUploads(
     repositories: {
         asyncPreprocessingRepository: AsyncPreprocessingRepository;
         glassUploadsRepository: GlassUploadsRepository;
         glassDocumentsRepository: GlassDocumentsRepository;
+        risIndividualFungalRepository: RISIndividualFungalDataRepository;
+        glassAsyncUploadsRepository: GlassAsyncUploadsRepository;
     },
     uploadsToPreprocess: AsyncPreprocessing[],
     glassModules: GlassModule[]
@@ -305,7 +350,7 @@ function preprocessUploads(
                             `ERROR - An error occured while preprocessing: ${error}. Incrementing attempts and setting errorAsyncPreprocessing in upload.`
                         );
                         //incrementAsyncUploadsOrDeleteIfMaxAttemptAndSetErrorStatus
-                        return Future.error(undefined);
+                        return Future.error(error ?? "");
                     });
             } catch (e) {
                 consoleLogger.error(
@@ -313,7 +358,7 @@ function preprocessUploads(
                 );
 
                 //incrementAsyncUploadsOrDeleteIfMaxAttemptAndSetErrorStatus
-                return Future.error(undefined);
+                return Future.error((typeof e === "string" ? e : (e as Error)?.message) ?? "Unknown error");
             }
         })
     ).toVoid();
@@ -324,10 +369,34 @@ function manageAsyncPreprocess(
         asyncPreprocessingRepository: AsyncPreprocessingRepository;
         glassUploadsRepository: GlassUploadsRepository;
         glassDocumentsRepository: GlassDocumentsRepository;
+        risIndividualFungalRepository: RISIndividualFungalDataRepository;
+        glassAsyncUploadsRepository: GlassAsyncUploadsRepository;
     },
     upload: GlassUploads,
-    uploadsToPreprocess: AsyncPreprocessing,
+    _asyncPreprocessingItem: AsyncPreprocessing,
     glassModule: GlassModule
-) {}
+): FutureData<void> {
+    consoleLogger.debug(`Preprocessing upload ${upload.id} for module ${glassModule.name}`);
+    return downloadBlob(repositories.glassDocumentsRepository, upload.fileId).flatMap(fileBlob => {
+        consoleLogger.debug(`Downloaded blob for upload ${upload.id} (${fileBlob.size / (1024 * 1024)}mb)`);
+        return repositories.risIndividualFungalRepository
+            .validate(glassModule.customDataColumns ?? [], fileBlob)
+            .flatMap(validation => {
+                if (validation.isValid) {
+                    consoleLogger.debug(`Upload ${upload.id} passed validation during async preprocessing.`);
+                    return deleteAsyncPreprocessingAndMoveToAsyncUpload(repositories, upload.id).flatMap(() => {
+                        return Future.success(undefined);
+                    });
+                } else {
+                    consoleLogger.error(`Upload ${upload.id} failed validation during async preprocessing.`);
+                    return deleteAsyncPreprocessingAndSetErrorAsyncPreprocessing(repositories, [upload.id]).flatMap(
+                        () => {
+                            return Future.success(undefined);
+                        }
+                    );
+                }
+            });
+    });
+}
 
 main();
