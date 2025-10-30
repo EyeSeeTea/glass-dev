@@ -105,14 +105,14 @@ export class GlassDocumentsDefaultRepository implements GlassDocumentsRepository
         });
     }
 
-    delete(id: string): FutureData<string> {
+    delete(id: string): FutureData<void> {
         return this.dataStoreClient.listCollection<GlassDocuments>(DataStoreKeys.DOCUMENTS).flatMap(documents => {
             const document = documents.find(document => document.id === id);
             if (document) {
                 documents.splice(documents.indexOf(document), 1);
-                return this.dataStoreClient
-                    .saveObject(DataStoreKeys.DOCUMENTS, documents)
-                    .flatMap(() => Future.success(document.id));
+                return this.dataStoreClient.saveObject(DataStoreKeys.DOCUMENTS, documents).flatMap(() => {
+                    return this.deleteDocumentApi(id);
+                });
             } else {
                 return Future.error("Document could not be found");
             }
@@ -123,8 +123,8 @@ export class GlassDocumentsDefaultRepository implements GlassDocumentsRepository
         return apiToFuture(this.api.files.get(id));
     }
 
-    deleteDocumentApi(id: string): FutureData<void> {
-        return apiToFuture(this.api.files.delete(id)).flatMap(response => {
+    deleteDocumentApi(documentId: string): FutureData<void> {
+        return apiToFuture(this.api.files.delete(documentId)).flatMap(response => {
             if (response.httpStatus === "OK") return Future.success(undefined);
             else return Future.error("Error when deleting document");
         });

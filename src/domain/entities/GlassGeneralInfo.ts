@@ -4,4 +4,6 @@ export type GlassGeneralInfo = {
     regionLevel: number;
     maxAttemptsForAsyncDeletions: number;
     maxAttemptsForAsyncUploads: number;
+    maxAttemptsForAsyncPreprocessing: number;
+    fileSizeLimit: number;
 };

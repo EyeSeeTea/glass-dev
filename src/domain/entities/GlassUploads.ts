@@ -1,7 +1,13 @@
 import { ImportSummary, ImportSummaryErrors } from "./data-entry/ImportSummary";
 import { Id } from "./Ref";
 
-export type GlassUploadsStatus = "UPLOADED" | "IMPORTED" | "VALIDATED" | "COMPLETED";
+export type GlassUploadsStatus =
+    | "PREPROCESSING"
+    | "PREPROCESSING_FAILED"
+    | "UPLOADED"
+    | "IMPORTED"
+    | "VALIDATED"
+    | "COMPLETED";
 
 export interface GlassUploads {
     id: string;
@@ -29,5 +35,7 @@ export interface GlassUploads {
     calculatedEventListDataDeleted?: boolean;
     errorAsyncDeleting?: boolean;
     errorAsyncUploading?: boolean;
+    errorAsyncPreprocessing?: boolean;
+    errorMessageAsyncPreprocessing?: string;
     asyncImportSummaries?: ImportSummary[];
 }

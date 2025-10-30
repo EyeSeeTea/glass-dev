@@ -73,6 +73,7 @@ export const UploadPrimaryFile: React.FC<UploadPrimaryFileProps> = ({
                 if (uploadedPrimaryFile) {
                     setIsLoading(true);
 
+                    // here
                     return compositionRoot.fileSubmission.validatePrimaryFile(uploadedPrimaryFile, moduleName).run(
                         primaryFileData => {
                             if (!dataSubmissionId) {

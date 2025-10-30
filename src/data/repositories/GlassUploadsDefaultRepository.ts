@@ -33,6 +33,15 @@ export class GlassUploadsDefaultRepository implements GlassUploadsRepository {
         });
     }
 
+    update(uploadUpdated: GlassUploads): FutureData<void> {
+        return this.getAll().flatMap(uploads => {
+            const newUploads = uploads.map(existingUpload =>
+                existingUpload.id === uploadUpdated.id ? uploadUpdated : existingUpload
+            );
+            return this.dataStoreClient.saveObject(DataStoreKeys.UPLOADS, newUploads);
+        });
+    }
+
     setStatus(id: Id, status: GlassUploadsStatus): FutureData<void> {
         return this.dataStoreClient.listCollection<GlassUploads>(DataStoreKeys.UPLOADS).flatMap(uploads => {
             const uploadFound = uploads?.find(upload => upload.id === id);
@@ -250,6 +259,24 @@ export class GlassUploadsDefaultRepository implements GlassUploadsRepository {
                 const updatedUploads = filteredUploads.map(upload => ({
                     ...upload,
                     errorAsyncUploading: ids.includes(upload.id),
+                }));
+                const restUploads = uploads.filter(upload => !ids.includes(upload.id));
+
+                return this.dataStoreClient.saveObject(DataStoreKeys.UPLOADS, [...restUploads, ...updatedUploads]);
+            } else {
+                return Future.success(undefined);
+            }
+        });
+    }
+
+    setMultipleErrorAsyncPreprocessing(ids: Id[], errorMessage?: string): FutureData<void> {
+        return this.dataStoreClient.listCollection<GlassUploads>(DataStoreKeys.UPLOADS).flatMap(uploads => {
+            const filteredUploadsToChange = uploads?.filter(upload => ids.includes(upload.id));
+            if (filteredUploadsToChange.length > 0) {
+                const updatedUploads: GlassUploads[] = filteredUploadsToChange.map(upload => ({
+                    ...upload,
+                    errorAsyncPreprocessing: ids.includes(upload.id),
+                    errorMessageAsyncPreprocessing: errorMessage,
                 }));
                 const restUploads = uploads.filter(upload => !ids.includes(upload.id));
 

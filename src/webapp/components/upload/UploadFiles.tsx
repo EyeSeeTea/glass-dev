@@ -413,6 +413,7 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
         history.push(`/current-data-submission`);
     }, [history]);
 
+    // here
     const setToAsyncUploads = useCallback(
         (primaryUploadId: Maybe<Id>, secondaryUploadId: Maybe<Id>) => {
             compositionRoot.glassUploads.setToAsyncUploads(primaryUploadId, secondaryUploadId).run(
@@ -433,6 +434,7 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
         [compositionRoot.glassUploads, returnToDatasetsTab, snackbar]
     );
 
+    // this
     const handleAsyncUploads = useCallback(() => {
         const primaryUploadId = localStorage.getItem("primaryUploadId") ?? undefined;
         const secondaryUploadId =

@@ -27,4 +27,5 @@ export interface UploadsDataItem {
     calculatedEventListDataDeleted?: boolean;
     errorAsyncDeleting?: boolean;
     errorAsyncUploading?: boolean;
+    errorAsyncPreprocessing?: boolean;
 }

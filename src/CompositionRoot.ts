@@ -136,6 +136,9 @@ import { GetStrataOptionsUseCase } from "./domain/usecases/amc-questionnaires/Ge
 import { SaveComponentAMCQuestionnaireUseCase } from "./domain/usecases/amc-questionnaires/SaveComponentAMCQuestionnaireUseCase";
 import { UNPopulationD2Repository } from "./data/repositories/amc-questionnaires/UNPopulationD2Repository";
 import { GetUNPopulationUseCase } from "./domain/usecases/amc-questionnaires/GetUNPopulationUseCase";
+import { GetAsyncPreprocessingUseCase } from "./domain/usecases/GetAsyncPreprocessingUseCase";
+import { AsyncPreprocessingDefaultRepository } from "./data/repositories/AsyncPreprocessingDefaultRepository";
+import { RemoveAsyncPreprocessingUseCase } from "./domain/usecases/RemoveAsyncPreprocessingUseCase";
 
 export function getCompositionRoot(instance: Instance) {
     const api = getD2APiFromInstance(instance);
@@ -189,6 +192,7 @@ export function getCompositionRoot(instance: Instance) {
     const proportion50to100UnknownOptionsD2Repository = new Proportion50to100UnknownOptionsD2Repository(api);
     const strataOptionsRepository = new StrataOptionsD2Repository(api);
     const unPopulationRepository = new UNPopulationD2Repository(api);
+    const asyncPreprocessingRepository = new AsyncPreprocessingDefaultRepository(dataStoreClient);
 
     return {
         instance: getExecute({
@@ -242,6 +246,8 @@ export function getCompositionRoot(instance: Instance) {
                 glassAsyncUploadsRepository,
                 glassUploadsRepository,
             }),
+            getAsyncPreprocessing: new GetAsyncPreprocessingUseCase(asyncPreprocessingRepository),
+            removeAsyncPreprocessing: new RemoveAsyncPreprocessingUseCase(asyncPreprocessingRepository),
         }),
         glassDocuments: getExecute({
             getAll: new GetGlassDocumentsUseCase(glassDocumentsRepository),
