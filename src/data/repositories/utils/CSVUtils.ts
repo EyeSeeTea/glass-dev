@@ -9,5 +9,9 @@ export function getNumberValue(row: Row<string>, column: string): number {
 }
 
 export function doesColumnExist(header: string[], column: string): boolean {
-    return header.find(value => value === column) !== undefined;
+    return header.includes(column);
+}
+
+export function isCsvFile(file: File): boolean {
+    return file.type === "text/csv" || file.name.toLowerCase().endsWith(".csv");
 }
