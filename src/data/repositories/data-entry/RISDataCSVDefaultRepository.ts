@@ -1,4 +1,5 @@
 import { RISData } from "../../../domain/entities/data-entry/amr-external/RISData";
+import { ValidationResultWithSpecimens } from "../../../domain/entities/FileValidationResult";
 import { Future, FutureData } from "../../../domain/entities/Future";
 import { RISDataRepository } from "../../../domain/repositories/data-entry/RISDataRepository";
 import { Row } from "../../../domain/repositories/SpreadsheetXlsxRepository";
@@ -43,7 +44,7 @@ export class RISDataCSVDefaultRepository implements RISDataRepository {
         });
     }
 
-    validate(file: File): FutureData<{ isValid: boolean; specimens: string[]; rows: number }> {
+    validate(file: File): FutureData<ValidationResultWithSpecimens> {
         return Future.fromPromise(new SpreadsheetXlsxDataSource().read(file)).map(spreadsheet => {
             const sheet = spreadsheet.sheets[0]; //Only one sheet for AMR RIS
             const headerRow = sheet?.headers;

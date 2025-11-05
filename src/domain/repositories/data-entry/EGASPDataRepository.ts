@@ -1,5 +1,6 @@
+import { ValidationResultWithSpecimens } from "../../entities/FileValidationResult";
 import { FutureData } from "../../entities/Future";
 
 export interface EGASPDataRepository {
-    validate(file: File, dataColumns: string[]): FutureData<{ isValid: boolean; rows: number; specimens: string[] }>;
+    validate(file: File, dataColumns: string[]): FutureData<ValidationResultWithSpecimens>;
 }

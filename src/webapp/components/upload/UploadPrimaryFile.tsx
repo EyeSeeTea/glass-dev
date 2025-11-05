@@ -69,47 +69,57 @@ export const UploadPrimaryFile: React.FC<UploadPrimaryFileProps> = ({
             if (rejections.length > 0) {
                 snackbar.error(i18n.t("Multiple uploads not allowed, please select one file"));
             } else {
-                const uploadedPrimaryFile = files[0];
-                if (uploadedPrimaryFile) {
+                const primaryFile = files[0];
+                if (primaryFile) {
                     setIsLoading(true);
 
                     // here
-                    return compositionRoot.fileSubmission.validatePrimaryFile(uploadedPrimaryFile, moduleName).run(
-                        primaryFileData => {
+                    return compositionRoot.fileSubmission.validatePrimaryFile(primaryFile, moduleName).run(
+                        validationResult => {
                             if (!dataSubmissionId) {
                                 snackbar.error(i18n.t("Data submission id not found. Please try again"));
                                 setIsLoading(false);
                                 return;
                             }
-
-                            if (primaryFileData.isValid) {
-                                setPrimaryFile(uploadedPrimaryFile);
-                                setPrimaryFileTotalRows(primaryFileData.rows);
-
-                                const primaryFileType = moduleProperties.get(moduleName)?.primaryFileType;
-                                const data = {
-                                    batchId,
-                                    fileType: primaryFileType !== undefined ? primaryFileType : moduleName,
-                                    dataSubmission: dataSubmissionId,
-                                    moduleId,
-                                    moduleName,
-                                    period: currentPeriod.toString(),
-                                    orgUnitId: orgUnitId,
-                                    orgUnitCode: orgUnitCode,
-                                    rows: primaryFileData.rows,
-                                    specimens: primaryFileData.specimens,
-                                };
-                                return compositionRoot.glassDocuments.upload({ file: uploadedPrimaryFile, data }).run(
-                                    uploadId => {
-                                        localStorage.setItem("primaryUploadId", uploadId);
-                                        setIsLoading(false);
-                                    },
-                                    error => {
-                                        console.error(`Error in file upload: ${error}`);
-                                        snackbar.error(i18n.t(`Error in file upload: ${error}`));
-                                        setIsLoading(false);
-                                    }
+                            const primaryFileType = moduleProperties.get(moduleName)?.primaryFileType;
+                            const baseData = {
+                                batchId,
+                                fileType: primaryFileType !== undefined ? primaryFileType : moduleName,
+                                dataSubmission: dataSubmissionId,
+                                moduleId,
+                                moduleName,
+                                period: currentPeriod.toString(),
+                                orgUnitId: orgUnitId,
+                                orgUnitCode: orgUnitCode,
+                            };
+                            if (validationResult.status === "needsPreprocessing") {
+                                snackbar.error(
+                                    i18n.t("File requires preprocessing because of size and format.To be implemented")
                                 );
+                                setIsLoading(false);
+                                return;
+                            }
+                            if (validationResult.status === "validated" && validationResult.isValid) {
+                                setPrimaryFile(primaryFile);
+                                setPrimaryFileTotalRows(validationResult.rows);
+                                const data = {
+                                    ...baseData,
+                                    rows: validationResult.rows,
+                                    specimens: validationResult.specimens,
+                                };
+                                return compositionRoot.glassDocuments
+                                    .upload({ file: primaryFile, data, status: "UPLOADED" })
+                                    .run(
+                                        uploadId => {
+                                            localStorage.setItem("primaryUploadId", uploadId);
+                                            setIsLoading(false);
+                                        },
+                                        error => {
+                                            console.error(`Error in file upload: ${error}`);
+                                            snackbar.error(i18n.t(`Error in file upload: ${error}`));
+                                            setIsLoading(false);
+                                        }
+                                    );
                             } else {
                                 snackbar.error(i18n.t("Incorrect File Format. Please retry with a valid file"));
                                 setIsLoading(false);

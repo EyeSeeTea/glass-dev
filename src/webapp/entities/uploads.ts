@@ -11,7 +11,7 @@ export interface UploadsDataItem {
     inputLineNb: number;
     outputLineNb: number;
     period: string;
-    specimens: string[];
+    specimens?: string[];
     status: GlassUploadsStatus;
     uploadDate: string;
     dataSubmission: string;

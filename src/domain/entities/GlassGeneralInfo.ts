@@ -7,3 +7,5 @@ export type GlassGeneralInfo = {
     maxAttemptsForAsyncPreprocessing: number;
     fileSizeLimit: number;
 };
+
+export const DEFAULT_FILE_SIZE_LIMIT_MB = 50;

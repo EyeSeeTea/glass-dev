@@ -1,10 +1,14 @@
 import { UseCase } from "../../../CompositionRoot";
 import { GlassModuleDefaultRepository } from "../../../data/repositories/GlassModuleDefaultRepository";
+import { isSizeGreaterThan } from "../../../utils/files";
+import { FileValidationResult, ValidationResultWithSpecimens } from "../../entities/FileValidationResult";
 import { FutureData, Future } from "../../entities/Future";
+import { DEFAULT_FILE_SIZE_LIMIT_MB } from "../../entities/GlassGeneralInfo";
 import { AMCDataRepository } from "../../repositories/data-entry/AMCDataRepository";
 import { EGASPDataRepository } from "../../repositories/data-entry/EGASPDataRepository";
 import { RISDataRepository } from "../../repositories/data-entry/RISDataRepository";
 import { RISIndividualFungalDataRepository } from "../../repositories/data-entry/RISIndividualFungalDataRepository";
+import { GeneralInfoRepository } from "../../repositories/GeneralInfoRepository";
 
 export class ValidatePrimaryFileUseCase implements UseCase {
     constructor(
@@ -12,13 +16,33 @@ export class ValidatePrimaryFileUseCase implements UseCase {
         private risIndividualFungalRepository: RISIndividualFungalDataRepository,
         private egaspDataRepository: EGASPDataRepository,
         private glassModuleDefaultRepository: GlassModuleDefaultRepository,
-        private amcDataRepository: AMCDataRepository
+        private amcDataRepository: AMCDataRepository,
+        private generalInfoRepository: GeneralInfoRepository
     ) {}
 
-    public execute(
-        inputFile: File,
-        moduleName: string
-    ): FutureData<{ isValid: boolean; rows: number; specimens: string[] }> {
+    public execute(inputFile: File, moduleName: string): FutureData<FileValidationResult> {
+        return this.needsPreprocessing(inputFile).flatMap((needsPreprocessing): FutureData<FileValidationResult> => {
+            if (needsPreprocessing) {
+                return Future.success({
+                    status: "needsPreprocessing",
+                });
+            } else {
+                return this.validate(inputFile, moduleName).map(result => ({
+                    ...result,
+                    status: "validated",
+                }));
+            }
+        });
+    }
+
+    private needsPreprocessing(file: File): FutureData<boolean> {
+        return this.generalInfoRepository.get().map(info => {
+            const maxSizeMB = info.fileSizeLimit || DEFAULT_FILE_SIZE_LIMIT_MB;
+            return isSizeGreaterThan(file, maxSizeMB);
+        });
+    }
+
+    private validate(inputFile: File, moduleName: string): FutureData<ValidationResultWithSpecimens> {
         switch (moduleName) {
             case "AMR": {
                 return this.risDataRepository.validate(inputFile);

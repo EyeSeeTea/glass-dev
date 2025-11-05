@@ -7,12 +7,7 @@ import {
 import { SpreadsheetXlsxDataSource } from "../SpreadsheetXlsxDefaultRepository";
 import { doesColumnExist, getNumberValue, getTextValue } from "../utils/CSVUtils";
 import { RISIndividualFungalDataRepository } from "../../../domain/repositories/data-entry/RISIndividualFungalDataRepository";
-
-type RISIndividualFungalDataCsvValidationResult = {
-    isValid: boolean;
-    specimens: string[];
-    rows: number;
-};
+import { ValidationResultWithSpecimens } from "../../../domain/entities/FileValidationResult";
 
 export class RISIndividualFungalDataCSVDefaultRepository implements RISIndividualFungalDataRepository {
     get(dataColumns: CustomDataColumns, file: File): FutureData<CustomDataColumns[]> {
@@ -41,10 +36,7 @@ export class RISIndividualFungalDataCSVDefaultRepository implements RISIndividua
         });
     }
 
-    validate(
-        dataColumns: CustomDataColumns,
-        file: File | Blob
-    ): FutureData<RISIndividualFungalDataCsvValidationResult> {
+    validate(dataColumns: CustomDataColumns, file: File | Blob): FutureData<ValidationResultWithSpecimens> {
         const readPromise =
             file instanceof File
                 ? new SpreadsheetXlsxDataSource().read(file)

@@ -5,13 +5,14 @@ import { ProductDataTrackedEntity } from "../../entities/data-entry/amc/ProductD
 import { ProductRegisterProgramMetadata, ProgramStage } from "../../entities/data-entry/amc/ProductRegisterProgram";
 import { RawSubstanceConsumptionCalculated } from "../../entities/data-entry/amc/RawSubstanceConsumptionCalculated";
 import { ImportStrategy } from "../../entities/data-entry/DataValuesSaveSummary";
+import { ValidationResultWithSpecimens } from "../../entities/FileValidationResult";
 
 export interface AMCProductDataRepository {
     validate(
         file: File,
         teiDataColumns: string[],
         rawProductDataColumns: string[]
-    ): FutureData<{ isValid: boolean; rows: number; specimens: string[] }>;
+    ): FutureData<ValidationResultWithSpecimens>;
     importCalculations(
         importStrategy: ImportStrategy,
         productDataTrackedEntities: ProductDataTrackedEntity[],

@@ -76,40 +76,51 @@ export const UploadSecondary: React.FC<UploadSecondaryProps> = ({
                     setIsLoading(true);
 
                     return compositionRoot.fileSubmission.validateSecondaryFile(uploadedSample, moduleName).run(
-                        sampleData => {
+                        validationResult => {
                             if (!dataSubmissionId) {
                                 snackbar.error(i18n.t("Data submission id not found. Please try again"));
                                 setIsLoading(false);
                                 return;
                             }
-
-                            if (sampleData.isValid) {
+                            const baseData = {
+                                batchId,
+                                fileType: moduleProperties.get(moduleName)?.secondaryFileType ?? "",
+                                dataSubmission: dataSubmissionId,
+                                moduleId,
+                                moduleName,
+                                period: currentPeriod.toString(),
+                                orgUnitId: orgUnitId,
+                                orgUnitCode: orgUnitCode,
+                            };
+                            if (validationResult.status === "needsPreprocessing") {
+                                snackbar.error(
+                                    i18n.t("File requires preprocessing because of size and format.To be implemented")
+                                );
+                                setIsLoading(false);
+                                return;
+                            }
+                            if (validationResult.status === "validated" && validationResult.isValid) {
                                 setSecondaryFile(uploadedSample);
-                                setSecondaryFileTotalRows(sampleData.rows);
+                                setSecondaryFileTotalRows(validationResult.rows);
                                 const data = {
-                                    batchId,
-                                    fileType: moduleProperties.get(moduleName)?.secondaryFileType ?? "",
-                                    dataSubmission: dataSubmissionId,
-                                    moduleId,
-                                    moduleName,
-                                    period: currentPeriod.toString(),
-                                    orgUnitId: orgUnitId,
-                                    orgUnitCode: orgUnitCode,
-                                    rows: sampleData.rows,
+                                    ...baseData,
+                                    rows: validationResult.rows,
                                     specimens: [],
                                 };
-                                return compositionRoot.glassDocuments.upload({ file: uploadedSample, data }).run(
-                                    uploadId => {
-                                        localStorage.setItem("secondaryUploadId", uploadId);
-                                        setIsLoading(false);
-                                        setHasSecondaryFile(true);
-                                    },
-                                    error => {
-                                        console.error(`Error in file upload: ${error}`);
-                                        snackbar.error(i18n.t(`Error in file upload: ${error}`));
-                                        setIsLoading(false);
-                                    }
-                                );
+                                return compositionRoot.glassDocuments
+                                    .upload({ file: uploadedSample, data, status: "UPLOADED" })
+                                    .run(
+                                        uploadId => {
+                                            localStorage.setItem("secondaryUploadId", uploadId);
+                                            setIsLoading(false);
+                                            setHasSecondaryFile(true);
+                                        },
+                                        error => {
+                                            console.error(`Error in file upload: ${error}`);
+                                            snackbar.error(i18n.t(`Error in file upload: ${error}`));
+                                            setIsLoading(false);
+                                        }
+                                    );
                             } else {
                                 snackbar.error(i18n.t("Incorrect File Format. Please retry with a valid file"));
                                 setIsLoading(false);

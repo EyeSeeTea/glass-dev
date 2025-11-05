@@ -8,8 +8,7 @@ export type GlassUploadsStatus =
     | "IMPORTED"
     | "VALIDATED"
     | "COMPLETED";
-
-export interface GlassUploads {
+interface GlassUploadsBase {
     id: string;
     batchId: string;
     countryCode: string;
@@ -19,8 +18,8 @@ export interface GlassUploads {
     inputLineNb: number;
     outputLineNb: number;
     period: string;
-    specimens: string[];
     status: GlassUploadsStatus;
+    specimens?: string[];
     uploadDate: string;
     dataSubmission: string;
     module: string;
@@ -39,3 +38,15 @@ export interface GlassUploads {
     errorMessageAsyncPreprocessing?: string;
     asyncImportSummaries?: ImportSummary[];
 }
+
+// interface GlassUploadsPreprocessing extends GlassUploadsBase {
+//     status: "PREPROCESSING" | "PREPROCESSING_FAILED";
+//     specimens?: string[];
+// }
+
+// interface GlassUploadsDefault extends GlassUploadsBase {
+//     status: Exclude<GlassUploadsStatus, "PREPROCESSING" | "PREPROCESSING_FAILED">;
+//     specimens: string[];
+// }
+
+export type GlassUploads = GlassUploadsBase;

@@ -139,6 +139,7 @@ import { GetUNPopulationUseCase } from "./domain/usecases/amc-questionnaires/Get
 import { GetAsyncPreprocessingUseCase } from "./domain/usecases/GetAsyncPreprocessingUseCase";
 import { AsyncPreprocessingDefaultRepository } from "./data/repositories/AsyncPreprocessingDefaultRepository";
 import { RemoveAsyncPreprocessingUseCase } from "./domain/usecases/RemoveAsyncPreprocessingUseCase";
+import { GeneralInfoDefaultRepository } from "./data/repositories/GeneralInfoDefaultRepository";
 
 export function getCompositionRoot(instance: Instance) {
     const api = getD2APiFromInstance(instance);
@@ -193,6 +194,7 @@ export function getCompositionRoot(instance: Instance) {
     const strataOptionsRepository = new StrataOptionsD2Repository(api);
     const unPopulationRepository = new UNPopulationD2Repository(api);
     const asyncPreprocessingRepository = new AsyncPreprocessingDefaultRepository(dataStoreClient);
+    const generalInfoRepository = new GeneralInfoDefaultRepository(dataStoreClient, instance);
 
     return {
         instance: getExecute({
@@ -282,7 +284,8 @@ export function getCompositionRoot(instance: Instance) {
                 risIndividualFungalRepository,
                 egaspDataRepository,
                 glassModuleRepository,
-                amcProductDataRepository
+                amcProductDataRepository,
+                generalInfoRepository
             ),
             secondaryFile: new ImportSecondaryFileUseCase(
                 sampleDataRepository,
@@ -299,7 +302,8 @@ export function getCompositionRoot(instance: Instance) {
             validateSecondaryFile: new ValidateSampleFileUseCase(
                 sampleDataRepository,
                 amcSubstanceDataRepository,
-                glassModuleRepository
+                glassModuleRepository,
+                generalInfoRepository
             ),
 
             downloadEmptyTemplate: new DownloadEmptyTemplateUseCase(

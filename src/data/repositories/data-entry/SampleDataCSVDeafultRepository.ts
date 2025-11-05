@@ -1,4 +1,5 @@
 import { SampleData } from "../../../domain/entities/data-entry/amr-external/SampleData";
+import { ValidationResult } from "../../../domain/entities/FileValidationResult";
 import { Future, FutureData } from "../../../domain/entities/Future";
 import { SampleDataRepository } from "../../../domain/repositories/data-entry/SampleDataRepository";
 import { Row } from "../../../domain/repositories/SpreadsheetXlsxRepository";
@@ -43,7 +44,7 @@ export class SampleDataCSVDeafultRepository implements SampleDataRepository {
         });
     }
 
-    validate(file: File): FutureData<{ isValid: boolean; rows: number }> {
+    validate(file: File): FutureData<ValidationResult> {
         return Future.fromPromise(new SpreadsheetXlsxDataSource().read(file)).map(spreadsheet => {
             const sheet = spreadsheet.sheets[0]; //Only one sheet for AMR RIS
             const headerRow = sheet?.headers;

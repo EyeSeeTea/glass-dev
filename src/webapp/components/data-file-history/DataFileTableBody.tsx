@@ -11,6 +11,7 @@ import { moduleProperties } from "../../../domain/utils/ModuleProperties";
 import { useCurrentModuleContext } from "../../contexts/current-module-context";
 import { ImportSummaryErrors } from "../../../domain/entities/data-entry/ImportSummary";
 import { ImportSummaryErrorsDialog } from "../import-summary-errors-dialog/ImportSummaryErrorsDialog";
+import i18n from "../../../locales";
 
 export interface DataFileTableBodyProps {
     rows?: DataFileHistoryItemProps[];
@@ -57,7 +58,7 @@ export const DataFileTableBody: React.FC<DataFileTableBodyProps> = ({ rows }) =>
                             <TableCell>{row.period}</TableCell>
                             {moduleProperties.get(currentModuleAccess.moduleName)?.isSpecimenReq && (
                                 <TableCell style={{ maxWidth: "150px", wordWrap: "break-word" }}>
-                                    {row.specimens.join(", ")}
+                                    {row.specimens ? row.specimens.join(", ") : i18n.t("N/A")}
                                 </TableCell>
                             )}
                             <TableCell>{row.status}</TableCell>
