@@ -82,6 +82,11 @@ export const UploadSecondary: React.FC<UploadSecondaryProps> = ({
                                 setIsLoading(false);
                                 return;
                             }
+                            if (validationResult.status === "validated" && !validationResult.isValid) {
+                                snackbar.error(i18n.t("Incorrect File Format. Please retry with a valid file"));
+                                setIsLoading(false);
+                                return;
+                            }
                             const baseData = {
                                 batchId,
                                 fileType: moduleProperties.get(moduleName)?.secondaryFileType ?? "",
@@ -92,39 +97,34 @@ export const UploadSecondary: React.FC<UploadSecondaryProps> = ({
                                 orgUnitId: orgUnitId,
                                 orgUnitCode: orgUnitCode,
                             };
-                            if (validationResult.status === "needsPreprocessing") {
-                                snackbar.error(
-                                    i18n.t("File requires preprocessing because of size and format.To be implemented")
-                                );
-                                setIsLoading(false);
-                                return;
-                            }
-                            if (validationResult.status === "validated" && validationResult.isValid) {
-                                setSecondaryFile(uploadedSample);
+                            const data =
+                                validationResult.status === "needsPreprocessing"
+                                    ? baseData
+                                    : {
+                                          ...baseData,
+                                          rows: validationResult.rows,
+                                          specimens: [],
+                                      };
+                            const status =
+                                validationResult.status === "needsPreprocessing" ? "PREPROCESSING" : "UPLOADED";
+                            setSecondaryFile(uploadedSample);
+                            if ("rows" in validationResult && validationResult.rows) {
                                 setSecondaryFileTotalRows(validationResult.rows);
-                                const data = {
-                                    ...baseData,
-                                    rows: validationResult.rows,
-                                    specimens: [],
-                                };
-                                return compositionRoot.glassDocuments
-                                    .upload({ file: uploadedSample, data, status: "UPLOADED" })
-                                    .run(
-                                        uploadId => {
-                                            localStorage.setItem("secondaryUploadId", uploadId);
-                                            setIsLoading(false);
-                                            setHasSecondaryFile(true);
-                                        },
-                                        error => {
-                                            console.error(`Error in file upload: ${error}`);
-                                            snackbar.error(i18n.t(`Error in file upload: ${error}`));
-                                            setIsLoading(false);
-                                        }
-                                    );
-                            } else {
-                                snackbar.error(i18n.t("Incorrect File Format. Please retry with a valid file"));
-                                setIsLoading(false);
                             }
+                            return compositionRoot.glassDocuments
+                                .upload({ file: uploadedSample, data, status: status })
+                                .run(
+                                    uploadId => {
+                                        localStorage.setItem("secondaryUploadId", uploadId);
+                                        setIsLoading(false);
+                                        setHasSecondaryFile(true);
+                                    },
+                                    error => {
+                                        console.error(`Error in file upload: ${error}`);
+                                        snackbar.error(i18n.t(`Error in file upload: ${error}`));
+                                        setIsLoading(false);
+                                    }
+                                );
                         },
                         () => {
                             snackbar.error(i18n.t("Error in file upload"));

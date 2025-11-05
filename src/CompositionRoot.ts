@@ -253,7 +253,11 @@ export function getCompositionRoot(instance: Instance) {
         }),
         glassDocuments: getExecute({
             getAll: new GetGlassDocumentsUseCase(glassDocumentsRepository),
-            upload: new UploadDocumentUseCase(glassDocumentsRepository, glassUploadsRepository),
+            upload: new UploadDocumentUseCase(
+                glassDocumentsRepository,
+                glassUploadsRepository,
+                asyncPreprocessingRepository
+            ),
             deleteByUploadId: new DeleteDocumentInfoByUploadIdUseCase(glassDocumentsRepository, glassUploadsRepository),
             download: new DownloadDocumentUseCase(glassDocumentsRepository),
             downloadAsArrayBuffer: new DownloadDocumentAsArrayBufferUseCase(glassDocumentsRepository),

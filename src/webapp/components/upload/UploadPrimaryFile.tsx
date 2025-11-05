@@ -81,6 +81,11 @@ export const UploadPrimaryFile: React.FC<UploadPrimaryFileProps> = ({
                                 setIsLoading(false);
                                 return;
                             }
+                            if (validationResult.status === "validated" && !validationResult.isValid) {
+                                snackbar.error(i18n.t("Incorrect File Format. Please retry with a valid file"));
+                                setIsLoading(false);
+                                return;
+                            }
                             const primaryFileType = moduleProperties.get(moduleName)?.primaryFileType;
                             const baseData = {
                                 batchId,
@@ -92,38 +97,33 @@ export const UploadPrimaryFile: React.FC<UploadPrimaryFileProps> = ({
                                 orgUnitId: orgUnitId,
                                 orgUnitCode: orgUnitCode,
                             };
-                            if (validationResult.status === "needsPreprocessing") {
-                                snackbar.error(
-                                    i18n.t("File requires preprocessing because of size and format.To be implemented")
-                                );
-                                setIsLoading(false);
-                                return;
-                            }
-                            if (validationResult.status === "validated" && validationResult.isValid) {
-                                setPrimaryFile(primaryFile);
+                            const data =
+                                validationResult.status === "needsPreprocessing"
+                                    ? baseData
+                                    : {
+                                          ...baseData,
+                                          rows: validationResult.rows,
+                                          specimens: validationResult.specimens,
+                                      };
+                            const status =
+                                validationResult.status === "needsPreprocessing" ? "PREPROCESSING" : "UPLOADED";
+                            setPrimaryFile(primaryFile);
+                            if ("rows" in validationResult && validationResult.rows) {
                                 setPrimaryFileTotalRows(validationResult.rows);
-                                const data = {
-                                    ...baseData,
-                                    rows: validationResult.rows,
-                                    specimens: validationResult.specimens,
-                                };
-                                return compositionRoot.glassDocuments
-                                    .upload({ file: primaryFile, data, status: "UPLOADED" })
-                                    .run(
-                                        uploadId => {
-                                            localStorage.setItem("primaryUploadId", uploadId);
-                                            setIsLoading(false);
-                                        },
-                                        error => {
-                                            console.error(`Error in file upload: ${error}`);
-                                            snackbar.error(i18n.t(`Error in file upload: ${error}`));
-                                            setIsLoading(false);
-                                        }
-                                    );
-                            } else {
-                                snackbar.error(i18n.t("Incorrect File Format. Please retry with a valid file"));
-                                setIsLoading(false);
                             }
+                            return compositionRoot.glassDocuments
+                                .upload({ file: primaryFile, data, status: status })
+                                .run(
+                                    uploadId => {
+                                        localStorage.setItem("primaryUploadId", uploadId);
+                                        setIsLoading(false);
+                                    },
+                                    error => {
+                                        console.error(`Error in file upload: ${error}`);
+                                        snackbar.error(i18n.t(`Error in file upload: ${error}`));
+                                        setIsLoading(false);
+                                    }
+                                );
                         },
                         _error => {
                             snackbar.error(i18n.t("Error in file upload"));
