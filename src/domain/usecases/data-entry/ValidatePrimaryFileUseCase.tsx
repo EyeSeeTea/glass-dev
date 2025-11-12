@@ -1,5 +1,6 @@
 import { UseCase } from "../../../CompositionRoot";
 import { GlassModuleDefaultRepository } from "../../../data/repositories/GlassModuleDefaultRepository";
+import { isCsvFile } from "../../../data/repositories/utils/CSVUtils";
 import { isSizeGreaterThan } from "../../../utils/files";
 import { FileValidationResult, ValidationResultWithSpecimens } from "../../entities/FileValidationResult";
 import { FutureData, Future } from "../../entities/Future";
@@ -36,6 +37,9 @@ export class ValidatePrimaryFileUseCase implements UseCase {
     }
 
     private needsPreprocessing(file: File): FutureData<boolean> {
+        if (isCsvFile(file)) {
+            return Future.success(false);
+        }
         return this.generalInfoRepository.get().map(info => {
             const maxSizeMB = info.fileSizeLimit || DEFAULT_FILE_SIZE_LIMIT_MB;
             return isSizeGreaterThan(file, maxSizeMB);

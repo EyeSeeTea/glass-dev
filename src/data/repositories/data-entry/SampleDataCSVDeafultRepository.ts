@@ -4,7 +4,14 @@ import { Future, FutureData } from "../../../domain/entities/Future";
 import { SampleDataRepository } from "../../../domain/repositories/data-entry/SampleDataRepository";
 import { Row } from "../../../domain/repositories/SpreadsheetXlsxRepository";
 import { SpreadsheetXlsxDataSource } from "../SpreadsheetXlsxDefaultRepository";
-import { doesColumnExist, getNumberValue, getTextValue } from "../utils/CSVUtils";
+import {
+    doesColumnExist,
+    getNumberValue,
+    getTextValue,
+    isCsvFile,
+    getRowCountAndSelectDistinctFromCsv,
+    validateCsvHeaders,
+} from "../utils/CSVUtils";
 
 export class SampleDataCSVDeafultRepository implements SampleDataRepository {
     get(file: File): FutureData<SampleData[]> {
@@ -45,21 +52,25 @@ export class SampleDataCSVDeafultRepository implements SampleDataRepository {
     }
 
     validate(file: File): FutureData<ValidationResult> {
+        const requiredColumns = [
+            "COUNTRY",
+            "YEAR",
+            "SPECIMEN",
+            "GENDER",
+            "ORIGIN",
+            "AGEGROUP",
+            "NUMSAMPLEDPATIENTS",
+            "BATCHID",
+        ];
+        if (isCsvFile(file)) {
+            return this.validateCsv(file, requiredColumns);
+        }
         return Future.fromPromise(new SpreadsheetXlsxDataSource().read(file)).map(spreadsheet => {
             const sheet = spreadsheet.sheets[0]; //Only one sheet for AMR RIS
             const headerRow = sheet?.headers;
 
             if (headerRow) {
-                const allSampleColsPresent =
-                    doesColumnExist(headerRow, "COUNTRY") &&
-                    doesColumnExist(headerRow, "YEAR") &&
-                    doesColumnExist(headerRow, "SPECIMEN") &&
-                    doesColumnExist(headerRow, "GENDER") &&
-                    doesColumnExist(headerRow, "ORIGIN") &&
-                    doesColumnExist(headerRow, "AGEGROUP") &&
-                    // doesColumnExist(firstRow, "NUMINFECTED") &&
-                    doesColumnExist(headerRow, "NUMSAMPLEDPATIENTS") &&
-                    doesColumnExist(headerRow, "BATCHID");
+                const allSampleColsPresent = requiredColumns.every(col => doesColumnExist(headerRow, col));
 
                 return {
                     isValid: allSampleColsPresent ? true : false,
@@ -71,5 +82,25 @@ export class SampleDataCSVDeafultRepository implements SampleDataRepository {
                     rows: 0,
                 };
         });
+    }
+
+    private validateCsv(file: File, requiredColumns: string[]): FutureData<ValidationResult> {
+        return Future.fromPromise(
+            validateCsvHeaders(file, requiredColumns).then(headerValidationResult => {
+                if (!headerValidationResult.valid) {
+                    return {
+                        isValid: false,
+                        rows: 0,
+                    };
+                } else {
+                    return getRowCountAndSelectDistinctFromCsv(file, []).then(distinctResult => {
+                        return {
+                            isValid: true,
+                            rows: distinctResult.rows,
+                        };
+                    });
+                }
+            })
+        );
     }
 }

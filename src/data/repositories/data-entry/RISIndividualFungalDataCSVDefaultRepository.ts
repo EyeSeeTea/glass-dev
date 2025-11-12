@@ -8,7 +8,7 @@ import { SpreadsheetXlsxDataSource } from "../SpreadsheetXlsxDefaultRepository";
 import { doesColumnExist, getNumberValue, getTextValue } from "../utils/CSVUtils";
 import { RISIndividualFungalDataRepository } from "../../../domain/repositories/data-entry/RISIndividualFungalDataRepository";
 import { ValidationResultWithSpecimens } from "../../../domain/entities/FileValidationResult";
-
+import { isCsvFile, validateCsvHeaders, getRowCountAndSelectDistinctFromCsv } from "../utils/CSVUtils";
 export class RISIndividualFungalDataCSVDefaultRepository implements RISIndividualFungalDataRepository {
     get(dataColumns: CustomDataColumns, file: File): FutureData<CustomDataColumns[]> {
         return Future.fromPromise(new SpreadsheetXlsxDataSource().read(file)).map(spreadsheet => {
@@ -37,6 +37,13 @@ export class RISIndividualFungalDataCSVDefaultRepository implements RISIndividua
     }
 
     validate(dataColumns: CustomDataColumns, file: File | Blob): FutureData<ValidationResultWithSpecimens> {
+        if (isCsvFile(file)) {
+            return this.validateCsv(
+                // @ts-expect-error TODO: file being a Blob still works for CSV validation?
+                file,
+                dataColumns.map(col => col.key)
+            );
+        }
         const readPromise = new SpreadsheetXlsxDataSource().readFromBlob(file);
         return Future.fromPromise(readPromise).map(spreadsheet => {
             const sheet = spreadsheet.sheets[0]; //Only one sheet for AMR RIS
@@ -63,6 +70,27 @@ export class RISIndividualFungalDataCSVDefaultRepository implements RISIndividua
                     specimens: [],
                 };
         });
+    }
+
+    private validateCsv(file: File, requiredColumns: string[]): FutureData<ValidationResultWithSpecimens> {
+        return Future.fromPromise(
+            validateCsvHeaders(file, requiredColumns).then(headerValidationResult => {
+                if (!headerValidationResult.valid) {
+                    return {
+                        isValid: false,
+                        rows: 0,
+                        specimens: [],
+                    };
+                }
+                return getRowCountAndSelectDistinctFromCsv(file, ["SPECIMEN"]).then(distinctResult => {
+                    return {
+                        isValid: true,
+                        rows: distinctResult.rows,
+                        specimens: Array.from(distinctResult.distinct.get("SPECIMEN") || []),
+                    };
+                });
+            })
+        );
     }
 
     getFromBlob(dataColumns: CustomDataColumns, blob: Blob): FutureData<CustomDataColumns[]> {
