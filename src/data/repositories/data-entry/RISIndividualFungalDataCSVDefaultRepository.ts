@@ -37,10 +37,7 @@ export class RISIndividualFungalDataCSVDefaultRepository implements RISIndividua
     }
 
     validate(dataColumns: CustomDataColumns, file: File | Blob): FutureData<ValidationResultWithSpecimens> {
-        const readPromise =
-            file instanceof File
-                ? new SpreadsheetXlsxDataSource().read(file)
-                : new SpreadsheetXlsxDataSource().readFromBlob(file);
+        const readPromise = new SpreadsheetXlsxDataSource().readFromBlob(file);
         return Future.fromPromise(readPromise).map(spreadsheet => {
             const sheet = spreadsheet.sheets[0]; //Only one sheet for AMR RIS
 

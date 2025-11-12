@@ -10,8 +10,13 @@ import {
 
 export class SpreadsheetXlsxDataSource implements SpreadsheetDataSource {
     async read(inputFile: File): Async<Spreadsheet> {
+        const arrayBuffer = await inputFile.arrayBuffer();
+        return this.readFromArrayBuffer(arrayBuffer, inputFile.name);
+    }
+
+    async readFromArrayBuffer(arrayBuffer: ArrayBuffer, fileName?: string): Async<Spreadsheet> {
         try {
-            const workbook = XLSX.read(await inputFile?.arrayBuffer(), { cellDates: true });
+            const workbook = XLSX.read(arrayBuffer, { cellDates: true, type: "array" });
 
             const sheets = _(workbook.Sheets)
                 .toPairs()
@@ -28,7 +33,7 @@ export class SpreadsheetXlsxDataSource implements SpreadsheetDataSource {
                 .value();
 
             const spreadsheet: Spreadsheet = {
-                name: inputFile.name,
+                name: fileName || "spreadsheet.xlsx",
                 sheets,
             };
 
@@ -38,13 +43,8 @@ export class SpreadsheetXlsxDataSource implements SpreadsheetDataSource {
         }
     }
 
-    async readFromArrayBuffer(arrayBuffer: ArrayBuffer, fileName?: string): Async<Spreadsheet> {
-        const blob = new Blob([arrayBuffer]);
-        return this.readFromBlob(blob, fileName);
-    }
-
     async readFromBlob(blob: Blob, fileName?: string): Async<Spreadsheet> {
-        const file = new File([blob], fileName || "spreadsheet.xlsx", { type: blob.type });
-        return this.read(file);
+        const arrayBuffer = await blob.arrayBuffer();
+        return this.readFromArrayBuffer(arrayBuffer, fileName);
     }
 }

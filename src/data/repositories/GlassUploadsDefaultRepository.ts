@@ -275,6 +275,7 @@ export class GlassUploadsDefaultRepository implements GlassUploadsRepository {
             if (filteredUploadsToChange.length > 0) {
                 const updatedUploads: GlassUploads[] = filteredUploadsToChange.map(upload => ({
                     ...upload,
+                    status: "PREPROCESSING_FAILED",
                     errorAsyncPreprocessing: ids.includes(upload.id),
                     errorMessageAsyncPreprocessing: errorMessage,
                 }));

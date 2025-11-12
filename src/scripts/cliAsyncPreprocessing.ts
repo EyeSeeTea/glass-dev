@@ -149,7 +149,19 @@ async function main() {
                                                                 glassAsyncUploadsRepository,
                                                             },
                                                             pendingToPreprocess,
-                                                            glassModules
+                                                            glassModules,
+                                                            maxAttempts
+                                                        ).run(
+                                                            () => {
+                                                                consoleLogger.debug(
+                                                                    "Preprocessing completed successfully"
+                                                                );
+                                                            },
+                                                            error => {
+                                                                consoleLogger.error(
+                                                                    `ERROR - Error during preprocessing: ${error}`
+                                                                );
+                                                            }
                                                         );
                                                     },
                                                     error =>
@@ -309,21 +321,22 @@ function preprocessUploads(
         glassAsyncUploadsRepository: GlassAsyncUploadsRepository;
     },
     uploadsToPreprocess: AsyncPreprocessing[],
-    glassModules: GlassModule[]
+    glassModules: GlassModule[],
+    maxAttempts: number
 ): FutureData<void> {
+    consoleLogger.debug(`[preprocessUploads] STARTING - Processing ${uploadsToPreprocess.length.toString()} uploads`);
+    consoleLogger.debug(`[preprocessUploads] Upload IDs: ${uploadsToPreprocess.map(u => u.uploadId).join(", ")}`);
+
     return Future.sequential(
         uploadsToPreprocess.map(asyncPreprocessingItem => {
-            try {
-                return setAsyncPreprocessingStatus(
-                    repositories.asyncPreprocessingRepository,
-                    asyncPreprocessingItem.uploadId,
-                    "PREPROCESSING"
-                )
-                    .flatMap(() => {
-                        return getUploadById(
-                            repositories.glassUploadsRepository,
-                            asyncPreprocessingItem.uploadId
-                        ).flatMap(upload => {
+            return setAsyncPreprocessingStatus(
+                repositories.asyncPreprocessingRepository,
+                asyncPreprocessingItem.uploadId,
+                "PREPROCESSING"
+            )
+                .flatMap(() => {
+                    return getUploadById(repositories.glassUploadsRepository, asyncPreprocessingItem.uploadId).flatMap(
+                        upload => {
                             if (upload) {
                                 consoleLogger.debug(`Found upload ${upload.id}`);
                                 const currentModule = glassModules.find(module => module.id === upload.module);
@@ -343,23 +356,30 @@ function preprocessUploads(
                                 consoleLogger.error(`Upload ${asyncPreprocessingItem.uploadId} not found`);
                                 return Future.error(`Upload ${asyncPreprocessingItem.uploadId} not found`);
                             }
-                        });
-                    })
-                    .flatMapError(error => {
-                        consoleLogger.error(
-                            `ERROR - An error occured while preprocessing: ${error}. Incrementing attempts and setting errorAsyncPreprocessing in upload.`
-                        );
-                        //incrementAsyncUploadsOrDeleteIfMaxAttemptAndSetErrorStatus
-                        return Future.error(error ?? "");
-                    });
-            } catch (e) {
-                consoleLogger.error(
-                    `ERROR - An error occured while preprocessing: ${e}. Incrementing attempts and setting errorAsyncPreprocessing in upload.`
-                );
-
-                //incrementAsyncUploadsOrDeleteIfMaxAttemptAndSetErrorStatus
-                return Future.error((typeof e === "string" ? e : (e as Error)?.message) ?? "Unknown error");
-            }
+                        }
+                    );
+                })
+                .flatMapError(error => {
+                    consoleLogger.error(
+                        `ERROR - An error occured while preprocessing upload ${asyncPreprocessingItem.uploadId}: ${error}`
+                    );
+                    return incrementAsyncPreprocessingOrDelete(
+                        {
+                            asyncPreprocessingRepository: repositories.asyncPreprocessingRepository,
+                            glassUploadsRepository: repositories.glassUploadsRepository,
+                            glassDocumentsRepository: repositories.glassDocumentsRepository,
+                        },
+                        asyncPreprocessingItem,
+                        maxAttempts,
+                        error
+                    );
+                })
+                .flatMap(() => {
+                    consoleLogger.debug(
+                        `[preprocessUploads] COMPLETED - Preprocessing for upload ${asyncPreprocessingItem.uploadId} done.`
+                    );
+                    return Future.success(undefined);
+                });
         })
     ).toVoid();
 }
@@ -397,6 +417,31 @@ function manageAsyncPreprocess(
                 }
             });
     });
+}
+
+function incrementAsyncPreprocessingOrDelete(
+    repositories: {
+        asyncPreprocessingRepository: AsyncPreprocessingRepository;
+        glassUploadsRepository: GlassUploadsRepository;
+        glassDocumentsRepository: GlassDocumentsRepository;
+    },
+    asyncUpload: AsyncPreprocessing,
+    maxAttempts: number,
+    error?: string
+): FutureData<void> {
+    const nextAttempt = asyncUpload.attempts + 1;
+    if (nextAttempt >= maxAttempts) {
+        consoleLogger.debug(
+            `Upload ${asyncUpload.uploadId} has reached the maximum number preprocessing of attempts (${maxAttempts}). Setting errorAsyncPreprocessing in upload and removing from async-preprocessing in Datastore.`
+        );
+        return deleteAsyncPreprocessingAndSetErrorAsyncPreprocessing(repositories, [asyncUpload.uploadId], error);
+    } else {
+        consoleLogger.debug(`Increasing preprocessing attempts for upload ${asyncUpload.uploadId}`);
+        return repositories.asyncPreprocessingRepository.incrementAttemptsAndResetStatusById(
+            asyncUpload.uploadId,
+            error
+        );
+    }
 }
 
 main();
