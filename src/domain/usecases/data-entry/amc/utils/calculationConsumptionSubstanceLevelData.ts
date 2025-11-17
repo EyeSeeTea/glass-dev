@@ -20,6 +20,8 @@ import { Id } from "../../../../entities/Ref";
 import { RawSubstanceConsumptionData } from "../../../../entities/data-entry/amc/RawSubstanceConsumptionData";
 import { SubstanceConsumptionCalculated } from "../../../../entities/data-entry/amc/SubstanceConsumptionCalculated";
 
+const LAST_ATC_CODE_LEVEL = 5;
+
 export function calculateConsumptionSubstanceLevelData(
     period: string,
     orgUnitId: Id,
@@ -129,12 +131,17 @@ export function calculateConsumptionSubstanceLevelData(
                 return;
             }
 
-            const atcAutocalculated = getNewAtcCodeRecursively({
-                oldAtcCode: rawSubstanceConsumption.atc_manual,
-                atcVersionYearToCompareWith: atcManualVersionYear,
-                atcChanges: latestAtcChanges,
-                currentAtcs: latestAtcData,
-            });
+            const atcCodeInLatestAtcData = latestAtcData.find(
+                data => data.CODE === rawSubstanceConsumption.atc_manual && data.LEVEL === LAST_ATC_CODE_LEVEL
+            )?.CODE;
+
+            const atcAutocalculated = atcCodeInLatestAtcData
+                ? atcCodeInLatestAtcData
+                : getNewAtcCodeRecursively({
+                      oldAtcCode: rawSubstanceConsumption.atc_manual,
+                      atcChanges: latestAtcChanges,
+                      currentAtcs: latestAtcData,
+                  });
 
             if (atcAutocalculated === undefined) {
                 // The code atc_manual is not in the current version and has no replacement, copy pasting ddd_manual into ddd_autocalculated
@@ -332,7 +339,7 @@ function getDDDsAdjust(
     })?.UNIT;
     const newDDDFam = atcVersion.units.find(({ UNIT }: UnitsData) => {
         return UNIT === newDDD.DDD_UNIT;
-    });
+    })?.UNIT;
 
     if (oldDDDFam !== newDDDFam) {
         return {
