@@ -1,7 +1,7 @@
 import { command, run } from "cmd-ts";
 import "dotenv/config";
 
-import { getD2ApiFromArgs, getInstance } from "./common";
+import { getInstance } from "./common";
 import { DataStoreClient } from "../data/data-store/DataStoreClient";
 import { Future, FutureData } from "../domain/entities/Future";
 import consoleLogger from "../utils/consoleLogger";
@@ -32,13 +32,7 @@ import { DownloadDocumentUseCase } from "../domain/usecases/DownloadDocumentUseC
 import { SetAsyncPreprocessingStatusUseCase } from "../domain/usecases/SetAsyncPreprocessingStatusUseCase";
 import { GlassModuleRepository } from "../domain/repositories/GlassModuleRepository";
 import { GlassModule } from "../domain/entities/GlassModule";
-import { CountryDefaultRepository } from "../data/repositories/CountryDefaultRepository";
 import { RISIndividualFungalDataCSVDefaultRepository } from "../data/repositories/data-entry/RISIndividualFungalDataCSVDefaultRepository";
-import { SampleDataCSVDeafultRepository } from "../data/repositories/data-entry/SampleDataCSVDeafultRepository";
-import { TrackerDefaultRepository } from "../data/repositories/TrackerDefaultRepository";
-import { ProgramRulesMetadataDefaultRepository } from "../data/repositories/program-rule/ProgramRulesMetadataDefaultRepository";
-import { MetadataDefaultRepository } from "../data/repositories/MetadataDefaultRepository";
-import { DataValuesDefaultRepository } from "../data/repositories/data-entry/DataValuesDefaultRepository";
 import { RISIndividualFungalDataRepository } from "../domain/repositories/data-entry/RISIndividualFungalDataRepository";
 import { SetAsyncUploadsUseCase } from "../domain/usecases/SetAsyncUploadsUseCase";
 import { GlassAsyncUploadsRepository } from "../domain/repositories/GlassAsyncUploadsRepository";
@@ -73,7 +67,6 @@ async function main() {
                     },
                 };
 
-                const api = getD2ApiFromArgs(envVars);
                 const instance = getInstance(envVars);
                 const dataStoreClient = new DataStoreClient(instance);
 
@@ -81,14 +74,8 @@ async function main() {
                 const asyncPreprocessingRepository = new AsyncPreprocessingDefaultRepository(dataStoreClient);
                 const glassUploadsRepository = new GlassUploadsDefaultRepository(dataStoreClient);
                 const glassModuleRepository = new GlassModuleDefaultRepository(dataStoreClient);
-                const countryRepository = new CountryDefaultRepository(api);
                 const glassDocumentsRepository = new GlassDocumentsDefaultRepository(dataStoreClient, instance);
                 const risIndividualFungalRepository = new RISIndividualFungalDataCSVDefaultRepository();
-                const sampleDataRepository = new SampleDataCSVDeafultRepository();
-                const trackerRepository = new TrackerDefaultRepository(instance);
-                const programRulesMetadataRepository = new ProgramRulesMetadataDefaultRepository(instance);
-                const metadataRepository = new MetadataDefaultRepository(instance);
-                const dataValuesRepository = new DataValuesDefaultRepository(instance);
                 const glassAsyncUploadsRepository = new GlassAsyncUploadsDefaultRepository(dataStoreClient);
 
                 consoleLogger.debug(`Running asynchronous preprocessing for URL ${envVars.url}`);
