@@ -130,12 +130,6 @@ export class RecalculateConsumptionDataProductLevelForAllUseCase {
                 return Future.success(undefined);
             }
 
-            const allRawSubstanceConsumptionCalculated = Object.values(
-                currentRawSubstanceConsumptionCalculatedByProductId
-            ).flat();
-            // Every raw substance consumption calculated event has the same atc_version_autocalculated value
-            const prevAtcVersionAutocalculated = allRawSubstanceConsumptionCalculated[0]?.atc_version_autocalculated;
-
             return getConsumptionDataProductLevel({
                 orgUnitId,
                 period,
@@ -143,7 +137,6 @@ export class RecalculateConsumptionDataProductLevelForAllUseCase {
                 productDataTrackedEntities,
                 atcCurrentVersionData,
                 atcVersionKey,
-                prevAtcVersionAutocalculated: prevAtcVersionAutocalculated,
             }).flatMap(newRawSubstanceConsumptionCalculatedData => {
                 if (_.isEmpty(newRawSubstanceConsumptionCalculatedData)) {
                     logger.error(

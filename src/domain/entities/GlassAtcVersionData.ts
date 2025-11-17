@@ -258,7 +258,6 @@ export function getStandardizedUnit(unitsData: UnitsData[], unit: UnitCode): Uni
  * Get the corresponding ATC code in the current ATC version of an ATC code defined in an old ATC version.
  *
  * @param {ATCCodeLevel5} oldAtcCode - The old ATC code
- * @param {number} atcVersionYearToCompareWith - The year of the ATC version
  * @param {ATCChangesData[]} atcChanges - The list of ATC changes
  * @param {ATCData[]} currentAtcs - The list of current ATC codes
  *
@@ -266,32 +265,29 @@ export function getStandardizedUnit(unitsData: UnitsData[], unit: UnitCode): Uni
  */
 export function getNewAtcCodeRecursively(params: {
     oldAtcCode: ATCCodeLevel5;
-    atcVersionYearToCompareWith: number;
     atcChanges: ATCChangesData[];
     currentAtcs: ATCData[];
 }): ATCCodeLevel5 | undefined {
-    const { oldAtcCode, atcVersionYearToCompareWith, atcChanges, currentAtcs } = params;
+    const { oldAtcCode, atcChanges, currentAtcs } = params;
 
     const findAtcCodeCurrent = (atcCode: ATCCodeLevel5): string | undefined => {
         const atcChangeFound = atcChanges.find(({ PREVIOUS_ATC, CHANGE }) => {
-            return CHANGE !== "SUPERSEDED" && CHANGE !== "DELETED" && PREVIOUS_ATC === atcCode;
+            return CHANGE === "SUPERSEDED" && PREVIOUS_ATC === atcCode;
         });
 
         if (!atcChangeFound) {
             return undefined;
         }
 
-        const yearOfChange = atcChangeFound.YEAR;
         const newAtcCode = atcChangeFound.NEW_ATC;
         const newAtcCodeFoundInCurrent = currentAtcs.find(({ CODE }: ATCData) => {
             return CODE === newAtcCode;
         })?.CODE;
 
         if (newAtcCodeFoundInCurrent) {
-            // If the year of the ATC version is older than the year of the change, we return the new ATC code found
-            return atcVersionYearToCompareWith < yearOfChange ? newAtcCodeFoundInCurrent : oldAtcCode;
+            return newAtcCodeFoundInCurrent;
         } else {
-            findAtcCodeCurrent(newAtcCode);
+            return findAtcCodeCurrent(newAtcCode);
         }
     };
 
@@ -362,7 +358,8 @@ export function getNewDddData(params: {
         return CHANGE !== "DELETED" && ATC_CODE === atcCode && PREVIOUS_DDD_ROA === roa;
     });
 
-    // If the ATC version year is older than the year of the change, we return the new DDD found
+    // If the ATC version year is older than the year of the change, we return the new DDD found.
+    // If not, we return undefined because the change has already been applied in DDDs.
     return newDDD && atcVersionYearToCompareWith < newDDD.YEAR ? newDDD : undefined;
 }
 

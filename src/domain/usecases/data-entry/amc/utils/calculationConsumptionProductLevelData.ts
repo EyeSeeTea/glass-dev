@@ -44,16 +44,12 @@ export function calculateConsumptionProductLevelData(
     teiInstancesData: ProductRegistryAttributes[],
     rawProductConsumptionData: RawProductConsumption[],
     atcClassification: GlassAtcVersionData,
-    currentAtcVersion: ATCVersionKey,
-    prevAtcVersionAutocalculated?: ATCVersionKey
+    currentAtcVersion: ATCVersionKey
 ): RawSubstanceConsumptionCalculated[] {
     logger.info(
         `[${new Date().toISOString()}] Starting the calculation of consumption product level data for organisation ${orgUnitId} and period ${period}`
     );
     const currentAtcVersionYear = getYearFromAtcVersionKey(currentAtcVersion);
-    const prevAtcVersionYear = prevAtcVersionAutocalculated
-        ? getYearFromAtcVersionKey(prevAtcVersionAutocalculated)
-        : undefined;
 
     if (!Object.keys(atcClassification)?.length || !currentAtcVersionYear) {
         logger.error(
@@ -61,8 +57,6 @@ export function calculateConsumptionProductLevelData(
         );
         return [];
     }
-
-    const atcVersionYearToCompareWith = prevAtcVersionYear || currentAtcVersionYear;
 
     const dddCombinations = atcClassification?.combinations;
     const dddData = atcClassification?.ddds;
@@ -94,7 +88,6 @@ export function calculateConsumptionProductLevelData(
             const atcCodeAutocalculated: ATCCodeLevel5 =
                 getNewAtcCodeRecursively({
                     oldAtcCode: product.AMR_GLASS_AMC_TEA_ATC,
-                    atcVersionYearToCompareWith: atcVersionYearToCompareWith,
                     atcChanges: atcChanges,
                     currentAtcs: atcData,
                 }) || product.AMR_GLASS_AMC_TEA_ATC;
@@ -107,7 +100,7 @@ export function calculateConsumptionProductLevelData(
                     dddData,
                     dddChanges,
                     unitsData,
-                    atcVersionYearToCompareWith,
+                    currentAtcVersionYear,
                     atcCodeAutocalculated
                 );
                 calculationLogs = [...calculationLogs, ...dddPerProduct.logs];
