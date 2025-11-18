@@ -177,8 +177,45 @@ export function calculateConsumptionSubstanceLevelData(
                 },
             ];
 
+            const oldAtcCodeInLatestAtcData = atcManualVersionData.atcs.find(
+                data => data.CODE === rawSubstanceConsumption.atc_manual && data.LEVEL === LAST_ATC_CODE_LEVEL
+            )?.CODE;
+
+            const atcManualVersionAtcChanges: ATCChangesData[] = getATCChanges(atcManualVersionData.changes);
+
+            const oldAtcCode = oldAtcCodeInLatestAtcData
+                ? oldAtcCodeInLatestAtcData
+                : getNewAtcCodeRecursively({
+                      oldAtcCode: rawSubstanceConsumption.atc_manual,
+                      atcChanges: atcManualVersionAtcChanges,
+                      currentAtcs: atcManualVersionData.atcs,
+                  });
+
+            if (oldAtcCode === undefined) {
+                // The code in atc_manual is not in the atcs or atc changes from manual version, copy pasting ddd_manual into ddd_autocalculated
+                calculationLogs = [
+                    ...calculationLogs,
+                    {
+                        content: `[${new Date().toISOString()}] Substance ${rawSubstanceConsumption.id} - atc_manual ${
+                            rawSubstanceConsumption.atc_manual
+                        } is not in the atcs or atc changes from manual version ${atc_version_manual}.`,
+                        messageType: "Warn",
+                    },
+                ];
+
+                return copyDDDManualToDDDAutocalculated({
+                    rawSubstanceConsumption,
+                    currentAtcVersionKey,
+                    period,
+                    orgUnitId,
+                    amClassData: latestAmClassData,
+                    atcData: latestAtcData,
+                    awareClassData: latestAwareClassData,
+                });
+            }
+
             const oldDDD = getDDDForAtcVersion({
-                atcCode: rawSubstanceConsumption.atc_manual,
+                atcCode: oldAtcCode,
                 atcVersionYearToCompareWith: atcManualVersionYear,
                 roaCode: rawSubstanceConsumption.route_admin_manual,
                 saltCode: rawSubstanceConsumption.salt_manual,
