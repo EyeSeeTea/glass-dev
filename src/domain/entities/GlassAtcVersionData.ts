@@ -298,7 +298,6 @@ export function getNewAtcCodeRecursively(params: {
  * Get the DDD for an ATC code, ROA code and SALT code based on an specific ATC version.
  *
  * @param {ATCCodeLevel5} atcCode - The ATC code
- * @param {number} atcVersionYearToCompareWith - The year of the ATC version
  * @param {RouteOfAdministrationCode} roaCode - The ROA code
  * @param {SaltCode} saltCode - The Salt code
  * @param {GlassAtcVersionData} atcVersion - The ATC version
@@ -307,12 +306,11 @@ export function getNewAtcCodeRecursively(params: {
  */
 export function getDDDForAtcVersion(params: {
     atcCode: ATCCodeLevel5;
-    atcVersionYearToCompareWith: number;
     roaCode: RouteOfAdministrationCode;
     saltCode: SaltCode;
     atcVersion: GlassAtcVersionData;
 }): DDDData | undefined {
-    const { atcCode, atcVersionYearToCompareWith, roaCode, saltCode, atcVersion } = params;
+    const { atcCode, roaCode, saltCode, atcVersion } = params;
     const ddd = atcVersion.ddds.find(({ ATC5, ROA, SALT }: DDDData) => {
         return ATC5 === atcCode && ROA === roaCode && SALT === saltCode;
     });
@@ -322,7 +320,6 @@ export function getDDDForAtcVersion(params: {
     } else {
         const newDDD = getNewDddData({
             atcCode: atcCode,
-            atcVersionYearToCompareWith: atcVersionYearToCompareWith,
             roa: roaCode,
             dddChanges: atcVersion.changes ? getDDDChanges(atcVersion.changes) : undefined,
         });
@@ -348,19 +345,16 @@ function parseDDDChangesDataToDDDData(dddChange: DDDChangesData, unitsData: Unit
 
 export function getNewDddData(params: {
     atcCode: ATCCodeLevel5;
-    atcVersionYearToCompareWith: number;
     roa: RouteOfAdministrationCode;
     dddChanges: DDDChangesData[] | undefined;
 }): DDDChangesData | undefined {
-    const { atcCode, atcVersionYearToCompareWith, roa, dddChanges } = params;
+    const { atcCode, roa, dddChanges } = params;
 
     const newDDD = dddChanges?.find(({ ATC_CODE, CHANGE, PREVIOUS_DDD_ROA }) => {
         return CHANGE !== "DELETED" && ATC_CODE === atcCode && PREVIOUS_DDD_ROA === roa;
     });
 
-    // If the ATC version year is older than the year of the change, we return the new DDD found.
-    // If not, we return undefined because the change has already been applied in DDDs.
-    return newDDD && atcVersionYearToCompareWith < newDDD.YEAR ? newDDD : undefined;
+    return newDDD;
 }
 
 export function getAmClass(amClassData: AmClassificationData, atcCode: ATCCodeLevel5): AmName | undefined {

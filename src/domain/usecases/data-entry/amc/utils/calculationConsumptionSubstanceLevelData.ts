@@ -13,7 +13,6 @@ import {
     AwareClassificationData,
     ATCData,
     ATCChangesData,
-    getYearFromAtcVersionKey,
     getNewAtcCodeRecursively,
 } from "../../../../entities/GlassAtcVersionData";
 import { Id } from "../../../../entities/Ref";
@@ -116,21 +115,6 @@ export function calculateConsumptionSubstanceLevelData(
                 },
             ];
 
-            const atcManualVersionYear = getYearFromAtcVersionKey(atc_version_manual);
-            if (!atcManualVersionYear) {
-                // Cannot get year from atc version key, log error and skip this record
-                calculationLogs = [
-                    ...calculationLogs,
-                    {
-                        content: `[${new Date().toISOString()}] Substance ${
-                            rawSubstanceConsumption.id
-                        } - Cannot get year from atc version key ${atc_version_manual}.`,
-                        messageType: "Error",
-                    },
-                ];
-                return;
-            }
-
             const atcCodeInLatestAtcData = latestAtcData.find(
                 data => data.CODE === rawSubstanceConsumption.atc_manual && data.LEVEL === LAST_ATC_CODE_LEVEL
             )?.CODE;
@@ -216,14 +200,12 @@ export function calculateConsumptionSubstanceLevelData(
 
             const oldDDD = getDDDForAtcVersion({
                 atcCode: oldAtcCode,
-                atcVersionYearToCompareWith: atcManualVersionYear,
                 roaCode: rawSubstanceConsumption.route_admin_manual,
                 saltCode: rawSubstanceConsumption.salt_manual,
                 atcVersion: atcManualVersionData,
             });
             const newDDD = getDDDForAtcVersion({
                 atcCode: atcAutocalculated,
-                atcVersionYearToCompareWith: atcManualVersionYear,
                 roaCode: rawSubstanceConsumption.route_admin_manual,
                 saltCode: rawSubstanceConsumption.salt_manual,
                 atcVersion: latestAtcVersionData,

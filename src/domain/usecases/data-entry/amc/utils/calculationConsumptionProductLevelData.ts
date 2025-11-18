@@ -22,7 +22,6 @@ import {
     getNewDddData,
     getStandardizedUnit,
     getStandardizedUnitsAndValue,
-    getYearFromAtcVersionKey,
     isStrengthUnitValid,
 } from "../../../../entities/GlassAtcVersionData";
 import { Id } from "../../../../entities/Ref";
@@ -49,9 +48,8 @@ export function calculateConsumptionProductLevelData(
     logger.info(
         `[${new Date().toISOString()}] Starting the calculation of consumption product level data for organisation ${orgUnitId} and period ${period}`
     );
-    const currentAtcVersionYear = getYearFromAtcVersionKey(currentAtcVersion);
 
-    if (!Object.keys(atcClassification)?.length || !currentAtcVersionYear) {
+    if (!Object.keys(atcClassification)?.length) {
         logger.error(
             `[${new Date().toISOString()}] Atc classsification data is empty or atc version year not found: ${currentAtcVersion}`
         );
@@ -100,7 +98,6 @@ export function calculateConsumptionProductLevelData(
                     dddData,
                     dddChanges,
                     unitsData,
-                    currentAtcVersionYear,
                     atcCodeAutocalculated
                 );
                 calculationLogs = [...calculationLogs, ...dddPerProduct.logs];
@@ -232,7 +229,6 @@ function calculateDDDPerProduct(
     dddData: DDDData[] | undefined,
     dddChanges: DDDChangesData[] | undefined,
     unitsData: UnitsData[],
-    atcVersionYearToCompareWith: number,
     atcCodeAutocalculated: ATCCodeLevel5
 ): { result: DDDPerProduct | undefined; logs: BatchLogContent } {
     if (product.AMR_GLASS_AMC_TEA_COMBINATION) {
@@ -259,14 +255,7 @@ function calculateDDDPerProduct(
             return getDDDOfProductFromDDDCombinationsTable(product, codeCombinationData);
         }
     } else {
-        return getDDDOfProductFromDDDTable(
-            product,
-            dddData,
-            dddChanges,
-            unitsData,
-            atcVersionYearToCompareWith,
-            atcCodeAutocalculated
-        );
+        return getDDDOfProductFromDDDTable(product, dddData, dddChanges, unitsData, atcCodeAutocalculated);
     }
 }
 
@@ -301,7 +290,6 @@ function getDDDOfProductFromDDDTable(
     dddData: DDDData[] | undefined,
     dddChanges: DDDChangesData[] | undefined,
     unitsData: UnitsData[],
-    atcVersionYearToCompareWith: number,
     atcCodeAutocalculated: ATCCodeLevel5
 ): { result: DDDPerProduct | undefined; logs: BatchLogContent } {
     const { AMR_GLASS_AMC_TEA_ROUTE_ADMIN, AMR_GLASS_AMC_TEA_SALT } = product;
@@ -368,14 +356,7 @@ function getDDDOfProductFromDDDTable(
     ];
 
     // If not found in ddd table, we try to find it in ddd changes table
-    return getLatestDDDStandardized(
-        product,
-        dddChanges,
-        unitsData,
-        calculationLogs,
-        atcVersionYearToCompareWith,
-        atcCodeAutocalculated
-    );
+    return getLatestDDDStandardized(product, dddChanges, unitsData, calculationLogs, atcCodeAutocalculated);
 }
 
 // 2d
@@ -384,7 +365,6 @@ function getLatestDDDStandardized(
     dddChanges: DDDChangesData[] | undefined,
     unitsData: UnitsData[],
     calculationLogs: BatchLogContent,
-    atcVersionYearToCompareWith: number,
     atcCodeAutocalculated: ATCCodeLevel5
 ): { result: DDDPerProduct | undefined; logs: BatchLogContent } {
     calculationLogs = [
@@ -399,7 +379,6 @@ function getLatestDDDStandardized(
 
     const newDddData = getNewDddData({
         atcCode: atcCodeAutocalculated,
-        atcVersionYearToCompareWith: atcVersionYearToCompareWith,
         roa: product.AMR_GLASS_AMC_TEA_ROUTE_ADMIN,
         dddChanges: dddChanges,
     });
