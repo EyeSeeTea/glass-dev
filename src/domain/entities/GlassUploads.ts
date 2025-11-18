@@ -39,14 +39,4 @@ interface GlassUploadsBase {
     asyncImportSummaries?: ImportSummary[];
 }
 
-// interface GlassUploadsPreprocessing extends GlassUploadsBase {
-//     status: "PREPROCESSING" | "PREPROCESSING_FAILED";
-//     specimens?: string[];
-// }
-
-// interface GlassUploadsDefault extends GlassUploadsBase {
-//     status: Exclude<GlassUploadsStatus, "PREPROCESSING" | "PREPROCESSING_FAILED">;
-//     specimens: string[];
-// }
-
 export type GlassUploads = GlassUploadsBase;
