@@ -15,11 +15,14 @@ import { EffectFn, useCallbackEffect } from "../../hooks/use-callback-effect";
 import { useCurrentPeriodContext } from "../../contexts/current-period-context";
 import { moduleProperties } from "../../../domain/utils/ModuleProperties";
 import { Maybe } from "../../../utils/ts-utils";
+import { glassColors } from "../../pages/app/themes/dhis2.theme";
 
 interface UploadSecondaryProps {
     secondaryFile: File | null;
     setSecondaryFile: (maybeFile: File | null) => void;
     setSecondaryFileTotalRows: React.Dispatch<React.SetStateAction<Maybe<number>>>;
+    isPreprocessing: boolean;
+    setIsPreprocessing: React.Dispatch<React.SetStateAction<boolean>>;
     setHasSecondaryFile: React.Dispatch<React.SetStateAction<boolean>>;
     batchId: string;
     validate: (val: boolean) => void;
@@ -34,6 +37,8 @@ export const UploadSecondary: React.FC<UploadSecondaryProps> = ({
     secondaryFile,
     setSecondaryFile,
     setSecondaryFileTotalRows,
+    isPreprocessing,
+    setIsPreprocessing,
     setHasSecondaryFile,
     validate,
     removeSecondaryFile,
@@ -108,6 +113,7 @@ export const UploadSecondary: React.FC<UploadSecondaryProps> = ({
                             const status =
                                 validationResult.status === "needsPreprocessing" ? "PREPROCESSING" : "UPLOADED";
                             setSecondaryFile(uploadedSample);
+                            setIsPreprocessing(validationResult.status === "needsPreprocessing");
                             if ("rows" in validationResult && validationResult.rows) {
                                 setSecondaryFileTotalRows(validationResult.rows);
                             }
@@ -150,6 +156,7 @@ export const UploadSecondary: React.FC<UploadSecondaryProps> = ({
             setIsLoading,
             setSecondaryFile,
             setSecondaryFileTotalRows,
+            setIsPreprocessing,
             snackbar,
         ]
     );
@@ -185,6 +192,13 @@ export const UploadSecondary: React.FC<UploadSecondaryProps> = ({
                         <CloseIcon />
                     </StyledRemoveButton>
                 </RemoveContainer>
+            )}
+            {isPreprocessing && (
+                <div style={{ marginTop: "10px", color: glassColors.red }}>
+                    {i18n.t(
+                        "Given the file size and format, it is marked for async-preprocessing. You can check the status in the Uploads tab."
+                    )}
+                </div>
             )}
         </ContentWrapper>
     );

@@ -14,10 +14,13 @@ import { EffectFn, useCallbackEffect } from "../../hooks/use-callback-effect";
 import { useCurrentPeriodContext } from "../../contexts/current-period-context";
 import { moduleProperties } from "../../../domain/utils/ModuleProperties";
 import { Maybe } from "../../../utils/ts-utils";
+import { glassColors } from "../../pages/app/themes/dhis2.theme";
 interface UploadPrimaryFileProps {
     primaryFile: File | null;
     setPrimaryFile: React.Dispatch<React.SetStateAction<File | null>>;
     setPrimaryFileTotalRows: React.Dispatch<React.SetStateAction<Maybe<number>>>;
+    isPreprocessing: boolean;
+    setIsPreprocessing: React.Dispatch<React.SetStateAction<boolean>>;
     validate: (val: boolean) => void;
     batchId: string;
     removePrimaryFile: EffectFn<[event: React.MouseEvent<HTMLButtonElement, MouseEvent>]>;
@@ -30,6 +33,8 @@ export const UploadPrimaryFile: React.FC<UploadPrimaryFileProps> = ({
     primaryFile,
     setPrimaryFile,
     setPrimaryFileTotalRows,
+    isPreprocessing,
+    setIsPreprocessing,
     validate,
     batchId,
     removePrimaryFile,
@@ -73,7 +78,6 @@ export const UploadPrimaryFile: React.FC<UploadPrimaryFileProps> = ({
                 if (primaryFile) {
                     setIsLoading(true);
 
-                    // here
                     return compositionRoot.fileSubmission.validatePrimaryFile(primaryFile, moduleName).run(
                         validationResult => {
                             if (!dataSubmissionId) {
@@ -108,6 +112,7 @@ export const UploadPrimaryFile: React.FC<UploadPrimaryFileProps> = ({
                             const status =
                                 validationResult.status === "needsPreprocessing" ? "PREPROCESSING" : "UPLOADED";
                             setPrimaryFile(primaryFile);
+                            setIsPreprocessing(validationResult.status === "needsPreprocessing");
                             if ("rows" in validationResult && validationResult.rows) {
                                 setPrimaryFileTotalRows(validationResult.rows);
                             }
@@ -146,6 +151,7 @@ export const UploadPrimaryFile: React.FC<UploadPrimaryFileProps> = ({
             setIsLoading,
             setPrimaryFile,
             setPrimaryFileTotalRows,
+            setIsPreprocessing,
             snackbar,
         ]
     );
@@ -178,6 +184,13 @@ export const UploadPrimaryFile: React.FC<UploadPrimaryFileProps> = ({
                         <CloseIcon />
                     </StyledRemoveButton>
                 </RemoveContainer>
+            )}
+            {isPreprocessing && (
+                <div style={{ marginTop: "10px", color: glassColors.red }}>
+                    {i18n.t(
+                        "Given the file size and format, it is marked for async-preprocessing. You can check the status in the Uploads tab."
+                    )}
+                </div>
             )}
         </div>
     );

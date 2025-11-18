@@ -121,7 +121,8 @@ async function main() {
                                             glassUploadsRepository,
                                             glassDocumentsRepository,
                                         },
-                                        uploadIdsToSetError
+                                        uploadIdsToSetError,
+                                        `The maximum number of attempts for asynchronous preprocessing (${maxAttempts}) has been reached.`
                                     ).run(
                                         () => {
                                             if (pendingToPreprocess.length > 0) {
@@ -244,11 +245,14 @@ function deleteAsyncPreprocessingAndSetErrorAsyncPreprocessing(
             )} and removing from async-preprocessing in Datastore`
         );
         return removeAsyncPreprocessingFromDatastore(repositories, uploadIdsToSetError).flatMap(() => {
-            return new SetMultipleErrorAsyncPreprocessingUseCase(repositories.glassUploadsRepository)
-                .execute(uploadIdsToSetError, errorMessage)
-                .flatMap(() => {
-                    return removeDocumentsByUploadId(repositories, uploadIdsToSetError);
-                });
+            return new SetMultipleErrorAsyncPreprocessingUseCase(repositories.glassUploadsRepository).execute(
+                uploadIdsToSetError,
+                errorMessage
+            );
+            // TODO: confirm if not deleting the document here is OK (user must delete it from the UI instead?)
+            // .flatMap(() => {
+            //     return removeDocumentsByUploadId(repositories, uploadIdsToSetError);
+            // });
         });
     }
 }
@@ -262,18 +266,19 @@ function removeAsyncPreprocessingFromDatastore(
     return new RemoveAsyncPreprocessingUseCase(repositories.asyncPreprocessingRepository).execute(uploadIdsToRemove);
 }
 
-function removeDocumentsByUploadId(
-    repositories: {
-        glassUploadsRepository: GlassUploadsRepository;
-        glassDocumentsRepository: GlassDocumentsRepository;
-    },
-    uploadIdsToRemove: Id[]
-): FutureData<void> {
-    return new DeleteDocumentsByUploadIdUseCase(
-        repositories.glassDocumentsRepository,
-        repositories.glassUploadsRepository
-    ).execute(uploadIdsToRemove);
-}
+// TODO: remove if document deletion not needed here
+// function removeDocumentsByUploadId(
+//     repositories: {
+//         glassUploadsRepository: GlassUploadsRepository;
+//         glassDocumentsRepository: GlassDocumentsRepository;
+//     },
+//     uploadIdsToRemove: Id[]
+// ): FutureData<void> {
+//     return new DeleteDocumentsByUploadIdUseCase(
+//         repositories.glassDocumentsRepository,
+//         repositories.glassUploadsRepository
+//     ).execute(uploadIdsToRemove);
+// }
 
 function getUploadById(glassUploadsRepository: GlassUploadsRepository, uploadId: Id): FutureData<GlassUploads> {
     return new GetGlassUploadByIdUseCase(glassUploadsRepository).execute(uploadId);

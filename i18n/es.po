@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: i18next-conv\n"
-"POT-Creation-Date: 2025-08-20T13:28:55.361Z\n"
+"POT-Creation-Date: 2025-11-18T17:34:32.304Z\n"
 "PO-Revision-Date: 2018-10-25T09:02:35.143Z\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -203,6 +203,9 @@ msgid ""
 "You can add up to 6 datasets to this submission with different BATCH IDS."
 msgstr ""
 
+msgid "Uploads marked to be preprocessed asynchronously"
+msgstr ""
+
 msgid "Uploads marked to be uploaded asynchronously"
 msgstr ""
 
@@ -373,6 +376,11 @@ msgid "Status"
 msgstr ""
 
 msgid ""
+"PREPROCESSING - The file has been uploaded, but first needs to be "
+"preprocessed asynchronously and validated before data can be imported."
+msgstr ""
+
+msgid ""
 "UPLOADED - The file has been uploaded, but data has not been imported as "
 "upload was discarded in Step 1, due to errors in Step 2 or errors in async "
 "uploads."
@@ -414,6 +422,9 @@ msgstr ""
 msgid "Error occurred when removing async uploads"
 msgstr ""
 
+msgid "Error occurred when removing async preprocessing"
+msgstr ""
+
 msgid "Error occurred when setting data submission status to COMPLETED"
 msgstr ""
 
@@ -430,6 +441,12 @@ msgid "MARKED TO BE UPLOADED"
 msgstr ""
 
 msgid "UPLOADING ASYNC IN PROGRESS"
+msgstr ""
+
+msgid "MARKED TO BE PREPROCESSED ASYNC"
+msgstr ""
+
+msgid "ASYNC PREPROCESSING IN PROGRESS"
 msgstr ""
 
 msgid "Marked to be deleted"
@@ -554,6 +571,9 @@ msgid "Filename"
 msgstr ""
 
 msgid "Download"
+msgstr ""
+
+msgid "N/A"
 msgstr ""
 
 msgid "Filters"
@@ -775,6 +795,11 @@ msgstr ""
 msgid "Select file"
 msgstr ""
 
+msgid ""
+"Given the file size and format, it is marked for async-preprocessing. You "
+"can check the status in the Uploads tab."
+msgstr ""
+
 msgid "The password and confirm password fields don't match"
 msgstr ""
 
@@ -875,4 +900,10 @@ msgid "Reports"
 msgstr ""
 
 msgid "Signals"
+msgstr ""
+
+msgctxt ""
+"FAILED - The file async preprocessing has failed due to issues in file "
+"format, headers or file contents."
+msgid "PREPROCESSING"
 msgstr ""

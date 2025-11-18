@@ -21,6 +21,7 @@ import { useCurrentUserGroupsAccess } from "../../hooks/useCurrentUserGroupsAcce
 import { DataSubmissionStatusTypes } from "../../../domain/entities/GlassDataSubmission";
 import { useQuestionnaires } from "./Questionnaires";
 import { useGlassUploadsAsyncUploads } from "../../hooks/useGlassUploadsAsyncUploads";
+import { useGlassUploadsAsyncPreprocessing } from "../../hooks/useGlassUploadsAsyncPreprocessing";
 
 export const getCompletedUploads = (upload: GlassUploadsState) => {
     if (upload.kind === "loaded") {
@@ -71,8 +72,19 @@ export const ListOfDatasets: React.FC<ListOfDatasetsProps> = ({ setRefetchStatus
         currentPeriod
     );
     const { captureAccessGroup } = useCurrentUserGroupsAccess();
+    const { asyncPreprocessing } = useGlassUploadsAsyncPreprocessing();
     const { asyncUploads, refreshAsyncUploads } = useGlassUploadsAsyncUploads();
     const [isDatasetMarkAsCompleted, setIsDatasetMarkAsCompleted] = React.useState(false);
+
+    const uploadsToBePreproccesedAsync = useMemo(() => {
+        if (uploads.kind === "loaded" && asyncPreprocessing.kind === "loaded") {
+            return uploads.data.filter((row: UploadsDataItem) =>
+                asyncPreprocessing.data?.some(asyncUpload => asyncUpload.uploadId === row.id)
+            );
+        } else {
+            return [];
+        }
+    }, [asyncPreprocessing, uploads]);
 
     const uploadsToBeUploadAsync = useMemo(() => {
         if (uploads.kind === "loaded" && asyncUploads.kind === "loaded") {
@@ -88,8 +100,9 @@ export const ListOfDatasets: React.FC<ListOfDatasetsProps> = ({ setRefetchStatus
         if (uploads.kind === "loaded" && asyncUploads.kind === "loaded") {
             return uploads.data.filter(
                 (row: UploadsDataItem) =>
-                    (row.status.toLowerCase() === "uploaded" || row.status.toLowerCase() === "imported") &&
-                    uploadsToBeUploadAsync?.every(asyncUpload => asyncUpload.id !== row.id)
+                    ((row.status.toLowerCase() === "uploaded" || row.status.toLowerCase() === "imported") &&
+                        uploadsToBeUploadAsync?.every(asyncUpload => asyncUpload.id !== row.id)) ||
+                    row.status === "PREPROCESSING_FAILED"
             );
         } else {
             return [];
@@ -141,6 +154,7 @@ export const ListOfDatasets: React.FC<ListOfDatasetsProps> = ({ setRefetchStatus
                         refreshUploads={refreshUploads}
                         refreshAsyncUploads={refreshAsyncUploads}
                         asyncUploads={asyncUploads.kind === "loaded" ? asyncUploads.data : []}
+                        asyncPreprocessing={asyncPreprocessing.kind === "loaded" ? asyncPreprocessing.data : []}
                     />
                 )}
                 {currentDataSubmissionStatus.kind === "loaded" ? (
@@ -201,6 +215,16 @@ export const ListOfDatasets: React.FC<ListOfDatasetsProps> = ({ setRefetchStatus
                         <CircularProgress size={20} />
                     </div>
                 )}
+                {uploadsToBePreproccesedAsync && uploadsToBePreproccesedAsync.length > 0 && (
+                    <UploadsTable
+                        title={i18n.t("Uploads marked to be preprocessed asynchronously")}
+                        items={uploadsToBePreproccesedAsync}
+                        refreshUploads={refreshUploads}
+                        refreshAsyncUploads={refreshAsyncUploads}
+                        asyncUploads={asyncUploads.kind === "loaded" ? asyncUploads.data : []}
+                        asyncPreprocessing={asyncPreprocessing.kind === "loaded" ? asyncPreprocessing.data : []}
+                    />
+                )}
                 {uploadsToBeUploadAsync && uploadsToBeUploadAsync.length > 0 && (
                     <UploadsTable
                         title={i18n.t("Uploads marked to be uploaded asynchronously")}
@@ -208,6 +232,7 @@ export const ListOfDatasets: React.FC<ListOfDatasetsProps> = ({ setRefetchStatus
                         refreshUploads={refreshUploads}
                         refreshAsyncUploads={refreshAsyncUploads}
                         asyncUploads={asyncUploads.kind === "loaded" ? asyncUploads.data : []}
+                        asyncPreprocessing={asyncPreprocessing.kind === "loaded" ? asyncPreprocessing.data : []}
                     />
                 )}
                 {validatedUploads && validatedUploads.length > 0 && (
@@ -221,6 +246,7 @@ export const ListOfDatasets: React.FC<ListOfDatasetsProps> = ({ setRefetchStatus
                         allUploads={uploads.kind === "loaded" ? uploads.data : []}
                         refreshAsyncUploads={refreshAsyncUploads}
                         asyncUploads={asyncUploads.kind === "loaded" ? asyncUploads.data : []}
+                        asyncPreprocessing={asyncPreprocessing.kind === "loaded" ? asyncPreprocessing.data : []}
                     />
                 )}
                 {incompleteUploadsNotAsyncUploaded && incompleteUploadsNotAsyncUploaded.length > 0 && (
@@ -230,6 +256,7 @@ export const ListOfDatasets: React.FC<ListOfDatasetsProps> = ({ setRefetchStatus
                         refreshUploads={refreshUploads}
                         refreshAsyncUploads={refreshAsyncUploads}
                         asyncUploads={asyncUploads.kind === "loaded" ? asyncUploads.data : []}
+                        asyncPreprocessing={asyncPreprocessing.kind === "loaded" ? asyncPreprocessing.data : []}
                     />
                 )}
             </ContentWrapper>

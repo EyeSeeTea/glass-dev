@@ -8,4 +8,4 @@ export type GlassGeneralInfo = {
     fileSizeLimit: number;
 };
 
-export const DEFAULT_FILE_SIZE_LIMIT_MB = 50;
+export const DEFAULT_FILE_SIZE_LIMIT_MB = 100;
