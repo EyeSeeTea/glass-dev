@@ -128,7 +128,7 @@ export class RISIndividualFungalDataCSVDefaultRepository implements RISIndividua
         dataColumns: CustomDataColumns,
         blob: Blob,
         chunkSize: number,
-        onChunk: (chunk: CustomDataColumns[]) => FutureData<void>
+        onChunk: (chunk: CustomDataColumns[]) => FutureData<boolean>
     ): FutureData<void> {
         if (isCsvFile(blob)) {
             return Future.fromPromise(
@@ -149,7 +149,12 @@ export class RISIndividualFungalDataCSVDefaultRepository implements RISIndividua
                 if (!chunk) {
                     return Future.success(undefined);
                 }
-                return onChunk(chunk).flatMap(() => processChunk(index + 1));
+                return onChunk(chunk).flatMap(shouldContinue => {
+                    if (!shouldContinue) {
+                        return Future.success(undefined);
+                    }
+                    return processChunk(index + 1);
+                });
             };
             return processChunk(0);
         });

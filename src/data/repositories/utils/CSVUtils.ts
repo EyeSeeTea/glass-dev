@@ -117,10 +117,12 @@ export async function parseCsvBlobInChunks<T>(
     dataColumns: Array<{ key: string; type: "string" | "number" }>,
     fileOrBlob: Blob | File,
     chunkSize: number,
-    onChunk: (chunk: T[]) => Promise<void>
+    /** Callback to process each chunk. Return false to stop processing following chunks */
+    onChunk: (chunk: T[]) => Promise<boolean>
 ): Promise<void> {
     return new Promise<void>((resolve, reject) => {
         let currentChunk: T[] = [];
+        let shouldContinue = true;
         const readable = createReadableInput(fileOrBlob);
         Papa.parse<Record<string, string>>(readable, {
             worker: true,
@@ -128,6 +130,11 @@ export async function parseCsvBlobInChunks<T>(
             skipEmptyLines: true,
             chunk: async (results, parser) => {
                 try {
+                    if (!shouldContinue) {
+                        parser.abort();
+                        return;
+                    }
+
                     // TODO: with XLSX we use cellDates: true. Emulate that behavior here if needed.
 
                     // Transform CSV rows to the desired format
@@ -159,7 +166,13 @@ export async function parseCsvBlobInChunks<T>(
                         const chunkToProcess = currentChunk.slice(0, chunkSize);
                         currentChunk = currentChunk.slice(chunkSize);
 
-                        await onChunk(chunkToProcess);
+                        shouldContinue = await onChunk(chunkToProcess);
+
+                        if (!shouldContinue) {
+                            parser.abort();
+                            resolve();
+                            return;
+                        }
 
                         parser.resume();
                     }
@@ -171,10 +184,13 @@ export async function parseCsvBlobInChunks<T>(
             complete: async () => {
                 try {
                     // Process any remaining rows in chunks respecting the chunkSize limit
-                    while (currentChunk.length > 0) {
+                    while (currentChunk.length > 0 && shouldContinue) {
                         const chunkToProcess = currentChunk.slice(0, chunkSize);
                         currentChunk = currentChunk.slice(chunkSize);
-                        await onChunk(chunkToProcess);
+                        shouldContinue = await onChunk(chunkToProcess);
+                        if (!shouldContinue) {
+                            break;
+                        }
                     }
                     resolve();
                 } catch (error) {

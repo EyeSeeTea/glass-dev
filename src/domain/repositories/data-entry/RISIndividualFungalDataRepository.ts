@@ -9,7 +9,7 @@ export interface RISIndividualFungalDataRepository {
         dataColumns: CustomDataColumns,
         blob: Blob,
         chunkSize: number,
-        onChunk: (chunk: CustomDataColumns[]) => FutureData<void>
+        onChunk: (chunk: CustomDataColumns[]) => FutureData<boolean>
     ): FutureData<void>;
     validate(dataColumns: CustomDataColumns, file: File | Blob): FutureData<ValidationResultWithSpecimens>;
 }
