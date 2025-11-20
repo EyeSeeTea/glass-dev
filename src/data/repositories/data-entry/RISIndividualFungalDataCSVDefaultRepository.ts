@@ -8,7 +8,13 @@ import { SpreadsheetXlsxDataSource } from "../SpreadsheetXlsxDefaultRepository";
 import { doesColumnExist, getNumberValue, getTextValue } from "../utils/CSVUtils";
 import { RISIndividualFungalDataRepository } from "../../../domain/repositories/data-entry/RISIndividualFungalDataRepository";
 import { ValidationResultWithSpecimens } from "../../../domain/entities/FileValidationResult";
-import { isCsvFile, validateCsvHeaders, getRowCountAndSelectDistinctFromCsv } from "../utils/CSVUtils";
+import {
+    isCsvFile,
+    validateCsvHeaders,
+    getRowCountAndSelectDistinctFromCsv,
+    parseCsvBlobInChunks,
+} from "../utils/CSVUtils";
+import _ from "lodash";
 export class RISIndividualFungalDataCSVDefaultRepository implements RISIndividualFungalDataRepository {
     get(dataColumns: CustomDataColumns, file: File): FutureData<CustomDataColumns[]> {
         return Future.fromPromise(new SpreadsheetXlsxDataSource().read(file)).map(spreadsheet => {
@@ -39,7 +45,6 @@ export class RISIndividualFungalDataCSVDefaultRepository implements RISIndividua
     validate(dataColumns: CustomDataColumns, file: File | Blob): FutureData<ValidationResultWithSpecimens> {
         if (isCsvFile(file)) {
             return this.validateCsv(
-                // @ts-expect-error TODO: file being a Blob still works for CSV validation?
                 file,
                 dataColumns.map(col => col.key)
             );
@@ -72,7 +77,7 @@ export class RISIndividualFungalDataCSVDefaultRepository implements RISIndividua
         });
     }
 
-    private validateCsv(file: File, requiredColumns: string[]): FutureData<ValidationResultWithSpecimens> {
+    private validateCsv(file: File | Blob, requiredColumns: string[]): FutureData<ValidationResultWithSpecimens> {
         return Future.fromPromise(
             validateCsvHeaders(file, requiredColumns).then(headerValidationResult => {
                 if (!headerValidationResult.valid) {
@@ -116,6 +121,37 @@ export class RISIndividualFungalDataCSVDefaultRepository implements RISIndividua
                     return data;
                 }) || [];
             return rows;
+        });
+    }
+
+    getFromBlobInChunks(
+        dataColumns: CustomDataColumns,
+        blob: Blob,
+        chunkSize: number,
+        onChunk: (chunk: CustomDataColumns[]) => FutureData<void>
+    ): FutureData<void> {
+        if (isCsvFile(blob)) {
+            return Future.fromPromise(
+                parseCsvBlobInChunks<CustomDataColumns>(dataColumns, blob, chunkSize, (chunk: CustomDataColumns[]) =>
+                    onChunk(chunk).toPromise()
+                )
+            );
+        }
+
+        // For Excel files, fall back to loading all at once and chunking manually
+        return this.getFromBlob(dataColumns, blob).flatMap(allRows => {
+            const chunks = _.chunk(allRows, chunkSize);
+            const processChunk = (index: number): FutureData<void> => {
+                if (index >= chunks.length) {
+                    return Future.success(undefined);
+                }
+                const chunk = chunks[index];
+                if (!chunk) {
+                    return Future.success(undefined);
+                }
+                return onChunk(chunk).flatMap(() => processChunk(index + 1));
+            };
+            return processChunk(0);
         });
     }
 }
