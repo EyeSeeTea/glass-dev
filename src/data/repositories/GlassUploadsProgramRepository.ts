@@ -1,5 +1,4 @@
 import _ from "lodash";
-import FormData from "form-data";
 
 import { Future, FutureData } from "../../domain/entities/Future";
 import { GlassUploads, GlassUploadsStatus } from "../../domain/entities/GlassUploads";
@@ -17,7 +16,11 @@ import {
 } from "../../types/d2-api";
 import { apiToFuture } from "../../utils/futures";
 import { Maybe } from "../../utils/ts-utils";
-import { getAsyncImportSummariesFormData, getImportSummaryFormData } from "./utils/getImportSummaryFormData";
+import {
+    getUploadsFormDataBuilder,
+    UploadsFormData,
+    UploadsFormDataBuilder,
+} from "./utils/builders/UploadsFormDataBuilder";
 
 const AMR_GLASS_PROE_UPLOADS_PROGRAM_ID = "yVFQpwmCX0D";
 const AMR_GLASS_PROE_UPLOADS_PROGRAM_STAGE_ID = "a6s7mVGkZZF";
@@ -52,7 +55,12 @@ export function getValueById(dataValues: DataValue[], dataElement: string): Mayb
 }
 
 export class GlassUploadsProgramRepository implements GlassUploadsRepository {
-    constructor(private api: D2Api) {}
+    private readonly uploadsFormDataBuilder: UploadsFormDataBuilder;
+
+    constructor(private api: D2Api) {
+        const runtime: "node" | "browser" = typeof window === "undefined" ? "node" : "browser";
+        this.uploadsFormDataBuilder = getUploadsFormDataBuilder(runtime);
+    }
 
     getById(id: Id): FutureData<GlassUploads> {
         return apiToFuture(
@@ -297,18 +305,18 @@ export class GlassUploadsProgramRepository implements GlassUploadsRepository {
                         });
                     }
 
-                    return this.saveEventDataValueFile(getImportSummaryFormData(upload.importSummary)).flatMap(
-                        importSummaryId => {
-                            const updatedUpload: GlassUploadsWithFileResourceIds = {
-                                ...upload,
-                                importSummaryId: importSummaryId,
-                            };
-                            return Future.success(updatedUpload);
-                        }
-                    );
+                    return this.saveEventDataValueFile(
+                        this.uploadsFormDataBuilder.createImportSummaryFormData(upload.importSummary)
+                    ).flatMap(importSummaryId => {
+                        const updatedUpload: GlassUploadsWithFileResourceIds = {
+                            ...upload,
+                            importSummaryId: importSummaryId,
+                        };
+                        return Future.success(updatedUpload);
+                    });
                 })
             ).flatMap(uploadsWithFileResourceIds => {
-                return this.saveUploads(uploadsWithFileResourceIds);
+                return this.saveUploadsWithFileResourceIds(uploadsWithFileResourceIds);
             });
         });
     }
@@ -394,7 +402,11 @@ export class GlassUploadsProgramRepository implements GlassUploadsRepository {
         });
     }
 
-    private mapUploadToEvent(upload: GlassUploadsWithFileResourceIds): D2TrackerEventToPost {
+    private mapUploadToEvent(
+        upload: GlassUploads,
+        importSummaryId?: Id,
+        asyncImportSummariesId?: Id
+    ): D2TrackerEventToPost {
         const dataValues = [
             { dataElement: uploadsDHIS2Ids.batchId, value: upload.batchId },
             { dataElement: uploadsDHIS2Ids.countryCode, value: upload.countryCode },
@@ -428,15 +440,22 @@ export class GlassUploadsProgramRepository implements GlassUploadsRepository {
                 dataElement: uploadsDHIS2Ids.errorAsyncUploading,
                 value: upload.errorAsyncUploading ? "true" : null,
             },
-            {
-                dataElement: uploadsDHIS2Ids.importSummary,
-                value: upload.importSummaryId || "",
-            },
-            {
-                dataElement: uploadsDHIS2Ids.asyncImportSummaries,
-                value: upload.asyncImportSummariesId || "",
-            },
+            // FIX: null needed to remove the value in DHIS2 if a yes-only field is set to false
+        ] as D2TrackerEventToPost["dataValues"];
+
+        const importSummariesDataValues: D2TrackerEventToPost["dataValues"] = [
+            ...(importSummaryId ? [{ dataElement: uploadsDHIS2Ids.importSummary, value: importSummaryId }] : []),
+            ...(asyncImportSummariesId
+                ? [
+                      {
+                          dataElement: uploadsDHIS2Ids.asyncImportSummaries,
+                          value: asyncImportSummariesId,
+                      },
+                  ]
+                : []),
         ];
+
+        const allDataValues: D2TrackerEventToPost["dataValues"] = [...dataValues, ...importSummariesDataValues];
 
         return {
             event: upload.id,
@@ -444,8 +463,8 @@ export class GlassUploadsProgramRepository implements GlassUploadsRepository {
             programStage: AMR_GLASS_PROE_UPLOADS_PROGRAM_STAGE_ID,
             orgUnit: upload.orgUnit,
             occurredAt: `${upload.period}-01-01`,
-            dataValues: dataValues,
-        } as D2TrackerEventToPost;
+            dataValues: allDataValues,
+        };
     }
 
     private getImportSummary(eventId: Id, dataElementId: Id): FutureData<ImportSummaryErrors> {
@@ -464,7 +483,7 @@ export class GlassUploadsProgramRepository implements GlassUploadsRepository {
         });
     }
 
-    private saveEventDataValueFile(payload: FormData): FutureData<Id> {
+    private saveEventDataValueFile(payload: UploadsFormData): FutureData<Id> {
         return apiToFuture(
             this.api.post<PartialSaveFileResourceResponse>("/fileResources", undefined, payload, {
                 requestBodyType: "raw",
@@ -537,8 +556,22 @@ export class GlassUploadsProgramRepository implements GlassUploadsRepository {
         return events;
     }
 
-    private saveUploads(uploads: GlassUploadsWithFileResourceIds[]): FutureData<void> {
+    private saveUploads(uploads: GlassUploads[]): FutureData<void> {
         const d2TrackerEvents = uploads.map(upload => this.mapUploadToEvent(upload));
+
+        return apiToFuture(
+            this.api.tracker.post({ importStrategy: "CREATE_AND_UPDATE" }, { events: d2TrackerEvents })
+        ).flatMap(response => {
+            if (response.status !== "OK") {
+                return Future.error(`Error saving uploads: ${response.message}`);
+            } else return Future.success(undefined);
+        });
+    }
+
+    private saveUploadsWithFileResourceIds(uploads: GlassUploadsWithFileResourceIds[]): FutureData<void> {
+        const d2TrackerEvents = uploads.map(upload =>
+            this.mapUploadToEvent(upload, upload.importSummaryId, upload.asyncImportSummariesId)
+        );
 
         return apiToFuture(
             this.api.tracker.post({ importStrategy: "CREATE_AND_UPDATE" }, { events: d2TrackerEvents })
@@ -552,12 +585,17 @@ export class GlassUploadsProgramRepository implements GlassUploadsRepository {
     private updateUpload(id: Id, patch: Partial<GlassUploads>): FutureData<void> {
         return this.getById(id).flatMap(upload => {
             const updatedUpload: GlassUploads = { ...upload, ...patch };
+
             return Future.joinObj({
                 asyncImportSummariesId: patch.asyncImportSummaries
-                    ? this.saveEventDataValueFile(getAsyncImportSummariesFormData(patch.asyncImportSummaries))
+                    ? this.saveEventDataValueFile(
+                          this.uploadsFormDataBuilder.createAsyncImportSummariesFormData(patch.asyncImportSummaries)
+                      )
                     : Future.success(undefined),
                 importSummaryId: patch.importSummary
-                    ? this.saveEventDataValueFile(getImportSummaryFormData(patch.importSummary))
+                    ? this.saveEventDataValueFile(
+                          this.uploadsFormDataBuilder.createImportSummaryFormData(patch.importSummary)
+                      )
                     : Future.success(undefined),
             }).flatMap(({ asyncImportSummariesId, importSummaryId }) => {
                 const upload: GlassUploadsWithFileResourceIds = {
@@ -565,7 +603,7 @@ export class GlassUploadsProgramRepository implements GlassUploadsRepository {
                     asyncImportSummariesId: asyncImportSummariesId,
                     importSummaryId: importSummaryId,
                 };
-                return this.saveUploads([upload]);
+                return this.saveUploadsWithFileResourceIds([upload]);
             });
         });
     }
@@ -587,11 +625,15 @@ export class GlassUploadsProgramRepository implements GlassUploadsRepository {
                         return Future.joinObj({
                             asyncImportSummariesId: patch.asyncImportSummaries
                                 ? this.saveEventDataValueFile(
-                                      getAsyncImportSummariesFormData(patch.asyncImportSummaries)
+                                      this.uploadsFormDataBuilder.createAsyncImportSummariesFormData(
+                                          patch.asyncImportSummaries
+                                      )
                                   )
                                 : Future.success(undefined),
                             importSummaryId: patch.importSummary
-                                ? this.saveEventDataValueFile(getImportSummaryFormData(patch.importSummary))
+                                ? this.saveEventDataValueFile(
+                                      this.uploadsFormDataBuilder.createImportSummaryFormData(patch.importSummary)
+                                  )
                                 : Future.success(undefined),
                         }).flatMap(({ asyncImportSummariesId, importSummaryId }) => {
                             const updatedUpload: GlassUploadsWithFileResourceIds = {
@@ -603,7 +645,7 @@ export class GlassUploadsProgramRepository implements GlassUploadsRepository {
                         });
                     })
                 ).flatMap(uploadsWithFileResourceIds => {
-                    return this.saveUploads(uploadsWithFileResourceIds);
+                    return this.saveUploadsWithFileResourceIds(uploadsWithFileResourceIds);
                 });
             } else {
                 return this.saveUploads(updatedUploads);
