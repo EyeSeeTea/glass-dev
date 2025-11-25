@@ -120,14 +120,14 @@ export class AsyncImportRISIndividualFungalFile {
                                         ];
                                         return this.saveAllImportSummaries(uploadId, errorSummaries);
                                     } else {
-                                        consoleLogger.debug(
-                                            `No blocking errors found during program rule validation of ${uploadId} for module ${glassModule.name}, programId ${programId}, orgUnitId ${orgUnitId}, countryCode ${countryCode}, period ${period}. Proceeding with import...`
-                                        );
                                         const trackedEntities =
                                             validationResult.teis && validationResult.teis.length > 0
                                                 ? validationResult.teis
                                                 : [];
 
+                                        consoleLogger.debug(
+                                            `No blocking errors found during program rule validation of ${uploadId} for module ${glassModule.name}, programId ${programId}, orgUnitId ${orgUnitId}, countryCode ${countryCode}, period ${period}. Proceeding with import of ${trackedEntities.length} tracked entity instances.`
+                                        );
                                         return importOrDeleteTrackedEntitiesInChunks({
                                             trackedEntities: trackedEntities,
                                             chunkSize: uploadChunkSize,
