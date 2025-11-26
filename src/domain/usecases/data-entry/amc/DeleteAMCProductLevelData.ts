@@ -17,6 +17,8 @@ import { GlassUploadsRepository } from "../../../repositories/GlassUploadsReposi
 import { GlassUploads } from "../../../entities/GlassUploads";
 import { Id } from "../../../entities/Ref";
 import { AMC_SUBSTANCE_CALCULATED_CONSUMPTION_PROGRAM_ID } from "./ImportAMCSubstanceLevelData";
+import { Maybe } from "../../../../utils/ts-utils";
+import { MODULE_NAMES } from "../../../entities/GlassModule";
 
 // NOTICE: code adapted for node environment from ImportAMCProductLevelData.ts (only DELETE)
 export class DeleteAMCProductLevelData {
@@ -32,7 +34,11 @@ export class DeleteAMCProductLevelData {
         }
     ) {}
 
-    public delete(arrayBuffer: ArrayBuffer, upload: GlassUploads): FutureData<ImportSummary> {
+    public delete(
+        arrayBuffer: ArrayBuffer,
+        upload: GlassUploads,
+        asyncDeleteChunkSize: Maybe<number>
+    ): FutureData<ImportSummary> {
         const { id: uploadId, calculatedEventListFileId, calculatedEventListDataDeleted } = upload;
         return this.options.excelRepository
             .loadTemplateFromArrayBuffer(arrayBuffer, AMC_PRODUCT_REGISTER_PROGRAM_ID)
@@ -57,13 +63,17 @@ export class DeleteAMCProductLevelData {
 
                             return downloadIdsAndDeleteTrackedEntitiesUsingFileBlob(
                                 upload,
+                                MODULE_NAMES.AMC,
                                 AMC_PRODUCT_REGISTER_PROGRAM_ID,
                                 "DELETE",
                                 AMR_GLASS_AMC_TET_PRODUCT_REGISTER,
-                                this.options.glassDocumentsRepository,
-                                this.options.trackerRepository,
-                                this.options.metadataRepository,
-                                this.options.glassUploadsRepository
+                                asyncDeleteChunkSize,
+                                {
+                                    glassDocumentsRepository: this.options.glassDocumentsRepository,
+                                    trackerRepository: this.options.trackerRepository,
+                                    metadataRepository: this.options.metadataRepository,
+                                    glassUploadsRepository: this.options.glassUploadsRepository,
+                                }
                             ).flatMap(deleteProductSummary => {
                                 if (
                                     (deleteProductSummary.status === "SUCCESS" ||

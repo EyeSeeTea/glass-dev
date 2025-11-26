@@ -8,10 +8,11 @@ import {
     getCategoryOptionComboByDataElement,
     getCategoryOptionComboByOptionCodes,
 } from "../utils/getCategoryOptionCombo";
-import { includeBlockingErrors } from "../utils/includeBlockingErrors";
 import { mapDataValuesToImportSummary } from "../utils/mapDhis2Summary";
 import { RISData } from "../../../entities/data-entry/amr-external/RISData";
 import { AMR_AMR_DS_INPUT_FILES_RIS_DS_ID, AMR_DATA_PATHOGEN_ANTIBIOTIC_BATCHID_CC_ID } from "./ImportRISFile";
+import { Maybe } from "../../../../utils/ts-utils";
+import { deleteDataValues } from "../utils/deleteDataValues";
 
 // NOTICE: code adapted for node environment from ImportRISFile.ts (only DELETE)
 export class DeleteRISDataset {
@@ -23,9 +24,9 @@ export class DeleteRISDataset {
         }
     ) {}
 
-    public delete(arrayBuffer: ArrayBuffer): FutureData<ImportSummary> {
+    public delete(arrayBuffer: ArrayBuffer, asyncDeleteChunkSize: Maybe<number>): FutureData<ImportSummary> {
         return this.options.risDataRepository
-            .getFromArayBuffer(arrayBuffer)
+            .getFromArrayBuffer(arrayBuffer)
             .flatMap(risDataItems => {
                 return Future.joinObj({
                     risDataItems: Future.success(risDataItems),
@@ -79,15 +80,16 @@ export class DeleteRISDataset {
                     })
                     .flat();
 
-                return this.options.dataValuesRepository.save(dataValues, "DELETE", false).map(saveSummary => {
-                    const importSummary = mapDataValuesToImportSummary(saveSummary, "DELETE");
+                return deleteDataValues(dataValues, asyncDeleteChunkSize, this.options.dataValuesRepository).map(
+                    saveSummary => {
+                        const importSummary = mapDataValuesToImportSummary(saveSummary, "DELETE");
 
-                    const summaryWithConsistencyBlokingErrors = includeBlockingErrors(importSummary, []);
-
-                    summaryWithConsistencyBlokingErrors.importTime = saveSummary.importTime;
-
-                    return summaryWithConsistencyBlokingErrors;
-                });
+                        return {
+                            ...importSummary,
+                            importTime: saveSummary.importTime,
+                        };
+                    }
+                );
             });
     }
 }

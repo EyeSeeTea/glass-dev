@@ -13,7 +13,7 @@ export class SampleDataCSVDeafultRepository implements SampleDataRepository {
         });
     }
 
-    getFromArayBuffer(arrayBuffer: ArrayBuffer): FutureData<SampleData[]> {
+    getFromArrayBuffer(arrayBuffer: ArrayBuffer): FutureData<SampleData[]> {
         return Future.fromPromise(new SpreadsheetXlsxDataSource().readFromArrayBuffer(arrayBuffer)).map(spreadsheet => {
             const sheet = spreadsheet.sheets[0]; //Only one sheet for AMR RIS
             return this.mapSheetRowsToSampleData(sheet?.rows || []);
