@@ -14,10 +14,13 @@ import { EffectFn, useCallbackEffect } from "../../hooks/use-callback-effect";
 import { useCurrentPeriodContext } from "../../contexts/current-period-context";
 import { moduleProperties } from "../../../domain/utils/ModuleProperties";
 import { Maybe } from "../../../utils/ts-utils";
+import { glassColors } from "../../pages/app/themes/dhis2.theme";
 interface UploadPrimaryFileProps {
     primaryFile: File | null;
     setPrimaryFile: React.Dispatch<React.SetStateAction<File | null>>;
     setPrimaryFileTotalRows: React.Dispatch<React.SetStateAction<Maybe<number>>>;
+    isPreprocessing: boolean;
+    setIsPreprocessing: React.Dispatch<React.SetStateAction<boolean>>;
     validate: (val: boolean) => void;
     batchId: string;
     removePrimaryFile: EffectFn<[event: React.MouseEvent<HTMLButtonElement, MouseEvent>]>;
@@ -30,6 +33,8 @@ export const UploadPrimaryFile: React.FC<UploadPrimaryFileProps> = ({
     primaryFile,
     setPrimaryFile,
     setPrimaryFileTotalRows,
+    isPreprocessing,
+    setIsPreprocessing,
     validate,
     batchId,
     removePrimaryFile,
@@ -69,36 +74,51 @@ export const UploadPrimaryFile: React.FC<UploadPrimaryFileProps> = ({
             if (rejections.length > 0) {
                 snackbar.error(i18n.t("Multiple uploads not allowed, please select one file"));
             } else {
-                const uploadedPrimaryFile = files[0];
-                if (uploadedPrimaryFile) {
+                const primaryFile = files[0];
+                if (primaryFile) {
                     setIsLoading(true);
 
-                    return compositionRoot.fileSubmission.validatePrimaryFile(uploadedPrimaryFile, moduleName).run(
-                        primaryFileData => {
+                    return compositionRoot.fileSubmission.validatePrimaryFile(primaryFile, moduleName).run(
+                        validationResult => {
                             if (!dataSubmissionId) {
                                 snackbar.error(i18n.t("Data submission id not found. Please try again"));
                                 setIsLoading(false);
                                 return;
                             }
-
-                            if (primaryFileData.isValid) {
-                                setPrimaryFile(uploadedPrimaryFile);
-                                setPrimaryFileTotalRows(primaryFileData.rows);
-
-                                const primaryFileType = moduleProperties.get(moduleName)?.primaryFileType;
-                                const data = {
-                                    batchId,
-                                    fileType: primaryFileType !== undefined ? primaryFileType : moduleName,
-                                    dataSubmission: dataSubmissionId,
-                                    moduleId,
-                                    moduleName,
-                                    period: currentPeriod.toString(),
-                                    orgUnitId: orgUnitId,
-                                    orgUnitCode: orgUnitCode,
-                                    rows: primaryFileData.rows,
-                                    specimens: primaryFileData.specimens,
-                                };
-                                return compositionRoot.glassDocuments.upload({ file: uploadedPrimaryFile, data }).run(
+                            if (validationResult.status === "validated" && !validationResult.isValid) {
+                                snackbar.error(i18n.t("Incorrect File Format. Please retry with a valid file"));
+                                setIsLoading(false);
+                                return;
+                            }
+                            const primaryFileType = moduleProperties.get(moduleName)?.primaryFileType;
+                            const baseData = {
+                                batchId,
+                                fileType: primaryFileType !== undefined ? primaryFileType : moduleName,
+                                dataSubmission: dataSubmissionId,
+                                moduleId,
+                                moduleName,
+                                period: currentPeriod.toString(),
+                                orgUnitId: orgUnitId,
+                                orgUnitCode: orgUnitCode,
+                            };
+                            const data =
+                                validationResult.status === "needsPreprocessing"
+                                    ? baseData
+                                    : {
+                                          ...baseData,
+                                          rows: validationResult.rows,
+                                          specimens: validationResult.specimens,
+                                      };
+                            const status =
+                                validationResult.status === "needsPreprocessing" ? "PREPROCESSING" : "UPLOADED";
+                            setPrimaryFile(primaryFile);
+                            setIsPreprocessing(validationResult.status === "needsPreprocessing");
+                            if ("rows" in validationResult && validationResult.rows) {
+                                setPrimaryFileTotalRows(validationResult.rows);
+                            }
+                            return compositionRoot.glassDocuments
+                                .upload({ file: primaryFile, data, status: status })
+                                .run(
                                     uploadId => {
                                         localStorage.setItem("primaryUploadId", uploadId);
                                         setIsLoading(false);
@@ -109,10 +129,6 @@ export const UploadPrimaryFile: React.FC<UploadPrimaryFileProps> = ({
                                         setIsLoading(false);
                                     }
                                 );
-                            } else {
-                                snackbar.error(i18n.t("Incorrect File Format. Please retry with a valid file"));
-                                setIsLoading(false);
-                            }
                         },
                         _error => {
                             snackbar.error(i18n.t("Error in file upload"));
@@ -135,6 +151,7 @@ export const UploadPrimaryFile: React.FC<UploadPrimaryFileProps> = ({
             setIsLoading,
             setPrimaryFile,
             setPrimaryFileTotalRows,
+            setIsPreprocessing,
             snackbar,
         ]
     );
@@ -167,6 +184,13 @@ export const UploadPrimaryFile: React.FC<UploadPrimaryFileProps> = ({
                         <CloseIcon />
                     </StyledRemoveButton>
                 </RemoveContainer>
+            )}
+            {isPreprocessing && (
+                <div style={{ marginTop: "10px", color: glassColors.red }}>
+                    {i18n.t(
+                        "Given the file size and format, it is marked for async-preprocessing. You can check the status in the Uploads tab."
+                    )}
+                </div>
             )}
         </div>
     );

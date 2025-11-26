@@ -1,3 +1,4 @@
+import { ValidationResultWithSpecimens } from "../../entities/FileValidationResult";
 import { FutureData } from "../../entities/Future";
 
 export interface AMCDataRepository {
@@ -5,5 +6,5 @@ export interface AMCDataRepository {
         file: File,
         teiDataColumns: string[],
         rawProductDataColumns: string[]
-    ): FutureData<{ isValid: boolean; rows: number; specimens: string[] }>;
+    ): FutureData<ValidationResultWithSpecimens>;
 }

@@ -4,12 +4,10 @@ import { Id } from "../../entities/Ref";
 import { RawSubstanceConsumptionData } from "../../entities/data-entry/amc/RawSubstanceConsumptionData";
 import { SubstanceConsumptionCalculated } from "../../entities/data-entry/amc/SubstanceConsumptionCalculated";
 import { ImportStrategy } from "../../entities/data-entry/DataValuesSaveSummary";
+import { ValidationResultWithSpecimens } from "../../entities/FileValidationResult";
 
 export interface AMCSubstanceDataRepository {
-    validate(
-        file: File,
-        rawSubstanceDataColumns: string[]
-    ): FutureData<{ isValid: boolean; rows: number; specimens: string[] }>;
+    validate(file: File, rawSubstanceDataColumns: string[]): FutureData<ValidationResultWithSpecimens>;
     getRawSubstanceConsumptionDataByEventsIds(
         orgUnitId: Id,
         substanceIds: Id[],

@@ -114,7 +114,9 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
 
     const [isValidated, setIsValidated] = useState(false);
     const [isPrimaryFileValid, setIsPrimaryFileValid] = useState(false);
+    const [isPrimaryFilePreprocessing, setIsPrimaryFilePreprocessing] = useState(false);
     const [isSecondaryFileValid, setIsSecondaryFileValid] = useState(false);
+    const [isSecondaryFilePreprocessing, setIsSecondaryFilePreprocessing] = useState(false);
     const [previousUploadsBatchIds, setPreviousUploadsBatchIds] = useState<string[]>([]);
     const [importLoading, setImportLoading] = useState<boolean>(false);
     const [previousBatchIdsLoading, setPreviousBatchIdsLoading] = useState<boolean>(true);
@@ -615,6 +617,8 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
                                 setIsLoading={setIsLoadingPrimary}
                                 dataSubmissionId={dataSubmissionId}
                                 setPrimaryFileTotalRows={setPrimaryFileTotalRows}
+                                isPreprocessing={isPrimaryFilePreprocessing}
+                                setIsPreprocessing={setIsPrimaryFilePreprocessing}
                             />
                         ) : (
                             <UploadSecondary
@@ -628,6 +632,8 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
                                 setIsLoading={setIsLoadingSecondary}
                                 dataSubmissionId={dataSubmissionId}
                                 setSecondaryFileTotalRows={setSecondaryFileTotalRows}
+                                isPreprocessing={isSecondaryFilePreprocessing}
+                                setIsPreprocessing={setIsSecondaryFilePreprocessing}
                             />
                         )}
                     </StyledSingleFileSelectContainer>
@@ -657,6 +663,8 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
                                     setIsLoading={setIsLoadingPrimary}
                                     dataSubmissionId={dataSubmissionId}
                                     setPrimaryFileTotalRows={setPrimaryFileTotalRows}
+                                    isPreprocessing={isPrimaryFilePreprocessing}
+                                    setIsPreprocessing={setIsPrimaryFilePreprocessing}
                                 />
                                 {moduleProperties.get(moduleName)?.isSecondaryFileApplicable && (
                                     <UploadSecondary
@@ -670,6 +678,8 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
                                         setIsLoading={setIsLoadingSecondary}
                                         dataSubmissionId={dataSubmissionId}
                                         setSecondaryFileTotalRows={setSecondaryFileTotalRows}
+                                        isPreprocessing={isSecondaryFilePreprocessing}
+                                        setIsPreprocessing={setIsSecondaryFilePreprocessing}
                                     />
                                 )}
                             </div>
@@ -702,11 +712,13 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
                     variant="contained"
                     color={isValidated ? "primary" : "default"}
                     disabled={
-                        isValidated
+                        isPrimaryFilePreprocessing ||
+                        isSecondaryFilePreprocessing ||
+                        (isValidated
                             ? isAsyncUploadsEnabled &&
                               !localStorage.getItem("primaryUploadId") &&
                               !localStorage.getItem("secondaryUploadId")
-                            : true
+                            : true)
                     }
                     endIcon={<ChevronRightIcon />}
                     disableElevation

@@ -18,7 +18,7 @@ export interface DataFileHistoryItemProps {
     inputLineNb: number;
     outputLineNb: number;
     period: string;
-    specimens: string[];
+    specimens?: string[];
     status: string;
     uploadDate: string;
     dataSubmission: string;

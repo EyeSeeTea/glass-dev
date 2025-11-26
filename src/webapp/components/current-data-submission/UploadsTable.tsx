@@ -11,6 +11,7 @@ import { InfoOutlined } from "@material-ui/icons";
 import { DataSubmissionStatusTypes } from "../../../domain/entities/GlassDataSubmission";
 import { GlassUploads } from "../../../domain/entities/GlassUploads";
 import { GlassAsyncUpload } from "../../../domain/entities/GlassAsyncUploads";
+import { AsyncPreprocessing } from "../../../domain/entities/AsyncPreprocessing";
 
 export interface UploadsTableProps {
     title: string;
@@ -20,6 +21,7 @@ export interface UploadsTableProps {
     refreshUploads: React.Dispatch<React.SetStateAction<{}>>;
     refreshAsyncUploads: React.Dispatch<React.SetStateAction<{}>>;
     asyncUploads: GlassAsyncUpload[];
+    asyncPreprocessing: AsyncPreprocessing[];
     showComplete?: boolean;
     setIsDatasetMarkAsCompleted?: React.Dispatch<React.SetStateAction<boolean>>;
     setRefetchStatus?: React.Dispatch<React.SetStateAction<DataSubmissionStatusTypes | undefined>>;
@@ -32,6 +34,7 @@ export const UploadsTable: React.FC<UploadsTableProps> = ({
     allUploads,
     refreshAsyncUploads,
     asyncUploads,
+    asyncPreprocessing,
     className,
     refreshUploads,
     showComplete,
@@ -63,6 +66,18 @@ export const UploadsTable: React.FC<UploadsTableProps> = ({
                                 <Tooltip
                                     title={
                                         <>
+                                            <Typography variant="caption">
+                                                {i18n.t(
+                                                    "PREPROCESSING - The file has been uploaded, but first needs to be preprocessed asynchronously and validated before data can be imported."
+                                                )}
+                                                <br />
+                                            </Typography>
+                                            <Typography variant="caption">
+                                                {i18n.t(
+                                                    "PREPROCESSING_FAILED - The file async preprocessing has failed due to issues in file format, headers or file contents."
+                                                )}
+                                                <br />
+                                            </Typography>
                                             <Typography variant="caption">
                                                 {i18n.t(
                                                     "UPLOADED - The file has been uploaded, but data has not been imported as upload was discarded in Step 1, due to errors in Step 2 or errors in async uploads."
@@ -120,6 +135,7 @@ export const UploadsTable: React.FC<UploadsTableProps> = ({
                         allUploads={allUploads}
                         refreshAsyncUploads={refreshAsyncUploads}
                         asyncUploads={asyncUploads}
+                        asyncPreprocessing={asyncPreprocessing}
                     />
                 </Table>
             </TableContainer>

@@ -1,9 +1,14 @@
 import { ImportSummary, ImportSummaryErrors } from "./data-entry/ImportSummary";
 import { Id } from "./Ref";
 
-export type GlassUploadsStatus = "UPLOADED" | "IMPORTED" | "VALIDATED" | "COMPLETED";
-
-export interface GlassUploads {
+export type GlassUploadsStatus =
+    | "PREPROCESSING"
+    | "PREPROCESSING_FAILED"
+    | "UPLOADED"
+    | "IMPORTED"
+    | "VALIDATED"
+    | "COMPLETED";
+interface GlassUploadsBase {
     id: string;
     batchId: string;
     countryCode: string;
@@ -13,8 +18,8 @@ export interface GlassUploads {
     inputLineNb: number;
     outputLineNb: number;
     period: string;
-    specimens: string[];
     status: GlassUploadsStatus;
+    specimens?: string[];
     uploadDate: string;
     dataSubmission: string;
     module: string;
@@ -29,5 +34,9 @@ export interface GlassUploads {
     calculatedEventListDataDeleted?: boolean;
     errorAsyncDeleting?: boolean;
     errorAsyncUploading?: boolean;
+    errorAsyncPreprocessing?: boolean;
+    errorMessageAsyncPreprocessing?: string;
     asyncImportSummaries?: ImportSummary[];
 }
+
+export type GlassUploads = GlassUploadsBase;

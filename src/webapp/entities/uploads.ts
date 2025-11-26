@@ -11,7 +11,7 @@ export interface UploadsDataItem {
     inputLineNb: number;
     outputLineNb: number;
     period: string;
-    specimens: string[];
+    specimens?: string[];
     status: GlassUploadsStatus;
     uploadDate: string;
     dataSubmission: string;
@@ -27,4 +27,5 @@ export interface UploadsDataItem {
     calculatedEventListDataDeleted?: boolean;
     errorAsyncDeleting?: boolean;
     errorAsyncUploading?: boolean;
+    errorAsyncPreprocessing?: boolean;
 }

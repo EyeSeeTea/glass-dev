@@ -26,6 +26,7 @@ import { importApiTracker } from "../utils/importApiTracker";
 import { ImportStrategy } from "../../../domain/entities/data-entry/DataValuesSaveSummary";
 import { logger } from "../../../utils/logger";
 import moment from "moment";
+import { ValidationResultWithSpecimens } from "../../../domain/entities/FileValidationResult";
 
 export const AMC_PRODUCT_REGISTER_PROGRAM_ID = "G6ChA5zMW9n";
 
@@ -42,7 +43,7 @@ export class AMCProductDataDefaultRepository implements AMCProductDataRepository
         file: File,
         rawProductDataColumns: string[],
         teiDataColumns: string[]
-    ): FutureData<{ isValid: boolean; rows: number; specimens: string[] }> {
+    ): FutureData<ValidationResultWithSpecimens> {
         return Future.fromPromise(new SpreadsheetXlsxDataSource().read(file)).map(spreadsheet => {
             const teiSheet = spreadsheet.sheets[0]; //First sheet is tracked entity instance data
             const teiHeaderRow = teiSheet?.rows[0]; //The second row has header details for AMC template.

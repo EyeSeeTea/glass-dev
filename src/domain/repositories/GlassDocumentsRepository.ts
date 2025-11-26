@@ -4,7 +4,7 @@ import { GlassDocuments } from "../entities/GlassDocuments";
 export interface GlassDocumentsRepository {
     getAll(): FutureData<GlassDocuments[]>;
     save(file: File, module: string): FutureData<string>;
-    delete(id: string): FutureData<string>;
+    delete(id: string): FutureData<void>;
     download(id: string): FutureData<Blob>;
     deleteDocumentApi(id: string): FutureData<void>;
     saveBuffer(fileBuffer: Buffer, fileName: string, module: string): FutureData<string>;

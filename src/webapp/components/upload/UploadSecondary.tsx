@@ -15,11 +15,14 @@ import { EffectFn, useCallbackEffect } from "../../hooks/use-callback-effect";
 import { useCurrentPeriodContext } from "../../contexts/current-period-context";
 import { moduleProperties } from "../../../domain/utils/ModuleProperties";
 import { Maybe } from "../../../utils/ts-utils";
+import { glassColors } from "../../pages/app/themes/dhis2.theme";
 
 interface UploadSecondaryProps {
     secondaryFile: File | null;
     setSecondaryFile: (maybeFile: File | null) => void;
     setSecondaryFileTotalRows: React.Dispatch<React.SetStateAction<Maybe<number>>>;
+    isPreprocessing: boolean;
+    setIsPreprocessing: React.Dispatch<React.SetStateAction<boolean>>;
     setHasSecondaryFile: React.Dispatch<React.SetStateAction<boolean>>;
     batchId: string;
     validate: (val: boolean) => void;
@@ -34,6 +37,8 @@ export const UploadSecondary: React.FC<UploadSecondaryProps> = ({
     secondaryFile,
     setSecondaryFile,
     setSecondaryFileTotalRows,
+    isPreprocessing,
+    setIsPreprocessing,
     setHasSecondaryFile,
     validate,
     removeSecondaryFile,
@@ -76,29 +81,45 @@ export const UploadSecondary: React.FC<UploadSecondaryProps> = ({
                     setIsLoading(true);
 
                     return compositionRoot.fileSubmission.validateSecondaryFile(uploadedSample, moduleName).run(
-                        sampleData => {
+                        validationResult => {
                             if (!dataSubmissionId) {
                                 snackbar.error(i18n.t("Data submission id not found. Please try again"));
                                 setIsLoading(false);
                                 return;
                             }
-
-                            if (sampleData.isValid) {
-                                setSecondaryFile(uploadedSample);
-                                setSecondaryFileTotalRows(sampleData.rows);
-                                const data = {
-                                    batchId,
-                                    fileType: moduleProperties.get(moduleName)?.secondaryFileType ?? "",
-                                    dataSubmission: dataSubmissionId,
-                                    moduleId,
-                                    moduleName,
-                                    period: currentPeriod.toString(),
-                                    orgUnitId: orgUnitId,
-                                    orgUnitCode: orgUnitCode,
-                                    rows: sampleData.rows,
-                                    specimens: [],
-                                };
-                                return compositionRoot.glassDocuments.upload({ file: uploadedSample, data }).run(
+                            if (validationResult.status === "validated" && !validationResult.isValid) {
+                                snackbar.error(i18n.t("Incorrect File Format. Please retry with a valid file"));
+                                setIsLoading(false);
+                                return;
+                            }
+                            const baseData = {
+                                batchId,
+                                fileType: moduleProperties.get(moduleName)?.secondaryFileType ?? "",
+                                dataSubmission: dataSubmissionId,
+                                moduleId,
+                                moduleName,
+                                period: currentPeriod.toString(),
+                                orgUnitId: orgUnitId,
+                                orgUnitCode: orgUnitCode,
+                            };
+                            const data =
+                                validationResult.status === "needsPreprocessing"
+                                    ? baseData
+                                    : {
+                                          ...baseData,
+                                          rows: validationResult.rows,
+                                          specimens: [],
+                                      };
+                            const status =
+                                validationResult.status === "needsPreprocessing" ? "PREPROCESSING" : "UPLOADED";
+                            setSecondaryFile(uploadedSample);
+                            setIsPreprocessing(validationResult.status === "needsPreprocessing");
+                            if ("rows" in validationResult && validationResult.rows) {
+                                setSecondaryFileTotalRows(validationResult.rows);
+                            }
+                            return compositionRoot.glassDocuments
+                                .upload({ file: uploadedSample, data, status: status })
+                                .run(
                                     uploadId => {
                                         localStorage.setItem("secondaryUploadId", uploadId);
                                         setIsLoading(false);
@@ -110,10 +131,6 @@ export const UploadSecondary: React.FC<UploadSecondaryProps> = ({
                                         setIsLoading(false);
                                     }
                                 );
-                            } else {
-                                snackbar.error(i18n.t("Incorrect File Format. Please retry with a valid file"));
-                                setIsLoading(false);
-                            }
                         },
                         () => {
                             snackbar.error(i18n.t("Error in file upload"));
@@ -139,6 +156,7 @@ export const UploadSecondary: React.FC<UploadSecondaryProps> = ({
             setIsLoading,
             setSecondaryFile,
             setSecondaryFileTotalRows,
+            setIsPreprocessing,
             snackbar,
         ]
     );
@@ -174,6 +192,13 @@ export const UploadSecondary: React.FC<UploadSecondaryProps> = ({
                         <CloseIcon />
                     </StyledRemoveButton>
                 </RemoveContainer>
+            )}
+            {isPreprocessing && (
+                <div style={{ marginTop: "10px", color: glassColors.red }}>
+                    {i18n.t(
+                        "Given the file size and format, it is marked for async-preprocessing. You can check the status in the Uploads tab."
+                    )}
+                </div>
             )}
         </ContentWrapper>
     );

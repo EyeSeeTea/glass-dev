@@ -136,6 +136,10 @@ import { GetStrataOptionsUseCase } from "./domain/usecases/amc-questionnaires/Ge
 import { SaveComponentAMCQuestionnaireUseCase } from "./domain/usecases/amc-questionnaires/SaveComponentAMCQuestionnaireUseCase";
 import { UNPopulationD2Repository } from "./data/repositories/amc-questionnaires/UNPopulationD2Repository";
 import { GetUNPopulationUseCase } from "./domain/usecases/amc-questionnaires/GetUNPopulationUseCase";
+import { GetAsyncPreprocessingUseCase } from "./domain/usecases/GetAsyncPreprocessingUseCase";
+import { AsyncPreprocessingDefaultRepository } from "./data/repositories/AsyncPreprocessingDefaultRepository";
+import { RemoveAsyncPreprocessingUseCase } from "./domain/usecases/RemoveAsyncPreprocessingUseCase";
+import { GeneralInfoDefaultRepository } from "./data/repositories/GeneralInfoDefaultRepository";
 
 export function getCompositionRoot(instance: Instance) {
     const api = getD2APiFromInstance(instance);
@@ -189,6 +193,8 @@ export function getCompositionRoot(instance: Instance) {
     const proportion50to100UnknownOptionsD2Repository = new Proportion50to100UnknownOptionsD2Repository(api);
     const strataOptionsRepository = new StrataOptionsD2Repository(api);
     const unPopulationRepository = new UNPopulationD2Repository(api);
+    const asyncPreprocessingRepository = new AsyncPreprocessingDefaultRepository(dataStoreClient);
+    const generalInfoRepository = new GeneralInfoDefaultRepository(dataStoreClient, instance);
 
     return {
         instance: getExecute({
@@ -242,10 +248,16 @@ export function getCompositionRoot(instance: Instance) {
                 glassAsyncUploadsRepository,
                 glassUploadsRepository,
             }),
+            getAsyncPreprocessing: new GetAsyncPreprocessingUseCase(asyncPreprocessingRepository),
+            removeAsyncPreprocessing: new RemoveAsyncPreprocessingUseCase(asyncPreprocessingRepository),
         }),
         glassDocuments: getExecute({
             getAll: new GetGlassDocumentsUseCase(glassDocumentsRepository),
-            upload: new UploadDocumentUseCase(glassDocumentsRepository, glassUploadsRepository),
+            upload: new UploadDocumentUseCase(
+                glassDocumentsRepository,
+                glassUploadsRepository,
+                asyncPreprocessingRepository
+            ),
             deleteByUploadId: new DeleteDocumentInfoByUploadIdUseCase(glassDocumentsRepository, glassUploadsRepository),
             download: new DownloadDocumentUseCase(glassDocumentsRepository),
             downloadAsArrayBuffer: new DownloadDocumentAsArrayBufferUseCase(glassDocumentsRepository),
@@ -276,7 +288,8 @@ export function getCompositionRoot(instance: Instance) {
                 risIndividualFungalRepository,
                 egaspDataRepository,
                 glassModuleRepository,
-                amcProductDataRepository
+                amcProductDataRepository,
+                generalInfoRepository
             ),
             secondaryFile: new ImportSecondaryFileUseCase(
                 sampleDataRepository,
@@ -293,7 +306,8 @@ export function getCompositionRoot(instance: Instance) {
             validateSecondaryFile: new ValidateSampleFileUseCase(
                 sampleDataRepository,
                 amcSubstanceDataRepository,
-                glassModuleRepository
+                glassModuleRepository,
+                generalInfoRepository
             ),
 
             downloadEmptyTemplate: new DownloadEmptyTemplateUseCase(

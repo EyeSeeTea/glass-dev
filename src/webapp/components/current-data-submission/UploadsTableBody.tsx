@@ -31,6 +31,7 @@ import { useQuestionnaires } from "./Questionnaires";
 import { DataSubmissionStatusTypes } from "../../../domain/entities/GlassDataSubmission";
 import { GlassUploads } from "../../../domain/entities/GlassUploads";
 import { GlassAsyncUpload } from "../../../domain/entities/GlassAsyncUploads";
+import { AsyncPreprocessing } from "../../../domain/entities/AsyncPreprocessing";
 
 export interface UploadsTableBodyProps {
     rows?: UploadsDataItem[];
@@ -38,10 +39,22 @@ export interface UploadsTableBodyProps {
     refreshUploads: React.Dispatch<React.SetStateAction<{}>>;
     refreshAsyncUploads: React.Dispatch<React.SetStateAction<{}>>;
     asyncUploads: GlassAsyncUpload[];
+    asyncPreprocessing: AsyncPreprocessing[];
     showComplete?: boolean;
     setIsDatasetMarkAsCompleted?: React.Dispatch<React.SetStateAction<boolean>>;
     setRefetchStatus?: React.Dispatch<React.SetStateAction<DataSubmissionStatusTypes | undefined>>;
 }
+
+/**
+ * returns true if at least some data values have been potentially imported for the upload
+ */
+const isPartiallyImported = (upload: UploadsDataItem): boolean => {
+    return (
+        upload.status.toLowerCase() !== "uploaded" &&
+        upload.status !== "PREPROCESSING" &&
+        upload.status !== "PREPROCESSING_FAILED"
+    );
+};
 
 export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({
     rows,
@@ -49,6 +62,7 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({
     refreshUploads,
     refreshAsyncUploads,
     asyncUploads,
+    asyncPreprocessing,
     showComplete,
     setIsDatasetMarkAsCompleted,
     setRefetchStatus,
@@ -150,6 +164,28 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({
         [asyncDeletionsState.kind, currentModuleAccess.moduleName, rows]
     );
 
+    const isSetToAsyncPreprocessing = useCallback(
+        (uploadDataItem: UploadsDataItem): boolean => {
+            return (
+                asyncPreprocessing.some(
+                    upload => upload.uploadId === uploadDataItem.id && upload.status === "PENDING"
+                ) ?? false
+            );
+        },
+        [asyncPreprocessing]
+    );
+
+    const isCurrentlyBeingAsyncPreprocessed = useCallback(
+        (uploadDataItem: UploadsDataItem): boolean => {
+            return (
+                asyncPreprocessing.some(
+                    upload => upload.uploadId === uploadDataItem.id && upload.status === "PREPROCESSING"
+                ) ?? false
+            );
+        },
+        [asyncPreprocessing]
+    );
+
     const isSetToBeUploadedAsync = useCallback(
         (uploadDataItem: UploadsDataItem): boolean => {
             return (
@@ -220,12 +256,9 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({
                 }).run(
                     ({ primaryArrayBuffer, secondaryArrayBuffer }) => {
                         if (primaryFileToDelete && primaryArrayBuffer) {
-                            //If the file is in uploaded status then, data values have not been imported.
-                            //No need for deletion
-
                             Future.joinObj({
                                 deletePrimaryFileSummary:
-                                    primaryFileToDelete.status.toLowerCase() !== "uploaded" ||
+                                    isPartiallyImported(primaryFileToDelete) ||
                                     !moduleProperties.get(currentModuleAccess.moduleName)?.isDryRunReq
                                         ? compositionRoot.fileSubmission.deletePrimaryFile(
                                               currentModule.data,
@@ -236,7 +269,7 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({
                                         : Future.success(undefined),
                                 deleteSecondaryFileSummary:
                                     secondaryFileToDelete &&
-                                    secondaryFileToDelete.status.toLowerCase() !== "uploaded" &&
+                                    isPartiallyImported(secondaryFileToDelete) &&
                                     secondaryArrayBuffer
                                         ? compositionRoot.fileSubmission.deleteSecondaryFile(
                                               currentModule.data,
@@ -479,6 +512,7 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({
             return;
 
         const isRowInAsyncUploads = isSetToBeUploadedAsync(rowToDelete);
+        const isRowInAsyncPreprocessing = isSetToAsyncPreprocessing(rowToDelete);
 
         if (isRowInAsyncUploads) {
             compositionRoot.glassUploads.removeAsyncUploadById(rowToDelete.id).run(
@@ -488,6 +522,16 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({
                 error => {
                     snackbar.error(i18n.t("Error occurred when removing async uploads"));
                     console.debug("Error occurred when removing async uploads: " + error);
+                }
+            );
+        } else if (isRowInAsyncPreprocessing) {
+            compositionRoot.glassUploads.removeAsyncPreprocessing([rowToDelete.id]).run(
+                () => {
+                    deleteDataset();
+                },
+                error => {
+                    snackbar.error(i18n.t("Error occurred when removing async preprocessing"));
+                    console.debug("Error occurred when removing async preprocessing: " + error);
                 }
             );
         } else {
@@ -500,6 +544,7 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({
         deleteDataset,
         isCurrentlyBeingUploadedAsync,
         isSetToBeUploadedAsync,
+        isSetToAsyncPreprocessing,
         rowToDelete,
         snackbar,
     ]);
@@ -718,6 +763,10 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({
                                     ? i18n.t("MARKED TO BE UPLOADED")
                                     : isCurrentlyBeingUploadedAsync(row)
                                     ? i18n.t("UPLOADING ASYNC IN PROGRESS")
+                                    : isSetToAsyncPreprocessing(row)
+                                    ? i18n.t("MARKED TO BE PREPROCESSED ASYNC")
+                                    : isCurrentlyBeingAsyncPreprocessed(row)
+                                    ? i18n.t("ASYNC PREPROCESSING IN PROGRESS")
                                     : i18n.t(row.status).toUpperCase()}
                             </TableCell>
                             <TableCell style={{ opacity: 0.5 }}>

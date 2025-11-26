@@ -1,9 +1,17 @@
 import { RISData } from "../../../domain/entities/data-entry/amr-external/RISData";
+import { ValidationResultWithSpecimens } from "../../../domain/entities/FileValidationResult";
 import { Future, FutureData } from "../../../domain/entities/Future";
 import { RISDataRepository } from "../../../domain/repositories/data-entry/RISDataRepository";
 import { Row } from "../../../domain/repositories/SpreadsheetXlsxRepository";
 import { SpreadsheetXlsxDataSource } from "../SpreadsheetXlsxDefaultRepository";
-import { doesColumnExist, getNumberValue, getTextValue } from "../utils/CSVUtils";
+import {
+    doesColumnExist,
+    getNumberValue,
+    getTextValue,
+    isCsvFile,
+    getRowCountAndSelectDistinctFromCsv,
+    validateCsvHeaders,
+} from "../utils/CSVUtils";
 
 export class RISDataCSVDefaultRepository implements RISDataRepository {
     get(file: File): FutureData<RISData[]> {
@@ -43,28 +51,33 @@ export class RISDataCSVDefaultRepository implements RISDataRepository {
         });
     }
 
-    validate(file: File): FutureData<{ isValid: boolean; specimens: string[]; rows: number }> {
+    validate(file: File): FutureData<ValidationResultWithSpecimens> {
+        const requiredColumns = [
+            "COUNTRY",
+            "YEAR",
+            "SPECIMEN",
+            "PATHOGEN",
+            "GENDER",
+            "ORIGIN",
+            "AGEGROUP",
+            "ANTIBIOTIC",
+            "RESISTANT",
+            "INTERMEDIATE",
+            "NONSUSCEPTIBLE",
+            "SUSCEPTIBLE",
+            "UNKNOWN_NO_AST",
+            "UNKNOWN_NO_BREAKPOINTS",
+            "BATCHID",
+        ];
+        if (isCsvFile(file)) {
+            return this.validateCsv(file, requiredColumns);
+        }
         return Future.fromPromise(new SpreadsheetXlsxDataSource().read(file)).map(spreadsheet => {
             const sheet = spreadsheet.sheets[0]; //Only one sheet for AMR RIS
             const headerRow = sheet?.headers;
 
             if (headerRow) {
-                const allRISColsPresent =
-                    doesColumnExist(headerRow, "COUNTRY") &&
-                    doesColumnExist(headerRow, "YEAR") &&
-                    doesColumnExist(headerRow, "SPECIMEN") &&
-                    doesColumnExist(headerRow, "PATHOGEN") &&
-                    doesColumnExist(headerRow, "GENDER") &&
-                    doesColumnExist(headerRow, "ORIGIN") &&
-                    doesColumnExist(headerRow, "AGEGROUP") &&
-                    doesColumnExist(headerRow, "ANTIBIOTIC") &&
-                    doesColumnExist(headerRow, "RESISTANT") &&
-                    doesColumnExist(headerRow, "INTERMEDIATE") &&
-                    doesColumnExist(headerRow, "NONSUSCEPTIBLE") &&
-                    doesColumnExist(headerRow, "SUSCEPTIBLE") &&
-                    doesColumnExist(headerRow, "UNKNOWN_NO_AST") &&
-                    doesColumnExist(headerRow, "UNKNOWN_NO_BREAKPOINTS") &&
-                    doesColumnExist(headerRow, "BATCHID");
+                const allRISColsPresent = requiredColumns.every(col => doesColumnExist(headerRow, col));
 
                 const uniqSpecimens = _(sheet.rows)
                     .uniqBy("SPECIMEN")
@@ -83,6 +96,27 @@ export class RISDataCSVDefaultRepository implements RISDataRepository {
                     specimens: [],
                 };
         });
+    }
+
+    private validateCsv(file: File, requiredColumns: string[]): FutureData<ValidationResultWithSpecimens> {
+        return Future.fromPromise(
+            validateCsvHeaders(file, requiredColumns).then(headerValidationResult => {
+                if (!headerValidationResult.valid) {
+                    return {
+                        isValid: false,
+                        rows: 0,
+                        specimens: [],
+                    };
+                }
+                return getRowCountAndSelectDistinctFromCsv(file, ["SPECIMEN"]).then(distinctResult => {
+                    return {
+                        isValid: true,
+                        rows: distinctResult.rows,
+                        specimens: Array.from(distinctResult.distinct.get("SPECIMEN") || []),
+                    };
+                });
+            })
+        );
     }
 
     validateABCLASS(absClass: string) {

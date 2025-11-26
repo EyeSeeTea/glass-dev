@@ -7,6 +7,7 @@ export interface GlassUploadsRepository {
     getAll(): FutureData<GlassUploads[]>;
     getById(uploadId: Id): FutureData<GlassUploads>;
     save(upload: GlassUploads): FutureData<void>;
+    update(upload: GlassUploads): FutureData<void>;
     setStatus(id: Id, status: GlassUploadsStatus): FutureData<void>;
     setBatchId(id: string, batchId: string): FutureData<void>;
     delete(id: string): FutureData<{
@@ -31,5 +32,6 @@ export interface GlassUploadsRepository {
     setCalculatedEventListDataDeleted(id: string): FutureData<void>;
     setMultipleErrorAsyncDeleting(ids: Id[]): FutureData<void>;
     setMultipleErrorAsyncUploading(ids: Id[]): FutureData<void>;
+    setMultipleErrorAsyncPreprocessing(ids: Id[], errorMessage?: string): FutureData<void>;
     saveImportSummaries(params: { uploadId: Id; importSummaries: ImportSummary[] }): FutureData<void>;
 }

@@ -24,6 +24,7 @@ import { ImportStrategy } from "../../../domain/entities/data-entry/DataValuesSa
 import { logger } from "../../../utils/logger";
 import { TrackerPostResponse } from "@eyeseetea/d2-api/api/tracker";
 import { importApiTracker } from "../utils/importApiTracker";
+import { ValidationResultWithSpecimens } from "../../../domain/entities/FileValidationResult";
 
 export const AMC_RAW_SUBSTANCE_CONSUMPTION_PROGRAM_ID = "q8aSKr17J5S";
 const AMC_CALCULATED_CONSUMPTION_DATA_PROGRAM_ID = "eUmWZeKZNrg";
@@ -34,10 +35,7 @@ const AMC_CALCULATED_CONSUMPTION_DATA_PROGRAM_STAGE_ID = "ekEXxadjL0e";
 export class AMCSubstanceDataDefaultRepository implements AMCSubstanceDataRepository {
     constructor(private api: D2Api) {}
 
-    validate(
-        file: File,
-        rawSubstanceDataColumns: string[]
-    ): FutureData<{ isValid: boolean; rows: number; specimens: string[] }> {
+    validate(file: File, rawSubstanceDataColumns: string[]): FutureData<ValidationResultWithSpecimens> {
         return Future.fromPromise(new SpreadsheetXlsxDataSource().read(file)).map(spreadsheet => {
             const rawSubstanceSheet = spreadsheet.sheets[0];
             const rawSubstanceHeaderRow = rawSubstanceSheet?.rows[1];
