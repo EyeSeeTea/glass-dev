@@ -21,9 +21,10 @@ import {
     UploadsFormData,
     UploadsFormDataBuilder,
 } from "./utils/builders/UploadsFormDataBuilder";
+import { periodToYearMonthDay } from "../../utils/currentPeriodHelper";
 
-const AMR_GLASS_PROE_UPLOADS_PROGRAM_ID = "yVFQpwmCX0D";
-const AMR_GLASS_PROE_UPLOADS_PROGRAM_STAGE_ID = "a6s7mVGkZZF";
+export const AMR_GLASS_PROE_UPLOADS_PROGRAM_ID = "yVFQpwmCX0D";
+export const AMR_GLASS_PROE_UPLOADS_PROGRAM_STAGE_ID = "a6s7mVGkZZF";
 
 const DEFAULT_CHUNK_SIZE = 100;
 const DEFAULT_PAGE_SIZE = 250;
@@ -48,6 +49,7 @@ export const uploadsDHIS2Ids = {
     errorAsyncDeleting: "lIHM2QXWwUK",
     errorAsyncUploading: "O7EFyS16DBg",
     asyncImportSummaries: "rV0d3FQC8Jp",
+    period: "BXvUeQEf9bT",
 } as const;
 
 export function getValueById(dataValues: DataValue[], dataElement: string): Maybe<string> {
@@ -121,26 +123,6 @@ export class GlassUploadsProgramRepository implements GlassUploadsRepository {
         });
     }
 
-    getByOrgUnitAndPeriod(orgUnit: Id, period: string): FutureData<GlassUploads[]> {
-        const occurredAfter = `${period}-01-01`;
-        const occurredBefore = `${period}-12-31`;
-
-        return Future.fromPromise(
-            this.getEventsWithFilters({
-                orgUnit: orgUnit,
-                orgUnitMode: "SELECTED",
-                occurredAfter: occurredAfter,
-                occurredBefore: occurredBefore,
-            })
-        ).flatMap(d2Events => {
-            return Future.sequential(d2Events.map(event => this.buildGlassUploadFromEvent(event))).flatMap(
-                glassUploads => {
-                    return Future.success(glassUploads);
-                }
-            );
-        });
-    }
-
     getUploadsByModuleOU(module: Id, orgUnit: Id): FutureData<GlassUploads[]> {
         return Future.fromPromise(
             this.getEventsWithFilters({
@@ -158,16 +140,11 @@ export class GlassUploadsProgramRepository implements GlassUploadsRepository {
     }
 
     getUploadsByModuleOUPeriod(module: Id, orgUnit: Id, period: string): FutureData<GlassUploads[]> {
-        const occurredAfter = `${period}-01-01`;
-        const occurredBefore = `${period}-12-31`;
-
         return Future.fromPromise(
             this.getEventsWithFilters({
                 orgUnit: orgUnit,
                 orgUnitMode: "SELECTED",
-                occurredAfter: occurredAfter,
-                occurredBefore: occurredBefore,
-                filter: `${uploadsDHIS2Ids.moduleId}:eq:${module}`,
+                filter: `${uploadsDHIS2Ids.period}:eq:${period}`,
             })
         ).flatMap(d2Events => {
             return Future.sequential(d2Events.map(event => this.buildGlassUploadFromEvent(event))).flatMap(
@@ -370,7 +347,7 @@ export class GlassUploadsProgramRepository implements GlassUploadsRepository {
                 fileType: getValueById(event.dataValues, uploadsDHIS2Ids.documentFileType) || "",
                 fileId: getValueById(event.dataValues, uploadsDHIS2Ids.documentId) || "",
                 fileName: getValueById(event.dataValues, uploadsDHIS2Ids.documentName) || "",
-                period: event.occurredAt.slice(0, 4),
+                period: getValueById(event.dataValues, uploadsDHIS2Ids.period) || "",
                 specimens: (getValueById(event.dataValues, uploadsDHIS2Ids.specimens) || "").split(","),
                 status: (getValueById(event.dataValues, uploadsDHIS2Ids.status) as GlassUploadsStatus) || "UPLOADED",
                 uploadDate: event.createdAt || "",
@@ -462,7 +439,7 @@ export class GlassUploadsProgramRepository implements GlassUploadsRepository {
             program: AMR_GLASS_PROE_UPLOADS_PROGRAM_ID,
             programStage: AMR_GLASS_PROE_UPLOADS_PROGRAM_STAGE_ID,
             orgUnit: upload.orgUnit,
-            occurredAt: `${upload.period}-01-01`,
+            occurredAt: periodToYearMonthDay(upload.period),
             dataValues: allDataValues,
         };
     }
