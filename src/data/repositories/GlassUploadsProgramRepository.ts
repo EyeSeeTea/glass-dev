@@ -144,7 +144,7 @@ export class GlassUploadsProgramRepository implements GlassUploadsRepository {
             this.getEventsWithFilters({
                 orgUnit: orgUnit,
                 orgUnitMode: "SELECTED",
-                filter: `${uploadsDHIS2Ids.period}:eq:${period}`,
+                filter: `${uploadsDHIS2Ids.period}:eq:${period},${uploadsDHIS2Ids.moduleId}:eq:${module}`,
             })
         ).flatMap(d2Events => {
             return Future.sequential(d2Events.map(event => this.buildGlassUploadFromEvent(event))).flatMap(
