@@ -380,8 +380,14 @@ export function getAmClass(amClassData: AmClassificationData, atcCode: ATCCodeLe
     }
 }
 
-export function getAwareClass(awareClassData: AwareClassificationData, atcCode: ATCCodeLevel5): AwrName | undefined {
-    const atcAwareCode = awareClassData.atc_awr_mapping.find(({ ATC5 }) => ATC5 === atcCode)?.AWR;
+export function getAwareClass(
+    awareClassData: AwareClassificationData,
+    atcCode: ATCCodeLevel5,
+    roa: RouteOfAdministrationCode
+): AwrName | undefined {
+    const atcAwareCode = awareClassData.atc_awr_mapping.find(
+        ({ ATC5, ROA }) => ATC5 === atcCode && (!ROA || ROA === roa)
+    )?.AWR;
     return awareClassData.classification.find(({ CODE }) => CODE === atcAwareCode)?.NAME;
 }
 

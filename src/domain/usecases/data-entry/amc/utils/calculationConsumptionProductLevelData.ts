@@ -680,7 +680,7 @@ function aggregateDataByAtcRouteAdminYearHealthSectorAndHealthLevel(
 
                     const am_class = getAmClass(amClassData, atcCodeAutocalculated);
                     const atcCodeByLevel = getAtcCodeByLevel(atcData, atcCodeAutocalculated);
-                    const aware = getAwareClass(awareClassData, atcCodeAutocalculated);
+                    const aware = getAwareClass(awareClassData, atcCodeAutocalculated, AMR_GLASS_AMC_TEA_ROUTE_ADMIN);
 
                     // 5c, 6a, 7a, 8a
                     const id = `${AMR_GLASS_AMC_TEA_PRODUCT_ID}-${atcCodeAutocalculated}-${AMR_GLASS_AMC_TEA_ROUTE_ADMIN}-${period}-${health_sector_manual}-${health_level_manual}-${data_status_manual}`;

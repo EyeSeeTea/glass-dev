@@ -244,7 +244,11 @@ export function calculateConsumptionSubstanceLevelData(
 
             const am_class = getAmClass(latestAmClassData, atcAutocalculated);
             const atcCodeByLevel = getAtcCodeByLevel(latestAtcData, atcAutocalculated);
-            const aware = getAwareClass(latestAwareClassData, atcAutocalculated);
+            const aware = getAwareClass(
+                latestAwareClassData,
+                atcAutocalculated,
+                rawSubstanceConsumption.route_admin_manual
+            );
 
             return {
                 period,
@@ -295,7 +299,11 @@ function copyDDDManualToDDDAutocalculated(params: {
 
     const am_class = getAmClass(amClassData, rawSubstanceConsumption.atc_manual);
     const atcCodeByLevel = getAtcCodeByLevel(atcData, rawSubstanceConsumption.atc_manual);
-    const aware = getAwareClass(awareClassData, rawSubstanceConsumption.atc_manual);
+    const aware = getAwareClass(
+        awareClassData,
+        rawSubstanceConsumption.atc_manual,
+        rawSubstanceConsumption.route_admin_manual
+    );
 
     return {
         period,
