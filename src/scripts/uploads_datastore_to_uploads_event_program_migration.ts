@@ -17,13 +17,9 @@ import {
 import { apiToFuture } from "../utils/futures";
 import { UploadsFormData } from "../data/repositories/utils/builders/UploadsFormDataBuilder";
 import { NodeUploadsFormDataBuilder } from "../data/repositories/utils/builders/NodeUploadsFormDataBuilder";
-import { GlassAsyncUpload } from "../domain/entities/GlassAsyncUploads";
-import { GlassAsyncDeletion } from "../domain/entities/GlassAsyncDeletions";
 import { periodToYearMonthDay } from "../utils/currentPeriodHelper";
-import { generateId } from "../domain/entities/Ref";
 
 const CHUNK_SIZE = 150;
-const DATASTORE_KEY_TEMP_UPLOADS_EVENTS_MAPPING = "temp-uploads-events-mapping";
 
 // TO BE RUN ONCE ONLY
 
@@ -65,12 +61,7 @@ async function main() {
                     allDatastoreGlassUploads => {
                         consoleLogger.info(`Fetched ${allDatastoreGlassUploads.length} GLASS uploads from Datastore.`);
 
-                        saveDatastoreUploadsInProgram(
-                            api,
-                            dataStoreClient,
-                            uploadsFormDataBuilder,
-                            allDatastoreGlassUploads
-                        ).run(
+                        saveDatastoreUploadsInProgram(api, uploadsFormDataBuilder, allDatastoreGlassUploads).run(
                             () => {
                                 consoleLogger.info("Migration completed successfully.");
                                 process.exit(0);
@@ -107,18 +98,12 @@ type PartialSaveFileResourceResponse = {
     };
 };
 
-type UploadDatastoreToEventIdEntry = {
-    uploadDatastoreId: Id;
-    uploadEventProgramId: Id;
-};
-
 function getAllGlassUploadsFromDatastore(dataStoreClient: DataStoreClient): FutureData<GlassUploads[]> {
     return dataStoreClient.listCollection<GlassUploads>(DataStoreKeys.UPLOADS);
 }
 
 function saveDatastoreUploadsInProgram(
     api: D2Api,
-    dataStoreClient: DataStoreClient,
     uploadsFormDataBuilder: NodeUploadsFormDataBuilder,
     datastoreGlassUploads: GlassUploads[]
 ): FutureData<void> {
@@ -127,96 +112,18 @@ function saveDatastoreUploadsInProgram(
             return saveImportSummaryFilesAndGetGlassUploadWithFileResourceIds(api, uploadsFormDataBuilder, upload);
         })
     ).flatMap(uploadsWithFileResourceIds => {
-        return saveUploadsWithFileResourceIds(api, dataStoreClient, uploadsWithFileResourceIds);
+        return saveUploadsWithFileResourceIds(api, uploadsWithFileResourceIds);
     });
 }
 
-function saveUploadsWithFileResourceIds(
-    api: D2Api,
-    dataStoreClient: DataStoreClient,
-    uploads: GlassUploadsWithFileResourceIds[]
-): FutureData<void> {
+function saveUploadsWithFileResourceIds(api: D2Api, uploads: GlassUploadsWithFileResourceIds[]): FutureData<void> {
     consoleLogger.info("Mapping Datastore uploads to Tracker Event uploads.");
-    const d2TrackerEventsWithMapping = uploads.map(upload => {
-        const eventProgramUpload = mapUploadToEvent(upload);
+    const d2TrackerEvents = uploads.map(upload => mapUploadToEvent(upload));
 
-        const mappingEntry: UploadDatastoreToEventIdEntry = {
-            uploadDatastoreId: upload.id,
-            uploadEventProgramId: eventProgramUpload.event,
-        };
-
-        return { eventProgramUpload, mappingEntry };
+    return saveInChunks(api, d2TrackerEvents).flatMap(() => {
+        consoleLogger.info(`Saved ${d2TrackerEvents.length} uploads in Event program successfully.`);
+        return Future.success(undefined);
     });
-
-    const d2TrackerEvents = d2TrackerEventsWithMapping.map(({ eventProgramUpload }) => eventProgramUpload);
-    const mappingEntries = d2TrackerEventsWithMapping.map(({ mappingEntry }) => mappingEntry);
-
-    consoleLogger.info("Saving mapping between Datastore upload IDs and Event program upload IDs in Datastore.");
-    return dataStoreClient.saveObject(DATASTORE_KEY_TEMP_UPLOADS_EVENTS_MAPPING, mappingEntries).flatMap(() => {
-        consoleLogger.info("Mapping between Datastore upload IDs and Event program upload IDs saved successfully.");
-        return saveInChunks(api, d2TrackerEvents).flatMap(() => {
-            consoleLogger.info("Saved all uploads in Event program successfully.");
-            return updateAsyncUploadsAndAsyncDeletionsWithNewIds(dataStoreClient, mappingEntries);
-        });
-    });
-}
-
-function updateAsyncUploadsAndAsyncDeletionsWithNewIds(
-    dataStoreClient: DataStoreClient,
-    mappingEntries: UploadDatastoreToEventIdEntry[]
-): FutureData<void> {
-    consoleLogger.info("Updating async uploads and async deletions with new upload IDs from Event program.");
-    return Future.joinObj({
-        asyncUploads: getAsyncUploads(dataStoreClient),
-        asyncDeletions: getAsyncDeletions(dataStoreClient),
-    }).flatMap(({ asyncUploads, asyncDeletions }) => {
-        consoleLogger.info(
-            `Found ${asyncUploads.length} async uploads and ${asyncDeletions.length} async deletions to update.`
-        );
-        const updatedAsyncUploads: GlassAsyncUpload[] = asyncUploads.map(asyncUpload => {
-            const uploadsMappingEntry = mappingEntries.find(entry => entry.uploadDatastoreId === asyncUpload.uploadId);
-            return uploadsMappingEntry
-                ? {
-                      ...asyncUpload,
-                      uploadId: uploadsMappingEntry.uploadEventProgramId,
-                  }
-                : asyncUpload;
-        });
-
-        const updatedAsyncDeletions: GlassAsyncDeletion[] = asyncDeletions.map(asyncDeletion => {
-            const deletionsMappingEntry = mappingEntries.find(
-                entry => entry.uploadDatastoreId === asyncDeletion.uploadId
-            );
-            return deletionsMappingEntry
-                ? {
-                      ...asyncDeletion,
-                      uploadId: deletionsMappingEntry.uploadEventProgramId,
-                  }
-                : asyncDeletion;
-        });
-
-        return saveAsyncUploadsAndAsyncDeletions(dataStoreClient, updatedAsyncUploads, updatedAsyncDeletions);
-    });
-}
-
-function saveAsyncUploadsAndAsyncDeletions(
-    dataStoreClient: DataStoreClient,
-    updatedAsyncUploads: GlassAsyncUpload[],
-    updatedAsyncDeletions: GlassAsyncDeletion[]
-): FutureData<void> {
-    consoleLogger.info("Saving updated async uploads in Datastore.");
-    return dataStoreClient.saveObject(DataStoreKeys.ASYNC_UPLOADS, updatedAsyncUploads).flatMap(() => {
-        consoleLogger.info("Saving updated async deletions in Datastore.");
-        return dataStoreClient.saveObject(DataStoreKeys.ASYNC_DELETIONS, updatedAsyncDeletions);
-    });
-}
-
-function getAsyncUploads(dataStoreClient: DataStoreClient): FutureData<GlassAsyncUpload[]> {
-    return dataStoreClient.listCollection<GlassAsyncUpload>(DataStoreKeys.ASYNC_UPLOADS);
-}
-
-function getAsyncDeletions(dataStoreClient: DataStoreClient): FutureData<GlassAsyncDeletion[]> {
-    return dataStoreClient.listCollection<GlassAsyncDeletion>(DataStoreKeys.ASYNC_DELETIONS);
 }
 
 function saveInChunks(api: D2Api, d2TrackerEvents: D2TrackerEventToPost[]): FutureData<void> {
@@ -373,7 +280,7 @@ function mapUploadToEvent(upload: GlassUploadsWithFileResourceIds): D2TrackerEve
     const allDataValues: D2TrackerEventToPost["dataValues"] = [...dataValues, ...importSummariesDataValues];
 
     return {
-        event: generateId(),
+        event: upload.id,
         program: AMR_GLASS_PROE_UPLOADS_PROGRAM_ID,
         programStage: AMR_GLASS_PROE_UPLOADS_PROGRAM_STAGE_ID,
         orgUnit: upload.orgUnit,
