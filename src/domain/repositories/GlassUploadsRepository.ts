@@ -4,7 +4,6 @@ import { Id } from "../entities/Ref";
 import { ImportSummary, ImportSummaryErrors } from "../entities/data-entry/ImportSummary";
 
 export interface GlassUploadsRepository {
-    getByOrgUnitAndPeriod(orgUnit: Id, period: string): FutureData<GlassUploads[]>;
     getById(id: Id): FutureData<GlassUploads>;
     getByIds(ids: Id[], options?: { chunkSize: number }): FutureData<GlassUploads[]>;
     save(upload: GlassUploads): FutureData<void>;
