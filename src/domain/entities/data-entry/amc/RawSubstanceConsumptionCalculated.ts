@@ -27,6 +27,7 @@ export type DDDPerPackage = {
 
 export type ContentDDDPerProductAndDDDPerPackage = {
     AMR_GLASS_AMC_TEA_PRODUCT_ID: string;
+    atcCodeAutocalculated: ATCCodeLevel5;
     content: Content;
     dddPerProduct: DDDPerProduct | undefined;
     dddPerPackage: DDDPerPackage | undefined;

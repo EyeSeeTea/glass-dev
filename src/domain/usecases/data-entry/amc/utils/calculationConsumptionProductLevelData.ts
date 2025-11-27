@@ -1,7 +1,9 @@
 import { BatchLogContent, logger } from "../../../../../utils/logger";
 import {
     ATCChangesData,
+    ATCCodeLevel5,
     ATCData,
+    ATCVersionKey,
     AmClassificationData,
     AwareClassificationData,
     CombinationsData,
@@ -16,7 +18,7 @@ import {
     getAtcCodeByLevel,
     getAwareClass,
     getDDDChanges,
-    getNewAtcCode,
+    getNewAtcCodeRecursively,
     getNewDddData,
     getStandardizedUnit,
     getStandardizedUnitsAndValue,
@@ -41,21 +43,23 @@ export function calculateConsumptionProductLevelData(
     teiInstancesData: ProductRegistryAttributes[],
     rawProductConsumptionData: RawProductConsumption[],
     atcClassification: GlassAtcVersionData,
-    atcVersion: string
+    currentAtcVersion: ATCVersionKey
 ): RawSubstanceConsumptionCalculated[] {
     logger.info(
         `[${new Date().toISOString()}] Starting the calculation of consumption product level data for organisation ${orgUnitId} and period ${period}`
     );
 
     if (!Object.keys(atcClassification)?.length) {
-        logger.error(`[${new Date().toISOString()}] Atc classsification data is empty.`);
+        logger.error(
+            `[${new Date().toISOString()}] Atc classsification data is empty or atc version year not found: ${currentAtcVersion}`
+        );
         return [];
     }
 
     const dddCombinations = atcClassification?.combinations;
     const dddData = atcClassification?.ddds;
-    const dddChanges = getDDDChanges(atcClassification?.changes);
-    const atcChanges = getATCChanges(atcClassification?.changes);
+    const dddChanges: DDDChangesData[] = getDDDChanges(atcClassification?.changes);
+    const atcChanges: ATCChangesData[] = getATCChanges(atcClassification?.changes);
     const unitsData = atcClassification?.units;
     const conversionsIUToGramsData = atcClassification?.conversions_iu_g;
     const amClassData = atcClassification.am_classification;
@@ -79,6 +83,13 @@ export function calculateConsumptionProductLevelData(
             const content = calculateContentPerProduct(product, unitsData);
             calculationLogs = [...calculationLogs, ...content.logs];
 
+            const atcCodeAutocalculated: ATCCodeLevel5 =
+                getNewAtcCodeRecursively({
+                    oldAtcCode: product.AMR_GLASS_AMC_TEA_ATC,
+                    atcChanges: atcChanges,
+                    currentAtcs: atcData,
+                }) || product.AMR_GLASS_AMC_TEA_ATC;
+
             if (content.result) {
                 // 2 - Identify corresponding DDD per product = ddd
                 const dddPerProduct = calculateDDDPerProduct(
@@ -86,8 +97,8 @@ export function calculateConsumptionProductLevelData(
                     dddCombinations,
                     dddData,
                     dddChanges,
-                    atcChanges,
-                    unitsData
+                    unitsData,
+                    atcCodeAutocalculated
                 );
                 calculationLogs = [...calculationLogs, ...dddPerProduct.logs];
 
@@ -97,12 +108,13 @@ export function calculateConsumptionProductLevelData(
                     content.result,
                     dddPerProduct.result,
                     conversionsIUToGramsData,
-                    atcChanges
+                    atcCodeAutocalculated
                 );
                 calculationLogs = [...calculationLogs, ...dddPerPackage.logs];
 
                 return {
                     AMR_GLASS_AMC_TEA_PRODUCT_ID: product.AMR_GLASS_AMC_TEA_PRODUCT_ID,
+                    atcCodeAutocalculated: atcCodeAutocalculated,
                     content: content.result,
                     dddPerProduct: dddPerProduct.result,
                     dddPerPackage: dddPerPackage.result,
@@ -122,8 +134,7 @@ export function calculateConsumptionProductLevelData(
         amClassData,
         awareClassData,
         atcData,
-        atcChanges,
-        atcVersion
+        currentAtcVersion
     );
 
     calculationLogs = [...calculationLogs, ...rawSubstanceConsumptionCalculated.logs];
@@ -217,80 +228,76 @@ function calculateDDDPerProduct(
     dddCombinations: CombinationsData[] | undefined,
     dddData: DDDData[] | undefined,
     dddChanges: DDDChangesData[] | undefined,
-    atcChanges: ATCChangesData[] | undefined,
-    unitsData: UnitsData[]
+    unitsData: UnitsData[],
+    atcCodeAutocalculated: ATCCodeLevel5
 ): { result: DDDPerProduct | undefined; logs: BatchLogContent } {
     if (product.AMR_GLASS_AMC_TEA_COMBINATION) {
         const codeCombinationData = dddCombinations?.find(
-            ({ COMB_CODE, ATC5 }) =>
-                COMB_CODE === product.AMR_GLASS_AMC_TEA_COMBINATION ||
-                ATC5 === getNewAtcCode(product.AMR_GLASS_AMC_TEA_ATC, atcChanges)
+            ({ COMB_CODE }) => COMB_CODE === product.AMR_GLASS_AMC_TEA_COMBINATION
         );
-        return getDDDOfProductFromDDDCombinationsTable(product, codeCombinationData, atcChanges, dddChanges, unitsData);
+
+        if (!codeCombinationData) {
+            // If not found, log error as it should not happen
+            return {
+                result: undefined,
+                logs: [
+                    {
+                        content: `[${new Date().toISOString()}] Product ${
+                            product.AMR_GLASS_AMC_TEA_PRODUCT_ID
+                        } - Combination code not found in combinations json for product with combination code ${
+                            product.AMR_GLASS_AMC_TEA_COMBINATION
+                        } `,
+                        messageType: "Error",
+                    },
+                ],
+            };
+        } else {
+            return getDDDOfProductFromDDDCombinationsTable(product, codeCombinationData);
+        }
     } else {
-        return getDDDOfProductFromDDDTable(product, dddData, atcChanges, dddChanges, unitsData);
+        return getDDDOfProductFromDDDTable(product, dddData, dddChanges, unitsData, atcCodeAutocalculated);
     }
 }
 
 // 2b
 function getDDDOfProductFromDDDCombinationsTable(
     product: ProductRegistryAttributes,
-    codeCombinationData: CombinationsData | undefined,
-    atcChanges: ATCChangesData[] | undefined,
-    dddChanges: DDDChangesData[] | undefined,
-    unitsData: UnitsData[]
-): { result: DDDPerProduct | undefined; logs: BatchLogContent } {
-    let calculationLogs: BatchLogContent = [];
-
-    if (codeCombinationData) {
-        calculationLogs = [
-            ...calculationLogs,
-            {
-                content: `[${new Date().toISOString()}]  Product ${
-                    product.AMR_GLASS_AMC_TEA_PRODUCT_ID
-                } - Identifying corresponding ddd_value and ddd_unit using code combination data: ${codeCombinationData}.`,
-                messageType: "Info",
-            },
-        ];
-
-        const { DDD: DDD_VALUE, DDD_UNIT } = codeCombinationData;
-
-        return {
-            result: {
-                dddValue: DDD_VALUE,
-                dddUnit: DDD_UNIT,
-            },
-            logs: calculationLogs,
-        };
-    }
-
-    calculationLogs = [
-        ...calculationLogs,
+    codeCombinationData: CombinationsData
+): { result: DDDPerProduct; logs: BatchLogContent } {
+    const calculationLogs: BatchLogContent = [
         {
-            content: `[${new Date().toISOString()}] Product ${
+            content: `[${new Date().toISOString()}]  Product ${
                 product.AMR_GLASS_AMC_TEA_PRODUCT_ID
-            } - Combination code not found in combinations json for product ${product.AMR_GLASS_AMC_TEA_PRODUCT_ID}`,
-            messageType: "Warn",
+            } - Identifying corresponding ddd_value and ddd_unit using code combination data: ${codeCombinationData}.`,
+            messageType: "Info",
         },
     ];
 
-    return getLatestDDDStandardized(product, atcChanges, dddChanges, unitsData, calculationLogs);
+    const { DDD: DDD_VALUE, DDD_UNIT } = codeCombinationData;
+
+    return {
+        result: {
+            dddValue: DDD_VALUE,
+            dddUnit: DDD_UNIT,
+        },
+        logs: calculationLogs,
+    };
 }
 
 // 2c
 function getDDDOfProductFromDDDTable(
     product: ProductRegistryAttributes,
     dddData: DDDData[] | undefined,
-    atcChanges: ATCChangesData[] | undefined,
     dddChanges: DDDChangesData[] | undefined,
-    unitsData: UnitsData[]
+    unitsData: UnitsData[],
+    atcCodeAutocalculated: ATCCodeLevel5
 ): { result: DDDPerProduct | undefined; logs: BatchLogContent } {
-    const { AMR_GLASS_AMC_TEA_ATC, AMR_GLASS_AMC_TEA_ROUTE_ADMIN, AMR_GLASS_AMC_TEA_SALT } = product;
+    const { AMR_GLASS_AMC_TEA_ROUTE_ADMIN, AMR_GLASS_AMC_TEA_SALT } = product;
     let calculationLogs: BatchLogContent = [
         {
             content: `[${new Date().toISOString()}] Product ${
                 product.AMR_GLASS_AMC_TEA_PRODUCT_ID
-            } - Identifying corresponding ddd_value and ddd_unit from ddd json using: ${AMR_GLASS_AMC_TEA_ATC}, ${AMR_GLASS_AMC_TEA_ROUTE_ADMIN} and ${AMR_GLASS_AMC_TEA_SALT}`,
+            } - Identifying corresponding ddd_value and ddd_unit from ddd json using: ${atcCodeAutocalculated}, ${AMR_GLASS_AMC_TEA_ROUTE_ADMIN} and ${AMR_GLASS_AMC_TEA_SALT}`,
             messageType: "Info",
         },
     ];
@@ -299,7 +306,7 @@ function getDDDOfProductFromDDDTable(
         const isDefaultSalt = !SALT && AMR_GLASS_AMC_TEA_SALT === DEFAULT_SALT_CODE;
 
         return (
-            (ATC5 === AMR_GLASS_AMC_TEA_ATC || ATC5 === getNewAtcCode(product.AMR_GLASS_AMC_TEA_ATC, atcChanges)) &&
+            ATC5 === atcCodeAutocalculated &&
             ROA === AMR_GLASS_AMC_TEA_ROUTE_ADMIN &&
             (SALT === AMR_GLASS_AMC_TEA_SALT || isDefaultSalt)
         );
@@ -348,29 +355,33 @@ function getDDDOfProductFromDDDTable(
         },
     ];
 
-    return getLatestDDDStandardized(product, atcChanges, dddChanges, unitsData, calculationLogs);
+    // If not found in ddd table, we try to find it in ddd changes table
+    return getLatestDDDStandardized(product, dddChanges, unitsData, calculationLogs, atcCodeAutocalculated);
 }
 
 // 2d
 function getLatestDDDStandardized(
     product: ProductRegistryAttributes,
-    atcChanges: ATCChangesData[] | undefined,
     dddChanges: DDDChangesData[] | undefined,
     unitsData: UnitsData[],
-    calculationLogs: BatchLogContent
+    calculationLogs: BatchLogContent,
+    atcCodeAutocalculated: ATCCodeLevel5
 ): { result: DDDPerProduct | undefined; logs: BatchLogContent } {
-    const atcCode = getNewAtcCode(product.AMR_GLASS_AMC_TEA_ATC, atcChanges) || product.AMR_GLASS_AMC_TEA_ATC;
     calculationLogs = [
         ...calculationLogs,
         {
             content: `[${new Date().toISOString()}] Product ${
                 product.AMR_GLASS_AMC_TEA_PRODUCT_ID
-            } - Get latest ddd_value and ddd_unit from ddd changes using: ${atcCode}`,
+            } - Get latest ddd_value and ddd_unit from ddd changes using: ${atcCodeAutocalculated}`,
             messageType: "Info",
         },
     ];
 
-    const newDddData = getNewDddData(atcCode, product.AMR_GLASS_AMC_TEA_ROUTE_ADMIN, dddChanges);
+    const newDddData = getNewDddData({
+        atcCode: atcCodeAutocalculated,
+        roa: product.AMR_GLASS_AMC_TEA_ROUTE_ADMIN,
+        dddChanges: dddChanges,
+    });
 
     if (newDddData) {
         const dddStandardized = getStandardizedUnitsAndValue(
@@ -433,7 +444,7 @@ function calculateDDDPerPackage(
     content: Content,
     dddPerProduct: DDDPerProduct | undefined,
     conversionsIUToGramsData: ConversionsIUToGramsData[] | undefined,
-    atcChanges: ATCChangesData[] | undefined
+    atcCodeAutocalculated: ATCCodeLevel5
 ): { result: DDDPerPackage | undefined; logs: BatchLogContent } {
     const calculationLogs: BatchLogContent = [
         {
@@ -445,14 +456,12 @@ function calculateDDDPerPackage(
     ];
 
     if (dddPerProduct) {
-        const { AMR_GLASS_AMC_TEA_ATC, AMR_GLASS_AMC_TEA_ROUTE_ADMIN } = product;
+        const { AMR_GLASS_AMC_TEA_ROUTE_ADMIN } = product;
 
         const { standarizedStrengthUnit } = content;
 
         const conversionFactorIuToGram = conversionsIUToGramsData?.find(
-            ({ ATC5, ROA }) =>
-                (ATC5 === AMR_GLASS_AMC_TEA_ATC || ATC5 === getNewAtcCode(AMR_GLASS_AMC_TEA_ATC, atcChanges)) &&
-                ROA === AMR_GLASS_AMC_TEA_ROUTE_ADMIN
+            ({ ATC5, ROA }) => ATC5 === atcCodeAutocalculated && ROA === AMR_GLASS_AMC_TEA_ROUTE_ADMIN
         );
 
         // 3a
@@ -559,7 +568,7 @@ function getTonnesPerProduct(
     productConsumption: RawProductConsumption,
     content: Content,
     conversionsIUToGramsData: ConversionsIUToGramsData[] | undefined,
-    atcChanges: ATCChangesData[] | undefined
+    atcCodeAutocalculated: ATCCodeLevel5
 ): { result: ContentTonnesPerProduct; logs: BatchLogContent } {
     const calculationLogs: BatchLogContent = [
         {
@@ -570,14 +579,12 @@ function getTonnesPerProduct(
         },
     ];
 
-    const { AMR_GLASS_AMC_TEA_PRODUCT_ID: teiIdProduct, AMR_GLASS_AMC_TEA_ATC } = product;
+    const { AMR_GLASS_AMC_TEA_PRODUCT_ID: teiIdProduct } = product;
     const { packages_manual, health_sector_manual, health_level_manual } = productConsumption;
 
     const { standarizedStrengthUnit: contentUnit } = content;
     // 5a
-    const conversionFactorAtc = conversionsIUToGramsData?.find(
-        ({ ATC5 }) => ATC5 === AMR_GLASS_AMC_TEA_ATC || ATC5 === getNewAtcCode(AMR_GLASS_AMC_TEA_ATC, atcChanges)
-    );
+    const conversionFactorAtc = conversionsIUToGramsData?.find(({ ATC5 }) => ATC5 === atcCodeAutocalculated);
     const conversionFactor = contentUnit !== "gram" && conversionFactorAtc?.FACTOR ? conversionFactorAtc.FACTOR : 1;
 
     // 5b - content_tonnes = (content × conv_factor × packages in the year, health_sector and health_level) ÷ 1e6
@@ -616,8 +623,7 @@ function aggregateDataByAtcRouteAdminYearHealthSectorAndHealthLevel(
     amClassData: AmClassificationData,
     awareClassData: AwareClassificationData,
     atcData: ATCData[],
-    atcChanges: ATCChangesData[] | undefined,
-    atcVersion: string
+    currentAtcVersion: string
 ): { result: RawSubstanceConsumptionCalculated[]; logs: BatchLogContent } {
     let calculationLogs: BatchLogContent = [];
 
@@ -655,6 +661,8 @@ function aggregateDataByAtcRouteAdminYearHealthSectorAndHealthLevel(
                 calculationLogs = [...calculationLogs, ...dddPerProductConsumptionPackages.logs];
 
                 if (dddPerProductConsumptionPackages.result) {
+                    const atcCodeAutocalculated = contentDDDPerProductAndDDDPerPackageOfProduct.atcCodeAutocalculated;
+
                     // 5b - content_tonnes = (content × conv_factor × packages in year, health_sector and health_level) ÷ 1e6
                     const contentTonnesOfProduct = getTonnesPerProduct(
                         period,
@@ -662,25 +670,20 @@ function aggregateDataByAtcRouteAdminYearHealthSectorAndHealthLevel(
                         productConsumption,
                         contentDDDPerProductAndDDDPerPackageOfProduct.content,
                         conversionsIUToGramsData,
-                        atcChanges
+                        atcCodeAutocalculated
                     );
                     calculationLogs = [...calculationLogs, ...contentTonnesOfProduct.logs];
-
-                    const {
-                        AMR_GLASS_AMC_TEA_PRODUCT_ID,
-                        AMR_GLASS_AMC_TEA_SALT,
-                        AMR_GLASS_AMC_TEA_ATC,
-                        AMR_GLASS_AMC_TEA_ROUTE_ADMIN,
-                    } = product;
+                    const { AMR_GLASS_AMC_TEA_PRODUCT_ID, AMR_GLASS_AMC_TEA_SALT, AMR_GLASS_AMC_TEA_ROUTE_ADMIN } =
+                        product;
                     const { packages_manual, data_status_manual, health_sector_manual, health_level_manual } =
                         productConsumption;
 
-                    const am_class = getAmClass(amClassData, AMR_GLASS_AMC_TEA_ATC);
-                    const atcCodeByLevel = getAtcCodeByLevel(atcData, AMR_GLASS_AMC_TEA_ATC);
-                    const aware = getAwareClass(awareClassData, AMR_GLASS_AMC_TEA_ATC);
+                    const am_class = getAmClass(amClassData, atcCodeAutocalculated);
+                    const atcCodeByLevel = getAtcCodeByLevel(atcData, atcCodeAutocalculated);
+                    const aware = getAwareClass(awareClassData, atcCodeAutocalculated, AMR_GLASS_AMC_TEA_ROUTE_ADMIN);
 
                     // 5c, 6a, 7a, 8a
-                    const id = `${AMR_GLASS_AMC_TEA_PRODUCT_ID}-${AMR_GLASS_AMC_TEA_ATC}-${AMR_GLASS_AMC_TEA_ROUTE_ADMIN}-${period}-${health_sector_manual}-${health_level_manual}-${data_status_manual}`;
+                    const id = `${AMR_GLASS_AMC_TEA_PRODUCT_ID}-${atcCodeAutocalculated}-${AMR_GLASS_AMC_TEA_ROUTE_ADMIN}-${period}-${health_sector_manual}-${health_level_manual}-${data_status_manual}`;
                     const accWithThisId = acc[id] as RawSubstanceConsumptionCalculated;
 
                     const isAlreadyInTheAggregation =
@@ -696,7 +699,7 @@ function aggregateDataByAtcRouteAdminYearHealthSectorAndHealthLevel(
                                 content: `[${new Date().toISOString()}]  Product ${AMR_GLASS_AMC_TEA_PRODUCT_ID} - Aggregating content tonnes and packages of: ${JSON.stringify(
                                     {
                                         AMR_GLASS_AMC_TEA_PRODUCT_ID,
-                                        AMR_GLASS_AMC_TEA_ATC,
+                                        atcCodeAutocalculated,
                                         AMR_GLASS_AMC_TEA_ROUTE_ADMIN,
                                         health_sector_manual,
                                         health_level_manual,
@@ -729,7 +732,7 @@ function aggregateDataByAtcRouteAdminYearHealthSectorAndHealthLevel(
                               }
                             : {
                                   AMR_GLASS_AMC_TEA_PRODUCT_ID,
-                                  atc_autocalculated: AMR_GLASS_AMC_TEA_ATC,
+                                  atc_autocalculated: atcCodeAutocalculated,
                                   route_admin_autocalculated: AMR_GLASS_AMC_TEA_ROUTE_ADMIN,
                                   salt_autocalculated: AMR_GLASS_AMC_TEA_SALT,
                                   year: period,
@@ -738,7 +741,7 @@ function aggregateDataByAtcRouteAdminYearHealthSectorAndHealthLevel(
                                   ddds_autocalculated: dddPerProductConsumptionPackages.result.dddConsumptionPackages,
                                   data_status_autocalculated: data_status_manual,
                                   health_sector_autocalculated: health_sector_manual,
-                                  atc_version_autocalculated: atcVersion,
+                                  atc_version_autocalculated: currentAtcVersion,
                                   health_level_autocalculated: health_level_manual,
                                   orgUnitId,
                                   am_class: am_class,

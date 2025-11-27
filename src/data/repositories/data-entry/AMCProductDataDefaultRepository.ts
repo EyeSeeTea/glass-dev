@@ -22,10 +22,16 @@ import {
     RawSubstanceConsumptionCalculatedKeys,
 } from "../../../domain/entities/data-entry/amc/RawSubstanceConsumptionCalculated";
 import { TrackerPostResponse } from "@eyeseetea/d2-api/api/tracker";
-import { importApiTracker } from "../utils/importApiTracker";
-import { ImportStrategy } from "../../../domain/entities/data-entry/DataValuesSaveSummary";
+import {
+    getDefaultErrorTrackerPostResponse,
+    importApiTracker,
+    joinAllTrackerPostResponses,
+} from "../utils/importApiTracker";
 import { logger } from "../../../utils/logger";
 import moment from "moment";
+import { ImportStrategy } from "../../../domain/entities/data-entry/ImportSummary";
+import consoleLogger from "../../../utils/consoleLogger";
+import { TrackerEvent } from "../../../domain/entities/TrackedEntityInstance";
 
 export const AMC_PRODUCT_REGISTER_PROGRAM_ID = "G6ChA5zMW9n";
 
@@ -33,6 +39,8 @@ export const AMC_RAW_PRODUCT_CONSUMPTION_STAGE_ID = "GmElQHKXLIE";
 export const AMC_RAW_SUBSTANCE_CONSUMPTION_CALCULATED_STAGE_ID = "q8cl5qllyjd";
 
 export const AMR_GLASS_AMC_TEA_PRODUCT_ID = "iasfoeU8veF";
+
+const DEFAULT_IMPORT_DELETE_CALCULATIONS_CHUNK_SIZE = 300;
 
 // TODO: Move logic to use case and entity instead of in repository which should be logic-less, just get/store the data.
 export class AMCProductDataDefaultRepository implements AMCProductDataRepository {
@@ -76,14 +84,25 @@ export class AMCProductDataDefaultRepository implements AMCProductDataRepository
     }
 
     // TODO: decouple TrackerPostResponse from DHIS2
-    importCalculations(
-        importStrategy: ImportStrategy,
-        productDataTrackedEntities: ProductDataTrackedEntity[],
-        rawSubstanceConsumptionCalculatedStageMetadata: ProgramStage,
-        rawSubstanceConsumptionCalculatedData: RawSubstanceConsumptionCalculated[],
-        orgUnitId: Id,
-        period: string
-    ): FutureData<TrackerPostResponse> {
+    importCalculations(params: {
+        importStrategy: ImportStrategy;
+        productDataTrackedEntities: ProductDataTrackedEntity[];
+        rawSubstanceConsumptionCalculatedStageMetadata: ProgramStage;
+        rawSubstanceConsumptionCalculatedData: RawSubstanceConsumptionCalculated[];
+        orgUnitId: Id;
+        period: string;
+        chunkSize?: number;
+    }): FutureData<TrackerPostResponse> {
+        const {
+            importStrategy,
+            productDataTrackedEntities,
+            rawSubstanceConsumptionCalculatedStageMetadata,
+            rawSubstanceConsumptionCalculatedData,
+            orgUnitId,
+            period,
+            chunkSize = DEFAULT_IMPORT_DELETE_CALCULATIONS_CHUNK_SIZE,
+        } = params;
+
         const d2TrackerEvents = this.mapRawSubstanceConsumptionCalculatedToD2TrackerEvent(
             productDataTrackedEntities,
             rawSubstanceConsumptionCalculatedStageMetadata,
@@ -92,11 +111,144 @@ export class AMCProductDataDefaultRepository implements AMCProductDataRepository
             period
         );
         if (!_.isEmpty(d2TrackerEvents)) {
-            return importApiTracker(this.api, { events: d2TrackerEvents }, importStrategy);
+            const chunkedD2TrackerEvents = _(d2TrackerEvents).chunk(chunkSize).value();
+
+            const $importTrackerEvents = chunkedD2TrackerEvents.map((d2TrackerEventsChunk, index) => {
+                logger.debug(
+                    `[${new Date().toISOString()}] Product level data: Chunk ${index + 1}/${
+                        chunkedD2TrackerEvents.length
+                    } of Raw Substance Consumption Calculated.`
+                );
+
+                return importApiTracker(this.api, { events: d2TrackerEventsChunk }, importStrategy)
+                    .mapError(error => {
+                        logger.error(
+                            `[${new Date().toISOString()}] Product level data: Error importing Raw Substance Consumption Calculated: ${error}`
+                        );
+
+                        return getDefaultErrorTrackerPostResponse(error);
+                    })
+                    .flatMap(response => {
+                        logger.debug(
+                            `[${new Date().toISOString()}] Product level data: End of chunk ${index + 1}/${
+                                chunkedD2TrackerEvents.length
+                            } of Raw Substance Consumption Calculated.`
+                        );
+                        return Future.success(response);
+                    });
+            });
+
+            return Future.sequentialWithAccumulation($importTrackerEvents, {
+                stopOnError: true,
+            })
+                .flatMap(result => {
+                    if (result.type === "error") {
+                        const errorTrackerPostResponse = result.error;
+                        const messageError = errorTrackerPostResponse.message;
+                        logger.error(
+                            `[${new Date().toISOString()}] Product level data: Error importing some Raw Substance Consumption Calculated: ${messageError}`
+                        );
+                        const accumulatedTrackerPostResponses = result.data;
+                        const trackerPostResponse = joinAllTrackerPostResponses([
+                            ...accumulatedTrackerPostResponses,
+                            errorTrackerPostResponse,
+                        ]);
+                        return Future.success(trackerPostResponse);
+                    } else {
+                        logger.debug(
+                            `[${new Date().toISOString()}] Product level data: All chunks of Raw Substance Consumption Calculated imported.`
+                        );
+                        const trackerPostResponse = joinAllTrackerPostResponses(result.data);
+                        return Future.success(trackerPostResponse);
+                    }
+                })
+                .mapError(() => {
+                    logger.error(
+                        `[${new Date().toISOString()}] Product level data: Unknown error while saving Raw Substance Consumption Calculated in chunks.`
+                    );
+                    return `[${new Date().toISOString()}] Product level data: Unknown error while saving Raw Substance Consumption Calculated in chunks.`;
+                });
         } else {
             logger.error(`[${new Date().toISOString()}] Product level data: there are no events to be created`);
-            return Future.error("There are no events to be created");
+            return Future.error("Product level data: There are no events to be created");
         }
+    }
+
+    deleteRawSubstanceConsumptionCalculatedById(
+        rawSubstanceConsumptionCalculatedIds: Id[],
+        chunkSize: number = DEFAULT_IMPORT_DELETE_CALCULATIONS_CHUNK_SIZE
+    ): FutureData<TrackerPostResponse> {
+        const d2TrackerEventsToDelete: TrackerEvent[] = rawSubstanceConsumptionCalculatedIds.map(eventId => {
+            return {
+                event: eventId,
+                program: "",
+                status: "COMPLETED",
+                orgUnit: "",
+                occurredAt: "",
+                attributeOptionCombo: "",
+                dataValues: [],
+                programStage: "",
+                scheduledAt: "",
+            };
+        });
+
+        const chunkedD2TrackerEventsToDelete = _(d2TrackerEventsToDelete).chunk(chunkSize).value();
+
+        const $deleteTrackerEvents = chunkedD2TrackerEventsToDelete.map((d2TrackerEventsToDeleteChunk, index) => {
+            consoleLogger.debug(
+                `[${new Date().toISOString()}] Chunk ${index + 1}/${
+                    chunkedD2TrackerEventsToDelete.length
+                } of Raw Substance Consumption Calculated.`
+            );
+
+            return importApiTracker(this.api, { events: d2TrackerEventsToDeleteChunk }, "DELETE")
+                .mapError(error => {
+                    consoleLogger.error(
+                        `[${new Date().toISOString()}] Error deleting Raw Substance Consumption Calculated: ${error}`
+                    );
+                    return getDefaultErrorTrackerPostResponse(error);
+                })
+                .flatMap(response => {
+                    consoleLogger.debug(
+                        `[${new Date().toISOString()}] End of chunk ${index + 1}/${
+                            chunkedD2TrackerEventsToDelete.length
+                        } of Raw Substance Consumption Calculated.`
+                    );
+
+                    return Future.success(response);
+                });
+        });
+
+        return Future.sequentialWithAccumulation($deleteTrackerEvents, {
+            stopOnError: true,
+        })
+            .flatMap(result => {
+                if (result.type === "error") {
+                    const errorTrackerPostResponse = result.error;
+                    const messageError = errorTrackerPostResponse.message;
+                    logger.error(
+                        `[${new Date().toISOString()}] Error deleting some Raw Substance Consumption Calculated: ${messageError}`
+                    );
+                    const accumulatedTrackerPostResponses = result.data;
+                    const trackerPostResponse = joinAllTrackerPostResponses([
+                        ...accumulatedTrackerPostResponses,
+                        errorTrackerPostResponse,
+                    ]);
+                    return Future.success(trackerPostResponse);
+                } else {
+                    logger.debug(
+                        `[${new Date().toISOString()}] All chunks of Raw Substance Consumption Calculated deleted.`
+                    );
+                    const trackerPostResponse = joinAllTrackerPostResponses(result.data);
+                    return Future.success(trackerPostResponse);
+                }
+            })
+            .mapError(() => {
+                logger.error(
+                    `[${new Date().toISOString()}] Unknown error while deleting Raw Substance Consumption Calculated in chunks.`
+                );
+                return `[${new Date().toISOString()}] Unknown error while deleting Raw Substance Consumption Calculated in chunks.`;
+            });
     }
 
     getProductRegisterAndRawProductConsumptionByProductIds(

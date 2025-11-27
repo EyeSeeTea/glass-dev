@@ -17,4 +17,5 @@ export interface GlassATCRepository {
     disableRecalculations(): FutureData<void>;
     getLastAtcVersionKeyYear(year: string): FutureData<ATCVersionKey>;
     getListOfLastAtcVersionsKeysByYears(years: string[]): FutureData<ListGlassATCLastVersionKeysByYear>;
+    getCurrentAtcVersionKey(): FutureData<ATCVersionKey>;
 }
