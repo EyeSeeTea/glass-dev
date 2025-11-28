@@ -18,6 +18,7 @@ import { apiToFuture } from "../utils/futures";
 import { UploadsFormData } from "../data/repositories/utils/builders/UploadsFormDataBuilder";
 import { NodeUploadsFormDataBuilder } from "../data/repositories/utils/builders/NodeUploadsFormDataBuilder";
 import { periodToYearMonthDay } from "../utils/currentPeriodHelper";
+import { GlassGeneralInfo } from "../domain/entities/GlassGeneralInfo";
 
 const CHUNK_SIZE = 150;
 
@@ -57,22 +58,55 @@ async function main() {
 
                 consoleLogger.info("Starting migration of GLASS uploads from Datastore to Event program...");
 
-                return getAllGlassUploadsFromDatastore(dataStoreClient).run(
-                    allDatastoreGlassUploads => {
-                        consoleLogger.info(`Fetched ${allDatastoreGlassUploads.length} GLASS uploads from Datastore.`);
+                return checkIfMigrationWasAlreadyRun(dataStoreClient).run(
+                    wasAlreadyRun => {
+                        if (wasAlreadyRun) {
+                            consoleLogger.info(
+                                "Migration has already been run previously. Exiting without making any changes."
+                            );
+                            process.exit(0);
+                        } else {
+                            return getAllGlassUploadsFromDatastore(dataStoreClient).run(
+                                allDatastoreGlassUploads => {
+                                    consoleLogger.info(
+                                        `Fetched ${allDatastoreGlassUploads.length} GLASS uploads from Datastore.`
+                                    );
 
-                        saveDatastoreUploadsInProgram(api, uploadsFormDataBuilder, allDatastoreGlassUploads).run(
-                            () => {
-                                consoleLogger.info("Migration completed successfully.");
-                                process.exit(0);
-                            },
-                            e => {
-                                consoleLogger.error(`Error saving GLASS uploads to Event program: ${e}`);
-                            }
-                        );
+                                    saveDatastoreUploadsInProgram(
+                                        api,
+                                        uploadsFormDataBuilder,
+                                        allDatastoreGlassUploads
+                                    ).run(
+                                        () => {
+                                            setUploadsMigrationCompletedFlag(dataStoreClient).run(
+                                                () => {
+                                                    consoleLogger.info(
+                                                        "Migration flag set successfully in Datastore General Info."
+                                                    );
+                                                    consoleLogger.info("Migration completed successfully.");
+                                                    process.exit(0);
+                                                },
+                                                e => {
+                                                    consoleLogger.error(
+                                                        `Error setting migration flag in Datastore General Info: ${e}`
+                                                    );
+                                                }
+                                            );
+                                        },
+                                        e => {
+                                            consoleLogger.error(`Error saving GLASS uploads to Event program: ${e}`);
+                                        }
+                                    );
+                                },
+                                e => {
+                                    consoleLogger.error(`Error fetching GLASS uploads from Datastore: ${e}`);
+                                }
+                            );
+                        }
                     },
                     e => {
-                        consoleLogger.error(`Error fetching GLASS uploads from Datastore: ${e}`);
+                        consoleLogger.error(`Error checking migration status: ${e}`);
+                        process.exit(1);
                     }
                 );
             } catch (e) {
@@ -97,6 +131,33 @@ type PartialSaveFileResourceResponse = {
         };
     };
 };
+
+function checkIfMigrationWasAlreadyRun(dataStoreClient: DataStoreClient): FutureData<boolean> {
+    return dataStoreClient.getObject<GlassGeneralInfo>(DataStoreKeys.GENERAL).flatMap(generalDataStoreItems => {
+        if (generalDataStoreItems?.uploadsMigrationCompleted) {
+            return Future.success(true);
+        } else {
+            return Future.success(false);
+        }
+    });
+}
+
+function setUploadsMigrationCompletedFlag(dataStoreClient: DataStoreClient): FutureData<void> {
+    return dataStoreClient.getObject<GlassGeneralInfo>(DataStoreKeys.GENERAL).flatMap(generalDataStoreItems => {
+        if (generalDataStoreItems) {
+            const updatedGeneralInfo: GlassGeneralInfo = {
+                ...generalDataStoreItems,
+                uploadsMigrationCompleted: true,
+            };
+            return dataStoreClient.saveObject<GlassGeneralInfo>(DataStoreKeys.GENERAL, updatedGeneralInfo).map(() => {
+                consoleLogger.info("Set uploadsMigrationCompleted flag to true in General Info datastore.");
+                return;
+            });
+        } else {
+            return Future.error("General Info not found in Datastore to set uploadsMigrationCompleted flag.");
+        }
+    });
+}
 
 function getAllGlassUploadsFromDatastore(dataStoreClient: DataStoreClient): FutureData<GlassUploads[]> {
     return dataStoreClient.listCollection<GlassUploads>(DataStoreKeys.UPLOADS);
