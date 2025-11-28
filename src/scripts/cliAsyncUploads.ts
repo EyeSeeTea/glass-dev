@@ -16,7 +16,7 @@ import { Id } from "../domain/entities/Ref";
 import { GlassUploadsRepository } from "../domain/repositories/GlassUploadsRepository";
 import { RemoveAsyncUploadsUseCase } from "../domain/usecases/RemoveAsyncUploadsUseCase";
 import { SetMultipleUploadErrorAsyncUploadingUseCase } from "../domain/usecases/SetMultipleUploadErrorAsyncUploadingUseCase";
-import { GlassUploadsDefaultRepository } from "../data/repositories/GlassUploadsDefaultRepository";
+import { GlassUploadsProgramRepository } from "../data/repositories/GlassUploadsProgramRepository";
 import { GlassModuleRepository } from "../domain/repositories/GlassModuleRepository";
 import { GlassModule } from "../domain/entities/GlassModule";
 import { GlassModuleDefaultRepository } from "../data/repositories/GlassModuleDefaultRepository";
@@ -88,7 +88,7 @@ async function main() {
 
                 const glassGeneralInfoRepository = new GeneralInfoDefaultRepository(dataStoreClient, instance);
                 const glassAsyncUploadsRepository = new GlassAsyncUploadsDefaultRepository(dataStoreClient);
-                const glassUploadsRepository = new GlassUploadsDefaultRepository(dataStoreClient);
+                const glassUploadsRepository = new GlassUploadsProgramRepository(api);
                 const glassModuleRepository = new GlassModuleDefaultRepository(dataStoreClient);
                 const countryRepository = new CountryDefaultRepository(api);
                 const glassDocumentsRepository = new GlassDocumentsDefaultRepository(dataStoreClient, instance);

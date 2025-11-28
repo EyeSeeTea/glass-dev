@@ -3,7 +3,7 @@ import { Instance } from "./data/entities/Instance";
 import { GlassDataSubmissionsDefaultRepository } from "./data/repositories/GlassDataSubmissionDefaultRepository";
 import { GlassModuleDefaultRepository } from "./data/repositories/GlassModuleDefaultRepository";
 import { GlassNewsDefaultRepository } from "./data/repositories/GlassNewsDefaultRepository";
-import { GlassUploadsDefaultRepository } from "./data/repositories/GlassUploadsDefaultRepository";
+import { GlassUploadsProgramRepository } from "./data/repositories/GlassUploadsProgramRepository";
 import { GlassDocumentsDefaultRepository } from "./data/repositories/GlassDocumentsDefaultRepository";
 import { InstanceDefaultRepository } from "./data/repositories/InstanceDefaultRepository";
 import { GetCurrentUserUseCase } from "./domain/usecases/GetCurrentUserUseCase";
@@ -12,7 +12,6 @@ import { GetGlassModuleByNameUseCase } from "./domain/usecases/GetGlassModuleByN
 import { GetGlassModuleByIdUseCase } from "./domain/usecases/GetGlassModuleByIdUseCase";
 import { GetGlassModulesUseCase } from "./domain/usecases/GetGlassModulesUseCase";
 import { GetGlassNewsUseCase } from "./domain/usecases/GetGlassNewsUseCase";
-import { GetGlassUploadsUseCase } from "./domain/usecases/GetGlassUploadsUseCase";
 import { GetInstanceVersionUseCase } from "./domain/usecases/GetInstanceVersionUseCase";
 import { ValidateGlassModulesUseCase } from "./domain/usecases/ValidateGlassModulesUseCase";
 import { ValidateGlassNewsUseCase } from "./domain/usecases/ValidateGlassNewsUseCase";
@@ -145,7 +144,7 @@ export function getCompositionRoot(instance: Instance) {
     const glassModuleRepository = new GlassModuleDefaultRepository(dataStoreClient);
     const glassNewsRepository = new GlassNewsDefaultRepository(dataStoreClient);
     const glassDataSubmissionRepository = new GlassDataSubmissionsDefaultRepository(dataStoreClient);
-    const glassUploadsRepository = new GlassUploadsDefaultRepository(dataStoreClient);
+    const glassUploadsRepository = new GlassUploadsProgramRepository(api);
     const glassDocumentsRepository = new GlassDocumentsDefaultRepository(dataStoreClient, instance);
     const risDataRepository = new RISDataCSVDefaultRepository();
     const risIndividualFungalRepository = new RISIndividualFungalDataCSVDefaultRepository();
@@ -214,7 +213,6 @@ export function getCompositionRoot(instance: Instance) {
             saveDataSubmissions: new SaveDataSubmissionsUseCase(glassDataSubmissionRepository),
         }),
         glassUploads: getExecute({
-            getAll: new GetGlassUploadsUseCase(glassUploadsRepository),
             getById: new GetGlassUploadByIdUseCase(glassUploadsRepository),
             setStatus: new SetUploadStatusUseCase(glassUploadsRepository),
             getAMRUploadsForCurrentDataSubmission: new GetGlassUploadsByDataSubmissionUseCase(
