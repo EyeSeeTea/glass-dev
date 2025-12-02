@@ -327,22 +327,23 @@ export class GlassUploadsProgramRepository implements GlassUploadsRepository {
                 eventListFileId: getValueById(event.dataValues, uploadsDHIS2Ids.eventListDocumentId) || undefined,
                 calculatedEventListFileId:
                     getValueById(event.dataValues, uploadsDHIS2Ids.calculatedEventListDocumentId) || undefined,
-                eventListDataDeleted:
-                    getValueById(event.dataValues, uploadsDHIS2Ids.eventListDataDeleted) === "true" ? true : false,
-                calculatedEventListDataDeleted:
-                    getValueById(event.dataValues, uploadsDHIS2Ids.calculatedEventListDataDeleted) === "true"
-                        ? true
-                        : false,
-                errorAsyncDeleting:
-                    getValueById(event.dataValues, uploadsDHIS2Ids.errorAsyncDeleting) === "true" ? true : false,
-                errorAsyncUploading:
-                    getValueById(event.dataValues, uploadsDHIS2Ids.errorAsyncUploading) === "true" ? true : false,
+                eventListDataDeleted: this.getBooleanValue(event.dataValues, uploadsDHIS2Ids.eventListDataDeleted),
+                calculatedEventListDataDeleted: this.getBooleanValue(
+                    event.dataValues,
+                    uploadsDHIS2Ids.calculatedEventListDataDeleted
+                ),
+                errorAsyncDeleting: this.getBooleanValue(event.dataValues, uploadsDHIS2Ids.errorAsyncDeleting),
+                errorAsyncUploading: this.getBooleanValue(event.dataValues, uploadsDHIS2Ids.errorAsyncUploading),
                 importSummary: importSummary,
                 asyncImportSummaries: asyncImportSummaries,
                 inputLineNb: 0,
                 outputLineNb: 0,
             };
         });
+    }
+
+    private getBooleanValue(dataValues: DataValue[], dataElement: string): boolean {
+        return getValueById(dataValues, dataElement) === "true";
     }
 
     private mapUploadToEvent(
