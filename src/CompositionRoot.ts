@@ -135,16 +135,20 @@ import { GetStrataOptionsUseCase } from "./domain/usecases/amc-questionnaires/Ge
 import { SaveComponentAMCQuestionnaireUseCase } from "./domain/usecases/amc-questionnaires/SaveComponentAMCQuestionnaireUseCase";
 import { UNPopulationD2Repository } from "./data/repositories/amc-questionnaires/UNPopulationD2Repository";
 import { GetUNPopulationUseCase } from "./domain/usecases/amc-questionnaires/GetUNPopulationUseCase";
+import { getUploadsFormDataBuilder } from "./utils/getUploadsFormDataBuilder";
 
 export function getCompositionRoot(instance: Instance) {
     const api = getD2APiFromInstance(instance);
+    const runtime: "node" | "browser" = typeof window === "undefined" ? "node" : "browser";
+    const uploadsFormDataBuilder = getUploadsFormDataBuilder(runtime);
+
     const dataStoreClient = new DataStoreClient(instance);
     const bulkLoadDatastoreClient = new BulkLoadDataStoreClient(instance);
     const instanceRepository = new InstanceDefaultRepository(instance, dataStoreClient);
     const glassModuleRepository = new GlassModuleDefaultRepository(dataStoreClient);
     const glassNewsRepository = new GlassNewsDefaultRepository(dataStoreClient);
     const glassDataSubmissionRepository = new GlassDataSubmissionsDefaultRepository(dataStoreClient);
-    const glassUploadsRepository = new GlassUploadsProgramRepository(api);
+    const glassUploadsRepository = new GlassUploadsProgramRepository(api, uploadsFormDataBuilder);
     const glassDocumentsRepository = new GlassDocumentsDefaultRepository(dataStoreClient, instance);
     const risDataRepository = new RISDataCSVDefaultRepository();
     const risIndividualFungalRepository = new RISIndividualFungalDataCSVDefaultRepository();
