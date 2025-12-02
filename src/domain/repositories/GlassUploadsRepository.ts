@@ -3,6 +3,10 @@ import { GlassUploads, GlassUploadsStatus } from "../entities/GlassUploads";
 import { Id } from "../entities/Ref";
 import { ImportSummary, ImportSummaryErrors } from "../entities/data-entry/ImportSummary";
 
+/* TODO: change setStatus, setBatchId, updateSampleUploadWithRisId, setEventListFileId, saveImportSummaryErrorsOfFilesInUploads,
+ * setCalculatedEventListFileId, setEventListDataDeleted, setCalculatedEventListDataDeleted, setMultipleErrorAsyncDeleting,
+ * setMultipleErrorAsyncUploading, saveImportSummaries functions to return and receive entities, not primitives, to avoid bussiness rules in repository
+ */
 export interface GlassUploadsRepository {
     getById(id: Id): FutureData<GlassUploads>;
     getByIds(ids: Id[], options?: { chunkSize: number }): FutureData<GlassUploads[]>;
