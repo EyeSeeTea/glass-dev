@@ -146,17 +146,15 @@ export class GlassUploadsProgramRepository implements GlassUploadsRepository {
         filter?: string;
         orgUnitMode?: "SELECTED" | "CHILDREN" | "DESCENDANTS" | "ACCESSIBLE" | "CAPTURE" | "ALL";
     }): FutureData<GlassUploads[]> {
-        return Future.fromPromise(this.getEventsWithFilters(filters)).flatMap(d2Events =>
+        return this.getEventsWithFilters(filters).flatMap(d2Events =>
             Future.sequential(d2Events.map(event => this.buildGlassUploadFromEvent(event)))
         );
     }
 
     getByCorrespondingRisUploadId(correspondingRisUploadId: Id): FutureData<GlassUploads> {
-        return Future.fromPromise(
-            this.getEventsWithFilters({
-                filter: `${uploadsDHIS2Ids.correspondingRisUploadId}:eq:${correspondingRisUploadId}`,
-            })
-        ).flatMap(d2Events => {
+        return this.getEventsWithFilters({
+            filter: `${uploadsDHIS2Ids.correspondingRisUploadId}:eq:${correspondingRisUploadId}`,
+        }).flatMap(d2Events => {
             const event = d2Events[0];
             if (event) {
                 return this.buildGlassUploadFromEvent(event).flatMap(glassUpload => {
@@ -460,22 +458,22 @@ export class GlassUploadsProgramRepository implements GlassUploadsRepository {
         ).flatMap(listOfEvents => Future.success(_(listOfEvents).flatten().value()));
     }
 
-    private async getEventsWithFilters(filters: {
+    private getEventsWithFilters(filters: {
         orgUnit?: Id;
         occurredAfter?: string;
         occurredBefore?: string;
         pageSize?: number;
         filter?: string;
         orgUnitMode?: "SELECTED" | "CHILDREN" | "DESCENDANTS" | "ACCESSIBLE" | "CAPTURE" | "ALL";
-    }): Promise<D2TrackerEvent[]> {
+    }): FutureData<D2TrackerEvent[]> {
         const pageSize = filters.pageSize ?? DEFAULT_PAGE_SIZE;
         const events: D2TrackerEvent[] = [];
         let page = 1;
         let pageCount: number | undefined;
 
-        do {
-            const result = (await this.api.tracker.events
-                .get({
+        const fetchPage = (): FutureData<D2TrackerEvent[]> => {
+            return apiToFuture(
+                this.api.tracker.events.get({
                     fields: eventFields,
                     program: AMR_GLASS_PROE_UPLOADS_PROGRAM_ID,
                     totalPages: true,
@@ -483,17 +481,24 @@ export class GlassUploadsProgramRepository implements GlassUploadsRepository {
                     page,
                     ...filters,
                 })
-                .getData()) as FixedTrackerEventsResponse;
+            ).flatMap(response => {
+                const result = response as FixedTrackerEventsResponse;
+                const apiEvents: D2TrackerEvent[] = result.events ?? result.instances ?? [];
+                events.push(...apiEvents);
 
-            const apiEvents: D2TrackerEvent[] = result.events ?? result.instances ?? [];
-            events.push(...apiEvents);
+                const pager = result.pager ?? result;
+                pageCount = pager.pageCount;
+                page = pager.page + 1;
 
-            const pager = result.pager ?? result;
-            pageCount = pager.pageCount;
-            page = pager.page + 1;
-        } while (pageCount !== undefined && page <= pageCount);
+                if (pageCount !== undefined && page <= pageCount) {
+                    return fetchPage();
+                }
 
-        return events;
+                return Future.success(events);
+            });
+        };
+
+        return fetchPage();
     }
 
     private saveUploads(uploads: GlassUploads[]): FutureData<void> {
