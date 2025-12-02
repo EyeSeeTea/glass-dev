@@ -6,16 +6,22 @@ import {
     getAmClass,
     getAtcCodeByLevel,
     getAwareClass,
-    getNewAtcCodeRec,
     DDDData,
     getDDDForAtcVersion,
     UnitsData,
+    AmClassificationData,
+    AwareClassificationData,
+    ATCData,
+    ATCChangesData,
+    getNewAtcCodeRecursively,
+    ATCCodeLevel5,
 } from "../../../../entities/GlassAtcVersionData";
 import { Id } from "../../../../entities/Ref";
 import { RawSubstanceConsumptionData } from "../../../../entities/data-entry/amc/RawSubstanceConsumptionData";
 import { SubstanceConsumptionCalculated } from "../../../../entities/data-entry/amc/SubstanceConsumptionCalculated";
 
-// TODO: Divide this function into smaller functions
+const LAST_ATC_CODE_LEVEL = 5;
+
 export function calculateConsumptionSubstanceLevelData(
     period: string,
     orgUnitId: Id,
@@ -40,10 +46,10 @@ export function calculateConsumptionSubstanceLevelData(
         return [];
     }
 
-    const amClassData = latestAtcVersionData.am_classification;
-    const awareClassData = latestAtcVersionData.aware_classification;
-    const atcData = latestAtcVersionData.atcs;
-    const atcChanges = getATCChanges(latestAtcVersionData.changes);
+    const latestAmClassData: AmClassificationData = latestAtcVersionData.am_classification;
+    const latestAwareClassData: AwareClassificationData = latestAtcVersionData.aware_classification;
+    const latestAtcData: ATCData[] = latestAtcVersionData.atcs;
+    const latestAtcChanges: ATCChangesData[] = getATCChanges(latestAtcVersionData.changes);
 
     const calculatedConsumptionSubstanceLevelData = rawSubstanceConsumptionData
         .map(rawSubstanceConsumption => {
@@ -59,7 +65,7 @@ export function calculateConsumptionSubstanceLevelData(
             const { atc_version_manual } = rawSubstanceConsumption;
 
             if (atc_version_manual === currentAtcVersionKey) {
-                // User atc version is identical to the current atc version, just copy manual to autocalculated
+                // If manual atc version is identical to the current atc version, just copy manual to autocalculated
                 calculationLogs = [
                     ...calculationLogs,
                     {
@@ -70,39 +76,20 @@ export function calculateConsumptionSubstanceLevelData(
                     },
                 ];
 
-                const rawSubstanceConsumptionKilograms = rawSubstanceConsumption.tons_manual
-                    ? rawSubstanceConsumption.tons_manual * 1000
-                    : undefined;
-
-                const am_class = getAmClass(amClassData, rawSubstanceConsumption.atc_manual);
-                const atcCodeByLevel = getAtcCodeByLevel(atcData, rawSubstanceConsumption.atc_manual);
-                const aware = getAwareClass(awareClassData, rawSubstanceConsumption.atc_manual);
-
-                return {
+                return copyDDDManualToDDDAutocalculated({
+                    rawSubstanceConsumption,
+                    currentAtcVersionKey,
                     period,
                     orgUnitId,
-                    report_date: rawSubstanceConsumption.report_date,
-                    atc_autocalculated: rawSubstanceConsumption.atc_manual,
-                    route_admin_autocalculated: rawSubstanceConsumption.route_admin_manual,
-                    salt_autocalculated: rawSubstanceConsumption.salt_manual,
-                    packages_autocalculated: rawSubstanceConsumption.packages_manual,
-                    ddds_autocalculated: rawSubstanceConsumption.ddds_manual,
-                    atc_version_autocalculated: currentAtcVersionKey,
-                    kilograms_autocalculated: rawSubstanceConsumptionKilograms,
-                    data_status_autocalculated: rawSubstanceConsumption.data_status_manual,
-                    health_sector_autocalculated: rawSubstanceConsumption.health_sector_manual,
-                    health_level_autocalculated: rawSubstanceConsumption.health_level_manual,
-                    am_class: am_class,
-                    atc2: atcCodeByLevel?.level2,
-                    atc3: atcCodeByLevel?.level3,
-                    atc4: atcCodeByLevel?.level4,
-                    aware: aware,
-                };
+                    amClassData: latestAmClassData,
+                    atcData: latestAtcData,
+                    awareClassData: latestAwareClassData,
+                });
             }
 
-            // atc_version_manual is different from current_atc_version, we need to adjust
-            const userAtcVersion = atcVersionsByKeys[atc_version_manual];
-            if (!userAtcVersion) {
+            const atcManualVersionData = atcVersionsByKeys[atc_version_manual];
+            if (!atcManualVersionData) {
+                // Cannot find the atc version provided in the raw substance consumption data, log error and skip this record
                 calculationLogs = [
                     ...calculationLogs,
                     {
@@ -117,7 +104,6 @@ export function calculateConsumptionSubstanceLevelData(
                 return;
             }
 
-            // Check if the atc_manual is still valid in the current atc version, if not has it been replaced by a new atc?
             calculationLogs = [
                 ...calculationLogs,
                 {
@@ -130,9 +116,20 @@ export function calculateConsumptionSubstanceLevelData(
                 },
             ];
 
-            const atcAutoCalc = getNewAtcCodeRec(rawSubstanceConsumption.atc_manual, atcChanges, atcData);
+            const atcCodeInLatestAtcData = latestAtcData.find(
+                data => data.CODE === rawSubstanceConsumption.atc_manual && data.LEVEL === LAST_ATC_CODE_LEVEL
+            )?.CODE;
 
-            if (atcAutoCalc === undefined) {
+            const atcAutocalculated = atcCodeInLatestAtcData
+                ? atcCodeInLatestAtcData
+                : getNewAtcCodeRecursively({
+                      oldAtcCode: rawSubstanceConsumption.atc_manual,
+                      atcChanges: latestAtcChanges,
+                      currentAtcs: latestAtcData,
+                  });
+
+            if (atcAutocalculated === undefined) {
+                // The code atc_manual is not in the current version and has no replacement, copy pasting ddd_manual into ddd_autocalculated
                 calculationLogs = [
                     ...calculationLogs,
                     {
@@ -142,34 +139,16 @@ export function calculateConsumptionSubstanceLevelData(
                         messageType: "Warn",
                     },
                 ];
-                const rawSubstanceConsumptionKilograms = rawSubstanceConsumption.tons_manual
-                    ? rawSubstanceConsumption.tons_manual * 1000
-                    : undefined;
 
-                const am_class = getAmClass(amClassData, rawSubstanceConsumption.atc_manual);
-                const atcCodeByLevel = getAtcCodeByLevel(atcData, rawSubstanceConsumption.atc_manual);
-                const aware = getAwareClass(awareClassData, rawSubstanceConsumption.atc_manual);
-
-                return {
+                return copyDDDManualToDDDAutocalculated({
+                    rawSubstanceConsumption,
+                    currentAtcVersionKey,
                     period,
                     orgUnitId,
-                    report_date: rawSubstanceConsumption.report_date,
-                    atc_autocalculated: rawSubstanceConsumption.atc_manual,
-                    route_admin_autocalculated: rawSubstanceConsumption.route_admin_manual,
-                    salt_autocalculated: rawSubstanceConsumption.salt_manual,
-                    packages_autocalculated: rawSubstanceConsumption.packages_manual,
-                    ddds_autocalculated: rawSubstanceConsumption.ddds_manual,
-                    atc_version_autocalculated: currentAtcVersionKey,
-                    kilograms_autocalculated: rawSubstanceConsumptionKilograms,
-                    data_status_autocalculated: rawSubstanceConsumption.data_status_manual,
-                    health_sector_autocalculated: rawSubstanceConsumption.health_sector_manual,
-                    health_level_autocalculated: rawSubstanceConsumption.health_level_manual,
-                    am_class: am_class,
-                    atc2: atcCodeByLevel?.level2,
-                    atc3: atcCodeByLevel?.level3,
-                    atc4: atcCodeByLevel?.level4,
-                    aware: aware,
-                };
+                    amClassData: latestAmClassData,
+                    atcData: latestAtcData,
+                    awareClassData: latestAwareClassData,
+                });
             }
 
             // Check for the ratio old DDD and new DDD
@@ -183,58 +162,78 @@ export function calculateConsumptionSubstanceLevelData(
                 },
             ];
 
-            const oldDDD = getDDDForAtcVersion(
-                rawSubstanceConsumption.atc_manual,
-                rawSubstanceConsumption.route_admin_manual,
-                rawSubstanceConsumption.salt_manual,
-                userAtcVersion
-            );
-            const newDDD = getDDDForAtcVersion(
-                atcAutoCalc,
-                rawSubstanceConsumption.route_admin_manual,
-                rawSubstanceConsumption.salt_manual,
-                latestAtcVersionData
-            );
+            const oldAtcCodeInLatestAtcData = atcManualVersionData.atcs.find(
+                data => data.CODE === rawSubstanceConsumption.atc_manual && data.LEVEL === LAST_ATC_CODE_LEVEL
+            )?.CODE;
+
+            const atcManualVersionAtcChanges: ATCChangesData[] = getATCChanges(atcManualVersionData.changes);
+
+            const oldAtcCode = oldAtcCodeInLatestAtcData
+                ? oldAtcCodeInLatestAtcData
+                : getNewAtcCodeRecursively({
+                      oldAtcCode: rawSubstanceConsumption.atc_manual,
+                      atcChanges: atcManualVersionAtcChanges,
+                      currentAtcs: atcManualVersionData.atcs,
+                  });
+
+            if (oldAtcCode === undefined) {
+                // The code in atc_manual is not in the atcs or atc changes from manual version, copy pasting ddd_manual into ddd_autocalculated
+                calculationLogs = [
+                    ...calculationLogs,
+                    {
+                        content: `[${new Date().toISOString()}] Substance ${rawSubstanceConsumption.id} - atc_manual ${
+                            rawSubstanceConsumption.atc_manual
+                        } is not in the atcs or atc changes from manual version ${atc_version_manual}.`,
+                        messageType: "Warn",
+                    },
+                ];
+
+                return copyDDDManualToDDDAutocalculated({
+                    rawSubstanceConsumption,
+                    currentAtcVersionKey,
+                    period,
+                    orgUnitId,
+                    amClassData: latestAmClassData,
+                    atcData: latestAtcData,
+                    awareClassData: latestAwareClassData,
+                });
+            }
+
+            const oldDDD = getDDDForAtcVersion({
+                atcCode: oldAtcCode,
+                roaCode: rawSubstanceConsumption.route_admin_manual,
+                saltCode: rawSubstanceConsumption.salt_manual,
+                atcVersion: atcManualVersionData,
+            });
+            const newDDD = getDDDForAtcVersion({
+                atcCode: atcAutocalculated,
+                roaCode: rawSubstanceConsumption.route_admin_manual,
+                saltCode: rawSubstanceConsumption.salt_manual,
+                atcVersion: latestAtcVersionData,
+            });
+
             if (oldDDD === undefined || newDDD === undefined) {
-                // No DDD for the old or new ATC codes
-                const rawSubstanceConsumptionKilograms = rawSubstanceConsumption.tons_manual
-                    ? rawSubstanceConsumption.tons_manual * 1000
-                    : undefined;
-
-                const am_class = getAmClass(amClassData, rawSubstanceConsumption.atc_manual);
-                const atcCodeByLevel = getAtcCodeByLevel(atcData, rawSubstanceConsumption.atc_manual);
-                const aware = getAwareClass(awareClassData, rawSubstanceConsumption.atc_manual);
-
+                // No DDD for the old or new ATC codes, then add 0 to ddd_autocalculated
                 calculationLogs = [
                     ...calculationLogs,
                     {
                         content: `[${new Date().toISOString()}] Substance ${
                             rawSubstanceConsumption.id
-                        } - Error getting old DDD and new DDD. Copy pasting ddd_manual into ddd_autocalculated`,
+                        } - Error getting old DDD ${oldDDD} or new DDD ${newDDD}. Setting ddd_autocalculated to 0`,
                         messageType: "Warn",
                     },
                 ];
 
-                return {
+                return setDDDAutocalculatedToZero({
+                    rawSubstanceConsumption,
+                    currentAtcVersionKey,
                     period,
                     orgUnitId,
-                    report_date: rawSubstanceConsumption.report_date,
-                    atc_autocalculated: rawSubstanceConsumption.atc_manual,
-                    route_admin_autocalculated: rawSubstanceConsumption.route_admin_manual,
-                    salt_autocalculated: rawSubstanceConsumption.salt_manual,
-                    packages_autocalculated: rawSubstanceConsumption.packages_manual,
-                    ddds_autocalculated: rawSubstanceConsumption.ddds_manual,
-                    atc_version_autocalculated: currentAtcVersionKey,
-                    kilograms_autocalculated: rawSubstanceConsumptionKilograms,
-                    data_status_autocalculated: rawSubstanceConsumption.data_status_manual,
-                    health_sector_autocalculated: rawSubstanceConsumption.health_sector_manual,
-                    health_level_autocalculated: rawSubstanceConsumption.health_level_manual,
-                    am_class: am_class,
-                    atc2: atcCodeByLevel?.level2,
-                    atc3: atcCodeByLevel?.level3,
-                    atc4: atcCodeByLevel?.level4,
-                    aware: aware,
-                };
+                    amClassData: latestAmClassData,
+                    atcData: latestAtcData,
+                    awareClassData: latestAwareClassData,
+                    atcAutocalculated: atcAutocalculated,
+                });
             }
 
             // Adjust the number of DDDs with ratio oldDDD and newDDD
@@ -245,15 +244,19 @@ export function calculateConsumptionSubstanceLevelData(
                 ? rawSubstanceConsumption.tons_manual * 1000
                 : undefined;
 
-            const am_class = getAmClass(amClassData, atcAutoCalc);
-            const atcCodeByLevel = getAtcCodeByLevel(atcData, atcAutoCalc);
-            const aware = getAwareClass(awareClassData, atcAutoCalc);
+            const am_class = getAmClass(latestAmClassData, atcAutocalculated);
+            const atcCodeByLevel = getAtcCodeByLevel(latestAtcData, atcAutocalculated);
+            const aware = getAwareClass(
+                latestAwareClassData,
+                atcAutocalculated,
+                rawSubstanceConsumption.route_admin_manual
+            );
 
             return {
                 period,
                 orgUnitId,
                 report_date: rawSubstanceConsumption.report_date,
-                atc_autocalculated: rawSubstanceConsumption.atc_manual,
+                atc_autocalculated: atcAutocalculated,
                 route_admin_autocalculated: rawSubstanceConsumption.route_admin_manual,
                 salt_autocalculated: rawSubstanceConsumption.salt_manual,
                 packages_autocalculated: rawSubstanceConsumption.packages_manual,
@@ -278,6 +281,92 @@ export function calculateConsumptionSubstanceLevelData(
     );
 
     return calculatedConsumptionSubstanceLevelData;
+}
+
+function setDDDAutocalculatedToZero(params: {
+    atcAutocalculated: ATCCodeLevel5 | undefined;
+    rawSubstanceConsumption: RawSubstanceConsumptionData;
+    currentAtcVersionKey: string;
+    period: string;
+    orgUnitId: Id;
+    amClassData: AmClassificationData;
+    atcData: ATCData[];
+    awareClassData: AwareClassificationData;
+}): SubstanceConsumptionCalculated {
+    return setDDDAutocalculated({
+        dddsToSet: 0,
+        ...params,
+    });
+}
+
+function copyDDDManualToDDDAutocalculated(params: {
+    rawSubstanceConsumption: RawSubstanceConsumptionData;
+    currentAtcVersionKey: string;
+    period: string;
+    orgUnitId: Id;
+    amClassData: AmClassificationData;
+    atcData: ATCData[];
+    awareClassData: AwareClassificationData;
+}): SubstanceConsumptionCalculated {
+    return setDDDAutocalculated({
+        dddsToSet: params.rawSubstanceConsumption.ddds_manual,
+        ...params,
+    });
+}
+
+function setDDDAutocalculated(params: {
+    dddsToSet: number;
+    atcAutocalculated?: ATCCodeLevel5;
+    rawSubstanceConsumption: RawSubstanceConsumptionData;
+    currentAtcVersionKey: string;
+    period: string;
+    orgUnitId: Id;
+    amClassData: AmClassificationData;
+    atcData: ATCData[];
+    awareClassData: AwareClassificationData;
+}): SubstanceConsumptionCalculated {
+    const {
+        rawSubstanceConsumption,
+        currentAtcVersionKey,
+        period,
+        orgUnitId,
+        amClassData,
+        atcData,
+        awareClassData,
+        dddsToSet,
+        atcAutocalculated,
+    } = params;
+
+    const atcCode = atcAutocalculated ? atcAutocalculated : rawSubstanceConsumption.atc_manual;
+
+    const rawSubstanceConsumptionKilograms = rawSubstanceConsumption.tons_manual
+        ? rawSubstanceConsumption.tons_manual * 1000
+        : undefined;
+
+    const am_class = getAmClass(amClassData, atcCode);
+    const atcCodeByLevel = getAtcCodeByLevel(atcData, atcCode);
+    const aware = getAwareClass(awareClassData, atcCode, rawSubstanceConsumption.route_admin_manual);
+
+    return {
+        period,
+        orgUnitId,
+        report_date: rawSubstanceConsumption.report_date,
+        atc_autocalculated: atcCode,
+        route_admin_autocalculated: rawSubstanceConsumption.route_admin_manual,
+        salt_autocalculated: rawSubstanceConsumption.salt_manual,
+        packages_autocalculated: rawSubstanceConsumption.packages_manual,
+        ddds_autocalculated: dddsToSet,
+        atc_version_autocalculated: currentAtcVersionKey,
+        kilograms_autocalculated: rawSubstanceConsumptionKilograms,
+        data_status_autocalculated: rawSubstanceConsumption.data_status_manual,
+        health_sector_autocalculated: rawSubstanceConsumption.health_sector_manual,
+        health_level_autocalculated: rawSubstanceConsumption.health_level_manual,
+        am_class: am_class,
+        atc2: atcCodeByLevel?.level2,
+        atc3: atcCodeByLevel?.level3,
+        atc4: atcCodeByLevel?.level4,
+        aware: aware,
+    };
 }
 
 /**
@@ -319,7 +408,7 @@ function getDDDsAdjust(
     })?.UNIT;
     const newDDDFam = atcVersion.units.find(({ UNIT }: UnitsData) => {
         return UNIT === newDDD.DDD_UNIT;
-    });
+    })?.UNIT;
 
     if (oldDDDFam !== newDDDFam) {
         return {

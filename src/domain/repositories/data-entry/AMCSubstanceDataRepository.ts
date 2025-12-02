@@ -16,11 +16,12 @@ export interface AMCSubstanceDataRepository {
         substanceIdsChunkSize: number,
         chunked?: boolean
     ): FutureData<RawSubstanceConsumptionData[] | undefined>;
-    importCalculations(
-        importStrategy: ImportStrategy,
-        orgUnitId: Id,
-        calculatedConsumptionSubstanceLevelData: SubstanceConsumptionCalculated[]
-    ): FutureData<{ response: TrackerPostResponse; eventIdLineNoMap: { id: string; lineNo: number }[] }>;
+    importCalculations(params: {
+        importStrategy: ImportStrategy;
+        orgUnitId: Id;
+        calculatedConsumptionSubstanceLevelData: SubstanceConsumptionCalculated[];
+        chunkSize?: number;
+    }): FutureData<{ response: TrackerPostResponse; eventIdLineNoMap: { id: string; lineNo: number }[] }>;
     getAllRawSubstanceConsumptionDataByByPeriod(
         orgUnitId: Id,
         period: string
@@ -29,5 +30,8 @@ export interface AMCSubstanceDataRepository {
         orgUnitId: Id,
         period: string
     ): FutureData<SubstanceConsumptionCalculated[] | undefined>;
-    deleteCalculatedSubstanceConsumptionDataById(calculatedConsumptionIds: Id[]): FutureData<TrackerPostResponse>;
+    deleteCalculatedSubstanceConsumptionDataById(
+        calculatedConsumptionIds: Id[],
+        chunkSize?: number
+    ): FutureData<TrackerPostResponse>;
 }

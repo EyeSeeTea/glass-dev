@@ -1,6 +1,5 @@
 import { getD2APiFromInstance } from "../../utils/d2-api";
 import { Instance } from "../entities/Instance";
-import { ImportStrategy } from "../../domain/entities/data-entry/DataValuesSaveSummary";
 import { Future, FutureData } from "../../domain/entities/Future";
 import { EGASP_PROGRAM_ID } from "./program-rule/ProgramRulesMetadataDefaultRepository";
 import { D2TrackerEventSchema, TrackerEventsResponse } from "@eyeseetea/d2-api/api/trackerEvents";
@@ -12,6 +11,7 @@ import { AMR_GLASS_AMC_DET_DS_PERIOD } from "../../domain/usecases/data-entry/am
 import { trackerPostResponseDefaultError } from "./utils/TrackerPostResponseDefaultError";
 import { TrackerEvent, TrackerEventsPostRequest } from "../../domain/entities/TrackedEntityInstance";
 import { mapTrackerPostRequestToD2TrackerPostRequest } from "./utils/importApiTracker";
+import { ImportStrategy } from "../../domain/entities/data-entry/ImportSummary";
 
 export declare type EventStatus = "ACTIVE" | "COMPLETED" | "VISITED" | "SCHEDULED" | "OVERDUE" | "SKIPPED";
 

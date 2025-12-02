@@ -6,11 +6,12 @@ import { SubstanceConsumptionCalculated } from "../../../../entities/data-entry/
 import { GlassATCRepository } from "../../../../repositories/GlassATCRepository";
 import { calculateConsumptionSubstanceLevelData } from "./calculationConsumptionSubstanceLevelData";
 import { logger } from "../../../../../utils/logger";
+import { Maybe } from "../../../../../types/utils";
 
 export function getConsumptionDataSubstanceLevel(params: {
     orgUnitId: Id;
     period: string;
-    rawSubstanceConsumptionData: RawSubstanceConsumptionData[] | undefined;
+    rawSubstanceConsumptionData: Maybe<RawSubstanceConsumptionData[]>;
     atcCurrentVersionData: GlassAtcVersionData;
     currentAtcVersionKey: string;
     atcRepository: GlassATCRepository;

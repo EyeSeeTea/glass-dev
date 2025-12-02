@@ -103,11 +103,12 @@ export class CalculateConsumptionDataSubstanceLevelUseCase {
                                 `[${new Date().toISOString()}] Creating calculations of substance level data as events for orgUnitId ${orgUnitId} and period ${period}`
                             );
                             return this.amcSubstanceDataRepository
-                                .importCalculations(
-                                    IMPORT_STRATEGY_CREATE_AND_UPDATE,
-                                    orgUnitId,
-                                    calculatedConsumptionSubstanceLevelData
-                                )
+                                .importCalculations({
+                                    importStrategy: IMPORT_STRATEGY_CREATE_AND_UPDATE,
+                                    orgUnitId: orgUnitId,
+                                    calculatedConsumptionSubstanceLevelData: calculatedConsumptionSubstanceLevelData,
+                                    chunkSize: module.chunkSizes?.importCalculations,
+                                })
                                 .flatMap(result => {
                                     const { response, eventIdLineNoMap } = result;
                                     if (response.status === "OK") {

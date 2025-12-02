@@ -8,6 +8,7 @@ import { ListGlassATCVersions } from "../../../../../entities/GlassAtcVersionDat
 import { SubstanceConsumptionCalculated } from "../../../../../entities/data-entry/amc/SubstanceConsumptionCalculated";
 import { setupLoggerForTesting } from "../../../../../../utils/logger";
 import { calculationConsumptionSubstanceAtcNotFound } from "./data/calculationConsumptionSubstanceAtcNotFound";
+import { calculationConsumptionSubstanceDDDNotFound } from "./data/calculationConsumptionSubstanceDDDNotFound";
 
 describe("Given calculate Consumption Substance Level Data function", () => {
     beforeAll(async () => await setupLoggerForTesting());
@@ -33,8 +34,8 @@ describe("Given calculate Consumption Substance Level Data function", () => {
         });
     });
     describe("When some ddds are NOT assigned correctly", () => {
-        it("Then should return correct solution", async () => {
-            const type = "atcNotFound";
+        it("Then should return 0 in DDDs autocalculated", async () => {
+            const type = "dddNotFound";
             const period = "2019";
             const orgUnitId = "vboedbUs1As";
             const rawSubstanceConsumptionData = givenRawSubstanceConsumptionDataByType(type);
@@ -79,6 +80,7 @@ function givenRawSubstanceConsumptionDataByType(type?: string): RawSubstanceCons
         basic: rawSubstanceConsumptionDataBasic,
         no_atc_data: rawSubstanceConsumptionDataBasic,
         atcNotFound: rawSubstanceConsumptionDataAtcNotFound,
+        dddNotFound: rawSubstanceConsumptionDataAtcNotFound,
     } as Record<string, RawSubstanceConsumptionData[]>;
 
     const rawSubstanceConsumptionData = type
@@ -92,6 +94,7 @@ function getExpectedCalculationSolution(type?: string): SubstanceConsumptionCalc
     const calculationSolutionTypes = {
         basic: calculationConsumptionSubstanceLevelBasic,
         atcNotFound: calculationConsumptionSubstanceAtcNotFound,
+        dddNotFound: calculationConsumptionSubstanceDDDNotFound,
         no_atc_data: [],
     } as Record<string, SubstanceConsumptionCalculated[]>;
 

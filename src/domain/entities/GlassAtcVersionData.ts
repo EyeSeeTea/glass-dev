@@ -89,7 +89,7 @@ type ATCAndDDDChangesData = ATCChangesData | DDDChangesData;
 export type DDDChangesData = {
     CATEGORY: "DDD";
     ATC_CODE: ATCCodeLevel5;
-    CHANGE: string;
+    CHANGE: "UPDATED" | "DELETED";
     NEW_DDD_INFO: string | null;
     NEW_DDD_ROA: RouteOfAdministrationCode;
     NEW_DDD_UNIT: UnitCode;
@@ -103,7 +103,7 @@ export type DDDChangesData = {
 
 export type ATCChangesData = {
     CATEGORY: "ATC";
-    CHANGE: string; // TODO: Add what are the possible values
+    CHANGE: "SUPERSEDED" | "DELETED" | "SPLITTED";
     INFO: string | null;
     NEW_ATC: ATCCodeLevel5;
     NEW_NAME: string | null;
@@ -254,79 +254,107 @@ export function getStandardizedUnit(unitsData: UnitsData[], unit: UnitCode): Uni
     }
 }
 
-export function getNewAtcCode(
-    oldAtcCode: ATCCodeLevel5,
-    atcChanges: ATCChangesData[] | undefined
-): ATCCodeLevel5 | undefined {
-    return atcChanges?.find(({ PREVIOUS_ATC, CHANGE }) => {
-        return CHANGE !== "DELETED" && PREVIOUS_ATC === oldAtcCode;
-    })?.NEW_ATC;
-}
-
 /**
  * Get the corresponding ATC code in the current ATC version of an ATC code defined in an old ATC version.
  *
  * @param {ATCCodeLevel5} oldAtcCode - The old ATC code
- * @param {ATCChangesData[]} AtcChanges - The list of ATC changes
+ * @param {ATCChangesData[]} atcChanges - The list of ATC changes
  * @param {ATCData[]} currentAtcs - The list of current ATC codes
  *
  * @return {ATCCodeLevel5 | undefined} - the current ATC code or undefined if no correspondance.
  */
-export function getNewAtcCodeRec( // Todo: replace getNewAtcCode by this function
-    oldAtcCode: ATCCodeLevel5,
-    atcChanges: ATCChangesData[],
-    currentAtcs: ATCData[]
-): ATCCodeLevel5 | undefined {
-    function findAtcCodeCurrent(atcCode: ATCCodeLevel5): string | undefined {
-        const newAtc = atcChanges.find(({ PREVIOUS_ATC, CHANGE }) => {
-            return CHANGE !== "SUPERSEDED" && PREVIOUS_ATC === atcCode;
-        })?.NEW_ATC;
-        if (newAtc === undefined) {
+export function getNewAtcCodeRecursively(params: {
+    oldAtcCode: ATCCodeLevel5;
+    atcChanges: ATCChangesData[];
+    currentAtcs: ATCData[];
+}): ATCCodeLevel5 | undefined {
+    const { oldAtcCode, atcChanges, currentAtcs } = params;
+
+    const findAtcCodeCurrent = (atcCode: ATCCodeLevel5): string | undefined => {
+        const atcChangeFound = atcChanges.find(({ PREVIOUS_ATC, CHANGE }) => {
+            return CHANGE === "SUPERSEDED" && PREVIOUS_ATC === atcCode;
+        });
+
+        if (!atcChangeFound) {
             return undefined;
         }
-        const foundAtcInCurrent = currentAtcs.find(({ CODE }: ATCData) => {
-            return CODE === atcCode;
+
+        const newAtcCode = atcChangeFound.NEW_ATC;
+        const newAtcCodeFoundInCurrent = currentAtcs.find(({ CODE }: ATCData) => {
+            return CODE === newAtcCode;
         })?.CODE;
-        if (foundAtcInCurrent === undefined) {
-            return findAtcCodeCurrent(newAtc);
+
+        if (newAtcCodeFoundInCurrent) {
+            return newAtcCodeFoundInCurrent;
         } else {
-            return foundAtcInCurrent;
+            return findAtcCodeCurrent(newAtcCode);
         }
-    }
+    };
+
     return findAtcCodeCurrent(oldAtcCode);
 }
 
 /**
  * Get the DDD for an ATC code, ROA code and SALT code based on an specific ATC version.
  *
- * @param {ATCCodeLevel5} oldCode - The ATC code
+ * @param {ATCCodeLevel5} atcCode - The ATC code
  * @param {RouteOfAdministrationCode} roaCode - The ROA code
  * @param {SaltCode} saltCode - The Salt code
  * @param {GlassAtcVersionData} atcVersion - The ATC version
  *
  * @return {DDDData | undefined} - the corresponding DDD.
  */
-export function getDDDForAtcVersion(
-    atcCode: ATCCodeLevel5,
-    roaCode: RouteOfAdministrationCode,
-    saltCode: SaltCode,
-    atcVersion: GlassAtcVersionData
-) {
-    const ddds = atcVersion.ddds.filter(({ ATC5, ROA, SALT }: DDDData) => {
+export function getDDDForAtcVersion(params: {
+    atcCode: ATCCodeLevel5;
+    roaCode: RouteOfAdministrationCode;
+    saltCode: SaltCode;
+    atcVersion: GlassAtcVersionData;
+}): DDDData | undefined {
+    const { atcCode, roaCode, saltCode, atcVersion } = params;
+    const ddd = atcVersion.ddds.find(({ ATC5, ROA, SALT }: DDDData) => {
         return ATC5 === atcCode && ROA === roaCode && SALT === saltCode;
     });
-    if (ddds.length === 0) return undefined;
-    return ddds[0];
+
+    if (ddd) {
+        return ddd;
+    } else {
+        const newDDD = getNewDddData({
+            atcCode: atcCode,
+            roa: roaCode,
+            dddChanges: atcVersion.changes ? getDDDChanges(atcVersion.changes) : undefined,
+        });
+        const unitsData = atcVersion?.units;
+        return newDDD ? parseDDDChangesDataToDDDData(newDDD, unitsData, saltCode) : undefined;
+    }
 }
 
-export function getNewDddData(
-    atcCode: ATCCodeLevel5,
-    roa: RouteOfAdministrationCode,
-    dddChanges: DDDChangesData[] | undefined
-): DDDChangesData | undefined {
-    return dddChanges?.find(({ ATC_CODE, CHANGE, PREVIOUS_DDD_ROA }) => {
+function parseDDDChangesDataToDDDData(dddChange: DDDChangesData, unitsData: UnitsData[], saltCode: SaltCode): DDDData {
+    const standarized = getStandardizedUnitsAndValue(unitsData, dddChange.NEW_DDD_UNIT, dddChange.NEW_DDD_VALUE);
+
+    return {
+        ARS: `${dddChange.ATC_CODE}_${dddChange.NEW_DDD_ROA}_${saltCode}`,
+        ATC5: dddChange.ATC_CODE,
+        ROA: dddChange.NEW_DDD_ROA,
+        SALT: saltCode,
+        DDD: dddChange.NEW_DDD_VALUE,
+        DDD_UNIT: dddChange.NEW_DDD_UNIT,
+        DDD_STD: standarized?.standarizedValue ?? dddChange.NEW_DDD_VALUE,
+        NOTES: dddChange.NEW_DDD_INFO,
+    };
+}
+
+export function getNewDddData(params: {
+    atcCode: ATCCodeLevel5;
+    roa: RouteOfAdministrationCode;
+    dddChanges: DDDChangesData[] | undefined;
+}): DDDChangesData | undefined {
+    const { atcCode, roa, dddChanges } = params;
+
+    const newDDD = dddChanges?.find(({ ATC_CODE, CHANGE, PREVIOUS_DDD_ROA }) => {
         return CHANGE !== "DELETED" && ATC_CODE === atcCode && PREVIOUS_DDD_ROA === roa;
     });
+
+    return newDDD;
 }
 
 export function getAmClass(amClassData: AmClassificationData, atcCode: ATCCodeLevel5): AmName | undefined {
@@ -352,8 +380,14 @@ export function getAmClass(amClassData: AmClassificationData, atcCode: ATCCodeLe
     }
 }
 
-export function getAwareClass(awareClassData: AwareClassificationData, atcCode: ATCCodeLevel5): AwrName | undefined {
-    const atcAwareCode = awareClassData.atc_awr_mapping.find(({ ATC5 }) => ATC5 === atcCode)?.AWR;
+export function getAwareClass(
+    awareClassData: AwareClassificationData,
+    atcCode: ATCCodeLevel5,
+    roa: RouteOfAdministrationCode
+): AwrName | undefined {
+    const atcAwareCode = awareClassData.atc_awr_mapping.find(
+        ({ ATC5, ROA }) => ATC5 === atcCode && (!ROA || ROA === roa)
+    )?.AWR;
     return awareClassData.classification.find(({ CODE }) => CODE === atcAwareCode)?.NAME;
 }
 
