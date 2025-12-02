@@ -65,6 +65,7 @@ import { RemoveAsyncDeletionsUseCase } from "../domain/usecases/RemoveAsyncDelet
 import consoleLogger from "../utils/consoleLogger";
 import { GetGlassUploadsByCorrespondingRisUploadIdUseCase } from "../domain/usecases/GetGlassUploadsByCorrespondingRisUploadIdUseCase";
 import { GetGlassUploadByIdUseCase } from "../domain/usecases/GetGlassUploadByIdUseCase";
+import { getUploadsFormDataBuilder } from "../utils/getUploadsFormDataBuilder";
 
 const UPLOADED_FILE_STATUS_LOWERCASE = "uploaded";
 const IMPORT_SUMMARY_STATUS_ERROR = "ERROR";
@@ -101,10 +102,12 @@ async function main() {
                 const api = getD2ApiFromArgs(envVars);
                 const instance = getInstance(envVars);
                 const dataStoreClient = new DataStoreClient(instance);
+                const runtime: "node" | "browser" = typeof window === "undefined" ? "node" : "browser";
+                const uploadsFormDataBuilder = getUploadsFormDataBuilder(runtime);
 
                 const instanceRepository = new InstanceDefaultRepository(instance, dataStoreClient);
                 const glassModuleRepository = new GlassModuleDefaultRepository(dataStoreClient);
-                const glassUploadsRepository = new GlassUploadsProgramRepository(api);
+                const glassUploadsRepository = new GlassUploadsProgramRepository(api, uploadsFormDataBuilder);
                 const glassDocumentsRepository = new GlassDocumentsDefaultRepository(dataStoreClient, instance);
                 const risDataRepository = new RISDataCSVDefaultRepository();
                 const risIndividualFungalRepository = new RISIndividualFungalDataCSVDefaultRepository();

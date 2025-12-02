@@ -16,11 +16,7 @@ import {
 } from "../../types/d2-api";
 import { apiToFuture } from "../../utils/futures";
 import { Maybe } from "../../utils/ts-utils";
-import {
-    getUploadsFormDataBuilder,
-    UploadsFormData,
-    UploadsFormDataBuilder,
-} from "./utils/builders/UploadsFormDataBuilder";
+import { UploadsFormData, UploadsFormDataBuilder } from "./utils/builders/UploadsFormDataBuilder";
 import { periodToYearMonthDay } from "../../utils/currentPeriodHelper";
 
 export const AMR_GLASS_PROE_UPLOADS_PROGRAM_ID = "yVFQpwmCX0D";
@@ -57,12 +53,7 @@ export function getValueById(dataValues: DataValue[], dataElement: string): Mayb
 }
 
 export class GlassUploadsProgramRepository implements GlassUploadsRepository {
-    private readonly uploadsFormDataBuilder: UploadsFormDataBuilder;
-
-    constructor(private api: D2Api) {
-        const runtime: "node" | "browser" = typeof window === "undefined" ? "node" : "browser";
-        this.uploadsFormDataBuilder = getUploadsFormDataBuilder(runtime);
-    }
+    constructor(private api: D2Api, private uploadsFormDataBuilder: UploadsFormDataBuilder) {}
 
     getById(id: Id): FutureData<GlassUploads> {
         return apiToFuture(
@@ -75,20 +66,14 @@ export class GlassUploadsProgramRepository implements GlassUploadsRepository {
                 return Future.error("Upload not found");
             }
 
-            return this.buildGlassUploadFromEvent(d2Event).flatMap(glassUpload => {
-                return Future.success(glassUpload);
-            });
+            return this.buildGlassUploadFromEvent(d2Event);
         });
     }
 
     getByIds(ids: Id[], options?: { chunkSize: number }): FutureData<GlassUploads[]> {
         const { chunkSize = DEFAULT_CHUNK_SIZE } = options || {};
         return this.getEventsIdsChunked(ids, chunkSize).flatMap(d2Events => {
-            return Future.sequential(d2Events.map(event => this.buildGlassUploadFromEvent(event))).flatMap(
-                glassUploads => {
-                    return Future.success(glassUploads);
-                }
-            );
+            return Future.sequential(d2Events.map(event => this.buildGlassUploadFromEvent(event)));
         });
     }
 
@@ -124,65 +109,46 @@ export class GlassUploadsProgramRepository implements GlassUploadsRepository {
     }
 
     getUploadsByModuleOU(module: Id, orgUnit: Id): FutureData<GlassUploads[]> {
-        return Future.fromPromise(
-            this.getEventsWithFilters({
-                orgUnit: orgUnit,
-                orgUnitMode: "SELECTED",
-                filter: `${uploadsDHIS2Ids.moduleId}:eq:${module}`,
-            })
-        ).flatMap(d2Events => {
-            return Future.sequential(d2Events.map(event => this.buildGlassUploadFromEvent(event))).flatMap(
-                glassUploads => {
-                    return Future.success(glassUploads);
-                }
-            );
+        return this.getUploadsByFilters({
+            orgUnit: orgUnit,
+            orgUnitMode: "SELECTED",
+            filter: `${uploadsDHIS2Ids.moduleId}:eq:${module}`,
         });
     }
 
     getUploadsByModuleOUPeriod(module: Id, orgUnit: Id, period: string): FutureData<GlassUploads[]> {
-        return Future.fromPromise(
-            this.getEventsWithFilters({
-                orgUnit: orgUnit,
-                orgUnitMode: "SELECTED",
-                filter: `${uploadsDHIS2Ids.period}:eq:${period},${uploadsDHIS2Ids.moduleId}:eq:${module}`,
-            })
-        ).flatMap(d2Events => {
-            return Future.sequential(d2Events.map(event => this.buildGlassUploadFromEvent(event))).flatMap(
-                glassUploads => {
-                    return Future.success(glassUploads);
-                }
-            );
+        return this.getUploadsByFilters({
+            orgUnit: orgUnit,
+            orgUnitMode: "SELECTED",
+            filter: `${uploadsDHIS2Ids.period}:eq:${period},${uploadsDHIS2Ids.moduleId}:eq:${module}`,
         });
     }
 
     getUploadsByDataSubmission(dataSubmissionId: Id): FutureData<GlassUploads[]> {
-        return Future.fromPromise(
-            this.getEventsWithFilters({
-                filter: `${uploadsDHIS2Ids.dataSubmissionId}:eq:${dataSubmissionId}`,
-            })
-        ).flatMap(d2Events => {
-            return Future.sequential(d2Events.map(event => this.buildGlassUploadFromEvent(event))).flatMap(
-                glassUploads => {
-                    return Future.success(glassUploads);
-                }
-            );
+        return this.getUploadsByFilters({
+            filter: `${uploadsDHIS2Ids.dataSubmissionId}:eq:${dataSubmissionId}`,
         });
     }
 
     getByDataSubmissionIds(dataSubmissionIds: Id[]): FutureData<GlassUploads[]> {
         const filterValues = dataSubmissionIds.join(";");
 
-        return Future.fromPromise(
-            this.getEventsWithFilters({
-                filter: `${uploadsDHIS2Ids.dataSubmissionId}:in:${filterValues}`,
-            })
-        ).flatMap(d2Events => {
-            return Future.sequential(d2Events.map(event => this.buildGlassUploadFromEvent(event))).flatMap(
-                glassUploads => {
-                    return Future.success(glassUploads);
-                }
-            );
+        return this.getUploadsByFilters({
+            filter: `${uploadsDHIS2Ids.dataSubmissionId}:in:${filterValues}`,
         });
+    }
+
+    private getUploadsByFilters(filters: {
+        orgUnit?: Id;
+        occurredAfter?: string;
+        occurredBefore?: string;
+        pageSize?: number;
+        filter?: string;
+        orgUnitMode?: "SELECTED" | "CHILDREN" | "DESCENDANTS" | "ACCESSIBLE" | "CAPTURE" | "ALL";
+    }): FutureData<GlassUploads[]> {
+        return Future.fromPromise(this.getEventsWithFilters(filters)).flatMap(d2Events =>
+            Future.sequential(d2Events.map(event => this.buildGlassUploadFromEvent(event)))
+        );
     }
 
     getByCorrespondingRisUploadId(correspondingRisUploadId: Id): FutureData<GlassUploads> {
@@ -447,17 +413,13 @@ export class GlassUploadsProgramRepository implements GlassUploadsRepository {
     private getImportSummary(eventId: Id, dataElementId: Id): FutureData<ImportSummaryErrors> {
         return apiToFuture(
             this.api.get<ImportSummaryErrors>(`/tracker/events/${eventId}/dataValues/${dataElementId}/file`)
-        ).flatMap(importSummary => {
-            return Future.success(importSummary);
-        });
+        );
     }
 
     private getAsyncImportSummaries(eventId: Id, dataElementId: Id): FutureData<ImportSummary[]> {
         return apiToFuture(
             this.api.get<ImportSummary[]>(`/tracker/events/${eventId}/dataValues/${dataElementId}/file`)
-        ).flatMap(asyncImportSummaries => {
-            return Future.success(asyncImportSummaries);
-        });
+        );
     }
 
     private saveEventDataValueFile(payload: UploadsFormData): FutureData<Id> {
@@ -497,7 +459,7 @@ export class GlassUploadsProgramRepository implements GlassUploadsRepository {
         ).flatMap(listOfEvents => Future.success(_(listOfEvents).flatten().value()));
     }
 
-    private async getEventsWithFilters(params: {
+    private async getEventsWithFilters(filters: {
         orgUnit?: Id;
         occurredAfter?: string;
         occurredBefore?: string;
@@ -505,7 +467,7 @@ export class GlassUploadsProgramRepository implements GlassUploadsRepository {
         filter?: string;
         orgUnitMode?: "SELECTED" | "CHILDREN" | "DESCENDANTS" | "ACCESSIBLE" | "CAPTURE" | "ALL";
     }): Promise<D2TrackerEvent[]> {
-        const pageSize = params.pageSize ?? DEFAULT_PAGE_SIZE;
+        const pageSize = filters.pageSize ?? DEFAULT_PAGE_SIZE;
         const events: D2TrackerEvent[] = [];
         let page = 1;
         let pageCount: number | undefined;
@@ -518,7 +480,7 @@ export class GlassUploadsProgramRepository implements GlassUploadsRepository {
                     totalPages: true,
                     pageSize,
                     page,
-                    ...params,
+                    ...filters,
                 })
                 .getData()) as FixedTrackerEventsResponse;
 
