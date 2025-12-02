@@ -14,6 +14,7 @@ import {
     ATCData,
     ATCChangesData,
     getNewAtcCodeRecursively,
+    ATCCodeLevel5,
 } from "../../../../entities/GlassAtcVersionData";
 import { Id } from "../../../../entities/Ref";
 import { RawSubstanceConsumptionData } from "../../../../entities/data-entry/amc/RawSubstanceConsumptionData";
@@ -212,18 +213,18 @@ export function calculateConsumptionSubstanceLevelData(
             });
 
             if (oldDDD === undefined || newDDD === undefined) {
-                // No DDD for the old or new ATC codes, copy pasting ddd_manual into ddd_autocalculated
+                // No DDD for the old or new ATC codes, then add 0 to ddd_autocalculated
                 calculationLogs = [
                     ...calculationLogs,
                     {
                         content: `[${new Date().toISOString()}] Substance ${
                             rawSubstanceConsumption.id
-                        } - Error getting old DDD and new DDD. Copy pasting ddd_manual into ddd_autocalculated`,
+                        } - Error getting old DDD ${oldDDD} or new DDD ${newDDD}. Setting ddd_autocalculated to 0`,
                         messageType: "Warn",
                     },
                 ];
 
-                return copyDDDManualToDDDAutocalculated({
+                return setDDDAutocalculatedToZero({
                     rawSubstanceConsumption,
                     currentAtcVersionKey,
                     period,
@@ -231,6 +232,7 @@ export function calculateConsumptionSubstanceLevelData(
                     amClassData: latestAmClassData,
                     atcData: latestAtcData,
                     awareClassData: latestAwareClassData,
+                    atcAutocalculated: atcAutocalculated,
                 });
             }
 
@@ -281,6 +283,22 @@ export function calculateConsumptionSubstanceLevelData(
     return calculatedConsumptionSubstanceLevelData;
 }
 
+function setDDDAutocalculatedToZero(params: {
+    atcAutocalculated: ATCCodeLevel5 | undefined;
+    rawSubstanceConsumption: RawSubstanceConsumptionData;
+    currentAtcVersionKey: string;
+    period: string;
+    orgUnitId: Id;
+    amClassData: AmClassificationData;
+    atcData: ATCData[];
+    awareClassData: AwareClassificationData;
+}): SubstanceConsumptionCalculated {
+    return setDDDAutocalculated({
+        dddsToSet: 0,
+        ...params,
+    });
+}
+
 function copyDDDManualToDDDAutocalculated(params: {
     rawSubstanceConsumption: RawSubstanceConsumptionData;
     currentAtcVersionKey: string;
@@ -290,30 +308,54 @@ function copyDDDManualToDDDAutocalculated(params: {
     atcData: ATCData[];
     awareClassData: AwareClassificationData;
 }): SubstanceConsumptionCalculated {
-    const { rawSubstanceConsumption, currentAtcVersionKey, period, orgUnitId, amClassData, atcData, awareClassData } =
-        params;
+    return setDDDAutocalculated({
+        dddsToSet: params.rawSubstanceConsumption.ddds_manual,
+        ...params,
+    });
+}
+
+function setDDDAutocalculated(params: {
+    dddsToSet: number;
+    atcAutocalculated?: ATCCodeLevel5;
+    rawSubstanceConsumption: RawSubstanceConsumptionData;
+    currentAtcVersionKey: string;
+    period: string;
+    orgUnitId: Id;
+    amClassData: AmClassificationData;
+    atcData: ATCData[];
+    awareClassData: AwareClassificationData;
+}): SubstanceConsumptionCalculated {
+    const {
+        rawSubstanceConsumption,
+        currentAtcVersionKey,
+        period,
+        orgUnitId,
+        amClassData,
+        atcData,
+        awareClassData,
+        dddsToSet,
+        atcAutocalculated,
+    } = params;
+
+    const atcCode = atcAutocalculated ? atcAutocalculated : rawSubstanceConsumption.atc_manual;
 
     const rawSubstanceConsumptionKilograms = rawSubstanceConsumption.tons_manual
         ? rawSubstanceConsumption.tons_manual * 1000
         : undefined;
 
-    const am_class = getAmClass(amClassData, rawSubstanceConsumption.atc_manual);
-    const atcCodeByLevel = getAtcCodeByLevel(atcData, rawSubstanceConsumption.atc_manual);
-    const aware = getAwareClass(
-        awareClassData,
-        rawSubstanceConsumption.atc_manual,
-        rawSubstanceConsumption.route_admin_manual
-    );
+    const am_class = getAmClass(amClassData, atcCode);
+    const atcCodeByLevel = getAtcCodeByLevel(atcData, atcCode);
+    const aware = getAwareClass(awareClassData, atcCode, rawSubstanceConsumption.route_admin_manual);
 
     return {
         period,
         orgUnitId,
         report_date: rawSubstanceConsumption.report_date,
-        atc_autocalculated: rawSubstanceConsumption.atc_manual,
+        atc_autocalculated: atcCode,
         route_admin_autocalculated: rawSubstanceConsumption.route_admin_manual,
         salt_autocalculated: rawSubstanceConsumption.salt_manual,
         packages_autocalculated: rawSubstanceConsumption.packages_manual,
-        ddds_autocalculated: rawSubstanceConsumption.ddds_manual,
+        ddds_autocalculated: dddsToSet,
         atc_version_autocalculated: currentAtcVersionKey,
         kilograms_autocalculated: rawSubstanceConsumptionKilograms,
         data_status_autocalculated: rawSubstanceConsumption.data_status_manual,
