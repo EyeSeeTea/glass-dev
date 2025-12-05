@@ -2,7 +2,7 @@ import { Future, FutureData } from "../../domain/entities/Future";
 import { GlassUploads, GlassUploadsStatus } from "../../domain/entities/GlassUploads";
 import { Id } from "../../domain/entities/Ref";
 import { ImportSummary, ImportSummaryErrors } from "../../domain/entities/data-entry/ImportSummary";
-import { GlassUploadsRepository } from "../../domain/repositories/GlassUploadsRepository";
+import { GetUploadsByModuleOuParams, GlassUploadsRepository } from "../../domain/repositories/GlassUploadsRepository";
 import { cache } from "../../utils/cache";
 import { DataStoreClient } from "../data-store/DataStoreClient";
 import { DataStoreKeys } from "../data-store/DataStoreKeys";
@@ -123,16 +123,28 @@ export class GlassUploadsDefaultRepository implements GlassUploadsRepository {
         );
     }
 
-    getUploadsByModuleOUPeriod(module: string, orgUnit: string, period: string): FutureData<GlassUploads[]> {
-        return this.dataStoreClient.getObjectsFilteredByProps<GlassUploads>(
-            DataStoreKeys.UPLOADS,
-            new Map<keyof GlassUploads, unknown>([
-                ["module", module],
-                ["orgUnit", orgUnit],
-                ["period", period],
-            ])
-        );
+    getUploadsByModuleOUPeriod(props: GetUploadsByModuleOuParams): FutureData<GlassUploads[]> {
+        const { moduleId, orgUnit, period, additionalFilters } = props;
+
+        const modulesToQuery = new Set([...(additionalFilters?.moduleIds ?? []), moduleId]);
+
+        return this.dataStoreClient
+            .getObjectsFilteredByProps<GlassUploads>(
+                DataStoreKeys.UPLOADS,
+                new Map<keyof GlassUploads, unknown>([
+                    ["orgUnit", orgUnit],
+                    ["period", period],
+                ])
+            )
+            .map(uploads =>
+                uploads.filter(
+                    upload =>
+                        modulesToQuery.has(upload.module) &&
+                        (!additionalFilters?.fileTypes || additionalFilters.fileTypes.includes(upload.fileType))
+                )
+            );
     }
+
     updateSampleUploadWithRisId(sampleUploadId: string, risUploadId: string): FutureData<void> {
         return this.dataStoreClient.listCollection<GlassUploads>(DataStoreKeys.UPLOADS).flatMap(uploads => {
             const upload = uploads?.find(upload => upload.id === sampleUploadId);
