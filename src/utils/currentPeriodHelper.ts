@@ -54,3 +54,30 @@ export const getLastNYearsQuarters = (n = 8) => {
 export const getRangeOfYears = (maxYear: number, minYear: number): string[] => {
     return Array.from({ length: maxYear - minYear + 1 }, (_, i) => (maxYear - i).toString());
 };
+
+export function periodToYearMonthDay(period: string): string {
+    const yearOnlyMatch = period.match(/^(\d{4})$/);
+    if (yearOnlyMatch) {
+        const year = yearOnlyMatch[1];
+        return `${year}-01-01`;
+    }
+
+    const quarterMatch = period.match(/^(\d{4})Q([1-4])$/);
+    if (quarterMatch) {
+        const [, year, qStr] = quarterMatch;
+        const q = Number(qStr);
+
+        const quarterStartMonthMap: Record<number, string> = {
+            1: "01", // Q1
+            2: "04", // Q2
+            3: "07", // Q3
+            4: "10", // Q4
+        };
+
+        const month = quarterStartMonthMap[q];
+
+        return `${year}-${month}-01`;
+    }
+
+    throw new Error(`Invalid period format: ${period}`);
+}
