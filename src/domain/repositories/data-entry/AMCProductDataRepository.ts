@@ -12,14 +12,15 @@ export interface AMCProductDataRepository {
         teiDataColumns: string[],
         rawProductDataColumns: string[]
     ): FutureData<{ isValid: boolean; rows: number; specimens: string[] }>;
-    importCalculations(
-        importStrategy: ImportStrategy,
-        productDataTrackedEntities: ProductDataTrackedEntity[],
-        rawSubstanceConsumptionCalculatedStageMetadata: ProgramStage,
-        rawSubstanceConsumptionCalculatedData: RawSubstanceConsumptionCalculated[],
-        orgUnitId: Id,
-        period: string
-    ): FutureData<TrackerPostResponse>;
+    importCalculations(params: {
+        importStrategy: ImportStrategy;
+        productDataTrackedEntities: ProductDataTrackedEntity[];
+        rawSubstanceConsumptionCalculatedStageMetadata: ProgramStage;
+        rawSubstanceConsumptionCalculatedData: RawSubstanceConsumptionCalculated[];
+        orgUnitId: Id;
+        period: string;
+        chunkSize?: number;
+    }): FutureData<TrackerPostResponse>;
     getProductRegisterProgramMetadata(): FutureData<ProductRegisterProgramMetadata | undefined>;
     getProductRegisterAndRawProductConsumptionByProductIds(
         orgUnitId: Id,
@@ -33,4 +34,8 @@ export interface AMCProductDataRepository {
         period: string
     ): FutureData<ProductDataTrackedEntity[]>;
     getTrackedEntityProductIdsByOUAndPeriod(orgUnitId: Id, period: string): FutureData<string[]>;
+    deleteRawSubstanceConsumptionCalculatedById(
+        rawSubstanceConsumptionCalculatedIds: Id[],
+        chunkSize?: number
+    ): FutureData<TrackerPostResponse>;
 }

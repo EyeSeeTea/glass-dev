@@ -84,7 +84,8 @@ export class DeleteAMCProductLevelData {
                                     return this.deleteCalculatedSubstanceConsumptionData(
                                         uploadId,
                                         deleteProductSummary,
-                                        calculatedEventListFileId
+                                        calculatedEventListFileId,
+                                        asyncDeleteChunkSize
                                     );
                                 } else {
                                     return Future.success(deleteProductSummary);
@@ -98,7 +99,8 @@ export class DeleteAMCProductLevelData {
     private deleteCalculatedSubstanceConsumptionData(
         uploadId: Id,
         deleteProductSummary: ImportSummary,
-        calculatedSubstanceConsumptionListFileId: string
+        calculatedSubstanceConsumptionListFileId: string,
+        asyncDeleteChunkSize: Maybe<number>
     ): FutureData<ImportSummary> {
         return this.options.glassDocumentsRepository
             .download(calculatedSubstanceConsumptionListFileId)
@@ -121,7 +123,7 @@ export class DeleteAMCProductLevelData {
                             }
 
                             return this.options.amcSubstanceDataRepository
-                                .deleteCalculatedSubstanceConsumptionDataById(existingEventsIds)
+                                .deleteCalculatedSubstanceConsumptionDataById(existingEventsIds, asyncDeleteChunkSize)
                                 .flatMap(deleteCalculatedSubstanceConsumptionResponse => {
                                     return mapToImportSummary(
                                         deleteCalculatedSubstanceConsumptionResponse,

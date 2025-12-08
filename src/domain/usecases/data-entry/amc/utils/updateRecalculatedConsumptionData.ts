@@ -15,24 +15,13 @@ export function updateRecalculatedConsumptionData(
     newCalculatedConsumptionData: SubstanceConsumptionCalculated[],
     currentCalculatedConsumptionData: Maybe<SubstanceConsumptionCalculated[]>,
     amcSubstanceDataRepository: AMCSubstanceDataRepository,
-    allowCreationIfNotExist: boolean
+    allowCreationIfNotExist: boolean,
+    importCalculationChunkSize: Maybe<number>
 ): FutureData<void> {
     const { withEventId: newCalculatedConsumptionDataWithIds, withoutEventId: newCalculatedConsumptionDataWithoutIds } =
         linkEventIdToNewCalculatedConsumptionData(currentCalculatedConsumptionData || [], newCalculatedConsumptionData);
 
     const eventIdsToUpdate = newCalculatedConsumptionDataWithIds.map(({ eventId }) => eventId);
-
-    const eventIdsNoUpdated = (currentCalculatedConsumptionData || []).filter(
-        ({ eventId }) => !eventIdsToUpdate.includes(eventId)
-    );
-
-    if (eventIdsNoUpdated.length) {
-        logger.error(
-            `[${new Date().toISOString()}] Substance level: these events could not be updated events=${eventIdsNoUpdated.join(
-                ","
-            )}`
-        );
-    }
 
     logger.info(
         `[${new Date().toISOString()}] Updating calculations of substance level events in DHIS2 for orgUnitId ${orgUnitId} and period ${period}: events=${eventIdsToUpdate.join(
@@ -49,13 +38,14 @@ export function updateRecalculatedConsumptionData(
     }
 
     return amcSubstanceDataRepository
-        .importCalculations(
-            allowCreationIfNotExist ? IMPORT_STRATEGY_CREATE_AND_UPDATE : IMPORT_STRATEGY_UPDATE,
-            orgUnitId,
-            allowCreationIfNotExist
+        .importCalculations({
+            importStrategy: allowCreationIfNotExist ? IMPORT_STRATEGY_CREATE_AND_UPDATE : IMPORT_STRATEGY_UPDATE,
+            orgUnitId: orgUnitId,
+            calculatedConsumptionSubstanceLevelData: allowCreationIfNotExist
                 ? [...newCalculatedConsumptionDataWithIds, ...newCalculatedConsumptionDataWithoutIds]
-                : newCalculatedConsumptionDataWithIds
-        )
+                : newCalculatedConsumptionDataWithIds,
+            chunkSize: importCalculationChunkSize,
+        })
         .flatMap(({ response }) => {
             if (response.status === "OK") {
                 logger.success(
@@ -82,6 +72,61 @@ export function updateRecalculatedConsumptionData(
                     }, ${allowCreationIfNotExist ? `created=${response.stats.created}, ` : ""} total=${
                         response.stats.total
                     } and warning=${JSON.stringify(response.validationReport.warningReports)}`
+                );
+            }
+
+            const eventIdsNoRecalculated = (currentCalculatedConsumptionData || [])
+                .filter(({ eventId }) => eventId && !eventIdsToUpdate.includes(eventId))
+                .map(({ eventId }) => eventId)
+                .filter((id): id is Id => id !== undefined);
+
+            if (eventIdsNoRecalculated.length) {
+                return deleteNoRecalculatedEvents(
+                    amcSubstanceDataRepository,
+                    eventIdsNoRecalculated,
+                    importCalculationChunkSize
+                );
+            } else {
+                logger.info(`[${new Date().toISOString()}] Substance level: all the events were recalculated.`);
+                return Future.success(undefined);
+            }
+        });
+}
+
+function deleteNoRecalculatedEvents(
+    amcSubstanceDataRepository: AMCSubstanceDataRepository,
+    eventIdsNoRecalculated: Id[],
+    importCalculationChunkSize: Maybe<number>
+): FutureData<void> {
+    logger.error(
+        `[${new Date().toISOString()}] Substance level: these events could not be recalculated so they will be deleted: events=${eventIdsNoRecalculated.join(
+            ","
+        )}`
+    );
+    return amcSubstanceDataRepository
+        .deleteCalculatedSubstanceConsumptionDataById(eventIdsNoRecalculated, importCalculationChunkSize)
+        .flatMap(response => {
+            if (response.status === "OK") {
+                logger.success(
+                    `[${new Date().toISOString()}] Substance level: no recalculated events deleted=${
+                        response.stats.deleted
+                    } of ${response.stats.total} events to delete`
+                );
+            }
+            if (response.status === "ERROR") {
+                logger.error(
+                    `[${new Date().toISOString()}] Substance level: error deleting no recalculated events: ${JSON.stringify(
+                        response.validationReport.errorReports
+                    )}`
+                );
+            }
+            if (response.status === "WARNING") {
+                logger.warn(
+                    `[${new Date().toISOString()}] Substance level: warning deleting no recalculatedevents: deleted=${
+                        response.stats.deleted
+                    }, total=${response.stats.total} and warning=${JSON.stringify(
+                        response.validationReport.warningReports
+                    )}`
                 );
             }
             return Future.success(undefined);
