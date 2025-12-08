@@ -16,7 +16,7 @@ import { Id } from "../domain/entities/Ref";
 import { GlassUploadsRepository } from "../domain/repositories/GlassUploadsRepository";
 import { RemoveAsyncUploadsUseCase } from "../domain/usecases/RemoveAsyncUploadsUseCase";
 import { SetMultipleUploadErrorAsyncUploadingUseCase } from "../domain/usecases/SetMultipleUploadErrorAsyncUploadingUseCase";
-import { GlassUploadsDefaultRepository } from "../data/repositories/GlassUploadsDefaultRepository";
+import { GlassUploadsProgramRepository } from "../data/repositories/GlassUploadsProgramRepository";
 import { GlassModuleRepository } from "../domain/repositories/GlassModuleRepository";
 import { GlassModule } from "../domain/entities/GlassModule";
 import { GlassModuleDefaultRepository } from "../data/repositories/GlassModuleDefaultRepository";
@@ -52,6 +52,7 @@ import { IncrementAsyncUploadAttemptsAndResetStatusUseCase } from "../domain/use
 import { GetAsyncUploadByIdUseCase } from "../domain/usecases/GetAsyncUploadByIdUseCase";
 import { SetAsyncUploadStatusUseCase } from "../domain/usecases/SetAsyncUploadStatusUseCase";
 import consoleLogger from "../utils/consoleLogger";
+import { getUploadsFormDataBuilder } from "../utils/getUploadsFormDataBuilder";
 
 const DEFAULT_MAX_ATTEMPS_FOR_ASYNC_UPLOADS = 3;
 
@@ -85,10 +86,12 @@ async function main() {
                 const api = getD2ApiFromArgs(envVars);
                 const instance = getInstance(envVars);
                 const dataStoreClient = new DataStoreClient(instance);
+                const runtime: "node" | "browser" = typeof window === "undefined" ? "node" : "browser";
+                const uploadsFormDataBuilder = getUploadsFormDataBuilder(runtime);
 
                 const glassGeneralInfoRepository = new GeneralInfoDefaultRepository(dataStoreClient, instance);
                 const glassAsyncUploadsRepository = new GlassAsyncUploadsDefaultRepository(dataStoreClient);
-                const glassUploadsRepository = new GlassUploadsDefaultRepository(dataStoreClient);
+                const glassUploadsRepository = new GlassUploadsProgramRepository(api, uploadsFormDataBuilder);
                 const glassModuleRepository = new GlassModuleDefaultRepository(dataStoreClient);
                 const countryRepository = new CountryDefaultRepository(api);
                 const glassDocumentsRepository = new GlassDocumentsDefaultRepository(dataStoreClient, instance);
