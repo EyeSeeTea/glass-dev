@@ -360,6 +360,7 @@ export class GlassUploadsProgramRepository implements GlassUploadsRepository {
             { dataElement: uploadsDHIS2Ids.dataSubmissionId, value: upload.dataSubmission },
             { dataElement: uploadsDHIS2Ids.moduleId, value: upload.module },
             { dataElement: uploadsDHIS2Ids.rows, value: upload.rows?.toString() || "0" },
+            { dataElement: uploadsDHIS2Ids.period, value: upload.period },
             { dataElement: uploadsDHIS2Ids.correspondingRisUploadId, value: upload.correspondingRisUploadId || "" },
             { dataElement: uploadsDHIS2Ids.eventListDocumentId, value: upload.eventListFileId || "" },
             {
