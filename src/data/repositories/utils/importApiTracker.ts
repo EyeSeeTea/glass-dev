@@ -17,24 +17,30 @@ import { D2TrackedEntityInstanceToPost } from "@eyeseetea/d2-api/api/trackerTrac
 export function importApiTracker(
     api: D2Api,
     request: D2TrackerPostRequest,
-    action: ImportStrategy
+    options: { action: ImportStrategy; async?: boolean }
 ): FutureData<TrackerPostResponse> {
-    return apiToFuture(
-        api.tracker.postAsync(
-            {
-                importStrategy: action,
-                skipRuleEngine: true,
-            },
-            request
-        )
-    ).flatMap(response => {
-        return apiToFuture(api.system.waitFor("TRACKER_IMPORT_JOB", response.response.id)).map(result => {
-            if (result) return result;
-            else {
-                return trackerPostResponseDefaultError;
-            }
+    const { action, async = false } = options;
+
+    if (async) {
+        return apiToFuture(
+            api.tracker.postAsync(
+                {
+                    importStrategy: action,
+                    skipRuleEngine: true,
+                },
+                request
+            )
+        ).flatMap(response => {
+            return apiToFuture(api.system.waitFor("TRACKER_IMPORT_JOB", response.response.id)).map(result => {
+                if (result) return result;
+                else {
+                    return trackerPostResponseDefaultError;
+                }
+            });
         });
-    });
+    } else {
+        return apiToFuture(api.tracker.post({ importStrategy: action, skipRuleEngine: true }, request));
+    }
 }
 
 export function mapTrackerPostRequestToD2TrackerPostRequest(

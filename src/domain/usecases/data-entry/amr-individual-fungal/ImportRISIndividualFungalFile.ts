@@ -138,7 +138,7 @@ export class ImportRISIndividualFungalFile {
                                                         ? validationResult.teis
                                                         : [],
                                             },
-                                            action
+                                            { action: action, async: true }
                                         )
                                         .flatMap(response => {
                                             return mapToImportSummary(
