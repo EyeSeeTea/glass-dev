@@ -92,7 +92,7 @@ export class AMCProductDataDefaultRepository implements AMCProductDataRepository
             period
         );
         if (!_.isEmpty(d2TrackerEvents)) {
-            return importApiTracker(this.api, { events: d2TrackerEvents }, importStrategy);
+            return importApiTracker(this.api, { events: d2TrackerEvents }, { action: importStrategy, async: true });
         } else {
             logger.error(`[${new Date().toISOString()}] Product level data: there are no events to be created`);
             return Future.error("There are no events to be created");

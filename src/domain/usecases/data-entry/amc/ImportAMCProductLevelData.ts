@@ -122,7 +122,7 @@ export class ImportAMCProductLevelData {
                                                     ? validationResults.teis
                                                     : [],
                                         },
-                                        action
+                                        { action: action, async: true }
                                     )
                                     .flatMap(response => {
                                         return mapToImportSummary(response, "trackedEntity", this.metadataRepository, {

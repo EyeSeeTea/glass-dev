@@ -19,8 +19,11 @@ export class TrackerDefaultRepository implements TrackerRepository {
         this.api = getD2APiFromInstance(instance);
     }
 
-    import(req: TrackerPostRequest, action: ImportStrategy): FutureData<TrackerPostResponse> {
-        return importApiTracker(this.api, req, action);
+    import(
+        req: TrackerPostRequest,
+        options: { action: ImportStrategy; async?: boolean }
+    ): FutureData<TrackerPostResponse> {
+        return importApiTracker(this.api, req, options);
     }
 
     getExistingTrackedEntitiesIdsByIds(trackEntitiesIds: Id[], programId: Id): FutureData<Id[]> {

@@ -159,7 +159,11 @@ export class AMCSubstanceDataDefaultRepository implements AMCSubstanceDataReposi
                     id: d2TrackerEvent.event,
                     lineNo: isNaN(parseInt(d2TrackerEvent.event)) ? 0 : parseInt(d2TrackerEvent.event),
                 }));
-                return importApiTracker(this.api, { events: d2TrackerEvents }, importStrategy).flatMap(response => {
+                return importApiTracker(
+                    this.api,
+                    { events: d2TrackerEvents },
+                    { action: importStrategy, async: true }
+                ).flatMap(response => {
                     return Future.success({
                         response,
                         eventIdLineNoMap,
@@ -186,7 +190,11 @@ export class AMCSubstanceDataDefaultRepository implements AMCSubstanceDataReposi
                 scheduledAt: "",
             };
         });
-        return importApiTracker(this.api, { events: d2EventsCalculatedConsumption }, "DELETE").flatMap(response => {
+        return importApiTracker(
+            this.api,
+            { events: d2EventsCalculatedConsumption },
+            { action: "DELETE", async: true }
+        ).flatMap(response => {
             return Future.success(response);
         });
     }
