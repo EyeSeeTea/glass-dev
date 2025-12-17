@@ -20,6 +20,8 @@ const AMR_DATA_PROGRAM_STAGE_ID = "KCmWZD8qoAk";
 const AMR_FUNGAL_PROGRAM_STAGE_ID = "ysGSonDq9Bc";
 const CREATE_AND_UPDATE = "CREATE_AND_UPDATE";
 
+const FILE_CHUNK_SIZE = 5000;
+
 export class AsyncImportRISIndividualFungalFile {
     constructor(
         private repositories: {
@@ -72,7 +74,7 @@ export class AsyncImportRISIndividualFungalFile {
         // First pass: Validate all chunks
         consoleLogger.debug(`Starting validation pass for upload ${uploadId}`);
         return this.repositories.risIndividualFungalRepository
-            .getFromBlobInChunks(dataColumns, inputBlob, uploadChunkSize, chunkOfCustomDataColumns => {
+            .getFromBlobInChunks(dataColumns, inputBlob, FILE_CHUNK_SIZE, chunkOfCustomDataColumns => {
                 // If we already encountered blocking errors, stop validation
                 if (validationErrorSummary) {
                     return Future.success(false);
@@ -143,7 +145,7 @@ export class AsyncImportRISIndividualFungalFile {
                 let allEventIdList: Id[] = [];
 
                 return this.repositories.risIndividualFungalRepository
-                    .getFromBlobInChunks(dataColumns, inputBlob, uploadChunkSize, chunkOfCustomDataColumns => {
+                    .getFromBlobInChunks(dataColumns, inputBlob, FILE_CHUNK_SIZE, chunkOfCustomDataColumns => {
                         totalRowsImported += chunkOfCustomDataColumns.length;
 
                         return mapIndividualFungalDataItemsToEntities(
