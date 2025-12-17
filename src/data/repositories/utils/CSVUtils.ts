@@ -4,7 +4,7 @@ import { Readable } from "stream";
 import { Row } from "../../../domain/repositories/SpreadsheetXlsxRepository";
 import consoleLogger from "../../../utils/consoleLogger";
 
-export const CSV_DEFAULT_CHUNK_SIZE = 300;
+const CSV_DEFAULT_CHUNK_SIZE = 5000;
 
 export function getTextValue(row: Row<string>, column: string): string {
     return row[column] || "";
@@ -247,8 +247,8 @@ function createReadableInput(fileOrBlob: Blob | File): File | NodeJS.ReadableStr
     const isNode = typeof process !== "undefined" && process.versions != null && process.versions.node != null;
 
     if (isNode) {
-        // In Node.js, stream the blob in chunks to avoid OOM: chunks of 64 KB
-        const chunkSize = 64 * 1024;
+        // In Node.js, stream the blob in chunks to avoid OOM: chunks of 1 MB
+        const chunkSize = 1 * 1024 * 1024;
         let position = 0;
         const fileSize = fileOrBlob.size;
 
