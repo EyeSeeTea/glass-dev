@@ -13,7 +13,6 @@ import {
 import { D2TrackerEventToPost } from "@eyeseetea/d2-api/api/trackerEvents";
 import { D2TrackerEnrollmentToPost } from "@eyeseetea/d2-api/api/trackerEnrollments";
 import { D2TrackedEntityInstanceToPost } from "@eyeseetea/d2-api/api/trackerTrackedEntities";
-import consoleLogger from "../../../utils/consoleLogger";
 
 export function importApiTracker(
     api: D2Api,
@@ -21,7 +20,6 @@ export function importApiTracker(
     options: { action: ImportStrategy; async?: boolean }
 ): FutureData<TrackerPostResponse> {
     const { action, async = false } = options;
-    const startTime = Date.now();
 
     if (async) {
         return apiToFuture(
@@ -43,10 +41,6 @@ export function importApiTracker(
     } else {
         return apiToFuture(api.tracker.post({ importStrategy: action, skipRuleEngine: true }, request)).map(
             response => {
-                const totalElapsedMs = Date.now() - startTime;
-
-                consoleLogger.debug(`[TRACKER IMPORT] sync POST total time ${totalElapsedMs} ms`);
-
                 return response;
             }
         );

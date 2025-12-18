@@ -49,21 +49,12 @@ export function importOrDeleteTrackedEntitiesInChunks(params: {
             } of tracked entities to ${action} for module ${glassModuleName}.`
         );
 
-        const chunkStartTime = Date.now();
-
         return importTrackedEntities(trackedEntitiesChunk, {
             trackerRepository,
             action,
             async,
         })
             .mapError(error => {
-                const elapsedMs = Date.now() - chunkStartTime;
-                consoleLogger.info(
-                    `Chunk ${index + 1}/${chunkedTrackedEntities.length} (${
-                        trackedEntitiesChunk.length
-                    } entities) in ${elapsedMs} ms`
-                );
-
                 consoleLogger.error(
                     `Error importing tracked entities from file in module ${glassModuleName} with action ${action}: ${error}`
                 );
@@ -74,14 +65,7 @@ export function importOrDeleteTrackedEntitiesInChunks(params: {
                 return errorImportSummary;
             })
             .flatMap(response => {
-                const elapsedMs = Date.now() - chunkStartTime;
-                consoleLogger.debug(
-                    `Chunk ${index + 1}/${chunkedTrackedEntities.length} (${
-                        trackedEntitiesChunk.length
-                    } entities) in ${elapsedMs} ms`
-                );
-
-                consoleLogger.debug(`Tracked entities stats: ${JSON.stringify(response.stats)}`);
+                consoleLogger.debug(`Tracked entities ${action} stats: ${JSON.stringify(response.stats)}`);
 
                 consoleLogger.debug(
                     `End of chunk ${index + 1}/${
