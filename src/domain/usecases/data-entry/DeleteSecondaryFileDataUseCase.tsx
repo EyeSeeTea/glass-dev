@@ -33,17 +33,20 @@ export class DeleteSecondaryFileDataUseCase implements UseCase {
     public execute(
         currentModule: GlassModule,
         upload: GlassUploads,
-        arrayBuffer: ArrayBuffer
+        arrayBuffer: ArrayBuffer,
+        isAsyncDeletion: boolean
     ): FutureData<ImportSummary> {
+        const asyncDeleteChunkSize = isAsyncDeletion ? currentModule.asyncDeleteChunkSizes?.primaryUpload : undefined;
+
         const { name: currentModuleName } = currentModule;
         switch (currentModuleName) {
             case "AMR":
             case "AMR - Individual": {
-                return new DeleteSampleDataset(this.options).delete(arrayBuffer);
+                return new DeleteSampleDataset(this.options).delete(arrayBuffer, asyncDeleteChunkSize);
             }
 
             case "AMC": {
-                return new DeleteAMCSubstanceLevelData(this.options).delete(arrayBuffer, upload);
+                return new DeleteAMCSubstanceLevelData(this.options).delete(arrayBuffer, upload, asyncDeleteChunkSize);
             }
             default: {
                 return Future.error(`Secondary upload async deletion for module ${currentModuleName} not found`);

@@ -1,7 +1,7 @@
 {
     "name": "glass",
     "description": "DHIS2 Glass App",
-    "version": "1.6.31",
+    "version": "1.6.35",
     "license": "GPL-3.0",
     "author": "EyeSeeTea team",
     "homepage": "http://.",
@@ -16,7 +16,7 @@
         "@dhis2/d2-i18n-generate": "1.2.0",
         "@dhis2/ui": "6.12.0",
         "@eyeseetea/d2-api": "1.18.0-beta.1",
-        "@eyeseetea/d2-logger": "1.1.0",
+        "@eyeseetea/d2-logger": "1.2.0-beta.2",
         "@eyeseetea/d2-ui-components": "2.6.11",
         "@eyeseetea/xlsx-populate": "4.1.0",
         "@material-ui/core": "4.12.3",
@@ -132,7 +132,8 @@
         "amr-agg-data-validation-sample": "npx ts-node -r dotenv/config src/scripts/amr_agg_data_validation_sample.ts",
         "amr-agg-data-reset-sample": "npx ts-node -r dotenv/config src/scripts/amr_agg_data_reset_sample.ts",
         "get-max-min-amc-calculated-tons": "npx ts-node -r dotenv/config src/scripts/get_max_min_amc_calculated_tons.ts",
-        "generate-secret-key-and-nonce": "npx ts-node src/scripts/generate_secret_key_and_nonce.ts"
+        "generate-secret-key-and-nonce": "npx ts-node src/scripts/generate_secret_key_and_nonce.ts",
+        "migrate-uploads-from-datastore-to-program": "npx ts-node -r dotenv/config src/scripts/uploads_datastore_to_uploads_event_program_migration.ts"
     },
     "manifest.webapp": {
         "name": "glass",

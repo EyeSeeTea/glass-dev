@@ -4,4 +4,5 @@ export type GlassGeneralInfo = {
     regionLevel: number;
     maxAttemptsForAsyncDeletions: number;
     maxAttemptsForAsyncUploads: number;
+    uploadsMigrationCompleted?: boolean;
 };

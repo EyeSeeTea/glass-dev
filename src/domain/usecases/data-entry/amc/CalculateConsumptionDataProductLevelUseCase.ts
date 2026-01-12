@@ -23,6 +23,7 @@ import { mapRawSubstanceCalculatedToSubstanceCalculated } from "./utils/mapRawSu
 import { GlassUploadsRepository } from "../../../repositories/GlassUploadsRepository";
 import { GlassDocumentsRepository } from "../../../repositories/GlassDocumentsRepository";
 import { getStringFromFileBlob } from "../utils/fileToString";
+import { Maybe } from "../../../../utils/ts-utils";
 
 const IMPORT_SUMMARY_EVENT_TYPE = "event";
 const IMPORT_STRATEGY_CREATE_AND_UPDATE = "CREATE_AND_UPDATE";
@@ -141,14 +142,16 @@ export class CalculateConsumptionDataProductLevelUseCase {
                                 `[${new Date().toISOString()}] Creating calculations of product level data as events for orgUnitId ${orgUnitId} and period ${period}`
                             );
                             return this.amcProductDataRepository
-                                .importCalculations(
-                                    IMPORT_STRATEGY_CREATE_AND_UPDATE,
-                                    validProductDataTrackedEntitiesToCalculate,
-                                    rawSubstanceConsumptionCalculatedStageMetadata,
-                                    rawSubstanceConsumptionCalculatedData,
-                                    orgUnitId,
-                                    period
-                                )
+                                .importCalculations({
+                                    importStrategy: IMPORT_STRATEGY_CREATE_AND_UPDATE,
+                                    productDataTrackedEntities: validProductDataTrackedEntitiesToCalculate,
+                                    rawSubstanceConsumptionCalculatedStageMetadata:
+                                        rawSubstanceConsumptionCalculatedStageMetadata,
+                                    rawSubstanceConsumptionCalculatedData: rawSubstanceConsumptionCalculatedData,
+                                    orgUnitId: orgUnitId,
+                                    period: period,
+                                    chunkSize: module.chunkSizes?.importCalculations,
+                                })
                                 .flatMap(importProductResponse => {
                                     if (importProductResponse.status === "OK") {
                                         logger.success(
@@ -163,7 +166,8 @@ export class CalculateConsumptionDataProductLevelUseCase {
                                             period,
                                             importProductResponse,
                                             uploadId,
-                                            moduleName
+                                            moduleName,
+                                            module.chunkSizes?.importCalculations
                                         );
                                     }
 
@@ -192,7 +196,8 @@ export class CalculateConsumptionDataProductLevelUseCase {
                                             period,
                                             importProductResponse,
                                             uploadId,
-                                            moduleName
+                                            moduleName,
+                                            module.chunkSizes?.importCalculations
                                         );
                                     }
 
@@ -233,7 +238,8 @@ export class CalculateConsumptionDataProductLevelUseCase {
         period: string,
         importProductResponse: TrackerPostResponse,
         uploadId: Id,
-        moduleName: string
+        moduleName: string,
+        importCalculationChunkSize: Maybe<number>
     ): FutureData<ImportSummary> {
         const calculatedConsumptionSubstanceLevelData = mapRawSubstanceCalculatedToSubstanceCalculated(
             rawSubstanceConsumptionCalculatedData,
@@ -241,7 +247,12 @@ export class CalculateConsumptionDataProductLevelUseCase {
         );
 
         return this.amcSubstanceDataRepository
-            .importCalculations(IMPORT_STRATEGY_CREATE_AND_UPDATE, orgUnitId, calculatedConsumptionSubstanceLevelData)
+            .importCalculations({
+                importStrategy: IMPORT_STRATEGY_CREATE_AND_UPDATE,
+                orgUnitId: orgUnitId,
+                calculatedConsumptionSubstanceLevelData: calculatedConsumptionSubstanceLevelData,
+                chunkSize: importCalculationChunkSize,
+            })
             .flatMap(importSubstancesResult => {
                 if (importSubstancesResult.response.status === "OK") {
                     logger.success(

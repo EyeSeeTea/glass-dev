@@ -15,6 +15,7 @@ type DataSubmissionPeriodTypes = "YEARLY" | "QUARTERLY";
 export type ChunkSizes = {
     productIds: number;
     substanceIds: number;
+    importCalculations: number;
 };
 
 export type PATHOGEN_ANTIBIOTIC_MAP = Record<string, string[]>;
@@ -69,6 +70,10 @@ export interface GlassModule {
         primaryUpload: number;
         secondaryUpload?: number;
     };
+    asyncDeleteChunkSizes?: {
+        primaryUpload: number;
+        secondaryUpload?: number;
+    };
 }
 
 export type LineListDetails = { id: Id; name?: string; programId: Id; programStageId?: Id };
@@ -78,4 +83,4 @@ interface QuestionnaireConfig {
     rules?: QuestionnaireRule[];
 }
 
-export const DEFAULT_ASYNC_UPLOAD_CHUNK_SIZE = 100;
+export const DEFAULT_ASYNC_UPLOAD_DELETE_CHUNK_SIZE = 100;
