@@ -149,8 +149,7 @@ async function main() {
                                     }
 
                                     const uploadsToContinueAsyncDeletion = asyncUploadsToDelete.filter(
-                                        upload =>
-                                            upload.attempts < maxAttemptsForAsyncDeletions 
+                                        upload => upload.attempts < maxAttemptsForAsyncDeletions
                                         //&& upload.status === "PENDING"
                                     );
 

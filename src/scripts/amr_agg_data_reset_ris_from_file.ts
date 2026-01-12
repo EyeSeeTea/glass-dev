@@ -68,7 +68,6 @@ function main() {
 
             const aggregatedDataValues: any[] = [];
 
-            
             const csvData = fs.readFileSync(filePath, "utf8").trim();
 
             if (!csvData) {
@@ -97,13 +96,12 @@ function main() {
 
             // Iterate over each row in the CSV (skip header)
             for (let i = 1; i < lines.length; i++) {
-                
                 const line = lines[i];
                 if (!line) continue; // skip empty rows
 
                 const row = line.split(",").map(value => value.trim());
                 if (row.length < header.length) continue;
-                
+
                 const value = row[orgUnitIndex];
                 if (!value) {
                     console.warn(`Missing Country value in row ${i}`);
@@ -150,7 +148,7 @@ function main() {
                     console.debug(
                         `Fetching data values for AMR RIS data set for country ${orgUnitId} and period ${period}`
                     );
-                    if (!period) continue; 
+                    if (!period) continue;
                     const dataSetValues = await api.dataValues
                         .getSet({
                             dataSet: [dataSetId],

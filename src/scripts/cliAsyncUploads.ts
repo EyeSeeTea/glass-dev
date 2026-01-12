@@ -299,9 +299,7 @@ function removeAsyncUploadByIdFromDatastore(
     uploadIdToRemove: Id
 ): FutureData<void> {
     console.debug(`[${new Date().toISOString()}] Removing upload ${uploadIdToRemove} from async-uploads in Datastore`);
-    return new RemoveAsyncUploadByIdUseCase({ glassAsyncUploadsRepository }).execute(
-        uploadIdToRemove
-    );
+    return new RemoveAsyncUploadByIdUseCase({ glassAsyncUploadsRepository }).execute(uploadIdToRemove);
 }
 
 function incrementAsyncUploadsOrDeleteIfMaxAttemptAndSetErrorStatus(

@@ -12,7 +12,6 @@ import { GlassAsyncUpload } from "../domain/entities/GlassAsyncUploads";
 import { RemoveAsyncUploadByIdUseCase } from "../domain/usecases/RemoveAsyncUploadByIdUseCase";
 import { GlassAsyncUploadsRepository } from "../domain/repositories/GlassAsyncUploadsRepository";
 
-
 const UPLOADED_FILE_STATUS_LOWERCASE = "uploaded";
 const IMPORT_SUMMARY_STATUS_ERROR = "ERROR";
 const DEFAULT_MAX_ATTEMPS_FOR_ASYNC_DELETIONS = 3;
@@ -50,16 +49,19 @@ async function main() {
                 const dataStoreClient = new DataStoreClient(instance);
                 const glassAsyncUploadsRepository = new GlassAsyncUploadsDefaultRepository(dataStoreClient);
 
-                const asyncUploadsFromDatastore = await getAsyncUploadsFromDatastore(glassAsyncUploadsRepository).toPromise();
-                
+                const asyncUploadsFromDatastore = await getAsyncUploadsFromDatastore(
+                    glassAsyncUploadsRepository
+                ).toPromise();
+
                 console.log(asyncUploadsFromDatastore);
                 await removeAsyncUploadByIdFromDatastore(glassAsyncUploadsRepository, "cIlmCVqcS16").toPromise();
 
-                const newAsyncUploadsFromDatastore = await getAsyncUploadsFromDatastore(glassAsyncUploadsRepository).toPromise();
-                
+                const newAsyncUploadsFromDatastore = await getAsyncUploadsFromDatastore(
+                    glassAsyncUploadsRepository
+                ).toPromise();
+
                 console.log(newAsyncUploadsFromDatastore);
                 //console.debug(`[${new Date().toISOString()}] Running asynchronous deletion for URL ${envVars.url}`);
-                
             } catch (e) {
                 console.error(
                     `[${new Date().toISOString()}] Async deletions have stopped with error: ${e}. Please, restart again.`
@@ -79,9 +81,7 @@ function removeAsyncUploadByIdFromDatastore(
     uploadIdToRemove: Id
 ): FutureData<void> {
     console.debug(`[${new Date().toISOString()}] Removing upload ${uploadIdToRemove} from async-uploads in Datastore`);
-    return new RemoveAsyncUploadByIdUseCase({ glassAsyncUploadsRepository }).execute(
-        uploadIdToRemove
-    );
+    return new RemoveAsyncUploadByIdUseCase({ glassAsyncUploadsRepository }).execute(uploadIdToRemove);
 }
 
 function getAsyncUploadsFromDatastore(
@@ -89,6 +89,5 @@ function getAsyncUploadsFromDatastore(
 ): FutureData<GlassAsyncUpload[]> {
     return new GetAsyncUploadsUseCase(glassAsyncUploadsRepository).execute();
 }
-
 
 main();

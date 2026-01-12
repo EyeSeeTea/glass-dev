@@ -117,7 +117,7 @@ async function main() {
                             console.debug(
                                 `There are ${uploadIdsToDelete.length} uploaded datasets marked for deletion`
                             );
-                            const uploadIdList = uploadIdsToDelete.map(deletion => deletion.uploadId)
+                            const uploadIdList = uploadIdsToDelete.map(deletion => deletion.uploadId);
                             return Future.joinObj({
                                 glassModules: getGlassModulesFromDatastore(glassModuleRepository),
                                 allUploads: getGlassUploadsDatastore(glassUploadsRepository),
@@ -164,7 +164,7 @@ async function main() {
                                         atcRepository,
                                         amcProductRepository: amcProductDataRepository,
                                         amcSubstanceDataRepository,
-                                        glassAsyncDeletionsRepository
+                                        glassAsyncDeletionsRepository,
                                     }).run(
                                         () => {
                                             console.debug(
@@ -199,7 +199,9 @@ async function main() {
 
 type GlassUploadsWithModuleName = GlassUploads & { moduleName: GlassModuleName };
 
-function getAsyncDeletionsFromDatastore(glassAsyncDeletionsRepository: GlassAsyncDeletionsRepository): FutureData<GlassAsyncDeletion[]> {
+function getAsyncDeletionsFromDatastore(
+    glassAsyncDeletionsRepository: GlassAsyncDeletionsRepository
+): FutureData<GlassAsyncDeletion[]> {
     return new GetAsyncDeletionsUseCase(glassAsyncDeletionsRepository).execute();
 }
 
