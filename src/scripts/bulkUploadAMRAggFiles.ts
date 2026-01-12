@@ -26,7 +26,7 @@ import { UpdateSampleUploadWithRisIdUseCase } from "../domain/usecases/UpdateSam
 import { moduleProperties } from "../domain/utils/ModuleProperties";
 
 import { generateUid } from "../utils/uid";
-import { getD2ApiFromArgs } from "./common";
+import { getD2ApiFromArgs, getInstance } from "./common";
 import { DataValuesDefaultImportRepository } from "../data/repositories/data-entry/DataValuesDefaultImportRepository";
 
 dotenv.config();
@@ -129,11 +129,12 @@ async function authenticate(): Promise<void> {
 async function initializeGlobals() {
     const startTime = Date.now();
     await authenticate();
-    //instance = getInstance(envVars);
+    const envVars = getEnvVars();
+    const instance = getInstance(envVars);
 
     //DataStore
     dataStoreClient = new DataStoreClient(undefined, api);
-    glassDocumentsRepository = new GlassDocumentsDefaultRepository(dataStoreClient, undefined, api);
+    glassDocumentsRepository = new GlassDocumentsDefaultRepository(dataStoreClient, instance);
     glassUploadsRepository = new GlassUploadsDefaultRepository(dataStoreClient);
     moduleRepository = new GlassModuleDefaultRepository(dataStoreClient);
     glassDataSubmissionRepository = new GlassDataSubmissionsDefaultRepository(dataStoreClient);
@@ -406,7 +407,8 @@ function isValidFileDataType(data: any): data is FileData {
 async function createFileFromPath(filePath: string): Promise<File> {
     const fileName = path.basename(filePath);
     const fileBuffer = await fs.readFile(filePath);
-    const blobFile = new Blob([fileBuffer], { type: "application/octet-stream" });
+    //const blobFile = new Blob([fileBuffer], { type: "application/octet-stream" });
+    const blobFile = new Blob([new Uint8Array(fileBuffer)], { type: "application/octet-stream" });
     return new File([blobFile], fileName, {
         type: blobFile.type,
         lastModified: Date.now(),
@@ -845,17 +847,32 @@ async function processDirectory(directoryPath: string): Promise<void> {
                     await processDirectory(filePath);
                 } else {
                     const fileName = path.basename(filePath);
-
-                    let beforeDot;
-                    if (fileName.includes(".")) {
-                        beforeDot = fileName.split(".")[0];
-                    } else {
-                        throw Error("The file name does not contain a dot.");
+                    
+                    if (!fileName.includes(".")) {
+                        throw new Error("The file name does not contain a dot.");
                     }
-                    const batchId = beforeDot.substring(beforeDot.lastIndexOf("_") + 1);
 
+                    const beforeDot = fileName.split(".")[0];
+
+                    if (!beforeDot) {
+                        throw new Error("Invalid file name format.");
+                    }
+
+                    const batchId = beforeDot.substring(beforeDot.lastIndexOf("_") + 1);
                     const [firstFileType, orgUnitCode, period] = fileName.split("_");
+                    
+                    if (!period) {
+                        throw new Error("Missing period in file name.");
+                    }
+
+                    if (!orgUnitCode) {
+                        throw new Error("Missing orgUnitCode in file name.");
+                    }
+
                     const orgUnitId = orgUnits[orgUnitCode];
+                    if (!orgUnitId) {
+                        throw new Error("Missing orgUnitId in file name.");
+                    }
 
                     let dataSubmission = getDataSubmission(orgUnitId, period);
 

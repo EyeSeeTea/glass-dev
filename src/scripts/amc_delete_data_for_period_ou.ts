@@ -9,11 +9,10 @@ import { GlassUploadsRepository } from "../domain/repositories/GlassUploadsRepos
 import { GlassUploadsDefaultRepository } from "../data/repositories/GlassUploadsDefaultRepository";
 import { GetGlassUploadsUseCase } from "../domain/usecases/GetGlassUploadsUseCase";
 import { Future, FutureData } from "../domain/entities/Future";
-import { GlassModule } from "../domain/entities/GlassModule";
+import { GlassModule, GlassModuleName, isGlassModuleName } from "../domain/entities/GlassModule";
 import { GlassModuleRepository } from "../domain/repositories/GlassModuleRepository";
 import { GlassUploads } from "../domain/entities/GlassUploads";
 import { GlassModuleDefaultRepository } from "../data/repositories/GlassModuleDefaultRepository";
-import { GlassModuleName, isGlassModuleName, moduleProperties } from "../domain/utils/ModuleProperties";
 import { getPrimaryAndSecondaryFilesToDelete } from "../webapp/utils/getPrimaryAndSecondaryFilesToDelete";
 import { GlassDocumentsRepository } from "../domain/repositories/GlassDocumentsRepository";
 import { GlassDocumentsDefaultRepository } from "../data/repositories/GlassDocumentsDefaultRepository";
@@ -51,6 +50,10 @@ import { UsersRepository } from "../domain/repositories/UsersRepository";
 import { DeletePrimaryFileDataUseCase } from "../domain/usecases/data-entry/DeletePrimaryFileDataUseCase";
 import { DeleteSecondaryFileDataUseCase } from "../domain/usecases/data-entry/DeleteSecondaryFileDataUseCase";
 import { DownloadDocumentAsArrayBufferUseCase } from "../domain/usecases/DownloadDocumentAsArrayBufferUseCase";
+import { moduleProperties } from "../domain/utils/ModuleProperties";
+import { GlassAsyncDeletionsRepository } from "../domain/repositories/GlassAsyncDeletionsRepository";
+import { GlassAsyncDeletion } from "../domain/entities/GlassAsyncDeletions";
+import { GlassAsyncDeletionsDefaultRepository } from "../data/repositories/GlassAsyncDeletionsDefaultRepository";
 
 const UPLOADED_FILE_STATUS_LOWERCASE = "uploaded";
 const IMPORT_SUMMARY_STATUS_ERROR = "ERROR";
@@ -90,6 +93,7 @@ async function main() {
                 const instanceRepository = new InstanceDefaultRepository(instance, dataStoreClient);
                 const glassModuleRepository = new GlassModuleDefaultRepository(dataStoreClient);
                 const glassUploadsRepository = new GlassUploadsDefaultRepository(dataStoreClient);
+                const glassAsyncDeletionsRepository = new GlassAsyncDeletionsDefaultRepository(dataStoreClient);
                 const glassDocumentsRepository = new GlassDocumentsDefaultRepository(dataStoreClient, instance);
                 const risDataRepository = new RISDataCSVDefaultRepository();
                 const risIndividualFungalRepository = new RISIndividualFungalDataCSVDefaultRepository();
@@ -107,19 +111,20 @@ async function main() {
 
                 console.debug(`Running asynchronous deletion for URL ${envVars.url}`);
 
-                return getAsyncDeletionsFromDatastore(glassUploadsRepository).run(
+                return getAsyncDeletionsFromDatastore(glassAsyncDeletionsRepository).run(
                     uploadIdsToDelete => {
                         if (uploadIdsToDelete && uploadIdsToDelete.length > 0) {
                             console.debug(
                                 `There are ${uploadIdsToDelete.length} uploaded datasets marked for deletion`
                             );
+                            const uploadIdList = uploadIdsToDelete.map(deletion => deletion.uploadId)
                             return Future.joinObj({
                                 glassModules: getGlassModulesFromDatastore(glassModuleRepository),
                                 allUploads: getGlassUploadsDatastore(glassUploadsRepository),
                             }).run(
                                 ({ glassModules, allUploads }) => {
                                     const uploadsToDelete: GlassUploadsWithModuleName[] = allUploads
-                                        .filter(upload => uploadIdsToDelete.includes(upload.id))
+                                        .filter(upload => uploadIdList.includes(upload.id))
                                         .map(upload => {
                                             const moduleName = glassModules.find(
                                                 module => module.id === upload.module
@@ -159,6 +164,7 @@ async function main() {
                                         atcRepository,
                                         amcProductRepository: amcProductDataRepository,
                                         amcSubstanceDataRepository,
+                                        glassAsyncDeletionsRepository
                                     }).run(
                                         () => {
                                             console.debug(
@@ -193,15 +199,15 @@ async function main() {
 
 type GlassUploadsWithModuleName = GlassUploads & { moduleName: GlassModuleName };
 
-function getAsyncDeletionsFromDatastore(glassUploadsRepository: GlassUploadsRepository): FutureData<Id[]> {
-    return new GetAsyncDeletionsUseCase(glassUploadsRepository).execute();
+function getAsyncDeletionsFromDatastore(glassAsyncDeletionsRepository: GlassAsyncDeletionsRepository): FutureData<GlassAsyncDeletion[]> {
+    return new GetAsyncDeletionsUseCase(glassAsyncDeletionsRepository).execute();
 }
 
 function removeAsyncDeletionsFromDatastore(
     uploadIdsToRemove: Id[],
-    glassUploadsRepository: GlassUploadsRepository
-): FutureData<Id[]> {
-    return new RemoveAsyncDeletionsUseCase(glassUploadsRepository).execute(uploadIdsToRemove);
+    glassAsyncDeletionsRepository: GlassAsyncDeletionsRepository
+): FutureData<void> {
+    return new RemoveAsyncDeletionsUseCase(glassAsyncDeletionsRepository).execute(uploadIdsToRemove);
 }
 
 // TODO: send notification to users
@@ -377,6 +383,7 @@ function deleteUploadedDatasets(
         atcRepository: GlassATCRepository;
         amcProductRepository: AMCProductDataRepository;
         amcSubstanceDataRepository: AMCSubstanceDataRepository;
+        glassAsyncDeletionsRepository: GlassAsyncDeletionsRepository;
     }
 ): FutureData<void> {
     return Future.sequential(
@@ -439,7 +446,7 @@ function deleteUploadedDatasets(
                                     ).flatMap(() => {
                                         return removeAsyncDeletionsFromDatastore(
                                             [primaryFileToDelete.id],
-                                            repositories.glassUploadsRepository
+                                            repositories.glassAsyncDeletionsRepository
                                         ).flatMap(() => {
                                             console.debug(
                                                 `SUCCESS - Deleted async-deletions id from Datastore ${primaryFileToDelete.id}`
@@ -450,7 +457,7 @@ function deleteUploadedDatasets(
                                 } else {
                                     return removeAsyncDeletionsFromDatastore(
                                         [primaryFileToDelete.id],
-                                        repositories.glassUploadsRepository
+                                        repositories.glassAsyncDeletionsRepository
                                     ).flatMap(() => {
                                         console.debug(
                                             `SUCCESS - Deleted async-deletions id from Datastore ${primaryFileToDelete.id}`
@@ -480,7 +487,7 @@ function deleteUploadedDatasets(
                                     ).flatMap(() => {
                                         return removeAsyncDeletionsFromDatastore(
                                             [secondaryFileToDelete.id],
-                                            repositories.glassUploadsRepository
+                                            repositories.glassAsyncDeletionsRepository
                                         ).flatMap(() => {
                                             console.debug(
                                                 `SUCCESS - Deleted async-deletions id from Datastore ${secondaryFileToDelete.id}`
@@ -501,7 +508,7 @@ function deleteUploadedDatasets(
                             ).flatMap(() => {
                                 return removeAsyncDeletionsFromDatastore(
                                     [secondaryFileToDelete.id],
-                                    repositories.glassUploadsRepository
+                                    repositories.glassAsyncDeletionsRepository
                                 ).flatMap(() => {
                                     console.debug(
                                         `SUCCESS - Deleted async-deletions id from Datastore ${secondaryFileToDelete.id}`
