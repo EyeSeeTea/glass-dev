@@ -1,7 +1,7 @@
 import { UseCase } from "../../../CompositionRoot";
 import { Future, FutureData } from "../../entities/Future";
 import { ImportSummary } from "../../entities/data-entry/ImportSummary";
-import { DEFAULT_ASYNC_UPLOAD_CHUNK_SIZE, GlassModule } from "../../entities/GlassModule";
+import { DEFAULT_ASYNC_UPLOAD_DELETE_CHUNK_SIZE, GlassModule } from "../../entities/GlassModule";
 import { Id } from "../../entities/Ref";
 import { AsyncImportSampleFile } from "./amr/AsyncImportSampleFile";
 import { SampleDataRepository } from "../../repositories/data-entry/SampleDataRepository";
@@ -33,7 +33,7 @@ export class AsyncImportSecondaryFileUseCase implements UseCase {
         switch (glassModule.name) {
             case "AMR - Individual": {
                 const uploadChunkSize =
-                    glassModule.asyncUploadChunkSizes?.secondaryUpload || DEFAULT_ASYNC_UPLOAD_CHUNK_SIZE;
+                    glassModule.asyncUploadChunkSizes?.secondaryUpload || DEFAULT_ASYNC_UPLOAD_DELETE_CHUNK_SIZE;
 
                 const importSampleFile = new AsyncImportSampleFile(this.repositories);
 

@@ -230,7 +230,8 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({
                                         ? compositionRoot.fileSubmission.deletePrimaryFile(
                                               currentModule.data,
                                               primaryFileToDelete,
-                                              primaryArrayBuffer
+                                              primaryArrayBuffer,
+                                              false
                                           )
                                         : Future.success(undefined),
                                 deleteSecondaryFileSummary:
@@ -240,7 +241,8 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({
                                         ? compositionRoot.fileSubmission.deleteSecondaryFile(
                                               currentModule.data,
                                               secondaryFileToDelete,
-                                              secondaryArrayBuffer
+                                              secondaryArrayBuffer,
+                                              false
                                           )
                                         : Future.success(undefined),
                             }).run(
@@ -359,7 +361,12 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({
                             secondaryArrayBuffer
                         ) {
                             compositionRoot.fileSubmission
-                                .deleteSecondaryFile(currentModule.data, secondaryFileToDelete, secondaryArrayBuffer)
+                                .deleteSecondaryFile(
+                                    currentModule.data,
+                                    secondaryFileToDelete,
+                                    secondaryArrayBuffer,
+                                    false
+                                )
                                 .run(
                                     deleteSecondaryFileSummary => {
                                         if (deleteSecondaryFileSummary?.status === "ERROR") {

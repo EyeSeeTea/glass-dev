@@ -18,11 +18,10 @@ export class GetGlassUploadsByDataSubmissionUseCase implements UseCase {
             amrAgg: this.glassDataSubmissionRepository.getSpecificDataSubmission(AMR_AGG, orgUnit, period),
             amrInd: this.glassDataSubmissionRepository.getSpecificDataSubmission(AMR_I, orgUnit, period),
         }).flatMap(({ amrAgg, amrInd }) => {
-            return this.glassUploadsRepository.getAll().map(uploads => {
-                return uploads.filter(
-                    upload => upload.dataSubmission === amrAgg[0]?.id || upload.dataSubmission === amrInd[0]?.id
-                );
-            });
+            const dataSubmissionIds = [amrAgg[0]?.id, amrInd[0]?.id].filter((id): id is string => id !== undefined);
+            return dataSubmissionIds.length > 0
+                ? this.glassUploadsRepository.getByDataSubmissionIds(dataSubmissionIds)
+                : Future.success([]);
         });
     }
 }

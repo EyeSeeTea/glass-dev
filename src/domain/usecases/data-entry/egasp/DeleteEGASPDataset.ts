@@ -10,6 +10,7 @@ import { DeleteBLTemplateEventProgram } from "../DeleteBLTemplateEventProgram";
 import { GlassUploads } from "../../../entities/GlassUploads";
 import { GlassUploadsRepository } from "../../../repositories/GlassUploadsRepository";
 import { TrackerRepository } from "../../../repositories/TrackerRepository";
+import { Maybe } from "../../../../utils/ts-utils";
 
 export class DeleteEGASPDataset {
     constructor(
@@ -24,7 +25,11 @@ export class DeleteEGASPDataset {
         }
     ) {}
 
-    public delete(arrayBuffer: ArrayBuffer, upload: GlassUploads): FutureData<ImportSummary> {
+    public delete(
+        arrayBuffer: ArrayBuffer,
+        upload: GlassUploads,
+        asyncDeleteChunkSize: Maybe<number>
+    ): FutureData<ImportSummary> {
         const deleteBLTemplateEventProgram = new DeleteBLTemplateEventProgram(
             this.options.excelRepository,
             this.options.instanceRepository,
@@ -35,6 +40,11 @@ export class DeleteEGASPDataset {
             this.options.trackerRepository
         );
 
-        return deleteBLTemplateEventProgram.delete(arrayBuffer, EGASP_PROGRAM_ID, upload);
+        return deleteBLTemplateEventProgram.delete({
+            arrayBuffer,
+            programId: EGASP_PROGRAM_ID,
+            upload,
+            asyncDeleteChunkSize,
+        });
     }
 }
