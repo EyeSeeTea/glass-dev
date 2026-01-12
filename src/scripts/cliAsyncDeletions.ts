@@ -133,22 +133,22 @@ async function main() {
                                         .filter(upload => upload.attempts >= maxAttemptsForAsyncDeletions)
                                         .map(upload => upload.uploadId);
 
-                                    const uploadsBeingDeleted = uploadsToDelete.filter(
-                                        upload => upload.status === "DELETING"
-                                    );
+                                    //const uploadsBeingDeleted = uploadsToDelete.filter(
+                                    //    upload => upload.status === "DELETING"
+                                    //);
 
-                                    if (uploadsBeingDeleted.length > 0) {
-                                        console.debug(
-                                            `[${new Date().toISOString()}] There are ${
-                                                uploadsBeingDeleted.length
-                                            } uploads being deleted. Skipping deletion of these`
-                                        );
-                                    }
+                                    //if (uploadsBeingDeleted.length > 0) {
+                                    //    console.debug(
+                                    //        `[${new Date().toISOString()}] There are ${
+                                    //            uploadsBeingDeleted.length
+                                    //        } uploads being deleted. Skipping deletion of these`
+                                     //   );
+                                   // }
 
                                     const uploadsToContinueAsyncDeletion = uploadsToDelete.filter(
                                         upload =>
-                                            upload.attempts < maxAttemptsForAsyncDeletions &&
-                                            upload.status === "PENDING"
+                                            upload.attempts < maxAttemptsForAsyncDeletions 
+                                        //&& upload.status === "PENDING"
                                     );
 
                                     console.debug(

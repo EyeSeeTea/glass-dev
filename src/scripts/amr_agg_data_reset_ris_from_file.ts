@@ -68,11 +68,21 @@ function main() {
 
             const aggregatedDataValues: any[] = [];
 
-            const csvData = fs.readFileSync(filePath, "utf8");
+            
+            const csvData = fs.readFileSync(filePath, "utf8").trim();
+
+            if (!csvData) {
+                throw new Error("CSV file is empty.");
+            }
+
             const lines = csvData.split("\n");
 
-            // Extract header and prepare for processing
-            const header = lines[0].split(",").map(h => h.trim()); // Header
+            if (lines.length === 0 || !lines[0]) {
+                throw new Error("No header found in CSV file.");
+            }
+
+            const header = lines[0].split(",").map(h => h.trim());
+
             const orgUnitIndex = header.indexOf("Country");
             const periodIndex = header.indexOf("Year");
             const batchIdIndex = header.indexOf("BatchId");
@@ -87,9 +97,21 @@ function main() {
 
             // Iterate over each row in the CSV (skip header)
             for (let i = 1; i < lines.length; i++) {
-                const row = lines[i].split(",").map(value => value.trim());
+                
+                const line = lines[i];
+                if (!line) continue; // skip empty rows
+
+                const row = line.split(",").map(value => value.trim());
                 if (row.length < header.length) continue;
-                const orgUnitId = await getOrgUnitIdFromCode(row[orgUnitIndex]);
+                
+                const value = row[orgUnitIndex];
+                if (!value) {
+                    console.warn(`Missing Country value in row ${i}`);
+                    continue;
+                }
+                const orgUnitId = await getOrgUnitIdFromCode(value);
+
+                //const orgUnitId = await getOrgUnitIdFromCode(row[orgUnitIndex]);
                 const period = row[periodIndex];
                 const batchId = row[batchIdIndex];
                 const dataSet = row[dataSetIdIndex];
@@ -128,6 +150,7 @@ function main() {
                     console.debug(
                         `Fetching data values for AMR RIS data set for country ${orgUnitId} and period ${period}`
                     );
+                    if (!period) continue; 
                     const dataSetValues = await api.dataValues
                         .getSet({
                             dataSet: [dataSetId],

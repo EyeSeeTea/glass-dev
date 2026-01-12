@@ -235,8 +235,7 @@ export function getCompositionRoot(instance: Instance) {
             getAsyncUploads: new GetAsyncUploadsUseCase(glassAsyncUploadsRepository),
             setToAsyncUploads: new SetAsyncUploadsUseCase({ glassAsyncUploadsRepository, glassUploadsRepository }),
             removeAsyncUploadById: new RemoveAsyncUploadByIdUseCase({
-                glassAsyncUploadsRepository,
-                glassUploadsRepository,
+                glassAsyncUploadsRepository
             }),
             removeAsyncUploads: new RemoveAsyncUploadsUseCase({
                 glassAsyncUploadsRepository,

@@ -1,4 +1,4 @@
-import { D2ValidationResponse } from "../../../../data/repositories/MetadataDefaultRepository";
+import { DataSetValidation } from "../../../entities/metadata/DataSetValidation";
 import { DataValue } from "../../../entities/data-entry/DataValue";
 import { DataValuesSaveSummary, ImportStrategy } from "../../../entities/data-entry/DataValuesSaveSummary";
 import { ConsistencyError, ImportSummary } from "../../../entities/data-entry/ImportSummary";
@@ -219,13 +219,13 @@ export class AMRAggDataValuesImportHelper {
     protected createErrorImportSummary(errors: ConsistencyError[]): ImportSummary {
         return {
             status: "ERROR",
-            importCount: { imported: 0, updated: 0, ignored: 0, deleted: 0 },
+            importCount: { imported: 0, updated: 0, ignored: 0, deleted: 0, total: 0 },
             nonBlockingErrors: [],
             blockingErrors: errors,
         };
     }
 
-    protected async getDHIS2ValidationErrors(validationResponse: D2ValidationResponse[]): Promise<ConsistencyError[]> {
+    protected async getDHIS2ValidationErrors(validationResponse: DataSetValidation[]): Promise<ConsistencyError[]> {
         const validationRulesIds: string[] = validationResponse.flatMap(({ validationRuleViolations }) =>
             validationRuleViolations.map(ruleViolation => (ruleViolation as any)?.validationRule?.id)
         );

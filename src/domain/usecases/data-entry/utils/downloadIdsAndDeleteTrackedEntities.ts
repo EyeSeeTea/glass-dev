@@ -9,7 +9,7 @@ import { mapToImportSummary } from "../ImportBLTemplateEventProgram";
 import { Id } from "../../../entities/Ref";
 import { GlassUploadsRepository } from "../../../repositories/GlassUploadsRepository";
 import { GlassUploads } from "../../../entities/GlassUploads";
-import { TrackerTrackedEntity } from "../../../entities/TrackedEntityInstance";
+import { TrackerTrackedEntity, TrackerEnrollment, TrackerTrackedEntityAttribute } from "../../../entities/TrackedEntityInstance";
 
 export const downloadIdsAndDeleteTrackedEntities = (
     eventListId: string | undefined,
@@ -200,7 +200,7 @@ export const downloadIdsAndDeleteTrackedEntitiesUsingFileBlob = (
             const existingTrackedEntitiesIds = await trackerRepository
                 .getExistingTrackedEntitiesIdsByIds(trackedEntitiesIdList, programId)
                 .toPromise();
-            console.log("Existing tracked entities count:", existingTrackedEntitiesIds.length);
+            //console.log("Existing tracked entities count:", existingTrackedEntitiesIds.length);
 
             // If no existing tracked entities, mark data as deleted and return success
             if (existingTrackedEntitiesIds.length === 0) {
@@ -212,8 +212,10 @@ export const downloadIdsAndDeleteTrackedEntitiesUsingFileBlob = (
                 orgUnit: orgUnitId,
                 trackedEntity: id,
                 trackedEntityType: trackedEntityType,
+                attributes: [],
+                enrollments: [],
             }));
-            console.log("Prepared tracked entities for import:", trackedEntities);
+            //console.log("Prepared tracked entities for import:", trackedEntities);
 
             // Import the tracked entities
             const response = await trackerRepository.import({ trackedEntities }, action).toPromise();
@@ -260,6 +262,7 @@ const markDataAsDeletedAndReturnSuccess = async (
             imported: 0,
             deleted: 0,
             updated: 0,
+            total: 0,
         },
         nonBlockingErrors: [],
         blockingErrors: [],
