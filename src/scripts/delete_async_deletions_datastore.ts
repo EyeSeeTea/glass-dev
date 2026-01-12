@@ -15,7 +15,6 @@ import { DataStoreClient } from "../data/data-store/DataStoreClient";
 import { getD2ApiFromArgs, getInstance } from "./common";
 import { GlassAsyncDeletionsDefaultRepository } from "../data/repositories/GlassAsyncDeletionsDefaultRepository";
 
-
 const UPLOADED_FILE_STATUS_LOWERCASE = "uploaded";
 const IMPORT_SUMMARY_STATUS_ERROR = "ERROR";
 const DEFAULT_MAX_ATTEMPS_FOR_ASYNC_DELETIONS = 3;
@@ -53,16 +52,19 @@ async function main() {
                 const dataStoreClient = new DataStoreClient(instance);
                 const glassAsyncDeletionsRepository = new GlassAsyncDeletionsDefaultRepository(dataStoreClient);
 
-                const asyncDeletionsFromDatastore = await getAsyncDeletionsFromDatastore(glassAsyncDeletionsRepository).toPromise();
-                
+                const asyncDeletionsFromDatastore = await getAsyncDeletionsFromDatastore(
+                    glassAsyncDeletionsRepository
+                ).toPromise();
+
                 console.log(asyncDeletionsFromDatastore);
                 await removeAsyncDeletionByIdFromDatastore("ndNZ3KHJsMn", glassAsyncDeletionsRepository).toPromise();
 
-                const newAsyncDeletionsFromDatastore = await getAsyncDeletionsFromDatastore(glassAsyncDeletionsRepository).toPromise();
-                
+                const newAsyncDeletionsFromDatastore = await getAsyncDeletionsFromDatastore(
+                    glassAsyncDeletionsRepository
+                ).toPromise();
+
                 console.log(newAsyncDeletionsFromDatastore);
                 //console.debug(`[${new Date().toISOString()}] Running asynchronous deletion for URL ${envVars.url}`);
-                
             } catch (e) {
                 console.error(
                     `[${new Date().toISOString()}] Async deletions have stopped with error: ${e}. Please, restart again.`

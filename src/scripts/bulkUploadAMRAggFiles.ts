@@ -847,7 +847,7 @@ async function processDirectory(directoryPath: string): Promise<void> {
                     await processDirectory(filePath);
                 } else {
                     const fileName = path.basename(filePath);
-                    
+
                     if (!fileName.includes(".")) {
                         throw new Error("The file name does not contain a dot.");
                     }
@@ -860,7 +860,7 @@ async function processDirectory(directoryPath: string): Promise<void> {
 
                     const batchId = beforeDot.substring(beforeDot.lastIndexOf("_") + 1);
                     const [firstFileType, orgUnitCode, period] = fileName.split("_");
-                    
+
                     if (!period) {
                         throw new Error("Missing period in file name.");
                     }
