@@ -9,6 +9,8 @@ import { GlassATCRepository } from "../../../repositories/GlassATCRepository";
 import { AMCSubstanceDataRepository } from "../../../repositories/data-entry/AMCSubstanceDataRepository";
 import { getConsumptionDataSubstanceLevel } from "./utils/getConsumptionDataSubstanceLevel";
 import { updateRecalculatedConsumptionData } from "./utils/updateRecalculatedConsumptionData";
+import { Maybe } from "../../../../utils/ts-utils";
+import consoleLogger from "../../../../utils/consoleLogger";
 
 export class RecalculateConsumptionDataSubstanceLevelForAllUseCase {
     constructor(
@@ -20,7 +22,8 @@ export class RecalculateConsumptionDataSubstanceLevelForAllUseCase {
         periods: string[],
         currentATCVersion: string,
         currentATCData: GlassAtcVersionData,
-        allowCreationIfNotExist: boolean
+        allowCreationIfNotExist: boolean,
+        importCalculationChunkSize: Maybe<number>
     ): FutureData<void> {
         logger.info(
             `[${new Date().toISOString()}] Calculate consumption data of substance level for orgUnitsIds=${orgUnitsIds.join(
@@ -28,23 +31,21 @@ export class RecalculateConsumptionDataSubstanceLevelForAllUseCase {
             )} and periods=${periods.join(",")}. Current ATC version ${currentATCVersion}`
         );
 
+        const allCombinations = orgUnitsIds.flatMap(orgUnitId => periods.map(period => ({ orgUnitId, period })));
+
         return Future.sequential(
-            orgUnitsIds.map(orgUnitId => {
-                return Future.fromPromise(new Promise(resolve => setTimeout(resolve, 1000))).flatMap(() => {
-                    console.debug(`Waiting 1 second... orgUnit: ${orgUnitId}`);
-                    return Future.sequential(
-                        periods.map(period => {
-                            return Future.fromPromise(new Promise(resolve => setTimeout(resolve, 1000))).flatMap(() => {
-                                console.debug(`Waiting 1 second... period: ${period}`);
-                                return this.calculateByOrgUnitAndPeriod(
-                                    orgUnitId,
-                                    period,
-                                    currentATCVersion,
-                                    currentATCData,
-                                    allowCreationIfNotExist
-                                ).toVoid();
-                            });
-                        })
+            allCombinations.map(({ orgUnitId, period }) => {
+                return Future.fromPromise(new Promise(resolve => setTimeout(resolve, 500))).flatMap(() => {
+                    consoleLogger.debug(
+                        `[${new Date().toISOString()}] Waiting 500 milliseconds... orgUnit: ${orgUnitId}, period: ${period}`
+                    );
+                    return this.calculateByOrgUnitAndPeriod(
+                        orgUnitId,
+                        period,
+                        currentATCVersion,
+                        currentATCData,
+                        allowCreationIfNotExist,
+                        importCalculationChunkSize
                     ).toVoid();
                 });
             })
@@ -56,7 +57,8 @@ export class RecalculateConsumptionDataSubstanceLevelForAllUseCase {
         period: string,
         currentATCVersion: string,
         currentATCData: GlassAtcVersionData,
-        allowCreationIfNotExist: boolean
+        allowCreationIfNotExist: boolean,
+        importCalculationChunkSize: Maybe<number>
     ): FutureData<void> {
         logger.info(
             `[${new Date().toISOString()}] Calculating consumption data of substance level for orgUnitsId ${orgUnitId} and period ${period}`
@@ -101,7 +103,8 @@ export class RecalculateConsumptionDataSubstanceLevelForAllUseCase {
                         newCalculatedConsumptionData,
                         currentCalculatedConsumptionData,
                         this.amcSubstanceDataRepository,
-                        allowCreationIfNotExist
+                        allowCreationIfNotExist,
+                        importCalculationChunkSize
                     );
                 });
             }

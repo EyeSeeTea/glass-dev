@@ -1,5 +1,11 @@
 import { MODULE_NAMES } from "../entities/GlassModule";
 
+const primaryFileTypes = ["RIS", "EGASP", "RIS Individual", "Product Level Data", "RIS Fungal"];
+const secondaryFileTypes = ["SAMPLE", "SAMPLE File", "Substance Level Data"];
+
+type PrimaryFileType = typeof primaryFileTypes[number];
+type SecondaryFileType = typeof secondaryFileTypes[number];
+
 export type ModuleDetails = {
     isbatchReq: boolean;
     isQuestionnaireReq: boolean;
@@ -15,9 +21,9 @@ export type ModuleDetails = {
         title: string;
         description: string;
     };
-    primaryFileType: string;
+    primaryFileType: PrimaryFileType;
     secondaryUploadLabel?: string;
-    secondaryFileType: string;
+    secondaryFileType: SecondaryFileType;
     primaryUploadLabel: string;
     unit: string;
     isSpecimenReq: boolean;
@@ -201,3 +207,10 @@ export const moduleProperties = new Map<string, ModuleDetails>([
         },
     ],
 ]);
+
+export function isPrimaryFileType(fileType: string): fileType is PrimaryFileType {
+    return primaryFileTypes.includes(fileType as PrimaryFileType);
+}
+export function isSecondaryFileType(fileType: string): fileType is SecondaryFileType {
+    return secondaryFileTypes.includes(fileType as SecondaryFileType);
+}

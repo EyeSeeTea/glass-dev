@@ -7,7 +7,7 @@ import { GlassState } from "./State";
 
 export type GlassUploadsState = GlassState<GlassUploads[]>;
 
-export function useGlassUploadsByModuleOUPeriod(period: string) {
+export function useGlassUploadsByModuleOUPeriod(period: string, includeShared = false) {
     const { compositionRoot } = useAppContext();
     const {
         currentModuleAccess: { moduleId },
@@ -23,11 +23,14 @@ export function useGlassUploadsByModuleOUPeriod(period: string) {
     const [shouldRefresh, refreshUploads] = React.useState({});
 
     React.useEffect(() => {
-        compositionRoot.glassUploads.getByModuleOUPeriod(moduleId, orgUnitId, period).run(
+        const fetchFn = includeShared
+            ? compositionRoot.glassUploads.getIncludeSharedByModuleOUPeriod
+            : compositionRoot.glassUploads.getByModuleOUPeriod;
+        fetchFn(moduleId, orgUnitId, period).run(
             uploads => setUploads({ kind: "loaded", data: uploads }),
             error => setUploads({ kind: "error", message: error })
         );
-    }, [compositionRoot, moduleId, orgUnitId, shouldRefresh, period]);
+    }, [compositionRoot, moduleId, orgUnitId, shouldRefresh, period, includeShared]);
 
     return { uploads, refreshUploads };
 }

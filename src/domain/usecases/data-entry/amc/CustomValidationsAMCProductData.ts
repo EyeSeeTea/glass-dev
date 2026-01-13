@@ -1,7 +1,14 @@
 import { Future, FutureData } from "../../../entities/Future";
 import { ConsistencyError } from "../../../entities/data-entry/ImportSummary";
 import { ValidationResult } from "../../../entities/program-rules/EventEffectTypes";
-import { GlassAtcVersionData, LAST_ATC_CODE_LEVEL, getAtcCodeByLevel } from "../../../entities/GlassAtcVersionData";
+import {
+    ATCChangesData,
+    GlassAtcVersionData,
+    LAST_ATC_CODE_LEVEL,
+    getATCChanges,
+    getAtcCodeByLevel,
+    getNewAtcCodeRecursively,
+} from "../../../entities/GlassAtcVersionData";
 import { AMCProductDataRepository } from "../../../repositories/data-entry/AMCProductDataRepository";
 import { Country } from "../../../entities/Country";
 import { GlassATCRepository } from "../../../repositories/GlassATCRepository";
@@ -158,12 +165,21 @@ export class CustomValidationsAMCProductData {
                             : atcData.find(data => data.CODE === atcCode && data.LEVEL === LAST_ATC_CODE_LEVEL)?.CODE;
 
                     if (!validATCCode) {
-                        curErrors.push({
-                            error: i18n.t(
-                                `ATC code specified in the file is not a valid level 5 ATC code : ${atcCode}`
-                            ),
-                            line: tei.trackedEntity ? parseInt(tei.trackedEntity) + 6 : -1,
+                        const atcChanges: ATCChangesData[] = getATCChanges(atcVersion.changes);
+                        const maybeNewATCCode = getNewAtcCodeRecursively({
+                            oldAtcCode: atcCode,
+                            atcChanges: atcChanges,
+                            currentAtcs: atcData,
                         });
+
+                        if (!maybeNewATCCode) {
+                            curErrors.push({
+                                error: i18n.t(
+                                    `ATC code specified in the file is not a valid level 5 ATC code : ${atcCode}`
+                                ),
+                                line: tei.trackedEntity ? parseInt(tei.trackedEntity) + 6 : -1,
+                            });
+                        }
                     } else {
                         const atcCodeByLevel = getAtcCodeByLevel(atcData, atcCode);
                         const atcCodeLevel4 = atcCodeByLevel?.level4;

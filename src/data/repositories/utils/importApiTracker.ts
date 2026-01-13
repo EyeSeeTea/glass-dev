@@ -72,3 +72,142 @@ function mapTrackerEventsToD2TrackerEventsToPost(trackerEvents: TrackerEvent[]):
         ...event,
     }));
 }
+
+const defaultStats = {
+    created: 0,
+    updated: 0,
+    ignored: 0,
+    deleted: 0,
+    total: 0,
+};
+
+const defaultTrackerPostResponse: TrackerPostResponse = {
+    status: "OK",
+    validationReport: {
+        errorReports: [],
+        warningReports: [],
+    },
+    stats: defaultStats,
+    bundleReport: {
+        status: "OK",
+        typeReportMap: {
+            ENROLLMENT: {
+                trackerType: "ENROLLMENT",
+                stats: defaultStats,
+                objectReports: [],
+            },
+            TRACKED_ENTITY: {
+                trackerType: "TRACKED_ENTITY",
+                stats: defaultStats,
+                objectReports: [],
+            },
+            RELATIONSHIP: {
+                trackerType: "RELATIONSHIP",
+                stats: defaultStats,
+                objectReports: [],
+            },
+            EVENT: {
+                trackerType: "EVENT",
+                stats: defaultStats,
+                objectReports: [],
+            },
+        },
+        stats: defaultStats,
+    },
+    timingsStats: {},
+    message: "",
+};
+
+export function getDefaultErrorTrackerPostResponse(errorMessage: string): TrackerPostResponse {
+    return {
+        ...defaultTrackerPostResponse,
+        status: "ERROR",
+        message: errorMessage,
+    };
+}
+
+function sumStats(...items: Array<Partial<TrackerPostResponse["stats"]> | undefined>): TrackerPostResponse["stats"] {
+    return items.reduce<TrackerPostResponse["stats"]>(
+        (acc, stat = {}) => ({
+            created: acc.created + (stat.created ?? 0),
+            updated: acc.updated + (stat.updated ?? 0),
+            ignored: acc.ignored + (stat.ignored ?? 0),
+            deleted: acc.deleted + (stat.deleted ?? 0),
+            total: acc.total + (stat.total ?? 0),
+        }),
+        { created: 0, updated: 0, ignored: 0, deleted: 0, total: 0 }
+    );
+}
+
+export function joinAllTrackerPostResponses(responses: TrackerPostResponse[]): TrackerPostResponse {
+    return responses.reduce((acc: TrackerPostResponse, response: TrackerPostResponse): TrackerPostResponse => {
+        const message = [acc.message, response.message].filter(Boolean).join(" | ");
+
+        return {
+            status: response.status === "ERROR" ? "ERROR" : acc.status,
+            validationReport: {
+                errorReports: [
+                    ...(acc.validationReport?.errorReports ?? []),
+                    ...(response.validationReport?.errorReports ?? []),
+                ],
+                warningReports: [
+                    ...(acc.validationReport?.warningReports ?? []),
+                    ...(response.validationReport?.warningReports ?? []),
+                ],
+            },
+            stats: sumStats(acc.stats, response.stats),
+            bundleReport: {
+                status: "OK",
+                typeReportMap: {
+                    ENROLLMENT: {
+                        trackerType: "ENROLLMENT",
+                        stats: sumStats(
+                            acc.bundleReport?.typeReportMap?.ENROLLMENT?.stats,
+                            response.bundleReport?.typeReportMap?.ENROLLMENT?.stats
+                        ),
+                        objectReports: [
+                            ...(acc.bundleReport?.typeReportMap?.ENROLLMENT?.objectReports ?? []),
+                            ...(response.bundleReport?.typeReportMap?.ENROLLMENT?.objectReports ?? []),
+                        ],
+                    },
+                    TRACKED_ENTITY: {
+                        trackerType: "TRACKED_ENTITY",
+                        stats: sumStats(
+                            acc.bundleReport?.typeReportMap?.TRACKED_ENTITY?.stats,
+                            response.bundleReport?.typeReportMap?.TRACKED_ENTITY?.stats
+                        ),
+                        objectReports: [
+                            ...(acc.bundleReport?.typeReportMap?.TRACKED_ENTITY?.objectReports ?? []),
+                            ...(response.bundleReport?.typeReportMap?.TRACKED_ENTITY?.objectReports ?? []),
+                        ],
+                    },
+                    RELATIONSHIP: {
+                        trackerType: "RELATIONSHIP",
+                        stats: sumStats(
+                            acc.bundleReport?.typeReportMap?.RELATIONSHIP?.stats,
+                            response.bundleReport?.typeReportMap?.RELATIONSHIP?.stats
+                        ),
+                        objectReports: [
+                            ...(acc.bundleReport?.typeReportMap?.RELATIONSHIP?.objectReports ?? []),
+                            ...(response.bundleReport?.typeReportMap?.RELATIONSHIP?.objectReports ?? []),
+                        ],
+                    },
+                    EVENT: {
+                        trackerType: "EVENT",
+                        stats: sumStats(
+                            acc.bundleReport?.typeReportMap?.EVENT?.stats,
+                            response.bundleReport?.typeReportMap?.EVENT?.stats
+                        ),
+                        objectReports: [
+                            ...(acc.bundleReport?.typeReportMap?.EVENT?.objectReports ?? []),
+                            ...(response.bundleReport?.typeReportMap?.EVENT?.objectReports ?? []),
+                        ],
+                    },
+                },
+                stats: sumStats(acc.bundleReport?.stats, response.bundleReport?.stats),
+            },
+            timingsStats: { ...(acc.timingsStats ?? {}), ...(response.timingsStats ?? {}) },
+            message: message,
+        };
+    }, defaultTrackerPostResponse);
+}
