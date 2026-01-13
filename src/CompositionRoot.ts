@@ -135,6 +135,7 @@ import { GetStrataOptionsUseCase } from "./domain/usecases/amc-questionnaires/Ge
 import { SaveComponentAMCQuestionnaireUseCase } from "./domain/usecases/amc-questionnaires/SaveComponentAMCQuestionnaireUseCase";
 import { UNPopulationD2Repository } from "./data/repositories/amc-questionnaires/UNPopulationD2Repository";
 import { GetUNPopulationUseCase } from "./domain/usecases/amc-questionnaires/GetUNPopulationUseCase";
+import { GetGlassUploadsIncludedSharedByModuleOUPeriodUseCase } from "./domain/usecases/GetGlassUploadsIncludedSharedByModuleOUPeriodUseCase";
 import { getUploadsFormDataBuilder } from "./utils/getUploadsFormDataBuilder";
 
 export function getCompositionRoot(instance: Instance) {
@@ -225,6 +226,10 @@ export function getCompositionRoot(instance: Instance) {
             ),
             getByModuleOU: new GetGlassUploadsByModuleOUUseCase(glassUploadsRepository),
             getByModuleOUPeriod: new GetGlassUploadsByModuleOUPeriodUseCase(glassUploadsRepository),
+            getIncludeSharedByModuleOUPeriod: new GetGlassUploadsIncludedSharedByModuleOUPeriodUseCase(
+                glassUploadsRepository,
+                glassModuleRepository
+            ),
             setBatchId: new SetUploadBatchIdUseCase(glassUploadsRepository),
             saveImportSummaryErrorsOfFiles: new SaveImportSummaryErrorsOfFilesInUploadsUseCase(glassUploadsRepository),
             getCurrentDataSubmissionFileType: new GetUploadsByDataSubmissionUseCase(glassUploadsRepository),
