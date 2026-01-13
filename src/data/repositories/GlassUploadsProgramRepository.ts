@@ -4,7 +4,7 @@ import { Future, FutureData } from "../../domain/entities/Future";
 import { GlassUploads, GlassUploadsStatus } from "../../domain/entities/GlassUploads";
 import { Id } from "../../domain/entities/Ref";
 import { ImportSummary, ImportSummaryErrors } from "../../domain/entities/data-entry/ImportSummary";
-import { GlassUploadsRepository } from "../../domain/repositories/GlassUploadsRepository";
+import { GetUploadsByModuleOuParams, GlassUploadsRepository } from "../../domain/repositories/GlassUploadsRepository";
 import {
     D2Api,
     D2TrackerEventSchema,
@@ -116,12 +116,22 @@ export class GlassUploadsProgramRepository implements GlassUploadsRepository {
         });
     }
 
-    getUploadsByModuleOUPeriod(module: Id, orgUnit: Id, period: string): FutureData<GlassUploads[]> {
+    getUploadsByModuleOUPeriod(props: GetUploadsByModuleOuParams): FutureData<GlassUploads[]> {
+        const { moduleId, orgUnit, period, additionalFilters } = props;
+
+        const modulesToQuery = new Set([...(additionalFilters?.moduleIds ?? []), moduleId]);
+
         return this.getUploadsByFilters({
             orgUnit: orgUnit,
             orgUnitMode: "SELECTED",
-            filter: `${uploadsDHIS2Ids.period}:eq:${period},${uploadsDHIS2Ids.moduleId}:eq:${module}`,
-        });
+            filter: `${uploadsDHIS2Ids.period}:eq:${period}`,
+        }).map(uploads =>
+            uploads.filter(
+                upload =>
+                    modulesToQuery.has(upload.module) &&
+                    (!additionalFilters?.fileTypes || additionalFilters.fileTypes.includes(upload.fileType))
+            )
+        );
     }
 
     getUploadsByDataSubmission(dataSubmissionId: Id): FutureData<GlassUploads[]> {

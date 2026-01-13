@@ -11,15 +11,16 @@ import {
 } from "@material-ui/core";
 import styled from "styled-components";
 import i18n from "@eyeseetea/d2-ui-components/locales";
-import { glassColors } from "../../pages/app/themes/dhis2.theme";
+import { useSnackbar } from "@eyeseetea/d2-ui-components";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
+
+import { glassColors } from "../../pages/app/themes/dhis2.theme";
 import { UploadPrimaryFile } from "./UploadPrimaryFile";
 import { UploadSecondary } from "./UploadSecondary";
 import { useAppContext } from "../../contexts/app-context";
 import { useCurrentModuleContext } from "../../contexts/current-module-context";
 import { useCurrentOrgUnitContext } from "../../contexts/current-orgUnit-context";
 import { useCurrentPeriodContext } from "../../contexts/current-period-context";
-import { useSnackbar } from "@eyeseetea/d2-ui-components";
 import { Future } from "../../../domain/entities/Future";
 import { ImportSummary } from "../../../domain/entities/data-entry/ImportSummary";
 import { StyledLoaderContainer } from "./ConsistencyChecks";
@@ -29,6 +30,7 @@ import { useHistory } from "react-router-dom";
 import { Maybe } from "../../../utils/ts-utils";
 import { Id } from "../../../domain/entities/Ref";
 import { useGlassModule } from "../../hooks/useGlassModule";
+import { DatasetOptions, useBatchedDataSubmissions } from "./useBatchedDataSubmissions";
 
 interface UploadFilesProps {
     changeStep: (step: number) => void;
@@ -54,35 +56,6 @@ interface UploadFilesProps {
     setSecondaryFileTotalRows: React.Dispatch<React.SetStateAction<Maybe<number>>>;
     secondaryFileTotalRows: Maybe<number>;
 }
-
-const UPLOADED_STATUS = "uploaded";
-
-const datasetOptions = [
-    {
-        label: "Dataset 1",
-        value: "DS1",
-    },
-    {
-        label: "Dataset 2",
-        value: "DS2",
-    },
-    {
-        label: "Dataset 3",
-        value: "DS3",
-    },
-    {
-        label: "Dataset 4",
-        value: "DS4",
-    },
-    {
-        label: "Dataset 5",
-        value: "DS5",
-    },
-    {
-        label: "Dataset 6",
-        value: "DS6",
-    },
-];
 
 export const UploadFiles: React.FC<UploadFilesProps> = ({
     changeStep,
@@ -115,9 +88,7 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
     const [isValidated, setIsValidated] = useState(false);
     const [isPrimaryFileValid, setIsPrimaryFileValid] = useState(false);
     const [isSecondaryFileValid, setIsSecondaryFileValid] = useState(false);
-    const [previousUploadsBatchIds, setPreviousUploadsBatchIds] = useState<string[]>([]);
     const [importLoading, setImportLoading] = useState<boolean>(false);
-    const [previousBatchIdsLoading, setPreviousBatchIdsLoading] = useState<boolean>(true);
     const [loading, setLoading] = useState<boolean>(false);
     const {
         currentModuleAccess: { moduleName },
@@ -133,48 +104,16 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
         secondaryFile ? currentModuleProperties?.secondaryFileType : currentModuleProperties?.primaryFileType
     );
 
-    useEffect(() => {
-        if (
-            currentModuleProperties?.isbatchReq ||
-            (currentModuleProperties?.isExternalSecondaryFile &&
-                uploadFileType === currentModuleProperties.secondaryFileType)
-        ) {
-            setPreviousBatchIdsLoading(true);
-
-            compositionRoot.glassUploads.getAMRUploadsForCurrentDataSubmission(orgUnitId, currentPeriod).run(
-                uploads => {
-                    const uniquePreviousBatchIds = _(
-                        uploads
-                            .filter(upload => upload.status.toLowerCase() !== UPLOADED_STATUS && upload.batchId !== "")
-                            .map(upload => upload.batchId)
-                    )
-                        .uniq()
-                        .value();
-                    setPreviousUploadsBatchIds(uniquePreviousBatchIds);
-                    const firstSelectableBatchId = datasetOptions.find(
-                        ({ value }) => !uniquePreviousBatchIds.includes(value)
-                    )?.value;
-                    setBatchId(firstSelectableBatchId || "");
-                    setPreviousBatchIdsLoading(false);
-                },
-                () => {
-                    snackbar.error(i18n.t("Error fetching previous uploads."));
-                    setPreviousBatchIdsLoading(false);
-                }
-            );
-        } else {
-            setPreviousBatchIdsLoading(false);
-        }
-    }, [
-        compositionRoot.glassUploads,
-        setBatchId,
-        snackbar,
-        moduleName,
-        currentPeriod,
-        orgUnitId,
-        currentModuleProperties,
-        uploadFileType,
-    ]);
+    const { fetchingPreviousUploads, previousUploadBatches, changeBatchId, datasetOptions, showSecondary } =
+        useBatchedDataSubmissions({
+            currentModuleProperties,
+            batchId,
+            setBatchId,
+            uploadFileType,
+            currentPeriod,
+            orgUnitId,
+            setLoading,
+        });
 
     useEffect(() => {
         if (moduleProperties.get(moduleName)?.isbatchReq) {
@@ -194,46 +133,6 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
             if (isPrimaryFileValid) setIsValidated(true);
         }
     }, [batchId, isPrimaryFileValid, isSecondaryFileValid, moduleName]);
-
-    const changeBatchId = async (event: React.ChangeEvent<{ value: unknown }>) => {
-        const batchId = event.target.value as string;
-        const primaryUploadId = localStorage.getItem("primaryUploadId");
-        const secondaryUploadId = localStorage.getItem("secondaryUploadId");
-        setBatchId(batchId);
-        if (primaryUploadId) {
-            setLoading(true);
-            compositionRoot.glassUploads.setBatchId({ id: primaryUploadId, batchId }).run(
-                () => {
-                    if (secondaryUploadId) {
-                        compositionRoot.glassUploads.setBatchId({ id: secondaryUploadId, batchId }).run(
-                            () => {
-                                setLoading(false);
-                            },
-                            () => {
-                                console.debug(`error occured while updating batch id to secondary upload in datastore`);
-                                setLoading(false);
-                            }
-                        );
-                    } else setLoading(false);
-                },
-                () => {
-                    console.debug(`error occured while updating batch id to primary upload in datastore`);
-                    setLoading(false);
-                }
-            );
-        } else if (secondaryUploadId) {
-            setLoading(true);
-            compositionRoot.glassUploads.setBatchId({ id: secondaryUploadId, batchId }).run(
-                () => {
-                    setLoading(false);
-                },
-                () => {
-                    console.debug(`error occured while updating batch id to secondary upload in datastore`);
-                    setLoading(false);
-                }
-            );
-        }
-    };
 
     const changeFileType = (event: React.ChangeEvent<{ value: unknown }>) => {
         const fileType = event.target.value as string;
@@ -529,30 +428,6 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
         );
     }, [compositionRoot.fileSubmission, snackbar, orgUnitId, moduleName, orgUnitCode, uploadFileType]);
 
-    const getBatchIdDropDown = () => {
-        return (
-            <div className="batch-id">
-                <h3>{i18n.t("Batch ID")}</h3>
-                <FormControl variant="outlined" style={{ minWidth: 180 }}>
-                    <InputLabel id="dataset-label">{i18n.t("Choose a Dataset")}</InputLabel>
-                    <Select
-                        value={batchId}
-                        onChange={changeBatchId}
-                        label={i18n.t("Choose a Dataset")}
-                        labelId="dataset-label"
-                        MenuProps={{ disableScrollLock: true }}
-                    >
-                        {datasetOptions.map(({ label, value }) => (
-                            <MenuItem key={value} value={value} disabled={previousUploadsBatchIds.includes(value)}>
-                                {i18n.t(label)}
-                            </MenuItem>
-                        ))}
-                    </Select>
-                </FormControl>
-            </div>
-        );
-    };
-
     return (
         <ContentWrapper>
             <Backdrop open={loading || !dataSubmissionId} style={{ color: "#fff", zIndex: 1 }}>
@@ -632,17 +507,22 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
                         )}
                     </StyledSingleFileSelectContainer>
 
-                    {previousBatchIdsLoading ? (
+                    {fetchingPreviousUploads ? (
                         <CircularProgress size={25} />
                     ) : (
                         currentModuleProperties.isExternalSecondaryFile &&
-                        uploadFileType === currentModuleProperties.secondaryFileType &&
-                        getBatchIdDropDown()
+                        uploadFileType === currentModuleProperties.secondaryFileType && (
+                            <BatchIdDropdown
+                                changeBatchId={changeBatchId}
+                                batchId={batchId}
+                                datasetOptions={datasetOptions}
+                            />
+                        )
                     )}
                 </>
             ) : (
                 <>
-                    {previousBatchIdsLoading ? (
+                    {fetchingPreviousUploads ? (
                         <CircularProgress size={25} />
                     ) : (
                         <>
@@ -658,7 +538,7 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
                                     dataSubmissionId={dataSubmissionId}
                                     setPrimaryFileTotalRows={setPrimaryFileTotalRows}
                                 />
-                                {moduleProperties.get(moduleName)?.isSecondaryFileApplicable && (
+                                {showSecondary && (
                                     <UploadSecondary
                                         validate={setIsSecondaryFileValid}
                                         batchId={batchId}
@@ -673,22 +553,28 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
                                     />
                                 )}
                             </div>
-                            {moduleProperties.get(moduleName)?.isbatchReq && getBatchIdDropDown()}
+                            {moduleProperties.get(moduleName)?.isbatchReq && (
+                                <BatchIdDropdown
+                                    changeBatchId={changeBatchId}
+                                    batchId={batchId}
+                                    datasetOptions={datasetOptions}
+                                />
+                            )}
                         </>
                     )}
                 </>
             )}
 
             <BottomContainer>
-                {previousUploadsBatchIds.length > 0 &&
+                {previousUploadBatches.length > 0 &&
                 (moduleProperties.get(moduleName)?.isbatchReq ||
                     (currentModuleProperties?.isExternalSecondaryFile &&
                         uploadFileType === currentModuleProperties.secondaryFileType)) ? (
                     <div>
                         <h4>{i18n.t("You Previously Submitted:")} </h4>
                         <ul>
-                            {previousUploadsBatchIds.map(batchId => (
-                                <li key={batchId}>{`Batch Id ${batchId}`}</li>
+                            {previousUploadBatches.map(({ batchId, files }) => (
+                                <li key={batchId}>{`Batch Id ${batchId}${files ? ` (${files.join(", ")})` : ""}`}</li>
                             ))}
                         </ul>
                     </div>
@@ -716,6 +602,36 @@ export const UploadFiles: React.FC<UploadFilesProps> = ({
                 </Button>
             </BottomContainer>
         </ContentWrapper>
+    );
+};
+
+type BatchIdDropdownProps = {
+    changeBatchId: (event: React.ChangeEvent<{ value: unknown }>) => void;
+    batchId: string;
+    datasetOptions: DatasetOptions[];
+};
+const BatchIdDropdown: React.FC<BatchIdDropdownProps> = props => {
+    const { changeBatchId, batchId, datasetOptions } = props;
+    return (
+        <div className="batch-id">
+            <h3>{i18n.t("Batch ID")}</h3>
+            <FormControl variant="outlined" style={{ minWidth: 180 }}>
+                <InputLabel id="dataset-label">{i18n.t("Choose a Dataset")}</InputLabel>
+                <Select
+                    value={batchId}
+                    onChange={changeBatchId}
+                    label={i18n.t("Choose a Dataset")}
+                    labelId="dataset-label"
+                    MenuProps={{ disableScrollLock: true }}
+                >
+                    {datasetOptions.map(({ label, value, disabled }) => (
+                        <MenuItem key={value} value={value} disabled={disabled}>
+                            {i18n.t(label)}
+                        </MenuItem>
+                    ))}
+                </Select>
+            </FormControl>
+        </div>
     );
 };
 
