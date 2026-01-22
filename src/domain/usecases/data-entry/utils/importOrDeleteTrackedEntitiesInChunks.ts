@@ -1,4 +1,6 @@
 import _ from "lodash";
+import { TrackerPostResponse } from "@eyeseetea/d2-api/api/tracker";
+
 import {
     ImportSummary,
     ImportSummaryWithEventIdList,
@@ -23,6 +25,7 @@ export function importOrDeleteTrackedEntitiesInChunks(params: {
     action: "CREATE_AND_UPDATE" | "DELETE";
     trackerRepository: TrackerRepository;
     metadataRepository: MetadataRepository;
+    async?: boolean;
 }): FutureData<{
     allImportSummaries: ImportSummary[];
     mergedEventIdList: Id[];
@@ -34,7 +37,9 @@ export function importOrDeleteTrackedEntitiesInChunks(params: {
         action,
         trackerRepository,
         metadataRepository,
+        async = false,
     } = params;
+    consoleLogger.debug(`Starting ${action} ${trackedEntities.length} tracked entities in chunks of ${chunkSize}.`);
     const chunkedTrackedEntities = _(trackedEntities).chunk(chunkSize).value();
 
     const $importTrackedEntities = chunkedTrackedEntities.map((trackedEntitiesChunk, index) => {
@@ -44,8 +49,11 @@ export function importOrDeleteTrackedEntitiesInChunks(params: {
             } of tracked entities to ${action} for module ${glassModuleName}.`
         );
 
-        return trackerRepository
-            .import({ trackedEntities: trackedEntitiesChunk }, action)
+        return importTrackedEntities(trackedEntitiesChunk, {
+            trackerRepository,
+            action,
+            async,
+        })
             .mapError(error => {
                 consoleLogger.error(
                     `Error importing tracked entities from file in module ${glassModuleName} with action ${action}: ${error}`
@@ -57,6 +65,8 @@ export function importOrDeleteTrackedEntitiesInChunks(params: {
                 return errorImportSummary;
             })
             .flatMap(response => {
+                consoleLogger.debug(`Tracked entities ${action} stats: ${JSON.stringify(response.stats)}`);
+
                 consoleLogger.debug(
                     `End of chunk ${index + 1}/${
                         chunkedTrackedEntities.length
@@ -120,4 +130,16 @@ export function importOrDeleteTrackedEntitiesInChunks(params: {
             consoleLogger.error(`Unknown error while processing tracked entities in chunks.`);
             return `Unknown error while processing tracked entities in chunks.`;
         });
+}
+
+// TODO: fix coupling with data layer in TrackerRepository
+function importTrackedEntities(
+    trackedEntitiesChunk: TrackerTrackedEntity[],
+    options: {
+        trackerRepository: TrackerRepository;
+        async: boolean;
+        action: "CREATE_AND_UPDATE" | "DELETE";
+    }
+): FutureData<TrackerPostResponse> {
+    return options.trackerRepository.import({ trackedEntities: trackedEntitiesChunk }, options);
 }
