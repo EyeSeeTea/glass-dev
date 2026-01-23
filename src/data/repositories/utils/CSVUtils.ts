@@ -171,7 +171,7 @@ export async function parseCsvBlobInChunks<T>(
                                 return {
                                     key: column.key,
                                     type: column.type,
-                                    value: +(row[column.key] || 0),
+                                    value: toNumberOrNull(row[column.key]),
                                 };
                             }
                         });
@@ -250,6 +250,7 @@ function createReadableInput(fileOrBlob: Blob | File): File | NodeJS.ReadableStr
         // In Node.js, stream the blob in chunks to avoid OOM: chunks of 1 MB
         const chunkSize = 1 * 1024 * 1024;
         let position = 0;
+        let isFirstChunk = true;
         const fileSize = fileOrBlob.size;
 
         const readable = new Readable({
@@ -263,7 +264,13 @@ function createReadableInput(fileOrBlob: Blob | File): File | NodeJS.ReadableStr
                     const end = Math.min(position + chunkSize, fileSize);
                     const slice = fileOrBlob.slice(position, end);
                     const arrayBuffer = await slice.arrayBuffer();
-                    const buffer = Buffer.from(arrayBuffer);
+                    let buffer = Buffer.from(arrayBuffer);
+
+                    // Remove UTF-8 BOM once, if present
+                    if (isFirstChunk) {
+                        buffer = stripUtf8Bom(buffer);
+                        isFirstChunk = false;
+                    }
 
                     position = end;
                     this.push(buffer);
@@ -278,4 +285,22 @@ function createReadableInput(fileOrBlob: Blob | File): File | NodeJS.ReadableStr
     }
 
     return fileOrBlob;
+}
+
+/**
+ * Removes UTF-8 BOM (EF BB BF) from the beginning of a buffer if present.
+ * Some CSV blobs include a BOM even when the original file does not.
+ */
+function stripUtf8Bom(buffer: Buffer): Buffer {
+    if (buffer.length >= 3 && buffer[0] === 0xef && buffer[1] === 0xbb && buffer[2] === 0xbf) {
+        return buffer.slice(3);
+    }
+    return buffer;
+}
+
+function toNumberOrNull(value: unknown): number | null {
+    const stringValue = String(value ?? "").trim();
+    if (stringValue === "") return null;
+    const numberValue = Number(stringValue);
+    return Number.isFinite(numberValue) ? numberValue : null;
 }

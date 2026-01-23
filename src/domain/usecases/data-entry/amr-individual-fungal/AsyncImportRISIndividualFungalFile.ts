@@ -80,9 +80,12 @@ export class AsyncImportRISIndividualFungalFile {
                     return Future.success(false);
                 }
 
+                // +2 because file lines start at 1, and we have a header row in the file
+                const fileLineStart = totalRowsValidated + 2;
+
                 totalRowsValidated += chunkOfCustomDataColumns.length;
 
-                return runCustomValidations(chunkOfCustomDataColumns, countryCode, period).flatMap(
+                return runCustomValidations(chunkOfCustomDataColumns, countryCode, period, fileLineStart).flatMap(
                     validationSummary => {
                         if (validationSummary.blockingErrors.length > 0) {
                             consoleLogger.debug(
@@ -91,6 +94,9 @@ export class AsyncImportRISIndividualFungalFile {
                             validationErrorSummary = validationSummary;
                             return Future.success(false);
                         }
+                        consoleLogger.debug(
+                            `Custom validation passed for chunk of ${chunkOfCustomDataColumns.length} rows in upload ${uploadId} for module ${glassModule.name}, orgUnitId ${orgUnitId}, countryCode ${countryCode}, period ${period}`
+                        );
 
                         return mapIndividualFungalDataItemsToEntities(
                             chunkOfCustomDataColumns,
@@ -120,6 +126,9 @@ export class AsyncImportRISIndividualFungalFile {
                                     validationErrorSummary = errorSummary;
                                     return Future.success(false);
                                 }
+                                consoleLogger.debug(
+                                    `Program rule validation passed for chunk of ${chunkOfCustomDataColumns.length} rows in upload ${uploadId} for module ${glassModule.name}, programId ${programId}, orgUnitId ${orgUnitId}, countryCode ${countryCode}, period ${period}`
+                                );
                                 return Future.success(true);
                             });
                         });
@@ -147,7 +156,6 @@ export class AsyncImportRISIndividualFungalFile {
                 return this.repositories.risIndividualFungalRepository
                     .getFromBlobInChunks(dataColumns, inputBlob, FILE_CHUNK_SIZE, chunkOfCustomDataColumns => {
                         totalRowsImported += chunkOfCustomDataColumns.length;
-
                         return mapIndividualFungalDataItemsToEntities(
                             chunkOfCustomDataColumns,
                             orgUnitId,
@@ -181,6 +189,9 @@ export class AsyncImportRISIndividualFungalFile {
                                             `${importSummariesWithMergedEventIdList.mergedEventIdList.length} Tracked entity IDs imported from chunk of ${uploadId} for module ${glassModule.name}, programId ${programId}, orgUnitId ${orgUnitId}, countryCode ${countryCode}, period ${period}`
                                         );
                                     }
+                                    consoleLogger.debug(
+                                        `Chunk imported successfully in upload ${uploadId} for module ${glassModule.name}, programId ${programId}, orgUnitId ${orgUnitId}, countryCode ${countryCode}, period ${period}`
+                                    );
                                     return Future.success(true);
                                 })
                                 .flatMapError(error => {

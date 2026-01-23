@@ -13,6 +13,7 @@ import {
 import { D2TrackerEventToPost } from "@eyeseetea/d2-api/api/trackerEvents";
 import { D2TrackerEnrollmentToPost } from "@eyeseetea/d2-api/api/trackerEnrollments";
 import { D2TrackedEntityInstanceToPost } from "@eyeseetea/d2-api/api/trackerTrackedEntities";
+import consoleLogger from "../../../utils/consoleLogger";
 
 export function importApiTracker(
     api: D2Api,
@@ -39,11 +40,15 @@ export function importApiTracker(
             });
         });
     } else {
-        return apiToFuture(api.tracker.post({ importStrategy: action, skipRuleEngine: true }, request)).map(
-            response => {
+        return apiToFuture(api.tracker.post({ importStrategy: action, skipRuleEngine: true }, request))
+            .map(response => {
+                consoleLogger.debug(`Successfully imported tracker data.`);
                 return response;
-            }
-        );
+            })
+            .mapError(error => {
+                consoleLogger.error(`Error while importing tracker data: ${error}`);
+                return error;
+            });
     }
 }
 

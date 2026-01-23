@@ -114,7 +114,8 @@ export const UploadPrimaryFile: React.FC<UploadPrimaryFileProps> = ({
                                 setIsLoading(false);
                             }
                         },
-                        _error => {
+                        error => {
+                            console.error(error);
                             snackbar.error(i18n.t("Error in file upload"));
                             setIsLoading(false);
                         }
