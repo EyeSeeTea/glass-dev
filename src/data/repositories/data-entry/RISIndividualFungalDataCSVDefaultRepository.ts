@@ -7,6 +7,10 @@ import {
 import { SpreadsheetXlsxDataSource } from "../SpreadsheetXlsxDefaultRepository";
 import { doesColumnExist, getNumberValue, getTextValue } from "../utils/CSVUtils";
 import { RISIndividualFungalDataRepository } from "../../../domain/repositories/data-entry/RISIndividualFungalDataRepository";
+import { Spreadsheet } from "../../../domain/repositories/SpreadsheetXlsxRepository";
+import consoleLogger from "../../../utils/consoleLogger";
+
+export const SMALL_FILE_LIMIT = 5 * 1024 * 1024;
 
 export class RISIndividualFungalDataCSVDefaultRepository implements RISIndividualFungalDataRepository {
     get(dataColumns: CustomDataColumns, file: File): FutureData<CustomDataColumns[]> {
@@ -39,7 +43,16 @@ export class RISIndividualFungalDataCSVDefaultRepository implements RISIndividua
         dataColumns: CustomDataColumns,
         file: File
     ): FutureData<{ isValid: boolean; specimens: string[]; rows: number }> {
-        return Future.fromPromise(new SpreadsheetXlsxDataSource().read(file)).map(spreadsheet => {
+        const smallFile = file.size <= SMALL_FILE_LIMIT;
+
+        const readSpreadsheetPromise: Promise<Spreadsheet> = new SpreadsheetXlsxDataSource()
+            .parseCsvToSpreadsheet(file, smallFile ? file.size : undefined)
+            .catch(error => {
+                consoleLogger.error(`Error parsing CSV file: ${error}`);
+                return { name: "", sheets: [] };
+            });
+
+        return Future.fromPromise(readSpreadsheetPromise).map(spreadsheet => {
             const sheet = spreadsheet.sheets[0]; //Only one sheet for AMR RIS
 
             const headerRow = sheet?.headers;
@@ -57,12 +70,13 @@ export class RISIndividualFungalDataCSVDefaultRepository implements RISIndividua
                     rows: sheet.rows.length,
                     specimens: uniqSpecimens,
                 };
-            } else
+            } else {
                 return {
                     isValid: false,
                     rows: 0,
                     specimens: [],
                 };
+            }
         });
     }
 
