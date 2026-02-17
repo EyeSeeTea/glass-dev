@@ -126,11 +126,14 @@ export class GlassUploadsProgramRepository implements GlassUploadsRepository {
             orgUnitMode: "SELECTED",
             filter: `${uploadsDHIS2Ids.period}:eq:${period}`,
         }).map(uploads =>
-            uploads.filter(
-                upload =>
+            uploads.filter(upload => {
+                const doNotHaveFileTypesFilters =
+                    !additionalFilters?.fileTypes || additionalFilters.fileTypes.length === 0;
+                return (
                     modulesToQuery.has(upload.module) &&
-                    (!additionalFilters?.fileTypes || additionalFilters.fileTypes.includes(upload.fileType))
-            )
+                    (doNotHaveFileTypesFilters || additionalFilters.fileTypes.includes(upload.fileType))
+                );
+            })
         );
     }
 
