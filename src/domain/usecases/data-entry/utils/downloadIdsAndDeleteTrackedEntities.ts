@@ -63,7 +63,7 @@ export const downloadIdsAndDeleteTrackedEntities = (
         return Future.success(summary);
     }
 };
-/*
+
 export const downloadIdsAndDeleteTrackedEntitiesUsingFileBlob = (
     upload: GlassUploads,
     glassModuleName: string,
@@ -216,4 +216,3 @@ function deleteTrackedEntitiesInChunks(
         }
     });
 }
-*/
