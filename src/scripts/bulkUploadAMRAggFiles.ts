@@ -10,7 +10,7 @@ import { SampleDataCSVDeafultRepository } from "../data/repositories/data-entry/
 import { GlassDataSubmissionsDefaultRepository } from "../data/repositories/GlassDataSubmissionDefaultRepository";
 import { GlassDocumentsDefaultRepository } from "../data/repositories/GlassDocumentsDefaultRepository";
 import { GlassModuleDefaultRepository } from "../data/repositories/GlassModuleDefaultRepository";
-import { GlassUploadsDefaultRepository } from "../data/repositories/GlassUploadsDefaultRepository";
+
 import { MetadataDefaultRepository } from "../data/repositories/MetadataDefaultRepository";
 import { GlassDataSubmission } from "../domain/entities/GlassDataSubmission";
 import { GlassUploads } from "../domain/entities/GlassUploads";
@@ -28,6 +28,9 @@ import { moduleProperties } from "../domain/utils/ModuleProperties";
 import { generateUid } from "../utils/uid";
 import { getD2ApiFromArgs, getInstance } from "./common";
 import { DataValuesDefaultImportRepository } from "../data/repositories/data-entry/DataValuesDefaultImportRepository";
+import { GlassUploadsProgramRepository } from "../data/repositories/GlassUploadsProgramRepository";
+import { getUploadsFormDataBuilder } from "../utils/getUploadsFormDataBuilder";
+import { getD2APiFromInstance } from "../utils/d2-api";
 
 dotenv.config();
 console.log("Base URL:", process.env.REACT_APP_DHIS2_BASE_URL);
@@ -39,7 +42,7 @@ let dataStoreClient: DataStoreClient;
 let metadataRepository: MetadataDefaultRepository;
 let risDataRepository: RISDataCSVDefaultRepository;
 let glassDocumentsRepository: GlassDocumentsDefaultRepository;
-let glassUploadsRepository: GlassUploadsDefaultRepository;
+let glassUploadsRepository: GlassUploadsProgramRepository;
 let sampleDataRepository: SampleDataCSVDeafultRepository;
 //let uploadDocumentsUseCase: UploadDocumentUseCase;
 let setUploadStatusUseCase: SetUploadStatusUseCase;
@@ -131,11 +134,14 @@ async function initializeGlobals() {
     await authenticate();
     const envVars = getEnvVars();
     const instance = getInstance(envVars);
+    const api = getD2APiFromInstance(instance);
+    const runtime: "node" | "browser" = typeof window === "undefined" ? "node" : "browser";
+        const uploadsFormDataBuilder = getUploadsFormDataBuilder(runtime);
 
     //DataStore
     dataStoreClient = new DataStoreClient(undefined, api);
     glassDocumentsRepository = new GlassDocumentsDefaultRepository(dataStoreClient, instance);
-    glassUploadsRepository = new GlassUploadsDefaultRepository(dataStoreClient);
+    glassUploadsRepository = new GlassUploadsProgramRepository(api, uploadsFormDataBuilder);
     moduleRepository = new GlassModuleDefaultRepository(dataStoreClient);
     glassDataSubmissionRepository = new GlassDataSubmissionsDefaultRepository(dataStoreClient);
     // uploadDocumentsUseCase = new UploadDocumentUseCase(glassDocumentsRepository, glassUploadsRepository);
