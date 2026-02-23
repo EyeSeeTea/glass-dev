@@ -5,8 +5,14 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2025-11-05T16:35:16.975Z\n"
-"PO-Revision-Date: 2025-11-05T16:35:16.975Z\n"
+"POT-Creation-Date: 2026-01-13T16:15:38.476Z\n"
+"PO-Revision-Date: 2026-01-13T16:15:38.476Z\n"
+
+msgid "Template {{id}} not loaded"
+msgstr ""
+
+msgid "Error saving registration status"
+msgstr ""
 
 msgid "Event id"
 msgstr ""
@@ -746,16 +752,13 @@ msgstr ""
 msgid "Fix upload data"
 msgstr ""
 
-msgid "Error fetching previous uploads."
-msgstr ""
-
-msgid "Choose a Dataset"
-msgstr ""
-
 msgid "Choose file type"
 msgstr ""
 
 msgid "Download empty template"
+msgstr ""
+
+msgid "Choose a Dataset"
 msgstr ""
 
 msgid "Multiple uploads not allowed, please select one file"
@@ -771,6 +774,9 @@ msgid "Error in file upload"
 msgstr ""
 
 msgid "Select file"
+msgstr ""
+
+msgid "Error fetching previous uploads."
 msgstr ""
 
 msgid "The password and confirm password fields don't match"
