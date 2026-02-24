@@ -706,7 +706,7 @@ export const UploadsTableBody: React.FC<UploadsTableBodyProps> = ({
                     </TableRow>
                     {rows.map((row: UploadsDataItem) => (
                         <TableRow key={row.id} onClick={() => handleShowImportSummaryErrors(row)}>
-                            <TableCell>{dayjs(row.uploadDate).format("DD-MM-YYYY")}</TableCell>
+                            <TableCell>{row.uploadDate ? dayjs(row.uploadDate).format("DD-MM-YYYY") : ""}</TableCell>
                             <TableCell>{row.period}</TableCell>
                             <TableCell>{row?.records || row?.rows}</TableCell>
                             <TableCell>{row.fileType}</TableCell>
