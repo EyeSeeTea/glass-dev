@@ -46,6 +46,7 @@ export const uploadsDHIS2Ids = {
     errorAsyncUploading: "O7EFyS16DBg",
     asyncImportSummaries: "rV0d3FQC8Jp",
     period: "BXvUeQEf9bT",
+    uploadDate: "NczzzehrmcO",
 } as const;
 
 export function getValueById(dataValues: DataValue[], dataElement: string): Maybe<string> {
@@ -327,7 +328,7 @@ export class GlassUploadsProgramRepository implements GlassUploadsRepository {
                 period: getValueById(event.dataValues, uploadsDHIS2Ids.period) || "",
                 specimens: (getValueById(event.dataValues, uploadsDHIS2Ids.specimens) || "").split(","),
                 status: (getValueById(event.dataValues, uploadsDHIS2Ids.status) as GlassUploadsStatus) || "UPLOADED",
-                uploadDate: event.createdAt || "",
+                uploadDate: getValueById(event.dataValues, uploadsDHIS2Ids.uploadDate) || "",
                 dataSubmission: getValueById(event.dataValues, uploadsDHIS2Ids.dataSubmissionId) || "",
                 module: getValueById(event.dataValues, uploadsDHIS2Ids.moduleId) || "",
                 orgUnit: event.orgUnit,
@@ -395,6 +396,10 @@ export class GlassUploadsProgramRepository implements GlassUploadsRepository {
             {
                 dataElement: uploadsDHIS2Ids.errorAsyncUploading,
                 value: upload.errorAsyncUploading ? "true" : null,
+            },
+            {
+                dataElement: uploadsDHIS2Ids.uploadDate,
+                value: upload.uploadDate,
             },
             // FIX: null needed to remove the value in DHIS2 if a yes-only field is set to false
         ] as D2TrackerEventToPost["dataValues"];
