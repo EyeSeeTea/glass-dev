@@ -321,6 +321,10 @@ function mapUploadToEvent(upload: GlassUploadsWithFileResourceIds): D2TrackerEve
             dataElement: uploadsDHIS2Ids.errorAsyncUploading,
             value: upload.errorAsyncUploading ? "true" : null,
         },
+        {
+            dataElement: uploadsDHIS2Ids.uploadDate,
+            value: upload.uploadDate,
+        },
         // FIX: null needed to remove the value in DHIS2 if a yes-only field is set to false
     ] as D2TrackerEventToPost["dataValues"];
 
