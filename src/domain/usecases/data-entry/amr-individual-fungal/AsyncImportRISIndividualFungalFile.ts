@@ -174,6 +174,7 @@ export class AsyncImportRISIndividualFungalFile {
                                 trackerRepository: this.repositories.trackerRepository,
                                 metadataRepository: this.repositories.metadataRepository,
                                 async: false,
+                                skipSideEffects: true,
                             })
                                 .flatMap(importSummariesWithMergedEventIdList => {
                                     allImportSummaries = [

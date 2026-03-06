@@ -21,7 +21,7 @@ export class TrackerDefaultRepository implements TrackerRepository {
 
     import(
         req: TrackerPostRequest,
-        options: { action: ImportStrategy; async?: boolean }
+        options: { action: ImportStrategy; async?: boolean; skipSideEffects?: boolean }
     ): FutureData<TrackerPostResponse> {
         return importApiTracker(this.api, req, options);
     }

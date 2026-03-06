@@ -18,9 +18,9 @@ import consoleLogger from "../../../utils/consoleLogger";
 export function importApiTracker(
     api: D2Api,
     request: D2TrackerPostRequest,
-    options: { action: ImportStrategy; async?: boolean }
+    options: { action: ImportStrategy; async?: boolean; skipSideEffects?: boolean }
 ): FutureData<TrackerPostResponse> {
-    const { action, async = false } = options;
+    const { action, async = false, skipSideEffects = false } = options;
 
     if (async) {
         return apiToFuture(
@@ -28,6 +28,7 @@ export function importApiTracker(
                 {
                     importStrategy: action,
                     skipRuleEngine: true,
+                    skipSideEffects: skipSideEffects,
                 },
                 request
             )
@@ -40,7 +41,12 @@ export function importApiTracker(
             });
         });
     } else {
-        return apiToFuture(api.tracker.post({ importStrategy: action, skipRuleEngine: true }, request))
+        return apiToFuture(
+            api.tracker.post(
+                { importStrategy: action, skipRuleEngine: true, skipSideEffects: skipSideEffects },
+                request
+            )
+        )
             .map(response => {
                 consoleLogger.debug(`Successfully imported tracker data.`);
                 return response;

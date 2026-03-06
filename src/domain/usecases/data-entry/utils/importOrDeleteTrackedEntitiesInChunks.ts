@@ -26,6 +26,7 @@ export function importOrDeleteTrackedEntitiesInChunks(params: {
     trackerRepository: TrackerRepository;
     metadataRepository: MetadataRepository;
     async?: boolean;
+    skipSideEffects?: boolean;
 }): FutureData<{
     allImportSummaries: ImportSummary[];
     mergedEventIdList: Id[];
@@ -38,6 +39,7 @@ export function importOrDeleteTrackedEntitiesInChunks(params: {
         trackerRepository,
         metadataRepository,
         async = false,
+        skipSideEffects = false,
     } = params;
     consoleLogger.debug(`Starting ${action} ${trackedEntities.length} tracked entities in chunks of ${chunkSize}.`);
     const chunkedTrackedEntities = _(trackedEntities).chunk(chunkSize).value();
@@ -53,6 +55,7 @@ export function importOrDeleteTrackedEntitiesInChunks(params: {
             trackerRepository,
             action,
             async,
+            skipSideEffects,
         })
             .mapError(error => {
                 consoleLogger.error(
@@ -138,6 +141,7 @@ function importTrackedEntities(
     options: {
         trackerRepository: TrackerRepository;
         async: boolean;
+        skipSideEffects?: boolean;
         action: "CREATE_AND_UPDATE" | "DELETE";
     }
 ): FutureData<TrackerPostResponse> {
