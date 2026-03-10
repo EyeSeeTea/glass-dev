@@ -27,6 +27,7 @@ export function importOrDeleteTrackedEntitiesInChunks(params: {
     metadataRepository: MetadataRepository;
     async?: boolean;
     skipSideEffects?: boolean;
+    maxConcurrency?: number;
 }): FutureData<{
     allImportSummaries: ImportSummary[];
     mergedEventIdList: Id[];
@@ -40,6 +41,7 @@ export function importOrDeleteTrackedEntitiesInChunks(params: {
         metadataRepository,
         async = false,
         skipSideEffects = false,
+        maxConcurrency = 1,
     } = params;
     consoleLogger.debug(`Starting ${action} ${trackedEntities.length} tracked entities in chunks of ${chunkSize}.`);
     const chunkedTrackedEntities = _(trackedEntities).chunk(chunkSize).value();
@@ -101,38 +103,75 @@ export function importOrDeleteTrackedEntitiesInChunks(params: {
             });
     });
 
-    return Future.sequentialWithAccumulation($importTrackedEntities, {
-        stopOnError: true,
-    })
-        .flatMap(result => {
-            if (result.type === "error") {
-                const errorImportSummary = result.error;
-                const messageErrors = errorImportSummary.importSummary.blockingErrors
-                    .map(error => error.error)
-                    .join(", ");
-
-                consoleLogger.error(
-                    `Error importing some tracked entities from file in module ${glassModuleName} with action ${action}: ${messageErrors}`
-                );
-
-                const accumulatedImportSummaries = result.data;
-                const importSummariesWithMergedEventIdListWithErrorSummary = mergeImportSummaries([
-                    ...accumulatedImportSummaries,
-                    errorImportSummary,
-                ]);
-                return Future.success(importSummariesWithMergedEventIdListWithErrorSummary);
-            } else {
-                consoleLogger.debug(
-                    `SUCCESS - All chunks of tracked entities to ${action} for module ${glassModuleName} processed.`
-                );
-                const importSummariesWithMergedEventIdList = mergeImportSummaries(result.data);
-                return Future.success(importSummariesWithMergedEventIdList);
-            }
+    if (maxConcurrency === 1) {
+        return Future.sequentialWithAccumulation($importTrackedEntities, {
+            stopOnError: true,
         })
-        .mapError(() => {
-            consoleLogger.error(`Unknown error while processing tracked entities in chunks.`);
-            return `Unknown error while processing tracked entities in chunks.`;
-        });
+            .flatMap(result => {
+                if (result.type === "error") {
+                    const errorImportSummary = result.error;
+                    const messageErrors = errorImportSummary.importSummary.blockingErrors
+                        .map(error => error.error)
+                        .join(", ");
+
+                    consoleLogger.error(
+                        `Error importing some tracked entities from file in module ${glassModuleName} with action ${action}: ${messageErrors}`
+                    );
+
+                    const accumulatedImportSummaries = result.data;
+                    const importSummariesWithMergedEventIdListWithErrorSummary = mergeImportSummaries([
+                        ...accumulatedImportSummaries,
+                        errorImportSummary,
+                    ]);
+                    return Future.success(importSummariesWithMergedEventIdListWithErrorSummary);
+                } else {
+                    consoleLogger.debug(
+                        `SUCCESS - All chunks of tracked entities to ${action} for module ${glassModuleName} processed.`
+                    );
+                    const importSummariesWithMergedEventIdList = mergeImportSummaries(result.data);
+                    return Future.success(importSummariesWithMergedEventIdList);
+                }
+            })
+            .mapError(() => {
+                consoleLogger.error(`Unknown error while processing tracked entities in chunks.`);
+                return `Unknown error while processing tracked entities in chunks.`;
+            });
+    } else {
+        return Future.parallelWithAccumulation($importTrackedEntities, {
+            maxConcurrency,
+            stopOnError: true,
+        })
+            .flatMap(result => {
+                if (result.type === "error") {
+                    const errorImportSummaries = result.errors;
+                    const messageErrors = errorImportSummaries
+                        .flatMap(errorImportSummary => errorImportSummary.importSummary.blockingErrors)
+                        .map(error => error.error)
+                        .join(", ");
+
+                    consoleLogger.error(
+                        `Error importing some tracked entities from file in module ${glassModuleName} with action ${action}: ${messageErrors}`
+                    );
+
+                    const importSummariesWithMergedEventIdListWithErrorSummary = mergeImportSummaries([
+                        ...result.data,
+                        ...errorImportSummaries,
+                    ]);
+
+                    return Future.success(importSummariesWithMergedEventIdListWithErrorSummary);
+                } else {
+                    consoleLogger.debug(
+                        `SUCCESS - All chunks of tracked entities to ${action} for module ${glassModuleName} processed.`
+                    );
+
+                    return Future.success(mergeImportSummaries(result.data));
+                }
+            })
+            .mapError(() => {
+                consoleLogger.error(`Unknown error while processing tracked entities in chunks.`);
+                return `Unknown error while processing tracked entities in chunks.`;
+            });
+    }
 }
 
 // TODO: fix coupling with data layer in TrackerRepository

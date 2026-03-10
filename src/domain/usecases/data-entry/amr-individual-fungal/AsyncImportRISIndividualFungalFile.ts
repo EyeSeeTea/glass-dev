@@ -155,6 +155,8 @@ export class AsyncImportRISIndividualFungalFile {
 
                 return this.repositories.risIndividualFungalRepository
                     .getFromBlobInChunks(dataColumns, inputBlob, FILE_CHUNK_SIZE, chunkOfCustomDataColumns => {
+                        consoleLogger.debug(`Next chunk of ${chunkOfCustomDataColumns.length} rows to be imported`);
+                        consoleLogger.debug(`Current imported rows: ${totalRowsImported} / ${totalRowsValidated}`);
                         totalRowsImported += chunkOfCustomDataColumns.length;
                         return mapIndividualFungalDataItemsToEntities(
                             chunkOfCustomDataColumns,
@@ -175,6 +177,7 @@ export class AsyncImportRISIndividualFungalFile {
                                 metadataRepository: this.repositories.metadataRepository,
                                 async: false,
                                 skipSideEffects: true,
+                                maxConcurrency: 6,
                             })
                                 .flatMap(importSummariesWithMergedEventIdList => {
                                     allImportSummaries = [

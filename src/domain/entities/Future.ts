@@ -124,12 +124,13 @@ export class Future<E, D> {
     static sequentialWithAccumulation<E, D>(
         futures: Array<Future<E, D>>,
         options: { stopOnError?: boolean } = {}
-    ): Future<E, SequentialAccumulatedData<E, D>> {
+    ): Future<E, SecuentialAccumulatedData<E, D>> {
         const { stopOnError = false } = options;
+
         const processSequentially = (
             futures: Array<Future<E, D>>,
             accumulatedData: D[] = []
-        ): Future<E, SequentialAccumulatedData<E, D>> => {
+        ): Future<E, SecuentialAccumulatedData<E, D>> => {
             if (futures.length === 0) {
                 return Future.success({ type: "success", data: accumulatedData });
             }
@@ -155,9 +156,59 @@ export class Future<E, D> {
 
         return processSequentially(futures);
     }
+
+    static parallelWithAccumulation<E, D>(
+        futures: Array<Future<E, D>>,
+        options: { maxConcurrency?: number; stopOnError?: boolean } = {}
+    ): Future<never, ParallelAccumulatedData<E, D>> {
+        const { maxConcurrency = 10, stopOnError = true } = options;
+
+        const toParallelResult = (future: Future<E, D>): Future<never, ParallelResult<E, D>> => {
+            return future
+                .map<ParallelResult<E, D>>(data => ({ type: "success", data }))
+                .mapError<ParallelResult<E, D>>(error => ({ type: "error", error }))
+                .flatMapError(errorResult => Future.success<ParallelResult<E, D>, never>(errorResult));
+        };
+
+        const processInParallel = (
+            pendingFutures: Array<Future<E, D>>,
+            accumulatedData: D[] = []
+        ): Future<never, ParallelAccumulatedData<E, D>> => {
+            if (pendingFutures.length === 0) {
+                return Future.success({ type: "success", data: accumulatedData });
+            }
+
+            const currentBatch = pendingFutures.slice(0, maxConcurrency);
+            const remainingFutures = pendingFutures.slice(maxConcurrency);
+
+            return Future.parallel(currentBatch.map(toParallelResult)).flatMap(batchResults => {
+                const successfulData = batchResults.flatMap(result => (result.type === "success" ? [result.data] : []));
+
+                const batchErrors = batchResults.flatMap(result => (result.type === "error" ? [result.error] : []));
+
+                const nextAccumulatedData = [...accumulatedData, ...successfulData];
+
+                if (batchErrors.length > 0 && stopOnError) {
+                    return Future.success({
+                        type: "error",
+                        errors: batchErrors,
+                        data: nextAccumulatedData,
+                    });
+                }
+
+                return processInParallel(remainingFutures, nextAccumulatedData);
+            });
+        };
+
+        return processInParallel(futures);
+    }
 }
 
-type SequentialAccumulatedData<E, D> = { type: "success"; data: D[] } | { type: "error"; error: E; data: D[] };
+type SecuentialAccumulatedData<E, D> = { type: "success"; data: D[] } | { type: "error"; error: E; data: D[] };
+
+type ParallelAccumulatedData<E, D> = { type: "success"; data: D[] } | { type: "error"; errors: E[]; data: D[] };
+
+type ParallelResult<E, D> = { type: "success"; data: D } | { type: "error"; error: E };
 
 type JoinObj<Futures extends Record<string, Future<any, any>>> = Future<
     ExtractFutureError<Futures[keyof Futures]>,
