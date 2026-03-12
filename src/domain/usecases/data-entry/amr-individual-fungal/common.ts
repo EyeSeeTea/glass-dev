@@ -188,7 +188,8 @@ type CustomValidationFunction = (dataItem: CustomDataColumns) => string | null;
 export function runCustomValidations(
     risIndividualFungalDataItems: CustomDataColumns[],
     orgUnit: string,
-    period: string
+    period: string,
+    fileLineStart = 2
 ): FutureData<ImportSummary> {
     const validations: CustomValidationFunction[] = [
         (dataItem: CustomDataColumns) => checkCountry(dataItem, orgUnit),
@@ -197,12 +198,13 @@ export function runCustomValidations(
         (dataItem: CustomDataColumns) => checkAdmissionDate(dataItem),
     ];
     const errors = risIndividualFungalDataItems.flatMap((dataItem, index) => {
+        const line = fileLineStart + index;
         return validations.map(validation => {
             const error = validation(dataItem);
             if (error) {
                 return {
                     error: error,
-                    line: index,
+                    line: line,
                 };
             }
             return null;

@@ -37,13 +37,15 @@ export const downloadIdsAndDeleteTrackedEntities = (
                     };
                     return trackedEntity;
                 });
-                return trackerRepository.import({ trackedEntities: trackedEntities }, action).flatMap(response => {
-                    return mapToImportSummary(response, "trackedEntity", metadataRepository).flatMap(
-                        ({ importSummary }) => {
-                            return Future.success(importSummary);
-                        }
-                    );
-                });
+                return trackerRepository
+                    .import({ trackedEntities: trackedEntities }, { action: action, async: true })
+                    .flatMap(response => {
+                        return mapToImportSummary(response, "trackedEntity", metadataRepository).flatMap(
+                            ({ importSummary }) => {
+                                return Future.success(importSummary);
+                            }
+                        );
+                    });
             });
         });
     } else {
@@ -128,7 +130,7 @@ export const downloadIdsAndDeleteTrackedEntitiesUsingFileBlob = (
                                 `Deleting all tracked entities in a single request for upload ${uploadId}`
                             );
                             return repositories.trackerRepository
-                                .import({ trackedEntities: trackedEntities }, action)
+                                .import({ trackedEntities: trackedEntities }, { action: action, async: true })
                                 .flatMap(response => {
                                     return mapToImportSummary(
                                         response,
@@ -205,6 +207,7 @@ function deleteTrackedEntitiesInChunks(
         action: "DELETE",
         trackerRepository: repositories.trackerRepository,
         metadataRepository: repositories.metadataRepository,
+        async: true,
     }).flatMap(({ allImportSummaries }) => {
         const importSummary = joinAllImportSummaries(allImportSummaries);
         if (importSummary.status === "SUCCESS") {
