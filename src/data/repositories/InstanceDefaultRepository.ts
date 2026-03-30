@@ -16,7 +16,7 @@ import { Instance } from "../entities/Instance";
 import { GlassGeneralInfo } from "../../domain/entities/GlassGeneralInfo";
 
 const KOSOVO = "NEPywTBN52g";
-const allowedNaOrgUnits = [KOSOVO];
+export const allowedNaOrgUnits = [KOSOVO];
 
 export class InstanceDefaultRepository implements InstanceRepository {
     private api: D2Api;
