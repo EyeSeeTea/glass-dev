@@ -47,6 +47,7 @@ export type DDDData = {
     SALT: SaltCode;
     DDD: number;
     DDD_UNIT: UnitCode;
+    DDD_GRAMS: number;
     DDD_STD: number;
     NOTES: string | null;
 };
@@ -95,10 +96,12 @@ export type DDDChangesData = {
     NEW_DDD_ROA: RouteOfAdministrationCode;
     NEW_DDD_UNIT: UnitCode;
     NEW_DDD_VALUE: number;
+    NEW_DDD_GRAMS: number;
     PREVIOUS_DDD_INFO: string | null;
     PREVIOUS_DDD_ROA: RouteOfAdministrationCode;
     PREVIOUS_DDD_UNIT: UnitCode;
     PREVIOUS_DDD_VALUE: number;
+    PREVIOUS_DDD_GRAMS: number;
     YEAR: number;
 };
 
@@ -339,6 +342,7 @@ function parseDDDChangesDataToDDDData(dddChange: DDDChangesData, unitsData: Unit
         SALT: saltCode,
         DDD: dddChange.NEW_DDD_VALUE,
         DDD_UNIT: dddChange.NEW_DDD_UNIT,
+        DDD_GRAMS: dddChange.NEW_DDD_GRAMS,
         DDD_STD: standarized?.standarizedValue ?? dddChange.NEW_DDD_VALUE,
         NOTES: dddChange.NEW_DDD_INFO,
     };
