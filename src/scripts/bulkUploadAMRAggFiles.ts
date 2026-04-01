@@ -136,7 +136,7 @@ async function initializeGlobals() {
     const instance = getInstance(envVars);
     const api = getD2APiFromInstance(instance);
     const runtime: "node" | "browser" = typeof window === "undefined" ? "node" : "browser";
-        const uploadsFormDataBuilder = getUploadsFormDataBuilder(runtime);
+    const uploadsFormDataBuilder = getUploadsFormDataBuilder(runtime);
 
     //DataStore
     dataStoreClient = new DataStoreClient(undefined, api);

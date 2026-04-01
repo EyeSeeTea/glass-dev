@@ -73,13 +73,14 @@ export function calculateConsumptionProductLevelData(
             calculationLogs = [
                 ...calculationLogs,
                 {
-                    content: `[${new Date().toISOString()}] Product ${product.AMR_GLASS_AMC_TEA_PRODUCT_ID
-                        } - Calculating content, ddd and  ddd_per_pack of product.`,
+                    content: `[${new Date().toISOString()}] Product ${
+                        product.AMR_GLASS_AMC_TEA_PRODUCT_ID
+                    } - Calculating content, ddd and  ddd_per_pack of product.`,
                     messageType: "Info",
                 },
             ];
             // 1 - Calculate the content per product = content
-            // content is the amount of active substance in one package of the product, calculated using strength, 
+            // content is the amount of active substance in one package of the product, calculated using strength,
             // strength unit, concentration volume, concentration volume unit, volume, volume unit and packsize of the product
             const content = calculateContentPerProduct(product, unitsData);
             calculationLogs = [...calculationLogs, ...content.logs];
@@ -93,7 +94,7 @@ export function calculateConsumptionProductLevelData(
 
             if (content.result) {
                 // 2 - Identify corresponding DDD per product = ddd
-                // based on ATC5, SALT, ROA you get the related standard DDD from the 
+                // based on ATC5, SALT, ROA you get the related standard DDD from the
                 // referential data for raw product and combination products. If the product has a combination code, the ddd is identified using the combination code, if not, it is identified using ATC5, SALT and ROA.
                 const dddPerProduct = getDDDPerProduct(
                     product,
@@ -114,8 +115,6 @@ export function calculateConsumptionProductLevelData(
                     atcCodeAutocalculated
                 );
                 calculationLogs = [...calculationLogs, ...dddPerPackage.logs];
-
-                
 
                 return {
                     AMR_GLASS_AMC_TEA_PRODUCT_ID: product.AMR_GLASS_AMC_TEA_PRODUCT_ID,
@@ -141,7 +140,6 @@ export function calculateConsumptionProductLevelData(
         currentAtcVersion
     );
 
-    
     calculationLogs = [...calculationLogs, ...rawSubstanceConsumptionCalculated.logs];
     logger.batchLog(calculationLogs);
 
@@ -159,8 +157,9 @@ function calculateContentPerProduct(
 ): { result: Content | undefined; logs: BatchLogContent } {
     const calculationLogs: BatchLogContent = [
         {
-            content: `[${new Date().toISOString()}]  Product ${product.AMR_GLASS_AMC_TEA_PRODUCT_ID
-                } - Calculating content of product.`,
+            content: `[${new Date().toISOString()}]  Product ${
+                product.AMR_GLASS_AMC_TEA_PRODUCT_ID
+            } - Calculating content of product.`,
             messageType: "Info",
         },
     ];
@@ -197,8 +196,9 @@ function calculateContentPerProduct(
                 logs: [
                     ...calculationLogs,
                     {
-                        content: `[${new Date().toISOString()}]  Product ${product.AMR_GLASS_AMC_TEA_PRODUCT_ID
-                            } - Content of product: ${content} ${standarizedStrength.standarizedUnit}`,
+                        content: `[${new Date().toISOString()}]  Product ${
+                            product.AMR_GLASS_AMC_TEA_PRODUCT_ID
+                        } - Content of product: ${content} ${standarizedStrength.standarizedUnit}`,
                         messageType: "Debug",
                     },
                 ],
@@ -216,8 +216,9 @@ function calculateContentPerProduct(
         logs: [
             ...calculationLogs,
             {
-                content: `[${new Date().toISOString()}]  Product ${product.AMR_GLASS_AMC_TEA_PRODUCT_ID
-                    } - Content of product cannot be calculated. Strength unit, concentration volume unit or volume unit not valid.`,
+                content: `[${new Date().toISOString()}]  Product ${
+                    product.AMR_GLASS_AMC_TEA_PRODUCT_ID
+                } - Content of product cannot be calculated. Strength unit, concentration volume unit or volume unit not valid.`,
                 messageType: "Error",
             },
         ],
@@ -244,9 +245,11 @@ function getDDDPerProduct(
                 result: undefined,
                 logs: [
                     {
-                        content: `[${new Date().toISOString()}] Product ${product.AMR_GLASS_AMC_TEA_PRODUCT_ID
-                            } - Combination code not found in combinations json for product with combination code ${product.AMR_GLASS_AMC_TEA_COMBINATION
-                            } `,
+                        content: `[${new Date().toISOString()}] Product ${
+                            product.AMR_GLASS_AMC_TEA_PRODUCT_ID
+                        } - Combination code not found in combinations json for product with combination code ${
+                            product.AMR_GLASS_AMC_TEA_COMBINATION
+                        } `,
                         messageType: "Error",
                     },
                 ],
@@ -266,8 +269,9 @@ function getDDDOfProductFromDDDCombinationsTable(
 ): { result: DDDPerProduct; logs: BatchLogContent } {
     const calculationLogs: BatchLogContent = [
         {
-            content: `[${new Date().toISOString()}]  Product ${product.AMR_GLASS_AMC_TEA_PRODUCT_ID
-                } - Identifying corresponding ddd_value and ddd_unit using code combination data: ${codeCombinationData}.`,
+            content: `[${new Date().toISOString()}]  Product ${
+                product.AMR_GLASS_AMC_TEA_PRODUCT_ID
+            } - Identifying corresponding ddd_value and ddd_unit using code combination data: ${codeCombinationData}.`,
             messageType: "Info",
         },
     ];
@@ -295,8 +299,9 @@ function getDDDOfProductFromDDDTable(
     const { AMR_GLASS_AMC_TEA_ROUTE_ADMIN, AMR_GLASS_AMC_TEA_SALT } = product;
     let calculationLogs: BatchLogContent = [
         {
-            content: `[${new Date().toISOString()}] Product ${product.AMR_GLASS_AMC_TEA_PRODUCT_ID
-                } - Identifying corresponding ddd_value and ddd_unit from ddd json using: ${atcCodeAutocalculated}, ${AMR_GLASS_AMC_TEA_ROUTE_ADMIN} and ${AMR_GLASS_AMC_TEA_SALT}`,
+            content: `[${new Date().toISOString()}] Product ${
+                product.AMR_GLASS_AMC_TEA_PRODUCT_ID
+            } - Identifying corresponding ddd_value and ddd_unit from ddd json using: ${atcCodeAutocalculated}, ${AMR_GLASS_AMC_TEA_ROUTE_ADMIN} and ${AMR_GLASS_AMC_TEA_SALT}`,
             messageType: "Info",
         },
     ];
@@ -323,8 +328,9 @@ function getDDDOfProductFromDDDTable(
                 logs: [
                     ...calculationLogs,
                     {
-                        content: `[${new Date().toISOString()}] Product ${product.AMR_GLASS_AMC_TEA_PRODUCT_ID
-                            } - DDD data found in ddd json: ${dddDataFound.DDD_STD} ${dddStandardizedUnit}`,
+                        content: `[${new Date().toISOString()}] Product ${
+                            product.AMR_GLASS_AMC_TEA_PRODUCT_ID
+                        } - DDD data found in ddd json: ${dddDataFound.DDD_STD} ${dddStandardizedUnit}`,
                         messageType: "Debug",
                     },
                 ],
@@ -335,8 +341,9 @@ function getDDDOfProductFromDDDTable(
             logs: [
                 ...calculationLogs,
                 {
-                    content: `[${new Date().toISOString()}] Product ${product.AMR_GLASS_AMC_TEA_PRODUCT_ID
-                        } - Standarized unit not found in units data for: ${dddDataFound.DDD_UNIT}`,
+                    content: `[${new Date().toISOString()}] Product ${
+                        product.AMR_GLASS_AMC_TEA_PRODUCT_ID
+                    } - Standarized unit not found in units data for: ${dddDataFound.DDD_UNIT}`,
                     messageType: "Error",
                 },
             ],
@@ -346,8 +353,9 @@ function getDDDOfProductFromDDDTable(
     calculationLogs = [
         ...calculationLogs,
         {
-            content: `[${new Date().toISOString()}] Product ${product.AMR_GLASS_AMC_TEA_PRODUCT_ID
-                } - DDD data not found in ddd json of product.`,
+            content: `[${new Date().toISOString()}] Product ${
+                product.AMR_GLASS_AMC_TEA_PRODUCT_ID
+            } - DDD data not found in ddd json of product.`,
             messageType: "Warn",
         },
     ];
@@ -367,8 +375,9 @@ function getLatestDDDStandardized(
     calculationLogs = [
         ...calculationLogs,
         {
-            content: `[${new Date().toISOString()}] Product ${product.AMR_GLASS_AMC_TEA_PRODUCT_ID
-                } - Get latest ddd_value and ddd_unit from ddd changes using: ${atcCodeAutocalculated}`,
+            content: `[${new Date().toISOString()}] Product ${
+                product.AMR_GLASS_AMC_TEA_PRODUCT_ID
+            } - Get latest ddd_value and ddd_unit from ddd changes using: ${atcCodeAutocalculated}`,
             messageType: "Info",
         },
     ];
@@ -396,9 +405,11 @@ function getLatestDDDStandardized(
                 logs: [
                     ...calculationLogs,
                     {
-                        content: `[${new Date().toISOString()}] Product ${product.AMR_GLASS_AMC_TEA_PRODUCT_ID
-                            } - DDD data found in changes json: ${dddStandardized.standarizedValue} ${dddStandardized.standarizedUnit
-                            }`,
+                        content: `[${new Date().toISOString()}] Product ${
+                            product.AMR_GLASS_AMC_TEA_PRODUCT_ID
+                        } - DDD data found in changes json: ${dddStandardized.standarizedValue} ${
+                            dddStandardized.standarizedUnit
+                        }`,
                         messageType: "Warn",
                     },
                 ],
@@ -410,8 +421,9 @@ function getLatestDDDStandardized(
             logs: [
                 ...calculationLogs,
                 {
-                    content: `[${new Date().toISOString()}] Product ${product.AMR_GLASS_AMC_TEA_PRODUCT_ID
-                        } - Standarized unit not found for ${newDddData.NEW_DDD_UNIT}.`,
+                    content: `[${new Date().toISOString()}] Product ${
+                        product.AMR_GLASS_AMC_TEA_PRODUCT_ID
+                    } - Standarized unit not found for ${newDddData.NEW_DDD_UNIT}.`,
                     messageType: "Error",
                 },
             ],
@@ -423,8 +435,9 @@ function getLatestDDDStandardized(
         logs: [
             ...calculationLogs,
             {
-                content: `[${new Date().toISOString()}] Product ${product.AMR_GLASS_AMC_TEA_PRODUCT_ID
-                    } - DDD data not found in changes json for product: ${JSON.stringify(product)}`,
+                content: `[${new Date().toISOString()}] Product ${
+                    product.AMR_GLASS_AMC_TEA_PRODUCT_ID
+                } - DDD data not found in changes json for product: ${JSON.stringify(product)}`,
                 messageType: "Error",
             },
         ],
@@ -441,8 +454,9 @@ function calculateDDDPerPackage(
 ): { result: DDDPerPackage | undefined; logs: BatchLogContent } {
     const calculationLogs: BatchLogContent = [
         {
-            content: `[${new Date().toISOString()}] Product ${product.AMR_GLASS_AMC_TEA_PRODUCT_ID
-                } - Calculating ddd per package of product.`,
+            content: `[${new Date().toISOString()}] Product ${
+                product.AMR_GLASS_AMC_TEA_PRODUCT_ID
+            } - Calculating ddd per package of product.`,
             messageType: "Info",
         },
     ];
@@ -471,9 +485,11 @@ function calculateDDDPerPackage(
             logs: [
                 ...calculationLogs,
                 {
-                    content: `[${new Date().toISOString()}] Product ${product.AMR_GLASS_AMC_TEA_PRODUCT_ID
-                        } - Conversion factor used to calculate ddd_per_pack: ${conversionFactor}. ddd_per_pack: ${(content.value * conversionFactor) / dddPerProduct.dddValue
-                        } ${dddPerProduct.dddUnit}`,
+                    content: `[${new Date().toISOString()}] Product ${
+                        product.AMR_GLASS_AMC_TEA_PRODUCT_ID
+                    } - Conversion factor used to calculate ddd_per_pack: ${conversionFactor}. ddd_per_pack: ${
+                        (content.value * conversionFactor) / dddPerProduct.dddValue
+                    } ${dddPerProduct.dddUnit}`,
                     messageType: "Debug",
                 },
             ],
@@ -485,8 +501,9 @@ function calculateDDDPerPackage(
         logs: [
             ...calculationLogs,
             {
-                content: `[${new Date().toISOString()}] Product ${product.AMR_GLASS_AMC_TEA_PRODUCT_ID
-                    } - ddd_value and ddd_unit of product not found: ${JSON.stringify(product)}`,
+                content: `[${new Date().toISOString()}] Product ${
+                    product.AMR_GLASS_AMC_TEA_PRODUCT_ID
+                } - ddd_value and ddd_unit of product not found: ${JSON.stringify(product)}`,
                 messageType: "Error",
             },
         ],
@@ -501,8 +518,9 @@ function calculateDDDPerProductConsumptionPackages(
 ): { result: DDDPerProductConsumptionPackages | undefined; logs: BatchLogContent } {
     const calculationLogs: BatchLogContent = [
         {
-            content: `[${new Date().toISOString()}] Product ${productConsumption.AMR_GLASS_AMC_TEA_PRODUCT_ID
-                } - Calculating DDD per product consumption packages using product consumption of product.`,
+            content: `[${new Date().toISOString()}] Product ${
+                productConsumption.AMR_GLASS_AMC_TEA_PRODUCT_ID
+            } - Calculating DDD per product consumption packages using product consumption of product.`,
             messageType: "Info",
         },
     ];
@@ -525,8 +543,9 @@ function calculateDDDPerProductConsumptionPackages(
             logs: [
                 ...calculationLogs,
                 {
-                    content: `[${new Date().toISOString()}]  Product ${productConsumption.AMR_GLASS_AMC_TEA_PRODUCT_ID
-                        } - DDD per product consumption packages: ${dddConsumptionPackages} (# packages: ${packages_manual})`,
+                    content: `[${new Date().toISOString()}]  Product ${
+                        productConsumption.AMR_GLASS_AMC_TEA_PRODUCT_ID
+                    } - DDD per product consumption packages: ${dddConsumptionPackages} (# packages: ${packages_manual})`,
                     messageType: "Info",
                 },
             ],
@@ -537,10 +556,11 @@ function calculateDDDPerProductConsumptionPackages(
         logs: [
             ...calculationLogs,
             {
-                content: `[${new Date().toISOString()}]  Product ${productConsumption.AMR_GLASS_AMC_TEA_PRODUCT_ID
-                    } - ddd_value and ddd_unit of product not found: productConsumption=${JSON.stringify(
-                        productConsumption
-                    )}`,
+                content: `[${new Date().toISOString()}]  Product ${
+                    productConsumption.AMR_GLASS_AMC_TEA_PRODUCT_ID
+                } - ddd_value and ddd_unit of product not found: productConsumption=${JSON.stringify(
+                    productConsumption
+                )}`,
                 messageType: "Error",
             },
         ],
@@ -618,10 +638,11 @@ function aggregateDataByAtcRouteAdminYearHealthSectorAndHealthLevel(
             calculationLogs = [
                 ...calculationLogs,
                 {
-                    content: `[${new Date().toISOString()}] Product ${productConsumption.AMR_GLASS_AMC_TEA_PRODUCT_ID
-                        } - Calculating raw substance consumption of product ${JSON.stringify(
-                            product
-                        )} with product consumption ${JSON.stringify(productConsumption)}`,
+                    content: `[${new Date().toISOString()}] Product ${
+                        productConsumption.AMR_GLASS_AMC_TEA_PRODUCT_ID
+                    } - Calculating raw substance consumption of product ${JSON.stringify(
+                        product
+                    )} with product consumption ${JSON.stringify(productConsumption)}`,
                     messageType: "Debug",
                 },
             ];
@@ -655,14 +676,18 @@ function aggregateDataByAtcRouteAdminYearHealthSectorAndHealthLevel(
                     );*/
 
                     //calculate the atc as kilograms using the DDD_GRAMS variable from the DDD sheet
-                    const contentKilograms = dddPerProductConsumptionPackages.result.dddConsumptionPackages && contentDDDPerProductAndDDDPerPackageOfProduct.dddPerProduct?.dddGrams
-                        ? dddPerProductConsumptionPackages.result.dddConsumptionPackages * contentDDDPerProductAndDDDPerPackageOfProduct.dddPerProduct.dddGrams / 1000
-                        : undefined;
+                    const contentKilograms =
+                        dddPerProductConsumptionPackages.result.dddConsumptionPackages &&
+                        contentDDDPerProductAndDDDPerPackageOfProduct.dddPerProduct?.dddGrams
+                            ? (dddPerProductConsumptionPackages.result.dddConsumptionPackages *
+                                  contentDDDPerProductAndDDDPerPackageOfProduct.dddPerProduct.dddGrams) /
+                              1000
+                            : undefined;
 
-                   /* const contentKilograms = contentTonnesOfProduct.result.contentTonnes
+                    /* const contentKilograms = contentTonnesOfProduct.result.contentTonnes
                         ? contentTonnesOfProduct.result.contentTonnes * 1000
                         : undefined;*/
-                        
+
                     //calculationLogs = [...calculationLogs, ...contentTonnesOfProduct.logs];
                     calculationLogs = [...calculationLogs];
                     const { AMR_GLASS_AMC_TEA_PRODUCT_ID, AMR_GLASS_AMC_TEA_SALT, AMR_GLASS_AMC_TEA_ROUTE_ADMIN } =
@@ -676,7 +701,7 @@ function aggregateDataByAtcRouteAdminYearHealthSectorAndHealthLevel(
 
                     // 5c, 6a, 7a, 8a
                     //Aggrgeated for product
-                    //we should eventually add the SALT and the combination code 
+                    //we should eventually add the SALT and the combination code
                     const id = `${AMR_GLASS_AMC_TEA_PRODUCT_ID}-${atcCodeAutocalculated}-${AMR_GLASS_AMC_TEA_ROUTE_ADMIN}-${period}-${health_sector_manual}-${health_level_manual}-${data_status_manual}`;
                     const accWithThisId = acc[id] as RawSubstanceConsumptionCalculated;
 
@@ -705,52 +730,52 @@ function aggregateDataByAtcRouteAdminYearHealthSectorAndHealthLevel(
                         ];
                     }
 
-
                     return {
                         ...acc,
                         [id]: isAlreadyInTheAggregation
                             ? {
-                                ...accWithThisId,
-                                kilograms_autocalculated: contentKilograms
-                                    ? (accWithThisId.kilograms_autocalculated || 0) + contentKilograms
-                                    : accWithThisId.kilograms_autocalculated,
-                                packages_autocalculated: packages_manual
-                                    ? (accWithThisId.packages_autocalculated || 0) + packages_manual
-                                    : accWithThisId.packages_autocalculated,
-                                ddds_autocalculated: dddPerProductConsumptionPackages.result.dddConsumptionPackages
-                                    ? (accWithThisId.ddds_autocalculated || 0) +
-                                    dddPerProductConsumptionPackages.result.dddConsumptionPackages
-                                    : accWithThisId.ddds_autocalculated,
-                            }
+                                  ...accWithThisId,
+                                  kilograms_autocalculated: contentKilograms
+                                      ? (accWithThisId.kilograms_autocalculated || 0) + contentKilograms
+                                      : accWithThisId.kilograms_autocalculated,
+                                  packages_autocalculated: packages_manual
+                                      ? (accWithThisId.packages_autocalculated || 0) + packages_manual
+                                      : accWithThisId.packages_autocalculated,
+                                  ddds_autocalculated: dddPerProductConsumptionPackages.result.dddConsumptionPackages
+                                      ? (accWithThisId.ddds_autocalculated || 0) +
+                                        dddPerProductConsumptionPackages.result.dddConsumptionPackages
+                                      : accWithThisId.ddds_autocalculated,
+                              }
                             : {
-                                AMR_GLASS_AMC_TEA_PRODUCT_ID,
-                                atc_autocalculated: atcCodeAutocalculated,
-                                route_admin_autocalculated: AMR_GLASS_AMC_TEA_ROUTE_ADMIN,
-                                salt_autocalculated: AMR_GLASS_AMC_TEA_SALT,
-                                year: period,
-                                packages_autocalculated: packages_manual,
-                                kilograms_autocalculated: contentKilograms,
-                                ddds_autocalculated: dddPerProductConsumptionPackages.result.dddConsumptionPackages,
-                                data_status_autocalculated: data_status_manual,
-                                health_sector_autocalculated: health_sector_manual,
-                                atc_version_autocalculated: currentAtcVersion,
-                                health_level_autocalculated: health_level_manual,
-                                orgUnitId,
-                                am_class: am_class,
-                                atc2: atcCodeByLevel?.level2,
-                                atc3: atcCodeByLevel?.level3,
-                                atc4: atcCodeByLevel?.level4,
-                                aware: aware,
-                            },
+                                  AMR_GLASS_AMC_TEA_PRODUCT_ID,
+                                  atc_autocalculated: atcCodeAutocalculated,
+                                  route_admin_autocalculated: AMR_GLASS_AMC_TEA_ROUTE_ADMIN,
+                                  salt_autocalculated: AMR_GLASS_AMC_TEA_SALT,
+                                  year: period,
+                                  packages_autocalculated: packages_manual,
+                                  kilograms_autocalculated: contentKilograms,
+                                  ddds_autocalculated: dddPerProductConsumptionPackages.result.dddConsumptionPackages,
+                                  data_status_autocalculated: data_status_manual,
+                                  health_sector_autocalculated: health_sector_manual,
+                                  atc_version_autocalculated: currentAtcVersion,
+                                  health_level_autocalculated: health_level_manual,
+                                  orgUnitId,
+                                  am_class: am_class,
+                                  atc2: atcCodeByLevel?.level2,
+                                  atc3: atcCodeByLevel?.level3,
+                                  atc4: atcCodeByLevel?.level4,
+                                  aware: aware,
+                              },
                     };
                 } else {
                     calculationLogs = [
                         ...calculationLogs,
                         {
-                            content: `[${new Date().toISOString()}]  Product ${product.AMR_GLASS_AMC_TEA_PRODUCT_ID
-                                } - Data not calculated and moving to the next. DDD per product consumption packages cannot be calculated of product ${JSON.stringify(
-                                    product
-                                )}`,
+                            content: `[${new Date().toISOString()}]  Product ${
+                                product.AMR_GLASS_AMC_TEA_PRODUCT_ID
+                            } - Data not calculated and moving to the next. DDD per product consumption packages cannot be calculated of product ${JSON.stringify(
+                                product
+                            )}`,
                             messageType: "Error",
                         },
                     ];
@@ -760,10 +785,11 @@ function aggregateDataByAtcRouteAdminYearHealthSectorAndHealthLevel(
                 calculationLogs = [
                     ...calculationLogs,
                     {
-                        content: `[${new Date().toISOString()}] Product ${productConsumption.AMR_GLASS_AMC_TEA_PRODUCT_ID
-                            } - Data not calculated and moving to the next. Product, ddd of product or ddd_per_pack of product not found (product ${JSON.stringify(
-                                product
-                            )})`,
+                        content: `[${new Date().toISOString()}] Product ${
+                            productConsumption.AMR_GLASS_AMC_TEA_PRODUCT_ID
+                        } - Data not calculated and moving to the next. Product, ddd of product or ddd_per_pack of product not found (product ${JSON.stringify(
+                            product
+                        )})`,
                         messageType: "Error",
                     },
                 ];
