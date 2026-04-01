@@ -87,7 +87,6 @@ export class TrackerDefaultRepository implements TrackerRepository {
         console.log("Fetching program metadata for programStageId ID:", programStageId);
         console.log("API base URL:", (this.api as any)?.http?.baseUrl || (this.api as any)?.baseUrl);
         return apiToFuture(
-            
             this.api.models.programs.get({
                 fields: {
                     id: true,

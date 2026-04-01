@@ -15,18 +15,13 @@ export function apiToFuture<Data>(res: CancelableResponse<Data>): FutureData<Dat
          return res.cancel;
      });*/
 
-
-
     return Future.fromComputation((resolve, reject) => {
-
         res.getData()
             .then(resolve)
             .catch(err => {
-
                 console.error("FULL ERROR:", err);
                 console.error("ERROR CODE:", (err as any)?.code);
                 console.error("CAUSE CODE:", (err as any)?.cause?.code);
-
 
                 try {
                     const util = require("node:util");
@@ -34,14 +29,9 @@ export function apiToFuture<Data>(res: CancelableResponse<Data>): FutureData<Dat
                     if ((err as any)?.cause) {
                         console.error("Error cause:", util.inspect((err as any).cause, { depth: 10, colors: true }));
                     }
-                } catch { }
+                } catch {}
 
-
-                const code =
-                    (err as any)?.code ??
-                    (err as any)?.cause?.code ??
-                    (err as any)?.cause?.errno ??
-                    undefined;
+                const code = (err as any)?.code ?? (err as any)?.cause?.code ?? (err as any)?.cause?.errno ?? undefined;
 
                 const request = (err as any)?.request;
                 const cause = (err as any)?.cause;
@@ -58,9 +48,7 @@ export function apiToFuture<Data>(res: CancelableResponse<Data>): FutureData<Dat
                 (e as any).stack = stack;
                 console.log("apiToFuture - rejecting with error:", e);
                 reject(e.message + e.stack + JSON.stringify(e.cause));
-
             });
         return res.cancel;
     });
-
 }

@@ -8,7 +8,7 @@ import XLSX, {
     Workbook as ExcelWorkbook,
     Workbook,
 } from "@eyeseetea/xlsx-populate";
-import XlsxPopulate from '@eyeseetea/xlsx-populate';
+import XlsxPopulate from "@eyeseetea/xlsx-populate";
 import { CellRef, Range, SheetRef, ValueRef } from "../../domain/entities/Template";
 import moment from "moment";
 import { Future, FutureData } from "../../domain/entities/Future";
@@ -52,8 +52,6 @@ export class ExcelPopulateDefaultRepository extends ExcelRepository {
          });
      }*/
 
-
-
     public loadTemplate(file: Blob, programId: Id): FutureData<string> {
         const templateId = getTemplateId(programId);
 
@@ -65,7 +63,7 @@ export class ExcelPopulateDefaultRepository extends ExcelRepository {
                 const type = (file as any).type;
                 const name = (file as any).name;
                 extra = ` [programId=${programId}, templateId=${templateId}, name=${name}, type=${type}, size=${size}]`;
-            } catch { }
+            } catch {}
             // Log the original error with stack
             console.error("parseFile() failed" + extra, e?.message || e, e?.stack || e);
             // Re-throw preserving original error as cause (TS target >= ES2022)
@@ -99,16 +97,12 @@ export class ExcelPopulateDefaultRepository extends ExcelRepository {
         const data = await this.toBuffer(id); // Buffer or Uint8Array
 
         // Produce a real ArrayBuffer slice with the exact bytes
-        const arrayBuffer = data.buffer.slice(
-            data.byteOffset,
-            data.byteOffset + data.byteLength
-        ) as ArrayBuffer;
+        const arrayBuffer = data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength) as ArrayBuffer;
 
         return new Blob([arrayBuffer], {
             type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         });
     }
-
 
     public async toBuffer(id: string): Promise<Buffer> {
         const workbook = await this.getWorkbook(id);
@@ -120,10 +114,8 @@ export class ExcelPopulateDefaultRepository extends ExcelRepository {
         return XLSX.fromDataAsync(file);
     }*/
 
-
-
     private async parseWorkbookFromBlob(file: Blob | File): Promise<ExcelWorkbook> {
-        console.log('[parseWorkbookFromBlob] Parsing Excel file...');
+        console.log("[parseWorkbookFromBlob] Parsing Excel file...");
 
         // Log the input meta so we can spot native/polyfill mixes
         const meta = {
@@ -132,12 +124,12 @@ export class ExcelPopulateDefaultRepository extends ExcelRepository {
             type: (file as any)?.type,
             size: (file as any)?.size,
         };
-        console.log('[parseWorkbookFromBlob] input meta:', meta);
+        console.log("[parseWorkbookFromBlob] input meta:", meta);
 
         try {
-            if (!file || typeof (file as any).arrayBuffer !== 'function') {
-                console.error('[parseWorkbookFromBlob] Input is not a Blob/File with arrayBuffer().');
-                throw new Error('Invalid input: expected Blob/File with arrayBuffer()');
+            if (!file || typeof (file as any).arrayBuffer !== "function") {
+                console.error("[parseWorkbookFromBlob] Input is not a Blob/File with arrayBuffer().");
+                throw new Error("Invalid input: expected Blob/File with arrayBuffer()");
             }
 
             // Convert to bytes first (avoid handing Blob directly to the parser)
@@ -146,26 +138,30 @@ export class ExcelPopulateDefaultRepository extends ExcelRepository {
 
             // Quick diagnostics
             const head16 = bytes.subarray(0, 16);
-            const headHex = Array.from(head16).map(b => b.toString(16).padStart(2, '0')).join(' ');
-            const magic = Array.from(bytes.subarray(0, 4)).map(b => b.toString(16).padStart(2, '0')).join(' ');
-            console.log('[parseWorkbookFromBlob] bytes length:', bytes.byteLength);
-            console.log('[parseWorkbookFromBlob] first 16 bytes (hex):', headHex);
+            const headHex = Array.from(head16)
+                .map(b => b.toString(16).padStart(2, "0"))
+                .join(" ");
+            const magic = Array.from(bytes.subarray(0, 4))
+                .map(b => b.toString(16).padStart(2, "0"))
+                .join(" ");
+            console.log("[parseWorkbookFromBlob] bytes length:", bytes.byteLength);
+            console.log("[parseWorkbookFromBlob] first 16 bytes (hex):", headHex);
             console.log('[parseWorkbookFromBlob] expected XLSX ZIP magic "50 4b 03 04", got:', magic);
 
-            console.log('[parseWorkbookFromBlob] calling XlsxPopulate.fromDataAsync(bytes)...');
+            console.log("[parseWorkbookFromBlob] calling XlsxPopulate.fromDataAsync(bytes)...");
             const workbook = await XlsxPopulate.fromDataAsync(bytes);
-            console.log('[parseWorkbookFromBlob] workbook loaded OK.');
+            console.log("[parseWorkbookFromBlob] workbook loaded OK.");
 
             // Optional: try to log sheet names
             try {
                 // @ts-ignore depends on typing
-                const sheetNames = (workbook.sheets ? workbook.sheets().map((s: any) => s.name()) : []);
-                console.log('[parseWorkbookFromBlob] sheets:', sheetNames);
-            } catch { }
+                const sheetNames = workbook.sheets ? workbook.sheets().map((s: any) => s.name()) : [];
+                console.log("[parseWorkbookFromBlob] sheets:", sheetNames);
+            } catch {}
 
             return workbook as unknown as ExcelWorkbook;
         } catch (err: any) {
-            console.error('[parseWorkbookFromBlob] FAILED', {
+            console.error("[parseWorkbookFromBlob] FAILED", {
                 ...meta,
                 message: err?.message ?? err,
                 stack: err?.stack ?? err,
@@ -173,8 +169,6 @@ export class ExcelPopulateDefaultRepository extends ExcelRepository {
             throw err;
         }
     }
-
-
 
     private async parseFile(file: Blob | File): Promise<ExcelWorkbook> {
         return this.parseWorkbookFromBlob(file);

@@ -1,7 +1,7 @@
 import { D2Api, Id } from "@eyeseetea/d2-api/2.34";
 import dotenv from "dotenv";
-import { promises as fs } from 'node:fs';
-import path from 'node:path';
+import { promises as fs } from "node:fs";
+import path from "node:path";
 
 import { DataStoreClient } from "../data/data-store/DataStoreClient";
 import { DataStoreKeys } from "../data/data-store/DataStoreKeys";
@@ -53,7 +53,6 @@ import { CountryRepository } from "../domain/repositories/CountryRepository";
 import { CountryDefaultRepository } from "../data/repositories/CountryDefaultRepository";
 import { CalculateConsumptionDataProductLevelUseCase } from "../domain/usecases/data-entry/amc/CalculateConsumptionDataProductLevelUseCase";
 import { CalculateConsumptionDataSubstanceLevelUseCase } from "../domain/usecases/data-entry/amc/CalculateConsumptionDataSubstanceLevelUseCase";
-
 
 dotenv.config();
 console.log("Auth:", process.env.REACT_APP_DHIS2_AUTH);
@@ -312,7 +311,6 @@ async function initializeGlobals() {
         moduleRepository
     );
 
-
     //held in memory so need to check resources available to script
 
     [allDataSubmissions, allUploads] = await Promise.all([
@@ -476,7 +474,6 @@ async function retryWithBackoff<T>(
     throw new Error(`Failed to complete operation after ${maxRetries} retries`);
 }
 
-
 async function initializeOrgUnits() {
     const orgUnitsObject = await api.models.organisationUnits
         .get({
@@ -578,14 +575,12 @@ async function getAllUpLoads(): Promise<Map<string, GlassUploads[]>> {
     }
 }
 
-
 function checkForExistingValidDataFiles(fileMetaData: FileMetaData): boolean {
     const dataSubmissionId = fileMetaData.batchMetaData.dataSubmission.id;
     const fileType = fileMetaData.fileType;
     const existingUploads = fileMetaData.batchMetaData.existingUploads;
 
     try {
-
         if (!Array.isArray(existingUploads)) {
             log(`existingUploads is not an array for submission ${dataSubmissionId}`, LogLevel.ERROR);
             return false;
@@ -600,10 +595,8 @@ function checkForExistingValidDataFiles(fileMetaData: FileMetaData): boolean {
             );
         });
         return fileExists;
-
     } catch (error) {
-        const errorMessage =
-            `Error checking existing uploads for Submission ${dataSubmissionId}, 
+        const errorMessage = `Error checking existing uploads for Submission ${dataSubmissionId}, 
              orgUnit=${fileMetaData.batchMetaData.orgUnitCode}, 
              period=${fileMetaData.batchMetaData.dataSubmission.period}, 
              type=${fileType}.
@@ -613,7 +606,6 @@ function checkForExistingValidDataFiles(fileMetaData: FileMetaData): boolean {
         throw new Error(errorMessage);
     }
 }
-
 
 function isValidFileDataType(data: any): data is FileData {
     return (
@@ -626,7 +618,6 @@ function isValidFileDataType(data: any): data is FileData {
         Array.isArray(data.specimens)
     );
 }
-
 
 export interface BufferFile {
     /** Base name of the file, e.g., "photo.jpg" */
@@ -646,13 +637,11 @@ export interface BufferFile {
     arrayBuffer: ArrayBuffer;
 }
 
-
 function toArrayBufferCopy(buf: Buffer): ArrayBuffer {
     const ab = new ArrayBuffer(buf.length);
     new Uint8Array(ab).set(buf);
     return ab;
 }
-
 
 export async function createBufferFileFromPath(filePath: string): Promise<BufferFile> {
     const fileName = path.basename(filePath);
@@ -669,7 +658,7 @@ export async function createBufferFileFromPath(filePath: string): Promise<Buffer
         `[createBufferFileFromPath] Read file ${fileName}, size: ${buf.length} bytes, lastModified: ${lastModified}`
     );
 
-    const arrayBuffer = toArrayBufferCopy(buf)
+    const arrayBuffer = toArrayBufferCopy(buf);
 
     const result: BufferFile = {
         name: fileName,
@@ -680,7 +669,7 @@ export async function createBufferFileFromPath(filePath: string): Promise<Buffer
         arrayBuffer,
     };
 
-    console.log('[createBufferFileFromPath] Created BufferFile meta:', {
+    console.log("[createBufferFileFromPath] Created BufferFile meta:", {
         name: result.name,
         type: result.type,
         size: result.size,
@@ -689,8 +678,6 @@ export async function createBufferFileFromPath(filePath: string): Promise<Buffer
 
     return result;
 }
-
-
 
 /*async function createFileFromPath(filePath: string): Promise<File> {
     console.log(`[createFileFromPath] Creating File from path: ${filePath}`);
@@ -708,17 +695,16 @@ export async function createBufferFileFromPath(filePath: string): Promise<Buffer
 function detectMimeFromExt(fileName: string): string {
     const ext = path.extname(fileName).toLowerCase();
     switch (ext) {
-        case '.xlsx':
-            return 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
-        case '.xls':
-            return 'application/vnd.ms-excel';
-        case '.csv':
-            return 'text/csv; charset=utf-8';
+        case ".xlsx":
+            return "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+        case ".xls":
+            return "application/vnd.ms-excel";
+        case ".csv":
+            return "text/csv; charset=utf-8";
         default:
-            return 'application/octet-stream';
+            return "application/octet-stream";
     }
 }
-
 
 export async function createFileFromPath(filePath: string): Promise<File> {
     const fileName = path.basename(filePath);
@@ -730,35 +716,33 @@ export async function createFileFromPath(filePath: string): Promise<File> {
 
     // Prefer native Blob if present; fallback to formdata-node's Blob if missing
     let BlobCtor: typeof Blob;
-    if (typeof (globalThis as any).Blob === 'function') {
+    if (typeof (globalThis as any).Blob === "function") {
         BlobCtor = (globalThis as any).Blob as typeof Blob;
-        console.log('[createFileFromPath] Using native Blob');
+        console.log("[createFileFromPath] Using native Blob");
     } else {
-        const { Blob: PBlob } = await import('formdata-node');
+        const { Blob: PBlob } = await import("formdata-node");
         BlobCtor = PBlob as unknown as typeof Blob;
-        console.log('[createFileFromPath] Using polyfilled Blob from formdata-node');
+        console.log("[createFileFromPath] Using polyfilled Blob from formdata-node");
     }
 
     const bytes = new Uint8Array(buf);
     const blob = new BlobCtor([bytes], { type });
-    console.log(
-        `[createFileFromPath] Created Blob for ${fileName}, size: ${blob.size} bytes, type: ${type}`
-    );
+    console.log(`[createFileFromPath] Created Blob for ${fileName}, size: ${blob.size} bytes, type: ${type}`);
 
     // Figure out a usable File constructor *without* modifying globals
     let FileCtor: any = (globalThis as any).File;
-    if (typeof FileCtor !== 'function') {
-        const { File: PFile } = await import('formdata-node');
+    if (typeof FileCtor !== "function") {
+        const { File: PFile } = await import("formdata-node");
         FileCtor = PFile;
-        console.log('[createFileFromPath] Using polyfilled File from formdata-node');
+        console.log("[createFileFromPath] Using polyfilled File from formdata-node");
     } else {
-        console.log('[createFileFromPath] Using native File');
+        console.log("[createFileFromPath] Using native File");
     }
 
     const file = new FileCtor([blob], fileName, { type, lastModified: Date.now() });
 
     // Final meta log
-    console.log('[createFileFromPath] Created File meta:', {
+    console.log("[createFileFromPath] Created File meta:", {
         ctor: file?.constructor?.name,
         name: (file as any)?.name,
         type: (file as any)?.type,
@@ -768,9 +752,6 @@ export async function createFileFromPath(filePath: string): Promise<File> {
     return file as File;
 }
 
-
-
-
 async function validateFile(fileArrayBuffer: ArrayBuffer, dataRepository: any): Promise<FileData> {
     try {
         const module = await moduleRepository.getByName(moduleName).toPromise();
@@ -779,21 +760,16 @@ async function validateFile(fileArrayBuffer: ArrayBuffer, dataRepository: any): 
             throw new Error(`Module '${moduleName}' does not exist`);
         }
 
-        return await dataRepository.validateFileBuffer(
-            fileArrayBuffer,
-            module.dataColumns,
-            module.teiColumns
-        );
-
+        return await dataRepository.validateFileBuffer(fileArrayBuffer, module.dataColumns, module.teiColumns);
     } catch (error) {
-        const msg = `Validation error for file ${fileArrayBuffer}: ${error instanceof Error ? error.message : String(error)
-            }`;
+        const msg = `Validation error for file ${fileArrayBuffer}: ${
+            error instanceof Error ? error.message : String(error)
+        }`;
 
         log(msg, LogLevel.ERROR);
         throw new Error(msg);
     }
 }
-
 
 /*
 ================================================================
@@ -811,14 +787,17 @@ async function uploadFileToDataStore(fileMetaData: FileMetaData): Promise<FileMe
     try {
         //fileMetaData.fileId = await retryWithBackoff(() =>
         console.log("Uploading file to DataStore: ", fileMetaData.fileName);
-            glassDocumentsRepository.saveBuffer(fileMetaData.fileBuffer.buffer, fileMetaData.fileName, moduleName).toPromise()
+        glassDocumentsRepository
+            .saveBuffer(fileMetaData.fileBuffer.buffer, fileMetaData.fileName, moduleName)
+            .toPromise();
         //);
         console.info(
             ` ${fileMetaData.fileType} File ${fileMetaData.fileName} uploaded successfully with File ID: ${fileMetaData.fileId}`
         );
     } catch (error) {
-        const errorMessage = `Error during the ${fileMetaData.fileType} file import process: ${fileMetaData.fileName
-            }, ${error instanceof Error ? error.message : String(error)}`;
+        const errorMessage = `Error during the ${fileMetaData.fileType} file import process: ${
+            fileMetaData.fileName
+        }, ${error instanceof Error ? error.message : String(error)}`;
         log(errorMessage, LogLevel.ERROR);
         throw new Error(errorMessage);
     }
@@ -852,8 +831,9 @@ async function uploadFileToDataStore(fileMetaData: FileMetaData): Promise<FileMe
         fileMetaData.fileUploadId = uploadData.id;
         return fileMetaData;
     } catch (uploadError) {
-        const errorMessage = `Error saving file upload data for ${fileMetaData.fileType} file: ${fileMetaData.fileName
-            }, ${uploadError instanceof Error ? uploadError.message : String(uploadError)}`;
+        const errorMessage = `Error saving file upload data for ${fileMetaData.fileType} file: ${
+            fileMetaData.fileName
+        }, ${uploadError instanceof Error ? uploadError.message : String(uploadError)}`;
         log(errorMessage, LogLevel.ERROR);
         throw new Error(errorMessage);
     }
@@ -889,19 +869,24 @@ async function uploadDataValues(fileMetaData: FileMetaData) {
                 amcProductDataRepository,
                 amcSubstanceDataRepository
             );
-            console.log("bulkUploadAMUFiles uploadDataValues Starting import of AMC Product File:", fileMetaData.fileName);
-            
-            importSummary = await importAMCProductFile.importAMCProductFileAsBuffer(
-                fileMetaData.fileBuffer.arrayBuffer,
-                CREATE_AND_UPDATE,
-                "",
-                fileMetaData.batchMetaData.dataSubmission.orgUnit,
-                fileMetaData.batchMetaData.orgUnitCode,
-                moduleName,
-                fileMetaData.batchMetaData.dataSubmission.period,
-                fileMetaData.fileUploadId,
-                allCountries
-            ).toPromise();
+            console.log(
+                "bulkUploadAMUFiles uploadDataValues Starting import of AMC Product File:",
+                fileMetaData.fileName
+            );
+
+            importSummary = await importAMCProductFile
+                .importAMCProductFileAsBuffer(
+                    fileMetaData.fileBuffer.arrayBuffer,
+                    CREATE_AND_UPDATE,
+                    "",
+                    fileMetaData.batchMetaData.dataSubmission.orgUnit,
+                    fileMetaData.batchMetaData.orgUnitCode,
+                    moduleName,
+                    fileMetaData.batchMetaData.dataSubmission.period,
+                    fileMetaData.fileUploadId,
+                    allCountries
+                )
+                .toPromise();
         } else {
             console.log("Importing substance level data");
             const importRawSubstanceData = new ImportAMCSubstanceLevelData(
@@ -914,15 +899,17 @@ async function uploadDataValues(fileMetaData: FileMetaData) {
                 programRulesMetadataRepository,
                 atcRepository
             );
-            importSummary = await importRawSubstanceData.import(
-                fileMetaData.file,
-                CREATE_AND_UPDATE,
-                "",
-                moduleName,
-                fileMetaData.batchMetaData.dataSubmission.orgUnit,
-                fileMetaData.batchMetaData.orgUnitCode,
-                fileMetaData.batchMetaData.dataSubmission.period,
-            ).toPromise();
+            importSummary = await importRawSubstanceData
+                .import(
+                    fileMetaData.file,
+                    CREATE_AND_UPDATE,
+                    "",
+                    moduleName,
+                    fileMetaData.batchMetaData.dataSubmission.orgUnit,
+                    fileMetaData.batchMetaData.orgUnitCode,
+                    fileMetaData.batchMetaData.dataSubmission.period
+                )
+                .toPromise();
         }
 
         if (importSummary.status === "ERROR" || importSummary.blockingErrors.length > 0) {
@@ -934,8 +921,9 @@ async function uploadDataValues(fileMetaData: FileMetaData) {
                 "Here are the non blocking errors for the failed metadata import: ",
                 importSummary.nonBlockingErrors
             );
-            const errorMessage = `File ${fileMetaData.fileName} metadata NOT imported! with importSummary status ${importSummary.status
-                }   ${importSummary.blockingErrors.map(error => `  - ${error.error}`).join("\n")} `;
+            const errorMessage = `File ${fileMetaData.fileName} metadata NOT imported! with importSummary status ${
+                importSummary.status
+            }   ${importSummary.blockingErrors.map(error => `  - ${error.error}`).join("\n")} `;
             console.error(errorMessage, LogLevel.ERROR);
             //await setUploadStatusUseCase.execute({ id: fileMetaData.fileUploadId, status: "IMPORTED" }).toPromise();
             throw new Error(errorMessage);
@@ -947,7 +935,6 @@ async function uploadDataValues(fileMetaData: FileMetaData) {
             );
             return importSummary.status;
         }
-
     } catch (error) {
         const errorMessage = ` Error in the Metadata import for file: ${fileMetaData.fileName}. ${error} `;
         //console.error(errorMessage);
@@ -993,24 +980,24 @@ async function uploadDataValuesAndFile(fileMetaData: FileMetaData): Promise<void
                 uploadDataValues(fileMetaData)
             );*/
             metaDataImportSummaryStatus = await uploadDataValues(fileMetaData);
-            console.log(`Metadata import summary status: ${metaDataImportSummaryStatus} for file: ${fileMetaData.fileName}`);
+            console.log(
+                `Metadata import summary status: ${metaDataImportSummaryStatus} for file: ${fileMetaData.fileName}`
+            );
             await processFile(fileMetaData);
 
             const elapsedSeconds = Math.floor((Date.now() - startTime) / 1000);
             console.warn(`All metadata and dataStore updates done for this batch in ${elapsedSeconds} seconds `);
 
             if (fileMetaData.fileName.includes("product")) {
-
-                await consumptionDataProductLevel.execute(
-                    fileMetaData.batchMetaData.dataSubmission.period,
-                    fileMetaData.batchMetaData.dataSubmission.orgUnit,
-                    moduleName,
-                    fileMetaData.fileId
-                ).toPromise();
-
-
+                await consumptionDataProductLevel
+                    .execute(
+                        fileMetaData.batchMetaData.dataSubmission.period,
+                        fileMetaData.batchMetaData.dataSubmission.orgUnit,
+                        moduleName,
+                        fileMetaData.fileId
+                    )
+                    .toPromise();
             } else if (fileMetaData.fileName.includes("substance")) {
-
                 //As the semaphore for the dataStore has max thread limit of 1 this is basically synchronous anyway.
                 //But if I want to run processBatchFiles Concurrently I might see minor benefits.
                 //async
@@ -1019,12 +1006,14 @@ async function uploadDataValuesAndFile(fileMetaData: FileMetaData): Promise<void
                      processFile(fileMetaData),
                  ]);*/
 
-                await consumptionDataSubstanceLevel.execute(
-                    fileMetaData.fileId,
-                    fileMetaData.batchMetaData.dataSubmission.period,
-                    fileMetaData.batchMetaData.dataSubmission.orgUnit,
-                    moduleName,
-                ).toPromise();
+                await consumptionDataSubstanceLevel
+                    .execute(
+                        fileMetaData.fileId,
+                        fileMetaData.batchMetaData.dataSubmission.period,
+                        fileMetaData.batchMetaData.dataSubmission.orgUnit,
+                        moduleName
+                    )
+                    .toPromise();
 
                 //synchronous
                 //const primaryMetaDataImportSummaryStatus = await uploadDataValues(primaryFileMetaData);
@@ -1035,11 +1024,9 @@ async function uploadDataValuesAndFile(fileMetaData: FileMetaData): Promise<void
                     1000,                       
                     10000,                      
                 );*/
-
             } else {
                 log(`Unrecognized file type: ${fileMetaData.fileName}`, LogLevel.ERROR);
             }
-
 
             //handlePostUploadBatchFileUpdates
             await datastore_semaphore.acquire();
@@ -1047,36 +1034,30 @@ async function uploadDataValuesAndFile(fileMetaData: FileMetaData): Promise<void
             try {
                 await handlePostUploadBatchDatastoreUpdates(
                     fileMetaData.fileUploadId,
-                    fileMetaData.batchMetaData.dataSubmission.id,
+                    fileMetaData.batchMetaData.dataSubmission.id
                 );
-                console.warn(
-                    `Completed handlePostUploadBatchDatastoreUpdates for : ${fileMetaData.fileName}`
-                );
+                console.warn(`Completed handlePostUploadBatchDatastoreUpdates for : ${fileMetaData.fileName}`);
             } catch (uploadError) {
-                const errorMessage = `Error handlePostUploadBatchFileUpdates for ${fileMetaData.fileName
-                    }, ${uploadError instanceof Error ? uploadError.message : String(uploadError)}`;
+                const errorMessage = `Error handlePostUploadBatchFileUpdates for ${fileMetaData.fileName}, ${
+                    uploadError instanceof Error ? uploadError.message : String(uploadError)
+                }`;
                 log(errorMessage, LogLevel.ERROR);
             } finally {
                 datastore_semaphore.release();
                 //console.log(`datastore_semaphore release for handlePostUploadBatchFileUpdates for ${primaryFileMetaData.file.name}: ${datastore_semaphore.getActiveCount()}`);
             }
-
         }
-
     } catch (error) {
-        const errorMessage = `Error processing file: ${fileMetaData.fileName}: ${error instanceof Error ? error.message : String(error)
-            } `;
+        const errorMessage = `Error processing file: ${fileMetaData.fileName}: ${
+            error instanceof Error ? error.message : String(error)
+        } `;
         log(errorMessage, LogLevel.ERROR);
     } finally {
         batch_semaphore.release();
     }
 }
 
-async function handlePostUploadBatchDatastoreUpdates(
-    fileUploadId: string,
-    submissionId: string,
-) {
-
+async function handlePostUploadBatchDatastoreUpdates(fileUploadId: string, submissionId: string) {
     try {
         //let promises: Promise<any>[];
 
@@ -1099,8 +1080,9 @@ async function handlePostUploadBatchDatastoreUpdates(
             `Successfully processed file(s) for submission ${submissionId}, setting them to COMPLETED and PENDING_APPROVAL status.`
         );
     } catch (error) {
-        const errorMessage = `Error during the update of statuses for submission ${submissionId}, file Id ${fileUploadId}: ${error instanceof Error ? error.message : String(error)
-            }`;
+        const errorMessage = `Error during the update of statuses for submission ${submissionId}, file Id ${fileUploadId}: ${
+            error instanceof Error ? error.message : String(error)
+        }`;
         log(errorMessage, LogLevel.ERROR);
         throw new Error(errorMessage);
     }
@@ -1110,7 +1092,6 @@ async function handlePostUploadBatchDatastoreUpdates(
 END OF FILE PROCESSING FUNCTIONS
 ================================================================
 */
-
 
 async function processDirectory(directoryPath: string): Promise<void> {
     const files = await fs.readdir(directoryPath);
@@ -1145,7 +1126,6 @@ async function processDirectory(directoryPath: string): Promise<void> {
                 const period = beforeDot.substring(beforeDot.lastIndexOf("_") + 1);
                 const [fileType, orgUnitCode] = fileName.split("_");
 
-
                 if (!period) {
                     throw new Error("Missing period in file name.");
                 }
@@ -1163,7 +1143,10 @@ async function processDirectory(directoryPath: string): Promise<void> {
 
                 //const existingUploads = await glassUploadsRepository.getUploadsByDataSubmission(dataSubmission.id).toPromise();
                 if (!dataSubmission) {
-                    log(`No dataSubmission found for orgUnitId: ${orgUnitId} and orgUnitCode ${orgUnitCode} and period ${period} and module ${moduleName}`, LogLevel.WARN);
+                    log(
+                        `No dataSubmission found for orgUnitId: ${orgUnitId} and orgUnitCode ${orgUnitCode} and period ${period} and module ${moduleName}`,
+                        LogLevel.WARN
+                    );
                     saveDataSubmissions.execute(moduleId, orgUnitId, [period]);
                     dataSubmission = await fetchDataSubmissionId(moduleId, moduleName, orgUnitId, period);
                     log(`Created a dataSubmission for orgUnitId: ${orgUnitId} and period ${period}`, LogLevel.WARN);
@@ -1198,12 +1181,10 @@ async function processDirectory(directoryPath: string): Promise<void> {
                     batchMetaData: batchMetaData,
                 };
 
-
                 /*console.debug('[bootstrap]', process.version, {
                     Blob: typeof Blob,
                     File: typeof File,
                 });*/
-
 
                 //if (fileType === "product") {
                 await uploadDataValuesAndFile(fileMetaData);
@@ -1222,10 +1203,8 @@ async function processDirectory(directoryPath: string): Promise<void> {
 async function main() {
     const startTime = Date.now();
 
-
     await initializeGlobals();
     const rootDirectory = "C:\\Users\\odohertyd\\Downloads\\AMU_CSR_HistoricalData\\products\\test";
-
 
     try {
         await processDirectory(rootDirectory);

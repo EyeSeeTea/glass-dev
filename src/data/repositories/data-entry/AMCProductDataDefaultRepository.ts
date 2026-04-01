@@ -44,7 +44,7 @@ const DEFAULT_IMPORT_DELETE_CALCULATIONS_CHUNK_SIZE = 300;
 
 // TODO: Move logic to use case and entity instead of in repository which should be logic-less, just get/store the data.
 export class AMCProductDataDefaultRepository implements AMCProductDataRepository {
-    constructor(private api: D2Api) { }
+    constructor(private api: D2Api) {}
 
     validate(
         file: File,
@@ -88,36 +88,42 @@ export class AMCProductDataDefaultRepository implements AMCProductDataRepository
         rawProductDataColumns: string[],
         teiDataColumns: string[]
     ): FutureData<{ isValid: boolean; rows: number; specimens: string[] }> {
-        return Future.fromPromise(new SpreadsheetXlsxDataSource().readFromArrayBuffer(fileArrayBuffer)).map(spreadsheet => {
-            const teiSheet = spreadsheet.sheets[0]; //First sheet is tracked entity instance data
-            const teiHeaderRow = teiSheet?.rows[0]; //The second row has header details for AMC template.
+        return Future.fromPromise(new SpreadsheetXlsxDataSource().readFromArrayBuffer(fileArrayBuffer)).map(
+            spreadsheet => {
+                const teiSheet = spreadsheet.sheets[0]; //First sheet is tracked entity instance data
+                const teiHeaderRow = teiSheet?.rows[0]; //The second row has header details for AMC template.
 
-            const rawProductSheet = spreadsheet.sheets[1]; //Second sheet is raw product level data
-            const rawProductHeaderRow = rawProductSheet?.rows[0];
+                const rawProductSheet = spreadsheet.sheets[1]; //Second sheet is raw product level data
+                const rawProductHeaderRow = rawProductSheet?.rows[0];
 
-            if (rawProductHeaderRow && teiHeaderRow) {
-                const sanitizedRawProductHeaders = Object.values(rawProductHeaderRow).map(header =>
-                    header.replace(/[* \n\r]/g, "")
-                );
-                const allRawProductCols = rawProductDataColumns.map(col => sanitizedRawProductHeaders.includes(col));
-                const allRawProductColsPresent = _.every(allRawProductCols, c => c === true);
+                if (rawProductHeaderRow && teiHeaderRow) {
+                    const sanitizedRawProductHeaders = Object.values(rawProductHeaderRow).map(header =>
+                        header.replace(/[* \n\r]/g, "")
+                    );
+                    const allRawProductCols = rawProductDataColumns.map(col =>
+                        sanitizedRawProductHeaders.includes(col)
+                    );
+                    const allRawProductColsPresent = _.every(allRawProductCols, c => c === true);
 
-                const sanitizedTEIHeaders = Object.values(teiHeaderRow).map(header => header.replace(/[* \n\r]/g, ""));
-                const allTEICols = teiDataColumns.map(col => sanitizedTEIHeaders.includes(col));
-                const allTEIColsPresent = _.every(allTEICols, c => c === true);
+                    const sanitizedTEIHeaders = Object.values(teiHeaderRow).map(header =>
+                        header.replace(/[* \n\r]/g, "")
+                    );
+                    const allTEICols = teiDataColumns.map(col => sanitizedTEIHeaders.includes(col));
+                    const allTEIColsPresent = _.every(allTEICols, c => c === true);
 
-                return {
-                    isValid: allRawProductColsPresent && allTEIColsPresent ? true : false,
-                    rows: teiSheet.rows.length - 1, //one row for header
-                    specimens: [],
-                };
-            } else
-                return {
-                    isValid: false,
-                    rows: 0,
-                    specimens: [],
-                };
-        });
+                    return {
+                        isValid: allRawProductColsPresent && allTEIColsPresent ? true : false,
+                        rows: teiSheet.rows.length - 1, //one row for header
+                        specimens: [],
+                    };
+                } else
+                    return {
+                        isValid: false,
+                        rows: 0,
+                        specimens: [],
+                    };
+            }
+        );
     }
 
     // TODO: decouple TrackerPostResponse from DHIS2
@@ -152,7 +158,8 @@ export class AMCProductDataDefaultRepository implements AMCProductDataRepository
 
             const $importTrackerEvents = chunkedD2TrackerEvents.map((d2TrackerEventsChunk, index) => {
                 logger.debug(
-                    `[${new Date().toISOString()}] Product level data: Chunk ${index + 1}/${chunkedD2TrackerEvents.length
+                    `[${new Date().toISOString()}] Product level data: Chunk ${index + 1}/${
+                        chunkedD2TrackerEvents.length
                     } of Raw Substance Consumption Calculated.`
                 );
 
@@ -166,7 +173,8 @@ export class AMCProductDataDefaultRepository implements AMCProductDataRepository
                     })
                     .flatMap(response => {
                         logger.debug(
-                            `[${new Date().toISOString()}] Product level data: End of chunk ${index + 1}/${chunkedD2TrackerEvents.length
+                            `[${new Date().toISOString()}] Product level data: End of chunk ${index + 1}/${
+                                chunkedD2TrackerEvents.length
                             } of Raw Substance Consumption Calculated.`
                         );
                         return Future.success(response);
@@ -231,7 +239,8 @@ export class AMCProductDataDefaultRepository implements AMCProductDataRepository
 
         const $deleteTrackerEvents = chunkedD2TrackerEventsToDelete.map((d2TrackerEventsToDeleteChunk, index) => {
             consoleLogger.debug(
-                `[${new Date().toISOString()}] Chunk ${index + 1}/${chunkedD2TrackerEventsToDelete.length
+                `[${new Date().toISOString()}] Chunk ${index + 1}/${
+                    chunkedD2TrackerEventsToDelete.length
                 } of Raw Substance Consumption Calculated.`
             );
 
@@ -244,7 +253,8 @@ export class AMCProductDataDefaultRepository implements AMCProductDataRepository
                 })
                 .flatMap(response => {
                     consoleLogger.debug(
-                        `[${new Date().toISOString()}] End of chunk ${index + 1}/${chunkedD2TrackerEventsToDelete.length
+                        `[${new Date().toISOString()}] End of chunk ${index + 1}/${
+                            chunkedD2TrackerEventsToDelete.length
                         } of Raw Substance Consumption Calculated.`
                     );
 
@@ -546,18 +556,18 @@ export class AMCProductDataDefaultRepository implements AMCProductDataRepository
                             const value = data[code.trim() as RawSubstanceConsumptionCalculatedKeys];
                             const dataValue = optionSetValue
                                 ? optionSet.options.find(
-                                    option =>
-                                        option.code === value ||
-                                        option.code === value?.toString() ||
-                                        option.name === value
-                                )?.code || ""
+                                      option =>
+                                          option.code === value ||
+                                          option.code === value?.toString() ||
+                                          option.name === value
+                                  )?.code || ""
                                 : (valueType === "NUMBER" ||
-                                    valueType === "INTEGER" ||
-                                    valueType === "INTEGER_POSITIVE" ||
-                                    valueType === "INTEGER_ZERO_OR_POSITIVE") &&
-                                    value === 0
-                                    ? value
-                                    : value || "";
+                                      valueType === "INTEGER" ||
+                                      valueType === "INTEGER_POSITIVE" ||
+                                      valueType === "INTEGER_ZERO_OR_POSITIVE") &&
+                                  value === 0
+                                ? value
+                                : value || "";
 
                             return {
                                 dataElement: id,
@@ -573,9 +583,9 @@ export class AMCProductDataDefaultRepository implements AMCProductDataRepository
                     const occurredAt = data.eventId
                         ? productDataTrackedEntity.events.find(({ eventId }) => eventId === data.eventId)?.occurredAt
                         : moment(new Date(`${period}-01-01`))
-                            .toISOString()
-                            .split("T")
-                            .at(0);
+                              .toISOString()
+                              .split("T")
+                              .at(0);
 
                     return {
                         event: data.eventId ?? "",
