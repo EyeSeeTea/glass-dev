@@ -64,177 +64,189 @@ export class AsyncImportRISIndividualFungalFile {
 
         const programId = program ? program.id : AMR_INDIVIDUAL_PROGRAM_ID;
         const programStageId =
-            program?.programStageId ?? glassModule.name === "AMR - Individual"
-                ? AMR_DATA_PROGRAM_STAGE_ID
-                : AMR_FUNGAL_PROGRAM_STAGE_ID;
+            program?.programStageId ??
+            (glassModule.name === "AMR - Individual" ? AMR_DATA_PROGRAM_STAGE_ID : AMR_FUNGAL_PROGRAM_STAGE_ID);
 
-        let totalRowsValidated = 0;
-        let validationErrorSummary: ImportSummary | undefined = undefined;
+        return this.repositories.trackerRepository
+            .getProgramMetadata(programId, programStageId)
+            .flatMap(programMetadata => {
+                let totalRowsValidated = 0;
+                let validationErrorSummary: ImportSummary | undefined = undefined;
 
-        // First pass: Validate all chunks
-        consoleLogger.debug(`Starting validation pass for upload ${uploadId}`);
-        return this.repositories.risIndividualFungalRepository
-            .getFromBlobInChunks(dataColumns, inputBlob, FILE_CHUNK_SIZE, chunkOfCustomDataColumns => {
-                // If we already encountered blocking errors, stop validation
-                if (validationErrorSummary) {
-                    return Future.success(false);
-                }
-
-                // +2 because file lines start at 1, and we have a header row in the file
-                const fileLineStart = totalRowsValidated + 2;
-
-                totalRowsValidated += chunkOfCustomDataColumns.length;
-
-                return runCustomValidations(chunkOfCustomDataColumns, countryCode, period, fileLineStart).flatMap(
-                    validationSummary => {
-                        if (validationSummary.blockingErrors.length > 0) {
-                            consoleLogger.debug(
-                                `Blocking errors found during custom validation of chunk in upload ${uploadId} for module ${glassModule.name}, orgUnitId ${orgUnitId}, countryCode ${countryCode}, period ${period}`
-                            );
-                            validationErrorSummary = validationSummary;
-                            return Future.success(false);
-                        }
-                        consoleLogger.debug(
-                            `Custom validation passed for chunk of ${chunkOfCustomDataColumns.length} rows in upload ${uploadId} for module ${glassModule.name}, orgUnitId ${orgUnitId}, countryCode ${countryCode}, period ${period}`
-                        );
-
-                        return mapIndividualFungalDataItemsToEntities(
-                            chunkOfCustomDataColumns,
-                            orgUnitId,
-                            programId,
-                            programStageId,
-                            countryCode,
-                            period,
-                            allCountries,
-                            this.repositories.trackerRepository
-                        ).flatMap(entities => {
-                            return runProgramRuleValidations(
-                                programId,
-                                entities,
-                                programStageId,
-                                this.repositories.programRulesMetadataRepository
-                            ).flatMap(validationResult => {
-                                if (validationResult.blockingErrors.length > 0) {
-                                    consoleLogger.debug(
-                                        `Blocking errors found during program rule validation of chunk in upload ${uploadId} for module ${glassModule.name}, programId ${programId}, orgUnitId ${orgUnitId}, countryCode ${countryCode}, period ${period}`
-                                    );
-
-                                    const errorSummary = getDefaultErrorImportSummary({
-                                        nonBlockingErrors: validationResult.nonBlockingErrors,
-                                        blockingErrors: validationResult.blockingErrors,
-                                    });
-                                    validationErrorSummary = errorSummary;
-                                    return Future.success(false);
-                                }
-                                consoleLogger.debug(
-                                    `Program rule validation passed for chunk of ${chunkOfCustomDataColumns.length} rows in upload ${uploadId} for module ${glassModule.name}, programId ${programId}, orgUnitId ${orgUnitId}, countryCode ${countryCode}, period ${period}`
-                                );
-                                return Future.success(true);
-                            });
-                        });
-                    }
-                );
-            })
-            .flatMap(() => {
-                // After validation pass, check if there were errors
-                if (validationErrorSummary) {
-                    consoleLogger.debug(
-                        `Validation failed for upload ${uploadId}. Total rows validated: ${totalRowsValidated}. Saving error report.`
-                    );
-                    return this.saveAllImportSummaries(uploadId, [validationErrorSummary]);
-                }
-
-                consoleLogger.debug(
-                    `Validation passed for upload ${uploadId}. Total rows validated: ${totalRowsValidated}. Starting import pass.`
-                );
-
-                // Second pass: Import all chunks (validation already passed)
-                let totalRowsImported = 0;
-                let allImportSummaries: ImportSummary[] = [];
-                let allEventIdList: Id[] = [];
-
+                // First pass: Validate all chunks
+                consoleLogger.debug(`Starting validation pass for upload ${uploadId}`);
                 return this.repositories.risIndividualFungalRepository
                     .getFromBlobInChunks(dataColumns, inputBlob, FILE_CHUNK_SIZE, chunkOfCustomDataColumns => {
-                        consoleLogger.debug(`Next chunk of ${chunkOfCustomDataColumns.length} rows to be imported`);
-                        consoleLogger.debug(`Current imported rows: ${totalRowsImported} / ${totalRowsValidated}`);
-                        totalRowsImported += chunkOfCustomDataColumns.length;
-                        return mapIndividualFungalDataItemsToEntities(
+                        // If we already encountered blocking errors, stop validation
+                        if (validationErrorSummary) {
+                            return Future.success(false);
+                        }
+
+                        // +2 because file lines start at 1, and we have a header row in the file
+                        const fileLineStart = totalRowsValidated + 2;
+
+                        totalRowsValidated += chunkOfCustomDataColumns.length;
+
+                        return runCustomValidations(
                             chunkOfCustomDataColumns,
-                            orgUnitId,
-                            programId,
-                            programStageId,
                             countryCode,
                             period,
-                            allCountries,
-                            this.repositories.trackerRepository
-                        ).flatMap(entities => {
-                            return importOrDeleteTrackedEntitiesInChunks({
-                                trackedEntities: entities,
-                                chunkSize: uploadChunkSize,
-                                glassModuleName: glassModule.name,
-                                action: CREATE_AND_UPDATE,
-                                trackerRepository: this.repositories.trackerRepository,
-                                metadataRepository: this.repositories.metadataRepository,
-                                async: false,
-                                skipSideEffects: true,
-                                maxConcurrency: 6,
-                            })
-                                .flatMap(importSummariesWithMergedEventIdList => {
-                                    allImportSummaries = [
-                                        ...allImportSummaries,
-                                        ...importSummariesWithMergedEventIdList.allImportSummaries,
-                                    ];
-                                    allEventIdList = [
-                                        ...allEventIdList,
-                                        ...importSummariesWithMergedEventIdList.mergedEventIdList,
-                                    ];
-                                    if (importSummariesWithMergedEventIdList.mergedEventIdList.length > 0) {
+                            fileLineStart
+                        ).flatMap(validationSummary => {
+                            if (validationSummary.blockingErrors.length > 0) {
+                                consoleLogger.debug(
+                                    `Blocking errors found during custom validation of chunk in upload ${uploadId} for module ${glassModule.name}, orgUnitId ${orgUnitId}, countryCode ${countryCode}, period ${period}`
+                                );
+                                validationErrorSummary = validationSummary;
+                                return Future.success(false);
+                            }
+                            consoleLogger.debug(
+                                `Custom validation passed for chunk of ${chunkOfCustomDataColumns.length} rows in upload ${uploadId} for module ${glassModule.name}, orgUnitId ${orgUnitId}, countryCode ${countryCode}, period ${period}`
+                            );
+
+                            return mapIndividualFungalDataItemsToEntities(
+                                chunkOfCustomDataColumns,
+                                orgUnitId,
+                                programId,
+                                programStageId,
+                                countryCode,
+                                period,
+                                allCountries,
+                                programMetadata
+                            ).flatMap(entities => {
+                                return runProgramRuleValidations(
+                                    programId,
+                                    entities,
+                                    programStageId,
+                                    this.repositories.programRulesMetadataRepository
+                                ).flatMap(validationResult => {
+                                    if (validationResult.blockingErrors.length > 0) {
                                         consoleLogger.debug(
-                                            `${importSummariesWithMergedEventIdList.mergedEventIdList.length} Tracked entity IDs imported from chunk of ${uploadId} for module ${glassModule.name}, programId ${programId}, orgUnitId ${orgUnitId}, countryCode ${countryCode}, period ${period}`
+                                            `Blocking errors found during program rule validation of chunk in upload ${uploadId} for module ${glassModule.name}, programId ${programId}, orgUnitId ${orgUnitId}, countryCode ${countryCode}, period ${period}`
                                         );
+
+                                        const errorSummary = getDefaultErrorImportSummary({
+                                            nonBlockingErrors: validationResult.nonBlockingErrors,
+                                            blockingErrors: validationResult.blockingErrors,
+                                        });
+                                        validationErrorSummary = errorSummary;
+                                        return Future.success(false);
                                     }
                                     consoleLogger.debug(
-                                        `Chunk imported successfully in upload ${uploadId} for module ${glassModule.name}, programId ${programId}, orgUnitId ${orgUnitId}, countryCode ${countryCode}, period ${period}`
+                                        `Program rule validation passed for chunk of ${chunkOfCustomDataColumns.length} rows in upload ${uploadId} for module ${glassModule.name}, programId ${programId}, orgUnitId ${orgUnitId}, countryCode ${countryCode}, period ${period}`
                                     );
                                     return Future.success(true);
-                                })
-                                .flatMapError(error => {
-                                    // If import fails, log error and add error summary
-                                    // TODO: check this behavior is correct
-                                    consoleLogger.error(
-                                        `Error importing chunk in upload ${uploadId}: ${error}. Stopping import.`
-                                    );
-                                    const errorSummary: ImportSummary = getDefaultErrorImportSummary({
-                                        blockingErrors: [
-                                            {
-                                                error: `Import failed: ${error}`,
-                                                count: 1,
-                                                lines: [],
-                                            },
-                                        ],
-                                        nonBlockingErrors: [],
-                                    });
-                                    allImportSummaries = [...allImportSummaries, errorSummary];
-                                    return Future.success(false);
                                 });
+                            });
                         });
                     })
                     .flatMap(() => {
+                        // After validation pass, check if there were errors
+                        if (validationErrorSummary) {
+                            consoleLogger.debug(
+                                `Validation failed for upload ${uploadId}. Total rows validated: ${totalRowsValidated}. Saving error report.`
+                            );
+                            return this.saveAllImportSummaries(uploadId, [validationErrorSummary]);
+                        }
+
                         consoleLogger.debug(
-                            `Import completed for upload ${uploadId}. Total rows imported: ${totalRowsImported}, Total event IDs: ${allEventIdList.length}`
+                            `Validation passed for upload ${uploadId}. Total rows validated: ${totalRowsValidated}. Starting import pass.`
                         );
-                        if (allEventIdList.length > 0) {
-                            return this.uploadIdListFileAndSave(uploadId, allEventIdList, glassModule.name).flatMap(
-                                () => {
+
+                        // Second pass: Import all chunks (validation already passed)
+                        let totalRowsImported = 0;
+                        let allImportSummaries: ImportSummary[] = [];
+                        let allEventIdList: Id[] = [];
+
+                        return this.repositories.risIndividualFungalRepository
+                            .getFromBlobInChunks(dataColumns, inputBlob, FILE_CHUNK_SIZE, chunkOfCustomDataColumns => {
+                                consoleLogger.debug(
+                                    `Next chunk of ${chunkOfCustomDataColumns.length} rows to be imported`
+                                );
+                                consoleLogger.debug(
+                                    `Current imported rows: ${totalRowsImported} / ${totalRowsValidated}`
+                                );
+                                totalRowsImported += chunkOfCustomDataColumns.length;
+                                return mapIndividualFungalDataItemsToEntities(
+                                    chunkOfCustomDataColumns,
+                                    orgUnitId,
+                                    programId,
+                                    programStageId,
+                                    countryCode,
+                                    period,
+                                    allCountries,
+                                    programMetadata
+                                ).flatMap(entities => {
+                                    return importOrDeleteTrackedEntitiesInChunks({
+                                        trackedEntities: entities,
+                                        chunkSize: uploadChunkSize,
+                                        glassModuleName: glassModule.name,
+                                        action: CREATE_AND_UPDATE,
+                                        trackerRepository: this.repositories.trackerRepository,
+                                        metadataRepository: this.repositories.metadataRepository,
+                                        async: false,
+                                        skipSideEffects: true,
+                                        maxConcurrency: 6,
+                                    })
+                                        .flatMap(importSummariesWithMergedEventIdList => {
+                                            allImportSummaries = [
+                                                ...allImportSummaries,
+                                                ...importSummariesWithMergedEventIdList.allImportSummaries,
+                                            ];
+                                            allEventIdList = [
+                                                ...allEventIdList,
+                                                ...importSummariesWithMergedEventIdList.mergedEventIdList,
+                                            ];
+                                            if (importSummariesWithMergedEventIdList.mergedEventIdList.length > 0) {
+                                                consoleLogger.debug(
+                                                    `${importSummariesWithMergedEventIdList.mergedEventIdList.length} Tracked entity IDs imported from chunk of ${uploadId} for module ${glassModule.name}, programId ${programId}, orgUnitId ${orgUnitId}, countryCode ${countryCode}, period ${period}`
+                                                );
+                                            }
+                                            consoleLogger.debug(
+                                                `Chunk imported successfully in upload ${uploadId} for module ${glassModule.name}, programId ${programId}, orgUnitId ${orgUnitId}, countryCode ${countryCode}, period ${period}`
+                                            );
+                                            return Future.success(true);
+                                        })
+                                        .flatMapError(error => {
+                                            // If import fails, log error and add error summary
+                                            // TODO: check this behavior is correct
+                                            consoleLogger.error(
+                                                `Error importing chunk in upload ${uploadId}: ${error}. Stopping import.`
+                                            );
+                                            const errorSummary: ImportSummary = getDefaultErrorImportSummary({
+                                                blockingErrors: [
+                                                    {
+                                                        error: `Import failed: ${error}`,
+                                                        count: 1,
+                                                        lines: [],
+                                                    },
+                                                ],
+                                                nonBlockingErrors: [],
+                                            });
+                                            allImportSummaries = [...allImportSummaries, errorSummary];
+                                            return Future.success(false);
+                                        });
+                                });
+                            })
+                            .flatMap(() => {
+                                consoleLogger.debug(
+                                    `Import completed for upload ${uploadId}. Total rows imported: ${totalRowsImported}, Total event IDs: ${allEventIdList.length}`
+                                );
+                                if (allEventIdList.length > 0) {
+                                    return this.uploadIdListFileAndSave(
+                                        uploadId,
+                                        allEventIdList,
+                                        glassModule.name
+                                    ).flatMap(() => {
+                                        return this.saveAllImportSummaries(uploadId, allImportSummaries);
+                                    });
+                                } else {
+                                    consoleLogger.debug(
+                                        `No Tracked entity IDs imported from ${uploadId} for module ${glassModule.name}, programId ${programId}, orgUnitId ${orgUnitId}, countryCode ${countryCode}, period ${period}`
+                                    );
                                     return this.saveAllImportSummaries(uploadId, allImportSummaries);
                                 }
-                            );
-                        } else {
-                            consoleLogger.debug(
-                                `No Tracked entity IDs imported from ${uploadId} for module ${glassModule.name}, programId ${programId}, orgUnitId ${orgUnitId}, countryCode ${countryCode}, period ${period}`
-                            );
-                            return this.saveAllImportSummaries(uploadId, allImportSummaries);
-                        }
+                            });
                     });
             });
     }

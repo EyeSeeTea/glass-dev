@@ -98,65 +98,69 @@ export class ImportRISIndividualFungalFile {
                                 }
                             };
 
-                            return mapIndividualFungalDataItemsToEntities(
-                                risIndividualFungalDataItems,
-                                orgUnit,
-                                AMRIProgramIDl,
-                                AMRDataProgramStageIdl(),
-                                countryCode,
-                                period,
-                                allCountries,
-                                this.trackerRepository
-                            ).flatMap(entities => {
-                                return runProgramRuleValidations(
-                                    AMRIProgramIDl,
-                                    entities,
-                                    AMRDataProgramStageIdl(),
-                                    this.programRulesMetadataRepository
-                                ).flatMap(validationResult => {
-                                    if (validationResult.blockingErrors.length > 0) {
-                                        const errorSummary: ImportSummary = {
-                                            status: "ERROR",
-                                            importCount: {
-                                                ignored: 0,
-                                                imported: 0,
-                                                deleted: 0,
-                                                updated: 0,
-                                                total: 0,
-                                            },
-                                            nonBlockingErrors: validationResult.nonBlockingErrors,
-                                            blockingErrors: validationResult.blockingErrors,
-                                        };
-                                        return Future.success(errorSummary);
-                                    }
+                            return this.trackerRepository
+                                .getProgramMetadata(AMRIProgramIDl, AMRDataProgramStageIdl())
+                                .flatMap(programMetadata => {
+                                    return mapIndividualFungalDataItemsToEntities(
+                                        risIndividualFungalDataItems,
+                                        orgUnit,
+                                        AMRIProgramIDl,
+                                        AMRDataProgramStageIdl(),
+                                        countryCode,
+                                        period,
+                                        allCountries,
+                                        programMetadata
+                                    ).flatMap(entities => {
+                                        return runProgramRuleValidations(
+                                            AMRIProgramIDl,
+                                            entities,
+                                            AMRDataProgramStageIdl(),
+                                            this.programRulesMetadataRepository
+                                        ).flatMap(validationResult => {
+                                            if (validationResult.blockingErrors.length > 0) {
+                                                const errorSummary: ImportSummary = {
+                                                    status: "ERROR",
+                                                    importCount: {
+                                                        ignored: 0,
+                                                        imported: 0,
+                                                        deleted: 0,
+                                                        updated: 0,
+                                                        total: 0,
+                                                    },
+                                                    nonBlockingErrors: validationResult.nonBlockingErrors,
+                                                    blockingErrors: validationResult.blockingErrors,
+                                                };
+                                                return Future.success(errorSummary);
+                                            }
 
-                                    return this.trackerRepository
-                                        .import(
-                                            {
-                                                trackedEntities:
-                                                    validationResult.teis && validationResult.teis.length > 0
-                                                        ? validationResult.teis
-                                                        : [],
-                                            },
-                                            { action: action, async: true }
-                                        )
-                                        .flatMap(response => {
-                                            return mapToImportSummary(
-                                                response,
-                                                "trackedEntity",
-                                                this.metadataRepository
-                                            ).flatMap(summary => {
-                                                return uploadIdListFileAndSave(
-                                                    "primaryUploadId",
-                                                    summary,
-                                                    moduleName,
-                                                    this.glassDocumentsRepository,
-                                                    this.glassUploadsRepository
-                                                );
-                                            });
+                                            return this.trackerRepository
+                                                .import(
+                                                    {
+                                                        trackedEntities:
+                                                            validationResult.teis && validationResult.teis.length > 0
+                                                                ? validationResult.teis
+                                                                : [],
+                                                    },
+                                                    { action: action, async: true }
+                                                )
+                                                .flatMap(response => {
+                                                    return mapToImportSummary(
+                                                        response,
+                                                        "trackedEntity",
+                                                        this.metadataRepository
+                                                    ).flatMap(summary => {
+                                                        return uploadIdListFileAndSave(
+                                                            "primaryUploadId",
+                                                            summary,
+                                                            moduleName,
+                                                            this.glassDocumentsRepository,
+                                                            this.glassUploadsRepository
+                                                        );
+                                                    });
+                                                });
                                         });
+                                    });
                                 });
-                            });
                         }
                     );
                 });

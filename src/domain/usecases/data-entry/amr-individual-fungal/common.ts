@@ -31,102 +31,96 @@ export function mapIndividualFungalDataItemsToEntities(
     countryCode: string,
     period: string,
     allCountries: Country[],
-    trackerRepository: TrackerRepository
+    metadata: Record<"programAttributes" | "programStageDataElements", any> // TODO: type this properly and fix clean architecture violation
 ): FutureData<TrackerTrackedEntity[]> {
-    return trackerRepository.getProgramMetadata(AMRIProgramIDl, AMRDataProgramStageIdl).flatMap(metadata => {
-        const trackedEntities = individualFungalDataItems.map(dataItem => {
-            const attributes: TrackerTrackedEntityAttribute[] = metadata.programAttributes.map(
-                (attr: { id: string; name: string; code: string; valueType: string }) => {
-                    const currentAttribute = dataItem.find(item => item.key === attr.code);
+    const trackedEntities = individualFungalDataItems.map(dataItem => {
+        const attributes: TrackerTrackedEntityAttribute[] = metadata.programAttributes.map(
+            (attr: { id: string; name: string; code: string; valueType: string }) => {
+                const currentAttribute = dataItem.find(item => item.key === attr.code);
 
-                    if (attr.valueType === "ORGANISATION_UNIT" && typeof currentAttribute?.value === "string") {
-                        return {
-                            attribute: attr.id,
-                            value: currentAttribute
-                                ? getTEAValueFromOrganisationUnitCountryEntry(
-                                      allCountries,
-                                      currentAttribute.value,
-                                      true
-                                  )
-                                : "",
-                        };
-                    }
-
+                if (attr.valueType === "ORGANISATION_UNIT" && typeof currentAttribute?.value === "string") {
                     return {
                         attribute: attr.id,
-                        value: currentAttribute?.value ?? "",
+                        value: currentAttribute
+                            ? getTEAValueFromOrganisationUnitCountryEntry(allCountries, currentAttribute.value, true)
+                            : "",
                     };
                 }
-            );
-            const AMRDataStage: { dataElement: string; value: string }[] = metadata.programStageDataElements.map(
-                (de: { id: string; name: string; code: string }) => {
-                    return {
-                        dataElement: de.id,
-                        value: dataItem.find(item => item.key === de.code)?.value ?? "",
-                    };
-                }
-            );
 
-            const sampleDateStr =
-                AMRDataStage.find(de => de.dataElement === AMR_GLASS_AMR_DET_SAMPLE_DATE)?.value ?? `01-01-${period}`;
-            const sampleDate = moment(new Date(sampleDateStr)).toISOString()?.split("T").at(0) ?? period;
+                return {
+                    attribute: attr.id,
+                    value: currentAttribute?.value ?? "",
+                };
+            }
+        );
+        const AMRDataStage: { dataElement: string; value: string }[] = metadata.programStageDataElements.map(
+            (de: { id: string; name: string; code: string }) => {
+                return {
+                    dataElement: de.id,
+                    value: dataItem.find(item => item.key === de.code)?.value ?? "",
+                };
+            }
+        );
 
-            const createdAt = moment(new Date()).toISOString()?.split("T").at(0) ?? period;
+        const sampleDateStr =
+            AMRDataStage.find(de => de.dataElement === AMR_GLASS_AMR_DET_SAMPLE_DATE)?.value ?? `01-01-${period}`;
+        const sampleDate = moment(new Date(sampleDateStr)).toISOString()?.split("T").at(0) ?? period;
 
-            const events: TrackerEvent[] = [
-                {
-                    program: AMRIProgramIDl,
-                    event: "",
-                    programStage: AMRDataProgramStageIdl,
-                    orgUnit,
-                    dataValues: AMRDataStage,
-                    occurredAt: sampleDate,
-                    status: "COMPLETED",
-                },
-            ];
-            const enrollments: TrackerEnrollment[] = [
-                {
-                    orgUnit,
-                    program: AMRIProgramIDl,
-                    trackedEntity: "",
-                    enrollment: "",
-                    trackedEntityType: AMR_GLASS_AMR_TET_PATIENT,
-                    attributes: attributes,
-                    events: events,
-                    enrolledAt: sampleDate,
-                    occurredAt: sampleDate,
-                    createdAt: createdAt,
-                    createdAtClient: createdAt,
-                    updatedAt: createdAt,
-                    updatedAtClient: createdAt,
-                    status: "COMPLETED",
-                    orgUnitName: countryCode,
-                    followUp: false,
-                    deleted: false,
-                    storedBy: "",
-                },
-            ];
+        const createdAt = moment(new Date()).toISOString()?.split("T").at(0) ?? period;
 
-            const entity: TrackerTrackedEntity = {
+        const events: TrackerEvent[] = [
+            {
+                program: AMRIProgramIDl,
+                event: "",
+                programStage: AMRDataProgramStageIdl,
                 orgUnit,
+                dataValues: AMRDataStage,
+                occurredAt: sampleDate,
+                status: "COMPLETED",
+            },
+        ];
+        const enrollments: TrackerEnrollment[] = [
+            {
+                orgUnit,
+                program: AMRIProgramIDl,
                 trackedEntity: "",
+                enrollment: "",
                 trackedEntityType: AMR_GLASS_AMR_TET_PATIENT,
-                enrollments: enrollments,
-                attributes: [
-                    {
-                        attribute: PATIENT_COUNTER_ID,
-                        value: attributes.find(at => at.attribute === PATIENT_COUNTER_ID)?.value.toString() ?? "",
-                    },
-                    {
-                        attribute: PATIENT_ID,
-                        value: attributes.find(at => at.attribute === PATIENT_ID)?.value.toString() ?? "",
-                    },
-                ],
-            };
-            return entity;
-        });
-        return Future.success(trackedEntities);
+                attributes: attributes,
+                events: events,
+                enrolledAt: sampleDate,
+                occurredAt: sampleDate,
+                createdAt: createdAt,
+                createdAtClient: createdAt,
+                updatedAt: createdAt,
+                updatedAtClient: createdAt,
+                status: "COMPLETED",
+                orgUnitName: countryCode,
+                followUp: false,
+                deleted: false,
+                storedBy: "",
+            },
+        ];
+
+        const entity: TrackerTrackedEntity = {
+            orgUnit,
+            trackedEntity: "",
+            trackedEntityType: AMR_GLASS_AMR_TET_PATIENT,
+            enrollments: enrollments,
+            attributes: [
+                {
+                    attribute: PATIENT_COUNTER_ID,
+                    value: attributes.find(at => at.attribute === PATIENT_COUNTER_ID)?.value.toString() ?? "",
+                },
+                {
+                    attribute: PATIENT_ID,
+                    value: attributes.find(at => at.attribute === PATIENT_ID)?.value.toString() ?? "",
+                },
+            ],
+        };
+        return entity;
     });
+    return Future.success(trackedEntities);
 }
 
 export function runProgramRuleValidations(
