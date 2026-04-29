@@ -34,22 +34,25 @@ export function mapIndividualFungalDataItemsToEntities(
     metadata: Record<"programAttributes" | "programStageDataElements", any> // TODO: type this properly and fix clean architecture violation
 ): FutureData<TrackerTrackedEntity[]> {
     const trackedEntities = individualFungalDataItems.map(dataItem => {
+        const valueByKey = new Map<string, string | number | undefined>();
+        for (const item of dataItem) {
+            valueByKey.set(item.key, item.value);
+        }
+
         const attributes: TrackerTrackedEntityAttribute[] = metadata.programAttributes.map(
             (attr: { id: string; name: string; code: string; valueType: string }) => {
-                const currentAttribute = dataItem.find(item => item.key === attr.code);
+                const currentValue = valueByKey.get(attr.code);
 
-                if (attr.valueType === "ORGANISATION_UNIT" && typeof currentAttribute?.value === "string") {
+                if (attr.valueType === "ORGANISATION_UNIT" && typeof currentValue === "string") {
                     return {
                         attribute: attr.id,
-                        value: currentAttribute
-                            ? getTEAValueFromOrganisationUnitCountryEntry(allCountries, currentAttribute.value, true)
-                            : "",
+                        value: getTEAValueFromOrganisationUnitCountryEntry(allCountries, currentValue, true),
                     };
                 }
 
                 return {
                     attribute: attr.id,
-                    value: currentAttribute?.value ?? "",
+                    value: currentValue ?? "",
                 };
             }
         );
@@ -57,7 +60,7 @@ export function mapIndividualFungalDataItemsToEntities(
             (de: { id: string; name: string; code: string }) => {
                 return {
                     dataElement: de.id,
-                    value: dataItem.find(item => item.key === de.code)?.value ?? "",
+                    value: valueByKey.get(de.code) ?? "",
                 };
             }
         );
