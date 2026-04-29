@@ -67,9 +67,11 @@ export class AsyncImportRISIndividualFungalFile {
             program?.programStageId ??
             (glassModule.name === "AMR - Individual" ? AMR_DATA_PROGRAM_STAGE_ID : AMR_FUNGAL_PROGRAM_STAGE_ID);
 
-        return this.repositories.trackerRepository
-            .getProgramMetadata(programId, programStageId)
-            .flatMap(programMetadata => {
+        return Future.joinObj({
+            programMetadata: this.repositories.trackerRepository.getProgramMetadata(programId, programStageId),
+            programRulesMetadata: this.repositories.programRulesMetadataRepository.getMetadata(programId),
+        })
+            .flatMap(({ programMetadata, programRulesMetadata }) => {
                 let totalRowsValidated = 0;
                 let validationErrorSummary: ImportSummary | undefined = undefined;
 
@@ -118,7 +120,8 @@ export class AsyncImportRISIndividualFungalFile {
                                     programId,
                                     entities,
                                     programStageId,
-                                    this.repositories.programRulesMetadataRepository
+                                    this.repositories.programRulesMetadataRepository,
+                                    programRulesMetadata
                                 ).flatMap(validationResult => {
                                     if (validationResult.blockingErrors.length > 0) {
                                         consoleLogger.debug(

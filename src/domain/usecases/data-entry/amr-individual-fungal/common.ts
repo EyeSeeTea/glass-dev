@@ -4,8 +4,7 @@ import { CustomDataColumns } from "../../../entities/data-entry/amr-individual-f
 import { Future, FutureData } from "../../../entities/Future";
 import moment from "moment";
 import { getTEAValueFromOrganisationUnitCountryEntry } from "../utils/getTEAValueFromOrganisationUnitCountryEntry";
-import { TrackerRepository } from "../../../repositories/TrackerRepository";
-import { ValidationResult } from "../../../entities/program-rules/EventEffectTypes";
+import { BulkLoadMetadata, ValidationResult } from "../../../entities/program-rules/EventEffectTypes";
 import { ProgramRuleValidationForBLEventProgram } from "../../program-rules-processing/ProgramRuleValidationForBLEventProgram";
 import { ProgramRulesMetadataRepository } from "../../../repositories/program-rules/ProgramRulesMetadataRepository";
 import { ConsistencyError, ImportSummary } from "../../../entities/data-entry/ImportSummary";
@@ -130,7 +129,8 @@ export function runProgramRuleValidations(
     programId: string,
     teis: TrackerTrackedEntity[],
     AMRDataProgramStageIdl: string,
-    programRulesMetadataRepository: ProgramRulesMetadataRepository
+    programRulesMetadataRepository: ProgramRulesMetadataRepository,
+    programRulesMetadata?: BulkLoadMetadata
 ): FutureData<ValidationResult> {
     //1. Before running validations, add ids to tei, enrollement and event so thier relationships can be processed.
     const teisWithId = teis?.map((tei, teiIndex) => {
@@ -152,8 +152,16 @@ export function runProgramRuleValidations(
     //2. Run Program Rule Validations
     const programRuleValidations = new ProgramRuleValidationForBLEventProgram(programRulesMetadataRepository);
 
-    return programRuleValidations
-        .getValidatedTeisAndEvents(programId, [], teisWithId, AMRDataProgramStageIdl)
+    const validationFuture = programRulesMetadata
+        ? programRuleValidations.getValidatedTeisAndEventsFromMetadata(
+              programRulesMetadata,
+              [],
+              teisWithId,
+              AMRDataProgramStageIdl
+          )
+        : programRuleValidations.getValidatedTeisAndEvents(programId, [], teisWithId, AMRDataProgramStageIdl);
+
+    return validationFuture
         .flatMap(programRuleValidationResults => {
             //3. After processing, remove ids to tei, enrollement and events so that they can be imported
             const teisWithoutId = programRuleValidationResults.teis?.map(tei => {
