@@ -152,7 +152,7 @@ export function runProgramRuleValidations(
     //2. Run Program Rule Validations
     const programRuleValidations = new ProgramRuleValidationForBLEventProgram(programRulesMetadataRepository);
 
-    const validationFuture = programRulesMetadata
+    const $validation = programRulesMetadata
         ? programRuleValidations.getValidatedTeisAndEventsFromMetadata(
               programRulesMetadata,
               [],
@@ -161,31 +161,30 @@ export function runProgramRuleValidations(
           )
         : programRuleValidations.getValidatedTeisAndEvents(programId, [], teisWithId, AMRDataProgramStageIdl);
 
-    return validationFuture
-        .flatMap(programRuleValidationResults => {
-            //3. After processing, remove ids to tei, enrollement and events so that they can be imported
-            const teisWithoutId = programRuleValidationResults.teis?.map(tei => {
-                const enrollementsWithoutId = tei.enrollments?.map(enrollment => {
-                    const eventsWithoutIds = enrollment.events.map(ev => {
-                        return {
-                            ...ev,
-                            event: "",
-                            enrollment: "",
-                            trackedEntity: "",
-                        };
-                    });
-
-                    return { ...enrollment, enrollment: "", events: eventsWithoutIds };
+    return $validation.flatMap(programRuleValidationResults => {
+        //3. After processing, remove ids to tei, enrollement and events so that they can be imported
+        const teisWithoutId = programRuleValidationResults.teis?.map(tei => {
+            const enrollementsWithoutId = tei.enrollments?.map(enrollment => {
+                const eventsWithoutIds = enrollment.events.map(ev => {
+                    return {
+                        ...ev,
+                        event: "",
+                        enrollment: "",
+                        trackedEntity: "",
+                    };
                 });
-                return { ...tei, enrollments: enrollementsWithoutId, trackedEntity: "" };
-            });
 
-            return Future.success({
-                blockingErrors: programRuleValidationResults.blockingErrors,
-                nonBlockingErrors: programRuleValidationResults.nonBlockingErrors,
-                teis: teisWithoutId,
+                return { ...enrollment, enrollment: "", events: eventsWithoutIds };
             });
+            return { ...tei, enrollments: enrollementsWithoutId, trackedEntity: "" };
         });
+
+        return Future.success({
+            blockingErrors: programRuleValidationResults.blockingErrors,
+            nonBlockingErrors: programRuleValidationResults.nonBlockingErrors,
+            teis: teisWithoutId,
+        });
+    });
 }
 
 type CustomValidationFunction = (dataItem: CustomDataColumns) => string | null;
