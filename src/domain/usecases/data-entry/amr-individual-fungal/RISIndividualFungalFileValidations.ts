@@ -30,7 +30,7 @@ export function checkPeriod(dataItem: CustomDataColumns, period: string): string
  * If no SAMPLE_DATE is provided, it defaults to 01-01-period */
 export function checkSpecimenDate(dataItem: CustomDataColumns, period: string): string | null {
     const specimenDateValue =
-        dataItem.find(item => item.key === RISIndividualFungalFileColumns.SPECIMEN_DATE)?.value || `01-01-${period}`;
+        dataItem.find(item => item.key === RISIndividualFungalFileColumns.SPECIMEN_DATE)?.value || `${period}-01-01`;
     const yearValue = dataItem.find(item => item.key === RISIndividualFungalFileColumns.YEAR)?.value;
     if (moment(specimenDateValue).year().toString() !== yearValue?.toString()) {
         return `${RISIndividualFungalFileColumns.SPECIMEN_DATE} year is different from ${

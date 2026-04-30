@@ -43,42 +43,51 @@ export class ProgramRuleValidationForBLEventProgram {
         currentProgramStage?: Id
     ): FutureData<ValidationResult> {
         return this.programRulesMetadataRepository.getMetadata(programId).flatMap(metadata => {
-            return this.getEventEffects(metadata, events, teis, currentProgramStage).flatMap(eventEffects => {
-                const actionsResult = this.getActions(eventEffects, metadata);
-                if (actionsResult.blockingErrors.length > 0) {
-                    //If there are blocking errors, do not process further. return the errors.
-                    const errors: ValidationResult = {
-                        teis: [],
-                        events: [],
-                        blockingErrors: actionsResult.blockingErrors,
-                        nonBlockingErrors: actionsResult.nonBlockingErrors,
-                    };
-                    return Future.success(errors);
-                } else {
-                    const eventsToBeUpdated = _.flatMap(eventEffects, eventEffect => eventEffect.events);
-                    const eventsById = _.keyBy(eventsToBeUpdated, "event");
-                    const eventsUpdated = this.getUpdatedEvents(actionsResult.actions, eventsById);
-                    const unChangedEvents = events?.filter(e => !eventsUpdated.some(ue => ue.event === e.event)) ?? [];
-                    const consolidatedEvents: TrackerEvent[] = [...eventsUpdated, ...unChangedEvents];
+            return this.getValidatedTeisAndEventsFromMetadata(metadata, events, teis, currentProgramStage);
+        });
+    }
 
-                    const teisCurrent = teis ? teis : [];
+    public getValidatedTeisAndEventsFromMetadata(
+        metadata: BulkLoadMetadata,
+        events?: TrackerEvent[],
+        teis?: TrackerTrackedEntity[], //For tracker programs only
+        currentProgramStage?: Id
+    ): FutureData<ValidationResult> {
+        return this.getEventEffects(metadata, events, teis, currentProgramStage).flatMap(eventEffects => {
+            const actionsResult = this.getActions(eventEffects, metadata);
+            if (actionsResult.blockingErrors.length > 0) {
+                //If there are blocking errors, do not process further. return the errors.
+                const errors: ValidationResult = {
+                    teis: [],
+                    events: [],
+                    blockingErrors: actionsResult.blockingErrors,
+                    nonBlockingErrors: actionsResult.nonBlockingErrors,
+                };
+                return Future.success(errors);
+            } else {
+                const eventsToBeUpdated = _.flatMap(eventEffects, eventEffect => eventEffect.events);
+                const eventsById = _.keyBy(eventsToBeUpdated, "event");
+                const eventsUpdated = this.getUpdatedEvents(actionsResult.actions, eventsById);
+                const unChangedEvents = events?.filter(e => !eventsUpdated.some(ue => ue.event === e.event)) ?? [];
+                const consolidatedEvents: TrackerEvent[] = [...eventsUpdated, ...unChangedEvents];
 
-                    const teisUpdated: TrackerTrackedEntity[] = this.getUpdatedTeis(teisCurrent, actionsResult.actions);
-                    const unchangedTeis = teisCurrent.filter(
-                        tei => !teisUpdated.some(updatedTei => updatedTei.trackedEntity === tei.trackedEntity)
-                    );
-                    const consolidatedTeis = [...teisUpdated, ...unchangedTeis];
-                    console.debug(`Changes: events=${eventsUpdated.length}, teis=${teisUpdated.length}`);
+                const teisCurrent = teis ? teis : [];
 
-                    const results: ValidationResult = {
-                        teis: consolidatedTeis,
-                        events: consolidatedEvents,
-                        blockingErrors: [],
-                        nonBlockingErrors: actionsResult.nonBlockingErrors,
-                    };
-                    return Future.success(results);
-                }
-            });
+                const teisUpdated: TrackerTrackedEntity[] = this.getUpdatedTeis(teisCurrent, actionsResult.actions);
+                const unchangedTeis = teisCurrent.filter(
+                    tei => !teisUpdated.some(updatedTei => updatedTei.trackedEntity === tei.trackedEntity)
+                );
+                const consolidatedTeis = [...teisUpdated, ...unchangedTeis];
+                console.debug(`Changes: events=${eventsUpdated.length}, teis=${teisUpdated.length}`);
+
+                const results: ValidationResult = {
+                    teis: consolidatedTeis,
+                    events: consolidatedEvents,
+                    blockingErrors: [],
+                    nonBlockingErrors: actionsResult.nonBlockingErrors,
+                };
+                return Future.success(results);
+            }
         });
     }
 
