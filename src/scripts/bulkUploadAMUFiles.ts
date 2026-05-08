@@ -19,7 +19,6 @@ import { GetSpecificDataSubmissionUseCase } from "../domain/usecases/GetSpecific
 import { SaveDataSubmissionsUseCase } from "../domain/usecases/SaveDataSubmissionsUseCase";
 import { SetDataSubmissionStatusUseCase } from "../domain/usecases/SetDataSubmissionStatusUseCase";
 import { SetUploadStatusUseCase } from "../domain/usecases/SetUploadStatusUseCase";
-import { moduleProperties } from "../domain/utils/ModuleProperties";
 
 import { generateUid } from "../utils/uid";
 import { getD2ApiFromArgs, getInstance } from "./common";
@@ -27,7 +26,6 @@ import { DataValuesDefaultImportRepository } from "../data/repositories/data-ent
 import { GlassUploadsProgramRepository } from "../data/repositories/GlassUploadsProgramRepository";
 import { getUploadsFormDataBuilder } from "../utils/getUploadsFormDataBuilder";
 import { getD2APiFromInstance } from "../utils/d2-api";
-import { UploadDocumentUseCase } from "../domain/usecases/UploadDocumentUseCase";
 import { AMCProductDataDefaultRepository } from "../data/repositories/data-entry/AMCProductDataDefaultRepository";
 import { AMCSubstanceDataDefaultRepository } from "../data/repositories/data-entry/AMCSubstanceDataDefaultRepository";
 import { ImportAMCProductLevelData } from "../domain/usecases/data-entry/amc/ImportAMCProductLevelData";
@@ -35,21 +33,14 @@ import { ImportAMCSubstanceLevelData } from "../domain/usecases/data-entry/amc/I
 import { ExcelRepository } from "../domain/repositories/ExcelRepository";
 import { InstanceRepository } from "../domain/repositories/InstanceRepository";
 import { TrackerRepository } from "../domain/repositories/TrackerRepository";
-import { GlassDocumentsRepository } from "../domain/repositories/GlassDocumentsRepository";
-import { GlassUploadsRepository } from "../domain/repositories/GlassUploadsRepository";
-import { MetadataRepository } from "../domain/repositories/MetadataRepository";
 import { ProgramRulesMetadataRepository } from "../domain/repositories/program-rules/ProgramRulesMetadataRepository";
 import { GlassATCRepository } from "../domain/repositories/GlassATCRepository";
-import { AMCProductDataRepository } from "../domain/repositories/data-entry/AMCProductDataRepository";
-import { AMCSubstanceDataRepository } from "../domain/repositories/data-entry/AMCSubstanceDataRepository";
 import { ExcelPopulateDefaultRepository } from "../data/repositories/ExcelPopulateDefaultRepository";
 import { GlassATCDefaultRepository } from "../data/repositories/GlassATCDefaultRepository";
 import { TrackerDefaultRepository } from "../data/repositories/TrackerDefaultRepository";
 import { InstanceDefaultRepository } from "../data/repositories/InstanceDefaultRepository";
 import { ProgramRulesMetadataDefaultRepository } from "../data/repositories/program-rule/ProgramRulesMetadataDefaultRepository";
 import { Dhis2EventsDefaultRepository } from "../data/repositories/Dhis2EventsDefaultRepository";
-import { GetAllCountriesUseCase } from "../domain/usecases/GetAllCountriesUseCase";
-import { CountryRepository } from "../domain/repositories/CountryRepository";
 import { CountryDefaultRepository } from "../data/repositories/CountryDefaultRepository";
 import { CalculateConsumptionDataProductLevelUseCase } from "../domain/usecases/data-entry/amc/CalculateConsumptionDataProductLevelUseCase";
 import { CalculateConsumptionDataSubstanceLevelUseCase } from "../domain/usecases/data-entry/amc/CalculateConsumptionDataSubstanceLevelUseCase";
@@ -762,9 +753,8 @@ async function validateFile(fileArrayBuffer: ArrayBuffer, dataRepository: any): 
 
         return await dataRepository.validateFileBuffer(fileArrayBuffer, module.dataColumns, module.teiColumns);
     } catch (error) {
-        const msg = `Validation error for file ${fileArrayBuffer}: ${
-            error instanceof Error ? error.message : String(error)
-        }`;
+        const msg = `Validation error for file ${fileArrayBuffer}: ${error instanceof Error ? error.message : String(error)
+            }`;
 
         log(msg, LogLevel.ERROR);
         throw new Error(msg);
@@ -795,9 +785,8 @@ async function uploadFileToDataStore(fileMetaData: FileMetaData): Promise<FileMe
             ` ${fileMetaData.fileType} File ${fileMetaData.fileName} uploaded successfully with File ID: ${fileMetaData.fileId}`
         );
     } catch (error) {
-        const errorMessage = `Error during the ${fileMetaData.fileType} file import process: ${
-            fileMetaData.fileName
-        }, ${error instanceof Error ? error.message : String(error)}`;
+        const errorMessage = `Error during the ${fileMetaData.fileType} file import process: ${fileMetaData.fileName
+            }, ${error instanceof Error ? error.message : String(error)}`;
         log(errorMessage, LogLevel.ERROR);
         throw new Error(errorMessage);
     }
@@ -831,9 +820,8 @@ async function uploadFileToDataStore(fileMetaData: FileMetaData): Promise<FileMe
         fileMetaData.fileUploadId = uploadData.id;
         return fileMetaData;
     } catch (uploadError) {
-        const errorMessage = `Error saving file upload data for ${fileMetaData.fileType} file: ${
-            fileMetaData.fileName
-        }, ${uploadError instanceof Error ? uploadError.message : String(uploadError)}`;
+        const errorMessage = `Error saving file upload data for ${fileMetaData.fileType} file: ${fileMetaData.fileName
+            }, ${uploadError instanceof Error ? uploadError.message : String(uploadError)}`;
         log(errorMessage, LogLevel.ERROR);
         throw new Error(errorMessage);
     }
@@ -921,9 +909,8 @@ async function uploadDataValues(fileMetaData: FileMetaData) {
                 "Here are the non blocking errors for the failed metadata import: ",
                 importSummary.nonBlockingErrors
             );
-            const errorMessage = `File ${fileMetaData.fileName} metadata NOT imported! with importSummary status ${
-                importSummary.status
-            }   ${importSummary.blockingErrors.map(error => `  - ${error.error}`).join("\n")} `;
+            const errorMessage = `File ${fileMetaData.fileName} metadata NOT imported! with importSummary status ${importSummary.status
+                }   ${importSummary.blockingErrors.map(error => `  - ${error.error}`).join("\n")} `;
             console.error(errorMessage, LogLevel.ERROR);
             //await setUploadStatusUseCase.execute({ id: fileMetaData.fileUploadId, status: "IMPORTED" }).toPromise();
             throw new Error(errorMessage);
@@ -1038,9 +1025,8 @@ async function uploadDataValuesAndFile(fileMetaData: FileMetaData): Promise<void
                 );
                 console.warn(`Completed handlePostUploadBatchDatastoreUpdates for : ${fileMetaData.fileName}`);
             } catch (uploadError) {
-                const errorMessage = `Error handlePostUploadBatchFileUpdates for ${fileMetaData.fileName}, ${
-                    uploadError instanceof Error ? uploadError.message : String(uploadError)
-                }`;
+                const errorMessage = `Error handlePostUploadBatchFileUpdates for ${fileMetaData.fileName}, ${uploadError instanceof Error ? uploadError.message : String(uploadError)
+                    }`;
                 log(errorMessage, LogLevel.ERROR);
             } finally {
                 datastore_semaphore.release();
@@ -1048,9 +1034,8 @@ async function uploadDataValuesAndFile(fileMetaData: FileMetaData): Promise<void
             }
         }
     } catch (error) {
-        const errorMessage = `Error processing file: ${fileMetaData.fileName}: ${
-            error instanceof Error ? error.message : String(error)
-        } `;
+        const errorMessage = `Error processing file: ${fileMetaData.fileName}: ${error instanceof Error ? error.message : String(error)
+            } `;
         log(errorMessage, LogLevel.ERROR);
     } finally {
         batch_semaphore.release();
@@ -1080,9 +1065,8 @@ async function handlePostUploadBatchDatastoreUpdates(fileUploadId: string, submi
             `Successfully processed file(s) for submission ${submissionId}, setting them to COMPLETED and PENDING_APPROVAL status.`
         );
     } catch (error) {
-        const errorMessage = `Error during the update of statuses for submission ${submissionId}, file Id ${fileUploadId}: ${
-            error instanceof Error ? error.message : String(error)
-        }`;
+        const errorMessage = `Error during the update of statuses for submission ${submissionId}, file Id ${fileUploadId}: ${error instanceof Error ? error.message : String(error)
+            }`;
         log(errorMessage, LogLevel.ERROR);
         throw new Error(errorMessage);
     }
@@ -1125,6 +1109,12 @@ async function processDirectory(directoryPath: string): Promise<void> {
                 const batchId = ""; //no batchId in AMU files
                 const period = beforeDot.substring(beforeDot.lastIndexOf("_") + 1);
                 const [fileType, orgUnitCode] = fileName.split("_");
+
+
+                if (!fileType) {
+                    throw new Error(`Invalid filename: "${fileName}". Expected format: <fileType>_<orgUnitCode>...`);
+                }
+
 
                 if (!period) {
                     throw new Error("Missing period in file name.");
@@ -1169,7 +1159,7 @@ async function processDirectory(directoryPath: string): Promise<void> {
                 let fileMetaData: FileMetaData = {
                     fileUploadId: "",
                     fileId: "",
-                    fileType: fileType,
+                    fileType: fileType!, 
                     file: await createFileFromPath(filePath),
                     fileBuffer: await createBufferFileFromPath(filePath),
                     fileData: {
