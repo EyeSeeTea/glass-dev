@@ -8,9 +8,6 @@ import {
     GlassAtcVersionData,
     ListGlassATCLastVersionKeysByYear,
     ListGlassATCVersions,
-    UnitCode,
-    UnitName,
-    UnitsData,
     validateAtcVersion,
 } from "../../domain/entities/GlassAtcVersionData";
 import { GlassATCRepository } from "../../domain/repositories/GlassATCRepository";
@@ -147,15 +144,8 @@ export class GlassATCDefaultRepository implements GlassATCRepository {
             units: glassAtcVersionData.units.map(unit => ({
                 ...unit,
                 NAME: unit.NAME.toLowerCase().replace(/_/g, " "),
-                UNIT_STD: this.getUnitSTDCode(
-                    glassAtcVersionData.units,
-                    unit?.UNIT_STD?.toLowerCase()?.replace(/_/g, " ")
-                ),
+                // UNIT_STD is already a UnitCode in the raw data; no name lookup needed
             })),
         };
-    }
-
-    private getUnitSTDCode(unitsData: UnitsData[], unitSTDName: UnitName | undefined): UnitCode | undefined {
-        return unitsData.find(unit => unit.NAME === unitSTDName)?.UNIT_STD;
     }
 }
