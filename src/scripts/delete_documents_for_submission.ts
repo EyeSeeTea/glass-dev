@@ -4,9 +4,11 @@ import { getInstance } from "./common";
 import dotenv from "dotenv";
 import { DataStoreClient } from "../data/data-store/DataStoreClient";
 import { GlassDocumentsDefaultRepository } from "../data/repositories/GlassDocumentsDefaultRepository";
-import { GlassUploadsDefaultRepository } from "../data/repositories/GlassUploadsDefaultRepository";
 import { Instance } from "../data/entities/Instance";
 import { DeleteDocumentInfoByUploadIdUseCase } from "../domain/usecases/DeleteDocumentInfoByUploadIdUseCase";
+import { GlassUploadsProgramRepository } from "../data/repositories/GlassUploadsProgramRepository";
+import { getUploadsFormDataBuilder } from "../utils/getUploadsFormDataBuilder";
+import { getD2APiFromInstance } from "../utils/d2-api";
 dotenv.config();
 
 console.log("Base URL:", process.env.REACT_APP_DHIS2_BASE_URL);
@@ -16,7 +18,7 @@ console.log("REACT_APP_DHIS2_BASE_URL:", process.env.REACT_APP_DHIS2_BASE_URL);
 let instance: Instance;
 let dataStoreClient: DataStoreClient;
 let glassDocumentsRepository: GlassDocumentsDefaultRepository;
-let glassUploadsRepository: GlassUploadsDefaultRepository;
+let glassUploadsRepository: GlassUploadsProgramRepository;
 let deleteDocumentInfoByUploadIdUseCase: DeleteDocumentInfoByUploadIdUseCase;
 
 // Initialize the global variables
@@ -24,7 +26,10 @@ function initializeGlobals(envVars: any) {
     instance = getInstance(envVars);
     dataStoreClient = new DataStoreClient(instance);
     glassDocumentsRepository = new GlassDocumentsDefaultRepository(dataStoreClient, instance);
-    glassUploadsRepository = new GlassUploadsDefaultRepository(dataStoreClient);
+    const api = getD2APiFromInstance(instance);
+    const runtime: "node" | "browser" = typeof window === "undefined" ? "node" : "browser";
+    const uploadsFormDataBuilder = getUploadsFormDataBuilder(runtime);
+    glassUploadsRepository = new GlassUploadsProgramRepository(api, uploadsFormDataBuilder);
     deleteDocumentInfoByUploadIdUseCase = new DeleteDocumentInfoByUploadIdUseCase(
         glassDocumentsRepository,
         glassUploadsRepository

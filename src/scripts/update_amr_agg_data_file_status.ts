@@ -3,10 +3,13 @@ import path from "path";
 import { getInstance } from "./common";
 import dotenv from "dotenv";
 import { DataStoreClient } from "../data/data-store/DataStoreClient";
-import { GlassUploadsDefaultRepository } from "../data/repositories/GlassUploadsDefaultRepository";
+
 import { Instance } from "../data/entities/Instance";
 import { SetUploadStatusUseCase } from "../domain/usecases/SetUploadStatusUseCase";
 import { UpdateSampleUploadWithRisIdUseCase } from "../domain/usecases/UpdateSampleUploadWithRisIdUseCase";
+import { GlassUploadsProgramRepository } from "../data/repositories/GlassUploadsProgramRepository";
+import { getD2APiFromInstance } from "../utils/d2-api";
+import { getUploadsFormDataBuilder } from "../utils/getUploadsFormDataBuilder";
 dotenv.config();
 
 console.log("Base URL:", process.env.REACT_APP_DHIS2_BASE_URL);
@@ -15,7 +18,7 @@ console.log("REACT_APP_DHIS2_BASE_URL:", process.env.REACT_APP_DHIS2_BASE_URL);
 
 let instance: Instance;
 let dataStoreClient: DataStoreClient;
-let glassUploadsRepository: GlassUploadsDefaultRepository;
+let glassUploadsRepository: GlassUploadsProgramRepository;
 let setUploadStatusUseCase: SetUploadStatusUseCase;
 let updateSecondaryFileWithPrimaryId: UpdateSampleUploadWithRisIdUseCase;
 
@@ -23,7 +26,10 @@ let updateSecondaryFileWithPrimaryId: UpdateSampleUploadWithRisIdUseCase;
 function initializeGlobals(envVars: any) {
     instance = getInstance(envVars);
     dataStoreClient = new DataStoreClient(instance);
-    glassUploadsRepository = new GlassUploadsDefaultRepository(dataStoreClient);
+    const api = getD2APiFromInstance(instance);
+    const runtime: "node" | "browser" = typeof window === "undefined" ? "node" : "browser";
+    const uploadsFormDataBuilder = getUploadsFormDataBuilder(runtime);
+    glassUploadsRepository = new GlassUploadsProgramRepository(api, uploadsFormDataBuilder);
     setUploadStatusUseCase = new SetUploadStatusUseCase(glassUploadsRepository);
     updateSecondaryFileWithPrimaryId = new UpdateSampleUploadWithRisIdUseCase(glassUploadsRepository);
 }

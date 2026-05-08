@@ -6,21 +6,14 @@ import dotenv from "dotenv";
 import { GlassDataSubmissionsDefaultRepository } from "../data/repositories/GlassDataSubmissionDefaultRepository";
 import { DataStoreClient } from "../data/data-store/DataStoreClient";
 import { GetSpecificDataSubmissionUseCase } from "../domain/usecases/GetSpecificDataSubmissionUseCase";
-import { GlassDataSubmission } from "../domain/entities/GlassDataSubmission";
-import { Future, FutureData } from "../domain/entities/Future";
-import { moduleProperties } from "../domain/utils/ModuleProperties";
-import { MetadataDefaultRepository } from "../data/repositories/MetadataDefaultRepository";
-import { RISDataCSVDefaultRepository } from "../data/repositories/data-entry/RISDataCSVDefaultRepository";
-import { UploadDocumentUseCase } from "../domain/usecases/UploadDocumentUseCase";
 import { GlassDocumentsDefaultRepository } from "../data/repositories/GlassDocumentsDefaultRepository";
-import { GlassUploadsDefaultRepository } from "../data/repositories/GlassUploadsDefaultRepository";
-import { SetUploadStatusUseCase } from "../domain/usecases/SetUploadStatusUseCase";
 import { Instance } from "../data/entities/Instance";
-import { SampleDataCSVDeafultRepository } from "../data/repositories/data-entry/SampleDataCSVDeafultRepository";
-import { UpdateSampleUploadWithRisIdUseCase } from "../domain/usecases/UpdateSampleUploadWithRisIdUseCase";
-import { CodedRef } from "../domain/entities/Ref";
 import { SetDataSubmissionStatusUseCase } from "../domain/usecases/SetDataSubmissionStatusUseCase";
 import { DeleteDocumentInfoByUploadIdUseCase } from "../domain/usecases/DeleteDocumentInfoByUploadIdUseCase";
+import { GlassUploadsProgramRepository } from "../data/repositories/GlassUploadsProgramRepository";
+import { getD2APiFromInstance } from "../utils/d2-api";
+import { getUploadsFormDataBuilder } from "../utils/getUploadsFormDataBuilder";
+
 dotenv.config();
 
 console.log("Base URL:", process.env.REACT_APP_DHIS2_BASE_URL);
@@ -30,7 +23,7 @@ console.log("REACT_APP_DHIS2_BASE_URL:", process.env.REACT_APP_DHIS2_BASE_URL);
 let instance: Instance;
 let dataStoreClient: DataStoreClient;
 let glassDocumentsRepository: GlassDocumentsDefaultRepository;
-let glassUploadsRepository: GlassUploadsDefaultRepository;
+let glassUploadsRepository: GlassUploadsProgramRepository;
 
 //let orgUnits: CodedRef[] = [];
 let getSpecificDataSubmission: GetSpecificDataSubmissionUseCase;
@@ -45,8 +38,11 @@ const moduleId = "AVnpk4xiXGG";
 function initializeGlobals(envVars: any) {
     instance = getInstance(envVars);
     dataStoreClient = new DataStoreClient(instance);
+    const api = getD2APiFromInstance(instance);
+    const runtime: "node" | "browser" = typeof window === "undefined" ? "node" : "browser";
+    const uploadsFormDataBuilder = getUploadsFormDataBuilder(runtime);
+    glassUploadsRepository = new GlassUploadsProgramRepository(api, uploadsFormDataBuilder);
     glassDocumentsRepository = new GlassDocumentsDefaultRepository(dataStoreClient, instance);
-    glassUploadsRepository = new GlassUploadsDefaultRepository(dataStoreClient);
     glassDataSubmissionRepository = new GlassDataSubmissionsDefaultRepository(dataStoreClient);
     getSpecificDataSubmission = new GetSpecificDataSubmissionUseCase(glassDataSubmissionRepository);
     setSubmissionStatus = new SetDataSubmissionStatusUseCase(glassDataSubmissionRepository);
