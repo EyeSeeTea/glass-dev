@@ -141,7 +141,7 @@ async function initializeGlobals() {
     //DataStore
     dataStoreClient = new DataStoreClient(undefined, api);
     glassDocumentsRepository = new GlassDocumentsDefaultRepository(dataStoreClient, instance);
-    
+
     moduleRepository = new GlassModuleDefaultRepository(dataStoreClient);
     glassDataSubmissionRepository = new GlassDataSubmissionsDefaultRepository(dataStoreClient);
     // uploadDocumentsUseCase = new UploadDocumentUseCase(glassDocumentsRepository, glassUploadsRepository);
