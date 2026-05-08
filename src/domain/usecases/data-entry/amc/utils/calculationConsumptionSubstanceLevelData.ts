@@ -403,12 +403,16 @@ function getDDDsAdjust(
     }
     const { ddds_manual } = rawSubstanceConsumptionData;
     // 2 - check compatible units between oldDDD and newDDD
+    // Compare standardized unit families (UNIT_STD), not raw unit codes.
+    // DDD_STD values are already expressed in the base unit (UNIT_STD), so the ratio
+    // is valid as long as both DDDs share the same standard unit — regardless of whether
+    // one used "mg" and the other "g" in the raw referential.
     const oldDDDFam = atcVersion.units.find(({ UNIT }: UnitsData) => {
         return UNIT === oldDDD.DDD_UNIT;
-    })?.UNIT;
+    })?.UNIT_STD;
     const newDDDFam = atcVersion.units.find(({ UNIT }: UnitsData) => {
         return UNIT === newDDD.DDD_UNIT;
-    })?.UNIT;
+    })?.UNIT_STD;
 
     if (oldDDDFam !== newDDDFam) {
         return {

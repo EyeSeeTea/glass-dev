@@ -47,7 +47,7 @@ export type DDDData = {
     SALT: SaltCode;
     DDD: number;
     DDD_UNIT: UnitCode;
-    DDD_GRAMS: number;
+    DDD_GRAMS: number | null;
     DDD_STD: number;
     NOTES: string | null;
 };
@@ -96,12 +96,10 @@ export type DDDChangesData = {
     NEW_DDD_ROA: RouteOfAdministrationCode;
     NEW_DDD_UNIT: UnitCode;
     NEW_DDD_VALUE: number;
-    NEW_DDD_GRAMS: number;
     PREVIOUS_DDD_INFO: string | null;
     PREVIOUS_DDD_ROA: RouteOfAdministrationCode;
     PREVIOUS_DDD_UNIT: UnitCode;
     PREVIOUS_DDD_VALUE: number;
-    PREVIOUS_DDD_GRAMS: number;
     YEAR: number;
 };
 
@@ -131,7 +129,7 @@ export type UnitsData = {
     BASE_CONV: number;
     UNIT: UnitCode;
     NAME: UnitName;
-    UNIT_FAMILY?: UnitCode;
+    UNIT_STD?: UnitCode;
     USE_STRENGTH: boolean;
     USE_VOLUME: boolean;
 };
@@ -243,7 +241,7 @@ export function getStandardizedUnitsAndValue(
     const unitData = unitsData.find(({ UNIT }) => unit === UNIT);
     if (unitData) {
         const standarizedValue = value * unitData.BASE_CONV;
-        const standarizedUnit = unitData.BASE_CONV === 1 ? unitData.UNIT : unitData.UNIT_FAMILY;
+        const standarizedUnit = unitData.UNIT_STD;
         return {
             standarizedValue: standarizedValue,
             standarizedUnit: standarizedUnit,
@@ -254,7 +252,7 @@ export function getStandardizedUnitsAndValue(
 export function getStandardizedUnit(unitsData: UnitsData[], unit: UnitCode): UnitCode | undefined {
     const unitData = unitsData.find(({ UNIT }) => unit === UNIT);
     if (unitData) {
-        return unitData.BASE_CONV === 1 ? unitData.UNIT : unitData.UNIT_FAMILY;
+        return unitData.UNIT_STD;
     }
 }
 
@@ -328,12 +326,19 @@ export function getDDDForAtcVersion(params: {
             dddChanges: atcVersion.changes ? getDDDChanges(atcVersion.changes) : undefined,
         });
         const unitsData = atcVersion?.units;
-        return newDDD ? parseDDDChangesDataToDDDData(newDDD, unitsData, saltCode) : undefined;
+        return newDDD ? parseDDDChangesDataToDDDData(newDDD, unitsData, saltCode, atcVersion.ddds) : undefined;
     }
 }
 
-function parseDDDChangesDataToDDDData(dddChange: DDDChangesData, unitsData: UnitsData[], saltCode: SaltCode): DDDData {
+function parseDDDChangesDataToDDDData(
+    dddChange: DDDChangesData,
+    unitsData: UnitsData[],
+    saltCode: SaltCode,
+    dddData: DDDData[]
+): DDDData {
     const standarized = getStandardizedUnitsAndValue(unitsData, dddChange.NEW_DDD_UNIT, dddChange.NEW_DDD_VALUE);
+    const dddGrams =
+        dddData.find(d => d.ATC5 === dddChange.ATC_CODE && d.ROA === dddChange.NEW_DDD_ROA)?.DDD_GRAMS ?? null;
 
     return {
         ARS: `${dddChange.ATC_CODE}_${dddChange.NEW_DDD_ROA}_${saltCode}`,
@@ -342,7 +347,7 @@ function parseDDDChangesDataToDDDData(dddChange: DDDChangesData, unitsData: Unit
         SALT: saltCode,
         DDD: dddChange.NEW_DDD_VALUE,
         DDD_UNIT: dddChange.NEW_DDD_UNIT,
-        DDD_GRAMS: dddChange.NEW_DDD_GRAMS,
+        DDD_GRAMS: dddGrams,
         DDD_STD: standarized?.standarizedValue ?? dddChange.NEW_DDD_VALUE,
         NOTES: dddChange.NEW_DDD_INFO,
     };
@@ -355,11 +360,17 @@ export function getNewDddData(params: {
 }): DDDChangesData | undefined {
     const { atcCode, roa, dddChanges } = params;
 
-    const newDDD = dddChanges?.find(({ ATC_CODE, CHANGE, PREVIOUS_DDD_ROA }) => {
+    // DDD changes are NOT salt-aware. Select deterministically by ATC_CODE + PREVIOUS_DDD_ROA
+    if (!dddChanges || dddChanges.length === 0) return undefined;
+
+    const candidates = dddChanges.filter(({ ATC_CODE, CHANGE, PREVIOUS_DDD_ROA }) => {
         return CHANGE !== "DELETED" && ATC_CODE === atcCode && PREVIOUS_DDD_ROA === roa;
     });
 
-    return newDDD;
+    if (candidates.length === 0) return undefined;
+
+    // Return the record with the latest YEAR
+    return candidates.reduce((best, cur) => (cur.YEAR > best.YEAR ? cur : best));
 }
 
 export function getAmClass(amClassData: AmClassificationData, atcCode: ATCCodeLevel5): AmName | undefined {

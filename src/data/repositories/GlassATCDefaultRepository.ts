@@ -147,15 +147,15 @@ export class GlassATCDefaultRepository implements GlassATCRepository {
             units: glassAtcVersionData.units.map(unit => ({
                 ...unit,
                 NAME: unit.NAME.toLowerCase().replace(/_/g, " "),
-                UNIT_FAMILY: this.getUnitFamilyCode(
+                UNIT_STD: this.getUnitSTDCode(
                     glassAtcVersionData.units,
-                    unit?.UNIT_FAMILY?.toLowerCase()?.replace(/_/g, " ")
+                    unit?.UNIT_STD?.toLowerCase()?.replace(/_/g, " ")
                 ),
             })),
         };
     }
 
-    private getUnitFamilyCode(unitsData: UnitsData[], unitFamilyName: UnitName | undefined): UnitCode | undefined {
-        return unitsData.find(unit => unit.NAME === unitFamilyName)?.UNIT;
+    private getUnitSTDCode(unitsData: UnitsData[], unitSTDName: UnitName | undefined): UnitCode | undefined {
+        return unitsData.find(unit => unit.NAME === unitSTDName)?.UNIT_STD;
     }
 }

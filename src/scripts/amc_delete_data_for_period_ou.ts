@@ -1,13 +1,11 @@
 import { command, run } from "cmd-ts";
 import "dotenv/config";
-
+/*
 import { getD2ApiFromArgs, getInstance } from "./common";
 import { DataStoreClient } from "../data/data-store/DataStoreClient";
 import { Id } from "../domain/entities/Ref";
 import { GetAsyncDeletionsUseCase } from "../domain/usecases/GetAsyncDeletionsUseCase";
 import { GlassUploadsRepository } from "../domain/repositories/GlassUploadsRepository";
-import { GlassUploadsDefaultRepository } from "../data/repositories/GlassUploadsDefaultRepository";
-import { GetGlassUploadsUseCase } from "../domain/usecases/GetGlassUploadsUseCase";
 import { Future, FutureData } from "../domain/entities/Future";
 import { GlassModule, GlassModuleName, isGlassModuleName } from "../domain/entities/GlassModule";
 import { GlassModuleRepository } from "../domain/repositories/GlassModuleRepository";
@@ -54,6 +52,8 @@ import { moduleProperties } from "../domain/utils/ModuleProperties";
 import { GlassAsyncDeletionsRepository } from "../domain/repositories/GlassAsyncDeletionsRepository";
 import { GlassAsyncDeletion } from "../domain/entities/GlassAsyncDeletions";
 import { GlassAsyncDeletionsDefaultRepository } from "../data/repositories/GlassAsyncDeletionsDefaultRepository";
+import { getUploadsFormDataBuilder } from "../utils/getUploadsFormDataBuilder";
+import { GlassUploadsProgramRepository } from "../data/repositories/GlassUploadsProgramRepository";
 
 const UPLOADED_FILE_STATUS_LOWERCASE = "uploaded";
 const IMPORT_SUMMARY_STATUS_ERROR = "ERROR";
@@ -90,9 +90,13 @@ async function main() {
                 const instance = getInstance(envVars);
                 const dataStoreClient = new DataStoreClient(instance);
 
+
+                const runtime: "node" | "browser" = typeof window === "undefined" ? "node" : "browser";
+                const uploadsFormDataBuilder = getUploadsFormDataBuilder(runtime);
+                const glassUploadsRepository = new GlassUploadsProgramRepository(api, uploadsFormDataBuilder);
                 const instanceRepository = new InstanceDefaultRepository(instance, dataStoreClient);
                 const glassModuleRepository = new GlassModuleDefaultRepository(dataStoreClient);
-                const glassUploadsRepository = new GlassUploadsDefaultRepository(dataStoreClient);
+
                 const glassAsyncDeletionsRepository = new GlassAsyncDeletionsDefaultRepository(dataStoreClient);
                 const glassDocumentsRepository = new GlassDocumentsDefaultRepository(dataStoreClient, instance);
                 const risDataRepository = new RISDataCSVDefaultRepository();
@@ -235,9 +239,7 @@ function getGlassModulesFromDatastore(glassModuleRepository: GlassModuleReposito
     return glassModuleRepository.getAll();
 }
 
-function getGlassUploadsDatastore(glassUploadsRepository: GlassUploadsRepository): FutureData<GlassUploads[]> {
-    return new GetGlassUploadsUseCase(glassUploadsRepository).execute();
-}
+
 
 function getArrayBufferOfFile(
     fileId: Id,
@@ -336,26 +338,26 @@ function deleteDatasetValuesOrEvents(
     return Future.joinObj({
         deletePrimaryFileSummary:
             primaryArrayBuffer &&
-            primaryFileToDelete &&
-            (primaryFileToDelete.status.toLowerCase() !== UPLOADED_FILE_STATUS_LOWERCASE ||
-                !moduleProperties.get(currentModuleName)?.isDryRunReq)
+                primaryFileToDelete &&
+                (primaryFileToDelete.status.toLowerCase() !== UPLOADED_FILE_STATUS_LOWERCASE ||
+                    !moduleProperties.get(currentModuleName)?.isDryRunReq)
                 ? deleteDatasetValuesOrEventsFromPrimaryUploaded(
-                      currentModule,
-                      primaryFileToDelete,
-                      primaryArrayBuffer,
-                      repositories
-                  )
+                    currentModule,
+                    primaryFileToDelete,
+                    primaryArrayBuffer,
+                    repositories
+                )
                 : Future.success(undefined),
         deleteSecondaryFileSummary:
             secondaryArrayBuffer &&
-            secondaryFileToDelete &&
-            secondaryFileToDelete.status.toLowerCase() !== UPLOADED_FILE_STATUS_LOWERCASE
+                secondaryFileToDelete &&
+                secondaryFileToDelete.status.toLowerCase() !== UPLOADED_FILE_STATUS_LOWERCASE
                 ? deleteDatasetValuesOrEventsFromSecondaryUploaded(
-                      currentModule,
-                      secondaryFileToDelete,
-                      secondaryArrayBuffer,
-                      repositories
-                  )
+                    currentModule,
+                    secondaryFileToDelete,
+                    secondaryArrayBuffer,
+                    repositories
+                )
                 : Future.success(undefined),
     });
 }
@@ -530,4 +532,4 @@ function deleteUploadedDatasets(
     ).toVoid();
 }
 
-main();
+main();*/

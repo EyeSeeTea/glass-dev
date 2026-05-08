@@ -63,7 +63,9 @@ export class ExcelPopulateDefaultRepository extends ExcelRepository {
                 const type = (file as any).type;
                 const name = (file as any).name;
                 extra = ` [programId=${programId}, templateId=${templateId}, name=${name}, type=${type}, size=${size}]`;
-            } catch {}
+            } catch {
+                // If we can't access file properties, we can still log the error without them
+            }
             // Log the original error with stack
             console.error("parseFile() failed" + extra, e?.message || e, e?.stack || e);
             // Re-throw preserving original error as cause (TS target >= ES2022)
@@ -157,7 +159,9 @@ export class ExcelPopulateDefaultRepository extends ExcelRepository {
                 // @ts-ignore depends on typing
                 const sheetNames = workbook.sheets ? workbook.sheets().map((s: any) => s.name()) : [];
                 console.log("[parseWorkbookFromBlob] sheets:", sheetNames);
-            } catch {}
+            } catch {
+                console.warn("[parseWorkbookFromBlob] unable to read sheet names, workbook structure may be unexpected.");
+            }
 
             return workbook as unknown as ExcelWorkbook;
         } catch (err: any) {
