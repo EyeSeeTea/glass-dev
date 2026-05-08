@@ -75,7 +75,7 @@ export function getConsumptionDataProductLevel(params: {
         );
     }
 
-    const { productRegistryAttributes, rawProductConsumption } = getProductRegistryAttributesAndRawProductConsumption(
+    const { productRegistryAttributes, rawProductConsumption: rawProductConsumptionRecords } = getProductRegistryAttributesAndRawProductConsumption(
         productDataTrackedEntities,
         productRegisterProgramMetadata.programAttributes,
         rawProductConsumptionStage
@@ -85,7 +85,7 @@ export function getConsumptionDataProductLevel(params: {
         period,
         orgUnitId,
         productRegistryAttributes,
-        rawProductConsumption,
+        rawProductConsumptionRecords,
         atcCurrentVersionData,
         atcVersionKey
     );

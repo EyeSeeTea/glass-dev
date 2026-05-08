@@ -98,7 +98,10 @@ export class DownloadTemplate {
 
         const enablePopulate = populate && !!populateStartDate && !!populateEndDate;
 
-        await this.excelRepository.loadTemplate(file, programId).toPromise();
+        // writeToBuffer() returns a Buffer (Uint8Array subclass), not a Blob.
+        // Extract a clean ArrayBuffer slice to avoid polyfill offset issues.
+        const ab = file.buffer.slice(file.byteOffset, file.byteOffset + file.byteLength) as ArrayBuffer;
+        await this.excelRepository.loadTemplateFromArrayBuffer(ab, programId).toPromise();
 
         const dataPackage = enablePopulate
             ? await this.downloadtemplateRepository.getDataPackage({
