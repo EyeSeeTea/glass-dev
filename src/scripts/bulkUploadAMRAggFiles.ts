@@ -137,11 +137,11 @@ async function initializeGlobals() {
     const api = getD2APiFromInstance(instance);
     const runtime: "node" | "browser" = typeof window === "undefined" ? "node" : "browser";
     const uploadsFormDataBuilder = getUploadsFormDataBuilder(runtime);
-
+    glassUploadsRepository = new GlassUploadsProgramRepository(api, uploadsFormDataBuilder);
     //DataStore
     dataStoreClient = new DataStoreClient(undefined, api);
     glassDocumentsRepository = new GlassDocumentsDefaultRepository(dataStoreClient, instance);
-    glassUploadsRepository = new GlassUploadsProgramRepository(api, uploadsFormDataBuilder);
+    
     moduleRepository = new GlassModuleDefaultRepository(dataStoreClient);
     glassDataSubmissionRepository = new GlassDataSubmissionsDefaultRepository(dataStoreClient);
     // uploadDocumentsUseCase = new UploadDocumentUseCase(glassDocumentsRepository, glassUploadsRepository);
