@@ -7,10 +7,13 @@ import { DataStoreClient } from "../data/data-store/DataStoreClient";
 import { GetSpecificDataSubmissionUseCase } from "../domain/usecases/GetSpecificDataSubmissionUseCase";
 import { MetadataDefaultRepository } from "../data/repositories/MetadataDefaultRepository";
 import { GlassDocumentsDefaultRepository } from "../data/repositories/GlassDocumentsDefaultRepository";
-import { GlassUploadsDefaultRepository } from "../data/repositories/GlassUploadsDefaultRepository";
+
 import { Instance } from "../data/entities/Instance";
 import { CodedRef } from "../domain/entities/Ref";
 import { DeleteDocumentInfoByUploadIdUseCase } from "../domain/usecases/DeleteDocumentInfoByUploadIdUseCase";
+import { GlassUploadsProgramRepository } from "../data/repositories/GlassUploadsProgramRepository";
+import { getD2APiFromInstance } from "../utils/d2-api";
+import { getUploadsFormDataBuilder } from "../utils/getUploadsFormDataBuilder";
 dotenv.config();
 
 console.log("Base URL:", process.env.REACT_APP_DHIS2_BASE_URL);
@@ -21,7 +24,7 @@ let instance: Instance;
 let dataStoreClient: DataStoreClient;
 let metadataRepository: MetadataDefaultRepository;
 let glassDocumentsRepository: GlassDocumentsDefaultRepository;
-let glassUploadsRepository: GlassUploadsDefaultRepository;
+let glassUploadsRepository: GlassUploadsProgramRepository;
 //const moduleName = "AMR";
 //const moduleId = "AVnpk4xiXGG";
 
@@ -33,10 +36,13 @@ let deleteDocumentInfoByUploadIdUseCase: DeleteDocumentInfoByUploadIdUseCase;
 // Initialize the global variables
 function initializeGlobals(envVars: any) {
     instance = getInstance(envVars);
+    const api = getD2APiFromInstance(instance);
+    const runtime: "node" | "browser" = typeof window === "undefined" ? "node" : "browser";
+    const uploadsFormDataBuilder = getUploadsFormDataBuilder(runtime);
+    glassUploadsRepository = new GlassUploadsProgramRepository(api, uploadsFormDataBuilder);
     dataStoreClient = new DataStoreClient(instance);
     metadataRepository = new MetadataDefaultRepository(instance);
     glassDocumentsRepository = new GlassDocumentsDefaultRepository(dataStoreClient, instance);
-    glassUploadsRepository = new GlassUploadsDefaultRepository(dataStoreClient);
     glassDataSubmissionRepository = new GlassDataSubmissionsDefaultRepository(dataStoreClient);
     getSpecificDataSubmission = new GetSpecificDataSubmissionUseCase(glassDataSubmissionRepository);
     deleteDocumentInfoByUploadIdUseCase = new DeleteDocumentInfoByUploadIdUseCase(
