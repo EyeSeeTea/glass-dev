@@ -160,7 +160,9 @@ export class ExcelPopulateDefaultRepository extends ExcelRepository {
                 const sheetNames = workbook.sheets ? workbook.sheets().map((s: any) => s.name()) : [];
                 console.log("[parseWorkbookFromBlob] sheets:", sheetNames);
             } catch {
-                console.warn("[parseWorkbookFromBlob] unable to read sheet names, workbook structure may be unexpected.");
+                console.warn(
+                    "[parseWorkbookFromBlob] unable to read sheet names, workbook structure may be unexpected."
+                );
             }
 
             return workbook as unknown as ExcelWorkbook;
