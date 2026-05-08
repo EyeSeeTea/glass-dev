@@ -29,7 +29,9 @@ export function apiToFuture<Data>(res: CancelableResponse<Data>): FutureData<Dat
                     if ((err as any)?.cause) {
                         console.error("Error cause:", util.inspect((err as any).cause, { depth: 10, colors: true }));
                     }
-                } catch {}
+                } catch {
+                    // purposely empty: If util.inspect isn't available (e.g., in a browser), we can skip this step
+                }
 
                 const code = (err as any)?.code ?? (err as any)?.cause?.code ?? (err as any)?.cause?.errno ?? undefined;
 
