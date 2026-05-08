@@ -10,37 +10,13 @@ import {
 
 export class SpreadsheetXlsxDataSource implements SpreadsheetDataSource {
     async read(inputFile: File): Async<Spreadsheet> {
-        try {
-            const workbook = XLSX.read(await inputFile?.arrayBuffer(), { cellDates: true });
-
-            const sheets = _(workbook.Sheets)
-                .toPairs()
-                .map(([sheetName, worksheet]): Sheet => {
-                    const headers = XLSX.utils.sheet_to_json<string[]>(worksheet, { header: 1, defval: "" })[0] || [];
-                    const rows = XLSX.utils.sheet_to_json<Row<string>>(worksheet, { raw: true, skipHidden: false });
-
-                    return {
-                        name: sheetName,
-                        headers,
-                        rows,
-                    };
-                })
-                .value();
-
-            const spreadsheet: Spreadsheet = {
-                name: inputFile.name,
-                sheets,
-            };
-
-            return spreadsheet;
-        } catch (e) {
-            return { name: "", sheets: [] };
-        }
+        const arrayBuffer = await inputFile.arrayBuffer();
+        return this.readFromArrayBuffer(arrayBuffer, inputFile.name);
     }
 
     async readFromArrayBuffer(arrayBuffer: ArrayBuffer, fileName?: string): Async<Spreadsheet> {
         try {
-            const workbook = XLSX.read(arrayBuffer, { cellDates: true });
+            const workbook = XLSX.read(arrayBuffer, { cellDates: true, type: "array" });
 
             const sheets = _(workbook.Sheets)
                 .toPairs()
@@ -57,7 +33,7 @@ export class SpreadsheetXlsxDataSource implements SpreadsheetDataSource {
                 .value();
 
             const spreadsheet: Spreadsheet = {
-                name: fileName || "",
+                name: fileName || "spreadsheet.xlsx",
                 sheets,
             };
 
@@ -68,31 +44,7 @@ export class SpreadsheetXlsxDataSource implements SpreadsheetDataSource {
     }
 
     async readFromBlob(blob: Blob, fileName?: string): Async<Spreadsheet> {
-        try {
-            const workbook = XLSX.read(await blob?.arrayBuffer(), { cellDates: true });
-
-            const sheets = _(workbook.Sheets)
-                .toPairs()
-                .map(([sheetName, worksheet]): Sheet => {
-                    const headers = XLSX.utils.sheet_to_json<string[]>(worksheet, { header: 1, defval: "" })[0] || [];
-                    const rows = XLSX.utils.sheet_to_json<Row<string>>(worksheet, { raw: true, skipHidden: false });
-
-                    return {
-                        name: sheetName,
-                        headers,
-                        rows,
-                    };
-                })
-                .value();
-
-            const spreadsheet: Spreadsheet = {
-                name: fileName || "",
-                sheets,
-            };
-
-            return spreadsheet;
-        } catch (e) {
-            return { name: "", sheets: [] };
-        }
+        const arrayBuffer = await blob.arrayBuffer();
+        return this.readFromArrayBuffer(arrayBuffer, fileName);
     }
 }

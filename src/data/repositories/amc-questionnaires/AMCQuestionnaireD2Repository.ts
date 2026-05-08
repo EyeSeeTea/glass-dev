@@ -82,7 +82,7 @@ export class AMCQuestionnaireD2Repository implements AMCQuestionnaireRepository 
                     return importApiTracker(
                         this.api,
                         { trackedEntities: [trackedEntity] },
-                        "CREATE_AND_UPDATE"
+                        { action: "CREATE_AND_UPDATE", async: true }
                     ).flatMap(saveResponse => {
                         const generalAMCQuestionnaireId =
                             saveResponse.bundleReport.typeReportMap.TRACKED_ENTITY.objectReports[0]?.uid;
@@ -144,19 +144,21 @@ export class AMCQuestionnaireD2Repository implements AMCQuestionnaireRepository 
     }
 
     private importQuestionnaireD2Event(event: D2TrackerEventToPost, questionnaireName: string): FutureData<Id> {
-        return importApiTracker(this.api, { events: [event] }, "CREATE_AND_UPDATE").flatMap(saveResponse => {
-            const questionnaireId = saveResponse?.bundleReport?.typeReportMap?.EVENT.objectReports[0]?.uid;
+        return importApiTracker(this.api, { events: [event] }, { action: "CREATE_AND_UPDATE", async: true }).flatMap(
+            saveResponse => {
+                const questionnaireId = saveResponse?.bundleReport?.typeReportMap?.EVENT.objectReports[0]?.uid;
 
-            if (saveResponse.status === "ERROR" || !questionnaireId) {
-                return Future.error(
-                    `Error saving ${questionnaireName} questionnaire: ${saveResponse.validationReport.errorReports
-                        .map(e => e.message)
-                        .join(", ")}`
-                );
-            } else {
-                return Future.success(questionnaireId);
+                if (saveResponse.status === "ERROR" || !questionnaireId) {
+                    return Future.error(
+                        `Error saving ${questionnaireName} questionnaire: ${saveResponse.validationReport.errorReports
+                            .map(e => e.message)
+                            .join(", ")}`
+                    );
+                } else {
+                    return Future.success(questionnaireId);
+                }
             }
-        });
+        );
     }
 
     private get({
