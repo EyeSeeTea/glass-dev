@@ -75,11 +75,12 @@ export function getConsumptionDataProductLevel(params: {
         );
     }
 
-    const { productRegistryAttributes, rawProductConsumption: rawProductConsumptionRecords } = getProductRegistryAttributesAndRawProductConsumption(
-        productDataTrackedEntities,
-        productRegisterProgramMetadata.programAttributes,
-        rawProductConsumptionStage
-    );
+    const { productRegistryAttributes, rawProductConsumption: rawProductConsumptionRecords } =
+        getProductRegistryAttributesAndRawProductConsumption(
+            productDataTrackedEntities,
+            productRegisterProgramMetadata.programAttributes,
+            rawProductConsumptionStage
+        );
 
     const rawSubstanceConsumptionCalculatedData = calculateConsumptionProductLevelData(
         period,

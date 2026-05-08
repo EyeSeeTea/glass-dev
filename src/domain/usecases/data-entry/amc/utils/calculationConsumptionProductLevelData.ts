@@ -71,14 +71,14 @@ export function calculateConsumptionProductLevelData(
     // Preserve first-match semantics by storing the first occurrence only,
     // and preserve original array order for grouped lists.
     const combinationMap: Record<string, CombinationsData> = {};
-    (dddCombinations ?? []).forEach((cd) => {
+    (dddCombinations ?? []).forEach(cd => {
         if (cd?.COMB_CODE && combinationMap[cd.COMB_CODE] === undefined) {
             combinationMap[cd.COMB_CODE] = cd;
         }
     });
 
     const conversionsMap: Record<string, ConversionsIUToGramsData> = {};
-    (conversionsIUToGramsData ?? []).forEach((c) => {
+    (conversionsIUToGramsData ?? []).forEach(c => {
         const key = `${c.ATC5}|${c.ROA}`;
         if (conversionsMap[key] === undefined) {
             conversionsMap[key] = c;
@@ -86,7 +86,7 @@ export function calculateConsumptionProductLevelData(
     });
 
     const dddByAtcRoa: Map<string, DDDData[]> = new Map();
-    (dddData ?? []).forEach((d) => {
+    (dddData ?? []).forEach(d => {
         const key = `${d.ATC5}|${d.ROA}`;
         const arr = dddByAtcRoa.get(key);
         if (arr) arr.push(d);
@@ -106,7 +106,7 @@ export function calculateConsumptionProductLevelData(
                     messageType: "Info",
                 },
             ];
-            
+
             // 1 - Calculate the active substance in a product package
             // the amount of active substance in one package of the product
             // calculated using: standardized_strength × (volume ÷ concentration_volume) × packsize
@@ -124,7 +124,7 @@ export function calculateConsumptionProductLevelData(
             if (amountActiveSubstancePerProductPackage.result) {
                 // 2 - Identify corresponding DDD value for this product from the referential data = ddd
                 // based on ATC5, SALT, ROA you get the related standard DDD from the
-                // referential data for raw product and combination products. 
+                // referential data for raw product and combination products.
                 // If the product has a combination code, the ddd is identified using the combination code, if not, it is identified using ATC5, SALT and ROA.
                 const dddPerProduct = getDDDValueForProduct(
                     product,
@@ -161,8 +161,6 @@ export function calculateConsumptionProductLevelData(
             }
         })
         .filter(Boolean) as ContentDDDPerProductAndDDDPerPackage[];
-
-    
 
     // Given 1&2&3 calculates 4, 5, 6, 7, 8
     const rawSubstanceConsumptionCalculated = aggregateDataByAtcRouteAdminYearHealthSectorAndHealthLevel(
@@ -235,7 +233,9 @@ function calculateActiveSubstancePerPackage(
                     {
                         content: `[${new Date().toISOString()}]  Product ${
                             product.AMR_GLASS_AMC_TEA_PRODUCT_ID
-                        } - Content of product: ${amountActiveSubstancePerProductPackage} ${standarizedStrength.standarizedUnit}`,
+                        } - Content of product: ${amountActiveSubstancePerProductPackage} ${
+                            standarizedStrength.standarizedUnit
+                        }`,
                         messageType: "Debug",
                     },
                 ],
@@ -297,7 +297,11 @@ function getDDDValueForProduct(
                 ],
             };
         } else {
-            return getDDDValueForCombinationProduct(product.AMR_GLASS_AMC_TEA_PRODUCT_ID, codeCombinationData, unitsData);
+            return getDDDValueForCombinationProduct(
+                product.AMR_GLASS_AMC_TEA_PRODUCT_ID,
+                codeCombinationData,
+                unitsData
+            );
         }
     } else {
         return getDDDValueForPlainProduct(
@@ -314,7 +318,7 @@ function getDDDValueForProduct(
 
 // 2b
 function getDDDValueForCombinationProduct(
-    productId: string, 
+    productId: string,
     codeCombinationData: CombinationsData,
     unitsData: UnitsData[]
 ): { result: DDDPerProduct; logs: BatchLogContent } {
@@ -327,11 +331,7 @@ function getDDDValueForCombinationProduct(
 
     const { DDD: DDD_VALUE, DDD_UNIT, DDD_GRAMS } = codeCombinationData;
 
-    const dddStandardized = getStandardizedUnitsAndValue(
-        unitsData,
-        DDD_UNIT,
-        DDD_VALUE
-    );
+    const dddStandardized = getStandardizedUnitsAndValue(unitsData, DDD_UNIT, DDD_VALUE);
 
     if (!dddStandardized?.standarizedUnit) {
         return {
@@ -359,7 +359,9 @@ function getDDDValueForCombinationProduct(
         logs: [
             ...calculationLogs,
             {
-                content: `[${new Date().toISOString()}] Product ${productId} - DDD: ${dddStandardized.standarizedValue} ${dddStandardized.standarizedUnit}.`,
+                content: `[${new Date().toISOString()}] Product ${productId} - DDD: ${
+                    dddStandardized.standarizedValue
+                } ${dddStandardized.standarizedUnit}.`,
                 messageType: "Debug",
             },
         ],
@@ -477,7 +479,14 @@ function getDDDValueForPlainProduct(
     }
 
     // If allowed (recalc/substance workflows), consult changes
-    return getLatestDDDStandardized(product, dddChanges, unitsData, calculationLogs, atcCodeAutocalculated, dddByAtcRoa);
+    return getLatestDDDStandardized(
+        product,
+        dddChanges,
+        unitsData,
+        calculationLogs,
+        atcCodeAutocalculated,
+        dddByAtcRoa
+    );
 }
 
 // 2d
@@ -760,19 +769,22 @@ function aggregateDataByAtcRouteAdminYearHealthSectorAndHealthLevel(
 
     // Precompute maps for fast lookup while preserving first-match semantics
     const productAttributesByProductId: Record<string, ProductRegistryAttributes> = {};
-    (productRegistryAttributes ?? []).forEach((p) => {
+    (productRegistryAttributes ?? []).forEach(p => {
         const k = p?.AMR_GLASS_AMC_TEA_PRODUCT_ID;
         if (k !== undefined && productAttributesByProductId[k] === undefined) productAttributesByProductId[k] = p;
     });
 
     const calculatedVariablesByProductId: Record<string, ContentDDDPerProductAndDDDPerPackage> = {};
-    (contentDDDPerProductAndDDDPerPackage ?? []).forEach((c) => {
+    (contentDDDPerProductAndDDDPerPackage ?? []).forEach(c => {
         const k = c?.AMR_GLASS_AMC_TEA_PRODUCT_ID;
         if (k !== undefined && calculatedVariablesByProductId[k] === undefined) calculatedVariablesByProductId[k] = c;
     });
 
     const rawSubstanceConsumptionCalculatedByKey = rawProductConsumptionData.reduce(
-        (aggregatedConsumptions: Record<string, RawSubstanceConsumptionCalculated>, productConsumption: RawProductConsumption) => {
+        (
+            aggregatedConsumptions: Record<string, RawSubstanceConsumptionCalculated>,
+            productConsumption: RawProductConsumption
+        ) => {
             const product = productAttributesByProductId[productConsumption.AMR_GLASS_AMC_TEA_PRODUCT_ID];
             calculationLogs = [
                 ...calculationLogs,
@@ -785,7 +797,8 @@ function aggregateDataByAtcRouteAdminYearHealthSectorAndHealthLevel(
                     messageType: "Debug",
                 },
             ];
-            const contentDDDPerProductAndDDDPerPackageOfProduct = calculatedVariablesByProductId[productConsumption.AMR_GLASS_AMC_TEA_PRODUCT_ID];
+            const contentDDDPerProductAndDDDPerPackageOfProduct =
+                calculatedVariablesByProductId[productConsumption.AMR_GLASS_AMC_TEA_PRODUCT_ID];
 
             if (product && contentDDDPerProductAndDDDPerPackageOfProduct) {
                 // 4 - Calculate DDD per product consumption packages:  ddd_cons_product = ddd_perpackage × packages (in year, health_sector and health_level)
@@ -808,8 +821,12 @@ function aggregateDataByAtcRouteAdminYearHealthSectorAndHealthLevel(
                             : undefined;
 
                     calculationLogs = [...calculationLogs];
-                    const { AMR_GLASS_AMC_TEA_COMBINATION , AMR_GLASS_AMC_TEA_PRODUCT_ID, AMR_GLASS_AMC_TEA_SALT, AMR_GLASS_AMC_TEA_ROUTE_ADMIN } =
-                        product;
+                    const {
+                        AMR_GLASS_AMC_TEA_COMBINATION,
+                        AMR_GLASS_AMC_TEA_PRODUCT_ID,
+                        AMR_GLASS_AMC_TEA_SALT,
+                        AMR_GLASS_AMC_TEA_ROUTE_ADMIN,
+                    } = product;
                     const { packages_manual, data_status_manual, health_sector_manual, health_level_manual } =
                         productConsumption;
 
@@ -854,7 +871,8 @@ function aggregateDataByAtcRouteAdminYearHealthSectorAndHealthLevel(
                                   ...aggregatedRecordWithThisId,
                                   kilograms_autocalculated:
                                       contentKilograms != null
-                                          ? (aggregatedRecordWithThisId.kilograms_autocalculated ?? 0) + contentKilograms
+                                          ? (aggregatedRecordWithThisId.kilograms_autocalculated ?? 0) +
+                                            contentKilograms
                                           : aggregatedRecordWithThisId.kilograms_autocalculated,
                                   packages_autocalculated:
                                       packages_manual != null
