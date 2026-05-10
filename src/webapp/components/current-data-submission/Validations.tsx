@@ -16,7 +16,17 @@ import { useGetLastSuccessfulAnalyticsRunTime } from "../../hooks/useGetLastSucc
 import { CircularProgress, Typography } from "@material-ui/core";
 import { MultiDashboardContent } from "../reports/MultiDashboardContent";
 import { EmbeddedReport } from "../reports/EmbeddedReport";
-import { DownloadType } from "../../../domain/utils/DownloadTemplate";
+import { DownloadType, NO_CALCULATED_DATA_AVAILABLE } from "../../../domain/utils/DownloadTemplate";
+
+function formatAnalyticsDate(date: Date): string {
+    return date.toLocaleString(undefined, {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+    });
+}
 
 export const Validations: React.FC = () => {
     const { compositionRoot } = useAppContext();
@@ -36,9 +46,8 @@ export const Validations: React.FC = () => {
 
     const downloadTemplate = useCallback(
         (downloadType: DownloadType, fileTypeStateData?: string) => {
-            setIsLoading(true);
-
             if (fileTypeState.kind === "loaded") {
+                setIsLoading(true);
                 compositionRoot.fileSubmission
                     .downloadPopulatedTemplate(
                         currentModuleAccess.moduleName,
@@ -49,20 +58,65 @@ export const Validations: React.FC = () => {
                     )
                     .run(
                         file => {
-                            const downloadSimulateAnchor = document.createElement("a");
-                            downloadSimulateAnchor.href = URL.createObjectURL(file);
-                            const fileTypeName = moduleProperties.get(currentModuleAccess.moduleName)
-                                ?.isSingleFileTypePerSubmission
-                                ? `-${fileTypeStateData || ""}`
-                                : "";
-                            downloadSimulateAnchor.download = `${currentModuleAccess.moduleName}${fileTypeName}-${downloadType}-${currentOrgUnitAccess.orgUnitCode}-Populated.xlsx`;
-                            // simulate link click
-                            document.body.appendChild(downloadSimulateAnchor);
-                            downloadSimulateAnchor.click();
-                            setIsLoading(false);
+                            try {
+                                let blob: Blob;
+                                if (typeof Blob !== "undefined" && file instanceof Blob) {
+                                    blob = file;
+                                } else if (file) {
+                                    blob = new Blob([file], {
+                                        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                                    });
+                                } else {
+                                    console.error("[DownloadPopulatedTemplate] no file received from use case");
+                                    snackbar.error(i18n.t("Error downloading data"));
+                                    setIsLoading(false);
+                                    return;
+                                }
+
+                                const downloadSimulateAnchor = document.createElement("a");
+                                downloadSimulateAnchor.id = "download-file";
+                                downloadSimulateAnchor.href = URL.createObjectURL(blob);
+                                const fileTypeName = moduleProperties.get(currentModuleAccess.moduleName)
+                                    ?.isSingleFileTypePerSubmission
+                                    ? `-${fileTypeStateData || ""}`
+                                    : "";
+                                downloadSimulateAnchor.download = `${currentModuleAccess.moduleName}${fileTypeName}-${downloadType}-${currentOrgUnitAccess.orgUnitCode}-Populated.xlsx`;
+                                downloadSimulateAnchor.style.display = "none";
+                                document.body.appendChild(downloadSimulateAnchor);
+                                try {
+                                    downloadSimulateAnchor.click();
+                                } catch (err) {
+                                    console.error("[DownloadPopulatedTemplate] error clicking download anchor", err);
+                                    snackbar.error(i18n.t("Error downloading data"));
+                                }
+                                setTimeout(() => {
+                                    URL.revokeObjectURL(downloadSimulateAnchor.href);
+                                    if (downloadSimulateAnchor.parentNode) {
+                                        downloadSimulateAnchor.parentNode.removeChild(downloadSimulateAnchor);
+                                    }
+                                }, 1000);
+                                setIsLoading(false);
+                            } catch (err) {
+                                console.error("[DownloadPopulatedTemplate] unexpected error", err);
+                                snackbar.error(i18n.t("Error downloading data"));
+                                setIsLoading(false);
+                            }
                         },
-                        _error => {
-                            snackbar.error(i18n.t("Error downloading data"));
+                        error => {
+                            if (error === NO_CALCULATED_DATA_AVAILABLE) {
+                                const dateStr =
+                                    lastSuccessfulAnalyticsRunTime.kind === "loaded"
+                                        ? formatAnalyticsDate(lastSuccessfulAnalyticsRunTime.data)
+                                        : null;
+                                snackbar.warning(
+                                    dateStr
+                                        ? `No calculated data found for this period. If you submitted data recently, it may take up to 24 hours to appear (last update: ${dateStr}). Please try again later or contact your administrator.`
+                                        : "No calculated data found for this period. If you submitted data recently, it may take up to 24 hours to appear. Please try again later or contact your administrator."
+                                );
+                            } else {
+                                console.error("[DownloadPopulatedTemplate] use case failed", error);
+                                snackbar.error(i18n.t("Error downloading data"));
+                            }
                             setIsLoading(false);
                         }
                     );
@@ -75,6 +129,7 @@ export const Validations: React.FC = () => {
             currentOrgUnitAccess.orgUnitId,
             currentPeriod,
             fileTypeState,
+            lastSuccessfulAnalyticsRunTime,
             snackbar,
         ]
     );
@@ -83,9 +138,7 @@ export const Validations: React.FC = () => {
         <>
             {lastSuccessfulAnalyticsRunTime.kind === "loaded" && (
                 <Typography>
-                    Last Successful Analytics Tables Update Time :
-                    {new Date(lastSuccessfulAnalyticsRunTime.data).toUTCString()}. Any data submitted after this date
-                    will not be reflected in these visualizations
+                    {`Data last updated: ${formatAnalyticsDate(lastSuccessfulAnalyticsRunTime.data)}. Any data submitted after this date may not yet be reflected in the visualisations or downloads below.`}
                 </Typography>
             )}
             {moduleProperties.get(currentModuleAccess.moduleName)?.isDownloadDataAllowed && (
@@ -109,7 +162,11 @@ export const Validations: React.FC = () => {
                                             : moduleProperties.get(currentModuleAccess.moduleName)
                                                   ?.calculatedSubstanceFileDownloadLabel) || "Download calculated data"
                                     }
-                                    helperText="An excel file with all the calculated data in this dashboard"
+                                    helperText={
+                                        lastSuccessfulAnalyticsRunTime.kind === "loaded"
+                                            ? `Contains data submitted before ${formatAnalyticsDate(lastSuccessfulAnalyticsRunTime.data)}`
+                                            : "An excel file with all the calculated data in this dashboard"
+                                    }
                                     onClick={() => downloadTemplate("CALCULATED", fileTypeState.data)}
                                 />
                                 {fileTypeState.data === "PRODUCT" && (
@@ -118,7 +175,11 @@ export const Validations: React.FC = () => {
                                             moduleProperties.get(currentModuleAccess.moduleName)
                                                 ?.calculatedSubstanceFileDownloadLabel || "Download calculated data"
                                         }
-                                        helperText="An excel file with all the calculated substance data"
+                                        helperText={
+                                            lastSuccessfulAnalyticsRunTime.kind === "loaded"
+                                                ? `Contains data submitted before ${formatAnalyticsDate(lastSuccessfulAnalyticsRunTime.data)}`
+                                                : "An excel file with all the calculated substance data"
+                                        }
                                         onClick={() => downloadTemplate("CALCULATED", "SUBSTANCE")}
                                         disabled={!fileTypeState.data}
                                     />

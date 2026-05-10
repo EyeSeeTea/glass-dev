@@ -23,6 +23,8 @@ import {
 } from "../usecases/data-entry/amc/ImportAMCSubstanceLevelData";
 
 export type DownloadType = "SUBMITTED" | "CALCULATED";
+
+export const NO_CALCULATED_DATA_AVAILABLE = "NO_CALCULATED_DATA_AVAILABLE" as const;
 export interface DownloadTemplateProps {
     moduleName: string;
     fileType: string;
@@ -114,6 +116,14 @@ export class DownloadTemplate {
                   relationshipsOuFilter,
               })
             : undefined;
+
+        if (enablePopulate && dataPackage && downloadType === "CALCULATED") {
+            const isEmpty =
+                dataPackage.type === "trackerPrograms"
+                    ? dataPackage.trackedEntityInstances.length === 0
+                    : dataPackage.dataEntries.length === 0;
+            if (isEmpty) throw new Error(NO_CALCULATED_DATA_AVAILABLE);
+        }
 
         const builder = new ExcelBuilder(this.excelRepository, this.downloadtemplateRepository);
 

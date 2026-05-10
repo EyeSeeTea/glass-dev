@@ -231,10 +231,7 @@ function verifyCalculationResult(result: RawSubstanceConsumptionCalculated[], ty
         expect(calculation.year).toBe(expectedCalculation?.year);
         expect(calculation.packages_autocalculated).toBe(expectedCalculation?.packages_autocalculated);
         if (expectedCalculation?.kilograms_autocalculated != null) {
-            expect(calculation.kilograms_autocalculated).toBeCloseTo(
-                expectedCalculation.kilograms_autocalculated,
-                10
-            );
+            expect(calculation.kilograms_autocalculated).toBeCloseTo(expectedCalculation.kilograms_autocalculated, 10);
         } else {
             expect(calculation.kilograms_autocalculated).toBe(expectedCalculation?.kilograms_autocalculated);
         }
