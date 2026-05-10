@@ -96,12 +96,11 @@ export class ExcelPopulateDefaultRepository extends ExcelRepository {
      }*/
 
     public async toBlob(id: string): Promise<Blob> {
-        const data = await this.toBuffer(id); // Buffer or Uint8Array
-
-        // Produce a real ArrayBuffer slice with the exact bytes
-        const arrayBuffer = data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength) as ArrayBuffer;
-
-        return new Blob([arrayBuffer], {
+        const workbook = await this.getWorkbook(id);
+        // Request uint8array explicitly: outputAsync() defaults to "blob" in browser
+        // environments (process.browser === true), and Blob has no .buffer property.
+        const data = (await workbook.outputAsync({ type: "uint8array" })) as unknown as Uint8Array;
+        return new Blob([data], {
             type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         });
     }

@@ -1,5 +1,4 @@
 import { Id } from "./Ref";
-import { RawSubstanceConsumptionData } from "./data-entry/amc/RawSubstanceConsumptionData";
 
 export type GlassATCHistory = {
     currentVersion: boolean;
