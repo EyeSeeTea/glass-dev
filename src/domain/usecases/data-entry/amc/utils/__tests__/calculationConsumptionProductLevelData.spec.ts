@@ -226,6 +226,7 @@ function verifyCalculationResult(result: RawSubstanceConsumptionCalculated[], ty
         const expectedCalculation = expectedSolution[index];
         expect(calculation.AMR_GLASS_AMC_TEA_PRODUCT_ID).toBe(expectedCalculation?.AMR_GLASS_AMC_TEA_PRODUCT_ID);
         expect(calculation.atc_autocalculated).toBe(expectedCalculation?.atc_autocalculated);
+        expect(calculation.combination_code_autocalculated).toBe(expectedCalculation?.combination_code_autocalculated);
         expect(calculation.route_admin_autocalculated).toBe(expectedCalculation?.route_admin_autocalculated);
         expect(calculation.salt_autocalculated).toBe(expectedCalculation?.salt_autocalculated);
         expect(calculation.year).toBe(expectedCalculation?.year);

@@ -705,54 +705,6 @@ function calculateDDDForAllPackagesConsumed(
     };
 }
 
-// 5b - Calculate tonnes per product
-/*function getTonnesPerProduct(
-    period: string,
-    product: ProductRegistryAttributes,
-    productConsumption: RawProductConsumption,
-    content: Content,
-    conversionsIUToGramsData: ConversionsIUToGramsData[] | undefined,
-    atcCodeAutocalculated: ATCCodeLevel5
-): { result: ContentTonnesPerProduct; logs: BatchLogContent } {
-    const calculationLogs: BatchLogContent = [
-        {
-            content: `[${new Date().toISOString()}]  Product ${productConsumption.AMR_GLASS_AMC_TEA_PRODUCT_ID
-                } - Calculating content tonnes of product.`,
-            messageType: "Info",
-        },
-    ];
-
-    const { AMR_GLASS_AMC_TEA_PRODUCT_ID: teiIdProduct } = product;
-    const { packages_manual, health_sector_manual, health_level_manual } = productConsumption;
-
-    const { standarizedStrengthUnit: contentUnit } = content;
-    // 5a
-    const conversionFactorAtc = conversionsIUToGramsData?.find(({ ATC5 }) => ATC5 === atcCodeAutocalculated);
-    const conversionFactor = contentUnit !== "gram" && conversionFactorAtc?.FACTOR ? conversionFactorAtc.FACTOR : 1;
-
-    // 5b - content_tonnes = (content × conv_factor × packages in the year, health_sector and health_level) ÷ 1e6
-    return {
-        result: {
-            AMR_GLASS_AMC_TEA_PRODUCT_ID: teiIdProduct,
-            year: period,
-            health_sector_manual,
-            health_level_manual,
-            contentTonnes: packages_manual ? (content.value * conversionFactor * packages_manual) / 1e6 : undefined,
-        },
-        logs: [
-            ...calculationLogs,
-            {
-                content: `[${new Date().toISOString()}]  Product ${productConsumption.AMR_GLASS_AMC_TEA_PRODUCT_ID
-                    } - Conversion factor used to calculate content_tonnes: ${conversionFactor}. Content tonnes: ${packages_manual
-                        ? (content.value * conversionFactor * packages_manual) / 1e6
-                        : "Not packages manual defined"
-                    }`,
-                messageType: "Debug",
-            },
-        ],
-    };
-}*/
-
 // Given 1&2&3 calculates 4, 5, 6, 7, 8
 function aggregateDataByAtcRouteAdminYearHealthSectorAndHealthLevel(
     period: string,
