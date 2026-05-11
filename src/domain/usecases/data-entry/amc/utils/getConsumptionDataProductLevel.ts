@@ -149,7 +149,7 @@ function getProductRegistryAttributes(
                             [programAttribute.code]: programAttribute.optionSetValue
                                 ? programAttribute.optionSet.options.find(
                                       option => option.code === productAttribute.value
-                                  )?.code
+                                  )?.code ?? productAttribute.value
                                 : productAttribute.value,
                         };
                     case "NUMBER":
