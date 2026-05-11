@@ -372,7 +372,7 @@ export class InstanceDefaultRepository implements InstanceRepository {
 
     public getProgram(programId: Id): FutureData<any> {
         const cacheKey = `program-${programId}`;
-
+        console.log("Getting program with ID:", programId);
         return this.getFromCacheOrRemote(
             cacheKey,
             apiToFuture(

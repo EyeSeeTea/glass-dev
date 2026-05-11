@@ -8,6 +8,7 @@ import XLSX, {
     Workbook as ExcelWorkbook,
     Workbook,
 } from "@eyeseetea/xlsx-populate";
+import XlsxPopulate from "@eyeseetea/xlsx-populate";
 import { CellRef, Range, SheetRef, ValueRef } from "../../domain/entities/Template";
 import moment from "moment";
 import { Future, FutureData } from "../../domain/entities/Future";
@@ -39,9 +40,39 @@ export const getTemplateId = (programId: Id): string => {
 export class ExcelPopulateDefaultRepository extends ExcelRepository {
     private workbooks: Record<string, ExcelWorkbook> = {};
 
+    /* public loadTemplate(file: Blob, programId: Id): FutureData<string> {
+         const templateId = getTemplateId(programId);
+         console.log("programId:", programId);
+         console.log("Loading template for program ID:", programId, "with template ID:", templateId);
+         return Future.fromPromise(this.parseFile(file)).map(workbook => {
+             console.log("Template loaded successfully for program ID:", programId);
+             const id = templateId;
+             this.workbooks[id] = workbook;
+             return id;
+         });
+     }*/
+
     public loadTemplate(file: Blob, programId: Id): FutureData<string> {
         const templateId = getTemplateId(programId);
-        return Future.fromPromise(this.parseFile(file)).map(workbook => {
+
+        // Wrap parseFile with detailed catch
+        const p = this.parseFile(file).catch(async (e: any) => {
+            let extra = "";
+            try {
+                const size = (file as any).size;
+                const type = (file as any).type;
+                const name = (file as any).name;
+                extra = ` [programId=${programId}, templateId=${templateId}, name=${name}, type=${type}, size=${size}]`;
+            } catch {
+                // If we can't access file properties, we can still log the error without them
+            }
+            // Log the original error with stack
+            console.error("parseFile() failed" + extra, e?.message || e, e?.stack || e);
+            // Re-throw preserving original error as cause (TS target >= ES2022)
+            throw new Error(`loadTemplate(): failed to parse file${extra}`, { cause: e });
+        });
+
+        return Future.fromPromise(p).map(workbook => {
             const id = templateId;
             this.workbooks[id] = workbook;
             return id;
@@ -57,8 +88,18 @@ export class ExcelPopulateDefaultRepository extends ExcelRepository {
         });
     }
 
+    /* public async toBlob(id: string): Promise<Blob> {
+         const data = await this.toBuffer(id);
+         return new Blob([data], {
+             type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+         });
+     }*/
+
     public async toBlob(id: string): Promise<Blob> {
-        const data = await this.toBuffer(id);
+        const workbook = await this.getWorkbook(id);
+        // Request uint8array explicitly: outputAsync() defaults to "blob" in browser
+        // environments (process.browser === true), and Blob has no .buffer property.
+        const data = (await workbook.outputAsync({ type: "uint8array" })) as unknown as Uint8Array;
         return new Blob([data], {
             type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         });
@@ -69,8 +110,73 @@ export class ExcelPopulateDefaultRepository extends ExcelRepository {
         return workbook.outputAsync() as unknown as Buffer;
     }
 
-    private async parseFile(file: Blob): Promise<ExcelWorkbook> {
+    /*private async parseFile(file: Blob): Promise<ExcelWorkbook> {
+        console.log("Parsing Excel file...");
         return XLSX.fromDataAsync(file);
+    }*/
+
+    private async parseWorkbookFromBlob(file: Blob | File): Promise<ExcelWorkbook> {
+        console.log("[parseWorkbookFromBlob] Parsing Excel file...");
+
+        // Log the input meta so we can spot native/polyfill mixes
+        const meta = {
+            ctor: (file as any)?.constructor?.name,
+            name: (file as any)?.name,
+            type: (file as any)?.type,
+            size: (file as any)?.size,
+        };
+        console.log("[parseWorkbookFromBlob] input meta:", meta);
+
+        try {
+            if (!file || typeof (file as any).arrayBuffer !== "function") {
+                console.error("[parseWorkbookFromBlob] Input is not a Blob/File with arrayBuffer().");
+                throw new Error("Invalid input: expected Blob/File with arrayBuffer()");
+            }
+
+            // Convert to bytes first (avoid handing Blob directly to the parser)
+            const ab = await file.arrayBuffer();
+            const bytes = new Uint8Array(ab);
+
+            // Quick diagnostics
+            const head16 = bytes.subarray(0, 16);
+            const headHex = Array.from(head16)
+                .map(b => b.toString(16).padStart(2, "0"))
+                .join(" ");
+            const magic = Array.from(bytes.subarray(0, 4))
+                .map(b => b.toString(16).padStart(2, "0"))
+                .join(" ");
+            console.log("[parseWorkbookFromBlob] bytes length:", bytes.byteLength);
+            console.log("[parseWorkbookFromBlob] first 16 bytes (hex):", headHex);
+            console.log('[parseWorkbookFromBlob] expected XLSX ZIP magic "50 4b 03 04", got:', magic);
+
+            console.log("[parseWorkbookFromBlob] calling XlsxPopulate.fromDataAsync(bytes)...");
+            const workbook = await XlsxPopulate.fromDataAsync(bytes);
+            console.log("[parseWorkbookFromBlob] workbook loaded OK.");
+
+            // Optional: try to log sheet names
+            try {
+                // @ts-ignore depends on typing
+                const sheetNames = workbook.sheets ? workbook.sheets().map((s: any) => s.name()) : [];
+                console.log("[parseWorkbookFromBlob] sheets:", sheetNames);
+            } catch {
+                console.warn(
+                    "[parseWorkbookFromBlob] unable to read sheet names, workbook structure may be unexpected."
+                );
+            }
+
+            return workbook as unknown as ExcelWorkbook;
+        } catch (err: any) {
+            console.error("[parseWorkbookFromBlob] FAILED", {
+                ...meta,
+                message: err?.message ?? err,
+                stack: err?.stack ?? err,
+            });
+            throw err;
+        }
+    }
+
+    private async parseFile(file: Blob | File): Promise<ExcelWorkbook> {
+        return this.parseWorkbookFromBlob(file);
     }
 
     private async parseFromArrayBuffer(buffer: ArrayBuffer): Promise<ExcelWorkbook> {

@@ -18,6 +18,7 @@ export type Content = {
 export type DDDPerProduct = {
     dddValue: number;
     dddUnit: UnitCode;
+    dddGrams: number | null;
 };
 
 export type DDDPerPackage = {
@@ -38,21 +39,22 @@ export type DDDPerProductConsumptionPackages = {
     year: string;
     health_sector_manual: string;
     health_level_manual: string;
-    dddConsumptionPackages: Maybe<number>;
+    dddOfProductConsumed: Maybe<number>;
     dddUnit: UnitCode;
 };
 
-export type ContentTonnesPerProduct = {
+/*export type ContentTonnesPerProduct = {
     AMR_GLASS_AMC_TEA_PRODUCT_ID: string;
     year: string;
     health_sector_manual: string;
     health_level_manual: string;
     contentTonnes: Maybe<number>;
-};
+};*/
 
 export type RawSubstanceConsumptionCalculated = {
     AMR_GLASS_AMC_TEA_PRODUCT_ID: string;
     atc_autocalculated: ATCCodeLevel5;
+    combination_code_autocalculated?: string;
     route_admin_autocalculated: RouteOfAdministrationCode;
     salt_autocalculated: SaltCode;
     year: string;
@@ -77,6 +79,7 @@ export type RawSubstanceConsumptionCalculatedKeys = keyof RawSubstanceConsumptio
 export const RAW_SUBSTANCE_CONSUMPTION_CALCULATED_KEYS = [
     "atc_autocalculated",
     "route_admin_autocalculated",
+    "combination_code_autocalculated",
     "salt_autocalculated",
     "packages_autocalculated",
     "kilograms_autocalculated",
