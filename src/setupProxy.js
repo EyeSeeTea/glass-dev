@@ -14,11 +14,13 @@ const redirectPaths = ["/dhis-web-pivot", "/dhis-web-data-visualizer"];
 
 const dhis2UrlVar = "REACT_APP_DHIS2_BASE_URL";
 const dhis2AuthVar = "REACT_APP_DHIS2_AUTH";
+const dhis2TokenVar = "REACT_APP_DHIS2_TOKEN";
 const proxyLogLevel = "REACT_APP_PROXY_LOG_LEVEL";
 
 module.exports = function (app) {
     const targetUrl = process.env[dhis2UrlVar];
     const auth = process.env[dhis2AuthVar];
+    const token = process.env[dhis2TokenVar];
     const logLevel = process.env[proxyLogLevel] || "warn";
 
     if (!targetUrl) {
@@ -26,9 +28,12 @@ module.exports = function (app) {
         process.exit(1);
     }
 
-    const proxy = createProxyMiddleware({
+    if (!token && !auth) {
+        console.warn(`No auth configured. Set ${dhis2TokenVar} (preferred, works with 2FA) or ${dhis2AuthVar}.`);
+    }
+
+    const proxyOptions = {
         target: targetUrl,
-        auth,
         logLevel,
         changeOrigin: true,
         pathRewrite: { "^/dhis2/": "/" },
@@ -42,7 +47,14 @@ module.exports = function (app) {
                 res.sendStatus(302);
             }
         },
-    });
+    };
 
+    if (token) {
+        proxyOptions.headers = { Authorization: `ApiToken ${token}` };
+    } else if (auth) {
+        proxyOptions.auth = auth;
+    }
+
+    const proxy = createProxyMiddleware(proxyOptions);
     app.use(["/dhis2"], proxy);
 };

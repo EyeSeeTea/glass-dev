@@ -5,6 +5,11 @@ import { D2Api } from "../types/d2-api";
 import { Instance } from "../data/entities/Instance";
 
 export function getD2Api(url: string): D2Api {
+    const token = process.env.REACT_APP_DHIS2_TOKEN;
+    if (token) {
+        const { baseUrl } = getApiOptionsFromUrl(url);
+        return createD2ApiWithToken(baseUrl, token);
+    }
     const { baseUrl, auth } = getApiOptionsFromUrl(url);
     return new D2Api({ baseUrl, auth });
 }
@@ -24,17 +29,40 @@ type Auth = {
 type D2ApiArgs = {
     url: string;
     auth?: Auth;
+    token?: string;
 };
 
 export function getD2ApiFromArgs(args: D2ApiArgs): D2Api {
+    const token = args.token || process.env.REACT_APP_DHIS2_TOKEN;
+    if (token) {
+        return createD2ApiWithToken(args.url, token);
+    }
     const { baseUrl, auth } = args.auth ? { baseUrl: args.url, auth: args.auth } : getApiOptionsFromUrl(args.url);
-
     return new D2Api({ baseUrl, auth });
 }
 
 export function getInstance(args: D2ApiArgs): Instance {
-    const instance = new Instance({ url: args.url, ...args.auth });
-    return instance;
+    const token = args.token || process.env.REACT_APP_DHIS2_TOKEN;
+    if (token) {
+        return new Instance({ url: args.url, token });
+    }
+    return new Instance({ url: args.url, ...args.auth });
+}
+
+function createD2ApiWithToken(baseUrl: string, token: string): D2Api {
+    // Dummy auth forces credentials:"omit"; ApiToken header overrides Basic auth (extraHeaders win in FetchHttpClientRepository)
+    const api = new D2Api({ baseUrl, auth: { username: "_", password: "_" } });
+    patchWithApiToken(api.baseConnection, token);
+    patchWithApiToken(api.apiConnection, token);
+    return api;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function patchWithApiToken(connection: any, token: string): void {
+    const original = connection.request.bind(connection);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    connection.request = (options: any) =>
+        original({ ...options, headers: { ...options.headers, Authorization: `ApiToken ${token}` } });
 }
 
 export function getApiUrlOption(options?: { long: string }) {
