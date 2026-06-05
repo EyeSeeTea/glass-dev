@@ -19,6 +19,7 @@ import {
 import { Id } from "../../../../entities/Ref";
 import { RawSubstanceConsumptionData } from "../../../../entities/data-entry/amc/RawSubstanceConsumptionData";
 import { SubstanceConsumptionCalculated } from "../../../../entities/data-entry/amc/SubstanceConsumptionCalculated";
+import { Maybe } from "../../../../../types/utils";
 
 const LAST_ATC_CODE_LEVEL = 5;
 
@@ -76,6 +77,12 @@ export function calculateConsumptionSubstanceLevelData(
                     },
                 ];
 
+                const dddForKg = getDDDForAtcVersion({
+                    atcCode: rawSubstanceConsumption.atc_manual,
+                    roaCode: rawSubstanceConsumption.route_admin_manual,
+                    saltCode: rawSubstanceConsumption.salt_manual,
+                    atcVersion: latestAtcVersionData,
+                });
                 return copyDDDManualToDDDAutocalculated({
                     rawSubstanceConsumption,
                     currentAtcVersionKey,
@@ -84,6 +91,7 @@ export function calculateConsumptionSubstanceLevelData(
                     amClassData: latestAmClassData,
                     atcData: latestAtcData,
                     awareClassData: latestAwareClassData,
+                    dddGrams: dddForKg?.DDD_GRAMS,
                 });
             }
 
@@ -140,6 +148,12 @@ export function calculateConsumptionSubstanceLevelData(
                     },
                 ];
 
+                const dddForKg = getDDDForAtcVersion({
+                    atcCode: rawSubstanceConsumption.atc_manual,
+                    roaCode: rawSubstanceConsumption.route_admin_manual,
+                    saltCode: rawSubstanceConsumption.salt_manual,
+                    atcVersion: latestAtcVersionData,
+                });
                 return copyDDDManualToDDDAutocalculated({
                     rawSubstanceConsumption,
                     currentAtcVersionKey,
@@ -148,6 +162,7 @@ export function calculateConsumptionSubstanceLevelData(
                     amClassData: latestAmClassData,
                     atcData: latestAtcData,
                     awareClassData: latestAwareClassData,
+                    dddGrams: dddForKg?.DDD_GRAMS,
                 });
             }
 
@@ -188,6 +203,12 @@ export function calculateConsumptionSubstanceLevelData(
                     },
                 ];
 
+                const dddForKg = getDDDForAtcVersion({
+                    atcCode: rawSubstanceConsumption.atc_manual,
+                    roaCode: rawSubstanceConsumption.route_admin_manual,
+                    saltCode: rawSubstanceConsumption.salt_manual,
+                    atcVersion: latestAtcVersionData,
+                });
                 return copyDDDManualToDDDAutocalculated({
                     rawSubstanceConsumption,
                     currentAtcVersionKey,
@@ -196,6 +217,7 @@ export function calculateConsumptionSubstanceLevelData(
                     amClassData: latestAmClassData,
                     atcData: latestAtcData,
                     awareClassData: latestAwareClassData,
+                    dddGrams: dddForKg?.DDD_GRAMS,
                 });
             }
 
@@ -233,16 +255,31 @@ export function calculateConsumptionSubstanceLevelData(
                     atcData: latestAtcData,
                     awareClassData: latestAwareClassData,
                     atcAutocalculated: atcAutocalculated,
+                    // DDD not found — cannot derive kg reliably; leave undefined
+                    dddGrams: undefined,
                 });
             }
 
-            // Adjust the number of DDDs with ratio oldDDD and newDDD
-            const dddsAdjust = getDDDsAdjust(rawSubstanceConsumption, oldDDD, newDDD, latestAtcVersionData);
+            // Adjust the number of DDDs using the ratio: ddds_manual × (OLD_DDD / NEW_DDD).
+            // Rationale: the reporter expressed their consumption using OLD_DDD as the unit size.
+            // Converting to NEW_DDD requires multiplying by (OLD_DDD / NEW_DDD) so that the
+            // total substance quantity is preserved.
+            // Sanity check: if NEW_DDD > OLD_DDD (DDD got larger), the adjusted count decreases.
+            const dddsAdjust = getDDDsAdjust(
+                rawSubstanceConsumption,
+                oldDDD,
+                newDDD,
+                latestAtcVersionData,
+                atcManualVersionData
+            );
             calculationLogs = [...calculationLogs, ...dddsAdjust.logs];
 
-            const rawSubstanceConsumptionKilograms = rawSubstanceConsumption.tons_manual
-                ? rawSubstanceConsumption.tons_manual * 1000
-                : undefined;
+            // Derive kg from auto-calculated DDDs and the current DDD_GRAMS value.
+            // Formula: kilograms = (ddds_autocalculated × DDD_GRAMS) / 1000
+            const kilograms: Maybe<number> =
+                dddsAdjust.result != null && newDDD.DDD_GRAMS != null
+                    ? (dddsAdjust.result * newDDD.DDD_GRAMS) / 1000
+                    : undefined;
 
             const am_class = getAmClass(latestAmClassData, atcAutocalculated);
             const atcCodeByLevel = getAtcCodeByLevel(latestAtcData, atcAutocalculated);
@@ -259,10 +296,11 @@ export function calculateConsumptionSubstanceLevelData(
                 atc_autocalculated: atcAutocalculated,
                 route_admin_autocalculated: rawSubstanceConsumption.route_admin_manual,
                 salt_autocalculated: rawSubstanceConsumption.salt_manual,
+                combination_autocalculated: rawSubstanceConsumption.combination_manual,
                 packages_autocalculated: rawSubstanceConsumption.packages_manual,
                 ddds_autocalculated: dddsAdjust.result,
                 atc_version_autocalculated: currentAtcVersionKey,
-                kilograms_autocalculated: rawSubstanceConsumptionKilograms,
+                kilograms_autocalculated: kilograms,
                 data_status_autocalculated: rawSubstanceConsumption.data_status_manual,
                 health_sector_autocalculated: rawSubstanceConsumption.health_sector_manual,
                 health_level_autocalculated: rawSubstanceConsumption.health_level_manual,
@@ -292,6 +330,7 @@ function setDDDAutocalculatedToZero(params: {
     amClassData: AmClassificationData;
     atcData: ATCData[];
     awareClassData: AwareClassificationData;
+    dddGrams: number | null | undefined;
 }): SubstanceConsumptionCalculated {
     return setDDDAutocalculated({
         dddsToSet: 0,
@@ -307,6 +346,7 @@ function copyDDDManualToDDDAutocalculated(params: {
     amClassData: AmClassificationData;
     atcData: ATCData[];
     awareClassData: AwareClassificationData;
+    dddGrams: number | null | undefined;
 }): SubstanceConsumptionCalculated {
     return setDDDAutocalculated({
         dddsToSet: params.rawSubstanceConsumption.ddds_manual,
@@ -316,6 +356,7 @@ function copyDDDManualToDDDAutocalculated(params: {
 
 function setDDDAutocalculated(params: {
     dddsToSet: number;
+    dddGrams: number | null | undefined; // null when DDD_GRAMS not available for this substance
     atcAutocalculated?: ATCCodeLevel5;
     rawSubstanceConsumption: RawSubstanceConsumptionData;
     currentAtcVersionKey: string;
@@ -334,14 +375,17 @@ function setDDDAutocalculated(params: {
         atcData,
         awareClassData,
         dddsToSet,
+        dddGrams,
         atcAutocalculated,
     } = params;
 
     const atcCode = atcAutocalculated ? atcAutocalculated : rawSubstanceConsumption.atc_manual;
 
-    const rawSubstanceConsumptionKilograms = rawSubstanceConsumption.tons_manual
-        ? rawSubstanceConsumption.tons_manual * 1000
-        : undefined;
+    // Derive kg from auto-calculated DDDs and DDD_GRAMS.
+    // kilograms = (ddds_autocalculated × DDD_GRAMS) / 1000
+    // If DDD_GRAMS is not available, leave kilograms undefined rather than coercing to 0.
+    const kilograms: Maybe<number> =
+        dddsToSet != null && dddGrams != null ? (dddsToSet * dddGrams) / 1000 : undefined;
 
     const am_class = getAmClass(amClassData, atcCode);
     const atcCodeByLevel = getAtcCodeByLevel(atcData, atcCode);
@@ -354,10 +398,11 @@ function setDDDAutocalculated(params: {
         atc_autocalculated: atcCode,
         route_admin_autocalculated: rawSubstanceConsumption.route_admin_manual,
         salt_autocalculated: rawSubstanceConsumption.salt_manual,
+        combination_autocalculated: rawSubstanceConsumption.combination_manual,
         packages_autocalculated: rawSubstanceConsumption.packages_manual,
         ddds_autocalculated: dddsToSet,
         atc_version_autocalculated: currentAtcVersionKey,
-        kilograms_autocalculated: rawSubstanceConsumptionKilograms,
+        kilograms_autocalculated: kilograms,
         data_status_autocalculated: rawSubstanceConsumption.data_status_manual,
         health_sector_autocalculated: rawSubstanceConsumption.health_sector_manual,
         health_level_autocalculated: rawSubstanceConsumption.health_level_manual,
@@ -370,20 +415,28 @@ function setDDDAutocalculated(params: {
 }
 
 /**
- * Adjust the number of DDDs based on the ratio of the old and new DDDs.
+ * Adjust the number of DDDs when the reporter used a different ATC version.
  *
- * @param {RawSubstanceConsumptionData} rawSubstanceConsumptionData - The raw substance consumption object
- * @param {DDDData} oldDDD - The ROA code
- * @param {DDDData} newDDD - The Salt code
- * @param {GlassAtcVersionData} atcVersion - The ATC version
+ * The reported DDD count is based on OLD_DDD (the DDD definition at the time of reporting).
+ * To express it in terms of NEW_DDD (current version), apply:
  *
- * @return { result: number | undefined; logs: BatchLogContent } - the adjusted number of DDDs and logs.
+ *   Adjusted_DDD = Reported_DDD × (OLD_DDD / NEW_DDD)
+ *
+ * This preserves the total substance quantity.  If the new DDD is larger the
+ * adjusted count decreases; if smaller it increases — which is the correct behaviour.
+ *
+ * @param rawSubstanceConsumptionData  The raw substance consumption row
+ * @param oldDDD                       DDD record from the manual (historical) ATC version
+ * @param newDDD                       DDD record from the current ATC version
+ * @param latestAtcVersionData         Current ATC version data (for resolving newDDD unit family)
+ * @param oldAtcVersionData            Historical ATC version data (for resolving oldDDD unit family)
  */
 function getDDDsAdjust(
     rawSubstanceConsumptionData: RawSubstanceConsumptionData,
     oldDDD: DDDData | undefined,
     newDDD: DDDData | undefined,
-    atcVersion: GlassAtcVersionData
+    latestAtcVersionData: GlassAtcVersionData,
+    oldAtcVersionData: GlassAtcVersionData
 ): { result: number | undefined; logs: BatchLogContent } {
     const calculationLogs: BatchLogContent = [];
     // 1 - check that oldDDD and newDDD are not undefined
@@ -403,16 +456,11 @@ function getDDDsAdjust(
     }
     const { ddds_manual } = rawSubstanceConsumptionData;
     // 2 - check compatible units between oldDDD and newDDD
-    // Compare standardized unit families (UNIT_STD), not raw unit codes.
-    // DDD_STD values are already expressed in the base unit (UNIT_STD), so the ratio
-    // is valid as long as both DDDs share the same standard unit — regardless of whether
-    // one used "mg" and the other "g" in the raw referential.
-    const oldDDDFam = atcVersion.units.find(({ UNIT }: UnitsData) => {
-        return UNIT === oldDDD.DDD_UNIT;
-    })?.UNIT_STD;
-    const newDDDFam = atcVersion.units.find(({ UNIT }: UnitsData) => {
-        return UNIT === newDDD.DDD_UNIT;
-    })?.UNIT_STD;
+    // Resolve each DDD unit's family (UNIT_STD) from its own version's units table so that
+    // a unit present in the old version but removed from the latest version does not cause
+    // a false "incompatible units" failure.
+    const oldDDDFam = oldAtcVersionData.units.find(({ UNIT }: UnitsData) => UNIT === oldDDD.DDD_UNIT)?.UNIT_STD;
+    const newDDDFam = latestAtcVersionData.units.find(({ UNIT }: UnitsData) => UNIT === newDDD.DDD_UNIT)?.UNIT_STD;
 
     if (oldDDDFam !== newDDDFam) {
         return {
@@ -429,9 +477,9 @@ function getDDDsAdjust(
         };
     }
 
-    // 3 - ratio_ddd = oldDDD ÷ newDDD
+    // 3 - ratio_ddd = OLD_DDD ÷ NEW_DDD  (intentional direction — see JSDoc above)
     const ratioDDD = oldDDD.DDD_STD / newDDD.DDD_STD;
-    // 4 - ddds_adjust = ddds × ratio_ddd
+    // 4 - ddds_adjust = ddds_manual × ratio_ddd
     return {
         result: ddds_manual * ratioDDD,
         logs: [
@@ -439,7 +487,7 @@ function getDDDsAdjust(
             {
                 content: `[${new Date().toISOString()}] Substance ${
                     rawSubstanceConsumptionData.id
-                } - Get ratio_ddd: ${ratioDDD}. Get ddds_adjust from ddds_manual: ${ddds_manual * ratioDDD}.`,
+                } - ratio_ddd: ${ratioDDD}. ddds_adjust: ${ddds_manual * ratioDDD}.`,
                 messageType: "Debug",
             },
         ],

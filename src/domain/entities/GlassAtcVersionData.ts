@@ -313,7 +313,9 @@ export function getDDDForAtcVersion(params: {
 }): DDDData | undefined {
     const { atcCode, roaCode, saltCode, atcVersion } = params;
     const ddd = atcVersion.ddds.find(({ ATC5, ROA, SALT }: DDDData) => {
-        return ATC5 === atcCode && ROA === roaCode && SALT === saltCode;
+        // Treat an empty SALT in the referential as the default salt placeholder.
+        const isDefaultSalt = !SALT && saltCode === DEFAULT_SALT_CODE;
+        return ATC5 === atcCode && ROA === roaCode && (SALT === saltCode || isDefaultSalt);
     });
 
     if (ddd) {
@@ -325,19 +327,20 @@ export function getDDDForAtcVersion(params: {
             dddChanges: atcVersion.changes ? getDDDChanges(atcVersion.changes) : undefined,
         });
         const unitsData = atcVersion?.units;
-        return newDDD ? parseDDDChangesDataToDDDData(newDDD, unitsData, saltCode, atcVersion.ddds) : undefined;
+        return newDDD ? parseDDDChangesDataToDDDData(newDDD, unitsData, saltCode) : undefined;
     }
 }
 
 function parseDDDChangesDataToDDDData(
     dddChange: DDDChangesData,
     unitsData: UnitsData[],
-    saltCode: SaltCode,
-    dddData: DDDData[]
+    saltCode: SaltCode
 ): DDDData {
     const standarized = getStandardizedUnitsAndValue(unitsData, dddChange.NEW_DDD_UNIT, dddChange.NEW_DDD_VALUE);
-    const dddGrams =
-        dddData.find(d => d.ATC5 === dddChange.ATC_CODE && d.ROA === dddChange.NEW_DDD_ROA)?.DDD_GRAMS ?? null;
+    // For gram-family DDDs (the only case in the changes table), DDD_GRAMS equals the
+    // standardized DDD value in grams. For IU-based DDDs this would need an IU→g factor;
+    // if no standardization is available, fall back to the raw value as a best-effort.
+    const dddGrams = standarized?.standarizedValue ?? dddChange.NEW_DDD_VALUE;
 
     return {
         ARS: `${dddChange.ATC_CODE}_${dddChange.NEW_DDD_ROA}_${saltCode}`,
