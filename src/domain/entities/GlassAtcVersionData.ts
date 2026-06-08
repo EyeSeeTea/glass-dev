@@ -46,6 +46,7 @@ export type DDDData = {
     SALT: SaltCode;
     DDD: number;
     DDD_UNIT: UnitCode;
+    DDD_GRAMS: number | null;
     DDD_STD: number;
     NOTES: string | null;
 };
@@ -127,7 +128,7 @@ export type UnitsData = {
     BASE_CONV: number;
     UNIT: UnitCode;
     NAME: UnitName;
-    UNIT_FAMILY?: UnitCode;
+    UNIT_STD?: UnitCode;
     USE_STRENGTH: boolean;
     USE_VOLUME: boolean;
 };
@@ -192,8 +193,11 @@ export type ListGlassATCVersions = Record<ATCVersionKey, GlassAtcVersionData>;
 export type ListGlassATCLastVersionKeysByYear = Record<string, ATCVersionKey>;
 
 export function validateAtcVersion(atcVersionKey: ATCVersionKey): boolean {
-    const pattern = /^ATC-\d{4}-v\d+$/;
-    return pattern.test(atcVersionKey);
+    // Accept full format "ATC-YYYY-vN" or plain 4-digit year "YYYY".
+    // Reporters may submit plain years (e.g. "2018") — confirmed by Martina.
+    const fullKeyPattern = /^ATC-\d{4}-v\d+$/;
+    const plainYearPattern = /^\d{4}$/;
+    return fullKeyPattern.test(atcVersionKey) || plainYearPattern.test(atcVersionKey);
 }
 
 export function createAtcVersionKey(year: number, version: number): ATCVersionKey {
@@ -201,8 +205,14 @@ export function createAtcVersionKey(year: number, version: number): ATCVersionKe
 }
 
 export function getYearFromAtcVersionKey(key: ATCVersionKey): number | undefined {
-    const year = key.split("-")[1];
-    if (year) return parseInt(year);
+    // Handle plain-year format "2018" as well as full key "ATC-2018-v1".
+    // Split by "-": "ATC-2018-v1" → index[1]="2018"; "2018" → no dashes → index[0]="2018".
+    const parts = key.split("-");
+    const yearStr = parts.length > 1 ? parts[1] : parts[0];
+    if (yearStr) {
+        const parsed = parseInt(yearStr);
+        if (!isNaN(parsed)) return parsed;
+    }
 }
 
 export function getDDDChanges(changesData: ATCAndDDDChangesData[]): DDDChangesData[] {
@@ -239,7 +249,7 @@ export function getStandardizedUnitsAndValue(
     const unitData = unitsData.find(({ UNIT }) => unit === UNIT);
     if (unitData) {
         const standarizedValue = value * unitData.BASE_CONV;
-        const standarizedUnit = unitData.BASE_CONV === 1 ? unitData.UNIT : unitData.UNIT_FAMILY;
+        const standarizedUnit = unitData.UNIT_STD;
         return {
             standarizedValue: standarizedValue,
             standarizedUnit: standarizedUnit,
@@ -250,7 +260,7 @@ export function getStandardizedUnitsAndValue(
 export function getStandardizedUnit(unitsData: UnitsData[], unit: UnitCode): UnitCode | undefined {
     const unitData = unitsData.find(({ UNIT }) => unit === UNIT);
     if (unitData) {
-        return unitData.BASE_CONV === 1 ? unitData.UNIT : unitData.UNIT_FAMILY;
+        return unitData.UNIT_STD;
     }
 }
 
@@ -312,7 +322,9 @@ export function getDDDForAtcVersion(params: {
 }): DDDData | undefined {
     const { atcCode, roaCode, saltCode, atcVersion } = params;
     const ddd = atcVersion.ddds.find(({ ATC5, ROA, SALT }: DDDData) => {
-        return ATC5 === atcCode && ROA === roaCode && SALT === saltCode;
+        // Treat an empty SALT in the referential as the default salt placeholder.
+        const isDefaultSalt = !SALT && saltCode === DEFAULT_SALT_CODE;
+        return ATC5 === atcCode && ROA === roaCode && (SALT === saltCode || isDefaultSalt);
     });
 
     if (ddd) {
@@ -330,6 +342,10 @@ export function getDDDForAtcVersion(params: {
 
 function parseDDDChangesDataToDDDData(dddChange: DDDChangesData, unitsData: UnitsData[], saltCode: SaltCode): DDDData {
     const standarized = getStandardizedUnitsAndValue(unitsData, dddChange.NEW_DDD_UNIT, dddChange.NEW_DDD_VALUE);
+    // For gram-family DDDs (the only case in the changes table), DDD_GRAMS equals the
+    // standardized DDD value in grams. For IU-based DDDs this would need an IU→g factor;
+    // if no standardization is available, fall back to the raw value as a best-effort.
+    const dddGrams = standarized?.standarizedValue ?? dddChange.NEW_DDD_VALUE;
 
     return {
         ARS: `${dddChange.ATC_CODE}_${dddChange.NEW_DDD_ROA}_${saltCode}`,
@@ -338,6 +354,7 @@ function parseDDDChangesDataToDDDData(dddChange: DDDChangesData, unitsData: Unit
         SALT: saltCode,
         DDD: dddChange.NEW_DDD_VALUE,
         DDD_UNIT: dddChange.NEW_DDD_UNIT,
+        DDD_GRAMS: dddGrams,
         DDD_STD: standarized?.standarizedValue ?? dddChange.NEW_DDD_VALUE,
         NOTES: dddChange.NEW_DDD_INFO,
     };
@@ -350,11 +367,17 @@ export function getNewDddData(params: {
 }): DDDChangesData | undefined {
     const { atcCode, roa, dddChanges } = params;
 
-    const newDDD = dddChanges?.find(({ ATC_CODE, CHANGE, PREVIOUS_DDD_ROA }) => {
+    // DDD changes are NOT salt-aware. Select deterministically by ATC_CODE + PREVIOUS_DDD_ROA
+    if (!dddChanges || dddChanges.length === 0) return undefined;
+
+    const candidates = dddChanges.filter(({ ATC_CODE, CHANGE, PREVIOUS_DDD_ROA }) => {
         return CHANGE !== "DELETED" && ATC_CODE === atcCode && PREVIOUS_DDD_ROA === roa;
     });
 
-    return newDDD;
+    if (candidates.length === 0) return undefined;
+
+    // Return the record with the latest YEAR
+    return candidates.reduce((best, cur) => (cur.YEAR > best.YEAR ? cur : best));
 }
 
 export function getAmClass(amClassData: AmClassificationData, atcCode: ATCCodeLevel5): AmName | undefined {

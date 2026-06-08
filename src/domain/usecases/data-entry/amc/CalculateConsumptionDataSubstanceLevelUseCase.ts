@@ -76,12 +76,12 @@ export class CalculateConsumptionDataSubstanceLevelUseCase {
                         return getConsumptionDataSubstanceLevel({
                             orgUnitId,
                             period,
-                            atcRepository: this.atcRepository,
+                            // atcRepository removed — change-table approach no longer loads historical DataStore objects
                             rawSubstanceConsumptionData: validRawSubstanceConsumptionData,
                             currentAtcVersionKey,
                             atcCurrentVersionData,
                         }).flatMap(calculatedConsumptionSubstanceLevelData => {
-                            if (_.isEmpty(calculatedConsumptionSubstanceLevelData)) {
+                            if (calculatedConsumptionSubstanceLevelData.length === 0) {
                                 logger.error(
                                     `[${new Date().toISOString()}] Substance level: there are no calculated data to import for orgUnitId ${orgUnitId} and period ${period}`
                                 );

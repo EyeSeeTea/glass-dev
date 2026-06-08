@@ -3,10 +3,35 @@ import { Future, FutureData } from "../../../../entities/Future";
 import { GlassAtcVersionData } from "../../../../entities/GlassAtcVersionData";
 import { RawSubstanceConsumptionData } from "../../../../entities/data-entry/amc/RawSubstanceConsumptionData";
 import { SubstanceConsumptionCalculated } from "../../../../entities/data-entry/amc/SubstanceConsumptionCalculated";
-import { GlassATCRepository } from "../../../../repositories/GlassATCRepository";
 import { calculateConsumptionSubstanceLevelData } from "./calculationConsumptionSubstanceLevelData";
 import { logger } from "../../../../../utils/logger";
 import { Maybe } from "../../../../../types/utils";
+
+// === CHANGE-TABLE APPROACH ===
+// atcRepository and getListOfAtcVersionsByKeys removed — historical ATC versions are no longer
+// loaded from DataStore.  calculateConsumptionSubstanceLevelData now derives historical DDD
+// values directly from the change table embedded in the current ATC version object.
+//
+// OLD signature (kept for reference):
+// export function getConsumptionDataSubstanceLevel(params: {
+//     orgUnitId: Id;
+//     period: string;
+//     rawSubstanceConsumptionData: Maybe<RawSubstanceConsumptionData[]>;
+//     atcCurrentVersionData: GlassAtcVersionData;
+//     currentAtcVersionKey: string;
+//     atcRepository: GlassATCRepository;   // ← removed
+// }): FutureData<SubstanceConsumptionCalculated[]>
+//
+// OLD body (kept for reference):
+//     const atcVersionKeys = Array.from(new Set(rawSubstanceConsumptionData.map(...)));
+//     return atcRepository.getListOfAtcVersionsByKeys(atcVersionKeys).flatMap(atcVersionsByKeys => {
+//         // If any key was missing from DataStore, Future.joinObj inside getListOfAtcVersionsByKeys
+//         // returned Future.error → the entire calculation aborted.
+//         const allATCClassificationsByVersion = { ...atcVersionsByKeys, [currentAtcVersionKey]: atcCurrentVersionData };
+//         const result = calculateConsumptionSubstanceLevelData(period, orgUnitId,
+//             rawSubstanceConsumptionData, allATCClassificationsByVersion, currentAtcVersionKey);
+//         return Future.success(result);
+//     });
 
 export function getConsumptionDataSubstanceLevel(params: {
     orgUnitId: Id;
@@ -14,16 +39,9 @@ export function getConsumptionDataSubstanceLevel(params: {
     rawSubstanceConsumptionData: Maybe<RawSubstanceConsumptionData[]>;
     atcCurrentVersionData: GlassAtcVersionData;
     currentAtcVersionKey: string;
-    atcRepository: GlassATCRepository;
 }): FutureData<SubstanceConsumptionCalculated[]> {
-    const {
-        orgUnitId,
-        period,
-        atcRepository,
-        rawSubstanceConsumptionData,
-        atcCurrentVersionData,
-        currentAtcVersionKey,
-    } = params;
+    const { orgUnitId, period, rawSubstanceConsumptionData, atcCurrentVersionData, currentAtcVersionKey } = params;
+
     if (!rawSubstanceConsumptionData) {
         logger.error(
             `[${new Date().toISOString()}] Cannot find Raw Substance Consumption Data for orgUnitsId ${orgUnitId} and period ${period} for calculations`
@@ -31,31 +49,12 @@ export function getConsumptionDataSubstanceLevel(params: {
         return Future.error("Cannot find Raw Substance Consumption Data");
     }
 
-    const atcVersionKeys: string[] = Array.from(
-        new Set(rawSubstanceConsumptionData?.map(({ atc_version_manual }) => atc_version_manual))
+    const calculatedConsumptionSubstanceLevelData = calculateConsumptionSubstanceLevelData(
+        period,
+        orgUnitId,
+        rawSubstanceConsumptionData,
+        atcCurrentVersionData,
+        currentAtcVersionKey
     );
-
-    return atcRepository.getListOfAtcVersionsByKeys(atcVersionKeys).flatMap(atcVersionsByKeys => {
-        const keysNotFound = atcVersionKeys.filter(key => !Object.keys(atcVersionsByKeys).includes(key));
-        if (keysNotFound.length) {
-            logger.error(
-                `[${new Date().toISOString()}] ATC data not found for these versions: ${keysNotFound.join(
-                    ","
-                )}. Calculated consumption data for raw substance consumption data with these ATC versions manual will not be calculated.`
-            );
-        }
-        const allATCClassificationsByVersion = {
-            ...atcVersionsByKeys,
-            [currentAtcVersionKey]: atcCurrentVersionData,
-        };
-
-        const calculatedConsumptionSubstanceLevelData = calculateConsumptionSubstanceLevelData(
-            period,
-            orgUnitId,
-            rawSubstanceConsumptionData,
-            allATCClassificationsByVersion,
-            currentAtcVersionKey
-        );
-        return Future.success(calculatedConsumptionSubstanceLevelData);
-    });
+    return Future.success(calculatedConsumptionSubstanceLevelData);
 }

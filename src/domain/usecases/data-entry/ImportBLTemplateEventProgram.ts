@@ -243,8 +243,10 @@ export class ImportBLTemplateEventProgram {
                             dataForm === AMC_RAW_SUBSTANCE_CONSUMPTION_PROGRAM_ID &&
                             el.dataElement === ATC_VERSION_DATA_ELEMENT_ID
                         ) {
-                            const atcVersionKey = atcVersionKeysByYear ? atcVersionKeysByYear[el.value.toString()] : "";
-                            return { ...el, value: atcVersionKey ?? "" };
+                            const atcVersionKey = atcVersionKeysByYear
+                                ? atcVersionKeysByYear[el.value.toString()]
+                                : undefined;
+                            return { ...el, value: atcVersionKey ?? el.value.toString() };
                         } else if (dataForm === EGASP_PROGRAM_ID && el.dataElement === PATIENT_DATAELEMENT_ID) {
                             //For EGASP, encrypt the patient id
 

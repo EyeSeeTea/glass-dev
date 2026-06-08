@@ -28,9 +28,10 @@ type UploadFileBufferResponse = {
 };
 export class GlassDocumentsDefaultRepository implements GlassDocumentsRepository {
     private api: D2Api;
-
-    constructor(private dataStoreClient: DataStoreClient, instance: Instance) {
+    private dataStoreClient: DataStoreClient;
+    constructor(dataStoreClient: DataStoreClient, instance: Instance) {
         this.api = getD2APiFromInstance(instance);
+        this.dataStoreClient = dataStoreClient;
     }
 
     @cache()
@@ -120,9 +121,25 @@ export class GlassDocumentsDefaultRepository implements GlassDocumentsRepository
     }
 
     download(id: string): FutureData<Blob> {
-        return apiToFuture(this.api.files.get(id));
+        console.log("GlassDocumentsDefaultRepository download file id : ", id);
+        try {
+            return apiToFuture(this.api.files.get(id));
+        } catch (error) {
+            if (error instanceof Error) {
+                console.error("Error downloading file with id:", id, error);
+                if (error.message.includes("fetch failed")) {
+                    throw new Error(
+                        `Network error: Failed to download file with id ${id}. Please check your internet connection and try again.`
+                    );
+                } else {
+                    throw new Error(`Failed to download file with id ${id}: ${error.message}`);
+                }
+            } else {
+                console.error("Unknown error downloading file with id:", id, error);
+                throw new Error(`Failed to download file with id ${id}: Unknown error`);
+            }
+        }
     }
-
     deleteDocumentApi(id: string): FutureData<void> {
         return apiToFuture(this.api.files.delete(id)).flatMap(response => {
             if (response.httpStatus === "OK") return Future.success(undefined);

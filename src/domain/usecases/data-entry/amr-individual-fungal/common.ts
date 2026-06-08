@@ -2,7 +2,6 @@ import _ from "lodash";
 import { Country } from "../../../entities/Country";
 import { CustomDataColumns } from "../../../entities/data-entry/amr-individual-fungal-external/RISIndividualFungalData";
 import { Future, FutureData } from "../../../entities/Future";
-import moment from "moment";
 import { getTEAValueFromOrganisationUnitCountryEntry } from "../utils/getTEAValueFromOrganisationUnitCountryEntry";
 import { TrackerRepository } from "../../../repositories/TrackerRepository";
 import { ValidationResult } from "../../../entities/program-rules/EventEffectTypes";
@@ -15,7 +14,14 @@ import {
     TrackerTrackedEntity,
     TrackerTrackedEntityAttribute,
 } from "../../../entities/TrackedEntityInstance";
-import { checkAdmissionDate, checkCountry, checkPeriod, checkSpecimenDate } from "./RISIndividualFungalFileValidations";
+import {
+    AMR_INDIVIDUAL_FUNGAL_DATE_COLUMNS,
+    checkAdmissionDate,
+    checkCountry,
+    checkPeriod,
+    checkSpecimenDate,
+} from "./RISIndividualFungalFileValidations";
+import { parseDateStrict, validateAllDateFieldsInRow } from "../utils/dateValidation";
 
 const AMR_GLASS_AMR_TET_PATIENT = "CcgnfemKr5U";
 
@@ -68,10 +74,10 @@ export function mapIndividualFungalDataItemsToEntities(
             );
 
             const sampleDateStr =
-                AMRDataStage.find(de => de.dataElement === AMR_GLASS_AMR_DET_SAMPLE_DATE)?.value ?? `01-01-${period}`;
-            const sampleDate = moment(new Date(sampleDateStr)).toISOString()?.split("T").at(0) ?? period;
+                AMRDataStage.find(de => de.dataElement === AMR_GLASS_AMR_DET_SAMPLE_DATE)?.value ?? `${period}-01-01`;
+            const sampleDate = parseDateStrict(sampleDateStr) ?? period;
 
-            const createdAt = moment(new Date()).toISOString()?.split("T").at(0) ?? period;
+            const createdAt = new Date().toISOString().split("T")[0] ?? period;
 
             const events: TrackerEvent[] = [
                 {
@@ -190,13 +196,48 @@ export function runCustomValidations(
     orgUnit: string,
     period: string
 ): FutureData<ImportSummary> {
+    // Step 1: date format validation across all rows — collect every bad cell before blocking
+    const dateFormatErrors = risIndividualFungalDataItems.flatMap((dataItem, index) => {
+        const row: Record<string, string> = Object.fromEntries(
+            dataItem
+                .filter(item => item.value !== undefined && item.value !== null)
+                .map(item => [item.key, item.value?.toString() ?? ""])
+        );
+        return validateAllDateFieldsInRow(row, AMR_INDIVIDUAL_FUNGAL_DATE_COLUMNS, index + 1).map(err => ({
+            error: err.message,
+            line: index,
+        }));
+    });
+
+    // Step 2: if any date format errors exist, return them immediately — business logic
+    // relies on parseDateStrict which only works on valid ISO dates, so we must not
+    // proceed until every date field is in the correct format.
+    if (dateFormatErrors.length > 0) {
+        const groupedFormatErrors = _(dateFormatErrors)
+            .groupBy(e => e.error)
+            .mapValues(v => v.map(e => e.line))
+            .value();
+        const blockingErrors: ConsistencyError[] = Object.keys(groupedFormatErrors).map(error => ({
+            error,
+            count: groupedFormatErrors[error]?.length ?? 0,
+            lines: groupedFormatErrors[error] ?? [],
+        }));
+        return Future.success({
+            status: "ERROR",
+            importCount: { ignored: 0, imported: 0, deleted: 0, updated: 0, total: 0 },
+            nonBlockingErrors: [],
+            blockingErrors,
+        });
+    }
+
+    // Step 3: all dates are valid ISO — run business logic checks
     const validations: CustomValidationFunction[] = [
         (dataItem: CustomDataColumns) => checkCountry(dataItem, orgUnit),
         (dataItem: CustomDataColumns) => checkPeriod(dataItem, period),
         (dataItem: CustomDataColumns) => checkSpecimenDate(dataItem, period),
         (dataItem: CustomDataColumns) => checkAdmissionDate(dataItem),
     ];
-    const errors = risIndividualFungalDataItems.flatMap((dataItem, index) => {
+    const businessErrors = risIndividualFungalDataItems.flatMap((dataItem, index) => {
         return validations.map(validation => {
             const error = validation(dataItem);
             if (error) {
@@ -208,7 +249,8 @@ export function runCustomValidations(
             return null;
         });
     });
-    const groupedErrors = _(errors)
+
+    const groupedErrors = _(businessErrors)
         .omitBy(_.isNil)
         .groupBy(error => error?.error)
         .mapValues(value => value.map(el => el?.line || 0))
