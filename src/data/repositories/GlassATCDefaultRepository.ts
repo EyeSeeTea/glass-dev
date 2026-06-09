@@ -76,13 +76,11 @@ export class GlassATCDefaultRepository implements GlassATCRepository {
             }
             const atcVersionKey = createAtcVersionKey(lastVersionOfYear.year, lastVersionOfYear.version);
 
-            return this.getAtcVersion(atcVersionKey).flatMap(atcVersionData => {
-                if (!atcVersionData) {
-                    return Future.error("Cannot find an ATC version data for the given year");
-                }
-
-                return Future.success(atcVersionKey);
-            });
+            // Under the change-table approach, the historical DataStore object is no longer
+            // needed for calculations — DDDs are derived from the current version's change table.
+            // Fetching and validating the old DataStore object here is unnecessary and crashes
+            // for legacy entries stored in the old array format (e.g. ATC-2020-v1).
+            return Future.success(atcVersionKey);
         });
     }
 

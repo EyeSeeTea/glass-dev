@@ -375,7 +375,7 @@ function isPendingDeletion(
 }
 
 // TODO: send notification to users
-function _sendNotification(
+/*function _sendNotification(
     usergroupIds: Id[],
     repositories: {
         notificationRepository: NotificationRepository;
@@ -391,7 +391,7 @@ function _sendNotification(
         usergroupIds,
         notOrgUnitPath
     );
-}
+}*/
 
 function getGlassModulesFromDatastore(glassModuleRepository: GlassModuleRepository): FutureData<GlassModule[]> {
     return glassModuleRepository.getAll();

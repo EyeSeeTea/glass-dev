@@ -378,7 +378,7 @@ export const mapToImportSummary = (
 
     if (result && result.validationReport && result.stats) {
         const blockingErrorList = _.compact(
-            result.validationReport.errorReports.map(summary => {
+            (result.validationReport.errorReports ?? []).map(summary => {
                 if (summary.message) return { error: summary.message, eventId: summary.uid };
             })
         );
@@ -445,8 +445,12 @@ export const mapToImportSummary = (
                 const eventIdList =
                     result.status === "OK"
                         ? type === "event"
-                            ? result.bundleReport.typeReportMap.EVENT.objectReports.map(report => report.uid)
-                            : result.bundleReport.typeReportMap.TRACKED_ENTITY.objectReports.map(report => report.uid)
+                            ? (result.bundleReport?.typeReportMap?.EVENT?.objectReports ?? []).map(
+                                  report => report.uid
+                              )
+                            : (result.bundleReport?.typeReportMap?.TRACKED_ENTITY?.objectReports ?? []).map(
+                                  report => report.uid
+                              )
                         : [];
 
                 return Future.success({ importSummary, eventIdList: _.compact(eventIdList) });

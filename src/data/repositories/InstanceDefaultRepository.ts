@@ -360,7 +360,7 @@ export class InstanceDefaultRepository implements InstanceRepository {
                     dataElements: programStageDataElements.map(({ dataElement }) => formatDataElement(dataElement)),
                     repeatable,
                 })),
-                teiAttributes: programTrackedEntityAttributes.map(({ trackedEntityAttribute }) => ({
+                teiAttributes: (programTrackedEntityAttributes ?? []).map(({ trackedEntityAttribute }) => ({
                     id: trackedEntityAttribute.id,
                     name: trackedEntityAttribute.name,
                     valueType: trackedEntityAttribute.valueType,
@@ -406,7 +406,7 @@ export class InstanceDefaultRepository implements InstanceRepository {
                                 repeatable,
                             })
                         ),
-                        teiAttributes: response.objects[0].programTrackedEntityAttributes.map(
+                        teiAttributes: (response.objects[0].programTrackedEntityAttributes ?? []).map(
                             ({ trackedEntityAttribute }) => ({
                                 id: trackedEntityAttribute.id,
                                 name: trackedEntityAttribute.name,
