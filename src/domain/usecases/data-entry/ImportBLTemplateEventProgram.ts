@@ -445,9 +445,7 @@ export const mapToImportSummary = (
                 const eventIdList =
                     result.status === "OK"
                         ? type === "event"
-                            ? (result.bundleReport?.typeReportMap?.EVENT?.objectReports ?? []).map(
-                                  report => report.uid
-                              )
+                            ? (result.bundleReport?.typeReportMap?.EVENT?.objectReports ?? []).map(report => report.uid)
                             : (result.bundleReport?.typeReportMap?.TRACKED_ENTITY?.objectReports ?? []).map(
                                   report => report.uid
                               )
