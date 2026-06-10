@@ -1,3 +1,4 @@
+/// <reference types="jest" />
 import { RawSubstanceConsumptionData } from "../../../../../entities/data-entry/amc/RawSubstanceConsumptionData";
 import { calculateConsumptionSubstanceLevelData } from "../calculationConsumptionSubstanceLevelData";
 import rawSubstanceConsumptionDataBasic from "./data/rawSubstanceConsumptionDataBasic.json";
@@ -104,9 +105,9 @@ describe("Given calculate Consumption Substance Level Data function", () => {
             const orgUnitId = "vboedbUs1As";
             const rawSubstanceConsumptionData = givenRawSubstanceConsumptionDataByType(type);
             const currentAtcVersionKey = "ATC-2023-v1";
-            const currentAtcVersionData = (atcVersionsByKeysData as Record<string, GlassAtcVersionData>)[
+            const currentAtcVersionData = (atcVersionsByKeysData as unknown as Record<string, GlassAtcVersionData>)[
                 currentAtcVersionKey
-            ];
+            ]!;
 
             const rawSubstanceConsumptionCalculatedData = calculateConsumptionSubstanceLevelData(
                 period,
@@ -127,9 +128,9 @@ describe("Given calculate Consumption Substance Level Data function", () => {
             const orgUnitId = "vboedbUs1As";
             const rawSubstanceConsumptionData = givenRawSubstanceConsumptionDataByType(type);
             const currentAtcVersionKey = "ATC-2023-v1";
-            const currentAtcVersionData = (atcVersionsByKeysData as Record<string, GlassAtcVersionData>)[
+            const currentAtcVersionData = (atcVersionsByKeysData as unknown as Record<string, GlassAtcVersionData>)[
                 currentAtcVersionKey
-            ];
+            ]!;
 
             const rawSubstanceConsumptionCalculatedData = calculateConsumptionSubstanceLevelData(
                 period,
