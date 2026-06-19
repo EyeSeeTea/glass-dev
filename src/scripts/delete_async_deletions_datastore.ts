@@ -12,7 +12,8 @@ import { RemoveAsyncDeletionsUseCase } from "../domain/usecases/RemoveAsyncDelet
 import { SetAsyncDeletionsStatusUseCase } from "../domain/usecases/SetAsyncDeletionsStatusUseCase";
 import { GlassModuleRepository } from "../domain/repositories/GlassModuleRepository";
 import { DataStoreClient } from "../data/data-store/DataStoreClient";
-import { getD2ApiFromArgs, getInstance } from "./common";
+import { getInstance, warmUpSession } from "./common";
+import { getD2APiFromInstance } from "../utils/d2-api";
 import { GlassAsyncDeletionsDefaultRepository } from "../data/repositories/GlassAsyncDeletionsDefaultRepository";
 
 const UPLOADED_FILE_STATUS_LOWERCASE = "uploaded";
@@ -47,8 +48,9 @@ async function main() {
                     },
                 };
 
-                const api = getD2ApiFromArgs(envVars);
                 const instance = getInstance(envVars);
+                const api = getD2APiFromInstance(instance);
+                await warmUpSession(api);
                 const dataStoreClient = new DataStoreClient(instance);
                 const glassAsyncDeletionsRepository = new GlassAsyncDeletionsDefaultRepository(dataStoreClient);
 

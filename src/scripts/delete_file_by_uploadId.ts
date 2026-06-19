@@ -1,6 +1,6 @@
 import { command, option, run, string } from "cmd-ts";
 import path from "path";
-import { getInstance } from "./common";
+import { getInstance, warmUpSession } from "./common";
 import dotenv from "dotenv";
 import { DataStoreClient } from "../data/data-store/DataStoreClient";
 import { GlassDocumentsDefaultRepository } from "../data/repositories/GlassDocumentsDefaultRepository";
@@ -22,11 +22,12 @@ let glassUploadsRepository: GlassUploadsProgramRepository;
 let deleteDocumentInfoByUploadIdUseCase: DeleteDocumentInfoByUploadIdUseCase;
 
 // Initialize the global variables
-function initializeGlobals(envVars: any) {
+async function initializeGlobals(envVars: any) {
     instance = getInstance(envVars);
     dataStoreClient = new DataStoreClient(instance);
     glassDocumentsRepository = new GlassDocumentsDefaultRepository(dataStoreClient, instance);
     const api = getD2APiFromInstance(instance);
+    await warmUpSession(api);
     const runtime: "node" | "browser" = typeof window === "undefined" ? "node" : "browser";
     const uploadsFormDataBuilder = getUploadsFormDataBuilder(runtime);
     glassUploadsRepository = new GlassUploadsProgramRepository(api, uploadsFormDataBuilder);
@@ -80,7 +81,7 @@ function main() {
 
             //const api = getD2ApiFromArgs(envVars);
             // Call this function once to initialize the variables
-            initializeGlobals(envVars);
+            await initializeGlobals(envVars);
 
             //1. Get Period for which to reset.
             if (!args.uploadId) throw new Error("uploadId is required");

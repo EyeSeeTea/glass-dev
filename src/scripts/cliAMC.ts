@@ -1,6 +1,7 @@
 import { boolean, command, flag, run } from "cmd-ts";
 import { setupLogger, logger } from "../utils/logger";
-import { getApiUrlOptions, getD2ApiFromArgs, getInstance } from "./common";
+import { getApiUrlOptions, getInstance, warmUpSession } from "./common";
+import { getD2APiFromInstance } from "../utils/d2-api";
 import { DataStoreClient } from "../data/data-store/DataStoreClient";
 import { RecalculateConsumptionDataProductLevelForAllUseCase } from "../domain/usecases/data-entry/amc/RecalculateConsumptionDataProductLevelForAllUseCase";
 import { RecalculateConsumptionDataSubstanceLevelForAllUseCase } from "../domain/usecases/data-entry/amc/RecalculateConsumptionDataSubstanceLevelForAllUseCase";
@@ -45,8 +46,9 @@ async function main() {
         },
         handler: async args => {
             try {
-                const api = getD2ApiFromArgs(args);
                 const instance = getInstance(args);
+                const api = getD2APiFromInstance(instance);
+                await warmUpSession(api);
                 const dataStoreClient = new DataStoreClient(instance);
                 const amcProductDataRepository = new AMCProductDataDefaultRepository(api);
                 const amcSubstanceDataRepository = new AMCSubstanceDataDefaultRepository(api);

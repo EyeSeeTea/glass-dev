@@ -5,7 +5,8 @@ import { GlassModuleName } from "../domain/entities/GlassModule";
 import { GlassUploads } from "../domain/entities/GlassUploads";
 import { Id } from "../domain/entities/Ref";
 import { DataStoreClient } from "../data/data-store/DataStoreClient";
-import { getD2ApiFromArgs, getInstance } from "./common";
+import { getInstance, warmUpSession } from "./common";
+import { getD2APiFromInstance } from "../utils/d2-api";
 import { GlassAsyncUploadsDefaultRepository } from "../data/repositories/GlassAsyncUploadsDefaultRepository";
 import { GetAsyncUploadsUseCase } from "../domain/usecases/GetAsyncUploadsUseCase";
 import { GlassAsyncUpload } from "../domain/entities/GlassAsyncUploads";
@@ -44,8 +45,9 @@ async function main() {
                     },
                 };
 
-                const api = getD2ApiFromArgs(envVars);
                 const instance = getInstance(envVars);
+                const api = getD2APiFromInstance(instance);
+                await warmUpSession(api);
                 const dataStoreClient = new DataStoreClient(instance);
                 const glassAsyncUploadsRepository = new GlassAsyncUploadsDefaultRepository(dataStoreClient);
 

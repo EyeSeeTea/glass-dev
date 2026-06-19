@@ -3,7 +3,8 @@ import { command, run } from "cmd-ts";
 import "dotenv/config";
 import moment from "moment-timezone";
 
-import { getD2ApiFromArgs, getInstance } from "./common";
+import { getInstance, warmUpSession } from "./common";
+import { getD2APiFromInstance } from "../utils/d2-api";
 import { DataStoreClient } from "../data/data-store/DataStoreClient";
 import consoleLogger from "../utils/consoleLogger";
 import {
@@ -55,8 +56,9 @@ async function main() {
                     },
                 };
 
-                const api = getD2ApiFromArgs(envVars);
                 const instance = getInstance(envVars);
+                const api = getD2APiFromInstance(instance);
+                await warmUpSession(api);
                 const dataStoreClient = new DataStoreClient(instance);
 
                 consoleLogger.info("Starting migration to add upload date to GLASS uploads in Event program...");

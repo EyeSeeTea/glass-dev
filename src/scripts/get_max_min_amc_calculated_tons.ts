@@ -3,7 +3,8 @@ import path from "path";
 import fs from "fs";
 import { D2TrackerEventSchema, TrackerEventsResponse } from "@eyeseetea/d2-api/api/trackerEvents";
 
-import { getD2ApiFromArgs } from "./common";
+import { getInstance, warmUpSession } from "./common";
+import { getD2APiFromInstance } from "../utils/d2-api";
 import { Future, FutureData } from "../domain/entities/Future";
 import { D2Api, SelectedPick } from "../types/d2-api";
 import { Id } from "../domain/entities/Ref";
@@ -63,7 +64,9 @@ function main() {
                 },
             };
 
-            const api = getD2ApiFromArgs(envVars);
+            const instance = getInstance(envVars);
+            const api = getD2APiFromInstance(instance);
+            await warmUpSession(api);
 
             try {
                 console.debug(`Fetching all org units...`);

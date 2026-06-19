@@ -26,7 +26,7 @@ import { UpdateSampleUploadWithRisIdUseCase } from "../domain/usecases/UpdateSam
 import { moduleProperties } from "../domain/utils/ModuleProperties";
 
 import { generateUid } from "../utils/uid";
-import { getD2ApiFromArgs, getInstance } from "./common";
+import { getInstance, warmUpSession } from "./common";
 import { DataValuesDefaultImportRepository } from "../data/repositories/data-entry/DataValuesDefaultImportRepository";
 import { GlassUploadsProgramRepository } from "../data/repositories/GlassUploadsProgramRepository";
 import { getUploadsFormDataBuilder } from "../utils/getUploadsFormDataBuilder";
@@ -70,7 +70,7 @@ let authPromise: Promise<void> | null = null;
 let orgUnits: { [key: string]: string } = {};
 let allDataSubmissions = new Map<string, GlassDataSubmission>();
 let allUploads = new Map<string, GlassUploads[]>();
-let api = new D2Api();
+let api!: D2Api;
 const errorMessages: string[] = [];
 interface FileMetaData {
     fileUploadId: string;
@@ -116,25 +116,12 @@ function getEnvVars() {
     return envVars;
 }
 
-async function authenticate(): Promise<void> {
-    console.warn("Authenticating!");
-    return new Promise((resolve, reject) => {
-        try {
-            const envVars = getEnvVars();
-            api = getD2ApiFromArgs(envVars);
-            resolve();
-        } catch (error) {
-            reject(error);
-        }
-    });
-}
-
 async function initializeGlobals() {
     const startTime = Date.now();
-    await authenticate();
     const envVars = getEnvVars();
     const instance = getInstance(envVars);
-    const api = getD2APiFromInstance(instance);
+    api = getD2APiFromInstance(instance);
+    await warmUpSession(api);
     const runtime: "node" | "browser" = typeof window === "undefined" ? "node" : "browser";
     const uploadsFormDataBuilder = getUploadsFormDataBuilder(runtime);
     glassUploadsRepository = new GlassUploadsProgramRepository(api, uploadsFormDataBuilder);
@@ -798,7 +785,7 @@ async function retryWithBackoff<T>(
             if (shouldReauthenticate && !isAuthCooldownActive) {
                 if (!authPromise) {
                     console.error("Attempting reauthentication...");
-                    authPromise = authenticate(); // Start the authentication process
+                    authPromise = warmUpSession(api); // Re-initialize the DHIS2 session
                     try {
                         await authPromise;
                         lastAuthTime = Date.now(); // Update the last authentication timestamp

@@ -1,6 +1,6 @@
 import { command, run, string, option } from "cmd-ts";
 import path from "path";
-import { getInstance } from "./common";
+import { getInstance, warmUpSession } from "./common";
 import dotenv from "dotenv";
 import { DataStoreClient } from "../data/data-store/DataStoreClient";
 
@@ -23,10 +23,11 @@ let setUploadStatusUseCase: SetUploadStatusUseCase;
 let updateSecondaryFileWithPrimaryId: UpdateSampleUploadWithRisIdUseCase;
 
 // Initialize the global variables
-function initializeGlobals(envVars: any) {
+async function initializeGlobals(envVars: any) {
     instance = getInstance(envVars);
     dataStoreClient = new DataStoreClient(instance);
     const api = getD2APiFromInstance(instance);
+    await warmUpSession(api);
     const runtime: "node" | "browser" = typeof window === "undefined" ? "node" : "browser";
     const uploadsFormDataBuilder = getUploadsFormDataBuilder(runtime);
     glassUploadsRepository = new GlassUploadsProgramRepository(api, uploadsFormDataBuilder);
@@ -74,7 +75,7 @@ function main() {
 
             //const api = getD2ApiFromArgs(envVars);
             // Call this function once to initialize the variables
-            initializeGlobals(envVars);
+            await initializeGlobals(envVars);
 
             try {
                 if (primaryFileUploadId) {

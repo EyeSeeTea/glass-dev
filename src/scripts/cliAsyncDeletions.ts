@@ -1,7 +1,8 @@
 import { command, run } from "cmd-ts";
 import "dotenv/config";
 
-import { getD2ApiFromArgs, getInstance } from "./common";
+import { getInstance, warmUpSession } from "./common";
+import { getD2APiFromInstance } from "../utils/d2-api";
 import { DataStoreClient } from "../data/data-store/DataStoreClient";
 import { Id } from "../domain/entities/Ref";
 import { GetAsyncDeletionsUseCase } from "../domain/usecases/GetAsyncDeletionsUseCase";
@@ -99,8 +100,9 @@ async function main() {
                     },
                 };
 
-                const api = getD2ApiFromArgs(envVars);
                 const instance = getInstance(envVars);
+                const api = getD2APiFromInstance(instance);
+                await warmUpSession(api);
                 const dataStoreClient = new DataStoreClient(instance);
                 const runtime: "node" | "browser" = typeof window === "undefined" ? "node" : "browser";
                 const uploadsFormDataBuilder = getUploadsFormDataBuilder(runtime);

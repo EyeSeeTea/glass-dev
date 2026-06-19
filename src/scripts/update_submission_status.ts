@@ -1,6 +1,7 @@
 import { command, run } from "cmd-ts";
 import path from "path";
-import { getInstance } from "./common";
+import { getInstance, warmUpSession } from "./common";
+import { getD2APiFromInstance } from "../utils/d2-api";
 import dotenv from "dotenv";
 import { DataStoreClient } from "../data/data-store/DataStoreClient";
 import { Instance } from "../data/entities/Instance";
@@ -69,7 +70,9 @@ function main() {
                 },
             };
 
-            //const api = getD2ApiFromArgs(envVars);
+            const instance = getInstance(envVars);
+            const api = getD2APiFromInstance(instance);
+            await warmUpSession(api);
             // Call this function once to initialize the variables
             initializeGlobals(envVars);
 

@@ -116,3 +116,14 @@ export function choiceOf<T extends string>(values: readonly T[]): Type<string, T
 export function sleep(milliseconds: number) {
     return new Promise(resolve => setTimeout(resolve, milliseconds));
 }
+
+/**
+ * DHIS2 workaround: a bug in certain DHIS2 versions causes PAT (Personal Access Token)
+ * sessions to fail on the first real API call. Calling GET /me first forces the server
+ * to fully initialize the session, after which all subsequent calls succeed normally.
+ * Call this once per script run, right after creating the D2Api instance.
+ */
+export async function warmUpSession(api: D2Api): Promise<void> {
+    const user = await api.get<{ id: string; username: string }>("/me").getData();
+    console.log(`[auth] Session initialized for user: ${user.username} (${user.id})`);
+}

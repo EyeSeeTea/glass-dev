@@ -1,7 +1,8 @@
 import { command, run, string, option } from "cmd-ts";
 import path from "path";
 import fs from "fs";
-import { getD2ApiFromArgs, getInstance } from "./common";
+import { getInstance, warmUpSession } from "./common";
+import { getD2APiFromInstance } from "../utils/d2-api";
 import dotenv from "dotenv";
 import { MetadataDefaultRepository } from "../data/repositories/MetadataDefaultRepository";
 import { Instance } from "../data/entities/Instance";
@@ -58,7 +59,8 @@ function main() {
 
             instance = getInstance(envVars);
             metadataRepository = new MetadataDefaultRepository(instance);
-            const api = getD2ApiFromArgs(envVars);
+            const api = getD2APiFromInstance(instance);
+            await warmUpSession(api);
 
             const filePath = args.filePath;
 

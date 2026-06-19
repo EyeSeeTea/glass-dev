@@ -2,7 +2,8 @@ import _ from "lodash";
 import { command, run } from "cmd-ts";
 import "dotenv/config";
 
-import { getD2ApiFromArgs, getInstance } from "./common";
+import { getInstance, warmUpSession } from "./common";
+import { getD2APiFromInstance } from "../utils/d2-api";
 import { DataStoreClient } from "../data/data-store/DataStoreClient";
 import consoleLogger from "../utils/consoleLogger";
 import { D2Api, D2TrackerEventToPost, Id } from "../types/d2-api";
@@ -51,8 +52,9 @@ async function main() {
                     },
                 };
 
-                const api = getD2ApiFromArgs(envVars);
                 const instance = getInstance(envVars);
+                const api = getD2APiFromInstance(instance);
+                await warmUpSession(api);
                 const dataStoreClient = new DataStoreClient(instance);
                 const uploadsFormDataBuilder = new NodeUploadsFormDataBuilder();
 

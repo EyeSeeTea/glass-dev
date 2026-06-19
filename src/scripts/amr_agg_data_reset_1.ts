@@ -1,7 +1,8 @@
 import { command, run, string, option } from "cmd-ts";
 import path from "path";
 import fs from "fs";
-import { getD2ApiFromArgs } from "./common";
+import { getInstance, warmUpSession } from "./common";
+import { getD2APiFromInstance } from "../utils/d2-api";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -69,7 +70,9 @@ function main() {
                 `Run AMR AGG RIS data reset for URL ${envVars.url} and period ${period} and orgUnit ${orgUnitId} and batchId ${batchId}`
             );
 
-            const api = getD2ApiFromArgs(envVars);
+            const instance = getInstance(envVars);
+            const api = getD2APiFromInstance(instance);
+            await warmUpSession(api);
 
             try {
                 //5.Get all category combination values for given batchId

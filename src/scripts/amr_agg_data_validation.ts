@@ -2,7 +2,8 @@ import { command, option, optional, run, string } from "cmd-ts";
 import path from "path";
 import _ from "lodash";
 import { DataStoreClient } from "../data/data-store/DataStoreClient";
-import { getD2ApiFromArgs, getInstance } from "./common";
+import { getInstance, warmUpSession } from "./common";
+import { getD2APiFromInstance } from "../utils/d2-api";
 import { DataStoreKeys } from "../data/data-store/DataStoreKeys";
 import { GlassUploads } from "../domain/entities/GlassUploads";
 import "dotenv/config";
@@ -39,8 +40,9 @@ function main() {
                 },
             };
 
-            const api = getD2ApiFromArgs(envVars);
             const instance = getInstance(envVars);
+            const api = getD2APiFromInstance(instance);
+            await warmUpSession(api);
             const dataStoreClient = new DataStoreClient(instance);
 
             //1. Initialize all periods

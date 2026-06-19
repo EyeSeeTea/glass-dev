@@ -4,7 +4,8 @@ import fs from "fs";
 
 import dotenv from "dotenv";
 
-import { getD2ApiFromArgs } from "./common";
+import { getInstance, warmUpSession } from "./common";
+import { getD2APiFromInstance } from "../utils/d2-api";
 import { DataValueSetsDataValue } from "@eyeseetea/d2-api/api";
 dotenv.config();
 
@@ -72,7 +73,9 @@ function main() {
                 },
             };
 
-            const api = getD2ApiFromArgs(envVars);
+            const instance = getInstance(envVars);
+            const api = getD2APiFromInstance(instance);
+            await warmUpSession(api);
             let batchIds: string[] = [];
 
             //1. Get Period for which to reset.

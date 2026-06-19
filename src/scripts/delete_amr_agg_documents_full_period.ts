@@ -1,7 +1,7 @@
 import { command, run, string, option } from "cmd-ts";
 import path from "path";
 import fs from "fs";
-import { getD2ApiFromArgs, getInstance } from "./common";
+import { getInstance, warmUpSession } from "./common";
 import dotenv from "dotenv";
 import { GlassDataSubmissionsDefaultRepository } from "../data/repositories/GlassDataSubmissionDefaultRepository";
 import { DataStoreClient } from "../data/data-store/DataStoreClient";
@@ -100,7 +100,9 @@ const cmd = command({
             },
         };
 
-        const api = getD2ApiFromArgs(envVars);
+        const instance = getInstance(envVars);
+        const api = getD2APiFromInstance(instance);
+        await warmUpSession(api);
 
         initializeGlobals(envVars);
 

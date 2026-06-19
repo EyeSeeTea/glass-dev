@@ -1,7 +1,8 @@
 import { command, run, string, option } from "cmd-ts";
 import path from "path";
 import fs from "fs";
-import { getD2ApiFromArgs } from "./common";
+import { getInstance, warmUpSession } from "./common";
+import { getD2APiFromInstance } from "../utils/d2-api";
 
 function main() {
     const cmd = command({
@@ -45,7 +46,9 @@ function main() {
                 },
             };
 
-            const api = getD2ApiFromArgs(envVars);
+            const instance = getInstance(envVars);
+            const api = getD2APiFromInstance(instance);
+            await warmUpSession(api);
 
             //1. Get Period for which to reset.
             if (!args.period) throw new Error("Period is required");
