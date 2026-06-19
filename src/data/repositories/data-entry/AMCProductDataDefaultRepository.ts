@@ -60,12 +60,12 @@ export class AMCProductDataDefaultRepository implements AMCProductDataRepository
 
             if (rawProductHeaderRow && teiHeaderRow) {
                 const sanitizedRawProductHeaders = Object.values(rawProductHeaderRow).map(header =>
-                    header.replace(/[* \n\r]/g, "")
+                    String(header).replace(/[* \n\r]/g, "")
                 );
                 const allRawProductCols = rawProductDataColumns.map(col => sanitizedRawProductHeaders.includes(col));
                 const allRawProductColsPresent = _.every(allRawProductCols, c => c === true);
 
-                const sanitizedTEIHeaders = Object.values(teiHeaderRow).map(header => header.replace(/[* \n\r]/g, ""));
+                const sanitizedTEIHeaders = Object.values(teiHeaderRow).map(header => String(header).replace(/[* \n\r]/g, ""));
                 const allTEICols = teiDataColumns.map(col => sanitizedTEIHeaders.includes(col));
                 const allTEIColsPresent = _.every(allTEICols, c => c === true);
 
@@ -98,7 +98,7 @@ export class AMCProductDataDefaultRepository implements AMCProductDataRepository
 
                 if (rawProductHeaderRow && teiHeaderRow) {
                     const sanitizedRawProductHeaders = Object.values(rawProductHeaderRow).map(header =>
-                        header.replace(/[* \n\r]/g, "")
+                        String(header).replace(/[* \n\r]/g, "")
                     );
                     const allRawProductCols = rawProductDataColumns.map(col =>
                         sanitizedRawProductHeaders.includes(col)
@@ -106,7 +106,7 @@ export class AMCProductDataDefaultRepository implements AMCProductDataRepository
                     const allRawProductColsPresent = _.every(allRawProductCols, c => c === true);
 
                     const sanitizedTEIHeaders = Object.values(teiHeaderRow).map(header =>
-                        header.replace(/[* \n\r]/g, "")
+                        String(header).replace(/[* \n\r]/g, "")
                     );
                     const allTEICols = teiDataColumns.map(col => sanitizedTEIHeaders.includes(col));
                     const allTEIColsPresent = _.every(allTEICols, c => c === true);

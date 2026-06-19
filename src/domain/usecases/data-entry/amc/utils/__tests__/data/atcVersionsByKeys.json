@@ -48,38 +48,23 @@
                 },
                 {
                     "CODE": "ATF",
-                    "ATCS": [
-                        "D01BA*",
-                        "J02*",
-                        "A07AA02",
-                        "A07AA03",
-                        "A07AA05",
-                        "A07AA07"
-                    ]
+                    "ATCS": ["D01BA*", "J02*", "A07AA02", "A07AA03", "A07AA05", "A07AA07"]
                 },
                 {
                     "CODE": "ATV",
-                    "ATCS": [
-                        "J05A*"
-                    ]
+                    "ATCS": ["J05A*"]
                 },
                 {
                     "CODE": "ATM",
-                    "ATCS": [
-                        "P01B*"
-                    ]
+                    "ATCS": ["P01B*"]
                 },
                 {
                     "CODE": "ATT",
-                    "ATCS": [
-                        "J04A*"
-                    ]
+                    "ATCS": ["J04A*"]
                 },
                 {
                     "CODE": "OTH",
-                    "ATCS": [
-                        "Z99ZZ99"
-                    ]
+                    "ATCS": ["Z99ZZ99"]
                 }
             ]
         },
@@ -16627,38 +16612,23 @@
                 },
                 {
                     "CODE": "ATF",
-                    "ATCS": [
-                        "D01BA*",
-                        "J02*",
-                        "A07AA02",
-                        "A07AA03",
-                        "A07AA05",
-                        "A07AA07"
-                    ]
+                    "ATCS": ["D01BA*", "J02*", "A07AA02", "A07AA03", "A07AA05", "A07AA07"]
                 },
                 {
                     "CODE": "ATV",
-                    "ATCS": [
-                        "J05A*"
-                    ]
+                    "ATCS": ["J05A*"]
                 },
                 {
                     "CODE": "ATM",
-                    "ATCS": [
-                        "P01B*"
-                    ]
+                    "ATCS": ["P01B*"]
                 },
                 {
                     "CODE": "ATT",
-                    "ATCS": [
-                        "J04A*"
-                    ]
+                    "ATCS": ["J04A*"]
                 },
                 {
                     "CODE": "OTH",
-                    "ATCS": [
-                        "Z99ZZ99"
-                    ]
+                    "ATCS": ["Z99ZZ99"]
                 }
             ]
         },
@@ -33206,38 +33176,23 @@
                 },
                 {
                     "CODE": "ATF",
-                    "ATCS": [
-                        "D01BA*",
-                        "J02*",
-                        "A07AA02",
-                        "A07AA03",
-                        "A07AA05",
-                        "A07AA07"
-                    ]
+                    "ATCS": ["D01BA*", "J02*", "A07AA02", "A07AA03", "A07AA05", "A07AA07"]
                 },
                 {
                     "CODE": "ATV",
-                    "ATCS": [
-                        "J05A*"
-                    ]
+                    "ATCS": ["J05A*"]
                 },
                 {
                     "CODE": "ATM",
-                    "ATCS": [
-                        "P01B*"
-                    ]
+                    "ATCS": ["P01B*"]
                 },
                 {
                     "CODE": "ATT",
-                    "ATCS": [
-                        "J04A*"
-                    ]
+                    "ATCS": ["J04A*"]
                 },
                 {
                     "CODE": "OTH",
-                    "ATCS": [
-                        "Z99ZZ99"
-                    ]
+                    "ATCS": ["Z99ZZ99"]
                 }
             ]
         },
@@ -49785,38 +49740,23 @@
                 },
                 {
                     "CODE": "ATF",
-                    "ATCS": [
-                        "D01BA*",
-                        "J02*",
-                        "A07AA02",
-                        "A07AA03",
-                        "A07AA05",
-                        "A07AA07"
-                    ]
+                    "ATCS": ["D01BA*", "J02*", "A07AA02", "A07AA03", "A07AA05", "A07AA07"]
                 },
                 {
                     "CODE": "ATV",
-                    "ATCS": [
-                        "J05A*"
-                    ]
+                    "ATCS": ["J05A*"]
                 },
                 {
                     "CODE": "ATM",
-                    "ATCS": [
-                        "P01B*"
-                    ]
+                    "ATCS": ["P01B*"]
                 },
                 {
                     "CODE": "ATT",
-                    "ATCS": [
-                        "J04A*"
-                    ]
+                    "ATCS": ["J04A*"]
                 },
                 {
                     "CODE": "OTH",
-                    "ATCS": [
-                        "Z99ZZ99"
-                    ]
+                    "ATCS": ["Z99ZZ99"]
                 }
             ]
         },
@@ -66364,38 +66304,23 @@
                 },
                 {
                     "CODE": "ATF",
-                    "ATCS": [
-                        "D01BA*",
-                        "J02*",
-                        "A07AA02",
-                        "A07AA03",
-                        "A07AA05",
-                        "A07AA07"
-                    ]
+                    "ATCS": ["D01BA*", "J02*", "A07AA02", "A07AA03", "A07AA05", "A07AA07"]
                 },
                 {
                     "CODE": "ATV",
-                    "ATCS": [
-                        "J05A*"
-                    ]
+                    "ATCS": ["J05A*"]
                 },
                 {
                     "CODE": "ATM",
-                    "ATCS": [
-                        "P01B*"
-                    ]
+                    "ATCS": ["P01B*"]
                 },
                 {
                     "CODE": "ATT",
-                    "ATCS": [
-                        "J04A*"
-                    ]
+                    "ATCS": ["J04A*"]
                 },
                 {
                     "CODE": "OTH",
-                    "ATCS": [
-                        "Z99ZZ99"
-                    ]
+                    "ATCS": ["Z99ZZ99"]
                 }
             ]
         },
@@ -82943,38 +82868,23 @@
                 },
                 {
                     "CODE": "ATF",
-                    "ATCS": [
-                        "D01BA*",
-                        "J02*",
-                        "A07AA02",
-                        "A07AA03",
-                        "A07AA05",
-                        "A07AA07"
-                    ]
+                    "ATCS": ["D01BA*", "J02*", "A07AA02", "A07AA03", "A07AA05", "A07AA07"]
                 },
                 {
                     "CODE": "ATV",
-                    "ATCS": [
-                        "J05A*"
-                    ]
+                    "ATCS": ["J05A*"]
                 },
                 {
                     "CODE": "ATM",
-                    "ATCS": [
-                        "P01B*"
-                    ]
+                    "ATCS": ["P01B*"]
                 },
                 {
                     "CODE": "ATT",
-                    "ATCS": [
-                        "J04A*"
-                    ]
+                    "ATCS": ["J04A*"]
                 },
                 {
                     "CODE": "OTH",
-                    "ATCS": [
-                        "Z99ZZ99"
-                    ]
+                    "ATCS": ["Z99ZZ99"]
                 }
             ]
         },
