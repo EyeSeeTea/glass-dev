@@ -65,7 +65,9 @@ export class AMCProductDataDefaultRepository implements AMCProductDataRepository
                 const allRawProductCols = rawProductDataColumns.map(col => sanitizedRawProductHeaders.includes(col));
                 const allRawProductColsPresent = _.every(allRawProductCols, c => c === true);
 
-                const sanitizedTEIHeaders = Object.values(teiHeaderRow).map(header => String(header).replace(/[* \n\r]/g, ""));
+                const sanitizedTEIHeaders = Object.values(teiHeaderRow).map(header =>
+                    String(header).replace(/[* \n\r]/g, "")
+                );
                 const allTEICols = teiDataColumns.map(col => sanitizedTEIHeaders.includes(col));
                 const allTEIColsPresent = _.every(allTEICols, c => c === true);
 

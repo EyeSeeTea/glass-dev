@@ -271,7 +271,7 @@ export class CustomValidationsAMCProductData {
                     }
                 }
 
-               /* const productManufacturerCountry = allCountries.find(country => country.id === manufacturerCountryId);
+                /* const productManufacturerCountry = allCountries.find(country => country.id === manufacturerCountryId);
 
                 if (manufacturerCountryId && !productManufacturerCountry) {
                     curErrors.push({

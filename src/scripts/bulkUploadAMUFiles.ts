@@ -231,7 +231,6 @@ function getEnvVars() {
     return envVars;
 }
 
-
 async function initializeGlobals() {
     const startTime = Date.now();
     const envVars = getEnvVars();
