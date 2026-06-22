@@ -6,6 +6,12 @@ export interface RISIndividualFungalDataRepository {
     getFromBlob(dataColumns: CustomDataColumns, blob: Blob): FutureData<CustomDataColumns[]>;
     validate(
         dataColumns: CustomDataColumns,
-        file: File
+        file: File | Blob
     ): FutureData<{ isValid: boolean; specimens: string[]; rows: number }>;
+    getFromBlobInChunks(
+        dataColumns: CustomDataColumns,
+        blob: Blob,
+        chunkSize: number,
+        onChunk: (chunk: CustomDataColumns[]) => FutureData<boolean>
+    ): FutureData<void>;
 }

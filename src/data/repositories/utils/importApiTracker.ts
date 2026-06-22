@@ -13,28 +13,49 @@ import {
 import { D2TrackerEventToPost } from "@eyeseetea/d2-api/api/trackerEvents";
 import { D2TrackerEnrollmentToPost } from "@eyeseetea/d2-api/api/trackerEnrollments";
 import { D2TrackedEntityInstanceToPost } from "@eyeseetea/d2-api/api/trackerTrackedEntities";
+import consoleLogger from "../../../utils/consoleLogger";
 
 export function importApiTracker(
     api: D2Api,
     request: D2TrackerPostRequest,
-    action: ImportStrategy
+    options: { action: ImportStrategy; async?: boolean; skipSideEffects?: boolean }
 ): FutureData<TrackerPostResponse> {
-    return apiToFuture(
-        api.tracker.postAsync(
-            {
-                importStrategy: action,
-                skipRuleEngine: true,
-            },
-            request
-        )
-    ).flatMap(response => {
-        return apiToFuture(api.system.waitFor("TRACKER_IMPORT_JOB", response.response.id)).map(result => {
-            if (result) return result;
-            else {
-                return trackerPostResponseDefaultError;
-            }
+    const { action, async = false, skipSideEffects = false } = options;
+
+    if (async) {
+        return apiToFuture(
+            api.tracker.postAsync(
+                {
+                    importStrategy: action,
+                    skipRuleEngine: true,
+                    skipSideEffects: skipSideEffects,
+                },
+                request
+            )
+        ).flatMap(response => {
+            return apiToFuture(api.system.waitFor("TRACKER_IMPORT_JOB", response.response.id)).map(result => {
+                if (result) return result;
+                else {
+                    return trackerPostResponseDefaultError;
+                }
+            });
         });
-    });
+    } else {
+        return apiToFuture(
+            api.tracker.post(
+                { importStrategy: action, skipRuleEngine: true, skipSideEffects: skipSideEffects },
+                request
+            )
+        )
+            .map(response => {
+                consoleLogger.debug(`Successfully imported tracker data.`);
+                return response;
+            })
+            .mapError(error => {
+                consoleLogger.error(`Error while importing tracker data: ${error}`);
+                return error;
+            });
+    }
 }
 
 export function mapTrackerPostRequestToD2TrackerPostRequest(

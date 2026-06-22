@@ -80,9 +80,13 @@ export class GlassDocumentsDefaultRepository implements GlassDocumentsRepository
         formData.append("file", fileBuffer, fileName);
         formData.append("domain", "DOCUMENT");
 
+        const bodyPayload = formData.getBuffer();
+        const headers = formData.getHeaders();
+
         return apiToFuture(
-            this.api.post<PartialSaveFileResourceResponse>("/fileResources", undefined, formData, {
+            this.api.post<PartialSaveFileResourceResponse>("/fileResources", undefined, bodyPayload, {
                 requestBodyType: "raw",
+                headers: headers,
             })
         ).flatMap(fileUploadResult => {
             const fileResourceId = fileUploadResult.response?.fileResource?.id;
