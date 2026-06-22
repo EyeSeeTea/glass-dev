@@ -319,8 +319,9 @@ export function getDDDForAtcVersion(params: {
     roaCode: RouteOfAdministrationCode;
     saltCode: SaltCode;
     atcVersion: GlassAtcVersionData;
+    combinationCode?: string;
 }): DDDData | undefined {
-    const { atcCode, roaCode, saltCode, atcVersion } = params;
+    const { atcCode, roaCode, saltCode, atcVersion, combinationCode } = params;
     const ddd = atcVersion.ddds.find(({ ATC5, ROA, SALT }: DDDData) => {
         // Treat an empty SALT in the referential as the default salt placeholder.
         const isDefaultSalt = !SALT && saltCode === DEFAULT_SALT_CODE;
@@ -329,15 +330,30 @@ export function getDDDForAtcVersion(params: {
 
     if (ddd) {
         return ddd;
-    } else {
-        const newDDD = getNewDddData({
-            atcCode: atcCode,
-            roa: roaCode,
-            dddChanges: atcVersion.changes ? getDDDChanges(atcVersion.changes) : undefined,
-        });
-        const unitsData = atcVersion?.units;
-        return newDDD ? parseDDDChangesDataToDDDData(newDDD, unitsData, saltCode) : undefined;
     }
+
+    const unitsData = atcVersion?.units;
+    const newDDD = getNewDddData({
+        atcCode: atcCode,
+        roa: roaCode,
+        dddChanges: atcVersion.changes ? getDDDChanges(atcVersion.changes) : undefined,
+    });
+    if (newDDD) {
+        return parseDDDChangesDataToDDDData(newDDD, unitsData, saltCode);
+    }
+
+    // Combination products store their DDD in combinations[], not ddds[].
+    // Only checked when a combinationCode (COMB_CODE) is supplied by the caller.
+    if (combinationCode) {
+        const comb = atcVersion.combinations?.find(
+            ({ COMB_CODE, ATC5, ROA }) => COMB_CODE === combinationCode && ATC5 === atcCode && ROA === roaCode
+        );
+        if (comb) {
+            return parseCombinationsDataToDDDData(comb, unitsData);
+        }
+    }
+
+    return undefined;
 }
 
 function parseDDDChangesDataToDDDData(dddChange: DDDChangesData, unitsData: UnitsData[], saltCode: SaltCode): DDDData {
@@ -357,6 +373,23 @@ function parseDDDChangesDataToDDDData(dddChange: DDDChangesData, unitsData: Unit
         DDD_GRAMS: dddGrams,
         DDD_STD: standarized?.standarizedValue ?? dddChange.NEW_DDD_VALUE,
         NOTES: dddChange.NEW_DDD_INFO,
+    };
+}
+
+function parseCombinationsDataToDDDData(comb: CombinationsData, unitsData: UnitsData[]): DDDData {
+    // DDD_STD: standardize using the current units table (e.g. MG → G).
+    // For non-standardizable units (e.g. UD), fall back to DDD_GRAMS which is pre-computed in grams.
+    const standardized = getStandardizedUnitsAndValue(unitsData, comb.DDD_UNIT, comb.DDD);
+    return {
+        ARS: comb.ARS,
+        ATC5: comb.ATC5,
+        ROA: comb.ROA,
+        SALT: DEFAULT_SALT_CODE,
+        DDD: comb.DDD,
+        DDD_UNIT: comb.DDD_UNIT,
+        DDD_GRAMS: comb.DDD_GRAMS,
+        DDD_STD: standardized?.standarizedValue ?? comb.DDD_GRAMS,
+        NOTES: comb.DDD_INFO,
     };
 }
 

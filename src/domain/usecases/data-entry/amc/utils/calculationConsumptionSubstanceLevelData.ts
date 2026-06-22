@@ -99,6 +99,7 @@ export function calculateConsumptionSubstanceLevelData(
                     roaCode: rawSubstanceConsumption.route_admin_manual,
                     saltCode: rawSubstanceConsumption.salt_manual,
                     atcVersion: latestAtcVersionData,
+                    combinationCode: rawSubstanceConsumption.combination_manual,
                 });
                 // No official current DDD for this ATC+ROA → must produce 0, not copy ddds_manual.
                 // OLD behaviour (kept for reference): always called copyDDDManualToDDDAutocalculated
@@ -200,6 +201,7 @@ export function calculateConsumptionSubstanceLevelData(
                 roaCode: rawSubstanceConsumption.route_admin_manual,
                 saltCode: rawSubstanceConsumption.salt_manual,
                 atcVersion: latestAtcVersionData,
+                combinationCode: rawSubstanceConsumption.combination_manual,
             });
 
             if (newDDD === undefined) {

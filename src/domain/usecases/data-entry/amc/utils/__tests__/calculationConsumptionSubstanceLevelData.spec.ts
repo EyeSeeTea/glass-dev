@@ -845,6 +845,126 @@ describe("Given calculate Consumption Substance Level Data function", () => {
     });
 
     // -----------------------------------------------------------------------
+    // Bug: combination products — DDD must be fetched from combinations[], not ddds[]
+    // -----------------------------------------------------------------------
+
+    describe("Combination DDD lookup from combinations table", () => {
+        const COMB_CODE = "J01AA01_COMB1";
+        const COMB_DDD = 2;
+        const COMB_DDD_UNIT = "UD";
+        const COMB_DDD_GRAMS = 0.6; // pre-computed: 2 UD × 0.3 g/UD
+
+        function makeAtcVersionWithCombination(): GlassAtcVersionData {
+            return {
+                atcs: [{ CODE: "J01AA01", NAME: "test", LEVEL: 5, PATH: "/J/J01/J01A/J01AA/J01AA01" }],
+                ddds: [], // combination is NOT in ddds
+                combinations: [
+                    {
+                        COMB_CODE: COMB_CODE,
+                        ARS: "J01AA01_O",
+                        ATC5: "J01AA01",
+                        FORM: "Tab",
+                        ROA: "O",
+                        MULTIFORM: false,
+                        UNIT_DOSE: "test components",
+                        DDD: COMB_DDD,
+                        DDD_UNIT: COMB_DDD_UNIT,
+                        DDD_INFO: "2 UD",
+                        EXAMPLES: "Example",
+                        DDD_GRAMS: COMB_DDD_GRAMS,
+                        UD_GRAMS: 0.3,
+                    },
+                ],
+                conversions_iu_g: [],
+                conversions_ddd_g: [],
+                changes: [],
+                salts: [],
+                roas: [],
+                units: GRAM_UNITS,
+                am_classification: { classification: [], atc_am_mapping: [] },
+                aware_classification: { classification: [], atc_awr_mapping: [] },
+            };
+        }
+
+        it("Same-version path: ddds_manual is copied and kg uses combination DDD_GRAMS", () => {
+            const REPORTED_DDDS = 500;
+            const expectedKg = (REPORTED_DDDS * COMB_DDD_GRAMS) / 1000;
+
+            const rawData: RawSubstanceConsumptionData[] = [
+                {
+                    ...BASE_SUBSTANCE,
+                    combination_manual: COMB_CODE,
+                    ddds_manual: REPORTED_DDDS,
+                    atc_version_manual: CURRENT_VERSION_KEY,
+                },
+            ];
+
+            const result = calculateConsumptionSubstanceLevelData(
+                PERIOD,
+                ORG_UNIT_ID,
+                rawData,
+                makeAtcVersionWithCombination(),
+                CURRENT_VERSION_KEY
+            );
+
+            expect(result).toHaveLength(1);
+            expect(result[0]?.ddds_autocalculated).toBeCloseTo(REPORTED_DDDS, 6);
+            expect(result[0]?.kilograms_autocalculated).toBeCloseTo(expectedKg, 6);
+            expect(result[0]?.combination_autocalculated).toBe(COMB_CODE);
+        });
+
+        it("Old-version path: ddds_manual is preserved 1:1 (no change-table entry for combination DDDs)", () => {
+            const REPORTED_DDDS = 300;
+            const expectedKg = (REPORTED_DDDS * COMB_DDD_GRAMS) / 1000;
+
+            const rawData: RawSubstanceConsumptionData[] = [
+                {
+                    ...BASE_SUBSTANCE,
+                    combination_manual: COMB_CODE,
+                    ddds_manual: REPORTED_DDDS,
+                    atc_version_manual: "ATC-2020-v1",
+                },
+            ];
+
+            const result = calculateConsumptionSubstanceLevelData(
+                PERIOD,
+                ORG_UNIT_ID,
+                rawData,
+                makeAtcVersionWithCombination(),
+                CURRENT_VERSION_KEY
+            );
+
+            expect(result).toHaveLength(1);
+            // No change-table entry for this combination → 1:1 ratio → ddds_manual copied
+            expect(result[0]?.ddds_autocalculated).toBeCloseTo(REPORTED_DDDS, 6);
+            expect(result[0]?.kilograms_autocalculated).toBeCloseTo(expectedKg, 6);
+        });
+
+        it("When combination_manual is set but code is absent from combinations table, ddds_autocalculated is 0", () => {
+            const rawData: RawSubstanceConsumptionData[] = [
+                {
+                    ...BASE_SUBSTANCE,
+                    combination_manual: "UNKNOWN_COMB",
+                    ddds_manual: 400,
+                    atc_version_manual: CURRENT_VERSION_KEY,
+                },
+            ];
+
+            const result = calculateConsumptionSubstanceLevelData(
+                PERIOD,
+                ORG_UNIT_ID,
+                rawData,
+                makeAtcVersionWithCombination(),
+                CURRENT_VERSION_KEY
+            );
+
+            expect(result).toHaveLength(1);
+            expect(result[0]?.ddds_autocalculated).toBe(0);
+            expect(result[0]?.kilograms_autocalculated).toBe(0);
+        });
+    });
+
+    // -----------------------------------------------------------------------
     // Bug B fix: atcAutocalculated undefined must produce DDD=0
     // -----------------------------------------------------------------------
 
