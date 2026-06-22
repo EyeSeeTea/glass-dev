@@ -197,6 +197,21 @@ export class AsyncImportRISIndividualFungalFile {
                                                 `${importSummariesWithMergedEventIdList.mergedEventIdList.length} Tracked entity IDs imported from chunk of ${uploadId} for module ${glassModule.name}, programId ${programId}, orgUnitId ${orgUnitId}, countryCode ${countryCode}, period ${period}`
                                             );
                                         }
+
+                                        // STOP-ON-IMPORT-ERROR POLICY:
+                                        // The file already passed the full validation pass, so a failure here is an
+                                        // import-time error (server/network/conflict). Stop immediately instead of
+                                        // importing later chunks: returning false aborts the CSV stream, and the
+                                        // summaries + event-id list accumulated so far are persisted afterwards so the
+                                        // partial state is recorded. We do NOT auto-retry, because the file is already
+                                        // partially imported and a blind retry could re-process rows.
+                                        if (importSummariesWithMergedEventIdList.hasBlockingErrors) {
+                                            consoleLogger.error(
+                                                `Blocking import error in a chunk of upload ${uploadId} for module ${glassModule.name}, programId ${programId}, orgUnitId ${orgUnitId}, countryCode ${countryCode}, period ${period}. Stopping import after ${totalRowsImported}/${totalRowsValidated} rows.`
+                                            );
+                                            return Future.success(false);
+                                        }
+
                                         consoleLogger.debug(
                                             `Chunk imported successfully in upload ${uploadId} for module ${glassModule.name}, programId ${programId}, orgUnitId ${orgUnitId}, countryCode ${countryCode}, period ${period}`
                                         );
@@ -224,8 +239,15 @@ export class AsyncImportRISIndividualFungalFile {
                             });
                         })
                         .flatMap(() => {
+                            const stoppedWithBlockingErrors = allImportSummaries.some(
+                                summary => summary.blockingErrors.length > 0
+                            );
                             consoleLogger.debug(
-                                `Import completed for upload ${uploadId}. Total rows imported: ${totalRowsImported}, Total event IDs: ${allEventIdList.length}`
+                                `Import ${
+                                    stoppedWithBlockingErrors ? "stopped with blocking errors" : "completed"
+                                } for upload ${uploadId}. Total rows imported: ${totalRowsImported}/${totalRowsValidated}, Total event IDs: ${
+                                    allEventIdList.length
+                                }`
                             );
                             if (allEventIdList.length > 0) {
                                 return this.uploadIdListFileAndSave(uploadId, allEventIdList, glassModule.name).flatMap(

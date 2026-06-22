@@ -31,6 +31,7 @@ export function importOrDeleteTrackedEntitiesInChunks(params: {
 }): FutureData<{
     allImportSummaries: ImportSummary[];
     mergedEventIdList: Id[];
+    hasBlockingErrors: boolean;
 }> {
     const {
         trackedEntities,
@@ -123,13 +124,16 @@ export function importOrDeleteTrackedEntitiesInChunks(params: {
                         ...accumulatedImportSummaries,
                         errorImportSummary,
                     ]);
-                    return Future.success(importSummariesWithMergedEventIdListWithErrorSummary);
+                    return Future.success({
+                        ...importSummariesWithMergedEventIdListWithErrorSummary,
+                        hasBlockingErrors: true,
+                    });
                 } else {
                     consoleLogger.debug(
                         `SUCCESS - All chunks of tracked entities to ${action} for module ${glassModuleName} processed.`
                     );
                     const importSummariesWithMergedEventIdList = mergeImportSummaries(result.data);
-                    return Future.success(importSummariesWithMergedEventIdList);
+                    return Future.success({ ...importSummariesWithMergedEventIdList, hasBlockingErrors: false });
                 }
             })
             .mapError(() => {
@@ -158,13 +162,16 @@ export function importOrDeleteTrackedEntitiesInChunks(params: {
                         ...errorImportSummaries,
                     ]);
 
-                    return Future.success(importSummariesWithMergedEventIdListWithErrorSummary);
+                    return Future.success({
+                        ...importSummariesWithMergedEventIdListWithErrorSummary,
+                        hasBlockingErrors: true,
+                    });
                 } else {
                     consoleLogger.debug(
                         `SUCCESS - All chunks of tracked entities to ${action} for module ${glassModuleName} processed.`
                     );
 
-                    return Future.success(mergeImportSummaries(result.data));
+                    return Future.success({ ...mergeImportSummaries(result.data), hasBlockingErrors: false });
                 }
             })
             .mapError(() => {
