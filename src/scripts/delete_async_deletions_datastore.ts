@@ -31,8 +31,7 @@ async function main() {
                 if (!process.env.REACT_APP_DHIS2_BASE_URL)
                     throw new Error("REACT_APP_DHIS2_BASE_URL  must be set in the .env file");
 
-                const token =
-                    process.env.REACT_APP_DHIS2_TOKEN_PROD || process.env.REACT_APP_DHIS2_TOKEN;
+                const token = process.env.REACT_APP_DHIS2_TOKEN_PROD || process.env.REACT_APP_DHIS2_TOKEN;
 
                 if (!token && !process.env.REACT_APP_DHIS2_AUTH)
                     throw new Error(
@@ -62,7 +61,11 @@ async function main() {
 
                 console.log(asyncDeletionsFromDatastore);
                 //await removeAsyncDeletionByIdFromDatastore("VdHtI6ZVjUb", glassAsyncDeletionsRepository).toPromise();
-                await setAsyncDeletionsStatus(glassAsyncDeletionsRepository, asyncDeletionsFromDatastore.map(d => d.uploadId), "PENDING").toPromise();
+                await setAsyncDeletionsStatus(
+                    glassAsyncDeletionsRepository,
+                    asyncDeletionsFromDatastore.map(d => d.uploadId),
+                    "PENDING"
+                ).toPromise();
                 const newAsyncDeletionsFromDatastore = await getAsyncDeletionsFromDatastore(
                     glassAsyncDeletionsRepository
                 ).toPromise();

@@ -83,8 +83,7 @@ const cmd = command({
         if (!process.env.REACT_APP_DHIS2_BASE_URL)
             throw new Error("REACT_APP_DHIS2_BASE_URL  must be set in the .env file");
 
-        const token =
-            process.env.REACT_APP_DHIS2_TOKEN_PROD || process.env.REACT_APP_DHIS2_TOKEN;
+        const token = process.env.REACT_APP_DHIS2_TOKEN_PROD || process.env.REACT_APP_DHIS2_TOKEN;
 
         if (!token && !process.env.REACT_APP_DHIS2_AUTH)
             throw new Error(
