@@ -19,6 +19,7 @@ export function mapRawSubstanceCalculatedToSubstanceCalculated(
     for (const raw of rawSubstanceConsumptionCalculatedData) {
         const key = [
             raw.atc_autocalculated,
+            raw.combination_code_autocalculated,
             raw.route_admin_autocalculated,
             raw.salt_autocalculated,
             raw.health_sector_autocalculated,
@@ -46,6 +47,7 @@ export function mapRawSubstanceCalculatedToSubstanceCalculated(
         } else {
             aggregated[key] = {
                 atc_autocalculated: raw.atc_autocalculated,
+                combination_code_autocalculated: raw.combination_code_autocalculated,
                 route_admin_autocalculated: raw.route_admin_autocalculated,
                 salt_autocalculated: raw.salt_autocalculated,
                 packages_autocalculated: raw.packages_autocalculated,

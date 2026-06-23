@@ -153,11 +153,13 @@ function linkEventIdToNewCalculatedConsumptionData(
         } => {
             const idsAlreadyUsed = acc.withEventId.map(({ eventId }) => eventId);
             const eventIdFound = currentCalculatedConsumptionData?.find(currentCalculatedData => {
-                // Match on identity key only — the fields that identify which substance was reported.
-                // Calculated outputs (kilograms, packages, data_status) must NOT be part of the match:
-                // their whole purpose is to change during recalculation, so including them would cause
-                // every updated substance to fail matching and either lose data (UPDATE-only mode) or
-                // produce a delete+recreate instead of an in-place update.
+                // Match on identity dimensions only — the fields that identify which substance row this is.
+                // Recalculated OUTPUTS (kilograms, packages, ddds) must NOT be part of the match: they change
+                // when the DDD/ATC version changes, so including them would make every updated row fail to
+                // match and either lose data (UPDATE-only mode) or be deleted+recreated instead of updated.
+                // data_status is a passthrough of the reported data_status_manual (not recalculated), so it is
+                // a genuine identity dimension and is kept — this set mirrors the aggregation key in
+                // mapRawSubstanceCalculatedToSubstanceCalculated.
                 return (
                     currentCalculatedData?.eventId &&
                     !idsAlreadyUsed.includes(currentCalculatedData.eventId) &&
@@ -169,7 +171,9 @@ function linkEventIdToNewCalculatedConsumptionData(
                         newCalulatedData.combination_code_autocalculated &&
                     currentCalculatedData.health_sector_autocalculated ===
                         newCalulatedData.health_sector_autocalculated &&
-                    currentCalculatedData.health_level_autocalculated === newCalulatedData.health_level_autocalculated
+                    currentCalculatedData.health_level_autocalculated ===
+                        newCalulatedData.health_level_autocalculated &&
+                    currentCalculatedData.data_status_autocalculated === newCalulatedData.data_status_autocalculated
                 );
             })?.eventId;
 
