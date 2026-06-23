@@ -619,11 +619,11 @@ describe("Given calculate Consumption Substance Level Data function", () => {
     });
 
     // -----------------------------------------------------------------------
-    // Fix E: combination_manual threaded through to combination_autocalculated
+    // Fix E: combination_manual threaded through to combination_code_autocalculated
     // -----------------------------------------------------------------------
 
     describe("Combination field threading", () => {
-        it("combination_manual is preserved in combination_autocalculated output (same-version path)", () => {
+        it("combination_manual is preserved in combination_code_autocalculated output (same-version path)", () => {
             const atcVersion = makeMinimalAtcVersion([
                 {
                     ARS: "J01AA01_OXXXX",
@@ -654,10 +654,10 @@ describe("Given calculate Consumption Substance Level Data function", () => {
                 CURRENT_VERSION_KEY
             );
 
-            expect(result[0]?.combination_autocalculated).toBe("J01AA01_COMB1");
+            expect(result[0]?.combination_code_autocalculated).toBe("J01AA01_COMB1");
         });
 
-        it("combination_autocalculated is undefined when combination_manual is absent", () => {
+        it("combination_code_autocalculated is undefined when combination_manual is absent", () => {
             const atcVersion = makeMinimalAtcVersion([
                 {
                     ARS: "J01AA01_OXXXX",
@@ -688,10 +688,10 @@ describe("Given calculate Consumption Substance Level Data function", () => {
                 CURRENT_VERSION_KEY
             );
 
-            expect(result[0]?.combination_autocalculated).toBeUndefined();
+            expect(result[0]?.combination_code_autocalculated).toBeUndefined();
         });
 
-        it("combination_manual is preserved in combination_autocalculated output (ratio-adjusted path)", () => {
+        it("combination_manual is preserved in combination_code_autocalculated output (ratio-adjusted path)", () => {
             const currentAtcVersion = makeMinimalAtcVersion(
                 [
                     {
@@ -725,7 +725,7 @@ describe("Given calculate Consumption Substance Level Data function", () => {
                 CURRENT_VERSION_KEY
             );
 
-            expect(result[0]?.combination_autocalculated).toBe("J01AA01_COMB2");
+            expect(result[0]?.combination_code_autocalculated).toBe("J01AA01_COMB2");
         });
     });
 
@@ -910,7 +910,7 @@ describe("Given calculate Consumption Substance Level Data function", () => {
             expect(result).toHaveLength(1);
             expect(result[0]?.ddds_autocalculated).toBeCloseTo(REPORTED_DDDS, 6);
             expect(result[0]?.kilograms_autocalculated).toBeCloseTo(expectedKg, 6);
-            expect(result[0]?.combination_autocalculated).toBe(COMB_CODE);
+            expect(result[0]?.combination_code_autocalculated).toBe(COMB_CODE);
         });
 
         it("Old-version path: ddds_manual is preserved 1:1 (no change-table entry for combination DDDs)", () => {

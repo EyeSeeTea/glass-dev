@@ -165,7 +165,8 @@ function linkEventIdToNewCalculatedConsumptionData(
                     currentCalculatedData.route_admin_autocalculated === newCalulatedData.route_admin_autocalculated &&
                     (currentCalculatedData.salt_autocalculated === newCalulatedData.salt_autocalculated ||
                         DEFAULT_SALT_CODE === newCalulatedData.salt_autocalculated) &&
-                    currentCalculatedData.combination_autocalculated === newCalulatedData.combination_autocalculated &&
+                    currentCalculatedData.combination_code_autocalculated ===
+                        newCalulatedData.combination_code_autocalculated &&
                     currentCalculatedData.health_sector_autocalculated ===
                         newCalulatedData.health_sector_autocalculated &&
                     currentCalculatedData.health_level_autocalculated === newCalulatedData.health_level_autocalculated
