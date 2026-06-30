@@ -1,13 +1,13 @@
 {
     "name": "glass",
     "description": "DHIS2 Glass App",
-    "version": "1.6.41RC2",
+    "version": "1.6.42",
     "license": "GPL-3.0",
-    "author": "",
+    "author": "Eyeseetea Team",
     "homepage": ".",
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/dodwho/glass-dev.git"
+        "url": "git+https://github.com/EyeSeeTea/glass-dev.git"
     },
     "dependencies": {
         "@dhis2/app-runtime": "2.8.0",
