@@ -85,7 +85,7 @@ export class RecalculateConsumptionDataSubstanceLevelForAllUseCase {
                 return getConsumptionDataSubstanceLevel({
                     orgUnitId,
                     period,
-                    atcRepository: this.atcRepository,
+                    // atcRepository removed — change-table approach no longer loads historical DataStore objects
                     rawSubstanceConsumptionData,
                     currentAtcVersionKey: currentATCVersion,
                     atcCurrentVersionData: currentATCData,

@@ -1,7 +1,8 @@
 import { command, run } from "cmd-ts";
 import "dotenv/config";
 
-import { getD2ApiFromArgs, getInstance } from "./common";
+import { getInstance, warmUpSession } from "./common";
+import { getD2APiFromInstance } from "../utils/d2-api";
 import { DataStoreClient } from "../data/data-store/DataStoreClient";
 import { Id } from "../domain/entities/Ref";
 import { GetAsyncDeletionsUseCase } from "../domain/usecases/GetAsyncDeletionsUseCase";
@@ -71,6 +72,21 @@ const UPLOADED_FILE_STATUS_LOWERCASE = "uploaded";
 const IMPORT_SUMMARY_STATUS_ERROR = "ERROR";
 const DEFAULT_MAX_ATTEMPS_FOR_ASYNC_DELETIONS = 3;
 
+// Any upload stuck in DELETING for longer than this is treated as a zombie left by a crashed run.
+// Genuine in-progress deletions are expected to complete well within this window.
+const DELETING_TIMEOUT_MS = 4 * 60 * 60 * 1000; // 4 hours
+
+function findZombieUploadIds(asyncDeletions: GlassAsyncDeletion[]): Id[] {
+    const now = Date.now();
+    return asyncDeletions
+        .filter(upload => {
+            if (upload.status !== "DELETING") return false;
+            if (!upload.deletingStartedAt) return true; // legacy record with no timestamp → treat as zombie
+            return now - new Date(upload.deletingStartedAt).getTime() > DELETING_TIMEOUT_MS;
+        })
+        .map(upload => upload.uploadId);
+}
+
 async function main() {
     const cmd = command({
         name: "Async deletions of uploaded files",
@@ -82,25 +98,27 @@ async function main() {
                 if (!process.env.REACT_APP_DHIS2_BASE_URL)
                     throw new Error("REACT_APP_DHIS2_BASE_URL  must be set in the .env file");
 
-                if (!process.env.REACT_APP_DHIS2_AUTH)
-                    throw new Error("REACT_APP_DHIS2_AUTH  must be set in the .env file");
+                const token = process.env.REACT_APP_DHIS2_TOKEN_PROD || process.env.REACT_APP_DHIS2_TOKEN;
 
-                const username = process.env.REACT_APP_DHIS2_AUTH.split(":")[0] ?? "";
-                const password = process.env.REACT_APP_DHIS2_AUTH.split(":")[1] ?? "";
+                if (!token && !process.env.REACT_APP_DHIS2_AUTH)
+                    throw new Error(
+                        "Either REACT_APP_DHIS2_TOKEN_PROD, REACT_APP_DHIS2_TOKEN, or REACT_APP_DHIS2_AUTH must be set in the .env file"
+                    );
 
-                if (username === "" || password === "") {
-                    throw new Error("REACT_APP_DHIS2_AUTH must be in the format 'username:password'");
-                }
-                const envVars = {
-                    url: process.env.REACT_APP_DHIS2_BASE_URL,
-                    auth: {
-                        username: username,
-                        password: password,
-                    },
-                };
+                const envVars = token
+                    ? { url: process.env.REACT_APP_DHIS2_BASE_URL, token }
+                    : (() => {
+                          const auth = process.env.REACT_APP_DHIS2_AUTH!;
+                          const username = auth.split(":")[0] ?? "";
+                          const password = auth.split(":")[1] ?? "";
+                          if (!username || !password)
+                              throw new Error("REACT_APP_DHIS2_AUTH must be in the format 'username:password'");
+                          return { url: process.env.REACT_APP_DHIS2_BASE_URL, auth: { username, password } };
+                      })();
 
-                const api = getD2ApiFromArgs(envVars);
                 const instance = getInstance(envVars);
+                const api = getD2APiFromInstance(instance);
+                await warmUpSession(api);
                 const dataStoreClient = new DataStoreClient(instance);
                 const runtime: "node" | "browser" = typeof window === "undefined" ? "node" : "browser";
                 const uploadsFormDataBuilder = getUploadsFormDataBuilder(runtime);
@@ -126,29 +144,61 @@ async function main() {
                 const glassGeneralInfoRepository = new GeneralInfoDefaultRepository(dataStoreClient, instance);
 
                 consoleLogger.debug(`Running asynchronous deletion for URL ${envVars.url}`);
-                return getMaxAttemptsForAsyncDeletionsFromDatastore(glassGeneralInfoRepository).run(
-                    generalInfo => {
+                return getMaxAttemptsForAsyncDeletionsFromDatastore(glassGeneralInfoRepository)
+                    .flatMap(generalInfo => {
                         const maxAttemptsForAsyncDeletions =
                             generalInfo?.maxAttemptsForAsyncDeletions ?? DEFAULT_MAX_ATTEMPS_FOR_ASYNC_DELETIONS;
 
-                        return getAsyncDeletionsFromDatastore(glassAsyncDeletionsRepository).run(
+                        return getAsyncDeletionsFromDatastore(glassAsyncDeletionsRepository).flatMap(
                             asyncUploadsToDelete => {
-                                if (asyncUploadsToDelete && asyncUploadsToDelete.length > 0) {
-                                    const uploadIdsToSetAsyncDeletionErrorStatus = asyncUploadsToDelete
+                                if (!asyncUploadsToDelete || asyncUploadsToDelete.length === 0) {
+                                    consoleLogger.debug(`There is nothing marked for deletion`);
+                                    return Future.success(undefined);
+                                }
+
+                                // Separate genuinely in-progress deletions from zombies left by a crashed run.
+                                // A DELETING upload with no timestamp or one older than DELETING_TIMEOUT_MS
+                                // is considered a zombie and will be reset to PENDING so it can be retried.
+                                const zombieUploadIds = findZombieUploadIds(asyncUploadsToDelete);
+                                const genuinelyDeletingCount = asyncUploadsToDelete.filter(
+                                    u => u.status === "DELETING" && !zombieUploadIds.includes(u.uploadId)
+                                ).length;
+
+                                if (genuinelyDeletingCount > 0) {
+                                    consoleLogger.debug(
+                                        `Skipping ${genuinelyDeletingCount} uploads currently being deleted (started within the last ${
+                                            DELETING_TIMEOUT_MS / 3600000
+                                        }h)`
+                                    );
+                                }
+                                if (zombieUploadIds.length > 0) {
+                                    consoleLogger.debug(
+                                        `Resetting ${zombieUploadIds.length} uploads stuck in DELETING status back to PENDING for retry`
+                                    );
+                                }
+
+                                // Update local state so the rest of the logic sees zombies as PENDING
+                                const normalizedUploads: GlassAsyncDeletion[] = asyncUploadsToDelete.map(upload =>
+                                    zombieUploadIds.includes(upload.uploadId)
+                                        ? { ...upload, status: "PENDING" as GlassAsyncDeletionStatus }
+                                        : upload
+                                );
+
+                                const resetZombiesFuture: FutureData<void> =
+                                    zombieUploadIds.length > 0
+                                        ? setAsyncDeletionsStatus(
+                                              glassAsyncDeletionsRepository,
+                                              zombieUploadIds,
+                                              "PENDING"
+                                          )
+                                        : Future.success(undefined);
+
+                                return resetZombiesFuture.flatMap(() => {
+                                    const uploadIdsToSetAsyncDeletionErrorStatus = normalizedUploads
                                         .filter(upload => upload.attempts >= maxAttemptsForAsyncDeletions)
                                         .map(upload => upload.uploadId);
 
-                                    const uploadsBeingDeleted = asyncUploadsToDelete.filter(
-                                        upload => upload.status === "DELETING"
-                                    );
-
-                                    if (uploadsBeingDeleted.length > 0) {
-                                        consoleLogger.debug(
-                                            `There are ${uploadsBeingDeleted.length} uploads being deleted. Skipping deletion of these`
-                                        );
-                                    }
-
-                                    const uploadsToContinueAsyncDeletion = asyncUploadsToDelete.filter(
+                                    const uploadsToContinueAsyncDeletion = normalizedUploads.filter(
                                         upload =>
                                             upload.attempts < maxAttemptsForAsyncDeletions &&
                                             upload.status === "PENDING"
@@ -162,120 +212,123 @@ async function main() {
                                         glassUploadsRepository,
                                         glassAsyncDeletionsRepository,
                                         uploadIdsToSetAsyncDeletionErrorStatus
-                                    ).run(
-                                        () => {
-                                            const uploadsIdsToContinueAsyncDeletion =
-                                                uploadsToContinueAsyncDeletion.map(({ uploadId }) => uploadId);
+                                    ).flatMap(() => {
+                                        const uploadsIdsToContinueAsyncDeletion = uploadsToContinueAsyncDeletion.map(
+                                            ({ uploadId }) => uploadId
+                                        );
 
-                                            if (uploadsIdsToContinueAsyncDeletion.length === 0) {
-                                                consoleLogger.debug(`END - No uploads to continue async deletion.`);
-                                                return Future.success(undefined);
+                                        if (uploadsIdsToContinueAsyncDeletion.length === 0) {
+                                            consoleLogger.debug(`END - No uploads to continue async deletion.`);
+                                            return Future.success(undefined);
+                                        }
+
+                                        return Future.joinObj({
+                                            glassModules: getGlassModulesFromDatastore(glassModuleRepository),
+                                            glassUploadsToDelete: getGlassUploadsByIdsUseCase(
+                                                uploadsIdsToContinueAsyncDeletion,
+                                                glassUploadsRepository
+                                            ),
+                                        }).flatMap(({ glassModules, glassUploadsToDelete }) => {
+                                            // Some IDs in the queue may no longer exist as events in DHIS2
+                                            // (already deleted externally, or orphaned after a partial run).
+                                            // Remove them from the queue so they don't block future runs.
+                                            const foundIds = new Set(glassUploadsToDelete.map(u => u.id));
+                                            const missingIds = uploadsIdsToContinueAsyncDeletion.filter(
+                                                id => !foundIds.has(id)
+                                            );
+
+                                            if (missingIds.length > 0) {
+                                                consoleLogger.debug(
+                                                    `${
+                                                        missingIds.length
+                                                    } upload(s) no longer exist in DHIS2, removing from async deletion queue: ${missingIds.join(
+                                                        ", "
+                                                    )}`
+                                                );
                                             }
 
-                                            return Future.joinObj({
-                                                glassModules: getGlassModulesFromDatastore(glassModuleRepository),
-                                                glassUploadsToDelete: getGlassUploadsByIdsUseCase(
-                                                    uploadsIdsToContinueAsyncDeletion,
-                                                    glassUploadsRepository
-                                                ),
-                                            }).run(
-                                                ({ glassModules, glassUploadsToDelete }) => {
-                                                    const uploadsToDelete: GlassUploadsWithModuleNameAndAttemps[] =
-                                                        glassUploadsToDelete.map(upload => {
-                                                            const moduleName = glassModules.find(
-                                                                module => module.id === upload.module
-                                                            )?.name;
+                                            const cleanupMissingFuture: FutureData<void> =
+                                                missingIds.length > 0
+                                                    ? removeAsyncDeletionsFromDatastore(
+                                                          missingIds,
+                                                          glassAsyncDeletionsRepository
+                                                      )
+                                                    : Future.success(undefined);
 
-                                                            const attempts =
-                                                                uploadsToContinueAsyncDeletion.find(
-                                                                    uploadAsyncDeletions =>
-                                                                        uploadAsyncDeletions.uploadId === upload.id
-                                                                )?.attempts || 0;
+                                            return cleanupMissingFuture.flatMap(() => {
+                                                const uploadsToDelete: GlassUploadsWithModuleNameAndAttemps[] =
+                                                    glassUploadsToDelete.map(upload => {
+                                                        const moduleName = glassModules.find(
+                                                            module => module.id === upload.module
+                                                        )?.name;
 
-                                                            if (!isGlassModuleName(moduleName)) {
-                                                                consoleLogger.error(
-                                                                    `Module name not found for upload ${upload.id}`
-                                                                );
-                                                                throw new Error(
-                                                                    `Module name not found for upload ${upload.id}`
-                                                                );
-                                                            }
+                                                        const attempts =
+                                                            uploadsToContinueAsyncDeletion.find(
+                                                                uploadAsyncDeletions =>
+                                                                    uploadAsyncDeletions.uploadId === upload.id
+                                                            )?.attempts || 0;
 
-                                                            return {
-                                                                ...upload,
-                                                                moduleName: moduleName,
-                                                                attempts: attempts,
-                                                            };
-                                                        });
-
-                                                    if (uploadsToDelete.length === 0) {
-                                                        consoleLogger.error(
-                                                            `ERROR - Uploads to delete not found in Datastore`
-                                                        );
-                                                        return Future.error(`Uploads to delete not found in Datastore`);
-                                                    }
-
-                                                    return deleteUploadedDatasets(
-                                                        uploadsToDelete,
-                                                        maxAttemptsForAsyncDeletions,
-                                                        glassModules,
-                                                        {
-                                                            sampleDataRepository,
-                                                            metadataRepository,
-                                                            dataValuesRepository,
-                                                            excelRepository,
-                                                            instanceRepository,
-                                                            glassDocumentsRepository,
-                                                            glassUploadsRepository,
-                                                            dhis2EventsDefaultRepository,
-                                                            programRulesMetadataRepository:
-                                                                programRulesMetadataDefaultRepository,
-                                                            glassAtcRepository,
-                                                            risDataRepository,
-                                                            risIndividualFungalRepository,
-                                                            trackerRepository,
-                                                            glassModuleRepository,
-                                                            atcRepository,
-                                                            amcProductRepository: amcProductDataRepository,
-                                                            amcSubstanceDataRepository,
-                                                            glassAsyncDeletionsRepository,
-                                                        }
-                                                    ).run(
-                                                        () => {
-                                                            consoleLogger.debug(
-                                                                `SUCCESS - Deleted all uploaded datasets marked for deletion with status PENDING.`
-                                                            );
-                                                        },
-                                                        error => {
+                                                        if (!isGlassModuleName(moduleName)) {
                                                             consoleLogger.error(
-                                                                `ERROR - An error occured while deleting: ${error}`
+                                                                `Module name not found for upload ${upload.id}`
+                                                            );
+                                                            throw new Error(
+                                                                `Module name not found for upload ${upload.id}`
                                                             );
                                                         }
-                                                    );
-                                                },
-                                                error =>
-                                                    consoleLogger.error(
-                                                        `ERROR - Error while getting glass modules and all uploads from Datastore, and all countries: ${error}.`
-                                                    )
-                                            );
-                                        },
-                                        error =>
-                                            consoleLogger.error(
-                                                `ERROR - Error while setting errorAsyncDeleting in Datastore: ${error}.`
-                                            )
-                                    );
-                                } else {
-                                    consoleLogger.debug(`There is nothing marked for deletion`);
-                                }
-                            },
-                            error =>
-                                consoleLogger.error(
-                                    `ERROR - Error while getting async deletions from Datastore: ${error}.`
-                                )
+
+                                                        return {
+                                                            ...upload,
+                                                            moduleName: moduleName,
+                                                            attempts: attempts,
+                                                        };
+                                                    });
+
+                                                if (uploadsToDelete.length === 0) {
+                                                    consoleLogger.debug(`END - No remaining uploads to delete.`);
+                                                    return Future.success(undefined);
+                                                }
+
+                                                return deleteUploadedDatasets(
+                                                    uploadsToDelete,
+                                                    maxAttemptsForAsyncDeletions,
+                                                    glassModules,
+                                                    {
+                                                        sampleDataRepository,
+                                                        metadataRepository,
+                                                        dataValuesRepository,
+                                                        excelRepository,
+                                                        instanceRepository,
+                                                        glassDocumentsRepository,
+                                                        glassUploadsRepository,
+                                                        dhis2EventsDefaultRepository,
+                                                        programRulesMetadataRepository:
+                                                            programRulesMetadataDefaultRepository,
+                                                        glassAtcRepository,
+                                                        risDataRepository,
+                                                        risIndividualFungalRepository,
+                                                        trackerRepository,
+                                                        glassModuleRepository,
+                                                        atcRepository,
+                                                        amcProductRepository: amcProductDataRepository,
+                                                        amcSubstanceDataRepository,
+                                                        glassAsyncDeletionsRepository,
+                                                    }
+                                                );
+                                            }); // cleanupMissingFuture.flatMap
+                                        });
+                                    });
+                                });
+                            }
                         );
-                    },
-                    error => consoleLogger.error(`ERROR - Error while getting general info from Datastore: ${error}.`)
-                );
+                    })
+                    .run(
+                        () =>
+                            consoleLogger.debug(
+                                `SUCCESS - Deleted all uploaded datasets marked for deletion with status PENDING.`
+                            ),
+                        error => consoleLogger.error(`ERROR - ${error}.`)
+                    );
             } catch (e) {
                 consoleLogger.error(`Async deletions have stopped with error: ${e}. Please, restart again.`);
                 process.exit(1);
@@ -376,7 +429,7 @@ function isPendingDeletion(
 }
 
 // TODO: send notification to users
-function _sendNotification(
+/*function _sendNotification(
     usergroupIds: Id[],
     repositories: {
         notificationRepository: NotificationRepository;
@@ -392,7 +445,7 @@ function _sendNotification(
         usergroupIds,
         notOrgUnitPath
     );
-}
+}*/
 
 function getGlassModulesFromDatastore(glassModuleRepository: GlassModuleRepository): FutureData<GlassModule[]> {
     return glassModuleRepository.getAll();
@@ -562,24 +615,38 @@ function getPrimaryAndSecondaryUploadsToDelete(
 
     // Case 1: Secondary file applicable and related (AMR: RIS + Sample)
     if (isSecondaryFileApplicable && isSecondaryRelated) {
+        type UploadPair = {
+            primaryUploadToDelete: GlassUploads | undefined;
+            secondaryUploadToDelete: GlassUploads | undefined;
+        };
         if (isPrimaryFile) {
-            return getGlassUploadByCorrespondingRisUploadId(rowToDelete.id, glassUploadsRepository).map(
-                secondaryUploadToDelete => {
-                    return {
+            return getGlassUploadByCorrespondingRisUploadId(rowToDelete.id, glassUploadsRepository)
+                .flatMap(secondaryUploadToDelete =>
+                    Future.success<UploadPair, string>({ primaryUploadToDelete: rowToDelete, secondaryUploadToDelete })
+                )
+                .flatMapError(_error => {
+                    consoleLogger.debug(
+                        `Secondary upload for primary ${rowToDelete.id} not found in DHIS2, proceeding with primary-only deletion`
+                    );
+                    return Future.success<UploadPair, string>({
                         primaryUploadToDelete: rowToDelete,
-                        secondaryUploadToDelete: secondaryUploadToDelete,
-                    };
-                }
-            );
+                        secondaryUploadToDelete: undefined,
+                    });
+                });
         } else {
-            return getGlassUploadByIdUseCase(rowToDelete.correspondingRisUploadId, glassUploadsRepository).map(
-                primaryUploadToDelete => {
-                    return {
-                        primaryUploadToDelete: primaryUploadToDelete,
+            return getGlassUploadByIdUseCase(rowToDelete.correspondingRisUploadId, glassUploadsRepository)
+                .flatMap(primaryUploadToDelete =>
+                    Future.success<UploadPair, string>({ primaryUploadToDelete, secondaryUploadToDelete: rowToDelete })
+                )
+                .flatMapError(_error => {
+                    consoleLogger.debug(
+                        `Primary upload ${rowToDelete.correspondingRisUploadId} not found in DHIS2, proceeding with secondary-only deletion`
+                    );
+                    return Future.success<UploadPair, string>({
+                        primaryUploadToDelete: undefined,
                         secondaryUploadToDelete: rowToDelete,
-                    };
-                }
-            );
+                    });
+                });
         }
     }
 
@@ -650,118 +717,187 @@ function deleteUploadedDatasets(
                                 repositories.glassAsyncDeletionsRepository,
                                 [uploadToDelete.id],
                                 "DELETING"
-                            ).flatMap(() => {
-                                return getPrimaryAndSecondaryUploadsToDelete(
-                                    uploadToDelete,
-                                    moduleProperties,
-                                    uploadToDelete.moduleName,
-                                    repositories.glassUploadsRepository
-                                ).flatMap(({ primaryUploadToDelete, secondaryUploadToDelete }) => {
-                                    const currentModule = glassModules.find(
-                                        module => module.name === uploadToDelete.moduleName
-                                    );
-                                    if (!currentModule) {
-                                        return incrementAsyncDeletionOrDeleteIfMaxAttemptAndSetErrorStatus(
-                                            repositories.glassAsyncDeletionsRepository,
-                                            repositories.glassUploadsRepository,
-                                            uploadToDelete,
-                                            maxAttemptsForAsyncDeletions
-                                        ).flatMap(() => {
+                            )
+                                .flatMap(() => {
+                                    return getPrimaryAndSecondaryUploadsToDelete(
+                                        uploadToDelete,
+                                        moduleProperties,
+                                        uploadToDelete.moduleName,
+                                        repositories.glassUploadsRepository
+                                    ).flatMap(({ primaryUploadToDelete, secondaryUploadToDelete }) => {
+                                        const currentModule = glassModules.find(
+                                            module => module.name === uploadToDelete.moduleName
+                                        );
+                                        if (!currentModule) {
                                             consoleLogger.error(`Module ${uploadToDelete.moduleName} not found`);
-                                            return Future.error(`Module ${uploadToDelete.moduleName} not found`);
-                                        });
-                                    }
+                                            return incrementAsyncDeletionOrDeleteIfMaxAttemptAndSetErrorStatus(
+                                                repositories.glassAsyncDeletionsRepository,
+                                                repositories.glassUploadsRepository,
+                                                uploadToDelete,
+                                                maxAttemptsForAsyncDeletions
+                                            );
+                                        }
 
-                                    consoleLogger.debug(
-                                        `Downloading files to delete: ${primaryUploadToDelete?.fileId}, ${secondaryUploadToDelete?.fileId}`
-                                    );
+                                        consoleLogger.debug(
+                                            `Downloading files to delete: ${primaryUploadToDelete?.fileId}, ${secondaryUploadToDelete?.fileId}`
+                                        );
 
-                                    return Future.joinObj({
-                                        primaryArrayBuffer: primaryUploadToDelete
-                                            ? getArrayBufferOfFile(primaryUploadToDelete.fileId, repositories)
-                                            : Future.success(undefined),
-                                        secondaryArrayBuffer: secondaryUploadToDelete
-                                            ? getArrayBufferOfFile(secondaryUploadToDelete.fileId, repositories)
-                                            : Future.success(undefined),
-                                    }).flatMap(({ primaryArrayBuffer, secondaryArrayBuffer }) => {
-                                        if (primaryUploadToDelete && primaryArrayBuffer) {
-                                            return deleteDatasetValuesOrEvents(
-                                                primaryUploadToDelete,
-                                                secondaryUploadToDelete,
-                                                primaryArrayBuffer,
-                                                secondaryArrayBuffer,
-                                                currentModule,
-                                                repositories
-                                            ).flatMap(({ deletePrimaryFileSummary, deleteSecondaryFileSummary }) => {
-                                                if (deletePrimaryFileSummary) {
-                                                    consoleLogger.debug(
-                                                        `Delete data from primary file summary: ${JSON.stringify(
-                                                            deletePrimaryFileSummary
-                                                        )}`
-                                                    );
-                                                }
-
-                                                if (deleteSecondaryFileSummary) {
-                                                    consoleLogger.debug(
-                                                        `Delete data from secondary file summary: ${JSON.stringify(
-                                                            deleteSecondaryFileSummary
-                                                        )}`
-                                                    );
-                                                }
-
-                                                if (
-                                                    deletePrimaryFileSummary?.status === IMPORT_SUMMARY_STATUS_ERROR ||
-                                                    deleteSecondaryFileSummary?.status === IMPORT_SUMMARY_STATUS_ERROR
-                                                ) {
-                                                    return incrementAsyncDeletionOrDeleteIfMaxAttemptAndSetErrorStatus(
-                                                        repositories.glassAsyncDeletionsRepository,
-                                                        repositories.glassUploadsRepository,
-                                                        uploadToDelete,
-                                                        maxAttemptsForAsyncDeletions
-                                                    ).flatMap(() => {
-                                                        consoleLogger.error(
-                                                            `An error occured while deleting the data exiting. Primary file: ${primaryUploadToDelete.fileName}, secondary file: ${secondaryUploadToDelete?.fileName}`
-                                                        );
-                                                        return Future.error(
-                                                            `An error occured while deleting the data exiting. Primary file: ${primaryUploadToDelete.fileName}, secondary file: ${secondaryUploadToDelete?.fileName}`
-                                                        );
-                                                    });
-                                                }
-
-                                                if (deletePrimaryFileSummary) {
-                                                    consoleLogger.debug(
-                                                        `Data from primary file ${primaryUploadToDelete.fileName} deleted`
-                                                    );
-                                                }
-
-                                                if (secondaryUploadToDelete && deleteSecondaryFileSummary) {
-                                                    consoleLogger.debug(
-                                                        `Data from secondary file ${secondaryUploadToDelete.fileName} deleted`
-                                                    );
-                                                }
-
-                                                return deleteUploadAndDocumentFromDatasoreAndDHIS2(
+                                        return Future.joinObj({
+                                            primaryArrayBuffer: primaryUploadToDelete
+                                                ? getArrayBufferOfFile(primaryUploadToDelete.fileId, repositories)
+                                                : Future.success(undefined),
+                                            secondaryArrayBuffer: secondaryUploadToDelete
+                                                ? getArrayBufferOfFile(secondaryUploadToDelete.fileId, repositories)
+                                                : Future.success(undefined),
+                                        }).flatMap(({ primaryArrayBuffer, secondaryArrayBuffer }) => {
+                                            if (primaryUploadToDelete && primaryArrayBuffer) {
+                                                return deleteDatasetValuesOrEvents(
                                                     primaryUploadToDelete,
+                                                    secondaryUploadToDelete,
+                                                    primaryArrayBuffer,
+                                                    secondaryArrayBuffer,
+                                                    currentModule,
                                                     repositories
-                                                ).flatMap(() => {
-                                                    if (secondaryUploadToDelete) {
+                                                ).flatMap(
+                                                    ({ deletePrimaryFileSummary, deleteSecondaryFileSummary }) => {
+                                                        if (deletePrimaryFileSummary) {
+                                                            consoleLogger.debug(
+                                                                `Delete data from primary file summary: ${JSON.stringify(
+                                                                    deletePrimaryFileSummary
+                                                                )}`
+                                                            );
+                                                        }
+
+                                                        if (deleteSecondaryFileSummary) {
+                                                            consoleLogger.debug(
+                                                                `Delete data from secondary file summary: ${JSON.stringify(
+                                                                    deleteSecondaryFileSummary
+                                                                )}`
+                                                            );
+                                                        }
+
+                                                        if (
+                                                            deletePrimaryFileSummary?.status ===
+                                                                IMPORT_SUMMARY_STATUS_ERROR ||
+                                                            deleteSecondaryFileSummary?.status ===
+                                                                IMPORT_SUMMARY_STATUS_ERROR
+                                                        ) {
+                                                            consoleLogger.error(
+                                                                `An error occured while deleting the data. Primary file: ${primaryUploadToDelete.fileName}, secondary file: ${secondaryUploadToDelete?.fileName}`
+                                                            );
+                                                            return incrementAsyncDeletionOrDeleteIfMaxAttemptAndSetErrorStatus(
+                                                                repositories.glassAsyncDeletionsRepository,
+                                                                repositories.glassUploadsRepository,
+                                                                uploadToDelete,
+                                                                maxAttemptsForAsyncDeletions
+                                                            );
+                                                        }
+
+                                                        if (deletePrimaryFileSummary) {
+                                                            consoleLogger.debug(
+                                                                `Data from primary file ${primaryUploadToDelete.fileName} deleted`
+                                                            );
+                                                        }
+
+                                                        if (secondaryUploadToDelete && deleteSecondaryFileSummary) {
+                                                            consoleLogger.debug(
+                                                                `Data from secondary file ${secondaryUploadToDelete.fileName} deleted`
+                                                            );
+                                                        }
+
                                                         return deleteUploadAndDocumentFromDatasoreAndDHIS2(
-                                                            secondaryUploadToDelete,
+                                                            primaryUploadToDelete,
                                                             repositories
                                                         ).flatMap(() => {
-                                                            return removeAsyncDeletionByIdFromDatastore(
-                                                                primaryUploadToDelete.id,
-                                                                repositories.glassAsyncDeletionsRepository
-                                                            ).flatMap(() => {
-                                                                consoleLogger.debug(
-                                                                    `SUCCESS - Deleted async-deletions id from Datastore ${uploadToDelete.id}`
-                                                                );
-                                                                return Future.success(undefined);
-                                                            });
+                                                            if (secondaryUploadToDelete) {
+                                                                return deleteUploadAndDocumentFromDatasoreAndDHIS2(
+                                                                    secondaryUploadToDelete,
+                                                                    repositories
+                                                                ).flatMap(() => {
+                                                                    return removeAsyncDeletionByIdFromDatastore(
+                                                                        primaryUploadToDelete.id,
+                                                                        repositories.glassAsyncDeletionsRepository
+                                                                    ).flatMap(() => {
+                                                                        consoleLogger.debug(
+                                                                            `SUCCESS - Deleted async-deletions id from Datastore ${uploadToDelete.id}`
+                                                                        );
+                                                                        return Future.success(undefined);
+                                                                    });
+                                                                });
+                                                            } else {
+                                                                return removeAsyncDeletionByIdFromDatastore(
+                                                                    primaryUploadToDelete.id,
+                                                                    repositories.glassAsyncDeletionsRepository
+                                                                ).flatMap(() => {
+                                                                    consoleLogger.debug(
+                                                                        `SUCCESS - Deleted async-deletions id from Datastore ${uploadToDelete.id}`
+                                                                    );
+                                                                    return Future.success(undefined);
+                                                                });
+                                                            }
                                                         });
-                                                    } else {
+                                                    }
+                                                );
+                                            } else if (secondaryUploadToDelete && secondaryArrayBuffer) {
+                                                if (
+                                                    secondaryUploadToDelete.status.toLowerCase() !==
+                                                    UPLOADED_FILE_STATUS_LOWERCASE
+                                                ) {
+                                                    consoleLogger.debug(`Delete only secondary uploaded dataset`);
+                                                    return deleteDatasetValuesOrEventsFromSecondaryUploaded(
+                                                        currentModule,
+                                                        secondaryUploadToDelete,
+                                                        secondaryArrayBuffer,
+                                                        repositories
+                                                    ).flatMap(deleteSecondaryFileSummary => {
+                                                        if (deleteSecondaryFileSummary) {
+                                                            consoleLogger.debug(
+                                                                `Delete data from secondary file summary: ${JSON.stringify(
+                                                                    deleteSecondaryFileSummary
+                                                                )}`
+                                                            );
+                                                        }
+                                                        if (
+                                                            deleteSecondaryFileSummary &&
+                                                            deleteSecondaryFileSummary.status !==
+                                                                IMPORT_SUMMARY_STATUS_ERROR
+                                                        ) {
+                                                            consoleLogger.debug(
+                                                                `Data from secondary file ${secondaryUploadToDelete.fileName} deleted`
+                                                            );
+                                                            return deleteUploadAndDocumentFromDatasoreAndDHIS2(
+                                                                secondaryUploadToDelete,
+                                                                repositories
+                                                            ).flatMap(() => {
+                                                                return removeAsyncDeletionByIdFromDatastore(
+                                                                    secondaryUploadToDelete.id,
+                                                                    repositories.glassAsyncDeletionsRepository
+                                                                ).flatMap(() => {
+                                                                    consoleLogger.debug(
+                                                                        `SUCCESS - Deleted async-deletions id from Datastore ${uploadToDelete.id}`
+                                                                    );
+                                                                    return Future.success(undefined);
+                                                                });
+                                                            });
+                                                        } else {
+                                                            consoleLogger.error(
+                                                                `An error occured while deleting the data. Secondary file: ${secondaryUploadToDelete?.fileName}`
+                                                            );
+                                                            return incrementAsyncDeletionOrDeleteIfMaxAttemptAndSetErrorStatus(
+                                                                repositories.glassAsyncDeletionsRepository,
+                                                                repositories.glassUploadsRepository,
+                                                                uploadToDelete,
+                                                                maxAttemptsForAsyncDeletions
+                                                            );
+                                                        }
+                                                    });
+                                                } else {
+                                                    return deleteUploadAndDocumentFromDatasoreAndDHIS2(
+                                                        secondaryUploadToDelete,
+                                                        repositories
+                                                    ).flatMap(() => {
                                                         return removeAsyncDeletionByIdFromDatastore(
-                                                            primaryUploadToDelete.id,
+                                                            secondaryUploadToDelete.id,
                                                             repositories.glassAsyncDeletionsRepository
                                                         ).flatMap(() => {
                                                             consoleLogger.debug(
@@ -769,100 +905,37 @@ function deleteUploadedDatasets(
                                                             );
                                                             return Future.success(undefined);
                                                         });
-                                                    }
-                                                });
-                                            });
-                                        } else if (secondaryUploadToDelete && secondaryArrayBuffer) {
-                                            if (
-                                                secondaryUploadToDelete.status.toLowerCase() !==
-                                                UPLOADED_FILE_STATUS_LOWERCASE
-                                            ) {
-                                                consoleLogger.debug(`Delete only secondary uploaded dataset`);
-                                                return deleteDatasetValuesOrEventsFromSecondaryUploaded(
-                                                    currentModule,
-                                                    secondaryUploadToDelete,
-                                                    secondaryArrayBuffer,
-                                                    repositories
-                                                ).flatMap(deleteSecondaryFileSummary => {
-                                                    if (deleteSecondaryFileSummary) {
-                                                        consoleLogger.debug(
-                                                            `Delete data from secondary file summary: ${JSON.stringify(
-                                                                deleteSecondaryFileSummary
-                                                            )}`
-                                                        );
-                                                    }
-                                                    if (
-                                                        deleteSecondaryFileSummary &&
-                                                        deleteSecondaryFileSummary.status !==
-                                                            IMPORT_SUMMARY_STATUS_ERROR
-                                                    ) {
-                                                        consoleLogger.debug(
-                                                            `Data from secondary file ${secondaryUploadToDelete.fileName} deleted`
-                                                        );
-                                                        return deleteUploadAndDocumentFromDatasoreAndDHIS2(
-                                                            secondaryUploadToDelete,
-                                                            repositories
-                                                        ).flatMap(() => {
-                                                            return removeAsyncDeletionByIdFromDatastore(
-                                                                secondaryUploadToDelete.id,
-                                                                repositories.glassAsyncDeletionsRepository
-                                                            ).flatMap(() => {
-                                                                consoleLogger.debug(
-                                                                    `SUCCESS - Deleted async-deletions id from Datastore ${uploadToDelete.id}`
-                                                                );
-                                                                return Future.success(undefined);
-                                                            });
-                                                        });
-                                                    } else {
-                                                        return incrementAsyncDeletionOrDeleteIfMaxAttemptAndSetErrorStatus(
-                                                            repositories.glassAsyncDeletionsRepository,
-                                                            repositories.glassUploadsRepository,
-                                                            uploadToDelete,
-                                                            maxAttemptsForAsyncDeletions
-                                                        ).flatMap(() => {
-                                                            consoleLogger.error(
-                                                                `An error occured while deleting the data exiting. Secondary file: ${secondaryUploadToDelete?.fileName}`
-                                                            );
-                                                            return Future.error(
-                                                                `An error occured while deleting the data exiting. Secondary file: ${secondaryUploadToDelete?.fileName}`
-                                                            );
-                                                        });
-                                                    }
-                                                });
-                                            } else {
-                                                return deleteUploadAndDocumentFromDatasoreAndDHIS2(
-                                                    secondaryUploadToDelete,
-                                                    repositories
-                                                ).flatMap(() => {
-                                                    return removeAsyncDeletionByIdFromDatastore(
-                                                        secondaryUploadToDelete.id,
-                                                        repositories.glassAsyncDeletionsRepository
-                                                    ).flatMap(() => {
-                                                        consoleLogger.debug(
-                                                            `SUCCESS - Deleted async-deletions id from Datastore ${uploadToDelete.id}`
-                                                        );
-                                                        return Future.success(undefined);
                                                     });
-                                                });
-                                            }
-                                        } else {
-                                            return incrementAsyncDeletionOrDeleteIfMaxAttemptAndSetErrorStatus(
-                                                repositories.glassAsyncDeletionsRepository,
-                                                repositories.glassUploadsRepository,
-                                                uploadToDelete,
-                                                maxAttemptsForAsyncDeletions
-                                            ).flatMap(() => {
+                                                }
+                                            } else {
                                                 consoleLogger.error(
                                                     `An error occured while deleting file, file not found. Upload selected to delete: ${uploadToDelete.id}`
                                                 );
-                                                return Future.error(
-                                                    `An error occured while deleting file, file not found. Upload selected to delete: ${uploadToDelete.id}`
+                                                return incrementAsyncDeletionOrDeleteIfMaxAttemptAndSetErrorStatus(
+                                                    repositories.glassAsyncDeletionsRepository,
+                                                    repositories.glassUploadsRepository,
+                                                    uploadToDelete,
+                                                    maxAttemptsForAsyncDeletions
                                                 );
-                                            });
-                                        }
+                                            }
+                                        });
                                     });
+                                })
+                                .flatMapError(error => {
+                                    // Safety net: catches any error that escaped the explicit handlers above
+                                    // after DELETING status was already set. Resets to PENDING for retry
+                                    // (or marks as error if max attempts reached) so the upload never stays
+                                    // permanently stuck in DELETING.
+                                    consoleLogger.error(
+                                        `Unexpected error during deletion of upload ${uploadToDelete.id}, resetting for retry: ${error}`
+                                    );
+                                    return incrementAsyncDeletionOrDeleteIfMaxAttemptAndSetErrorStatus(
+                                        repositories.glassAsyncDeletionsRepository,
+                                        repositories.glassUploadsRepository,
+                                        uploadToDelete,
+                                        maxAttemptsForAsyncDeletions
+                                    );
                                 });
-                            });
                         }
                     }
                 );

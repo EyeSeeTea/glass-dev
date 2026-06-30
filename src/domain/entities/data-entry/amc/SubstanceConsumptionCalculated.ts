@@ -13,6 +13,7 @@ export type SubstanceConsumptionCalculated = {
     atc_autocalculated: ATCCodeLevel5;
     route_admin_autocalculated: RouteOfAdministrationCode;
     salt_autocalculated: SaltCode;
+    combination_code_autocalculated?: string;
     packages_autocalculated: Maybe<number>;
     ddds_autocalculated: Maybe<number>;
     atc_version_autocalculated: ATCVersionKey;
@@ -35,6 +36,7 @@ export const SUBSTANCE_CONSUMPTION_CALCULATED_KEYS = [
     "atc_autocalculated",
     "route_admin_autocalculated",
     "salt_autocalculated",
+    "combination_code_autocalculated",
     "packages_autocalculated",
     "ddds_autocalculated",
     "atc_version_autocalculated",

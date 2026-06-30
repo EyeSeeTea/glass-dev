@@ -11396,7 +11396,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 5
         },
         {
             "ARS": "A07AA02_OXXXX",
@@ -11406,7 +11407,8 @@
             "DDD_UNIT": "MIU",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": null
         },
         {
             "ARS": "A07AA03_OXXXX",
@@ -11416,7 +11418,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.3
         },
         {
             "ARS": "A07AA05_OXXXX",
@@ -11426,7 +11429,8 @@
             "DDD_UNIT": "MIU",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": null
         },
         {
             "ARS": "A07AA06_OXXXX",
@@ -11436,7 +11440,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 3
         },
         {
             "ARS": "A07AA07_OXXXX",
@@ -11446,7 +11451,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.4
         },
         {
             "ARS": "A07AA08_OXXXX",
@@ -11456,7 +11462,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 3
         },
         {
             "ARS": "A07AA09_OXXXX",
@@ -11466,7 +11473,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 2
         },
         {
             "ARS": "A07AA10_OXXXX",
@@ -11476,7 +11484,8 @@
             "DDD_UNIT": "MIU",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": null
         },
         {
             "ARS": "A07AA11_OXXXX",
@@ -11486,7 +11495,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.6
         },
         {
             "ARS": "A07AA12_OXXXX",
@@ -11496,7 +11506,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.4
         },
         {
             "ARS": "A07AA13_OXXXX",
@@ -11506,7 +11517,8 @@
             "DDD_UNIT": "G",
             "NOTES": "as sodium salt",
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.8
         },
         {
             "ARS": "D01BA01_OXXXX",
@@ -11516,7 +11528,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.5
         },
         {
             "ARS": "D01BA02_OXXXX",
@@ -11526,7 +11539,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.25
         },
         {
             "ARS": "D01BA03_O",
@@ -11536,7 +11550,8 @@
             "DDD_UNIT": "G",
             "NOTES": "Expressed as ravuconazole",
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.1
         },
         {
             "ARS": "J01AA01_OXXXX",
@@ -11546,7 +11561,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.6
         },
         {
             "ARS": "J01AA02_OXXXX",
@@ -11556,7 +11572,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.1
         },
         {
             "ARS": "J01AA02_PXXXX",
@@ -11566,7 +11583,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.1
         },
         {
             "ARS": "J01AA03_OXXXX",
@@ -11576,7 +11594,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1
         },
         {
             "ARS": "J01AA04_OXXXX",
@@ -11586,7 +11605,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.6
         },
         {
             "ARS": "J01AA04_PXXXX",
@@ -11596,7 +11616,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.6
         },
         {
             "ARS": "J01AA05_OXXXX",
@@ -11606,7 +11627,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.6
         },
         {
             "ARS": "J01AA06_OXXXX",
@@ -11616,7 +11638,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1
         },
         {
             "ARS": "J01AA06_PXXXX",
@@ -11626,7 +11649,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1
         },
         {
             "ARS": "J01AA07_OXXXX",
@@ -11636,7 +11660,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1
         },
         {
             "ARS": "J01AA07_PXXXX",
@@ -11646,7 +11671,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1
         },
         {
             "ARS": "J01AA08_OXXXX",
@@ -11656,7 +11682,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.2
         },
         {
             "ARS": "J01AA08_PXXXX",
@@ -11666,7 +11693,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.2
         },
         {
             "ARS": "J01AA09_PXXXX",
@@ -11676,7 +11704,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.35
         },
         {
             "ARS": "J01AA11_OXXXX",
@@ -11686,7 +11715,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1
         },
         {
             "ARS": "J01AA12_PXXXX",
@@ -11696,7 +11726,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.1
         },
         {
             "ARS": "J01AA13_PXXXX",
@@ -11706,7 +11737,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.14
         },
         {
             "ARS": "J01AA14_OXXXX",
@@ -11716,7 +11748,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.1
         },
         {
             "ARS": "J01AA15_OXXXX",
@@ -11726,7 +11759,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.3
         },
         {
             "ARS": "J01AA15_PXXXX",
@@ -11736,7 +11770,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.1
         },
         {
             "ARS": "J01BA01_OXXXX",
@@ -11746,7 +11781,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 3
         },
         {
             "ARS": "J01BA01_PXXXX",
@@ -11756,7 +11792,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 3
         },
         {
             "ARS": "J01BA02_OXXXX",
@@ -11766,7 +11803,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1.5
         },
         {
             "ARS": "J01BA02_PXXXX",
@@ -11776,7 +11814,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1.5
         },
         {
             "ARS": "J01CA01_OXXXX",
@@ -11786,7 +11825,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 2
         },
         {
             "ARS": "J01CA01_PXXXX",
@@ -11796,7 +11836,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 6
         },
         {
             "ARS": "J01CA01_RXXXX",
@@ -11806,7 +11847,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "R",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 2
         },
         {
             "ARS": "J01CA02_OXXXX",
@@ -11816,7 +11858,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1.05
         },
         {
             "ARS": "J01CA03_PXXXX",
@@ -11826,7 +11869,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 12
         },
         {
             "ARS": "J01CA04_OXXXX",
@@ -11836,7 +11880,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1.5
         },
         {
             "ARS": "J01CA04_PXXXX",
@@ -11846,7 +11891,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 3
         },
         {
             "ARS": "J01CA05_OXXXX",
@@ -11856,7 +11902,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 4
         },
         {
             "ARS": "J01CA06_OXXXX",
@@ -11866,7 +11913,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1.2
         },
         {
             "ARS": "J01CA07_OXXXX",
@@ -11876,7 +11924,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 2
         },
         {
             "ARS": "J01CA07_PXXXX",
@@ -11886,7 +11935,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 2
         },
         {
             "ARS": "J01CA08_OXXXX",
@@ -11896,7 +11946,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.6
         },
         {
             "ARS": "J01CA09_PXXXX",
@@ -11906,7 +11957,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 12
         },
         {
             "ARS": "J01CA10_PXXXX",
@@ -11916,7 +11968,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 6
         },
         {
             "ARS": "J01CA11_PXXXX",
@@ -11926,7 +11979,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1.2
         },
         {
             "ARS": "J01CA12_PXXXX",
@@ -11936,7 +11990,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 14
         },
         {
             "ARS": "J01CA13_PXXXX",
@@ -11946,7 +12001,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 15
         },
         {
             "ARS": "J01CA14_OXXXX",
@@ -11956,7 +12012,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1.5
         },
         {
             "ARS": "J01CA14_PXXXX",
@@ -11966,7 +12023,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1.5
         },
         {
             "ARS": "J01CA15_OXXXX",
@@ -11976,7 +12034,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 2
         },
         {
             "ARS": "J01CA16_PXXXX",
@@ -11986,7 +12045,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 15
         },
         {
             "ARS": "J01CA17_PXXXX",
@@ -11996,7 +12056,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 4
         },
         {
             "ARS": "J01CA18_OXXXX",
@@ -12006,7 +12067,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 2
         },
         {
             "ARS": "J01CA19_PXXXX",
@@ -12016,7 +12078,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 4
         },
         {
             "ARS": "J01CE01_PXXXX",
@@ -12026,7 +12089,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 3.6
         },
         {
             "ARS": "J01CE02_OXXXX",
@@ -12036,7 +12100,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 2
         },
         {
             "ARS": "J01CE03_OXXXX",
@@ -12046,7 +12111,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.9
         },
         {
             "ARS": "J01CE04_OXXXX",
@@ -12056,7 +12122,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1.5
         },
         {
             "ARS": "J01CE05_OXXXX",
@@ -12066,7 +12133,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1
         },
         {
             "ARS": "J01CE06_OXXXX",
@@ -12076,7 +12144,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1.05
         },
         {
             "ARS": "J01CE07_OXXXX",
@@ -12086,7 +12155,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1
         },
         {
             "ARS": "J01CE08_PXXXX",
@@ -12096,7 +12166,8 @@
             "DDD_UNIT": "G",
             "NOTES": "Expressed as benzylpenicillin",
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 3.6
         },
         {
             "ARS": "J01CE09_PXXXX",
@@ -12106,7 +12177,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.6
         },
         {
             "ARS": "J01CE10_OXXXX",
@@ -12116,7 +12188,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 2
         },
         {
             "ARS": "J01CF01_OXXXX",
@@ -12126,7 +12199,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 2
         },
         {
             "ARS": "J01CF01_PXXXX",
@@ -12136,7 +12210,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 2
         },
         {
             "ARS": "J01CF02_OXXXX",
@@ -12146,7 +12221,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 2
         },
         {
             "ARS": "J01CF02_PXXXX",
@@ -12156,7 +12232,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 2
         },
         {
             "ARS": "J01CF03_PXXXX",
@@ -12166,7 +12243,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 4
         },
         {
             "ARS": "J01CF04_OXXXX",
@@ -12176,7 +12254,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 2
         },
         {
             "ARS": "J01CF04_PXXXX",
@@ -12186,7 +12265,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 2
         },
         {
             "ARS": "J01CF05_OXXXX",
@@ -12196,7 +12276,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 2
         },
         {
             "ARS": "J01CF05_PXXXX",
@@ -12206,7 +12287,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 2
         },
         {
             "ARS": "J01CF06_PXXXX",
@@ -12216,7 +12298,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 3
         },
         {
             "ARS": "J01CG01_PXXXX",
@@ -12226,7 +12309,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1
         },
         {
             "ARS": "J01CR01_PXXXX",
@@ -12236,7 +12320,8 @@
             "DDD_UNIT": "G",
             "NOTES": "Refers to ampicillin",
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 6
         },
         {
             "ARS": "J01CR02_OXXXX",
@@ -12246,7 +12331,8 @@
             "DDD_UNIT": "G",
             "NOTES": "Refers to amoxicillin",
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1.5
         },
         {
             "ARS": "J01CR02_PXXXX",
@@ -12256,7 +12342,8 @@
             "DDD_UNIT": "G",
             "NOTES": "Refers to amoxicillin",
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 3
         },
         {
             "ARS": "J01CR03_PXXXX",
@@ -12266,7 +12353,8 @@
             "DDD_UNIT": "G",
             "NOTES": "Refers to ticarcillin",
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 15
         },
         {
             "ARS": "J01CR04_OXXXX",
@@ -12276,7 +12364,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1.5
         },
         {
             "ARS": "J01CR05_PXXXX",
@@ -12286,7 +12375,8 @@
             "DDD_UNIT": "G",
             "NOTES": "Refers to piperacillin",
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 14
         },
         {
             "ARS": "J01DB01_OXXXX",
@@ -12296,7 +12386,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 2
         },
         {
             "ARS": "J01DB02_PXXXX",
@@ -12306,7 +12397,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 3
         },
         {
             "ARS": "J01DB03_PXXXX",
@@ -12316,7 +12408,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 4
         },
         {
             "ARS": "J01DB04_PXXXX",
@@ -12326,7 +12419,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 3
         },
         {
             "ARS": "J01DB05_OXXXX",
@@ -12336,7 +12430,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 2
         },
         {
             "ARS": "J01DB06_PXXXX",
@@ -12346,7 +12441,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 3
         },
         {
             "ARS": "J01DB07_OXXXX",
@@ -12356,7 +12452,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1
         },
         {
             "ARS": "J01DB08_PXXXX",
@@ -12366,7 +12463,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 4
         },
         {
             "ARS": "J01DB09_OXXXX",
@@ -12376,7 +12474,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 2
         },
         {
             "ARS": "J01DB09_PXXXX",
@@ -12386,7 +12485,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 2
         },
         {
             "ARS": "J01DB11_OXXXX",
@@ -12396,7 +12496,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 2.1
         },
         {
             "ARS": "J01DB12_PXXXX",
@@ -12406,7 +12507,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 3
         },
         {
             "ARS": "J01DC01_PXXXX",
@@ -12416,7 +12518,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 6
         },
         {
             "ARS": "J01DC02_OXXXX",
@@ -12426,7 +12529,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.5
         },
         {
             "ARS": "J01DC02_PXXXX",
@@ -12436,7 +12540,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 3
         },
         {
             "ARS": "J01DC03_PXXXX",
@@ -12446,7 +12551,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 6
         },
         {
             "ARS": "J01DC04_OXXXX",
@@ -12456,7 +12562,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1
         },
         {
             "ARS": "J01DC05_PXXXX",
@@ -12466,7 +12573,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 4
         },
         {
             "ARS": "J01DC06_PXXXX",
@@ -12476,7 +12584,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1
         },
         {
             "ARS": "J01DC07_OXXXX",
@@ -12486,7 +12595,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1.2
         },
         {
             "ARS": "J01DC07_PXXXX",
@@ -12496,7 +12606,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 4
         },
         {
             "ARS": "J01DC08_OXXXX",
@@ -12506,7 +12617,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.6
         },
         {
             "ARS": "J01DC09_PXXXX",
@@ -12516,7 +12628,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 4
         },
         {
             "ARS": "J01DC10_OXXXX",
@@ -12526,7 +12639,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1
         },
         {
             "ARS": "J01DC11_PXXXX",
@@ -12536,7 +12650,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 4
         },
         {
             "ARS": "J01DC12_PXXXX",
@@ -12546,7 +12661,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 4
         },
         {
             "ARS": "J01DC13_PXXXX",
@@ -12556,7 +12672,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 2
         },
         {
             "ARS": "J01DC14_PXXXX",
@@ -12566,7 +12683,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 2
         },
         {
             "ARS": "J01DC52_OXXXX",
@@ -12576,7 +12694,8 @@
             "DDD_UNIT": "G",
             "NOTES": "Refers to cefuroxime",
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.5
         },
         {
             "ARS": "J01DD01_PXXXX",
@@ -12586,7 +12705,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 4
         },
         {
             "ARS": "J01DD02_PXXXX",
@@ -12596,7 +12716,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 4
         },
         {
             "ARS": "J01DD03_PXXXX",
@@ -12606,7 +12727,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 4
         },
         {
             "ARS": "J01DD04_PXXXX",
@@ -12616,7 +12738,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 2
         },
         {
             "ARS": "J01DD05_PXXXX",
@@ -12626,7 +12749,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 2
         },
         {
             "ARS": "J01DD06_PXXXX",
@@ -12636,7 +12760,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 4
         },
         {
             "ARS": "J01DD07_PXXXX",
@@ -12646,7 +12771,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 4
         },
         {
             "ARS": "J01DD08_OXXXX",
@@ -12656,7 +12782,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.4
         },
         {
             "ARS": "J01DD09_PXXXX",
@@ -12666,7 +12793,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 2
         },
         {
             "ARS": "J01DD10_OXXXX",
@@ -12676,7 +12804,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1
         },
         {
             "ARS": "J01DD11_PXXXX",
@@ -12686,7 +12815,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 2
         },
         {
             "ARS": "J01DD12_PXXXX",
@@ -12696,7 +12826,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 4
         },
         {
             "ARS": "J01DD13_OXXXX",
@@ -12706,7 +12837,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.4
         },
         {
             "ARS": "J01DD14_OXXXX",
@@ -12716,7 +12848,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.4
         },
         {
             "ARS": "J01DD15_OXXXX",
@@ -12726,7 +12859,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.6
         },
         {
             "ARS": "J01DD16_OXXXX",
@@ -12736,7 +12870,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.4
         },
         {
             "ARS": "J01DD17_OXXXX",
@@ -12746,7 +12881,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.45
         },
         {
             "ARS": "J01DD18_OXXXX",
@@ -12756,7 +12892,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.4
         },
         {
             "ARS": "J01DD52_PXXXX",
@@ -12766,7 +12903,8 @@
             "DDD_UNIT": "G",
             "NOTES": "Refers to ceftazidime",
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 6
         },
         {
             "ARS": "J01DD62_PXXXX",
@@ -12776,7 +12914,8 @@
             "DDD_UNIT": "G",
             "NOTES": "Refers to cefoperazone",
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 4
         },
         {
             "ARS": "J01DD63_PXXXX",
@@ -12786,7 +12925,8 @@
             "DDD_UNIT": "G",
             "NOTES": "Refers to ceftriaxone",
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 2
         },
         {
             "ARS": "J01DD64_OXXXX",
@@ -12796,7 +12936,8 @@
             "DDD_UNIT": "G",
             "NOTES": "Refers to cefpodoxime",
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.4
         },
         {
             "ARS": "J01DE01_PXXXX",
@@ -12806,7 +12947,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 4
         },
         {
             "ARS": "J01DE02_PXXXX",
@@ -12816,7 +12958,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 4
         },
         {
             "ARS": "J01DE03_PXXXX",
@@ -12826,7 +12969,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 4
         },
         {
             "ARS": "J01DF01_ISXXXX",
@@ -12836,7 +12980,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "IS",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.225
         },
         {
             "ARS": "J01DF01_PXXXX",
@@ -12846,7 +12991,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 4
         },
         {
             "ARS": "J01DF02_PXXXX",
@@ -12856,7 +13002,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 2
         },
         {
             "ARS": "J01DH02_PXXXX",
@@ -12866,7 +13013,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 3
         },
         {
             "ARS": "J01DH03_PXXXX",
@@ -12876,7 +13024,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1
         },
         {
             "ARS": "J01DH04_PXXXX",
@@ -12886,7 +13035,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1.5
         },
         {
             "ARS": "J01DH05_PXXXX",
@@ -12896,7 +13046,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1.2
         },
         {
             "ARS": "J01DH06_OXXXX",
@@ -12906,7 +13057,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.56
         },
         {
             "ARS": "J01DH51_PXXXX",
@@ -12916,7 +13068,8 @@
             "DDD_UNIT": "G",
             "NOTES": "Refers to imipenem",
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 2
         },
         {
             "ARS": "J01DH52_P",
@@ -12926,7 +13079,8 @@
             "DDD_UNIT": "G",
             "NOTES": "Refers to meropenem",
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 3
         },
         {
             "ARS": "J01DH55_PXXXX",
@@ -12936,7 +13090,8 @@
             "DDD_UNIT": "G",
             "NOTES": "Refers to panipenem",
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 2
         },
         {
             "ARS": "J01DH56_P",
@@ -12946,7 +13101,8 @@
             "DDD_UNIT": "G",
             "NOTES": "Refers to imipenem",
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 2
         },
         {
             "ARS": "J01DI01_PXXXX",
@@ -12956,7 +13112,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1.5
         },
         {
             "ARS": "J01DI02_PXXXX",
@@ -12966,7 +13123,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1.2
         },
         {
             "ARS": "J01DI03_OXXXX",
@@ -12976,7 +13134,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.75
         },
         {
             "ARS": "J01DI04_PXXXX",
@@ -12986,7 +13145,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 6
         },
         {
             "ARS": "J01DI54_PXXXX",
@@ -12996,7 +13156,8 @@
             "DDD_UNIT": "G",
             "NOTES": "Refers to ceftolozane",
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 3
         },
         {
             "ARS": "J01EA01_OXXXX",
@@ -13006,7 +13167,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.4
         },
         {
             "ARS": "J01EA01_PXXXX",
@@ -13016,7 +13178,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.4
         },
         {
             "ARS": "J01EA02_OXXXX",
@@ -13026,7 +13189,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.2
         },
         {
             "ARS": "J01EB01_OXXXX",
@@ -13036,7 +13200,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 4
         },
         {
             "ARS": "J01EB01_PXXXX",
@@ -13046,7 +13211,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 4
         },
         {
             "ARS": "J01EB02_OXXXX",
@@ -13056,7 +13222,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 4
         },
         {
             "ARS": "J01EB03_OXXXX",
@@ -13066,7 +13233,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 4
         },
         {
             "ARS": "J01EB04_OXXXX",
@@ -13076,7 +13244,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1
         },
         {
             "ARS": "J01EB05_OXXXX",
@@ -13086,7 +13255,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 4
         },
         {
             "ARS": "J01EB05_PXXXX",
@@ -13096,7 +13266,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 4
         },
         {
             "ARS": "J01EB08_OXXXX",
@@ -13106,7 +13277,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 6
         },
         {
             "ARS": "J01EC01_OXXXX",
@@ -13116,7 +13288,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 2
         },
         {
             "ARS": "J01EC02_OXXXX",
@@ -13126,7 +13299,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.6
         },
         {
             "ARS": "J01EC03_OXXXX",
@@ -13136,7 +13310,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1
         },
         {
             "ARS": "J01EC03_PXXXX",
@@ -13146,7 +13321,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1
         },
         {
             "ARS": "J01ED01_OXXXX",
@@ -13156,7 +13332,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.5
         },
         {
             "ARS": "J01ED02_OXXXX",
@@ -13166,7 +13343,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.1
         },
         {
             "ARS": "J01ED04_OXXXX",
@@ -13176,7 +13354,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.5
         },
         {
             "ARS": "J01ED05_OXXXX",
@@ -13186,7 +13365,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.5
         },
         {
             "ARS": "J01ED06_OXXXX",
@@ -13196,7 +13376,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.5
         },
         {
             "ARS": "J01ED07_OXXXX",
@@ -13206,7 +13387,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 3
         },
         {
             "ARS": "J01ED08_OXXXX",
@@ -13216,7 +13398,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1
         },
         {
             "ARS": "J01ED09_OXXXX",
@@ -13226,7 +13409,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1.5
         },
         {
             "ARS": "J01ED09_RXXXX",
@@ -13236,7 +13420,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "R",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1.5
         },
         {
             "ARS": "J01FA01_OXXXX",
@@ -13246,7 +13431,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1
         },
         {
             "ARS": "J01FA01_OESUC",
@@ -13256,7 +13442,8 @@
             "DDD_UNIT": "G",
             "NOTES": "erythromycin ethylsuccinate tablets",
             "ROA": "O",
-            "SALT": "ESUC"
+            "SALT": "ESUC",
+            "DDD_GRAMS": 2
         },
         {
             "ARS": "J01FA01_PXXXX",
@@ -13266,7 +13453,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1
         },
         {
             "ARS": "J01FA02_OXXXX",
@@ -13276,7 +13464,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 3
         },
         {
             "ARS": "J01FA03_OXXXX",
@@ -13286,7 +13475,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1.2
         },
         {
             "ARS": "J01FA03_PXXXX",
@@ -13296,7 +13486,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1
         },
         {
             "ARS": "J01FA05_OXXXX",
@@ -13306,7 +13497,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1
         },
         {
             "ARS": "J01FA06_OXXXX",
@@ -13316,7 +13508,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.3
         },
         {
             "ARS": "J01FA07_OXXXX",
@@ -13326,7 +13519,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 2
         },
         {
             "ARS": "J01FA08_OXXXX",
@@ -13336,7 +13530,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1
         },
         {
             "ARS": "J01FA09_OXXXX",
@@ -13346,7 +13541,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.5
         },
         {
             "ARS": "J01FA09_PXXXX",
@@ -13356,7 +13552,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1
         },
         {
             "ARS": "J01FA10_OXXXX",
@@ -13366,7 +13563,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.3
         },
         {
             "ARS": "J01FA10_PXXXX",
@@ -13376,7 +13574,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.5
         },
         {
             "ARS": "J01FA11_OXXXX",
@@ -13386,7 +13585,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1.2
         },
         {
             "ARS": "J01FA12_OXXXX",
@@ -13396,7 +13596,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.8
         },
         {
             "ARS": "J01FA13_OXXXX",
@@ -13406,7 +13607,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.5
         },
         {
             "ARS": "J01FA14_OXXXX",
@@ -13416,7 +13618,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.75
         },
         {
             "ARS": "J01FA15_OXXXX",
@@ -13426,7 +13629,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.8
         },
         {
             "ARS": "J01FF01_OXXXX",
@@ -13436,7 +13640,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1.2
         },
         {
             "ARS": "J01FF01_PXXXX",
@@ -13446,7 +13651,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1.8
         },
         {
             "ARS": "J01FF02_OXXXX",
@@ -13456,7 +13662,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1.8
         },
         {
             "ARS": "J01FF02_PXXXX",
@@ -13466,7 +13673,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1.8
         },
         {
             "ARS": "J01FG01_OXXXX",
@@ -13476,7 +13684,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 2
         },
         {
             "ARS": "J01FG02_PXXXX",
@@ -13486,7 +13695,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1.5
         },
         {
             "ARS": "J01GA01_PXXXX",
@@ -13496,7 +13706,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1
         },
         {
             "ARS": "J01GA02_PXXXX",
@@ -13506,7 +13717,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1
         },
         {
             "ARS": "J01GB01_IPXXXX",
@@ -13516,7 +13728,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "IP",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.112
         },
         {
             "ARS": "J01GB01_ISXXXX",
@@ -13526,7 +13739,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "IS",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.3
         },
         {
             "ARS": "J01GB01_PXXXX",
@@ -13536,7 +13750,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.24
         },
         {
             "ARS": "J01GB03_PXXXX",
@@ -13546,7 +13761,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.24
         },
         {
             "ARS": "J01GB04_PXXXX",
@@ -13556,7 +13772,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1
         },
         {
             "ARS": "J01GB05_PXXXX",
@@ -13566,7 +13783,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1
         },
         {
             "ARS": "J01GB06_ISXXXX",
@@ -13576,7 +13794,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "IS",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.59
         },
         {
             "ARS": "J01GB06_PXXXX",
@@ -13586,7 +13805,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1
         },
         {
             "ARS": "J01GB07_OXXXX",
@@ -13596,7 +13816,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.35
         },
         {
             "ARS": "J01GB07_PXXXX",
@@ -13606,7 +13827,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.35
         },
         {
             "ARS": "J01GB08_PXXXX",
@@ -13616,7 +13838,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.24
         },
         {
             "ARS": "J01GB09_PXXXX",
@@ -13626,7 +13849,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.14
         },
         {
             "ARS": "J01GB10_PXXXX",
@@ -13636,7 +13860,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1
         },
         {
             "ARS": "J01GB11_PXXXX",
@@ -13646,7 +13871,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.4
         },
         {
             "ARS": "J01GB12_PXXXX",
@@ -13656,7 +13882,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.2
         },
         {
             "ARS": "J01GB13_PXXXX",
@@ -13666,7 +13893,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.6
         },
         {
             "ARS": "J01MA01_OXXXX",
@@ -13676,7 +13904,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.4
         },
         {
             "ARS": "J01MA01_PXXXX",
@@ -13686,7 +13915,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.4
         },
         {
             "ARS": "J01MA02_OXXXX",
@@ -13696,7 +13926,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1
         },
         {
             "ARS": "J01MA02_PXXXX",
@@ -13706,7 +13937,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.8
         },
         {
             "ARS": "J01MA03_OXXXX",
@@ -13716,7 +13948,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.8
         },
         {
             "ARS": "J01MA03_PXXXX",
@@ -13726,7 +13959,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.8
         },
         {
             "ARS": "J01MA04_OXXXX",
@@ -13736,7 +13970,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.8
         },
         {
             "ARS": "J01MA05_OXXXX",
@@ -13746,7 +13981,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.8
         },
         {
             "ARS": "J01MA06_OXXXX",
@@ -13756,7 +13992,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.8
         },
         {
             "ARS": "J01MA07_OXXXX",
@@ -13766,7 +14003,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.4
         },
         {
             "ARS": "J01MA08_OXXXX",
@@ -13776,7 +14014,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.4
         },
         {
             "ARS": "J01MA08_PXXXX",
@@ -13786,7 +14025,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.4
         },
         {
             "ARS": "J01MA09_OXXXX",
@@ -13796,7 +14036,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.2
         },
         {
             "ARS": "J01MA10_OXXXX",
@@ -13806,7 +14047,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.2
         },
         {
             "ARS": "J01MA11_OXXXX",
@@ -13816,7 +14058,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.4
         },
         {
             "ARS": "J01MA12_ISXXXX",
@@ -13826,7 +14069,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "IS",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.24
         },
         {
             "ARS": "J01MA12_OXXXX",
@@ -13836,7 +14080,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.5
         },
         {
             "ARS": "J01MA12_PXXXX",
@@ -13846,7 +14091,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.5
         },
         {
             "ARS": "J01MA13_OXXXX",
@@ -13856,7 +14102,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.2
         },
         {
             "ARS": "J01MA13_PXXXX",
@@ -13866,7 +14113,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.2
         },
         {
             "ARS": "J01MA14_OXXXX",
@@ -13876,7 +14124,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.4
         },
         {
             "ARS": "J01MA14_PXXXX",
@@ -13886,7 +14135,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.4
         },
         {
             "ARS": "J01MA15_OXXXX",
@@ -13896,7 +14146,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.32
         },
         {
             "ARS": "J01MA15_PXXXX",
@@ -13906,7 +14157,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.2
         },
         {
             "ARS": "J01MA16_OXXXX",
@@ -13916,7 +14168,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.4
         },
         {
             "ARS": "J01MA16_PXXXX",
@@ -13926,7 +14179,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.4
         },
         {
             "ARS": "J01MA17_OXXXX",
@@ -13936,7 +14190,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.6
         },
         {
             "ARS": "J01MA18_PXXXX",
@@ -13946,7 +14201,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1
         },
         {
             "ARS": "J01MA19_OXXXX",
@@ -13956,7 +14212,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.4
         },
         {
             "ARS": "J01MA21_OXXXX",
@@ -13966,7 +14223,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.1
         },
         {
             "ARS": "J01MA22_OXXXX",
@@ -13976,7 +14234,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.45
         },
         {
             "ARS": "J01MA23_OXXXX",
@@ -13986,7 +14245,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.9
         },
         {
             "ARS": "J01MA23_PXXXX",
@@ -13996,7 +14256,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.6
         },
         {
             "ARS": "J01MA25_O",
@@ -14006,7 +14267,8 @@
             "DDD_UNIT": "MG",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": null
         },
         {
             "ARS": "J01MB01_OXXXX",
@@ -14016,7 +14278,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.3
         },
         {
             "ARS": "J01MB02_OXXXX",
@@ -14026,7 +14289,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 4
         },
         {
             "ARS": "J01MB03_OXXXX",
@@ -14036,7 +14300,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 2
         },
         {
             "ARS": "J01MB04_OXXXX",
@@ -14046,7 +14311,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.8
         },
         {
             "ARS": "J01MB05_OXXXX",
@@ -14056,7 +14322,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1
         },
         {
             "ARS": "J01MB06_OXXXX",
@@ -14066,7 +14333,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1
         },
         {
             "ARS": "J01MB07_OXXXX",
@@ -14076,7 +14344,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1.2
         },
         {
             "ARS": "J01XA01_PXXXX",
@@ -14086,7 +14355,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 2
         },
         {
             "ARS": "J01XA02_PXXXX",
@@ -14096,7 +14366,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.4
         },
         {
             "ARS": "J01XA04_PXXXX",
@@ -14106,7 +14377,8 @@
             "DDD_UNIT": "G",
             "NOTES": "course dose",
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1.5
         },
         {
             "ARS": "J01XB01_IPXXXX",
@@ -14116,7 +14388,8 @@
             "DDD_UNIT": "MIU",
             "NOTES": null,
             "ROA": "IP",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": null
         },
         {
             "ARS": "J01XB01_ISXXXX",
@@ -14126,7 +14399,8 @@
             "DDD_UNIT": "MIU",
             "NOTES": null,
             "ROA": "IS",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": null
         },
         {
             "ARS": "J01XB01_PXXXX",
@@ -14136,7 +14410,8 @@
             "DDD_UNIT": "MIU",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": null
         },
         {
             "ARS": "J01XB02_PXXXX",
@@ -14146,7 +14421,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.15
         },
         {
             "ARS": "J01XC01_OXXXX",
@@ -14156,7 +14432,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1.5
         },
         {
             "ARS": "J01XC01_PXXXX",
@@ -14166,7 +14443,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1.5
         },
         {
             "ARS": "J01XD01_PXXXX",
@@ -14176,7 +14454,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1.5
         },
         {
             "ARS": "J01XD02_PXXXX",
@@ -14186,7 +14465,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1.5
         },
         {
             "ARS": "J01XD03_PXXXX",
@@ -14196,7 +14476,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1
         },
         {
             "ARS": "J01XE01_OXXXX",
@@ -14206,7 +14487,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.2
         },
         {
             "ARS": "J01XE02_OXXXX",
@@ -14216,7 +14498,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.16
         },
         {
             "ARS": "J01XE03_OXXXX",
@@ -14226,7 +14509,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.3
         },
         {
             "ARS": "J01XX01_OXXXX",
@@ -14236,7 +14520,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 3
         },
         {
             "ARS": "J01XX01_PXXXX",
@@ -14246,7 +14531,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 8
         },
         {
             "ARS": "J01XX03_RXXXX",
@@ -14256,7 +14542,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "R",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1.5
         },
         {
             "ARS": "J01XX04_PXXXX",
@@ -14266,7 +14553,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 3
         },
         {
             "ARS": "J01XX05_OHIPP",
@@ -14276,7 +14564,8 @@
             "DDD_UNIT": "G",
             "NOTES": "hippurate",
             "ROA": "O",
-            "SALT": "HIPP"
+            "SALT": "HIPP",
+            "DDD_GRAMS": 2
         },
         {
             "ARS": "J01XX05_OMAND",
@@ -14286,7 +14575,8 @@
             "DDD_UNIT": "G",
             "NOTES": "mandelate",
             "ROA": "O",
-            "SALT": "MAND"
+            "SALT": "MAND",
+            "DDD_GRAMS": 3
         },
         {
             "ARS": "J01XX06_OXXXX",
@@ -14296,7 +14586,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 12
         },
         {
             "ARS": "J01XX07_OXXXX",
@@ -14306,7 +14597,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1
         },
         {
             "ARS": "J01XX08_OXXXX",
@@ -14316,7 +14608,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1.2
         },
         {
             "ARS": "J01XX08_PXXXX",
@@ -14326,7 +14619,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1.2
         },
         {
             "ARS": "J01XX09_PXXXX",
@@ -14336,7 +14630,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.28
         },
         {
             "ARS": "J01XX11_OXXXX",
@@ -14346,7 +14641,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.2
         },
         {
             "ARS": "J01XX11_PXXXX",
@@ -14356,7 +14652,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.2
         },
         {
             "ARS": "J02AA01_PXXXX",
@@ -14366,7 +14663,8 @@
             "DDD_UNIT": "MG",
             "NOTES": "lipid formulations",
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": null
         },
         {
             "ARS": "J02AB01_PXXXX",
@@ -14376,7 +14674,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1
         },
         {
             "ARS": "J02AB02_OXXXX",
@@ -14386,7 +14685,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.2
         },
         {
             "ARS": "J02AC01_OXXXX",
@@ -14396,7 +14696,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.2
         },
         {
             "ARS": "J02AC01_PXXXX",
@@ -14406,7 +14707,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.2
         },
         {
             "ARS": "J02AC02_OXXXX",
@@ -14416,7 +14718,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.2
         },
         {
             "ARS": "J02AC02_PXXXX",
@@ -14426,7 +14729,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.2
         },
         {
             "ARS": "J02AC03_OXXXX",
@@ -14436,7 +14740,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.4
         },
         {
             "ARS": "J02AC03_PXXXX",
@@ -14446,7 +14751,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.4
         },
         {
             "ARS": "J02AC04_OXXXX",
@@ -14456,7 +14762,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.3
         },
         {
             "ARS": "J02AC04_PXXXX",
@@ -14466,7 +14773,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.3
         },
         {
             "ARS": "J02AC05_OXXXX",
@@ -14476,7 +14784,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.2
         },
         {
             "ARS": "J02AC05_PXXXX",
@@ -14486,7 +14795,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.2
         },
         {
             "ARS": "J02AC06_OXXXX",
@@ -14496,7 +14806,8 @@
             "DDD_UNIT": "MG",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": null
         },
         {
             "ARS": "J02AX01_OXXXX",
@@ -14506,7 +14817,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 10
         },
         {
             "ARS": "J02AX01_PXXXX",
@@ -14516,7 +14828,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 10
         },
         {
             "ARS": "J02AX04_PXXXX",
@@ -14526,7 +14839,8 @@
             "DDD_UNIT": "MG",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": null
         },
         {
             "ARS": "J02AX05_PXXXX",
@@ -14536,7 +14850,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.1
         },
         {
             "ARS": "J02AX06_PXXXX",
@@ -14546,7 +14861,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.1
         },
         {
             "ARS": "J04AA01_OXXXX",
@@ -14556,7 +14872,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 12
         },
         {
             "ARS": "J04AA02_OXXXX",
@@ -14566,7 +14883,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 14
         },
         {
             "ARS": "J04AA02_PXXXX",
@@ -14576,7 +14894,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 14
         },
         {
             "ARS": "J04AA03_OXXXX",
@@ -14586,7 +14905,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 15
         },
         {
             "ARS": "J04AB01_OXXXX",
@@ -14596,7 +14916,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.75
         },
         {
             "ARS": "J04AB02_OXXXX",
@@ -14606,7 +14927,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.6
         },
         {
             "ARS": "J04AB02_PXXXX",
@@ -14616,7 +14938,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.6
         },
         {
             "ARS": "J04AB03_PXXXX",
@@ -14626,7 +14949,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.6
         },
         {
             "ARS": "J04AB04_OXXXX",
@@ -14636,7 +14960,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.15
         },
         {
             "ARS": "J04AB05_OXXXX",
@@ -14646,7 +14971,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.11
         },
         {
             "ARS": "J04AB06_PXXXX",
@@ -14656,7 +14982,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1
         },
         {
             "ARS": "J04AB30_PXXXX",
@@ -14666,7 +14993,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1
         },
         {
             "ARS": "J04AC01_OXXXX",
@@ -14676,7 +15004,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.3
         },
         {
             "ARS": "J04AC01_PXXXX",
@@ -14686,7 +15015,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.3
         },
         {
             "ARS": "J04AD01_OXXXX",
@@ -14696,7 +15026,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.75
         },
         {
             "ARS": "J04AD02_OXXXX",
@@ -14706,7 +15037,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 7
         },
         {
             "ARS": "J04AD03_OXXXX",
@@ -14716,7 +15048,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.75
         },
         {
             "ARS": "J04AK01_OXXXX",
@@ -14726,7 +15059,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1.5
         },
         {
             "ARS": "J04AK02_OXXXX",
@@ -14736,7 +15070,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1.2
         },
         {
             "ARS": "J04AK02_PXXXX",
@@ -14746,7 +15081,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1.2
         },
         {
             "ARS": "J04AK05_OXXXX",
@@ -14756,7 +15092,8 @@
             "DDD_UNIT": "MG",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": null
         },
         {
             "ARS": "J04AK06_OXXXX",
@@ -14766,7 +15103,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.2
         },
         {
             "ARS": "J04AK08_OXXXX",
@@ -14776,7 +15114,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.2
         },
         {
             "ARS": "J04BA01_OXXXX",
@@ -14786,7 +15125,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.1
         },
         {
             "ARS": "J04BA02_OXXXX",
@@ -14796,7 +15136,8 @@
             "DDD_UNIT": "MG",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": null
         },
         {
             "ARS": "J04BA03_OXXXX",
@@ -14806,7 +15147,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.33
         },
         {
             "ARS": "J05AB01_OXXXX",
@@ -14816,7 +15158,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 4
         },
         {
             "ARS": "J05AB01_PXXXX",
@@ -14826,7 +15169,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 4
         },
         {
             "ARS": "J05AB03_PXXXX",
@@ -14836,7 +15180,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.7
         },
         {
             "ARS": "J05AB06_OXXXX",
@@ -14846,7 +15191,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 3
         },
         {
             "ARS": "J05AB06_PXXXX",
@@ -14856,7 +15202,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.5
         },
         {
             "ARS": "J05AB09_OXXXX",
@@ -14866,7 +15213,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.75
         },
         {
             "ARS": "J05AB11_OXXXX",
@@ -14876,7 +15224,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 3
         },
         {
             "ARS": "J05AB12_PXXXX",
@@ -14886,7 +15235,8 @@
             "DDD_UNIT": "MG",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": null
         },
         {
             "ARS": "J05AB14_OXXXX",
@@ -14896,7 +15246,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.9
         },
         {
             "ARS": "J05AB15_OXXXX",
@@ -14906,7 +15257,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.125
         },
         {
             "ARS": "J05AB16_PXXXX",
@@ -14916,7 +15268,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.1
         },
         {
             "ARS": "J05AB18_OXXXX",
@@ -14926,7 +15279,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1.6
         },
         {
             "ARS": "J05AC02_OXXXX",
@@ -14936,7 +15290,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.2
         },
         {
             "ARS": "J05AD01_PXXXX",
@@ -14946,7 +15301,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 6.5
         },
         {
             "ARS": "J05AE01_OXXXX",
@@ -14956,7 +15312,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1.8
         },
         {
             "ARS": "J05AE02_OXXXX",
@@ -14966,7 +15323,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 2.4
         },
         {
             "ARS": "J05AE03_OXXXX",
@@ -14976,7 +15334,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1.2
         },
         {
             "ARS": "J05AE04_OXXXX",
@@ -14986,7 +15345,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 2.25
         },
         {
             "ARS": "J05AE05_OXXXX",
@@ -14996,7 +15356,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1.2
         },
         {
             "ARS": "J05AE07_OXXXX",
@@ -15006,7 +15367,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1.4
         },
         {
             "ARS": "J05AE08_OXXXX",
@@ -15016,7 +15378,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.3
         },
         {
             "ARS": "J05AE09_OXXXX",
@@ -15026,7 +15389,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1
         },
         {
             "ARS": "J05AE10_OXXXX",
@@ -15036,7 +15400,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1.2
         },
         {
             "ARS": "J05AE16_OXXXX",
@@ -15046,7 +15411,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.175
         },
         {
             "ARS": "J05AE30_OXXXX",
@@ -15056,7 +15422,8 @@
             "DDD_UNIT": "G",
             "NOTES": "refers to nirmatrelvir",
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.6
         },
         {
             "ARS": "J05AF01_OXXXX",
@@ -15066,7 +15433,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.6
         },
         {
             "ARS": "J05AF01_PXXXX",
@@ -15076,7 +15444,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.6
         },
         {
             "ARS": "J05AF02_OXXXX",
@@ -15086,7 +15455,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.4
         },
         {
             "ARS": "J05AF03_OXXXX",
@@ -15096,7 +15466,8 @@
             "DDD_UNIT": "MG",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": null
         },
         {
             "ARS": "J05AF04_OXXXX",
@@ -15106,7 +15477,8 @@
             "DDD_UNIT": "MG",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": null
         },
         {
             "ARS": "J05AF05_OXXXX",
@@ -15116,7 +15488,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.3
         },
         {
             "ARS": "J05AF06_OXXXX",
@@ -15126,7 +15499,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.6
         },
         {
             "ARS": "J05AF07_OXXXX",
@@ -15136,7 +15510,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.245
         },
         {
             "ARS": "J05AF08_OXXXX",
@@ -15146,7 +15521,8 @@
             "DDD_UNIT": "MG",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": null
         },
         {
             "ARS": "J05AF09_OXXXX",
@@ -15156,7 +15532,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.2
         },
         {
             "ARS": "J05AF10_OXXXX",
@@ -15166,7 +15543,8 @@
             "DDD_UNIT": "MG",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": null
         },
         {
             "ARS": "J05AF11_OXXXX",
@@ -15176,7 +15554,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.6
         },
         {
             "ARS": "J05AF12_OXXXX",
@@ -15186,7 +15565,8 @@
             "DDD_UNIT": "MG",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": null
         },
         {
             "ARS": "J05AF13_O",
@@ -15196,7 +15576,8 @@
             "DDD_UNIT": "MG",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": null
         },
         {
             "ARS": "J05AG01_OXXXX",
@@ -15206,7 +15587,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.4
         },
         {
             "ARS": "J05AG02_OXXXX",
@@ -15216,7 +15598,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1.2
         },
         {
             "ARS": "J05AG03_OXXXX",
@@ -15226,7 +15609,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.6
         },
         {
             "ARS": "J05AG04_OXXXX",
@@ -15236,7 +15620,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.4
         },
         {
             "ARS": "J05AG05_OXXXX",
@@ -15246,7 +15631,8 @@
             "DDD_UNIT": "MG",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": null
         },
         {
             "ARS": "J05AG05_PXXXX",
@@ -15256,7 +15642,8 @@
             "DDD_UNIT": "MG",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": null
         },
         {
             "ARS": "J05AG06_OXXXX",
@@ -15266,7 +15653,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.1
         },
         {
             "ARS": "J05AH01_IPXXXX",
@@ -15276,7 +15664,8 @@
             "DDD_UNIT": "MG",
             "NOTES": null,
             "ROA": "IP",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": null
         },
         {
             "ARS": "J05AH01_PXXXX",
@@ -15286,7 +15675,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1.2
         },
         {
             "ARS": "J05AH02_OXXXX",
@@ -15296,7 +15686,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.15
         },
         {
             "ARS": "J05AH03_PXXXX",
@@ -15306,7 +15697,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.6
         },
         {
             "ARS": "J05AH04_IPXXXX",
@@ -15316,7 +15708,8 @@
             "DDD_UNIT": "MG",
             "NOTES": null,
             "ROA": "IP",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": null
         },
         {
             "ARS": "J05AH04_ISXXXX",
@@ -15326,7 +15719,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "IS",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.16
         },
         {
             "ARS": "J05AJ01_OXXXX",
@@ -15336,7 +15730,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.8
         },
         {
             "ARS": "J05AJ03_OXXXX",
@@ -15346,7 +15741,8 @@
             "DDD_UNIT": "MG",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": null
         },
         {
             "ARS": "J05AJ04_OXXXX",
@@ -15356,7 +15752,8 @@
             "DDD_UNIT": "MG",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": null
         },
         {
             "ARS": "J05AJ04_PXXXX",
@@ -15366,7 +15763,8 @@
             "DDD_UNIT": "MG",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": null
         },
         {
             "ARS": "J05AP01_ISXXXX",
@@ -15376,7 +15774,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "IS",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 6
         },
         {
             "ARS": "J05AP01_OXXXX",
@@ -15386,7 +15785,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1
         },
         {
             "ARS": "J05AP02_OXXXX",
@@ -15396,7 +15796,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 2.25
         },
         {
             "ARS": "J05AP03_OXXXX",
@@ -15406,7 +15807,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 2.4
         },
         {
             "ARS": "J05AP05_OXXXX",
@@ -15416,7 +15818,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.15
         },
         {
             "ARS": "J05AP06_OXXXX",
@@ -15426,7 +15829,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.2
         },
         {
             "ARS": "J05AP07_OXXXX",
@@ -15436,7 +15840,8 @@
             "DDD_UNIT": "MG",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": null
         },
         {
             "ARS": "J05AP08_OXXXX",
@@ -15446,7 +15851,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.4
         },
         {
             "ARS": "J05AP09_OXXXX",
@@ -15456,7 +15862,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.5
         },
         {
             "ARS": "J05AP10_OXXXX",
@@ -15466,7 +15873,8 @@
             "DDD_UNIT": "MG",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": null
         },
         {
             "ARS": "J05AP11_OXXXX",
@@ -15476,7 +15884,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.1
         },
         {
             "ARS": "J05AP13_OXXXX",
@@ -15486,7 +15895,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.2
         },
         {
             "ARS": "J05AR10_OXXXX",
@@ -15496,7 +15906,8 @@
             "DDD_UNIT": "G",
             "NOTES": "Refers to lopinavir",
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.8
         },
         {
             "ARS": "J05AR23_OXXXX",
@@ -15506,7 +15917,8 @@
             "DDD_UNIT": "G",
             "NOTES": "Refers to atazanavir",
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.3
         },
         {
             "ARS": "J05AX01_OXXXX",
@@ -15516,7 +15928,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.3
         },
         {
             "ARS": "J05AX05_OXXXX",
@@ -15526,7 +15939,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 3
         },
         {
             "ARS": "J05AX07_PXXXX",
@@ -15536,7 +15950,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.18
         },
         {
             "ARS": "J05AX09_OXXXX",
@@ -15546,7 +15961,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.6
         },
         {
             "ARS": "J05AX10_OXXXX",
@@ -15556,7 +15972,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.8
         },
         {
             "ARS": "J05AX13_OXXXX",
@@ -15566,7 +15983,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.8
         },
         {
             "ARS": "J05AX17_OXXXX",
@@ -15576,7 +15994,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1.5
         },
         {
             "ARS": "J05AX18_OXXXX",
@@ -15586,7 +16005,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.48
         },
         {
             "ARS": "J05AX18_PXXXX",
@@ -15596,7 +16016,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.48
         },
         {
             "ARS": "J05AX19_OXXXX",
@@ -15606,7 +16027,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.125
         },
         {
             "ARS": "J05AX21_OXXXX",
@@ -15616,7 +16038,8 @@
             "DDD_UNIT": "MG",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": null
         },
         {
             "ARS": "J05AX24_OXXXX",
@@ -15626,7 +16049,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1.2
         },
         {
             "ARS": "J05AX25_OXXXX",
@@ -15636,7 +16060,8 @@
             "DDD_UNIT": "MG",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": null
         },
         {
             "ARS": "J05AX26_OXXXX",
@@ -15646,7 +16071,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.4
         },
         {
             "ARS": "J05AX27_OXXXX",
@@ -15656,7 +16082,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1.6
         },
         {
             "ARS": "J05AX28_PXXXX",
@@ -15666,7 +16093,8 @@
             "DDD_UNIT": "MG",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": null
         },
         {
             "ARS": "J05AX29_OXXXX",
@@ -15676,7 +16104,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1.2
         },
         {
             "ARS": "J05AX31_OXXXX",
@@ -15686,7 +16115,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.19
         },
         {
             "ARS": "J05AX31_PXXXX",
@@ -15696,7 +16126,8 @@
             "DDD_UNIT": "MG",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": null
         },
         {
             "ARS": "P01AB01_OXXXX",
@@ -15706,7 +16137,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 2
         },
         {
             "ARS": "P01AB01_RXXXX",
@@ -15716,7 +16148,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "R",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 2
         },
         {
             "ARS": "P01AB02_OXXXX",
@@ -15726,7 +16159,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 2
         },
         {
             "ARS": "P01AB02_RXXXX",
@@ -15736,7 +16170,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "R",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 2
         },
         {
             "ARS": "P01AB03_OXXXX",
@@ -15746,7 +16181,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1.5
         },
         {
             "ARS": "P01AB06_OXXXX",
@@ -15756,7 +16192,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 2
         },
         {
             "ARS": "P01AB07_OXXXX",
@@ -15766,7 +16203,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 2
         },
         {
             "ARS": "P01BA01_OXXXX",
@@ -15776,7 +16214,8 @@
             "DDD_UNIT": "G",
             "NOTES": "base",
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.5
         },
         {
             "ARS": "P01BA01_PXXXX",
@@ -15786,7 +16225,8 @@
             "DDD_UNIT": "G",
             "NOTES": "base",
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.5
         },
         {
             "ARS": "P01BA02_OXXXX",
@@ -15796,7 +16236,8 @@
             "DDD_UNIT": "G",
             "NOTES": "base",
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.516
         },
         {
             "ARS": "P01BA03_OXXXX",
@@ -15806,7 +16247,8 @@
             "DDD_UNIT": "MG",
             "NOTES": "base",
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": null
         },
         {
             "ARS": "P01BA06_OXXXX",
@@ -15816,7 +16258,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.5
         },
         {
             "ARS": "P01BB01_OXXXX",
@@ -15826,7 +16269,8 @@
             "DDD_UNIT": "G",
             "NOTES": "hydrochloride, (prophylactic daily dose)",
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.2
         },
         {
             "ARS": "P01BC01_OXXXX",
@@ -15836,7 +16280,8 @@
             "DDD_UNIT": "G",
             "NOTES": "base",
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1.5
         },
         {
             "ARS": "P01BC01_PXXXX",
@@ -15846,7 +16291,8 @@
             "DDD_UNIT": "G",
             "NOTES": "base",
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1.5
         },
         {
             "ARS": "P01BC02_OXXXX",
@@ -15856,7 +16302,8 @@
             "DDD_UNIT": "G",
             "NOTES": "base",
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1
         },
         {
             "ARS": "P01BD01_OXXXX",
@@ -15866,7 +16313,8 @@
             "DDD_UNIT": "MG",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": null
         },
         {
             "ARS": "P01BD51_OXXXX",
@@ -15876,7 +16324,8 @@
             "DDD_UNIT": "MG",
             "NOTES": "Refers to pyrimethamine",
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": null
         },
         {
             "ARS": "P01BD51_PXXXX",
@@ -15886,7 +16335,8 @@
             "DDD_UNIT": "MG",
             "NOTES": "Refers to pyrimethamine",
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": null
         },
         {
             "ARS": "P01BE01_OXXXX",
@@ -15896,7 +16346,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1
         },
         {
             "ARS": "P01BE02_OXXXX",
@@ -15906,7 +16357,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.28
         },
         {
             "ARS": "P01BE02_PXXXX",
@@ -15916,7 +16368,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.12
         },
         {
             "ARS": "P01BE02_RXXXX",
@@ -15926,7 +16379,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "R",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.28
         },
         {
             "ARS": "P01BE03_OXXXX",
@@ -15936,7 +16390,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.28
         },
         {
             "ARS": "P01BE03_PXXXX",
@@ -15946,7 +16401,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "P",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.28
         },
         {
             "ARS": "P01BE03_RXXXX",
@@ -15956,7 +16412,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "R",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.28
         },
         {
             "ARS": "P01BE05_OXXXX",
@@ -15966,7 +16423,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.28
         },
         {
             "ARS": "P01BF01_OXXXX",
@@ -15976,7 +16434,8 @@
             "DDD_UNIT": "G",
             "NOTES": "Refers to artemether",
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 0.28
         },
         {
             "ARS": "P01BX01_OXXXX",
@@ -15986,7 +16445,8 @@
             "DDD_UNIT": "G",
             "NOTES": null,
             "ROA": "O",
-            "SALT": "XXXX"
+            "SALT": "XXXX",
+            "DDD_GRAMS": 1.5
         }
     ],
     "roas": [
@@ -16050,7 +16510,8 @@
             "NAME": "milligram",
             "UNIT_FAMILY": "GRAM",
             "USE_STRENGTH": true,
-            "USE_VOLUME": false
+            "USE_VOLUME": false,
+            "UNIT_STD": "G"
         },
         {
             "BASE_CONV": 1,
@@ -16058,15 +16519,17 @@
             "NAME": "gram",
             "UNIT_FAMILY": "GRAM",
             "USE_STRENGTH": true,
-            "USE_VOLUME": false
+            "USE_VOLUME": false,
+            "UNIT_STD": "G"
         },
         {
-            "BASE_CONV": 0.000001,
+            "BASE_CONV": 1e-6,
             "UNIT": "IU",
             "NAME": "international unit",
             "UNIT_FAMILY": "INTERNATIONAL_UNIT",
             "USE_STRENGTH": true,
-            "USE_VOLUME": false
+            "USE_VOLUME": false,
+            "UNIT_STD": "IU"
         },
         {
             "BASE_CONV": 1,
@@ -16074,7 +16537,8 @@
             "NAME": "millions international unit",
             "UNIT_FAMILY": "INTERNATIONAL_UNIT",
             "USE_STRENGTH": true,
-            "USE_VOLUME": false
+            "USE_VOLUME": false,
+            "UNIT_STD": "MIU"
         },
         {
             "BASE_CONV": 1,
@@ -16082,7 +16546,8 @@
             "NAME": "unit dose",
             "UNIT_FAMILY": "UNIT_DOSE",
             "USE_STRENGTH": true,
-            "USE_VOLUME": false
+            "USE_VOLUME": false,
+            "UNIT_STD": "UD"
         },
         {
             "BASE_CONV": 1,
@@ -16090,7 +16555,8 @@
             "NAME": "piece",
             "UNIT_FAMILY": "PIECE",
             "USE_STRENGTH": false,
-            "USE_VOLUME": false
+            "USE_VOLUME": false,
+            "UNIT_STD": "PCS"
         },
         {
             "BASE_CONV": 1,
@@ -16098,7 +16564,8 @@
             "NAME": "milliliter",
             "UNIT_FAMILY": "LITER",
             "USE_STRENGTH": false,
-            "USE_VOLUME": true
+            "USE_VOLUME": true,
+            "UNIT_STD": "ML"
         }
     ]
 }

@@ -153,6 +153,13 @@ function linkEventIdToNewCalculatedConsumptionData(
         } => {
             const idsAlreadyUsed = acc.withEventId.map(({ eventId }) => eventId);
             const eventIdFound = currentCalculatedConsumptionData?.find(currentCalculatedData => {
+                // Match on identity dimensions only — the fields that identify which substance row this is.
+                // Recalculated OUTPUTS (kilograms, packages, ddds) must NOT be part of the match: they change
+                // when the DDD/ATC version changes, so including them would make every updated row fail to
+                // match and either lose data (UPDATE-only mode) or be deleted+recreated instead of updated.
+                // data_status is a passthrough of the reported data_status_manual (not recalculated), so it is
+                // a genuine identity dimension and is kept — this set mirrors the aggregation key in
+                // mapRawSubstanceCalculatedToSubstanceCalculated.
                 return (
                     currentCalculatedData?.eventId &&
                     !idsAlreadyUsed.includes(currentCalculatedData.eventId) &&
@@ -160,8 +167,8 @@ function linkEventIdToNewCalculatedConsumptionData(
                     currentCalculatedData.route_admin_autocalculated === newCalulatedData.route_admin_autocalculated &&
                     (currentCalculatedData.salt_autocalculated === newCalulatedData.salt_autocalculated ||
                         DEFAULT_SALT_CODE === newCalulatedData.salt_autocalculated) &&
-                    currentCalculatedData.packages_autocalculated === newCalulatedData.packages_autocalculated &&
-                    currentCalculatedData.kilograms_autocalculated === newCalulatedData.kilograms_autocalculated &&
+                    currentCalculatedData.combination_code_autocalculated ===
+                        newCalulatedData.combination_code_autocalculated &&
                     currentCalculatedData.health_sector_autocalculated ===
                         newCalulatedData.health_sector_autocalculated &&
                     currentCalculatedData.health_level_autocalculated ===

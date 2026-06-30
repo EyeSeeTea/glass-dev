@@ -1,3 +1,4 @@
+import _ from "lodash";
 import { ImportStrategy } from "../../../entities/data-entry/DataValuesSaveSummary";
 import { ImportSummary, ImportSummaryWithEventIdList } from "../../../entities/data-entry/ImportSummary";
 import { Future, FutureData } from "../../../entities/Future";
@@ -52,6 +53,135 @@ export class ImportAMCProductLevelData {
         private amcSubstanceDataRepository: AMCSubstanceDataRepository
     ) {}
 
+    public importAMCProductFileAsBuffer(
+        fileArrayBuffer: ArrayBuffer,
+        action: ImportStrategy,
+        eventListId: string | undefined,
+        orgUnitId: string,
+        orgUnitName: string,
+        moduleName: string,
+        period: string,
+        uploadId: string,
+        allCountries: Country[],
+        calculatedEventListFileId?: string
+    ): FutureData<ImportSummary> {
+        console.log("importAMCProductFileAsBuffer Starting AMC Product Level Data Import...");
+        return this.excelRepository
+            .loadTemplateFromArrayBuffer(fileArrayBuffer, AMC_PRODUCT_REGISTER_PROGRAM_ID)
+            .flatMap(_templateId => {
+                //console.log("AMC Product Template loaded from file, template ID:", _templateId);
+                const amcTemplate = _.values(templates)
+                    .map(TemplateClass => new TemplateClass())
+                    .filter(t => t.id === "TRACKER_PROGRAM_GENERATED_v3")[0];
+                //console.log("amcTemplate:", amcTemplate)
+                console.log("AMC Product Template loaded from file, retrieving program metadata...");
+                return this.instanceRepository.getProgram(AMC_PRODUCT_REGISTER_PROGRAM_ID).flatMap(amcProgram => {
+                    if (!amcTemplate) return Future.error("Cannot find template");
+                    console.log("AMC Product Template found, proceeding with import...");
+                    return readTemplate(
+                        amcTemplate,
+                        amcProgram,
+                        this.excelRepository,
+                        this.instanceRepository,
+                        AMC_PRODUCT_REGISTER_PROGRAM_ID
+                    ).flatMap(dataPackage => {
+                        if (!dataPackage) return Future.error("Cannot find data package");
+
+                        if (action === "CREATE_AND_UPDATE") {
+                            return this.getTrackedEntitiesFromAMCProductData(
+                                dataPackage,
+                                orgUnitId,
+                                orgUnitName,
+                                period,
+                                allCountries
+                            ).flatMap(entities => {
+                                if (!entities.length)
+                                    return Future.error("The file is empty or failed while reading the file.");
+                                console.log(
+                                    "Mapped Tracked Entities from AMC Product Data, validating TEIs and Events..."
+                                );
+                                return this.validateTEIsAndEvents(
+                                    entities,
+                                    orgUnitId,
+                                    orgUnitName,
+                                    period,
+                                    AMC_PRODUCT_REGISTER_PROGRAM_ID,
+                                    allCountries
+                                ).flatMap(validationResults => {
+                                    if (validationResults.blockingErrors.length > 0) {
+                                        const errorSummary: ImportSummary = {
+                                            status: "ERROR",
+                                            importCount: {
+                                                ignored: 0,
+                                                imported: 0,
+                                                deleted: 0,
+                                                updated: 0,
+                                                total: 0,
+                                            },
+                                            nonBlockingErrors: validationResults.nonBlockingErrors,
+                                            blockingErrors: validationResults.blockingErrors,
+                                        };
+                                        return Future.success(errorSummary);
+                                    }
+                                    console.log("TEIs and Events validated, proceeding to import...");
+                                    return this.trackerRepository
+                                        .import(
+                                            {
+                                                trackedEntities:
+                                                    validationResults.teis && validationResults.teis.length > 0
+                                                        ? validationResults.teis
+                                                        : [],
+                                            },
+                                            action
+                                        )
+                                        .flatMap(response => {
+                                            return mapToImportSummary(
+                                                response,
+                                                "trackedEntity",
+                                                this.metadataRepository,
+                                                {
+                                                    nonBlockingErrors: validationResults.nonBlockingErrors,
+                                                }
+                                            ).flatMap(summary => {
+                                                return this.uploadTeiIdListFileAndSaveWithUpLoadId(
+                                                    uploadId,
+                                                    summary,
+                                                    moduleName
+                                                );
+                                            });
+                                        });
+                                });
+                            });
+                        } else {
+                            // NOTICE: check also DeleteAMCProductLevelDataUseCase.ts that contains same code adapted for node environment
+                            return downloadIdsAndDeleteTrackedEntities(
+                                eventListId,
+                                orgUnitId,
+                                "DELETE",
+                                AMR_GLASS_AMC_TET_PRODUCT_REGISTER,
+                                this.glassDocumentsRepository,
+                                this.trackerRepository,
+                                this.metadataRepository
+                            ).flatMap(deleteProductSummary => {
+                                if (
+                                    (deleteProductSummary.status === "SUCCESS" ||
+                                        deleteProductSummary.status === "WARNING") &&
+                                    calculatedEventListFileId
+                                ) {
+                                    return this.deleteCalculatedSubstanceConsumptionData(
+                                        deleteProductSummary,
+                                        calculatedEventListFileId
+                                    );
+                                }
+
+                                return Future.success(deleteProductSummary);
+                            });
+                        }
+                    });
+                });
+            });
+    }
+
     public importAMCProductFile(
         file: File,
         action: ImportStrategy,
@@ -63,13 +193,17 @@ export class ImportAMCProductLevelData {
         allCountries: Country[],
         calculatedEventListFileId?: string
     ): FutureData<ImportSummary> {
+        console.log("Starting AMC Product Level Data Import...");
         return this.excelRepository.loadTemplate(file, AMC_PRODUCT_REGISTER_PROGRAM_ID).flatMap(_templateId => {
+            //console.log("AMC Product Template loaded from file, template ID:", _templateId);
             const amcTemplate = _.values(templates)
                 .map(TemplateClass => new TemplateClass())
                 .filter(t => t.id === "TRACKER_PROGRAM_GENERATED_v3")[0];
+            //console.log("amcTemplate:", amcTemplate)
+            console.log("AMC Product Template loaded from file, retrieving program metadata...");
             return this.instanceRepository.getProgram(AMC_PRODUCT_REGISTER_PROGRAM_ID).flatMap(amcProgram => {
                 if (!amcTemplate) return Future.error("Cannot find template");
-
+                console.log("AMC Product Template found, proceeding with import...");
                 return readTemplate(
                     amcTemplate,
                     amcProgram,
@@ -89,7 +223,7 @@ export class ImportAMCProductLevelData {
                         ).flatMap(entities => {
                             if (!entities.length)
                                 return Future.error("The file is empty or failed while reading the file.");
-
+                            console.log("Mapped Tracked Entities from AMC Product Data, validating TEIs and Events...");
                             return this.validateTEIsAndEvents(
                                 entities,
                                 orgUnitId,
@@ -113,7 +247,7 @@ export class ImportAMCProductLevelData {
                                     };
                                     return Future.success(errorSummary);
                                 }
-
+                                console.log("TEIs and Events validated, proceeding to import...");
                                 return this.trackerRepository
                                     .import(
                                         {
@@ -174,17 +308,19 @@ export class ImportAMCProductLevelData {
         period: string,
         allCountries: Country[]
     ): FutureData<TrackerTrackedEntity[]> {
+        console.log("Mapping AMC Product data to Tracked Entities...");
         return this.trackerRepository
             .getProgramMetadata(AMC_PRODUCT_REGISTER_PROGRAM_ID, AMC_RAW_PRODUCT_CONSUMPTION_STAGE_ID)
             .flatMap(metadata => {
                 if (amcProductData.type !== "trackerPrograms") return Future.error("Incorrect data package");
+                console.log("IN FLAT MAP Mapping AMC Product data to Tracked Entities...");
                 const trackedEntities = amcProductData.trackedEntityInstances.map(tei => {
                     const productWithoutAtcCode = tei.attributeValues.some(
                         ({ attribute, value }) =>
                             (attribute.id === AMR_GLASS_AMC_TEA_ATC && value === CODE_PRODUCT_NOT_HAVE_ATC) ||
                             (attribute.id === AMR_GLASS_AMC_TEA_COMBINATION && value === COMB_CODE_PRODUCT_NOT_HAVE_ATC)
                     );
-
+                    console.log("Processing TEI:", tei.id, "Product without ATC code:", productWithoutAtcCode);
                     const attributes: TrackerEnrollmentAttribute[] = metadata.programAttributes.map(
                         (attr: {
                             id: string;
@@ -292,6 +428,7 @@ export class ImportAMCProductLevelData {
 
                     return entity;
                 });
+                console.log("Total TEIs mapped for import:", trackedEntities.length);
                 return Future.success(trackedEntities);
             });
     }
@@ -369,6 +506,30 @@ export class ImportAMCProductLevelData {
         });
     }
 
+    private uploadTeiIdListFileAndSaveWithUpLoadId = (
+        uploadId: string,
+        summary: ImportSummaryWithEventIdList,
+        moduleName: string
+    ): FutureData<ImportSummary> => {
+        //const uploadId = localStorage.getItem(uploadIdLocalStorageName);
+        if (summary.eventIdList.length > 0 && uploadId) {
+            //Events were imported successfully, so create and uplaod a file with tei ids
+            // and associate it with the upload datastore object
+            const teisListBlob = new Blob([JSON.stringify(summary.eventIdList)], {
+                type: "text/plain",
+            });
+            const teiIdListFile = new File([teisListBlob], `${uploadId}_eventIdsFile`);
+            console.log("Uploading TEI ID list file for upload ID:", uploadId);
+            return this.glassDocumentsRepository.save(teiIdListFile, moduleName).flatMap(fileId => {
+                return this.glassUploadsRepository.setEventListFileId(uploadId, fileId).flatMap(() => {
+                    return Future.success(summary.importSummary);
+                });
+            });
+        } else {
+            return Future.success(summary.importSummary);
+        }
+    };
+
     private uploadTeiIdListFileAndSave = (
         uploadIdLocalStorageName: string,
         summary: ImportSummaryWithEventIdList,
@@ -382,6 +543,7 @@ export class ImportAMCProductLevelData {
                 type: "text/plain",
             });
             const teiIdListFile = new File([teisListBlob], `${uploadId}_eventIdsFile`);
+            console.log("Uploading TEI ID list file for upload ID:", uploadId);
             return this.glassDocumentsRepository.save(teiIdListFile, moduleName).flatMap(fileId => {
                 return this.glassUploadsRepository.setEventListFileId(uploadId, fileId).flatMap(() => {
                     return Future.success(summary.importSummary);
