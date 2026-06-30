@@ -10,8 +10,16 @@ export class DataStoreClient {
     private api: D2Api;
     private dataStore: DataStore;
 
-    constructor(instance: Instance) {
-        this.api = getD2APiFromInstance(instance);
+    constructor(instance?: Instance, api?: D2Api) {
+        if (api) {
+            // Use the provided api instance
+            this.api = api;
+        } else if (instance) {
+            // Fallback to instance if no api is provided
+            this.api = getD2APiFromInstance(instance);
+        } else {
+            throw new Error("Either 'api' or 'instance' must be provided.");
+        }
         this.dataStore = this.api.dataStore(dataStoreNamespace);
     }
 

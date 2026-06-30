@@ -67,6 +67,7 @@ export class GlassAsyncDeletionsDefaultRepository implements GlassAsyncDeletions
     }
 
     setStatus(uploadIds: Id[], newStatus: GlassAsyncDeletionStatus): FutureData<void> {
+        const deletingStartedAt = newStatus === "DELETING" ? new Date().toISOString() : undefined;
         return this.dataStoreClient
             .listCollection<GlassAsyncDeletion>(DataStoreKeys.ASYNC_DELETIONS)
             .flatMap(asyncDeletionsArray => {
@@ -75,6 +76,7 @@ export class GlassAsyncDeletionsDefaultRepository implements GlassAsyncDeletions
                         return {
                             ...asyncDeletion,
                             status: newStatus,
+                            deletingStartedAt,
                         };
                     } else {
                         return asyncDeletion;
@@ -101,6 +103,7 @@ export class GlassAsyncDeletionsDefaultRepository implements GlassAsyncDeletions
                             ...uploadIdToUpdate,
                             attempts: uploadIdToUpdate.attempts + 1,
                             status: "PENDING",
+                            deletingStartedAt: undefined,
                         },
                     ];
                     return this.dataStoreClient
