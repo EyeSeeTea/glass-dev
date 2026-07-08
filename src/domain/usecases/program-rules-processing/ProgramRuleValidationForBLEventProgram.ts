@@ -28,10 +28,19 @@ import { outputConverter } from "./converters/outputConverter";
 import { dateUtils } from "./converters/dateUtils";
 import { BlockingError, NonBlockingError } from "../../entities/data-entry/ImportSummary";
 import {
+    TrackerEnrollment,
     TrackerEvent,
     TrackerTrackedEntity,
     TrackerTrackedEntityAttribute,
 } from "../../entities/TrackedEntityInstance";
+
+type ProgramRuleStaticContext = Readonly<{
+    enrollmentsById: Record<Id, TrackerEnrollment>;
+    trackedEntityAttributes: GetProgramRuleEffectsOptions["trackedEntityAttributes"];
+    programRulesContainer: GetProgramRuleEffectsOptions["programRulesContainer"];
+    dataElements: GetProgramRuleEffectsOptions["dataElements"];
+    optionSets: GetProgramRuleEffectsOptions["optionSets"];
+}>;
 
 export class ProgramRuleValidationForBLEventProgram {
     constructor(private programRulesMetadataRepository: ProgramRulesMetadataRepository) {}
@@ -54,41 +63,59 @@ export class ProgramRuleValidationForBLEventProgram {
         currentProgramStage?: Id
     ): FutureData<ValidationResult> {
         return this.getEventEffects(metadata, events, teis, currentProgramStage).flatMap(eventEffects => {
-            const actionsResult = this.getActions(eventEffects, metadata);
-            if (actionsResult.blockingErrors.length > 0) {
-                //If there are blocking errors, do not process further. return the errors.
-                const errors: ValidationResult = {
-                    teis: [],
-                    events: [],
-                    blockingErrors: actionsResult.blockingErrors,
-                    nonBlockingErrors: actionsResult.nonBlockingErrors,
-                };
-                return Future.success(errors);
-            } else {
-                const eventsToBeUpdated = _.flatMap(eventEffects, eventEffect => eventEffect.events);
-                const eventsById = _.keyBy(eventsToBeUpdated, "event");
-                const eventsUpdated = this.getUpdatedEvents(actionsResult.actions, eventsById);
-                const unChangedEvents = events?.filter(e => !eventsUpdated.some(ue => ue.event === e.event)) ?? [];
-                const consolidatedEvents: TrackerEvent[] = [...eventsUpdated, ...unChangedEvents];
-
-                const teisCurrent = teis ? teis : [];
-
-                const teisUpdated: TrackerTrackedEntity[] = this.getUpdatedTeis(teisCurrent, actionsResult.actions);
-                const unchangedTeis = teisCurrent.filter(
-                    tei => !teisUpdated.some(updatedTei => updatedTei.trackedEntity === tei.trackedEntity)
-                );
-                const consolidatedTeis = [...teisUpdated, ...unchangedTeis];
-                console.debug(`Changes: events=${eventsUpdated.length}, teis=${teisUpdated.length}`);
-
-                const results: ValidationResult = {
-                    teis: consolidatedTeis,
-                    events: consolidatedEvents,
-                    blockingErrors: [],
-                    nonBlockingErrors: actionsResult.nonBlockingErrors,
-                };
-                return Future.success(results);
-            }
+            return Future.success(this.toValidationResult(eventEffects, metadata, events, teis));
         });
+    }
+
+    public getValidatedTeisAndEventsFromMetadataForAsyncUpload(
+        metadata: BulkLoadMetadata,
+        events?: TrackerEvent[],
+        teis?: TrackerTrackedEntity[], //For tracker programs only
+        currentProgramStage?: Id
+    ): FutureData<ValidationResult> {
+        return this.getEventEffectsForAsyncUpload(metadata, events, teis, currentProgramStage).flatMap(eventEffects => {
+            return Future.success(this.toValidationResult(eventEffects, metadata, events, teis));
+        });
+    }
+
+    private toValidationResult(
+        eventEffects: EventEffect[],
+        metadata: BulkLoadMetadata,
+        events?: TrackerEvent[],
+        teis?: TrackerTrackedEntity[]
+    ): ValidationResult {
+        const actionsResult = this.getActions(eventEffects, metadata);
+        if (actionsResult.blockingErrors.length > 0) {
+            //If there are blocking errors, do not process further. return the errors.
+            return {
+                teis: [],
+                events: [],
+                blockingErrors: actionsResult.blockingErrors,
+                nonBlockingErrors: actionsResult.nonBlockingErrors,
+            };
+        } else {
+            const eventsToBeUpdated = _.flatMap(eventEffects, eventEffect => eventEffect.events);
+            const eventsById = _.keyBy(eventsToBeUpdated, "event");
+            const eventsUpdated = this.getUpdatedEvents(actionsResult.actions, eventsById);
+            const unChangedEvents = events?.filter(e => !eventsUpdated.some(ue => ue.event === e.event)) ?? [];
+            const consolidatedEvents: TrackerEvent[] = [...eventsUpdated, ...unChangedEvents];
+
+            const teisCurrent = teis ? teis : [];
+
+            const teisUpdated: TrackerTrackedEntity[] = this.getUpdatedTeis(teisCurrent, actionsResult.actions);
+            const unchangedTeis = teisCurrent.filter(
+                tei => !teisUpdated.some(updatedTei => updatedTei.trackedEntity === tei.trackedEntity)
+            );
+            const consolidatedTeis = [...teisUpdated, ...unchangedTeis];
+            console.debug(`Changes: events=${eventsUpdated.length}, teis=${teisUpdated.length}`);
+
+            return {
+                teis: consolidatedTeis,
+                events: consolidatedEvents,
+                blockingErrors: [],
+                nonBlockingErrors: actionsResult.nonBlockingErrors,
+            };
+        }
     }
 
     private getUpdatedTeis(teisCurrent: TrackerTrackedEntity[], actions: UpdateAction[]) {
@@ -369,50 +396,88 @@ export class ProgramRuleValidationForBLEventProgram {
         currentProgramStage?: Id
     ): FutureData<EventEffect[]> {
         const { program, metadata } = options;
+        const programRulesIds = this.getProgramRulesIds(metadata, currentProgramStage);
 
-        const programRulesIds: Id[] = currentProgramStage
+        const eventEffects = this.computeEventEffects(teis, (event, teiEvents, tei) =>
+            this.getEffects({ event, program, programRulesIds, metadata, events: teiEvents, teis, tei })
+        );
+
+        return Future.success(eventEffects);
+    }
+
+    private getEventEffectsForAsyncUpload(
+        metadata: BulkLoadMetadata,
+        events?: TrackerEvent[],
+        teis?: TrackerTrackedEntity[],
+        currentProgramStage?: Id
+    ): FutureData<EventEffect[]> {
+        const program = metadata.programs[0];
+        if (program) {
+            switch (program.programType) {
+                case "WITHOUT_REGISTRATION":
+                    if (events) return Future.success(this.getEventEffectsForEventProgram(events, metadata));
+                    else return Future.error("No events");
+
+                case "WITH_REGISTRATION":
+                    return this.getEventEffectsForTrackerProgramForAsyncUpload(
+                        teis,
+                        { program, metadata },
+                        currentProgramStage
+                    );
+            }
+        } else return Future.error("Unknown program");
+    }
+
+    private getEventEffectsForTrackerProgramForAsyncUpload(
+        teis: TrackerTrackedEntity[] | undefined,
+        options: { program: Program; metadata: BulkLoadMetadata },
+        currentProgramStage?: Id
+    ): FutureData<EventEffect[]> {
+        const { program, metadata } = options;
+        const programRulesIds = this.getProgramRulesIds(metadata, currentProgramStage);
+
+        // Built once per chunk: identical for every event, so it must not be rebuilt inside the loop
+        const staticContext = this.buildStaticRuleContext(program, programRulesIds, metadata, teis ?? []);
+
+        const eventEffects = this.computeEventEffects(teis, (event, teiEvents, tei) =>
+            this.getEffectsWithContext(staticContext, { event, program, metadata, events: teiEvents, tei })
+        );
+
+        return Future.success(eventEffects);
+    }
+
+    private getProgramRulesIds(metadata: BulkLoadMetadata, currentProgramStage?: Id): Id[] {
+        return currentProgramStage
             ? metadata.programRules.filter(pr => pr.programStage.id === currentProgramStage).map(pr => pr.id)
             : metadata.programRules.map(pr => pr.id);
+    }
 
-        const eventEffects = _(teis)
+    private computeEventEffects(
+        teis: TrackerTrackedEntity[] | undefined,
+        getEffectForEvent: (
+            event: TrackerEvent,
+            teiEvents: TrackerEvent[],
+            tei: TrackerTrackedEntity
+        ) => EventEffect | undefined
+    ): EventEffect[] {
+        return _(teis)
             .flatMap(tei => {
                 const teiEvents = _.flatMap(tei.enrollments, enrollment => enrollment.events);
 
                 return teiEvents
                     .filter(event => Boolean(event?.occurredAt))
-                    .map(event =>
-                        event
-                            ? this.getEffects({
-                                  event,
-                                  program,
-                                  programRulesIds,
-                                  metadata,
-                                  events: teiEvents,
-                                  teis,
-                                  tei,
-                              })
-                            : null
-                    );
+                    .map(event => (event ? getEffectForEvent(event, teiEvents, tei) : null));
             })
             .compact()
             .value();
-
-        return Future.success(eventEffects);
     }
 
-    private getEffects(options: {
-        event: TrackerEvent;
-        program: Program;
-        programRulesIds: Id[];
-        metadata: BulkLoadMetadata;
-        events: TrackerEvent[];
-        teis?: TrackerTrackedEntity[];
-        tei?: Maybe<TrackerTrackedEntity>;
-    }): EventEffect | undefined {
-        const { event: d2Event, program, programRulesIds, metadata, events, teis, tei } = options;
-        const allEvents = events.map(event => this.getProgramEvent(event, metadata));
-        const event = this.getProgramEvent(d2Event, metadata);
-
+    private buildStaticRuleContext(
+        program: Program,
+        programRulesIds: Id[],
+        metadata: BulkLoadMetadata,
+        teis: TrackerTrackedEntity[]
+    ): ProgramRuleStaticContext {
         const enrollmentsById = _(teis)
             .flatMap(tei => tei.enrollments)
             .filter(enrollment => enrollment !== undefined)
@@ -420,7 +485,87 @@ export class ProgramRuleValidationForBLEventProgram {
             .keyBy(enrollment => enrollment.enrollment)
             .value();
 
-        const enrollment = event.enrollmentId ? enrollmentsById[event.enrollmentId] : undefined;
+        const trackedEntityAttributes = this.getMap(
+            program.programTrackedEntityAttributes
+                .map(ptea => ptea.trackedEntityAttribute)
+                .map(tea => ({
+                    id: tea.id,
+                    valueType: tea.valueType,
+                    optionSetId: tea.optionSet?.id,
+                }))
+        );
+
+        const programRulesContainer: ProgramRuleStaticContext["programRulesContainer"] = {
+            programRules: metadata.programRules
+                .filter(rule => !programRulesIds || programRulesIds.includes(rule.id))
+                .filter(rule => rule.program.id === program.id)
+                .map(rule => {
+                    const actions = rule.programRuleActions.map(action => ({
+                        ...action,
+                        dataElementId: action.dataElement?.id,
+                        programStageId: action.programStage?.id,
+                        programStageSectionId: action.programStageSection?.id,
+                        trackedEntityAttributeId: action.trackedEntityAttribute?.id,
+                        optionGroupId: action.optionGroup?.id,
+                        optionId: action.option?.id,
+                    }));
+
+                    return {
+                        ...rule,
+                        programId: rule.program.id,
+                        programRuleActions: actions,
+                    };
+                }),
+            programRuleVariables: metadata.programRuleVariables
+                .filter(variable => variable.program.id === program.id)
+                .map(
+                    (variable): ProgramRuleVariable => ({
+                        ...variable,
+                        programId: variable.program?.id,
+                        dataElementId: variable.dataElement?.id,
+                        trackedEntityAttributeId: variable.trackedEntityAttribute?.id,
+                        programStageId: variable.programStage?.id,
+                        // 2.38 has valueType. For older versions, get from DE/TEA.
+                        valueType:
+                            variable.valueType ||
+                            variable.dataElement?.valueType ||
+                            variable.trackedEntityAttribute?.valueType ||
+                            "TEXT",
+                    })
+                ),
+            constants: metadata.constants,
+        };
+
+        return {
+            enrollmentsById,
+            trackedEntityAttributes,
+            programRulesContainer,
+            dataElements: this.getMap(
+                metadata.dataElements.map(dataElement => ({
+                    id: dataElement.id,
+                    valueType: dataElement.valueType,
+                    optionSetId: dataElement.optionSet?.id,
+                }))
+            ),
+            optionSets: this.getMap(metadata.optionSets),
+        };
+    }
+
+    private getEffectsWithContext(
+        staticContext: ProgramRuleStaticContext,
+        options: {
+            event: TrackerEvent;
+            program: Program;
+            metadata: BulkLoadMetadata;
+            events: TrackerEvent[];
+            tei?: Maybe<TrackerTrackedEntity>;
+        }
+    ): EventEffect | undefined {
+        const { event: d2Event, program, metadata, events, tei } = options;
+        const allEvents = events.map(event => this.getProgramEvent(event, metadata));
+        const event = this.getProgramEvent(d2Event, metadata);
+
+        const enrollment = event.enrollmentId ? staticContext.enrollmentsById[event.enrollmentId] : undefined;
 
         const selectedEntity: TrackedEntityAttributeValuesMap | undefined = tei
             ? _(tei.attributes)
@@ -435,71 +580,18 @@ export class ProgramRuleValidationForBLEventProgram {
             code: "",
             groups: [],
         };
+
         const getEffectsOptions: GetProgramRuleEffectsOptions = {
             currentEvent: event,
             otherEvents: allEvents,
-            trackedEntityAttributes: this.getMap(
-                program.programTrackedEntityAttributes
-                    .map(ptea => ptea.trackedEntityAttribute)
-                    .map(tea => ({
-                        id: tea.id,
-                        valueType: tea.valueType,
-                        optionSetId: tea.optionSet?.id,
-                    }))
-            ),
+            trackedEntityAttributes: staticContext.trackedEntityAttributes,
             selectedEnrollment: enrollment ? enrollment : undefined,
             selectedEntity,
-            programRulesContainer: {
-                programRules: metadata.programRules
-                    .filter(rule => !programRulesIds || programRulesIds.includes(rule.id))
-                    .filter(rule => rule.program.id === program.id)
-                    .map(rule => {
-                        const actions = rule.programRuleActions.map(action => ({
-                            ...action,
-                            dataElementId: action.dataElement?.id,
-                            programStageId: action.programStage?.id,
-                            programStageSectionId: action.programStageSection?.id,
-                            trackedEntityAttributeId: action.trackedEntityAttribute?.id,
-                            optionGroupId: action.optionGroup?.id,
-                            optionId: action.option?.id,
-                        }));
-
-                        return {
-                            ...rule,
-                            programId: rule.program.id,
-                            programRuleActions: actions,
-                        };
-                    }),
-                programRuleVariables: metadata.programRuleVariables
-                    .filter(variable => variable.program.id === program.id)
-                    .map(
-                        (variable): ProgramRuleVariable => ({
-                            ...variable,
-                            programId: variable.program?.id,
-                            dataElementId: variable.dataElement?.id,
-                            trackedEntityAttributeId: variable.trackedEntityAttribute?.id,
-                            programStageId: variable.programStage?.id,
-                            // 2.38 has valueType. For older versions, get from DE/TEA.
-                            valueType:
-                                variable.valueType ||
-                                variable.dataElement?.valueType ||
-                                variable.trackedEntityAttribute?.valueType ||
-                                "TEXT",
-                        })
-                    ),
-                constants: metadata.constants,
-            },
-            dataElements: this.getMap(
-                metadata.dataElements.map(dataElement => ({
-                    id: dataElement.id,
-                    valueType: dataElement.valueType,
-                    optionSetId: dataElement.optionSet?.id,
-                }))
-            ),
-            optionSets: this.getMap(metadata.optionSets),
+            programRulesContainer: staticContext.programRulesContainer,
+            dataElements: staticContext.dataElements,
+            optionSets: staticContext.optionSets,
             selectedOrgUnit,
         };
-
         const [effects, errors] = this.captureConsoleError(() => {
             return this.getProgramRuleEffects(getEffectsOptions);
         });
@@ -527,6 +619,22 @@ export class ProgramRuleValidationForBLEventProgram {
         } else {
             return undefined;
         }
+    }
+
+    private getEffects(options: {
+        event: TrackerEvent;
+        program: Program;
+        programRulesIds: Id[];
+        metadata: BulkLoadMetadata;
+        events: TrackerEvent[];
+        teis?: TrackerTrackedEntity[];
+        tei?: Maybe<TrackerTrackedEntity>;
+    }): EventEffect | undefined {
+        const { program, programRulesIds, metadata, teis } = options;
+
+        const staticContext = this.buildStaticRuleContext(program, programRulesIds, metadata, teis ?? []);
+
+        return this.getEffectsWithContext(staticContext, options);
     }
 
     private getMap<Obj extends { id: Id }>(objs: Obj[] | undefined): Record<Id, Obj> {

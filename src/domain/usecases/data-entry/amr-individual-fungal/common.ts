@@ -125,15 +125,8 @@ export function mapIndividualFungalDataItemsToEntities(
     return Future.success(trackedEntities);
 }
 
-export function runProgramRuleValidations(
-    programId: string,
-    teis: TrackerTrackedEntity[],
-    AMRDataProgramStageIdl: string,
-    programRulesMetadataRepository: ProgramRulesMetadataRepository,
-    programRulesMetadata?: BulkLoadMetadata
-): FutureData<ValidationResult> {
-    //1. Before running validations, add ids to tei, enrollement and event so thier relationships can be processed.
-    const teisWithId = teis?.map((tei, teiIndex) => {
+function addPositionalIdsToTeis(teis: TrackerTrackedEntity[]): TrackerTrackedEntity[] {
+    return teis.map((tei, teiIndex) => {
         const enrollmentsWithId = tei.enrollments?.map((enrollment, enrollmentIndex) => {
             const eventsWithIds = enrollment.events.map((ev, eventIndex) => {
                 return {
@@ -148,6 +141,37 @@ export function runProgramRuleValidations(
 
         return { ...tei, enrollments: enrollmentsWithId, trackedEntity: teiIndex.toString() };
     });
+}
+
+function removePositionalIdsFromTeis(
+    teis: ReadonlyArray<TrackerTrackedEntity> | undefined
+): TrackerTrackedEntity[] | undefined {
+    return teis?.map(tei => {
+        const enrollementsWithoutId = tei.enrollments?.map(enrollment => {
+            const eventsWithoutIds = enrollment.events.map(ev => {
+                return {
+                    ...ev,
+                    event: "",
+                    enrollment: "",
+                    trackedEntity: "",
+                };
+            });
+
+            return { ...enrollment, enrollment: "", events: eventsWithoutIds };
+        });
+        return { ...tei, enrollments: enrollementsWithoutId, trackedEntity: "" };
+    });
+}
+
+export function runProgramRuleValidations(
+    programId: string,
+    teis: TrackerTrackedEntity[],
+    AMRDataProgramStageIdl: string,
+    programRulesMetadataRepository: ProgramRulesMetadataRepository,
+    programRulesMetadata?: BulkLoadMetadata
+): FutureData<ValidationResult> {
+    //1. Before running validations, add ids to tei, enrollement and event so thier relationships can be processed.
+    const teisWithId = addPositionalIdsToTeis(teis);
 
     //2. Run Program Rule Validations
     const programRuleValidations = new ProgramRuleValidationForBLEventProgram(programRulesMetadataRepository);
@@ -163,28 +187,53 @@ export function runProgramRuleValidations(
 
     return $validation.flatMap(programRuleValidationResults => {
         //3. After processing, remove ids to tei, enrollement and events so that they can be imported
-        const teisWithoutId = programRuleValidationResults.teis?.map(tei => {
-            const enrollementsWithoutId = tei.enrollments?.map(enrollment => {
-                const eventsWithoutIds = enrollment.events.map(ev => {
-                    return {
-                        ...ev,
-                        event: "",
-                        enrollment: "",
-                        trackedEntity: "",
-                    };
-                });
-
-                return { ...enrollment, enrollment: "", events: eventsWithoutIds };
-            });
-            return { ...tei, enrollments: enrollementsWithoutId, trackedEntity: "" };
-        });
-
         return Future.success({
             blockingErrors: programRuleValidationResults.blockingErrors,
             nonBlockingErrors: programRuleValidationResults.nonBlockingErrors,
-            teis: teisWithoutId,
+            teis: removePositionalIdsFromTeis(programRuleValidationResults.teis),
         });
     });
+}
+
+/**
+ * Async-upload-only variant of runProgramRuleValidations: same validation outcome, but the
+ * metadata-derived rule structures are built once per chunk instead of once per event,
+ * which makes validating large CSV chunks an order of magnitude faster.
+ */
+export function runProgramRuleValidationsForAsyncUpload(
+    programId: string,
+    teis: TrackerTrackedEntity[],
+    AMRDataProgramStageIdl: string,
+    programRulesMetadataRepository: ProgramRulesMetadataRepository,
+    programRulesMetadata?: BulkLoadMetadata
+): FutureData<ValidationResult> {
+    //1. Before running validations, add ids to tei, enrollement and event so thier relationships can be processed.
+    const teisWithId = addPositionalIdsToTeis(teis);
+
+    //2. Run Program Rule Validations building the static rule context once per chunk
+    const programRuleValidations = new ProgramRuleValidationForBLEventProgram(programRulesMetadataRepository);
+
+    const $metadata: FutureData<BulkLoadMetadata> = programRulesMetadata
+        ? Future.success(programRulesMetadata)
+        : programRulesMetadataRepository.getMetadata(programId);
+
+    return $metadata
+        .flatMap(metadata =>
+            programRuleValidations.getValidatedTeisAndEventsFromMetadataForAsyncUpload(
+                metadata,
+                [],
+                teisWithId,
+                AMRDataProgramStageIdl
+            )
+        )
+        .flatMap(programRuleValidationResults => {
+            //3. After processing, remove ids to tei, enrollement and events so that they can be imported
+            return Future.success({
+                blockingErrors: programRuleValidationResults.blockingErrors,
+                nonBlockingErrors: programRuleValidationResults.nonBlockingErrors,
+                teis: removePositionalIdsFromTeis(programRuleValidationResults.teis),
+            });
+        });
 }
 
 type CustomValidationFunction = (dataItem: CustomDataColumns) => string | null;
