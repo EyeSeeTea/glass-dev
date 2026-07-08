@@ -59,7 +59,7 @@ export class AsyncImportPrimaryFileUseCase {
             case "AMR - Fungal": {
                 const uploadChunkSize =
                     glassModule.asyncUploadChunkSizes?.primaryUpload || DEFAULT_ASYNC_UPLOAD_DELETE_CHUNK_SIZE;
-                const maxConcurrency = glassModule.asyncUploadMaxConcurrency ?? DEFAULT_ASYNC_UPLOAD_MAX_CONCURRENCY;
+                const maxConcurrency = glassModule.asyncUploadMaxConcurrency || DEFAULT_ASYNC_UPLOAD_MAX_CONCURRENCY;
 
                 const asyncImportRISIndividualFungalFile = new AsyncImportRISIndividualFungalFile(this.repositories);
                 return asyncImportRISIndividualFungalFile.asyncImportRISIndividualFungalFile({
