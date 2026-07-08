@@ -11,14 +11,17 @@ import { MetadataRepository } from "../../../repositories/MetadataRepository";
 import { TrackerRepository } from "../../../repositories/TrackerRepository";
 import { RISIndividualFungalDataRepository } from "../../../repositories/data-entry/RISIndividualFungalDataRepository";
 import { ProgramRulesMetadataRepository } from "../../../repositories/program-rules/ProgramRulesMetadataRepository";
-import { mapIndividualFungalDataItemsToEntities, runCustomValidations, runProgramRuleValidations } from "./common";
-import { importOrDeleteTrackedEntitiesInChunks } from "../utils/importOrDeleteTrackedEntitiesInChunks";
+import {
+    mapIndividualFungalDataItemsToEntities,
+    runCustomValidations,
+    runProgramRuleValidationsForAsyncUpload,
+} from "./common";
+import { importTrackedEntitiesInChunksForAsyncUpload } from "../utils/importOrDeleteTrackedEntitiesInChunks";
 import consoleLogger from "../../../../utils/consoleLogger";
 
 const AMR_INDIVIDUAL_PROGRAM_ID = "mMAj6Gofe49";
 const AMR_DATA_PROGRAM_STAGE_ID = "KCmWZD8qoAk";
 const AMR_FUNGAL_PROGRAM_STAGE_ID = "ysGSonDq9Bc";
-const CREATE_AND_UPDATE = "CREATE_AND_UPDATE";
 
 const FILE_CHUNK_SIZE = 5000;
 
@@ -39,6 +42,7 @@ export class AsyncImportRISIndividualFungalFile {
         inputBlob: Blob;
         glassModule: GlassModule;
         uploadChunkSize: number;
+        maxConcurrency: number;
         orgUnitId: Id;
         countryCode: string;
         period: string;
@@ -54,6 +58,7 @@ export class AsyncImportRISIndividualFungalFile {
             inputBlob,
             glassModule,
             uploadChunkSize,
+            maxConcurrency,
             orgUnitId,
             countryCode,
             period,
@@ -111,7 +116,7 @@ export class AsyncImportRISIndividualFungalFile {
                                 allCountries,
                                 programMetadata
                             ).flatMap(entities => {
-                                return runProgramRuleValidations(
+                                return runProgramRuleValidationsForAsyncUpload(
                                     programId,
                                     entities,
                                     programStageId,
@@ -172,16 +177,14 @@ export class AsyncImportRISIndividualFungalFile {
                                 allCountries,
                                 programMetadata
                             ).flatMap(entities => {
-                                return importOrDeleteTrackedEntitiesInChunks({
+                                return importTrackedEntitiesInChunksForAsyncUpload({
                                     trackedEntities: entities,
                                     chunkSize: uploadChunkSize,
                                     glassModuleName: glassModule.name,
-                                    action: CREATE_AND_UPDATE,
                                     trackerRepository: this.repositories.trackerRepository,
                                     metadataRepository: this.repositories.metadataRepository,
-                                    async: false,
                                     skipSideEffects: true,
-                                    maxConcurrency: 6,
+                                    maxConcurrency: maxConcurrency,
                                 })
                                     .flatMap(importSummariesWithMergedEventIdList => {
                                         allImportSummaries = [

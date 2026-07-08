@@ -3,7 +3,11 @@ import { Country } from "../../entities/Country";
 import { CustomDataColumns } from "../../entities/data-entry/amr-individual-fungal-external/RISIndividualFungalData";
 import { ImportSummary } from "../../entities/data-entry/ImportSummary";
 import { Future, FutureData } from "../../entities/Future";
-import { DEFAULT_ASYNC_UPLOAD_DELETE_CHUNK_SIZE, GlassModule } from "../../entities/GlassModule";
+import {
+    DEFAULT_ASYNC_UPLOAD_DELETE_CHUNK_SIZE,
+    DEFAULT_ASYNC_UPLOAD_MAX_CONCURRENCY,
+    GlassModule,
+} from "../../entities/GlassModule";
 import { Id } from "../../entities/Ref";
 import { RISIndividualFungalDataRepository } from "../../repositories/data-entry/RISIndividualFungalDataRepository";
 import { GlassDocumentsRepository } from "../../repositories/GlassDocumentsRepository";
@@ -55,6 +59,7 @@ export class AsyncImportPrimaryFileUseCase {
             case "AMR - Fungal": {
                 const uploadChunkSize =
                     glassModule.asyncUploadChunkSizes?.primaryUpload || DEFAULT_ASYNC_UPLOAD_DELETE_CHUNK_SIZE;
+                const maxConcurrency = glassModule.asyncUploadMaxConcurrency ?? DEFAULT_ASYNC_UPLOAD_MAX_CONCURRENCY;
 
                 const asyncImportRISIndividualFungalFile = new AsyncImportRISIndividualFungalFile(this.repositories);
                 return asyncImportRISIndividualFungalFile.asyncImportRISIndividualFungalFile({
@@ -62,6 +67,7 @@ export class AsyncImportPrimaryFileUseCase {
                     inputBlob: inputBlob,
                     glassModule: glassModule,
                     uploadChunkSize: uploadChunkSize,
+                    maxConcurrency: maxConcurrency,
                     orgUnitId: orgUnitId,
                     countryCode: countryCode,
                     period: period,
