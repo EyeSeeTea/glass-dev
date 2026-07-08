@@ -143,6 +143,21 @@ export async function parseCsvBlobInChunks<T>(
         let shouldContinue = true;
         const readable = createReadableInput(fileOrBlob);
 
+        /**
+         * Drains full `chunkSize` batches from the buffer, invoking onChunk for each one.
+         * When `flushRemainder` is true (no more data will arrive) it also processes the
+         * final partial batch. Draining until the buffer is back below `chunkSize` keeps its
+         * size bounded regardless of how many rows each parser chunk delivers.
+         */
+        const drainBufferedChunks = async (flushRemainder: boolean): Promise<void> => {
+            const threshold = flushRemainder ? 1 : chunkSize;
+            while (currentChunk.length >= threshold && shouldContinue) {
+                const chunkToProcess = currentChunk.slice(0, chunkSize);
+                currentChunk = currentChunk.slice(chunkSize);
+                shouldContinue = await onChunk(chunkToProcess);
+            }
+        };
+
         Papa.parse<Record<string, string>>(readable, {
             worker: true,
             header: true,
@@ -181,7 +196,8 @@ export async function parseCsvBlobInChunks<T>(
                     consoleLogger.debug(`Adding ${transformedRows.length} transformed rows to current chunk.`);
                     currentChunk.push(...transformedRows);
 
-                    // Process chunk if it reaches the desired size
+                    // Process full chunks as soon as the buffer reaches the desired size,
+                    // draining it back below the limit so it never grows unbounded.
                     if (currentChunk.length >= chunkSize) {
                         consoleLogger.debug(
                             `Current chunk size ${currentChunk.length} reached limit ${chunkSize}, processing chunk.`
@@ -189,10 +205,7 @@ export async function parseCsvBlobInChunks<T>(
 
                         parser.pause();
 
-                        const chunkToProcess = currentChunk.slice(0, chunkSize);
-                        currentChunk = currentChunk.slice(chunkSize);
-
-                        shouldContinue = await onChunk(chunkToProcess);
+                        await drainBufferedChunks(false);
 
                         if (!shouldContinue) {
                             consoleLogger.debug(`Processing stopped by onChunk callback. Aborting parser.`);
@@ -214,14 +227,7 @@ export async function parseCsvBlobInChunks<T>(
                 try {
                     // Process any remaining rows in chunks respecting the chunkSize limit
                     consoleLogger.debug(`Processing remaining rows in final chunks.`);
-                    while (currentChunk.length > 0 && shouldContinue) {
-                        const chunkToProcess = currentChunk.slice(0, chunkSize);
-                        currentChunk = currentChunk.slice(chunkSize);
-                        shouldContinue = await onChunk(chunkToProcess);
-                        if (!shouldContinue) {
-                            break;
-                        }
-                    }
+                    await drainBufferedChunks(true);
                     consoleLogger.debug(`Completed processing remaining rows in final chunks.`);
                     resolve();
                 } catch (error) {
