@@ -23,6 +23,7 @@ export class TrackerDefaultRepository implements TrackerRepository {
         req: TrackerPostRequest,
         options: { action: ImportStrategy; async?: boolean; skipSideEffects?: boolean }
     ): FutureData<TrackerPostResponse> {
+        console.log("Importing tracker data with action:", options.action);
         return importApiTracker(this.api, req, options);
     }
 
@@ -41,7 +42,15 @@ export class TrackerDefaultRepository implements TrackerRepository {
                         ouMode: "ALL",
                     })
                 ).map(response => {
-                    return _.compact(response.instances.map(instance => instance.trackedEntity));
+                    if (response.instances && Array.isArray(response.instances)) {
+                        return _.compact(response.instances.map(instance => instance.trackedEntity));
+                    } else {
+                        console.error(
+                            `response.instances for trackedEntity  ${trackEntitiesIdsString} is undefined or not an array:`,
+                            response.instances
+                        );
+                        return [];
+                    }
                 });
             })
         ).flatMap(trackedEntitiesIds => Future.success(_.flatten(trackedEntitiesIds)));
@@ -62,13 +71,24 @@ export class TrackerDefaultRepository implements TrackerRepository {
                         pageSize: CHUNKED_SIZE,
                     })
                 ).map(response => {
-                    return response.instances.map(instance => instance.event);
+                    if (response.instances && Array.isArray(response.instances)) {
+                        return response.instances.map((instance: { event: string }) => instance.event);
+                    } else {
+                        console.error(
+                            `response.instances for event ${eventIdsString}is undefined or not an array:`,
+                            response.instances
+                        );
+                        return [];
+                    }
                 });
             })
         ).flatMap(eventIds => Future.success(_.flatten(eventIds)));
     }
 
     public getProgramMetadata(programID: string, programStageId: string): FutureData<any> {
+        console.log("Fetching program metadata for program ID:", programID);
+        console.log("Fetching program metadata for programStageId ID:", programStageId);
+        console.log("API base URL:", (this.api as any)?.http?.baseUrl || (this.api as any)?.baseUrl);
         return apiToFuture(
             this.api.models.programs.get({
                 fields: {
@@ -99,6 +119,7 @@ export class TrackerDefaultRepository implements TrackerRepository {
                 filter: { id: { eq: programID } },
             })
         ).map(response => {
+            console.log("Program metadata fetched for program ID:", programID);
             const programStage = response.objects[0]?.programStages.find(ps => ps.id === programStageId);
             return {
                 programAttributes: response.objects[0]?.programTrackedEntityAttributes.map(

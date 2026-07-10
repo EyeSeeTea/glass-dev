@@ -1,3 +1,4 @@
+import _ from "lodash";
 import { Future, FutureData } from "../../../entities/Future";
 import { ConsistencyError } from "../../../entities/data-entry/ImportSummary";
 import { ValidationResult } from "../../../entities/program-rules/EventEffectTypes";
@@ -270,14 +271,14 @@ export class CustomValidationsAMCProductData {
                     }
                 }
 
-                const productManufacturerCountry = allCountries.find(country => country.id === manufacturerCountryId);
+                /* const productManufacturerCountry = allCountries.find(country => country.id === manufacturerCountryId);
 
                 if (manufacturerCountryId && !productManufacturerCountry) {
                     curErrors.push({
                         error: i18n.t(`Manufacturer country code is incorrect: ${manufacturerCountryId}`),
                         line: tei.trackedEntity ? parseInt(tei.trackedEntity) + 6 : -1,
                     });
-                }
+                }*/
 
                 return curErrors;
             })

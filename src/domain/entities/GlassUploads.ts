@@ -1,7 +1,7 @@
 import { ImportSummary, ImportSummaryErrors } from "./data-entry/ImportSummary";
 import { Id } from "./Ref";
 
-export type GlassUploadsStatus = "UPLOADED" | "IMPORTED" | "VALIDATED" | "COMPLETED";
+export type GlassUploadsStatus = "UPLOADED" | "IMPORTED" | "VALIDATED" | "COMPLETED" | "DELETED";
 
 export interface GlassUploads {
     id: string;

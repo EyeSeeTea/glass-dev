@@ -4,7 +4,7 @@ import { Future, FutureData } from "../../domain/entities/Future";
 import { GlassUploads, GlassUploadsStatus } from "../../domain/entities/GlassUploads";
 import { Id } from "../../domain/entities/Ref";
 import { ImportSummary, ImportSummaryErrors } from "../../domain/entities/data-entry/ImportSummary";
-import { GlassUploadsRepository } from "../../domain/repositories/GlassUploadsRepository";
+import { GetUploadsByModuleOuParams, GlassUploadsRepository } from "../../domain/repositories/GlassUploadsRepository";
 import {
     D2Api,
     D2TrackerEventSchema,
@@ -46,6 +46,7 @@ export const uploadsDHIS2Ids = {
     errorAsyncUploading: "O7EFyS16DBg",
     asyncImportSummaries: "rV0d3FQC8Jp",
     period: "BXvUeQEf9bT",
+    uploadDate: "NczzzehrmcO",
 } as const;
 
 export function getValueById(dataValues: DataValue[], dataElement: string): Maybe<string> {
@@ -116,12 +117,25 @@ export class GlassUploadsProgramRepository implements GlassUploadsRepository {
         });
     }
 
-    getUploadsByModuleOUPeriod(module: Id, orgUnit: Id, period: string): FutureData<GlassUploads[]> {
+    getUploadsByModuleOUPeriod(props: GetUploadsByModuleOuParams): FutureData<GlassUploads[]> {
+        const { moduleId, orgUnit, period, additionalFilters } = props;
+
+        const modulesToQuery = new Set([...(additionalFilters?.moduleIds ?? []), moduleId]);
+
         return this.getUploadsByFilters({
             orgUnit: orgUnit,
             orgUnitMode: "SELECTED",
-            filter: `${uploadsDHIS2Ids.period}:eq:${period},${uploadsDHIS2Ids.moduleId}:eq:${module}`,
-        });
+            filter: `${uploadsDHIS2Ids.period}:eq:${period}`,
+        }).map(uploads =>
+            uploads.filter(upload => {
+                const doNotHaveFileTypesFilters =
+                    !additionalFilters?.fileTypes || additionalFilters.fileTypes.length === 0;
+                return (
+                    modulesToQuery.has(upload.module) &&
+                    (doNotHaveFileTypesFilters || additionalFilters.fileTypes.includes(upload.fileType))
+                );
+            })
+        );
     }
 
     getUploadsByDataSubmission(dataSubmissionId: Id): FutureData<GlassUploads[]> {
@@ -314,7 +328,7 @@ export class GlassUploadsProgramRepository implements GlassUploadsRepository {
                 period: getValueById(event.dataValues, uploadsDHIS2Ids.period) || "",
                 specimens: (getValueById(event.dataValues, uploadsDHIS2Ids.specimens) || "").split(","),
                 status: (getValueById(event.dataValues, uploadsDHIS2Ids.status) as GlassUploadsStatus) || "UPLOADED",
-                uploadDate: event.createdAt || "",
+                uploadDate: getValueById(event.dataValues, uploadsDHIS2Ids.uploadDate) || "",
                 dataSubmission: getValueById(event.dataValues, uploadsDHIS2Ids.dataSubmissionId) || "",
                 module: getValueById(event.dataValues, uploadsDHIS2Ids.moduleId) || "",
                 orgUnit: event.orgUnit,
@@ -355,7 +369,7 @@ export class GlassUploadsProgramRepository implements GlassUploadsRepository {
             { dataElement: uploadsDHIS2Ids.documentFileType, value: upload.fileType },
             { dataElement: uploadsDHIS2Ids.documentId, value: upload.fileId },
             { dataElement: uploadsDHIS2Ids.documentName, value: upload.fileName },
-            { dataElement: uploadsDHIS2Ids.specimens, value: upload.specimens.join(",") },
+            { dataElement: uploadsDHIS2Ids.specimens, value: (upload.specimens ?? []).join(",") },
             { dataElement: uploadsDHIS2Ids.status, value: upload.status },
             { dataElement: uploadsDHIS2Ids.dataSubmissionId, value: upload.dataSubmission },
             { dataElement: uploadsDHIS2Ids.moduleId, value: upload.module },
@@ -382,6 +396,10 @@ export class GlassUploadsProgramRepository implements GlassUploadsRepository {
             {
                 dataElement: uploadsDHIS2Ids.errorAsyncUploading,
                 value: upload.errorAsyncUploading ? "true" : null,
+            },
+            {
+                dataElement: uploadsDHIS2Ids.uploadDate,
+                value: upload.uploadDate,
             },
             // FIX: null needed to remove the value in DHIS2 if a yes-only field is set to false
         ] as D2TrackerEventToPost["dataValues"];

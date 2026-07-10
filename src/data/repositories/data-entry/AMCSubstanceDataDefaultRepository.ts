@@ -51,7 +51,7 @@ export class AMCSubstanceDataDefaultRepository implements AMCSubstanceDataReposi
 
             if (rawSubstanceHeaderRow) {
                 const sanitizedRawSubstanceHeaders = Object.values(rawSubstanceHeaderRow).map(header =>
-                    header.replace(/[* \n\r]/g, "")
+                    String(header).replace(/[* \n\r]/g, "")
                 );
                 const allRawSubstanceCols = rawSubstanceDataColumns.map(col =>
                     sanitizedRawSubstanceHeaders.includes(col)

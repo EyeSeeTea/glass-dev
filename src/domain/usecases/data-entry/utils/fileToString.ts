@@ -9,6 +9,9 @@ export const getStringFromFile = (file: Blob): Promise<string> => {
     });
 };
 
-export const getStringFromFileBlob = (fileBlob: Blob): FutureData<string> => {
-    return Future.fromPromise(fileBlob.text());
+export const getStringFromFileBlob = (fileBlob?: Blob): FutureData<string> => {
+    if (fileBlob) {
+        return Future.fromPromise(fileBlob.text());
+    }
+    throw Error;
 };

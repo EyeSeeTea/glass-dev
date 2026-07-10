@@ -57,7 +57,7 @@ export const ListOfDatasets: React.FC<ListOfDatasetsProps> = ({ setRefetchStatus
         currentPeriod
     );
     const [questionnaires] = useQuestionnaires();
-    const { uploads, refreshUploads } = useGlassUploadsByModuleOUPeriod(currentPeriod.toString());
+    const { uploads, refreshUploads } = useGlassUploadsByModuleOUPeriod(currentPeriod.toString(), true);
     const hasCurrentUserCaptureAccess = useGlassCaptureAccess();
 
     const completeUploads = getCompletedUploads(uploads);
@@ -100,7 +100,8 @@ export const ListOfDatasets: React.FC<ListOfDatasetsProps> = ({ setRefetchStatus
         if (
             uploads.kind === "loaded" &&
             dataSubmissionId &&
-            completeUploads?.length === 0 &&
+            completeUploads &&
+            completeUploads.length === 0 &&
             !isDatasetMarkAsCompleted &&
             currentDataSubmissionStatus.kind === "loaded" &&
             currentDataSubmissionStatus.data.status !== "NOT_COMPLETED" &&

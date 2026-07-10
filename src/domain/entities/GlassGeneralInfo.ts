@@ -5,4 +5,5 @@ export type GlassGeneralInfo = {
     maxAttemptsForAsyncDeletions: number;
     maxAttemptsForAsyncUploads: number;
     uploadsMigrationCompleted?: boolean;
+    uploadDateAddedToEventProgram?: boolean;
 };

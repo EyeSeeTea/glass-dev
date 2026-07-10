@@ -19,7 +19,7 @@ export interface GlassUploadsRepository {
         calculatedEventListFileId: string | undefined;
     }>;
     getUploadsByModuleOU(module: string, orgUnit: string): FutureData<GlassUploads[]>;
-    getUploadsByModuleOUPeriod(module: string, orgUnit: string, period: string): FutureData<GlassUploads[]>;
+    getUploadsByModuleOUPeriod(props: GetUploadsByModuleOuParams): FutureData<GlassUploads[]>;
     updateSampleUploadWithRisId(sampleUploadId: string, risUploadId: string): FutureData<void>;
     setEventListFileId(id: string, eventListFileId: string): FutureData<void>;
     saveImportSummaryErrorsOfFilesInUploads(params: {
@@ -39,3 +39,15 @@ export interface GlassUploadsRepository {
     setMultipleErrorAsyncUploading(ids: Id[]): FutureData<void>;
     saveImportSummaries(params: { uploadId: Id; importSummaries: ImportSummary[] }): FutureData<void>;
 }
+
+export type UploadFilters = {
+    moduleIds: string[];
+    fileTypes: string[];
+};
+
+export type GetUploadsByModuleOuParams = {
+    moduleId: string;
+    orgUnit: string;
+    period: string;
+    additionalFilters?: UploadFilters;
+};

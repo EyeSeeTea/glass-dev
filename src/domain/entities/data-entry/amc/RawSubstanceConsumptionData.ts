@@ -7,6 +7,7 @@ export type RawSubstanceConsumptionData = {
     atc_manual: ATCCodeLevel5;
     route_admin_manual: RouteOfAdministrationCode;
     salt_manual: SaltCode;
+    combination_manual?: string;
     packages_manual: number;
     ddds_manual: number;
     atc_version_manual: string;
@@ -21,6 +22,7 @@ export const RAW_SUBSTANCE_CONSUMPTION_DATA_KEYS = [
     "atc_manual",
     "route_admin_manual",
     "salt_manual",
+    "combination_manual",
     "packages_manual",
     "ddds_manual",
     "atc_version_manual",

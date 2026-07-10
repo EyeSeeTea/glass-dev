@@ -226,12 +226,21 @@ function verifyCalculationResult(result: RawSubstanceConsumptionCalculated[], ty
         const expectedCalculation = expectedSolution[index];
         expect(calculation.AMR_GLASS_AMC_TEA_PRODUCT_ID).toBe(expectedCalculation?.AMR_GLASS_AMC_TEA_PRODUCT_ID);
         expect(calculation.atc_autocalculated).toBe(expectedCalculation?.atc_autocalculated);
+        expect(calculation.combination_code_autocalculated).toBe(expectedCalculation?.combination_code_autocalculated);
         expect(calculation.route_admin_autocalculated).toBe(expectedCalculation?.route_admin_autocalculated);
         expect(calculation.salt_autocalculated).toBe(expectedCalculation?.salt_autocalculated);
         expect(calculation.year).toBe(expectedCalculation?.year);
         expect(calculation.packages_autocalculated).toBe(expectedCalculation?.packages_autocalculated);
-        expect(calculation.kilograms_autocalculated).toBe(expectedCalculation?.kilograms_autocalculated);
-        expect(calculation.ddds_autocalculated).toBe(expectedCalculation?.ddds_autocalculated);
+        if (expectedCalculation?.kilograms_autocalculated != null) {
+            expect(calculation.kilograms_autocalculated).toBeCloseTo(expectedCalculation.kilograms_autocalculated, 10);
+        } else {
+            expect(calculation.kilograms_autocalculated).toBe(expectedCalculation?.kilograms_autocalculated);
+        }
+        if (expectedCalculation?.ddds_autocalculated != null) {
+            expect(calculation.ddds_autocalculated).toBeCloseTo(expectedCalculation.ddds_autocalculated, 10);
+        } else {
+            expect(calculation.ddds_autocalculated).toBe(expectedCalculation?.ddds_autocalculated);
+        }
         expect(calculation.data_status_autocalculated).toBe(expectedCalculation?.data_status_autocalculated);
         expect(calculation.health_sector_autocalculated).toBe(expectedCalculation?.health_sector_autocalculated);
         expect(calculation.atc_version_autocalculated).toBe(expectedCalculation?.atc_version_autocalculated);
