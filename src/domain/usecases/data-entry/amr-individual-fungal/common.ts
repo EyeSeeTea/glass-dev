@@ -252,14 +252,15 @@ export function runCustomValidations(
 ): FutureData<ImportSummary> {
     // Step 1: date format validation across all rows — collect every bad cell before blocking
     const dateFormatErrors = risIndividualFungalDataItems.flatMap((dataItem, index) => {
+        const line = fileLineStart + index;
         const row: Record<string, string> = Object.fromEntries(
             dataItem
                 .filter(item => item.value !== undefined && item.value !== null)
                 .map(item => [item.key, item.value?.toString() ?? ""])
         );
-        return validateAllDateFieldsInRow(row, AMR_INDIVIDUAL_FUNGAL_DATE_COLUMNS, index + 1).map(err => ({
+        return validateAllDateFieldsInRow(row, AMR_INDIVIDUAL_FUNGAL_DATE_COLUMNS, line).map(err => ({
             error: err.message,
-            line: index,
+            line: err.row,
         }));
     });
 

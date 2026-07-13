@@ -148,7 +148,25 @@ export class RISIndividualFungalDataCSVDefaultRepository implements RISIndividua
                 )
             );
         } else {
-            return Future.error("The provided blob is not a CSV file.");
+            // xlsx (and other non-CSV) files are not streamed: read the whole file into memory as before,
+            // then hand the rows to the caller in chunkSize slices so it gets the same chunked contract as CSV.
+            consoleLogger.debug("Non-CSV file detected: reading it fully into memory before chunking rows.");
+            return this.getFromBlob(dataColumns, blob).flatMap(rows => this.emitRowsInChunks(rows, chunkSize, onChunk));
         }
+    }
+
+    private emitRowsInChunks(
+        rows: CustomDataColumns[],
+        chunkSize: number,
+        onChunk: (chunk: CustomDataColumns[]) => FutureData<boolean>
+    ): FutureData<void> {
+        const chunk = rows.slice(0, chunkSize);
+        if (chunk.length === 0) return Future.success(undefined);
+
+        const remainingRows = rows.slice(chunkSize);
+        return onChunk(chunk).flatMap(shouldContinue => {
+            if (!shouldContinue) return Future.success(undefined);
+            return this.emitRowsInChunks(remainingRows, chunkSize, onChunk);
+        });
     }
 }

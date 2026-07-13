@@ -141,6 +141,11 @@ export async function parseCsvBlobInChunks<T>(
     return new Promise<void>((resolve, reject) => {
         let currentChunk: T[] = [];
         let shouldContinue = true;
+        // Terminal state: set once the stream is finished for good — because onChunk asked to
+        // stop (returned false), threw, or the parser errored. PapaParse still fires `complete`
+        // after `parser.abort()`, so without this guard the final drain would replay any rows
+        // left in the buffer through onChunk again (e.g. re-importing rows after a failure).
+        let isTerminated = false;
         const readable = createReadableInput(fileOrBlob);
 
         /**
@@ -163,14 +168,9 @@ export async function parseCsvBlobInChunks<T>(
             header: true,
             skipEmptyLines: true,
             chunk: async (results, parser) => {
+                if (isTerminated) return;
                 try {
                     consoleLogger.debug(`Processing CSV chunk with ${results.data.length} rows.`);
-
-                    if (!shouldContinue) {
-                        consoleLogger.debug(`Processing has been stopped. Aborting parser.`);
-                        parser.abort();
-                        return;
-                    }
 
                     // Transform CSV rows to the desired format
                     consoleLogger.debug(`Transforming CSV rows according to dataColumns specification.`);
@@ -209,6 +209,7 @@ export async function parseCsvBlobInChunks<T>(
 
                         if (!shouldContinue) {
                             consoleLogger.debug(`Processing stopped by onChunk callback. Aborting parser.`);
+                            isTerminated = true;
                             parser.abort();
                             resolve();
                             return;
@@ -219,11 +220,18 @@ export async function parseCsvBlobInChunks<T>(
                     }
                 } catch (error) {
                     consoleLogger.error(`Error processing CSV chunk: ${error}`);
+                    isTerminated = true;
                     parser.abort();
                     reject(error);
                 }
             },
             complete: async () => {
+                // Skip the final drain if we already stopped/aborted/errored: the promise is
+                // settled and the buffered rows must not be replayed through onChunk.
+                if (isTerminated) {
+                    consoleLogger.debug(`Parsing already terminated; skipping final drain of buffered rows.`);
+                    return;
+                }
                 try {
                     // Process any remaining rows in chunks respecting the chunkSize limit
                     consoleLogger.debug(`Processing remaining rows in final chunks.`);
@@ -232,11 +240,13 @@ export async function parseCsvBlobInChunks<T>(
                     resolve();
                 } catch (error) {
                     consoleLogger.error(`Error processing final CSV chunk: ${error}`);
+                    isTerminated = true;
                     reject(error);
                 }
             },
             error: error => {
                 consoleLogger.error(`Error processing CSV file: ${error}`);
+                isTerminated = true;
                 reject(error);
             },
         });
