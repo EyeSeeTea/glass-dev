@@ -69,7 +69,7 @@ async function main() {
                         )} and orgUnitsIds=${recalculateDataInfo?.orgUnitsIds.join(",")}`
                     );
 
-                    if (recalculateDataInfo) {
+                    if (recalculateDataInfo && recalculateDataInfo.recalculate) {
                         logger.info(
                             `[${new Date().toISOString()}] Disabling AMC recalculations before start with calculations`
                         );
