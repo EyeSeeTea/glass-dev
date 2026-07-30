@@ -369,7 +369,7 @@ export class GlassUploadsProgramRepository implements GlassUploadsRepository {
             { dataElement: uploadsDHIS2Ids.documentFileType, value: upload.fileType },
             { dataElement: uploadsDHIS2Ids.documentId, value: upload.fileId },
             { dataElement: uploadsDHIS2Ids.documentName, value: upload.fileName },
-            { dataElement: uploadsDHIS2Ids.specimens, value: upload.specimens.join(",") },
+            { dataElement: uploadsDHIS2Ids.specimens, value: (upload.specimens ?? []).join(",") },
             { dataElement: uploadsDHIS2Ids.status, value: upload.status },
             { dataElement: uploadsDHIS2Ids.dataSubmissionId, value: upload.dataSubmission },
             { dataElement: uploadsDHIS2Ids.moduleId, value: upload.module },
@@ -441,9 +441,13 @@ export class GlassUploadsProgramRepository implements GlassUploadsRepository {
     }
 
     private saveEventDataValueFile(payload: UploadsFormData): FutureData<Id> {
+        const headers = this.uploadsFormDataBuilder.getHeaders(payload);
+        const body = this.uploadsFormDataBuilder.getBody(payload);
+
         return apiToFuture(
-            this.api.post<PartialSaveFileResourceResponse>("/fileResources", undefined, payload, {
+            this.api.post<PartialSaveFileResourceResponse>("/fileResources", undefined, body, {
                 requestBodyType: "raw",
+                headers: headers,
             })
         ).flatMap(fileUploadResult => {
             const fileResourceId = fileUploadResult.response?.fileResource?.id;

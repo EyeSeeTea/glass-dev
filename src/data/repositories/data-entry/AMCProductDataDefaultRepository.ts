@@ -60,12 +60,14 @@ export class AMCProductDataDefaultRepository implements AMCProductDataRepository
 
             if (rawProductHeaderRow && teiHeaderRow) {
                 const sanitizedRawProductHeaders = Object.values(rawProductHeaderRow).map(header =>
-                    header.replace(/[* \n\r]/g, "")
+                    String(header).replace(/[* \n\r]/g, "")
                 );
                 const allRawProductCols = rawProductDataColumns.map(col => sanitizedRawProductHeaders.includes(col));
                 const allRawProductColsPresent = _.every(allRawProductCols, c => c === true);
 
-                const sanitizedTEIHeaders = Object.values(teiHeaderRow).map(header => header.replace(/[* \n\r]/g, ""));
+                const sanitizedTEIHeaders = Object.values(teiHeaderRow).map(header =>
+                    String(header).replace(/[* \n\r]/g, "")
+                );
                 const allTEICols = teiDataColumns.map(col => sanitizedTEIHeaders.includes(col));
                 const allTEIColsPresent = _.every(allTEICols, c => c === true);
 
@@ -81,6 +83,49 @@ export class AMCProductDataDefaultRepository implements AMCProductDataRepository
                     specimens: [],
                 };
         });
+    }
+
+    validateFileBuffer(
+        fileArrayBuffer: ArrayBuffer,
+        rawProductDataColumns: string[],
+        teiDataColumns: string[]
+    ): FutureData<{ isValid: boolean; rows: number; specimens: string[] }> {
+        return Future.fromPromise(new SpreadsheetXlsxDataSource().readFromArrayBuffer(fileArrayBuffer)).map(
+            spreadsheet => {
+                const teiSheet = spreadsheet.sheets[0]; //First sheet is tracked entity instance data
+                const teiHeaderRow = teiSheet?.rows[0]; //The second row has header details for AMC template.
+
+                const rawProductSheet = spreadsheet.sheets[1]; //Second sheet is raw product level data
+                const rawProductHeaderRow = rawProductSheet?.rows[0];
+
+                if (rawProductHeaderRow && teiHeaderRow) {
+                    const sanitizedRawProductHeaders = Object.values(rawProductHeaderRow).map(header =>
+                        String(header).replace(/[* \n\r]/g, "")
+                    );
+                    const allRawProductCols = rawProductDataColumns.map(col =>
+                        sanitizedRawProductHeaders.includes(col)
+                    );
+                    const allRawProductColsPresent = _.every(allRawProductCols, c => c === true);
+
+                    const sanitizedTEIHeaders = Object.values(teiHeaderRow).map(header =>
+                        String(header).replace(/[* \n\r]/g, "")
+                    );
+                    const allTEICols = teiDataColumns.map(col => sanitizedTEIHeaders.includes(col));
+                    const allTEIColsPresent = _.every(allTEICols, c => c === true);
+
+                    return {
+                        isValid: allRawProductColsPresent && allTEIColsPresent ? true : false,
+                        rows: teiSheet.rows.length - 1, //one row for header
+                        specimens: [],
+                    };
+                } else
+                    return {
+                        isValid: false,
+                        rows: 0,
+                        specimens: [],
+                    };
+            }
+        );
     }
 
     // TODO: decouple TrackerPostResponse from DHIS2
@@ -120,7 +165,11 @@ export class AMCProductDataDefaultRepository implements AMCProductDataRepository
                     } of Raw Substance Consumption Calculated.`
                 );
 
-                return importApiTracker(this.api, { events: d2TrackerEventsChunk }, importStrategy)
+                return importApiTracker(
+                    this.api,
+                    { events: d2TrackerEventsChunk },
+                    { action: importStrategy, async: true }
+                )
                     .mapError(error => {
                         logger.error(
                             `[${new Date().toISOString()}] Product level data: Error importing Raw Substance Consumption Calculated: ${error}`
@@ -201,7 +250,11 @@ export class AMCProductDataDefaultRepository implements AMCProductDataRepository
                 } of Raw Substance Consumption Calculated.`
             );
 
-            return importApiTracker(this.api, { events: d2TrackerEventsToDeleteChunk }, "DELETE")
+            return importApiTracker(
+                this.api,
+                { events: d2TrackerEventsToDeleteChunk },
+                { action: "DELETE", async: true }
+            )
                 .mapError(error => {
                     consoleLogger.error(
                         `[${new Date().toISOString()}] Error deleting Raw Substance Consumption Calculated: ${error}`

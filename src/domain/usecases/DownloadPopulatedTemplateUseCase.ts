@@ -33,20 +33,33 @@ export class DownloadPopulatedTemplateUseCase implements UseCase {
             this.egaspRepository
         );
         return Future.fromPromise(
-            downloadTemplate.downloadTemplate({
-                moduleName,
-                fileType,
-                orgUnits: [orgUnit],
-                populate: true,
-                downloadRelationships,
-                useCodesForMetadata: moduleName === "EGASP" || moduleName === "AMC",
-                downloadType,
-                populateStartDate: startDateOfPeriod,
-                populateEndDate: endDateOfPeriod,
-                startDate: startDateOfPeriod,
-                endDate: endDateOfPeriod,
-                filterTEIEnrollmentDate,
-            })
+            downloadTemplate
+                .downloadTemplate({
+                    moduleName,
+                    fileType,
+                    orgUnits: [orgUnit],
+                    populate: true,
+                    downloadRelationships,
+                    useCodesForMetadata: moduleName === "EGASP" || moduleName === "AMC",
+                    downloadType,
+                    populateStartDate: startDateOfPeriod,
+                    populateEndDate: endDateOfPeriod,
+                    startDate: startDateOfPeriod,
+                    endDate: endDateOfPeriod,
+                    filterTEIEnrollmentDate,
+                })
+                .catch(e => {
+                    console.error("[AMC download] DownloadPopulatedTemplateUseCase failed:", {
+                        moduleName,
+                        fileType,
+                        downloadType,
+                        orgUnit,
+                        period,
+                        error: e,
+                        stack: e?.stack,
+                    });
+                    throw e;
+                })
         );
     }
 }

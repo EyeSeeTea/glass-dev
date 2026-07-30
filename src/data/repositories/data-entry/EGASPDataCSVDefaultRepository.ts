@@ -8,7 +8,9 @@ export class EGASPDataCSVDefaultRepository implements EGASPDataRepository {
             const sheet = spreadsheet.sheets[0]; //First sheet has data for EGASP
             const headerRow = sheet?.rows[1]; //The second row has header details for EGASP template.
             if (headerRow) {
-                const sanitizedHeaders = Object.values(headerRow).map(header => header.replace(/[* \n\r]/g, ""));
+                const sanitizedHeaders = Object.values(headerRow).map(header =>
+                    String(header).replace(/[* \n\r]/g, "")
+                );
                 const allEGASPCols = dataColumns.map(col => sanitizedHeaders.includes(col));
                 const allEGASPColsPresent = _.every(allEGASPCols, c => c === true);
 

@@ -1,4 +1,4 @@
-import moment from "moment";
+import { parseDateStrict } from "../utils/dateValidation";
 import { CustomDataColumns } from "../../../entities/data-entry/amr-individual-fungal-external/RISIndividualFungalData";
 
 enum RISIndividualFungalFileColumns {
@@ -7,6 +7,11 @@ enum RISIndividualFungalFileColumns {
     ADMISSION_DATE = "DATEOFHOSPITALISATION_VISIT",
     SPECIMEN_DATE = "SAMPLE_DATE",
 }
+
+export const AMR_INDIVIDUAL_FUNGAL_DATE_COLUMNS = [
+    RISIndividualFungalFileColumns.SPECIMEN_DATE,
+    RISIndividualFungalFileColumns.ADMISSION_DATE,
+];
 
 /** COUNTRY in each row must be the same as the selected org unit */
 export function checkCountry(dataItem: CustomDataColumns, orgUnit: string): string | null {
@@ -17,7 +22,7 @@ export function checkCountry(dataItem: CustomDataColumns, orgUnit: string): stri
     return null;
 }
 
-/** YEAR in each row must be the same as the selected period*/
+/** YEAR in each row must be the same as the selected period */
 export function checkPeriod(dataItem: CustomDataColumns, period: string): string | null {
     const yearValue = dataItem.find(item => item.key === RISIndividualFungalFileColumns.YEAR)?.value;
     if (yearValue?.toString() !== period) {
@@ -26,16 +31,19 @@ export function checkPeriod(dataItem: CustomDataColumns, period: string): string
     return null;
 }
 
-/**  SAMPLE_DATE must have the same year as YEAR in the same row.
- * If no SAMPLE_DATE is provided, it defaults to 01-01-period */
+/** SAMPLE_DATE must have the same year as YEAR in the same row.
+ * If no SAMPLE_DATE is provided, it defaults to period-01-01 */
 export function checkSpecimenDate(dataItem: CustomDataColumns, period: string): string | null {
-    const specimenDateValue =
-        dataItem.find(item => item.key === RISIndividualFungalFileColumns.SPECIMEN_DATE)?.value || `01-01-${period}`;
+    const rawSpecimenDate = dataItem
+        .find(item => item.key === RISIndividualFungalFileColumns.SPECIMEN_DATE)
+        ?.value?.toString();
+    // parseDateStrict returns null for wrong-format values; runCustomValidations blocks before
+    // reaching here in that case, so the fallback is only used when the field is absent.
+    const specimenDate = parseDateStrict(rawSpecimenDate) ?? `${period}-01-01`;
     const yearValue = dataItem.find(item => item.key === RISIndividualFungalFileColumns.YEAR)?.value;
-    if (moment(specimenDateValue).year().toString() !== yearValue?.toString()) {
-        return `${RISIndividualFungalFileColumns.SPECIMEN_DATE} year is different from ${
-            RISIndividualFungalFileColumns.YEAR
-        }: Specimen date is: ${moment(specimenDateValue).format("YYYY-MM-DD")}, Year in file: ${yearValue}`;
+    const specimenYear = specimenDate.split("-")[0];
+    if (specimenYear !== yearValue?.toString()) {
+        return `${RISIndividualFungalFileColumns.SPECIMEN_DATE} year is different from ${RISIndividualFungalFileColumns.YEAR}: Specimen date is: ${specimenDate}, Year in file: ${yearValue}`;
     }
     return null;
 }
@@ -43,20 +51,18 @@ export function checkSpecimenDate(dataItem: CustomDataColumns, period: string): 
 /** DATEOFHOSPITALISATION_VISIT cannot be prior to 2016, and must be before SPECIMEN_DATE */
 export function checkAdmissionDate(dataItem: CustomDataColumns): string | null {
     const MIN_ADMISSION_DATE = "2016-01-01";
-    const admissionDateValue = dataItem.find(item => item.key === RISIndividualFungalFileColumns.ADMISSION_DATE)?.value;
-    const specimenDateValue = dataItem.find(item => item.key === RISIndividualFungalFileColumns.SPECIMEN_DATE)?.value;
-    if (admissionDateValue) {
-        if (moment(admissionDateValue).isBefore(MIN_ADMISSION_DATE)) {
-            return `${RISIndividualFungalFileColumns.ADMISSION_DATE} cannot be prior to ${MIN_ADMISSION_DATE}: ${moment(
-                admissionDateValue
-            ).format("YYYY-MM-DD")}`;
+    const admissionDate = parseDateStrict(
+        dataItem.find(item => item.key === RISIndividualFungalFileColumns.ADMISSION_DATE)?.value?.toString()
+    );
+    if (admissionDate) {
+        if (admissionDate < MIN_ADMISSION_DATE) {
+            return `${RISIndividualFungalFileColumns.ADMISSION_DATE} cannot be prior to ${MIN_ADMISSION_DATE}: ${admissionDate}`;
         }
-        if (moment(admissionDateValue).isAfter(moment(specimenDateValue))) {
-            return `${RISIndividualFungalFileColumns.ADMISSION_DATE} cannot be after ${
-                RISIndividualFungalFileColumns.SPECIMEN_DATE
-            }: Admission Date: ${moment(admissionDateValue).format("YYYY-MM-DD")}, Specimen Date: ${moment(
-                specimenDateValue
-            ).format("YYYY-MM-DD")}`;
+        const specimenDate = parseDateStrict(
+            dataItem.find(item => item.key === RISIndividualFungalFileColumns.SPECIMEN_DATE)?.value?.toString()
+        );
+        if (specimenDate && admissionDate > specimenDate) {
+            return `${RISIndividualFungalFileColumns.ADMISSION_DATE} cannot be after ${RISIndividualFungalFileColumns.SPECIMEN_DATE}: Admission Date: ${admissionDate}, Specimen Date: ${specimenDate}`;
         }
     }
     return null;

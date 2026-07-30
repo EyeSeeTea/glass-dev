@@ -11,6 +11,14 @@ export class NodeUploadsFormDataBuilder implements UploadsFormDataBuilder {
         return this.createNodeFormData(importSummary, "importSummary.txt");
     }
 
+    getHeaders(formData: FormDataNode): Record<string, string> {
+        return formData.getHeaders();
+    }
+
+    getBody(formData: FormDataNode): Buffer {
+        return formData.getBuffer();
+    }
+
     private createNodeFormData(json: unknown, fileName: string): InstanceType<typeof FormDataNode> {
         const jsonString = JSON.stringify(json);
         const buffer = Buffer.from(jsonString);

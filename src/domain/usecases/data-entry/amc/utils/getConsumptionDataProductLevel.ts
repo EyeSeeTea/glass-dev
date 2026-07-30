@@ -75,17 +75,18 @@ export function getConsumptionDataProductLevel(params: {
         );
     }
 
-    const { productRegistryAttributes, rawProductConsumption } = getProductRegistryAttributesAndRawProductConsumption(
-        productDataTrackedEntities,
-        productRegisterProgramMetadata.programAttributes,
-        rawProductConsumptionStage
-    );
+    const { productRegistryAttributes, rawProductConsumption: rawProductConsumptionRecords } =
+        getProductRegistryAttributesAndRawProductConsumption(
+            productDataTrackedEntities,
+            productRegisterProgramMetadata.programAttributes,
+            rawProductConsumptionStage
+        );
 
     const rawSubstanceConsumptionCalculatedData = calculateConsumptionProductLevelData(
         period,
         orgUnitId,
         productRegistryAttributes,
-        rawProductConsumption,
+        rawProductConsumptionRecords,
         atcCurrentVersionData,
         atcVersionKey
     );
@@ -148,7 +149,7 @@ function getProductRegistryAttributes(
                             [programAttribute.code]: programAttribute.optionSetValue
                                 ? programAttribute.optionSet.options.find(
                                       option => option.code === productAttribute.value
-                                  )?.code
+                                  )?.code ?? productAttribute.value
                                 : productAttribute.value,
                         };
                     case "NUMBER":
