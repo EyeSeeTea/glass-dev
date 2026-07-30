@@ -124,12 +124,13 @@ export class Future<E, D> {
     static sequentialWithAccumulation<E, D>(
         futures: Array<Future<E, D>>,
         options: { stopOnError?: boolean } = {}
-    ): Future<E, SequentialAccumulatedData<E, D>> {
+    ): Future<E, SecuentialAccumulatedData<E, D>> {
         const { stopOnError = false } = options;
+
         const processSequentially = (
             futures: Array<Future<E, D>>,
             accumulatedData: D[] = []
-        ): Future<E, SequentialAccumulatedData<E, D>> => {
+        ): Future<E, SecuentialAccumulatedData<E, D>> => {
             if (futures.length === 0) {
                 return Future.success({ type: "success", data: accumulatedData });
             }
@@ -155,9 +156,103 @@ export class Future<E, D> {
 
         return processSequentially(futures);
     }
+
+    static parallelWithAccumulation<E, D>(
+        futures: Array<Future<E, D>>,
+        options: { maxConcurrency?: number; stopOnError?: boolean } = {}
+    ): Future<never, ParallelAccumulatedData<E, D>> {
+        const { maxConcurrency = 10, stopOnError = true } = options;
+
+        const toParallelResult = (future: Future<E, D>): Future<never, ParallelResult<E, D>> => {
+            return future
+                .map<ParallelResult<E, D>>(data => ({ type: "success", data }))
+                .mapError<ParallelResult<E, D>>(error => ({ type: "error", error }))
+                .flatMapError(errorResult => Future.success<ParallelResult<E, D>, never>(errorResult));
+        };
+
+        const processInParallel = (
+            pendingFutures: Array<Future<E, D>>,
+            accumulatedData: D[] = []
+        ): Future<never, ParallelAccumulatedData<E, D>> => {
+            if (pendingFutures.length === 0) {
+                return Future.success({ type: "success", data: accumulatedData });
+            }
+
+            const currentBatch = pendingFutures.slice(0, maxConcurrency);
+            const remainingFutures = pendingFutures.slice(maxConcurrency);
+
+            return Future.parallel(currentBatch.map(toParallelResult)).flatMap(batchResults => {
+                const successfulData = batchResults.flatMap(result => (result.type === "success" ? [result.data] : []));
+
+                const batchErrors = batchResults.flatMap(result => (result.type === "error" ? [result.error] : []));
+
+                const nextAccumulatedData = [...accumulatedData, ...successfulData];
+
+                if (batchErrors.length > 0 && stopOnError) {
+                    return Future.success({
+                        type: "error",
+                        errors: batchErrors,
+                        data: nextAccumulatedData,
+                    });
+                }
+
+                return processInParallel(remainingFutures, nextAccumulatedData);
+            });
+        };
+
+        return processInParallel(futures);
+    }
+
+    /**
+     * Like parallelWithAccumulation, but with a rolling pool instead of fixed batches: as soon as one
+     * future settles, the next pending one starts, so maxConcurrency futures are always in flight
+     * (parallelWithAccumulation waits for a whole batch to finish before starting the next one).
+     * With stopOnError, futures not yet started are skipped once an error settles; in-flight ones finish
+     * and their results are accumulated.
+     */
+    static parallelWithAccumulationRolling<E, D>(
+        futures: Array<Future<E, D>>,
+        options: { maxConcurrency?: number; stopOnError?: boolean } = {}
+    ): Future<never, ParallelAccumulatedData<E, D>> {
+        const { maxConcurrency = 10, stopOnError = true } = options;
+
+        // Shared flag read by the lazy guard below. fluture only forks a pending future when a
+        // concurrency slot frees up, so pending futures observe the flag at their start time and
+        // resolve as "skipped" without running once an error has settled.
+        let stopped = false;
+
+        const toRollingResult = (future: Future<E, D>): Future<never, RollingResult<E, D>> => {
+            return Future.success<undefined, never>(undefined).flatMap(() => {
+                if (stopped) return Future.success<RollingResult<E, D>, never>({ type: "skipped" });
+
+                return future
+                    .map<RollingResult<E, D>>(data => ({ type: "success", data }))
+                    .mapError<RollingResult<E, D>>(error => {
+                        if (stopOnError) stopped = true;
+                        return { type: "error", error };
+                    })
+                    .flatMapError(errorResult => Future.success<RollingResult<E, D>, never>(errorResult));
+            });
+        };
+
+        return Future.parallel(futures.map(toRollingResult), { maxConcurrency }).map(
+            (results): ParallelAccumulatedData<E, D> => {
+                const data = results.flatMap(result => (result.type === "success" ? [result.data] : []));
+                const errors = results.flatMap(result => (result.type === "error" ? [result.error] : []));
+
+                return errors.length > 0 ? { type: "error", errors, data } : { type: "success", data };
+            }
+        );
+    }
 }
 
-type SequentialAccumulatedData<E, D> = { type: "success"; data: D[] } | { type: "error"; error: E; data: D[] };
+type SecuentialAccumulatedData<E, D> = { type: "success"; data: D[] } | { type: "error"; error: E; data: D[] };
+
+export type ParallelAccumulatedData<E, D> = { type: "success"; data: D[] } | { type: "error"; errors: E[]; data: D[] };
+
+type ParallelResult<E, D> = { type: "success"; data: D } | { type: "error"; error: E };
+
+type RollingResult<E, D> = ParallelResult<E, D> | { type: "skipped" };
 
 type JoinObj<Futures extends Record<string, Future<any, any>>> = Future<
     ExtractFutureError<Futures[keyof Futures]>,

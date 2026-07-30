@@ -165,7 +165,11 @@ export class AMCProductDataDefaultRepository implements AMCProductDataRepository
                     } of Raw Substance Consumption Calculated.`
                 );
 
-                return importApiTracker(this.api, { events: d2TrackerEventsChunk }, importStrategy)
+                return importApiTracker(
+                    this.api,
+                    { events: d2TrackerEventsChunk },
+                    { action: importStrategy, async: true }
+                )
                     .mapError(error => {
                         logger.error(
                             `[${new Date().toISOString()}] Product level data: Error importing Raw Substance Consumption Calculated: ${error}`
@@ -246,7 +250,11 @@ export class AMCProductDataDefaultRepository implements AMCProductDataRepository
                 } of Raw Substance Consumption Calculated.`
             );
 
-            return importApiTracker(this.api, { events: d2TrackerEventsToDeleteChunk }, "DELETE")
+            return importApiTracker(
+                this.api,
+                { events: d2TrackerEventsToDeleteChunk },
+                { action: "DELETE", async: true }
+            )
                 .mapError(error => {
                     consoleLogger.error(
                         `[${new Date().toISOString()}] Error deleting Raw Substance Consumption Calculated: ${error}`

@@ -699,7 +699,9 @@ function uploadDatasets(
                                         }
                                     });
                                 } else {
-                                    consoleLogger.debug(`Upload ${asyncUpload.uploadId} is not pending deletion`);
+                                    consoleLogger.debug(
+                                        `Upload ${asyncUpload.uploadId} does not have status PENDING to be uploaded. Skipped.`
+                                    );
                                     return Future.success(undefined);
                                 }
                             }
@@ -727,8 +729,8 @@ function uploadDatasets(
                     repositories.glassUploadsRepository,
                     asyncUpload,
                     maxAttemptsForAsyncUploads
-                ).map(() => {
-                    return Future.error(e);
+                ).flatMap(() => {
+                    return Future.error(String(e));
                 });
             }
         })

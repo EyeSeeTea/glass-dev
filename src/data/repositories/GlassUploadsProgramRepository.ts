@@ -441,9 +441,13 @@ export class GlassUploadsProgramRepository implements GlassUploadsRepository {
     }
 
     private saveEventDataValueFile(payload: UploadsFormData): FutureData<Id> {
+        const headers = this.uploadsFormDataBuilder.getHeaders(payload);
+        const body = this.uploadsFormDataBuilder.getBody(payload);
+
         return apiToFuture(
-            this.api.post<PartialSaveFileResourceResponse>("/fileResources", undefined, payload, {
+            this.api.post<PartialSaveFileResourceResponse>("/fileResources", undefined, body, {
                 requestBodyType: "raw",
+                headers: headers,
             })
         ).flatMap(fileUploadResult => {
             const fileResourceId = fileUploadResult.response?.fileResource?.id;

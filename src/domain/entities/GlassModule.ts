@@ -70,6 +70,7 @@ export interface GlassModule {
         primaryUpload: number;
         secondaryUpload?: number;
     };
+    asyncUploadMaxConcurrency?: number;
     asyncDeleteChunkSizes?: {
         primaryUpload: number;
         secondaryUpload?: number;
@@ -84,3 +85,4 @@ interface QuestionnaireConfig {
 }
 
 export const DEFAULT_ASYNC_UPLOAD_DELETE_CHUNK_SIZE = 100;
+export const DEFAULT_ASYNC_UPLOAD_MAX_CONCURRENCY = 6;

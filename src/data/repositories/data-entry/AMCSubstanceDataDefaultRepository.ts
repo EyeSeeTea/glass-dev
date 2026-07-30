@@ -201,7 +201,7 @@ export class AMCSubstanceDataDefaultRepository implements AMCSubstanceDataReposi
                 } of Calculated Consumption Data.`
             );
 
-            return importApiTracker(this.api, { events: d2TrackerEventsChunk }, importStrategy)
+            return importApiTracker(this.api, { events: d2TrackerEventsChunk }, { action: importStrategy, async: true })
                 .mapError(error => {
                     logger.error(
                         `[${new Date().toISOString()}] Substance level data: Error importing Calculated Consumption Data: ${error}`
@@ -280,7 +280,11 @@ export class AMCSubstanceDataDefaultRepository implements AMCSubstanceDataReposi
                         } of Calculated Consumption Data.`
                     );
 
-                    return importApiTracker(this.api, { events: d2EventsCalculatedConsumptionChunk }, "DELETE")
+                    return importApiTracker(
+                        this.api,
+                        { events: d2EventsCalculatedConsumptionChunk },
+                        { action: "DELETE", async: true }
+                    )
                         .mapError(error => {
                             consoleLogger.error(
                                 `[${new Date().toISOString()}] Error deleting Calculated Consumption Data: ${error}`
@@ -330,7 +334,11 @@ export class AMCSubstanceDataDefaultRepository implements AMCSubstanceDataReposi
                     return `[${new Date().toISOString()}] Unknown error while deleting Calculated Consumption Data in chunks.`;
                 });
         } else {
-            return importApiTracker(this.api, { events: d2EventsCalculatedConsumption }, "DELETE").flatMap(response => {
+            return importApiTracker(
+                this.api,
+                { events: d2EventsCalculatedConsumption },
+                { action: "DELETE", async: true }
+            ).flatMap(response => {
                 return Future.success(response);
             });
         }
