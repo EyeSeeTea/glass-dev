@@ -8,6 +8,14 @@ export class BrowserUploadsFormDataBuilder implements UploadsFormDataBuilder {
         return this.createFormData(fileBlob, "asyncImportSummaries.txt");
     }
 
+    getHeaders(): Record<string, string> {
+        return {};
+    }
+
+    getBody(formData: FormData): FormData {
+        return formData;
+    }
+
     createImportSummaryFormData(importSummary: ImportSummaryErrors): FormData {
         const fileBlob = new Blob([JSON.stringify(importSummary)], { type: "text/plain" });
 
