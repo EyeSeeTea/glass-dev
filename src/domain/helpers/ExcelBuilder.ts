@@ -43,13 +43,28 @@ export class ExcelBuilder {
         const { dataSources = [] } = template;
         const dataSourceValues = await this.getDataSourceValues(template, dataSources);
 
+        // Populating a large combined workbook (many countries/years) can itself take a long time
+        // with no visible progress otherwise — this brackets it with start/per-source/end logging.
+        // Purely observational; the fill logic below is unchanged.
+        const activeSources = dataSourceValues.filter(dataSource => !dataSource.skipPopulate);
+        console.log(
+            `[download] Populating template: ${payload.dataEntries.length} data entries` +
+                (payload.type === "trackerPrograms"
+                    ? `, ${payload.trackedEntityInstances.length} tracked entities`
+                    : "") +
+                ` across ${activeSources.length} data source(s)...`
+        );
+
         const metadata =
             payload.type === "trackerPrograms"
                 ? await this.downloadTemplateRepository.getBuilderMetadata(payload.trackedEntityInstances)
                 : emptyBuilderMetadata;
 
+        let sourceIndex = 0;
         for (const dataSource of dataSourceValues) {
             if (!dataSource.skipPopulate) {
+                sourceIndex++;
+                const startTime = Date.now();
                 switch (dataSource.type) {
                     case "cell":
                         await this.fillCells(template, dataSource, payload);
@@ -75,8 +90,14 @@ export class ExcelBuilder {
                     default:
                         throw new Error(`Type ${dataSource} not supported`);
                 }
+                const elapsedSeconds = Math.round((Date.now() - startTime) / 1000);
+                console.log(
+                    `[download] Populate data source ${sourceIndex}/${activeSources.length} ` +
+                        `(${dataSource.type}) done in ${elapsedSeconds}s`
+                );
             }
         }
+        console.log("[download] Template populated.");
     }
 
     private async getDataSourceValues(template: Template, dataSources: DataSource[]): Promise<DataSourceValue[]> {
@@ -125,6 +146,10 @@ export class ExcelBuilder {
     private async fillTeiRows(template: Template, dataSource: TeiRowDataSource, payload: DataPackage) {
         let { rowStart } = dataSource.attributes;
         if (payload.type !== "trackerPrograms") return;
+
+        // The attribute-id header for a given column is the same for every TEI row, so it is resolved
+        // once (lazily, from the first row's cells) instead of re-read on every row.
+        let attributeIdsByColumn: (string | undefined)[] | undefined;
 
         for (const tei of payload.trackedEntityInstances ?? []) {
             const { orgUnit, id, enrollment } = tei;
@@ -178,20 +203,29 @@ export class ExcelBuilder {
                     format(new Date(enrollment.incidentDate), dateFormatPattern)
                 );
 
-            for (const cell of cells) {
-                const attributeIdCell = await this.excelRepository.findRelativeCell(
-                    template.id,
-                    dataSource.attributeId,
-                    cell
-                );
+            if (!attributeIdsByColumn) {
+                attributeIdsByColumn = [];
+                for (const cell of cells) {
+                    const attributeIdCell = await this.excelRepository.findRelativeCell(
+                        template.id,
+                        dataSource.attributeId,
+                        cell
+                    );
 
-                const attributeId = attributeIdCell
-                    ? removeCharacters(
-                          await this.excelRepository.readCell(template.id, attributeIdCell, {
-                              formula: true,
-                          })
-                      )
-                    : undefined;
+                    const attributeId = attributeIdCell
+                        ? removeCharacters(
+                              await this.excelRepository.readCell(template.id, attributeIdCell, {
+                                  formula: true,
+                              })
+                          )
+                        : undefined;
+
+                    attributeIdsByColumn.push(attributeId);
+                }
+            }
+
+            for (const [index, cell] of cells.entries()) {
+                const attributeId = attributeIdsByColumn[index];
 
                 const attributeValue = tei.attributeValues.find(av => av.attribute.id === attributeId);
 
@@ -358,6 +392,10 @@ export class ExcelBuilder {
     private async fillRows(template: Template, dataSource: RowDataSource, payload: DataPackage) {
         let { rowStart } = dataSource.range;
 
+        // The dataElement/category header for a given column is the same for every data row, so it is
+        // resolved once (lazily, from the first row's cells) instead of re-read on every row.
+        let columnMeta: { dataElement?: string; category?: string }[] | undefined;
+
         for (const { id, orgUnit, period, attribute, dataValues } of payload.dataEntries) {
             const cells = await this.excelRepository.getCellsInRange(template.id, {
                 ...dataSource.range,
@@ -383,18 +421,26 @@ export class ExcelBuilder {
                 await this.excelRepository.writeCell(template.id, attributeCell, attribute);
             }
 
-            for (const cell of cells) {
-                const dataElementCell = await this.findRelative(template, dataSource.dataElement, cell);
+            if (!columnMeta) {
+                columnMeta = [];
+                for (const cell of cells) {
+                    const dataElementCell = await this.findRelative(template, dataSource.dataElement, cell);
+                    const categoryCell = await this.findRelative(template, dataSource.categoryOption, cell);
 
-                const categoryCell = await this.findRelative(template, dataSource.categoryOption, cell);
+                    const dataElement = dataElementCell
+                        ? removeCharacters(await this.excelRepository.readCell(template.id, dataElementCell))
+                        : undefined;
 
-                const dataElement = dataElementCell
-                    ? removeCharacters(await this.excelRepository.readCell(template.id, dataElementCell))
-                    : undefined;
+                    const category = categoryCell
+                        ? removeCharacters(await this.excelRepository.readCell(template.id, categoryCell))
+                        : undefined;
 
-                const category = categoryCell
-                    ? removeCharacters(await this.excelRepository.readCell(template.id, categoryCell))
-                    : undefined;
+                    columnMeta.push({ dataElement, category });
+                }
+            }
+
+            for (const [index, cell] of cells.entries()) {
+                const { dataElement, category } = columnMeta[index] ?? {};
 
                 const { value } =
                     dataValues.find(

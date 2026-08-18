@@ -337,14 +337,10 @@ export class ImportBLTemplateEventProgram {
     ): TrackerEvent[] {
         return dataPackage.dataEntries.map(
             ({ id, orgUnit, period, attribute, dataValues, dataForm, coordinate }, index) => {
-                console.debug({ id, orgUnit, period, attribute, dataValues, dataForm, coordinate }, index);
-
                 const occurredAt =
                     dataForm === AMC_RAW_SUBSTANCE_CONSUMPTION_PROGRAM_ID
                         ? moment(new Date(new Date(period).getFullYear(), 0, 1)).format("YYYY-MM-DD") ?? period
                         : period;
-
-                console.debug(occurredAt);
 
                 return {
                     event: id || (index + 6).toString(),

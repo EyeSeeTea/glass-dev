@@ -84,7 +84,7 @@ export const statusMap = (module?: string) =>
         [
             "PENDING_APPROVAL",
             {
-                title: i18n.t("WAITING WHO APROVAL"),
+                title: i18n.t("WAITING WHO APPROVAL"),
                 description: i18n.t(
                     'We have received your submission. You don\'t have to take action at this point. WHO staff will review your data and mark it as "ready" or contact you in case you need to modify something.'
                 ),

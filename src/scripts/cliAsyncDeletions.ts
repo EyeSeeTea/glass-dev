@@ -45,9 +45,6 @@ import { ProgramRulesMetadataDefaultRepository } from "../data/repositories/prog
 import { TrackerDefaultRepository } from "../data/repositories/TrackerDefaultRepository";
 import { DeleteDocumentInfoByUploadIdUseCase } from "../domain/usecases/DeleteDocumentInfoByUploadIdUseCase";
 import { RemoveAsyncDeletionByIdUseCase } from "../domain/usecases/RemoveAsyncDeletionByIdUseCase";
-import { SendNotificationsUseCase } from "../domain/usecases/SendNotificationsUseCase";
-import { NotificationRepository } from "../domain/repositories/NotificationRepository";
-import { UsersRepository } from "../domain/repositories/UsersRepository";
 import { DeletePrimaryFileDataUseCase } from "../domain/usecases/data-entry/DeletePrimaryFileDataUseCase";
 import { DeleteSecondaryFileDataUseCase } from "../domain/usecases/data-entry/DeleteSecondaryFileDataUseCase";
 import { DownloadDocumentAsArrayBufferUseCase } from "../domain/usecases/DownloadDocumentAsArrayBufferUseCase";
@@ -98,11 +95,15 @@ async function main() {
                 if (!process.env.REACT_APP_DHIS2_BASE_URL)
                     throw new Error("REACT_APP_DHIS2_BASE_URL  must be set in the .env file");
 
-                const token = process.env.REACT_APP_DHIS2_TOKEN_PROD || process.env.REACT_APP_DHIS2_TOKEN;
+                const token =
+                    process.env.REACT_APP_DHIS2_TOKEN_PROD ||
+                    process.env.REACT_APP_DHIS2_TOKEN_PREPROD ||
+                    process.env.REACT_APP_DHIS2_TOKEN_TRAINING ||
+                    process.env.REACT_APP_DHIS2_TOKEN;
 
                 if (!token && !process.env.REACT_APP_DHIS2_AUTH)
                     throw new Error(
-                        "Either REACT_APP_DHIS2_TOKEN_PROD, REACT_APP_DHIS2_TOKEN, or REACT_APP_DHIS2_AUTH must be set in the .env file"
+                        "Either REACT_APP_DHIS2_TOKEN_PROD, REACT_APP_DHIS2_TOKEN_PREPROD, REACT_APP_DHIS2_TOKEN_TRAINING, or REACT_APP_DHIS2_AUTH must be set in the .env file"
                     );
 
                 const envVars = token

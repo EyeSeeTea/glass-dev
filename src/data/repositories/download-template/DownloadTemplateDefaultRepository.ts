@@ -8,7 +8,7 @@ import {
 import { Instance } from "../../entities/Instance";
 import { getD2APiFromInstance } from "../../../utils/d2-api";
 import { TeiOuRequest as TrackedEntityOURequestApi } from "@eyeseetea/d2-api/api/trackedEntityInstances";
-import { promiseMap } from "../../../utils/promises";
+import { promiseMap, promiseMapConcurrent, retryAsync } from "../../../utils/promises";
 import { Id, NamedRef, Ref } from "../../../domain/entities/Ref";
 import { D2RelationshipConstraint } from "@eyeseetea/d2-api/schemas";
 import { Moment } from "moment";
@@ -112,7 +112,20 @@ export interface GetOptions {
     enrollmentStartDate?: Moment;
     enrollmentEndDate?: Moment;
     relationshipsOuFilter?: RelationshipOrgUnitFilter;
+    fetchConcurrency?: number;
+    orgUnitLabels?: Record<Id, string>;
 }
+
+// Progress-log label for an org unit: "code (id)" when a label is known, else just the id.
+function labelOrgUnit(orgUnit: Id, orgUnitLabels?: Record<Id, string>): string {
+    const label = orgUnitLabels?.[orgUnit];
+    return label ? `${label} (${orgUnit})` : orgUnit;
+}
+
+// DHIS2 tracker endpoints paginate at this size for both events and tracked entities. Fewer, larger
+// pages means fewer round-trips for the same total volume — friendlier to a connection-count-limiting
+// proxy than many small pages.
+const DOWNLOAD_PAGE_SIZE = 1000;
 
 export class DownloadTemplateDefaultRepository implements DownloadTemplateRepository {
     private api: D2Api;
@@ -292,15 +305,39 @@ export class DownloadTemplateDefaultRepository implements DownloadTemplateReposi
         startDate,
         endDate,
         translateCodes = true,
+        fetchConcurrency,
+        orgUnitLabels,
     }: GetDataPackageParams): Promise<DataPackage> {
         const metadata = await this.api.get<MetadataPackage>(`/programs/${id}/metadata`).getData();
 
-        const programEvents: D2TrackerEvent[] = [];
-
-        for (const orgUnit of orgUnits) {
-            const events = await this.getEventsForPopulatingBLTemplate(id, orgUnit, startDate, endDate);
-            programEvents.push(...events);
-        }
+        // Org units are fetched with bounded concurrency (fetchConcurrency, default 1 = fully
+        // sequential — the original behaviour, and what every caller other than the bulk script
+        // gets). promiseMapConcurrent writes results by input INDEX regardless of completion order,
+        // so the flattened event order below is identical to the old sequential push-loop's order
+        // at any concurrency level — output is deterministic, not just "the same data".
+        console.log(`[download] Fetching events for program ${id}: ${orgUnits.length} org unit(s)...`);
+        let completed = 0;
+        const eventsByOrgUnit = await promiseMapConcurrent(
+            orgUnits,
+            async orgUnit => {
+                const orgUnitStart = Date.now();
+                const events = await this.getEventsForPopulatingBLTemplate(id, orgUnit, startDate, endDate);
+                completed++;
+                const elapsedSeconds = ((Date.now() - orgUnitStart) / 1000).toFixed(1);
+                console.log(
+                    `[download] Events ${completed}/${orgUnits.length} (orgUnit ${labelOrgUnit(
+                        orgUnit,
+                        orgUnitLabels
+                    )}): ` + `+${events.length} in ${elapsedSeconds}s`
+                );
+                return events;
+            },
+            fetchConcurrency ?? 1
+        );
+        // Not logged here: the total is reported once, together with the year-filtered count and TEI
+        // count, by DownloadTemplate.getMultiPeriodDataPackage's "Data package fetched" summary line —
+        // logging it again here would just duplicate the same number back-to-back.
+        const programEvents = eventsByOrgUnit.flat();
 
         return {
             type: "programs",
@@ -336,19 +373,33 @@ export class DownloadTemplateDefaultRepository implements DownloadTemplateReposi
     private async getTrackerProgramPackage(params: GetDataPackageParams): Promise<DataPackage> {
         const { api } = this;
 
-        const dataPackage = await this.getProgramPackage(params);
         const orgUnits = params.orgUnits.map(id => ({ id }));
         const program = { id: params.id };
-        const trackedEntityInstances = await getTrackedEntityInstances({
-            api,
-            program,
-            orgUnits,
-            enrollmentStartDate: params.filterTEIEnrollmentDate ? params.startDate : undefined,
-            enrollmentEndDate: params.filterTEIEnrollmentDate ? params.endDate : undefined,
-            relationshipsOuFilter: params.relationshipsOuFilter,
-            // @ts-ignore FIXME: Add property in d2-api
-            fields: "*",
-        });
+
+        // The event pass and the tracked-entity pass are independent queries (different endpoints,
+        // no shared state, results merged only at the end), so they run concurrently rather than
+        // one after the other. On a bulk multi-country run the TEI pass is the shorter of the two,
+        // so its cost is absorbed almost entirely by the longer event pass.
+        // NOTE ON LOAD: each pass independently honours `fetchConcurrency`, so peak in-flight
+        // requests is 2 x fetchConcurrency, not fetchConcurrency. Callers that tune the latter
+        // against a connection limit (see FETCH_CONCURRENCY in bulkDownloadAMUFiles.ts) must size
+        // it for that doubling. Progress lines from the two passes interleave in the log as a
+        // result; they stay distinguishable by their "Events"/"TEIs" prefixes.
+        const [dataPackage, trackedEntityInstances] = await Promise.all([
+            this.getProgramPackage(params),
+            getTrackedEntityInstances({
+                api,
+                program,
+                orgUnits,
+                enrollmentStartDate: params.filterTEIEnrollmentDate ? params.startDate : undefined,
+                enrollmentEndDate: params.filterTEIEnrollmentDate ? params.endDate : undefined,
+                relationshipsOuFilter: params.relationshipsOuFilter,
+                fetchConcurrency: params.fetchConcurrency,
+                orgUnitLabels: params.orgUnitLabels,
+                // @ts-ignore FIXME: Add property in d2-api
+                fields: "*",
+            }),
+        ]);
 
         return {
             type: "trackerPrograms",
@@ -365,33 +416,43 @@ export class DownloadTemplateDefaultRepository implements DownloadTemplateReposi
     ): Promise<D2TrackerEvent[]> {
         const d2TrackerEvents: D2TrackerEvent[] = [];
 
-        const pageSize = 250;
         let page = 1;
         let result;
-        try {
-            do {
-                result = await this.api.tracker.events
+        do {
+            // Retry the individual page (not the whole org unit) so a single transient/proxy-blocked
+            // request doesn't force refetching every page already fetched for this org unit.
+            result = await retryAsync(() =>
+                this.api.tracker.events
                     .get({
                         fields: eventFields,
                         program: program,
                         orgUnit: orgUnit,
                         totalPages: true,
                         page,
-                        pageSize: 250,
+                        pageSize: DOWNLOAD_PAGE_SIZE,
                         occurredAfter: startDate?.format("YYYY-MM-DD"),
                         occurredBefore: endDate?.format("YYYY-MM-DD"),
                     })
-                    .getData();
-                if (!result.total) {
-                    throw new Error(`Error getting paginated events of program ${program} and organisation ${orgUnit}`);
-                }
-                d2TrackerEvents.push(...result.instances);
-                page++;
-            } while (result.page < Math.ceil((result.total as number) / pageSize));
-            return d2TrackerEvents;
-        } catch {
-            return [];
-        }
+                    .getData()
+            );
+
+            // total === 0 is a legitimate "no events for this org unit" result — return [] as before.
+            // total === undefined/null means the response didn't include pagination info at all
+            // (malformed/unexpected response, e.g. a proxy intercepting the request) — that must
+            // propagate as a real error rather than being silently treated as "no data", or a
+            // country's data could vanish from the output while the run reports success.
+            if (result.total == null) {
+                throw new Error(
+                    `Missing pagination total fetching events: program ${program}, orgUnit ${orgUnit}, page ${page}`
+                );
+            }
+            if (result.total === 0) return [];
+
+            d2TrackerEvents.push(...result.instances);
+            page++;
+        } while (result.page < Math.ceil((result.total as number) / DOWNLOAD_PAGE_SIZE));
+
+        return d2TrackerEvents;
     }
 
     /* Return the raw metadata filtering out non-relevant category option combos.
@@ -435,30 +496,50 @@ export class DownloadTemplateDefaultRepository implements DownloadTemplateReposi
 }
 
 async function getTrackedEntityInstances(options: GetOptions): Promise<TrackedEntityInstance[]> {
-    const { api, orgUnits, enrollmentStartDate, enrollmentEndDate, relationshipsOuFilter = "CAPTURE" } = options;
+    const { api, orgUnits, enrollmentStartDate, enrollmentEndDate, fetchConcurrency, orgUnitLabels } = options;
     if (_.isEmpty(orgUnits)) return [];
 
     const program = await getProgram(api, options.program.id);
     if (!program) return [];
 
-    const metadata = await getRelationshipMetadata(program, api, {
-        organisationUnits: orgUnits,
-        ouMode: relationshipsOuFilter,
-    });
+    // NOTE: relationship metadata is deliberately NOT fetched here. buildTei() (below) takes a
+    // `metadata: RelationshipMetadata` parameter but never reads it — TEI relationships are built
+    // directly from teiApi.relationships instead — so the previous getRelationshipMetadata(...) call
+    // here computed a value that was always discarded. It was also, per org unit, an UNBOUNDED
+    // (no startDate/endDate) full-history events fetch via getConstraintForTypeProgram, making it a
+    // major, entirely wasted cost. Passing a static empty value preserves buildTei's output exactly
+    // (same as before: the parameter was never used) while eliminating that dead work.
+    const metadata: RelationshipMetadata = { relationshipTypes: [] };
 
-    // Get TEIs for the first page:
-    const apiTeis: D2TrackerEntity[] = [];
-
-    for (const orgUnit of orgUnits) {
-        const trackedEntityInstances = await getTeisFromApi({
-            api,
-            program,
-            orgUnit,
-            enrollmentStartDate,
-            enrollmentEndDate,
-        });
-        apiTeis.push(...trackedEntityInstances);
-    }
+    // Same bounded-concurrency, order-preserving shape as getProgramPackage's event fetch.
+    console.log(`[download] Fetching tracked entities for program ${program.id}: ${orgUnits.length} org unit(s)...`);
+    let completed = 0;
+    const teisByOrgUnit = await promiseMapConcurrent(
+        orgUnits,
+        async orgUnit => {
+            const orgUnitStart = Date.now();
+            const trackedEntityInstances = await getTeisFromApi({
+                api,
+                program,
+                orgUnit,
+                enrollmentStartDate,
+                enrollmentEndDate,
+            });
+            completed++;
+            const elapsedSeconds = ((Date.now() - orgUnitStart) / 1000).toFixed(1);
+            console.log(
+                `[download] TEIs ${completed}/${orgUnits.length} (orgUnit ${labelOrgUnit(
+                    orgUnit.id,
+                    orgUnitLabels
+                )}): ` + `+${trackedEntityInstances.length} in ${elapsedSeconds}s`
+            );
+            return trackedEntityInstances;
+        },
+        fetchConcurrency ?? 1
+    );
+    // Not logged here for the same reason as getProgramPackage's event total: DownloadTemplate's
+    // "Data package fetched" summary already reports this count alongside the event/filtered totals.
+    const apiTeis = teisByOrgUnit.flat();
 
     return apiTeis.map(tei => buildTei(metadata, program, tei));
 }
@@ -548,16 +629,16 @@ async function getTeisFromApi(options: {
     const trackedEntities: D2TrackerEntity[] = [];
     const { api, program, orgUnit, enrollmentStartDate, enrollmentEndDate } = options;
 
-    const pageSize = 250;
     let page = 1;
     let result;
-    try {
-        do {
-            result = await api.tracker.trackedEntities
+    do {
+        // Retry the individual page — see getEventsForPopulatingBLTemplate for the same rationale.
+        result = await retryAsync(() =>
+            api.tracker.trackedEntities
                 .get({
                     program: program.id,
                     orgUnit: orgUnit.id,
-                    pageSize,
+                    pageSize: DOWNLOAD_PAGE_SIZE,
                     page,
                     totalPages: true,
                     fields: trackedEntitiesFields,
@@ -565,17 +646,24 @@ async function getTeisFromApi(options: {
                     enrollmentEnrolledAfter: enrollmentStartDate?.format("YYYY-MM-DD") ?? "",
                     enrollmentEnrolledBefore: enrollmentEndDate?.format("YYYY-MM-DD") ?? "",
                 })
-                .getData();
-            if (!result.total) {
-                throw new Error(`Error getting paginated events of program ${program} and organisation ${orgUnit}`);
-            }
-            trackedEntities.push(...result.instances);
-            page++;
-        } while (result.page < Math.ceil((result.total as number) / pageSize));
-        return trackedEntities;
-    } catch {
-        return [];
-    }
+                .getData()
+        );
+
+        // See getEventsForPopulatingBLTemplate: distinguish legitimately-empty (total === 0) from a
+        // malformed/unexpected response (total missing), which must propagate rather than be
+        // silently swallowed as "no tracked entities for this org unit".
+        if (result.total == null) {
+            throw new Error(
+                `Missing pagination total fetching tracked entities: program ${program.id}, orgUnit ${orgUnit.id}, page ${page}`
+            );
+        }
+        if (result.total === 0) return [];
+
+        trackedEntities.push(...result.instances);
+        page++;
+    } while (result.page < Math.ceil((result.total as number) / DOWNLOAD_PAGE_SIZE));
+
+    return trackedEntities;
 }
 
 function buildTei(metadata: RelationshipMetadata, program: Program, teiApi: D2TrackerEntity): TrackedEntityInstance {
@@ -757,15 +845,16 @@ const trackedEntitiesFields = {
 
 type D2TrackerEntity = SelectedPick<D2TrackerTrackedEntitySchema, typeof trackedEntitiesFields>;
 
+// Scoped to exactly what getProgramPackage's map (below) reads. $owner/latitude/longitude were
+// fetched but never consumed — for a large multi-year, all-country PRODUCT pull (order of a million
+// events) that unused payload is a meaningful, avoidable share of both the response size and the
+// peak heap the events array occupies.
 const eventFields = {
-    $owner: true,
     event: true,
     dataValues: true,
     orgUnit: true,
     occurredAt: true,
     attributeOptionCombo: true,
-    latitude: true,
-    longitude: true,
     trackedEntity: true,
     programStage: true,
 } as const;

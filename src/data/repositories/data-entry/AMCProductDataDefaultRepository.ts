@@ -2,6 +2,8 @@ import _ from "lodash";
 import { D2Api, MetadataPick, SelectedPick } from "@eyeseetea/d2-api/2.34";
 import { Future, FutureData } from "../../../domain/entities/Future";
 import { SpreadsheetXlsxDataSource } from "../SpreadsheetXlsxDefaultRepository";
+import { Spreadsheet, Row } from "../../../domain/repositories/SpreadsheetXlsxRepository";
+import i18n from "../../../locales";
 import { D2TrackerTrackedEntitySchema, TrackedEntitiesGetResponse } from "@eyeseetea/d2-api/api/trackerTrackedEntities";
 import { Id } from "../../../domain/entities/Ref";
 import {
@@ -29,7 +31,7 @@ import {
 } from "../utils/importApiTracker";
 import { logger } from "../../../utils/logger";
 import moment from "moment";
-import { ImportStrategy } from "../../../domain/entities/data-entry/ImportSummary";
+import { ConsistencyError, ImportStrategy } from "../../../domain/entities/data-entry/ImportSummary";
 import consoleLogger from "../../../utils/consoleLogger";
 import { TrackerEvent } from "../../../domain/entities/TrackedEntityInstance";
 
@@ -126,6 +128,103 @@ export class AMCProductDataDefaultRepository implements AMCProductDataRepository
                     };
             }
         );
+    }
+
+    checkTeiIdIntegrity(file: File): FutureData<ConsistencyError[]> {
+        return Future.fromPromise(new SpreadsheetXlsxDataSource().read(file)).map(spreadsheet =>
+            this.getTeiIdIntegrityErrors(spreadsheet)
+        );
+    }
+
+    checkTeiIdIntegrityFromArrayBuffer(fileArrayBuffer: ArrayBuffer): FutureData<ConsistencyError[]> {
+        return Future.fromPromise(new SpreadsheetXlsxDataSource().readFromArrayBuffer(fileArrayBuffer)).map(
+            spreadsheet => this.getTeiIdIntegrityErrors(spreadsheet)
+        );
+    }
+
+    // Validates the TEIid linking key between the "TEI Instances" tab (sheet[0]) and the "Raw Product
+    // Consumption" tab (sheet[1]) on the RAW spreadsheet, before template parsing. The template parser
+    // silently repairs/drops the problems this catches: a blank product TEIid gets a random UID
+    // auto-assigned (orphaning it, since no consumption row can ever match a value it doesn't have),
+    // and a consumption row with a blank or unmatched TEIId is dropped outright — neither surfaces as
+    // an error downstream, so this must read the sheets directly rather than the parsed entities.
+    private getTeiIdIntegrityErrors(spreadsheet: Spreadsheet): ConsistencyError[] {
+        const teiSheet = spreadsheet.sheets[0]; // TEI Instances
+        const productSheet = spreadsheet.sheets[1]; // Raw Product Consumption
+        const teiHeaderRow = teiSheet?.rows[0];
+        const productHeaderRow = productSheet?.rows[0];
+        // A missing sheet/header row is already reported by validate()/validateFileBuffer(); nothing
+        // further to check here.
+        if (!teiSheet || !productSheet || !teiHeaderRow || !productHeaderRow) return [];
+
+        const sanitize = (value: unknown): string => String(value ?? "").replace(/[* \n\r]/g, "");
+        const findColumnKey = (headerRow: Row<string>, headerName: string): string | undefined =>
+            Object.entries(headerRow).find(([, value]) => sanitize(value) === headerName)?.[0];
+
+        // Column header casing differs between the two tabs in the real template ("TEIid" vs "TEIId").
+        const teiIdKey = findColumnKey(teiHeaderRow, "TEIid");
+        const productTeiIdKey = findColumnKey(productHeaderRow, "TEIId");
+        // A missing TEIid/TEIId column entirely is already reported by validate()/validateFileBuffer().
+        if (!teiIdKey || !productTeiIdKey) return [];
+
+        // rows[0] is the header row; data starts at rows[1]. "line" here is the 1-based data-row number
+        // (row 1 = first product/consumption row after the header), for a readable error message.
+        const teiRows = teiSheet.rows.slice(1).map((row, i) => ({ id: sanitize(row[teiIdKey]), line: i + 1 }));
+        const productRows = productSheet.rows
+            .slice(1)
+            .map((row, i) => ({ id: sanitize(row[productTeiIdKey]), line: i + 1 }));
+
+        const errors: ConsistencyError[] = [];
+
+        // 1. Blank TEIid in TEI Instances.
+        const blankTeiRows = teiRows.filter(r => !r.id);
+        if (blankTeiRows.length > 0) {
+            errors.push({
+                error: i18n.t('TEI Instances tab: rows with a blank "TEIid"'),
+                lines: blankTeiRows.map(r => r.line),
+                count: blankTeiRows.length,
+            });
+        }
+
+        // 2. Duplicate TEIid within TEI Instances.
+        const duplicateTeiIdGroups = _(teiRows)
+            .filter(r => !!r.id)
+            .groupBy("id")
+            .pickBy(group => group.length > 1)
+            .value();
+        Object.entries(duplicateTeiIdGroups).forEach(([id, group]) => {
+            errors.push({
+                error: i18n.t(`TEI Instances tab: duplicate "TEIid" value "${id}"`),
+                lines: group.map(r => r.line),
+                count: group.length,
+            });
+        });
+
+        // 3. Blank TEIId in Raw Product Consumption.
+        const blankProductRows = productRows.filter(r => !r.id);
+        if (blankProductRows.length > 0) {
+            errors.push({
+                error: i18n.t('Raw Product Consumption tab: rows with a blank "TEIId"'),
+                lines: blankProductRows.map(r => r.line),
+                count: blankProductRows.length,
+            });
+        }
+
+        // 4. TEIId in Raw Product Consumption that does not exist in TEI Instances.
+        const validTeiIds = new Set(teiRows.filter(r => !!r.id).map(r => r.id));
+        const orphanGroups = _(productRows)
+            .filter(r => !!r.id && !validTeiIds.has(r.id))
+            .groupBy("id")
+            .value();
+        Object.entries(orphanGroups).forEach(([id, group]) => {
+            errors.push({
+                error: i18n.t(`Raw Product Consumption tab: "TEIId" "${id}" does not exist in the TEI Instances tab`),
+                lines: group.map(r => r.line),
+                count: group.length,
+            });
+        });
+
+        return errors;
     }
 
     // TODO: decouple TrackerPostResponse from DHIS2

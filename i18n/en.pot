@@ -255,7 +255,7 @@ msgid ""
 "everything is fine send it to WHO for revision."
 msgstr ""
 
-msgid "WAITING WHO APROVAL"
+msgid "WAITING WHO APPROVAL"
 msgstr ""
 
 msgid ""

@@ -5,6 +5,7 @@ import { ProductDataTrackedEntity } from "../../entities/data-entry/amc/ProductD
 import { ProductRegisterProgramMetadata, ProgramStage } from "../../entities/data-entry/amc/ProductRegisterProgram";
 import { RawSubstanceConsumptionCalculated } from "../../entities/data-entry/amc/RawSubstanceConsumptionCalculated";
 import { ImportStrategy } from "../../entities/data-entry/DataValuesSaveSummary";
+import { ConsistencyError } from "../../entities/data-entry/ImportSummary";
 
 export interface AMCProductDataRepository {
     validate(
@@ -12,6 +13,13 @@ export interface AMCProductDataRepository {
         teiDataColumns: string[],
         rawProductDataColumns: string[]
     ): FutureData<{ isValid: boolean; rows: number; specimens: string[] }>;
+    // Validates the TEIid linking key between the "TEI Instances" and "Raw Product Consumption" tabs
+    // (blank/duplicate TEIid, and consumption rows referencing a TEIId absent from TEI Instances).
+    // Must run on the raw file BEFORE template parsing, since the parser silently repairs/drops these
+    // problems (a blank product TEIid gets an auto-generated UID; an unmatched/blank consumption row
+    // is dropped) rather than surfacing them as errors.
+    checkTeiIdIntegrity(file: File): FutureData<ConsistencyError[]>;
+    checkTeiIdIntegrityFromArrayBuffer(fileArrayBuffer: ArrayBuffer): FutureData<ConsistencyError[]>;
     importCalculations(params: {
         importStrategy: ImportStrategy;
         productDataTrackedEntities: ProductDataTrackedEntity[];

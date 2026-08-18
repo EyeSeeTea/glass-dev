@@ -28,8 +28,7 @@ import consoleLogger from "../utils/consoleLogger";
 const AMC_MODULE_ID = "BVnik5xiXGJ";
 
 function getEnvVars(): { url: string; token?: string; auth?: { username: string; password: string } } {
-    if (!process.env.REACT_APP_DHIS2_BASE_URL)
-        throw new Error("REACT_APP_DHIS2_BASE_URL must be set in the .env file");
+    if (!process.env.REACT_APP_DHIS2_BASE_URL) throw new Error("REACT_APP_DHIS2_BASE_URL must be set in the .env file");
 
     const url = process.env.REACT_APP_DHIS2_BASE_URL;
     const token = process.env.REACT_APP_DHIS2_TOKEN_PROD || process.env.REACT_APP_DHIS2_TOKEN;
@@ -44,8 +43,7 @@ function getEnvVars(): { url: string; token?: string; auth?: { username: string;
     const auth = process.env.REACT_APP_DHIS2_AUTH!;
     const username = auth.split(":")[0] ?? "";
     const password = auth.split(":")[1] ?? "";
-    if (!username || !password)
-        throw new Error("REACT_APP_DHIS2_AUTH must be in the format 'username:password'");
+    if (!username || !password) throw new Error("REACT_APP_DHIS2_AUTH must be in the format 'username:password'");
     return { url, auth: { username, password } };
 }
 

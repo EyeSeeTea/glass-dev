@@ -19,6 +19,13 @@ export interface GetDataPackageParams {
     translateCodes?: boolean;
     relationshipsOuFilter?: RelationshipOrgUnitFilter;
     filterTEIEnrollmentDate?: boolean;
+    /** Max concurrent per-org-unit fetches (events / tracked entities). Defaults to 1 (sequential)
+     *  when omitted — existing callers are unaffected unless they opt in. */
+    fetchConcurrency?: number;
+    /** Optional id -> human-readable label (e.g. country code) used only for progress logging
+     *  during the per-org-unit fetch loops. Falls back to the raw org unit id when omitted or when
+     *  a given id has no entry. */
+    orgUnitLabels?: Record<Id, string>;
 }
 
 export interface GetElementMetadataParams {
