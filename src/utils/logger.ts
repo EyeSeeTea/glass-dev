@@ -27,6 +27,15 @@ export async function setupLogger(instance: Instance, options?: { isDebug?: bool
     });
 }
 
+export async function setupConsoleLogger(options?: { isDebug?: boolean }): Promise<void> {
+    const { isDebug = false } = options ?? {};
+
+    logger = await initLogger({
+        type: "console",
+        debug: isDebug,
+    });
+}
+
 export async function setupLoggerForTesting(): Promise<void> {
     logger = await initLogger({
         type: "console",

@@ -8,15 +8,24 @@ import {
     SpreadsheetDataSource,
 } from "../../domain/repositories/SpreadsheetXlsxRepository";
 
+// READ_OPTIONS_NOTE: we read with { raw: true } (not { cellDates: true }) so every cell is kept
+// as the literal text the user typed. cellDates coerces date-like cells into JS Date objects, which
+// (a) breaks the ISO date-format validation (a Date stringifies to "Wed Oct 09 2024 ...") and
+// (b) shifts the calendar day depending on the runtime timezone. Downstream readers (getNumberValue,
+// getTextValue) tolerate string values, so this is safe for every module that uses this data source.
 export class SpreadsheetXlsxDataSource implements SpreadsheetDataSource {
     async read(inputFile: File): Async<Spreadsheet> {
-        const arrayBuffer = await inputFile.arrayBuffer();
-        return this.readFromArrayBuffer(arrayBuffer, inputFile.name);
+        try {
+            const arrayBuffer = await inputFile.arrayBuffer();
+            return this.readFromArrayBuffer(arrayBuffer, inputFile.name);
+        } catch (e) {
+            return { name: "", sheets: [] };
+        }
     }
 
     async readFromArrayBuffer(arrayBuffer: ArrayBuffer, fileName?: string): Async<Spreadsheet> {
         try {
-            const workbook = XLSX.read(arrayBuffer, { cellDates: true, type: "array" });
+            const workbook = XLSX.read(arrayBuffer, { raw: true }); // see READ_OPTIONS_NOTE below
 
             const sheets = _(workbook.Sheets)
                 .toPairs()
@@ -44,7 +53,11 @@ export class SpreadsheetXlsxDataSource implements SpreadsheetDataSource {
     }
 
     async readFromBlob(blob: Blob, fileName?: string): Async<Spreadsheet> {
-        const arrayBuffer = await blob.arrayBuffer();
-        return this.readFromArrayBuffer(arrayBuffer, fileName);
+        try {
+            const arrayBuffer = await blob.arrayBuffer();
+            return this.readFromArrayBuffer(arrayBuffer, fileName || "");
+        } catch (e) {
+            return { name: "", sheets: [] };
+        }
     }
 }

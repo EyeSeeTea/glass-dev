@@ -1,6 +1,6 @@
 import Papa from "papaparse";
 import { Readable } from "stream";
-
+import * as XLSX from "xlsx";
 import { Row } from "../../../domain/repositories/SpreadsheetXlsxRepository";
 import consoleLogger from "../../../utils/consoleLogger";
 
@@ -12,6 +12,18 @@ export function getTextValue(row: Row<string>, column: string): string {
 
 export function getNumberValue(row: Row<string>, column: string): number {
     return +(row[column] || 0);
+}
+
+// Reads a value from a date column. The spreadsheet reader keeps every cell as the literal text the
+// user typed, so CSV dates arrive as strings (e.g. "2024-10-09") and are passed through untouched —
+// letting date-format validation check exactly what was typed. A true .xlsx date cell instead arrives
+// as an Excel serial *number*, which we convert to an ISO YYYY-MM-DD string. XLSX.SSF.format uses
+// serial arithmetic (no JS Date), so the calendar day is stable regardless of runtime timezone.
+export function getDateValue(row: Row<string>, column: string): string {
+    const value = row[column] as unknown;
+    if (typeof value === "number") return XLSX.SSF.format("yyyy-mm-dd", value);
+    if (typeof value === "string") return value;
+    return "";
 }
 
 export function doesColumnExist(header: string[], column: string): boolean {

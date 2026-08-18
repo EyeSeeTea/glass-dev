@@ -1,12 +1,18 @@
+import _ from "lodash";
 import { Future, FutureData } from "../../../domain/entities/Future";
 import {
     CustomDataColumns,
     CustomDataElementNumber,
     CustomDataElementString,
 } from "../../../domain/entities/data-entry/amr-individual-fungal-external/RISIndividualFungalData";
+import { RISIndividualFungalDataRepository } from "../../../domain/repositories/data-entry/RISIndividualFungalDataRepository";
+import { Row } from "../../../domain/repositories/SpreadsheetXlsxRepository";
+import { AMR_INDIVIDUAL_FUNGAL_DATE_COLUMNS } from "../../../domain/usecases/data-entry/amr-individual-fungal/RISIndividualFungalFileValidations";
+import consoleLogger from "../../../utils/consoleLogger";
 import { SpreadsheetXlsxDataSource } from "../SpreadsheetXlsxDefaultRepository";
 import {
     doesColumnExist,
+    getDateValue,
     getNumberValue,
     getRowCountAndSelectDistinctFromCsv,
     getTextValue,
@@ -14,33 +20,41 @@ import {
     parseCsvBlobInChunks,
     validateCsvHeaders,
 } from "../utils/CSVUtils";
-import { RISIndividualFungalDataRepository } from "../../../domain/repositories/data-entry/RISIndividualFungalDataRepository";
-import consoleLogger from "../../../utils/consoleLogger";
+
+const DATE_COLUMN_KEYS: string[] = AMR_INDIVIDUAL_FUNGAL_DATE_COLUMNS;
 
 // AMR - INDIVIDUAL and AMR - FUNGAL MODULE: RIS INDIVIDUAL & FUNGAL DATA FILE
 export class RISIndividualFungalDataCSVDefaultRepository implements RISIndividualFungalDataRepository {
+    private mapRowToCustomDataColumns(dataColumns: CustomDataColumns, row: Row<string>): CustomDataColumns {
+        return dataColumns.map(column => {
+            // Date columns are normalized to ISO strings (handles both CSV literals and .xlsx serials).
+            if (DATE_COLUMN_KEYS.includes(column.key))
+                return {
+                    key: column.key,
+                    type: "string",
+                    value: getDateValue(row, column.key),
+                } as CustomDataElementString;
+            else if (column.type === "string")
+                return {
+                    key: column.key,
+                    type: column.type,
+                    value: getTextValue(row, column.key),
+                } as CustomDataElementString;
+            else
+                return {
+                    key: column.key,
+                    type: column.type,
+                    value: getNumberValue(row, column.key),
+                } as CustomDataElementNumber;
+        });
+    }
+
     get(dataColumns: CustomDataColumns, file: File): FutureData<CustomDataColumns[]> {
         return Future.fromPromise(new SpreadsheetXlsxDataSource().read(file)).map(spreadsheet => {
             const sheet = spreadsheet.sheets[0]; //Only one sheet for AMR Individual & Fungal
 
             const rows: CustomDataColumns[] =
-                sheet?.rows.map(row => {
-                    const data: CustomDataColumns = dataColumns.map(column => {
-                        if (column.type === "string")
-                            return {
-                                key: column.key,
-                                type: column.type,
-                                value: getTextValue(row, column.key),
-                            } as CustomDataElementString;
-                        else
-                            return {
-                                key: column.key,
-                                type: column.type,
-                                value: getNumberValue(row, column.key),
-                            } as CustomDataElementNumber;
-                    });
-                    return data;
-                }) || [];
+                sheet?.rows.map(row => this.mapRowToCustomDataColumns(dataColumns, row)) || [];
             return rows;
         });
     }
@@ -114,23 +128,7 @@ export class RISIndividualFungalDataCSVDefaultRepository implements RISIndividua
             const sheet = spreadsheet.sheets[0]; //Only one sheet for AMR Individual & Fungal
 
             const rows: CustomDataColumns[] =
-                sheet?.rows.map(row => {
-                    const data: CustomDataColumns = dataColumns.map(column => {
-                        if (column.type === "string")
-                            return {
-                                key: column.key,
-                                type: column.type,
-                                value: getTextValue(row, column.key),
-                            } as CustomDataElementString;
-                        else
-                            return {
-                                key: column.key,
-                                type: column.type,
-                                value: getNumberValue(row, column.key),
-                            } as CustomDataElementNumber;
-                    });
-                    return data;
-                }) || [];
+                sheet?.rows.map(row => this.mapRowToCustomDataColumns(dataColumns, row)) || [];
             return rows;
         });
     }

@@ -155,6 +155,122 @@ export class ImportBLTemplateEventProgram {
         });
     }
 
+    // Node-friendly variant of import(): reads the template from an ArrayBuffer (no File object)
+    // and takes the upload id directly instead of a localStorage key. Behaviour is otherwise
+    // identical to import(); kept separate so the browser/UI path is completely unchanged.
+    // NOTICE: keep the import/validation logic in sync with import() above.
+    public importAsBuffer(
+        fileArrayBuffer: ArrayBuffer,
+        action: ImportStrategy,
+        eventListFileId: string | undefined,
+        moduleName: string,
+        orgUnitId: string,
+        orgUnitName: string,
+        period: string,
+        programId: string,
+        uploadId: string,
+        calculatedEventListFileId?: string,
+        encryptionData?: EncryptionData
+    ): FutureData<ImportSummary> {
+        return this.excelRepository.loadTemplateFromArrayBuffer(fileArrayBuffer, programId).flatMap(_templateId => {
+            const template = _.values(templates)
+                .map(TemplateClass => new TemplateClass())
+                .filter(t => t.id === "PROGRAM_GENERATED_v4")[0];
+            return this.instanceRepository.getProgram(programId).flatMap(program => {
+                if (template) {
+                    return readTemplate(
+                        template,
+                        program,
+                        this.excelRepository,
+                        this.instanceRepository,
+                        programId
+                    ).flatMap(dataPackage => {
+                        if (dataPackage) {
+                            return this.buildEventsPayload(
+                                dataPackage,
+                                action,
+                                programId,
+                                eventListFileId,
+                                calculatedEventListFileId,
+                                encryptionData
+                            ).flatMap(events => {
+                                if (action === "CREATE_AND_UPDATE") {
+                                    if (!events.length)
+                                        return Future.error("The file is empty or failed while reading the file.");
+
+                                    //Run validations on import only
+                                    return this.validateEvents(
+                                        events,
+                                        orgUnitId,
+                                        orgUnitName,
+                                        period,
+                                        programId
+                                    ).flatMap(validatedEventResults => {
+                                        if (validatedEventResults.blockingErrors.length > 0) {
+                                            const errorSummary: ImportSummary = {
+                                                status: "ERROR",
+                                                importCount: {
+                                                    ignored: 0,
+                                                    imported: 0,
+                                                    deleted: 0,
+                                                    updated: 0,
+                                                    total: 0,
+                                                },
+                                                nonBlockingErrors: validatedEventResults.nonBlockingErrors,
+                                                blockingErrors: validatedEventResults.blockingErrors,
+                                            };
+                                            return Future.success(errorSummary);
+                                        } else {
+                                            const eventIdLineNoMap: { id: string; lineNo: number }[] = [];
+                                            const eventsWithId = validatedEventResults.events?.map(e => {
+                                                const generatedId = generateId();
+                                                eventIdLineNoMap.push({
+                                                    id: generatedId,
+                                                    lineNo: isNaN(parseInt(e.event)) ? 0 : parseInt(e.event),
+                                                });
+                                                e.event = generatedId;
+                                                return e;
+                                            });
+                                            return this.dhis2EventsDefaultRepository
+                                                .import({ events: eventsWithId ?? [] }, action)
+                                                .flatMap(result => {
+                                                    return mapToImportSummary(
+                                                        result,
+                                                        "event",
+                                                        this.metadataRepository,
+                                                        {
+                                                            nonBlockingErrors: validatedEventResults.nonBlockingErrors,
+                                                            eventIdLineNoMap,
+                                                        }
+                                                    ).flatMap(summary => {
+                                                        return uploadIdListFileAndSaveWithUploadId(
+                                                            uploadId,
+                                                            summary,
+                                                            moduleName,
+                                                            this.glassDocumentsRepository,
+                                                            this.glassUploadsRepository
+                                                        );
+                                                    });
+                                                });
+                                        }
+                                    });
+                                } //action === "DELETE"
+                                else {
+                                    // NOTICE: check also DeleteBLTemplateEventProgram.ts that contains same code adapted for node environment (only DELETE)
+                                    return this.deleteEvents(events);
+                                }
+                            });
+                        } else {
+                            return Future.error("Unknown template");
+                        }
+                    });
+                } else {
+                    return Future.error("Unknown template");
+                }
+            });
+        });
+    }
+
     private deleteEvents(events: TrackerEvent[]): FutureData<ImportSummary> {
         return this.dhis2EventsDefaultRepository.import({ events }, "DELETE").flatMap(result => {
             return mapToImportSummary(result, "event", this.metadataRepository).flatMap(({ importSummary }) => {
@@ -338,6 +454,30 @@ export class ImportBLTemplateEventProgram {
         return encryptedString;
     }
 }
+
+// Node-friendly variant of uploadIdListFileAndSave that receives the upload id directly instead
+// of reading it from localStorage (which does not exist in Node). Behaviour is otherwise identical.
+export const uploadIdListFileAndSaveWithUploadId = (
+    uploadId: string,
+    summary: ImportSummaryWithEventIdList,
+    moduleName: string,
+    glassDocumentsRepository: GlassDocumentsRepository,
+    glassUploadsRepository: GlassUploadsRepository
+): FutureData<ImportSummary> => {
+    if (summary.eventIdList.length > 0 && uploadId) {
+        const eventListBlob = new Blob([JSON.stringify(summary.eventIdList)], {
+            type: "text/plain",
+        });
+        const eventIdListFile = new File([eventListBlob], `${uploadId}_eventIdsFile`);
+        return glassDocumentsRepository.save(eventIdListFile, moduleName).flatMap(fileId => {
+            return glassUploadsRepository.setEventListFileId(uploadId, fileId).flatMap(() => {
+                return Future.success(summary.importSummary);
+            });
+        });
+    } else {
+        return Future.success(summary.importSummary);
+    }
+};
 
 export const uploadIdListFileAndSave = (
     uploadIdLocalStorageName: string,
