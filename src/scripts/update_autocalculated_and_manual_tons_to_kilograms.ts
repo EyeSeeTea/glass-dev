@@ -209,7 +209,16 @@ async function getD2TrackerEventsFromProgramAsync(
         } while (result.page < Math.ceil((result.total as number) / pageSize));
         return d2TrackerEvents;
     } catch (e) {
-        return [];
+        // Never swallow a paging failure: returning [] here would discard the pages already fetched
+        // AND make the caller report "0 events updated" as a success, so a half-read program would
+        // look like a completed no-op migration. Fail loudly instead — a partial read must not be
+        // mistaken for "nothing to convert".
+        const message = e instanceof Error ? e.message : String(e);
+        throw new Error(
+            `Failed to fetch events for program ${programId}${
+                programStageId ? ` / stage ${programStageId}` : ""
+            } after ${d2TrackerEvents.length} event(s) (page ${page}): ${message}`
+        );
     }
 }
 

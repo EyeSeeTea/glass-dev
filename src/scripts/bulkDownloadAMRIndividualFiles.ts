@@ -45,7 +45,7 @@ import v8 from "node:v8";
 
 import { getD2APiFromInstance } from "../utils/d2-api";
 import { getInstance, warmUpSession } from "./common";
-import { promiseMapConcurrent, retryAsync } from "../utils/promises";
+import { isRetryableError, promiseMapConcurrent, retryAsync } from "../utils/promises";
 import { setupConsoleLogger } from "../utils/logger";
 
 import { DataStoreClient } from "../data/data-store/DataStoreClient";
@@ -361,7 +361,15 @@ async function fetchPageWithRetry<T>(operation: () => Promise<T>): Promise<T> {
                 throw error;
             }
         },
-        { attempts: 3, baseDelayMs: 2000 }
+        {
+            attempts: 3,
+            baseDelayMs: 2000,
+            // retryAsync's default treats 401/403 as non-retryable, which is right for a caller that
+            // cannot do anything about them. Here it would be wrong: the wrapper above has just
+            // refreshed the session, so the *next* attempt is precisely what makes the refresh
+            // worth doing. Allow auth errors through, and defer to the default for everything else.
+            shouldRetry: error => isAuthError(error) || isRetryableError(error),
+        }
     );
 }
 
