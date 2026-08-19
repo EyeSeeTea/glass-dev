@@ -140,7 +140,9 @@
         "migrate-uploads-from-datastore-to-program": "npx ts-node -r dotenv/config src/scripts/uploads_datastore_to_uploads_event_program_migration.ts",
         "add-upload-date-uploads-event-program": "npx ts-node -r dotenv/config src/scripts/add_upload_date_uploads_event_program.ts",
         "bulk-download-amc-files": "cross-env NODE_OPTIONS=--max-old-space-size=8192 npx ts-node -r ./src/scripts/registerD2UiComponentsCjsInterop.js -r dotenv/config src/scripts/bulkDownloadAMUFiles.ts",
-        "bulk-download-amr-individual-files": "cross-env NODE_OPTIONS=--max-old-space-size=8192 npx ts-node -r ./src/scripts/registerD2UiComponentsCjsInterop.js -r dotenv/config src/scripts/bulkDownloadAMRIndividualFiles.ts"
+        "bulk-download-amr-individual-files": "cross-env NODE_OPTIONS=--max-old-space-size=8192 npx ts-node -r ./src/scripts/registerD2UiComponentsCjsInterop.js -r dotenv/config src/scripts/bulkDownloadAMRIndividualFiles.ts",
+        "update-tons-to-kilograms": "npx ts-node -r dotenv/config src/scripts/update_autocalculated_and_manual_tons_to_kilograms.ts",
+        "migrate-async-deletions-datastore": "npx ts-node -r dotenv/config src/scripts/async_deletions_migrate_new_datastore.ts"
     },
     "manifest.webapp": {
         "name": "glass",
