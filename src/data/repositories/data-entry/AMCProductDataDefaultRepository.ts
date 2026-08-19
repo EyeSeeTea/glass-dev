@@ -180,7 +180,7 @@ export class AMCProductDataDefaultRepository implements AMCProductDataRepository
         const blankTeiRows = teiRows.filter(r => !r.id);
         if (blankTeiRows.length > 0) {
             errors.push({
-                error: i18n.t('TEI Instances tab: rows with a blank "TEIid"'),
+                error: i18n.t('TEI Instances tab — rows with a blank "TEIid"'),
                 lines: blankTeiRows.map(r => r.line),
                 count: blankTeiRows.length,
             });
@@ -194,7 +194,7 @@ export class AMCProductDataDefaultRepository implements AMCProductDataRepository
             .value();
         Object.entries(duplicateTeiIdGroups).forEach(([id, group]) => {
             errors.push({
-                error: i18n.t(`TEI Instances tab: duplicate "TEIid" value "${id}"`),
+                error: i18n.t('TEI Instances tab — duplicate "TEIid" value "{{id}}"', { id }),
                 lines: group.map(r => r.line),
                 count: group.length,
             });
@@ -204,7 +204,7 @@ export class AMCProductDataDefaultRepository implements AMCProductDataRepository
         const blankProductRows = productRows.filter(r => !r.id);
         if (blankProductRows.length > 0) {
             errors.push({
-                error: i18n.t('Raw Product Consumption tab: rows with a blank "TEIId"'),
+                error: i18n.t('Raw Product Consumption tab — rows with a blank "TEIId"'),
                 lines: blankProductRows.map(r => r.line),
                 count: blankProductRows.length,
             });
@@ -218,7 +218,12 @@ export class AMCProductDataDefaultRepository implements AMCProductDataRepository
             .value();
         Object.entries(orphanGroups).forEach(([id, group]) => {
             errors.push({
-                error: i18n.t(`Raw Product Consumption tab: "TEIId" "${id}" does not exist in the TEI Instances tab`),
+                error: i18n.t(
+                    'Raw Product Consumption tab — "TEIId" "{{id}}" does not exist in the TEI Instances tab',
+                    {
+                        id,
+                    }
+                ),
                 lines: group.map(r => r.line),
                 count: group.length,
             });
