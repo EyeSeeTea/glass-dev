@@ -54,6 +54,10 @@ src/scripts/d2_tracker_events_updated.json
 /glass-async-deletions-server
 /glass-async-uploads-server
 
-.prettierrc.js
+# editor / tooling scratch
+.claude/
+.vs/
+
+# security scan output
 snyk-report.html
-.vs/slnx.sqlite
+snyk-results.json
