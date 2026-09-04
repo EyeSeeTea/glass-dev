@@ -60,4 +60,42 @@ export class ImportAMCSubstanceLevelData {
             calculatedEventListFileId
         );
     }
+
+    // Node-friendly variant of import(): reads the file from an ArrayBuffer and takes the upload id
+    // directly (no File object, no localStorage). Mirrors ImportAMCProductLevelData's AsBuffer method.
+    public importAsBuffer(
+        fileArrayBuffer: ArrayBuffer,
+        action: ImportStrategy,
+        eventListId: string | undefined,
+        moduleName: string,
+        orgUnitId: string,
+        orgUnitName: string,
+        period: string,
+        uploadId: string,
+        calculatedEventListFileId?: string
+    ): FutureData<ImportSummary> {
+        const importBLTemplateEventProgram = new ImportBLTemplateEventProgram(
+            this.excelRepository,
+            this.instanceRepository,
+            this.glassDocumentsRepository,
+            this.glassUploadsRepository,
+            this.dhis2EventsDefaultRepository,
+            this.metadataRepository,
+            this.programRulesMetadataRepository,
+            this.glassAtcRepository
+        );
+
+        return importBLTemplateEventProgram.importAsBuffer(
+            fileArrayBuffer,
+            action,
+            eventListId,
+            moduleName,
+            orgUnitId,
+            orgUnitName,
+            period,
+            AMC_RAW_SUBSTANCE_CONSUMPTION_PROGRAM_ID,
+            uploadId,
+            calculatedEventListFileId
+        );
+    }
 }

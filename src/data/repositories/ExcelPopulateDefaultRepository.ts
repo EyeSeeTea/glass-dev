@@ -40,6 +40,19 @@ export const getTemplateId = (programId: Id): string => {
 export class ExcelPopulateDefaultRepository extends ExcelRepository {
     private workbooks: Record<string, ExcelWorkbook> = {};
 
+    // Per-workbook caches for values that never change while a template is being populated (writing
+    // cell values does not add named ranges or merge cells). Rebuilding these on every readCell /
+    // writeCell was the dominant cost when filling large sheets. Both are invalidated in
+    // invalidateWorkbookCaches() whenever a workbook is (re)loaded, so a fresh template never reuses
+    // a stale cache. definedNameByNormalized keeps first-match order (see getDefinedNameByNormalized).
+    private definedNameByNormalized: Record<string, Map<string, string>> = {};
+    private mergedCellsBySheet: Record<string, Map<string | number, MergedCell[]>> = {};
+
+    private invalidateWorkbookCaches(id: string): void {
+        delete this.definedNameByNormalized[id];
+        delete this.mergedCellsBySheet[id];
+    }
+
     /* public loadTemplate(file: Blob, programId: Id): FutureData<string> {
          const templateId = getTemplateId(programId);
          console.log("programId:", programId);
@@ -75,6 +88,7 @@ export class ExcelPopulateDefaultRepository extends ExcelRepository {
         return Future.fromPromise(p).map(workbook => {
             const id = templateId;
             this.workbooks[id] = workbook;
+            this.invalidateWorkbookCaches(id);
             return id;
         });
     }
@@ -84,6 +98,7 @@ export class ExcelPopulateDefaultRepository extends ExcelRepository {
         return Future.fromPromise(this.parseFromArrayBuffer(buffer)).map(workbook => {
             const id = templateId;
             this.workbooks[id] = workbook;
+            this.invalidateWorkbookCaches(id);
             return id;
         });
     }
@@ -201,9 +216,8 @@ export class ExcelPopulateDefaultRepository extends ExcelRepository {
 
     public async writeCell(id: string, cellRef: CellRef, value: string | number | boolean): Promise<void> {
         const workbook = await this.getWorkbook(id);
-        const mergedCells = this.listMergedCells(workbook, cellRef.sheet);
-        const definedNames = await this.listDefinedNames(id);
-        const definedName = definedNames.find(name => removeCharacters(name) === removeCharacters(value));
+        const mergedCells = this.getMergedCells(id, cellRef.sheet);
+        const definedName = this.getDefinedNameByNormalized(id).get(removeCharacters(value));
 
         const cell = workbook.sheet(cellRef.sheet)?.cell(cellRef.ref);
         if (!cell) return;
@@ -229,8 +243,7 @@ export class ExcelPopulateDefaultRepository extends ExcelRepository {
         if (!cellRef) return undefined;
         if (cellRef.type === "value") return cellRef.id;
 
-        const workbook = await this.getWorkbook(id);
-        return this.readCellValue(workbook, cellRef, options?.formula);
+        return this.readCellValue(id, cellRef, options?.formula);
     }
 
     public async getSheets(id: string): Promise<Sheet[]> {
@@ -245,12 +258,9 @@ export class ExcelPopulateDefaultRepository extends ExcelRepository {
         });
     }
 
-    private async readCellValue(
-        workbook: Workbook,
-        cellRef: CellRef,
-        formula = false
-    ): Promise<ExcelValue | undefined> {
-        const mergedCells = this.listMergedCells(workbook, cellRef.sheet);
+    private async readCellValue(id: string, cellRef: CellRef, formula = false): Promise<ExcelValue | undefined> {
+        const workbook = await this.getWorkbook(id);
+        const mergedCells = this.getMergedCells(id, cellRef.sheet);
         const sheet = workbook.sheet(cellRef.sheet);
         const cell = sheet.cell(cellRef.ref);
         const { startCell: destination = cell } = mergedCells.find(range => range.hasCell(cell)) ?? {};
@@ -355,6 +365,44 @@ export class ExcelPopulateDefaultRepository extends ExcelRepository {
 
                 return { range, startCell, hasCell };
             });
+    }
+
+    // Cached merged-cell list per (workbook, sheet). Merges don't change while populating, so this is
+    // built once per sheet instead of on every readCell/writeCell. Cache is cleared on template load.
+    private getMergedCells(id: string, sheet: string | number): MergedCell[] {
+        const cacheForId = (this.mergedCellsBySheet[id] ??= new Map());
+        const cached = cacheForId.get(sheet);
+        if (cached) return cached;
+
+        const workbook = this.workbooks[id];
+        const merged = workbook ? this.listMergedCells(workbook, sheet) : [];
+        cacheForId.set(sheet, merged);
+        return merged;
+    }
+
+    // Cached lookup from a normalized value to its matching defined (named-range) name, built once per
+    // workbook. Replaces re-fetching all defined names and linearly scanning them on every writeCell.
+    // First-match-wins mirrors the original `definedNames.find(...)` tie-breaking exactly.
+    private getDefinedNameByNormalized(id: string): Map<string, string> {
+        const cached = this.definedNameByNormalized[id];
+        if (cached) return cached;
+
+        const workbook = this.workbooks[id];
+        let names: string[] = [];
+        try {
+            names = workbook ? workbook.definedName() : [];
+        } catch {
+            names = [];
+        }
+
+        const map = new Map<string, string>();
+        for (const name of names) {
+            const key = removeCharacters(name);
+            if (!map.has(key)) map.set(key, name);
+        }
+
+        this.definedNameByNormalized[id] = map;
+        return map;
     }
 
     private async getWorkbook(id: string) {

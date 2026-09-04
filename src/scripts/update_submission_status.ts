@@ -95,7 +95,7 @@ function main() {
             //1: Get the directory
 
             try {
-                setSubmissionStatus.execute("VERWYGBBTxz", "COMPLETE").toPromise();
+                setSubmissionStatus.execute("rTSoKWWXoSb", "PENDING_APPROVAL").toPromise();
             } catch (error) {
                 console.error(`Error thrown while trying to delete Document: ${error}`);
             }

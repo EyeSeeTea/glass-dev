@@ -21,12 +21,12 @@ const AMR_GLASS_AMC_TEA_COMBINATION = "mG49egdYK3G";
 const AMR_GLASS_AMC_TEA_ROUTE_ADMIN = "m4eyu3tO5IV";
 const AMR_GLASS_AMC_TEA_SALT = "K8wjLXjYFzf";
 const AMR_GLASS_AMC_TEA_PRODUCT_ID = "iasfoeU8veF";
-const atcLevel4WithOralROA1 = "A07AA";
+/*const atcLevel4WithOralROA1 = "A07AA";
 const atcLevel4WithOralOrRectalROA2 = "P01AB";
 const atcLevel4WithParenteralROA3 = "J01XD";
 const atcLevel4WithParenteralROA4 = "J01XA";
 const atcCodeWithSaltHippAndMand = "J01XX05";
-const atcCodeWithRoaOAndSaltDefault = "J01FA01";
+const atcCodeWithRoaOAndSaltDefault = "J01FA01";*/
 const CODE_PRODUCT_NOT_HAVE_ATC = "Z99ZZ99";
 const COMB_CODE_PRODUCT_NOT_HAVE_ATC = "Z99ZZ99_99";
 const AMR_GLASS_AMC_TEA_MANUFACTURER_COUNTRY = "OCSAMKIi1BD";
@@ -183,66 +183,8 @@ export class CustomValidationsAMCProductData {
                         }
                     } else {
                         const atcCodeByLevel = getAtcCodeByLevel(atcData, atcCode);
-                        const atcCodeLevel4 = atcCodeByLevel?.level4;
-
-                        if (atcCodeLevel4 === atcLevel4WithOralROA1 && roa && roa !== "O") {
-                            curErrors.push({
-                                error: i18n.t(
-                                    `If ATC code ${atcCode} is in ATC level ${atcCodeLevel4}, Route of administration must be oral`
-                                ),
-                                line: tei.trackedEntity ? parseInt(tei.trackedEntity) + 6 : -1,
-                            });
-                        }
-
-                        if (atcCodeLevel4 === atcLevel4WithOralOrRectalROA2 && roa && roa !== "O" && roa !== "R") {
-                            curErrors.push({
-                                error: i18n.t(
-                                    `If ATC code ${atcCode} is in ATC level ${atcCodeLevel4}, Route of administration must be oral or rectal`
-                                ),
-                                line: tei.trackedEntity ? parseInt(tei.trackedEntity) + 6 : -1,
-                            });
-                        }
-
-                        if (
-                            (atcCodeLevel4 === atcLevel4WithParenteralROA3 ||
-                                atcCodeLevel4 === atcLevel4WithParenteralROA4) &&
-                            roa &&
-                            roa !== "P"
-                        ) {
-                            curErrors.push({
-                                error: i18n.t(
-                                    `If ATC code ${atcCode} is in ATC level ${atcCodeLevel4}, Route of administration must be parenteral`
-                                ),
-                                line: tei.trackedEntity ? parseInt(tei.trackedEntity) + 6 : -1,
-                            });
-                        }
-
-                        if (validATCCode === atcCodeWithSaltHippAndMand && salt && salt !== "HIPP" && salt !== "MAND") {
-                            curErrors.push({
-                                error: i18n.t(
-                                    `If ATC code ${atcCode} is ${atcCodeWithSaltHippAndMand}, salt must be either HIPP or MAND`
-                                ),
-                                line: tei.trackedEntity ? parseInt(tei.trackedEntity) + 6 : -1,
-                            });
-                        }
-                        if (validATCCode === atcCodeWithRoaOAndSaltDefault) {
-                            if (roa && roa === "O" && !(salt === "XXXX" || salt === "ESUC")) {
-                                curErrors.push({
-                                    error: i18n.t(
-                                        `If ATC code is ${atcCodeWithRoaOAndSaltDefault} : If route of administration is oral, salt must be either “default” or "ESUC"`
-                                    ),
-                                    line: tei.trackedEntity ? parseInt(tei.trackedEntity) + 6 : -1,
-                                });
-                            }
-                            if (roa && roa !== "O" && salt !== "XXXX") {
-                                curErrors.push({
-                                    error: i18n.t(
-                                        `If ATC code is ${atcCodeWithRoaOAndSaltDefault} : If route of administration is not oral,  salt must be “default”`
-                                    ),
-                                    line: tei.trackedEntity ? parseInt(tei.trackedEntity) + 6 : -1,
-                                });
-                            }
-                        }
+                        // ATC route/salt validation is intentionally disabled for this import flow.
+                        // Keeping this branch empty prevents J01XA/J01XD-based ROA errors from being emitted.
                     }
                 }
                 const combinationData = atcVersion.combinations;

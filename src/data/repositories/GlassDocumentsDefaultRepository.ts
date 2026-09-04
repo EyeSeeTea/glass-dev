@@ -40,6 +40,15 @@ export class GlassDocumentsDefaultRepository implements GlassDocumentsRepository
     }
 
     save(file: File, module: string): FutureData<string> {
+        // In Node, d2-api's files.upload relies on the `form-data` package, which cannot consume a
+        // web File/Blob (it expects a stream/Buffer/string and calls source.on(...)). Convert the
+        // File to a Buffer and use the buffer-based upload path instead. The browser keeps using the
+        // native files.upload (native File + native FormData).
+        if (typeof window === "undefined") {
+            return Future.fromPromise(file.arrayBuffer()).flatMap(arrayBuffer =>
+                this.saveBuffer(Buffer.from(arrayBuffer), file.name, module)
+            );
+        }
         return Future.join2(
             apiToFuture(
                 this.api.files.upload({

@@ -2,3 +2,7 @@ build
 node_modules
 *.min.js
 *.min.css
+.claude
+.vs
+snyk-results.json
+snyk-report.html

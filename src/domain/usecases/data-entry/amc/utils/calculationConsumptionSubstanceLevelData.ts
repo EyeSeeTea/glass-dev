@@ -52,9 +52,15 @@ export function calculateConsumptionSubstanceLevelData(
     currentAtcVersionKey: string
 ): SubstanceConsumptionCalculated[] {
     logger.info(
-        `[${new Date().toISOString()}] Starting the calculation of consumption substance level data for organisation ${orgUnitId} and period ${period}`
+        `[${new Date().toISOString()}] Starting the calculation of consumption substance level data for organisation ${orgUnitId} and period ${period}: ${
+            rawSubstanceConsumptionData.length
+        } substances to process`
     );
     let calculationLogs: BatchLogContent = [];
+    let copiedUnchangedCount = 0;
+    let ratioAdjustedCount = 0;
+    let zeroedCount = 0;
+    let incompatibleUnitsCount = 0;
 
     // OLD body (kept for reference):
     //     const latestAtcVersionData = atcVersionsByKeys[currentAtcVersionKey];
@@ -71,29 +77,10 @@ export function calculateConsumptionSubstanceLevelData(
 
     const calculatedConsumptionSubstanceLevelData = rawSubstanceConsumptionData
         .map(rawSubstanceConsumption => {
-            calculationLogs = [
-                ...calculationLogs,
-                {
-                    content: `[${new Date().toISOString()}] Substance ${
-                        rawSubstanceConsumption.id
-                    } - Calculate consumption substance level data of: ${JSON.stringify(rawSubstanceConsumption)}.`,
-                    messageType: "Info",
-                },
-            ];
             const { atc_version_manual } = rawSubstanceConsumption;
 
             if (atc_version_manual === currentAtcVersionKey) {
                 // Reporter used the current ATC version — no DDD adjustment needed.
-                calculationLogs = [
-                    ...calculationLogs,
-                    {
-                        content: `[${new Date().toISOString()}] Substance ${
-                            rawSubstanceConsumption.id
-                        } - The provided ATC version is the current ATC version. No adjustment needed.`,
-                        messageType: "Info",
-                    },
-                ];
-
                 const dddForKg = getDDDForAtcVersion({
                     atcCode: rawSubstanceConsumption.atc_manual,
                     roaCode: rawSubstanceConsumption.route_admin_manual,
@@ -105,17 +92,7 @@ export function calculateConsumptionSubstanceLevelData(
                 // OLD behaviour (kept for reference): always called copyDDDManualToDDDAutocalculated
                 // regardless of whether dddForKg was defined.
                 if (dddForKg === undefined) {
-                    calculationLogs = [
-                        ...calculationLogs,
-                        {
-                            content: `[${new Date().toISOString()}] Substance ${
-                                rawSubstanceConsumption.id
-                            } - No official DDD found in current version for ${rawSubstanceConsumption.atc_manual} / ${
-                                rawSubstanceConsumption.route_admin_manual
-                            }. Setting ddd_autocalculated to 0.`,
-                            messageType: "Warn",
-                        },
-                    ];
+                    zeroedCount++;
                     return setDDDAutocalculatedToZero({
                         rawSubstanceConsumption,
                         currentAtcVersionKey,
@@ -128,6 +105,7 @@ export function calculateConsumptionSubstanceLevelData(
                         dddGrams: undefined,
                     });
                 }
+                copiedUnchangedCount++;
                 return copyDDDManualToDDDAutocalculated({
                     rawSubstanceConsumption,
                     currentAtcVersionKey,
@@ -145,18 +123,6 @@ export function calculateConsumptionSubstanceLevelData(
             //      if (!atcManualVersionData) { log error; return; }
             // NEW: no DataStore lookup — historical DDD is derived from change table below.
 
-            calculationLogs = [
-                ...calculationLogs,
-                {
-                    content: `[${new Date().toISOString()}] Substance ${
-                        rawSubstanceConsumption.id
-                    } - Getting atc_autocalculated for ${
-                        rawSubstanceConsumption.atc_manual
-                    } using version ${currentAtcVersionKey}.`,
-                    messageType: "Info",
-                },
-            ];
-
             const atcCodeInLatestAtcData = latestAtcData.find(
                 data => data.CODE === rawSubstanceConsumption.atc_manual && data.LEVEL === LAST_ATC_CODE_LEVEL
             )?.CODE;
@@ -173,15 +139,7 @@ export function calculateConsumptionSubstanceLevelData(
                 // ATC code has no equivalent in current version → no official current DDD → DDD must be 0.
                 // OLD behaviour (kept for reference): looked up getDDDForAtcVersion on the original ATC
                 // code and copied ddds_manual.  Wrong: no current ATC code means no official current DDD.
-                calculationLogs = [
-                    ...calculationLogs,
-                    {
-                        content: `[${new Date().toISOString()}] Substance ${rawSubstanceConsumption.id} - atc_manual ${
-                            rawSubstanceConsumption.atc_manual
-                        } is not in the current version ${currentAtcVersionKey} and has no replacement. No official current DDD — setting ddd_autocalculated to 0.`,
-                        messageType: "Warn",
-                    },
-                ];
+                zeroedCount++;
                 return setDDDAutocalculatedToZero({
                     rawSubstanceConsumption,
                     currentAtcVersionKey,
@@ -206,15 +164,7 @@ export function calculateConsumptionSubstanceLevelData(
 
             if (newDDD === undefined) {
                 // No current official DDD for this ATC+ROA → DDD must be 0.
-                calculationLogs = [
-                    ...calculationLogs,
-                    {
-                        content: `[${new Date().toISOString()}] Substance ${
-                            rawSubstanceConsumption.id
-                        } - No DDD found in current version for ${atcAutocalculated}. Setting ddd_autocalculated to 0`,
-                        messageType: "Warn",
-                    },
-                ];
+                zeroedCount++;
                 return setDDDAutocalculatedToZero({
                     rawSubstanceConsumption,
                     currentAtcVersionKey,
@@ -230,16 +180,6 @@ export function calculateConsumptionSubstanceLevelData(
 
             // Look up the DDD in effect during the reported year via the change table.
             // getYearFromAtcVersionKey handles both "ATC-2018-v1" and plain "2018" formats.
-            calculationLogs = [
-                ...calculationLogs,
-                {
-                    content: `[${new Date().toISOString()}] Substance ${
-                        rawSubstanceConsumption.id
-                    } - Getting ddd_value and ddd_unit using change table for reported version ${atc_version_manual}.`,
-                    messageType: "Info",
-                },
-            ];
-
             const reportedYear = getYearFromAtcVersionKey(atc_version_manual);
             const oldDDD =
                 reportedYear !== undefined
@@ -255,15 +195,7 @@ export function calculateConsumptionSubstanceLevelData(
             if (oldDDD === undefined) {
                 // No DDD change found after the reported year — DDD was the same then as now.
                 // Ratio is 1:1: copy ddds_manual unchanged but use current DDD_GRAMS for kg.
-                calculationLogs = [
-                    ...calculationLogs,
-                    {
-                        content: `[${new Date().toISOString()}] Substance ${
-                            rawSubstanceConsumption.id
-                        } - No DDD change found after reported year ${reportedYear ?? "unknown"}. Ratio 1:1.`,
-                        messageType: "Debug",
-                    },
-                ];
+                copiedUnchangedCount++;
                 return copyDDDManualToDDDAutocalculated({
                     rawSubstanceConsumption,
                     currentAtcVersionKey,
@@ -299,6 +231,8 @@ export function calculateConsumptionSubstanceLevelData(
             // const dddsAdjust = getDDDsAdjust(raw, oldDDD, newDDD, latestAtcVersionData, atcManualVersionData);
 
             calculationLogs = [...calculationLogs, ...dddsAdjust.logs];
+            if (dddsAdjust.result != null) ratioAdjustedCount++;
+            else incompatibleUnitsCount++;
 
             // Derive kg from auto-calculated DDDs and the current DDD_GRAMS value.
             // Formula: kilograms = (ddds_autocalculated × DDD_GRAMS) / 1000
@@ -341,7 +275,9 @@ export function calculateConsumptionSubstanceLevelData(
 
     logger.batchLog(calculationLogs);
     logger.success(
-        `[${new Date().toISOString()}] End of the calculation of consumption substance level data for organisation ${orgUnitId} and period ${period}`
+        `[${new Date().toISOString()}] End of the calculation of consumption substance level data for organisation ${orgUnitId} and period ${period}: ${
+            rawSubstanceConsumptionData.length
+        } substances processed, ${copiedUnchangedCount} copied unchanged (1:1), ${ratioAdjustedCount} ratio-adjusted, ${zeroedCount} set to 0 (no official DDD), ${incompatibleUnitsCount} skipped (incompatible DDD units)`
     );
 
     return calculatedConsumptionSubstanceLevelData;
@@ -463,7 +399,6 @@ function getDDDsAdjust(
     newDDD: DDDData,
     latestAtcVersionData: GlassAtcVersionData
 ): { result: number | undefined; logs: BatchLogContent } {
-    const calculationLogs: BatchLogContent = [];
     const { ddds_manual } = rawSubstanceConsumptionData;
 
     // Check compatible unit families using the current version's units table for both lookups.
@@ -476,7 +411,6 @@ function getDDDsAdjust(
         return {
             result: undefined,
             logs: [
-                ...calculationLogs,
                 {
                     content: `[${new Date().toISOString()}] Substance ${
                         rawSubstanceConsumptionData.id
@@ -491,15 +425,7 @@ function getDDDsAdjust(
     const ratioDDD = oldDDD.DDD_STD / newDDD.DDD_STD;
     return {
         result: ddds_manual * ratioDDD,
-        logs: [
-            ...calculationLogs,
-            {
-                content: `[${new Date().toISOString()}] Substance ${
-                    rawSubstanceConsumptionData.id
-                } - ratio_ddd: ${ratioDDD}. ddds_adjust: ${ddds_manual * ratioDDD}.`,
-                messageType: "Debug",
-            },
-        ],
+        logs: [],
     };
 }
 

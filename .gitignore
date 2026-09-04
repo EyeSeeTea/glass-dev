@@ -53,3 +53,11 @@ src/scripts/d2_tracker_events_updated.json
 /glass-amc-recalculate-server
 /glass-async-deletions-server
 /glass-async-uploads-server
+
+# editor / tooling scratch
+.claude/
+.vs/
+
+# security scan output
+snyk-report.html
+snyk-results.json

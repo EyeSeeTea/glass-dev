@@ -52,9 +52,9 @@ export class CalculateConsumptionDataProductLevelUseCase {
             }
 
             logger.info(
-                `[${new Date().toISOString()}] Calculating raw substance consumption data in org unit ${orgUnitId} and period ${period} for the following products (total: ${
+                `[${new Date().toISOString()}] Calculating raw substance consumption data in org unit ${orgUnitId} and period ${period} for ${
                     ids.length
-                }): ${ids.join(", ")}`
+                } products`
             );
             return this.glassModuleRepository.getByName(moduleName).flatMap(module => {
                 if (!module.chunkSizes?.productIds) {

@@ -72,6 +72,41 @@ export class AMCSubstanceDataDefaultRepository implements AMCSubstanceDataReposi
         });
     }
 
+    // Node-friendly variant of validate(): reads from an ArrayBuffer instead of a File so scripts
+    // can validate without constructing a web File. Mirrors validate() otherwise.
+    validateFileBuffer(
+        fileArrayBuffer: ArrayBuffer,
+        rawSubstanceDataColumns: string[]
+    ): FutureData<{ isValid: boolean; rows: number; specimens: string[] }> {
+        return Future.fromPromise(new SpreadsheetXlsxDataSource().readFromArrayBuffer(fileArrayBuffer)).map(
+            spreadsheet => {
+                const rawSubstanceSheet = spreadsheet.sheets[0];
+                const rawSubstanceHeaderRow = rawSubstanceSheet?.rows[1];
+
+                if (rawSubstanceHeaderRow) {
+                    const sanitizedRawSubstanceHeaders = Object.values(rawSubstanceHeaderRow).map(header =>
+                        String(header).replace(/[* \n\r]/g, "")
+                    );
+                    const allRawSubstanceCols = rawSubstanceDataColumns.map(col =>
+                        sanitizedRawSubstanceHeaders.includes(col)
+                    );
+                    const allRawSubstanceColsPresent = _.every(allRawSubstanceCols, c => c === true);
+
+                    return {
+                        isValid: allRawSubstanceColsPresent ? true : false,
+                        rows: rawSubstanceSheet.rows.length - 2, //two rows for header
+                        specimens: [],
+                    };
+                } else
+                    return {
+                        isValid: false,
+                        rows: 0,
+                        specimens: [],
+                    };
+            }
+        );
+    }
+
     getRawSubstanceConsumptionDataByEventsIds(
         orgUnitId: Id,
         substanceIds: Id[],

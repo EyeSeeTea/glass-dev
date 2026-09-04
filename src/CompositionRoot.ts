@@ -90,6 +90,7 @@ import { GetMultipleDashboardUseCase } from "./domain/usecases/GetMultipleDashbo
 import { DownloadAllDataButtonData } from "./domain/usecases/DownloadAllDataButtonData";
 import { DownloadEmptyTemplateUseCase } from "./domain/usecases/DownloadEmptyTemplateUseCase";
 import { DownloadPopulatedTemplateUseCase } from "./domain/usecases/DownloadPopulatedTemplateUseCase";
+import { DownloadBulkPopulatedTemplateUseCase } from "./domain/usecases/DownloadBulkPopulatedTemplateUseCase";
 import { CountryDefaultRepository } from "./data/repositories/CountryDefaultRepository";
 import { GetAllCountriesUseCase } from "./domain/usecases/GetAllCountriesUseCase";
 import { SetToAsyncDeletionsUseCase } from "./domain/usecases/SetToAsyncDeletionsUseCase";
@@ -309,6 +310,12 @@ export function getCompositionRoot(instance: Instance) {
                 metadataRepository
             ),
             downloadPopulatedTemplate: new DownloadPopulatedTemplateUseCase(
+                downloadTemplateRepository,
+                excelRepository,
+                egaspProgramRepository,
+                metadataRepository
+            ),
+            downloadBulkPopulatedTemplate: new DownloadBulkPopulatedTemplateUseCase(
                 downloadTemplateRepository,
                 excelRepository,
                 egaspProgramRepository,
