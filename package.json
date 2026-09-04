@@ -1,7 +1,7 @@
 {
     "name": "glass",
     "description": "DHIS2 Glass App",
-    "version": "1.6.43",
+    "version": "1.6.44",
     "license": "GPL-3.0",
     "author": "Eyeseetea Team",
     "homepage": ".",
@@ -139,10 +139,15 @@
         "generate-secret-key-and-nonce": "npx ts-node src/scripts/generate_secret_key_and_nonce.ts",
         "migrate-uploads-from-datastore-to-program": "npx ts-node -r dotenv/config src/scripts/uploads_datastore_to_uploads_event_program_migration.ts",
         "add-upload-date-uploads-event-program": "npx ts-node -r dotenv/config src/scripts/add_upload_date_uploads_event_program.ts",
-        "bulk-download-amc-files": "cross-env NODE_OPTIONS=--max-old-space-size=8192 npx ts-node -r ./src/scripts/registerD2UiComponentsCjsInterop.js -r dotenv/config src/scripts/bulkDownloadAMUFiles.ts",
+        "bulk-download-amc-files": "cross-env NODE_OPTIONS=--max-old-space-size=4096 npx ts-node -r ./src/scripts/registerD2UiComponentsCjsInterop.js -r dotenv/config src/scripts/bulkDownloadAMCFiles.ts",
         "bulk-download-amr-individual-files": "cross-env NODE_OPTIONS=--max-old-space-size=8192 npx ts-node -r ./src/scripts/registerD2UiComponentsCjsInterop.js -r dotenv/config src/scripts/bulkDownloadAMRIndividualFiles.ts",
+        "bulk-download-amr-agg-files": "cross-env NODE_OPTIONS=--max-old-space-size=8192 npx ts-node -r ./src/scripts/registerD2UiComponentsCjsInterop.js src/scripts/bulkDownloadAMRAggFiles.ts",
+        "amc-coverage-audit": "npx ts-node -r ./src/scripts/registerD2UiComponentsCjsInterop.js -r dotenv/config src/scripts/amc_coverage_audit.ts",
+        "download-amc-empty-templates": "npx ts-node -r ./src/scripts/registerD2UiComponentsCjsInterop.js -r dotenv/config src/scripts/downloadAMCEmptyTemplates.ts",
         "update-tons-to-kilograms": "npx ts-node -r dotenv/config src/scripts/update_autocalculated_and_manual_tons_to_kilograms.ts",
-        "migrate-async-deletions-datastore": "npx ts-node -r dotenv/config src/scripts/async_deletions_migrate_new_datastore.ts"
+        "migrate-async-deletions-datastore": "npx ts-node -r dotenv/config src/scripts/async_deletions_migrate_new_datastore.ts",
+        "amc-recalculate-local": "npx ts-node -P src/scripts/tsconfig.json src/scripts/cliAMCEnv.ts",
+        "amc-delete-data": "npx ts-node -r dotenv/config src/scripts/amc_delete_data_for_period_ou.ts"
     },
     "manifest.webapp": {
         "name": "glass",
